@@ -668,7 +668,7 @@ namespace MyUI
                 }
             }
         }
-        public void AddStaticEntityPrefabTo_selectorRoot(EntityID[] idList, int[] nums)
+        public void AddStaticEntityPrefabToSelector(EntityID[] idList, int[] nums)
         {
             for (int i = 0; i < idList.Length; i++)
             {
@@ -735,7 +735,7 @@ namespace MyUI
                 });
             });
         }
-        public void EntityBackTo_selectorRoot(Entity entityToBack)
+        public void EntityBackToSelector(Entity entityToBack)
         {
             if (entityToBack.EntityData.CanRespawn)
             {
@@ -751,7 +751,7 @@ namespace MyUI
                         return;
                     }
                 }
-                AddStaticEntityPrefabTo_selectorRoot(new EntityID[1] { entityToBack.EntityData.ID }, new int[1] { 1 });
+                AddStaticEntityPrefabToSelector(new EntityID[1] { entityToBack.EntityData.ID }, new int[1] { 1 });
             }
         }
         public void AcceptDamageMessage(Entity target, Entity origin, float finalDamage, int damageType)
