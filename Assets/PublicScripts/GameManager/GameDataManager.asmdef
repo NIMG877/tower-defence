@@ -1,0 +1,6 @@
+{
+    "name": "GameDataManager",
+    "references": [
+        "GUID:49b05dfb3ba40974886753aa2993aaff"
+    ]
+}

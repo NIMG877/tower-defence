@@ -1,0 +1,108 @@
+# ========== Unity 自动生成的运行时缓存（必忽略） ==========
+/Library/
+/Temp/
+/Logs/
+/UserSettings/
+/obj/
+/Build/
+/Builds/
+/[Bb]in/
+/[Mm]emoryCaptures/
+
+# ========== IDE / 编辑器配置 ==========
+.vs/
+.vscode/
+.idea/
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+
+# ========== 系统垃圾文件 ==========
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.tmp
+
+# ========== 美术资源（大文件，全部排除） ==========
+# 纹理
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tga
+*.psd
+*.psb
+*.tif
+*.tiff
+*.dds
+*.exr
+*.hdr
+
+# 3D 模型
+*.fbx
+*.obj
+*.max
+*.blend
+*.blend1
+*.dae
+*.3ds
+*.ma
+*.mb
+
+# 音频
+*.wav
+*.mp3
+*.ogg
+*.aiff
+*.aif
+*.flac
+*.m4a
+
+# 视频
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+
+# 字体（大文件）
+*.ttf
+*.otf
+*.woff
+*.woff2
+
+# Unity 二进制资产 / 编译产物
+*.asset
+*.unitypackage
+*.unity
+*.prefab.meta
+*.apk
+*.aab
+*.exe
+*.dll
+*.so
+*.dylib
+
+# 整个第三方资源目录
+/Assets/Plugins/
+/Assets/Spine/
+/Assets/img/
+/Assets/TextMesh Pro/
+
+# 某些特定不想上传的文件夹
+/Assets/DataTools/
+/Assets/Scenes/
+/Assets/Resources/
+# ========== 必须保留的（不要忽略） ==========
+# 这些不需要写规则，因为默认就是被跟踪的，但要确认没被上面的规则误伤：
+#   - *.cs 及其 .meta
+#   - *.unity (场景文件，YAML 文本，不大)
+#   - *.prefab (预制体，YAML 文本)
+#   - *.asmdef (程序集定义)
+#   - ProjectSettings/ProjectVersion.txt
+#   - Packages/manifest.json
+#   - Packages/packages-lock.json
