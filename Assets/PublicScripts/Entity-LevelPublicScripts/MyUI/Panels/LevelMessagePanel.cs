@@ -242,6 +242,62 @@ namespace MyUI
         #endregion
 
         #region UI Element References
+        // ===== Selector Area =====
+        private List<StaticEntityPlaceData> _placeDataList;
+        private List<GameObject> _selectorObjects;
+        private Transform _content;
+        private GameObject _selectorSample;
+
+        // ===== Time Control =====
+        private GameObject _pauseMask;
+        private Button _timeMultiple, _pause;
+
+        // ===== Resource Display =====
+        private Sprite _x1, _x2, _c, _p;
+        private int _currentCost;
+        private TextMeshProUGUI _cost;
+        private Image _costSlider;
+
+        // ===== Capacity Display =====
+        private TextMeshProUGUI _canSetNumText;
+        private int _canSetNum;
+
+        // ===== Level Status =====
+        private TextMeshProUGUI _currentNumAndTotalNum, _levelHpLeft;
+
+        // ===== Left Message Panel =====
+        private GameObject _leftMessage;
+        private Image _chooser, _up, _down, _left, _right;
+        private Image _class, _target;
+        private RectTransform _self_a, _rangeArea;
+        private List<RectTransform> _range_a;
+        private TextMeshProUGUI _name, _admb;
+        private RectTransform _hpSlider, _hpBk;
+        private (float width, float height) _hpSliderSize;
+        private TextMeshProUGUI _hpText;
+        private Sprite[] _professionsSmall, _professionsLighten;
+        private RectTransform _skillTalentRect, _skillTalentRectParent;
+        private SkillCard _skillCard;
+        private SubpCard _subpCard;
+        private List<TalentCard> _talentCards;
+        private List<BuffCard> _buffCards;
+        private Image[] _skillTalentSwitchButtons;
+        private List<SpriteRenderer> _rangeImg;
+        private GameObject _rangeImgCollection;
+
+        // ===== Operator Panel =====
+        private GameObject _operateArea;
+        private Image _callBack, _skillOpen, _skillRange, _spBk, _spState, _spMask, _stop, _skillChargeNum;
+        private TextMeshProUGUI _spText, _skillChargeNumText;
+        private Sprite[] _spMessageAtlas, _skillRangeButton;
+        private Skill _selectSkill;
+
+        // ===== Floating Text Pool =====
+        private Transform _text;
+        private List<TextMeshProUGUI>[] _textsInPool;
+
+        // ===== Misc UI =====
+        private EventTrigger _levelMessageTrigger;
         #endregion
 
         #region Runtime State
@@ -285,25 +341,9 @@ namespace MyUI
                 return _instance;
             }
         }
-        private List<StaticEntityPlaceData> _placeDataList;
-        private List<GameObject> _selectorObjects;
-        private Transform _content;
-        private GameObject _selectorSample;
-        
+
         private bool _isPause, _is2X, _isSlow;
-        private GameObject _pauseMask;
-        private Button _timeMultiple, _pause;
-        private Sprite _x1, _x2, _c, _p;
-        
-        private int _currentCost;
-        private TextMeshProUGUI _cost;
-        private Image _costSlider;
-        
-        private TextMeshProUGUI _canSetNumText;
-        private int _canSetNum;
-        
-        private TextMeshProUGUI _currentNumAndTotalNum, _levelHpLeft;
-        
+
         private bool _isShowMessage, _isShowCanSetBlock, _isShowOperate, _isShowAttackRange;
         // 选中状态（三字段联合表达，由 UIState 状态机保证互斥）：
         //   viewBeforeSet/setting/choosing → _selectedStaticEntityID + _selectedPlaceData
@@ -322,57 +362,24 @@ namespace MyUI
         private Camera _camera;
         private Vector3 _cameraOriginalPos;
         private float _deltaX;
-        
-        private EventTrigger _levelMessageTrigger;
+
         private string[] _characterChineseName;
         private DamageStatisticData[] _damageStatisticDatas;
         public DamageStatisticData[] DamageStatisticDatas { get { return _damageStatisticDatas; } }
         //leftMessage
         private bool _inChooser;
         private int _orientation;
-        private GameObject _leftMessage;
-        private Image _chooser;
-        private Image _up, _down, _left, _right;
-        private Image _class;
-        private Image _target;
-        private RectTransform _self_a;
-        private RectTransform _rangeArea;
-        private List<RectTransform> _range_a;
-        private TextMeshProUGUI _name;
-        private TextMeshProUGUI _admb;
-        private RectTransform _hpSlider;
-        private (float width, float height) _hpSliderSize;
-        private RectTransform _hpBk;
-        private TextMeshProUGUI _hpText;
-        private Sprite[] _professionsSmall, _professionsLighten;
-        private RectTransform _skillTalentRect, _skillTalentRectParent;
-        private SkillCard _skillCard;
-        private SubpCard _subpCard;
-        private List<TalentCard> _talentCards;
-        private List<BuffCard> _buffCards;
-        private Image[] _skillTalentSwitchButtons;
         private int _currentShow;
         private Color _colorSelect = new Color(0, 0, 0, 0.5882f);
         private Color _colorUnSelect = new Color(0.3529f, 0.3529f, 0.3529f, 0.7843f);
         //operator
-        private GameObject _operateArea;
-        private Image _callBack, _skillOpen, _skillRange, _spBk, _spState, _spMask, _stop, _skillChargeNum;
-        private TextMeshProUGUI _spText, _skillChargeNumText;
         private EventTrigger.Entry _callBackClick, _skillRangeClick;
-        private Skill _selectSkill;
-        private Sprite[] _spMessageAtlas, _skillRangeButton;
         private Color _lightGreen = new Color(0.796f, 0.925f, 0.278f);
         private Color _lightGreen_half = new Color(0.796f, 0.925f, 0.278f, 0.5f);
         private Color _orange = new Color(1, 0.412f, 0);
         private Color _orange_half = new Color(1, 0.412f, 0, 0.5f);
         private Color _gray = new Color(0.259f, 0.259f, 0.259f);
-        
-        private GameObject _rangeImgCollection;
-        private List<SpriteRenderer> _rangeImg;
-        
-        
-        private Transform _text;
-        private List<TextMeshProUGUI>[] _textsInPool;
+
         private LevelMessagePanel() : base(new UIType("Prefabs/UI/MyUIs/LevelMessagePanel"))
         {
             _camera = LevelResourceSharing.MainCamera;
