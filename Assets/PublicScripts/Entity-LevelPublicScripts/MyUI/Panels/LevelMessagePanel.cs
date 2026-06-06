@@ -15,26 +15,26 @@ namespace MyUI
         #region Nested Types
         private class StaticEntityPlaceData
         {
-            GameObject Selector;
-            RectTransform _selectorRectTransform;
+            GameObject _selectorRoot;
+            RectTransform _selectorRect;
             Image _photoImage, _classImage, _respawnRate;
             GameObject _respawn;
             TextMeshProUGUI _costText, _countText, _respawnRateText;
-            EventTrigger _event;
+            EventTrigger _trigger;
 
-            public EntityID StaticId;
-            public EntityData StaticEntityData;
+            public EntityID EntityId;
+            public EntityData EntityData;
 
             float _respawnTimer;
-            float _anchory;
-            int _placeTime;
-            int _leftNum;
-            bool _canSet;
+            float _selectorYAnchor;
+            int _deployCount;
+            int _remainingCount;
+            bool _isAffordable;
 
             public StaticEntityPlaceData(GameObject selector)
             {
-                Selector = selector;
-                _selectorRectTransform = Selector.GetComponent<RectTransform>();
+                _selectorRoot = selector;
+                _selectorRect = _selectorRoot.GetComponent<RectTransform>();
                 _photoImage = selector.transform.Find("photo").GetComponent<Image>();
                 _classImage = selector.transform.Find("head/class").GetComponent<Image>();
                 _costText = selector.transform.Find("head/cost").GetComponent<TextMeshProUGUI>();
@@ -42,29 +42,29 @@ namespace MyUI
                 _respawn = selector.transform.Find("respawn").gameObject;
                 _respawnRate = _respawn.transform.Find("rate").GetComponent<Image>();
                 _respawnRateText = _respawn.transform.Find("rateText").GetComponent<TextMeshProUGUI>();
-                _event = _photoImage.transform.GetComponent<EventTrigger>();
+                _trigger = _photoImage.transform.GetComponent<EventTrigger>();
             }
             public void InitializeSelectorData(EntityID staticId, int num)
             {
-                StaticId = staticId;
-                StaticEntityData = GameDataService.EntityRepository.Get(staticId);
+                EntityId = staticId;
+                EntityData = GameDataService.EntityRepository.Get(staticId);
 
                 _respawnTimer = 0;
-                _placeTime = 0;
-                _leftNum = num;
-                _anchory = -60;
-                _canSet = false;
+                _deployCount = 0;
+                _remainingCount = num;
+                _selectorYAnchor = -60;
+                _isAffordable = false;
                 _respawn.SetActive(false);
-                if (_leftNum > 1)
-                    _countText.text = $"��{_leftNum}";
+                if (_remainingCount > 1)
+                    _countText.text = $"��{_remainingCount}";
                 else
                     _countText.text = "";
-                Selector.gameObject.SetActive(true);
-                _photoImage.sprite = StaticEntityData.HeadImage;
-                _classImage.sprite = Panel._professionsSmall[StaticEntityData.CharacterJob];
+                _selectorRoot.gameObject.SetActive(true);
+                _photoImage.sprite = EntityData.HeadImage;
+                _classImage.sprite = Panel._professionsSmall[EntityData.CharacterJob];
 
 
-                _event.triggers.Clear();
+                _trigger.triggers.Clear();
                 EventTrigger.Entry point = new EventTrigger.Entry();
                 point.eventID = EventTriggerType.PointerClick;
                 point.callback.AddListener((data) =>
@@ -100,7 +100,7 @@ namespace MyUI
                         Panel._selectedPlaceData?.SelectorMove(false);
                         SelectorMove(true);
                     }
-                    if (_canSet)
+                    if (_isAffordable)
                     {
                         Panel.UIStates_SwitchTo_Setting(this);
                     }
@@ -121,42 +121,42 @@ namespace MyUI
                 {
                     Panel.HideTargetOrEnterNextStage(this);
                 });
-                _event.triggers.Add(point);
-                _event.triggers.Add(dragBegin);
-                _event.triggers.Add(drag);
-                _event.triggers.Add(dragEnd);
+                _trigger.triggers.Add(point);
+                _trigger.triggers.Add(dragBegin);
+                _trigger.triggers.Add(drag);
+                _trigger.triggers.Add(dragEnd);
             }
             public int CalculateCost()
             {
-                if (StaticEntityData.RespawnCostUp>0)
+                if (EntityData.RespawnCostUp>0)
                 {
-                    if (_placeTime == 0)
+                    if (_deployCount == 0)
                     {
-                        return StaticEntityData.Cost;
+                        return EntityData.Cost;
                     }
-                    if (_placeTime == 1)
+                    if (_deployCount == 1)
                     {
-                        return (int)(StaticEntityData.Cost * (1+StaticEntityData.RespawnCostUp/100));
+                        return (int)(EntityData.Cost * (1+EntityData.RespawnCostUp/100));
                     }
-                    return (int)(StaticEntityData.Cost * (1+StaticEntityData.RespawnCostUp/100)*((1+StaticEntityData.RespawnCostUp/100)));
+                    return (int)(EntityData.Cost * (1+EntityData.RespawnCostUp/100)*((1+EntityData.RespawnCostUp/100)));
                 }
-                return StaticEntityData.Cost;
+                return EntityData.Cost;
             }
             public void DeltaNum(int delta)
             {
-                _leftNum += delta;
-                if (_leftNum > 1)
-                    _countText.text = $"��{_leftNum}";
+                _remainingCount += delta;
+                if (_remainingCount > 1)
+                    _countText.text = $"��{_remainingCount}";
                 else
                     _countText.text = "";
-                if (_leftNum > 0)
+                if (_remainingCount > 0)
                 {
-                    Selector.SetActive(true);
+                    _selectorRoot.SetActive(true);
                 }
                 else
                 {
-                    _leftNum = 0;
-                    Selector.SetActive(false);
+                    _remainingCount = 0;
+                    _selectorRoot.SetActive(false);
                 }
                 //�޸���ʾ����������ʾ
             }
@@ -164,29 +164,29 @@ namespace MyUI
             {
                 if (up)
                 {
-                    Vector2 vector2 = _selectorRectTransform.anchoredPosition;
+                    Vector2 vector2 = _selectorRect.anchoredPosition;
                     DOTween.To((value) =>
                     {
                         vector2.y = value;
-                        _selectorRectTransform.anchoredPosition = vector2;
-                    }, vector2.y, _anchory + 10, 0.1f).SetUpdate(true);
-                    //Selector.transform.DOMoveY(0.2f, 0.1f).SetRelative().SetUpdate(true);
+                        _selectorRect.anchoredPosition = vector2;
+                    }, vector2.y, _selectorYAnchor + 10, 0.1f).SetUpdate(true);
+                    //_selectorRoot.transform.DOMoveY(0.2f, 0.1f).SetRelative().SetUpdate(true);
                 }
                 else
                 {
-                    Vector2 vector2 = _selectorRectTransform.anchoredPosition;
+                    Vector2 vector2 = _selectorRect.anchoredPosition;
                     DOTween.To((value) =>
                     {
                         vector2.y = value;
-                        _selectorRectTransform.anchoredPosition = vector2;
-                    }, vector2.y, _anchory, 0.1f).SetUpdate(true);
+                        _selectorRect.anchoredPosition = vector2;
+                    }, vector2.y, _selectorYAnchor, 0.1f).SetUpdate(true);
                 }
             }
             public void SetNum(int setNum)
             {
                 DeltaNum(-setNum);
-                _placeTime++;
-                if (StaticEntityData.RespawnStrategy == 0 || (StaticEntityData.RespawnStrategy == 2 && _leftNum == 0))
+                _deployCount++;
+                if (EntityData.RespawnStrategy == 0 || (EntityData.RespawnStrategy == 2 && _remainingCount == 0))
                 {
                     RespawnTiming();
                 }
@@ -194,14 +194,14 @@ namespace MyUI
             public void CallBackNum(int callBackNum)
             {
                 DeltaNum(callBackNum);
-                if (StaticEntityData.RespawnStrategy == 1)
+                if (EntityData.RespawnStrategy == 1)
                 {
                     RespawnTiming();
                 }
             }
             public async void RespawnTiming()
             {
-                float tt = StaticEntityData.RespawnTime;
+                float tt = EntityData.RespawnTime;
                 _respawnTimer = tt;
                 _respawn.SetActive(true);
                 while (_respawnTimer > 0)
@@ -227,14 +227,14 @@ namespace MyUI
             {
                 int cost = CalculateCost();
                 _costText.text = cost.ToString();
-                if (_respawnTimer <= 0 && cost <= LevelRescurceManager.Manager.CostMessage.currentCost && LevelRescurceManager.Manager.CanSetNumLeft - StaticEntityData.MaxOccupyCount >= 0)
+                if (_respawnTimer <= 0 && cost <= LevelRescurceManager.Manager.CostMessage.currentCost && LevelRescurceManager.Manager.CanSetNumLeft - EntityData.MaxOccupyCount >= 0)
                 {
-                    _canSet = true;
+                    _isAffordable = true;
                     _photoImage.color = Color.white;
                 }
                 else
                 {
-                    _canSet = false;
+                    _isAffordable = false;
                     _photoImage.color = Color.gray;
                 }
             }
@@ -242,7 +242,7 @@ namespace MyUI
         #endregion
 
         #region UI Element References
-        // ===== Selector Area =====
+        // ===== _selectorRoot Area =====
         private List<StaticEntityPlaceData> _placeDataList;
         private List<GameObject> _selectorObjects;
         private Transform _content;
@@ -259,8 +259,8 @@ namespace MyUI
         private Image _costSlider;
 
         // ===== Capacity Display =====
-        private TextMeshProUGUI _canSetNumText;
-        private int _canSetNum;
+        private TextMeshProUGUI _isAffordableNumText;
+        private int _isAffordableNum;
 
         // ===== Level Status =====
         private TextMeshProUGUI _currentNumAndTotalNum, _levelHpLeft;
@@ -326,8 +326,8 @@ namespace MyUI
         private bool[,] _higherCanSetBlock;
         private bool[,] _lowerCanSetBlock;
         private bool[,] _staticEntityExistBlock;
-        private int _canSetType;
-        private List<(int i, int j)> _canSetBlockList;
+        private int _isAffordableType;
+        private List<(int i, int j)> _isAffordableBlockList;
         private BlockData[,] _blockDatas;
         private int _iSize, _jSize;
 
@@ -446,7 +446,7 @@ namespace MyUI
                         EntityData entityData;
                         if (_selectedPlaceData != null && _selectedEntity == null)
                         {
-                            entityData = _selectedPlaceData.StaticEntityData.Prefab.GetComponent<Entity>().EntityData;
+                            entityData = _selectedPlaceData.EntityData.Prefab.GetComponent<Entity>().EntityData;
                         }
                         else if (_selectedPlaceData == null && _selectedEntity != null)
                         {
@@ -481,7 +481,7 @@ namespace MyUI
             _text = GetComponentInChildrenByPath<Transform>("texts");
             _cost = GetComponentInChildrenByPath<TextMeshProUGUI>("staticEntityArea/resource/cost");
             _costSlider = GetComponentInChildrenByPath<Image>("staticEntityArea/resource/costSlider");
-            _canSetNumText = GetComponentInChildrenByPath<TextMeshProUGUI>("staticEntityArea/numLeft/canSetNum");
+            _isAffordableNumText = GetComponentInChildrenByPath<TextMeshProUGUI>("staticEntityArea/numLeft/canSetNum");
             _currentNumAndTotalNum = GetComponentInChildrenByPath<TextMeshProUGUI>("count_total_healthleft/c_t");
             _levelHpLeft = GetComponentInChildrenByPath<TextMeshProUGUI>("count_total_healthleft/t_hp");
             _content = GetComponentInChildrenByPath<Transform>("staticEntityArea/content");
@@ -568,7 +568,7 @@ namespace MyUI
             
             _placeDataList = new List<StaticEntityPlaceData>();
             _selectorObjects = new List<GameObject>();
-            _canSetBlockList = new List<(int i, int j)>();
+            _isAffordableBlockList = new List<(int i, int j)>();
             _rangeImgCollection.transform.SetParent(LevelResourceSharing.LM);
             _callBackClick = new EventTrigger.Entry();
             _callBackClick.eventID = EventTriggerType.PointerClick;
@@ -661,13 +661,13 @@ namespace MyUI
                 }
             }
         }
-        public void AddStaticEntityPrefabToSelector(EntityID[] idList, int[] nums)
+        public void AddStaticEntityPrefabTo_selectorRoot(EntityID[] idList, int[] nums)
         {
             for (int i = 0; i < idList.Length; i++)
             {
                 for (int j = 0; j < _placeDataList.Count; j++)
                 {
-                    if (_placeDataList[j].StaticId == idList[i])
+                    if (_placeDataList[j].EntityId == idList[i])
                     {
                         _placeDataList[j].DeltaNum(nums[i]);
                         return;
@@ -787,7 +787,7 @@ namespace MyUI
         {
             if (_orientation != -1)
             {
-                int cost = EntityManager.Manager.SetStaticEntity(_selectedPlaceData.StaticId, _chooser.transform.position, 1, _orientation).GetComponent<InteractableStatic>().CurrentSetCost = _selectedPlaceData.CalculateCost();
+                int cost = EntityManager.Manager.SetStaticEntity(_selectedPlaceData.EntityId, _chooser.transform.position, 1, _orientation).GetComponent<InteractableStatic>().CurrentSetCost = _selectedPlaceData.CalculateCost();
                 LevelRescurceManager.Manager.ChangeCost(-cost);
                 _selectedPlaceData.SelectorMove(false);
                 _selectedPlaceData.SetNum(1);
@@ -804,7 +804,7 @@ namespace MyUI
         }
         private void FetchMapEntityData()
         {
-            switch (_canSetType)
+            switch (_isAffordableType)
             {
                 case 0:
                     _lowerCanSetBlock = MapDataManager.Manager.LowerCanSetBlock;
@@ -837,13 +837,13 @@ namespace MyUI
                 SlidersManager.Manager.TakeOverSliderMove();
             }, 0, 1, duration).SetUpdate(true);
         }
-        public void EntityBackToSelector(Entity entityToBack)
+        public void EntityBackTo_selectorRoot(Entity entityToBack)
         {
             if (entityToBack.EntityData.CanRespawn)
             {
                 for (int i = 0; i < _placeDataList.Count; i++)
                 {
-                    if (_placeDataList[i].StaticEntityData.ChineseName == entityToBack.NAME)
+                    if (_placeDataList[i].EntityData.ChineseName == entityToBack.NAME)
                     {
                         _placeDataList[i].CallBackNum(1);
                         if (entityToBack.EntityData.RespawnStrategy == 1)
@@ -853,7 +853,7 @@ namespace MyUI
                         return;
                     }
                 }
-                AddStaticEntityPrefabToSelector(new EntityID[1] { entityToBack.EntityData.ID }, new int[1] { 1 });
+                AddStaticEntityPrefabTo_selectorRoot(new EntityID[1] { entityToBack.EntityData.ID }, new int[1] { 1 });
             }
         }
         
@@ -976,11 +976,11 @@ namespace MyUI
             while (true)
             {
                 (int currentCost, int maxCost, float costTimer) cm = LevelRescurceManager.Manager.CostMessage;
-                _canSetNum = LevelRescurceManager.Manager.CanSetNumLeft;
+                _isAffordableNum = LevelRescurceManager.Manager.CanSetNumLeft;
                 _currentCost = cm.currentCost;
                 _cost.text = _currentCost.ToString();
                 _costSlider.fillAmount = cm.costTimer;
-                _canSetNumText.text = _canSetNum.ToString();
+                _isAffordableNumText.text = _isAffordableNum.ToString();
                 for (int i = 0; i < _placeDataList.Count; i++)
                 {
                     _placeDataList[i].CanSetStateUpDate();
@@ -1346,7 +1346,7 @@ namespace MyUI
             {
                 Vector3 p = _camera.ScreenToWorldPoint(Input.mousePosition);
                 (int i, int j) = ((int)(p.y + 0.5), (int)(p.x + 0.5));
-                if (_canSetBlockList.Contains((i, j)))
+                if (_isAffordableBlockList.Contains((i, j)))
                 {
                     _target.transform.position = new Vector2(j, i);
                     if (true)
@@ -1538,9 +1538,9 @@ namespace MyUI
                 if (_cansetOpen)
                 {
                     _cansetOpen = false;
-                    for (int i = 0; i < _canSetBlockList.Count; i++)
+                    for (int i = 0; i < _isAffordableBlockList.Count; i++)
                     {
-                        MapDataManager.Manager.BlockDataMatrix[_canSetBlockList[i].i, _canSetBlockList[i].j].Material.color = Color.white;
+                        MapDataManager.Manager.BlockDataMatrix[_isAffordableBlockList[i].i, _isAffordableBlockList[i].j].Material.color = Color.white;
                     }
                 }
             }
@@ -1550,12 +1550,12 @@ namespace MyUI
             //=====================================================================================================================================
             Color lightGreen = new Color(0, 0.4f, 0);
             FetchMapEntityData();
-            for (int i = 0; i < _canSetBlockList.Count; i++)
+            for (int i = 0; i < _isAffordableBlockList.Count; i++)
             {
-                MapDataManager.Manager.BlockDataMatrix[_canSetBlockList[i].i, _canSetBlockList[i].j].Material.color = Color.white;
+                MapDataManager.Manager.BlockDataMatrix[_isAffordableBlockList[i].i, _isAffordableBlockList[i].j].Material.color = Color.white;
             }
-            _canSetBlockList.Clear();
-            switch (_canSetType)
+            _isAffordableBlockList.Clear();
+            switch (_isAffordableType)
             {
                 case 0:
                     for (int i = 0; i < _iSize; i++)
@@ -1564,7 +1564,7 @@ namespace MyUI
                         {
                             if (_lowerCanSetBlock[i, j] && !_staticEntityExistBlock[i, j])
                             {
-                                _canSetBlockList.Add((i, j));
+                                _isAffordableBlockList.Add((i, j));
                             }
                         }
                     }
@@ -1576,7 +1576,7 @@ namespace MyUI
                         {
                             if (_higherCanSetBlock[i, j] && !_staticEntityExistBlock[i, j])
                             {
-                                _canSetBlockList.Add((i, j));
+                                _isAffordableBlockList.Add((i, j));
                             }
                         }
                     }
@@ -1588,7 +1588,7 @@ namespace MyUI
                         {
                             if ((_lowerCanSetBlock[i, j] || _higherCanSetBlock[i, j]) && !_staticEntityExistBlock[i, j])
                             {
-                                _canSetBlockList.Add((i, j));
+                                _isAffordableBlockList.Add((i, j));
                             }
                         }
                     }
@@ -1600,7 +1600,7 @@ namespace MyUI
                         {
                             if ((_lowerCanSetBlock[i, j] || _higherCanSetBlock[i, j]) && _staticEntityExistBlock[i, j])
                             {
-                                _canSetBlockList.Add((i, j));
+                                _isAffordableBlockList.Add((i, j));
                             }
                         }
                     }
@@ -1608,9 +1608,9 @@ namespace MyUI
                 default: break;
             }
             //չʾ�ɷ��õķ�Χ
-            for (int i = 0; i < _canSetBlockList.Count; i++)
+            for (int i = 0; i < _isAffordableBlockList.Count; i++)
             {
-                MapDataManager.Manager.BlockDataMatrix[_canSetBlockList[i].i, _canSetBlockList[i].j].Material.color = lightGreen;
+                MapDataManager.Manager.BlockDataMatrix[_isAffordableBlockList[i].i, _isAffordableBlockList[i].j].Material.color = lightGreen;
             }
             //=====================================================================================================================================
         }
@@ -1649,7 +1649,7 @@ namespace MyUI
             SetTimeScale();
             _selectedPlaceData = staticEntityPlaceData;
             //=====================================================================================================================================
-            _selectedStaticEntityID = staticEntityPlaceData.StaticId;
+            _selectedStaticEntityID = staticEntityPlaceData.EntityId;
             _selectedEntity = null;
             //=====================================================================================================================================
             UIStates_ShowSomethingAndOtherClose(new string[2] { "leftmessage", "canset" });
@@ -1666,7 +1666,7 @@ namespace MyUI
             SetTimeScale();
             _selectedPlaceData = staticEntityPlaceData;
             //=====================================================================================================================================
-            _selectedStaticEntityID = staticEntityPlaceData.StaticId;
+            _selectedStaticEntityID = staticEntityPlaceData.EntityId;
             _selectedEntity = null;
             //=====================================================================================================================================
             UIStates_ShowSomethingAndOtherClose(new string[3] { "leftmessage", "dragger", "canset" });
@@ -1683,7 +1683,7 @@ namespace MyUI
             SetTimeScale();
             _selectedPlaceData = staticEntityPlaceData;
             //=====================================================================================================================================
-            _selectedStaticEntityID = staticEntityPlaceData.StaticId;
+            _selectedStaticEntityID = staticEntityPlaceData.EntityId;
             _selectedEntity = null;
             //=====================================================================================================================================
             UIStates_ShowSomethingAndOtherClose(new string[4] { "leftmessage", "dragger", "choosing", "canset" });
@@ -1749,8 +1749,8 @@ namespace MyUI
         }
         public void CanSetNumUpDate()
         {
-            _canSetNum = LevelRescurceManager.Manager.CanSetNumLeft;
-            _canSetNumText.text = _canSetNum.ToString();
+            _isAffordableNum = LevelRescurceManager.Manager.CanSetNumLeft;
+            _isAffordableNumText.text = _isAffordableNum.ToString();
             for (int i = 0; i < _placeDataList.Count; i++)
             {
                 _placeDataList[i].CanSetStateUpDate();
@@ -1839,7 +1839,7 @@ namespace MyUI
         {
             base.OnExit();
             UIStates_SwitchTo_Normal();
-            _canSetBlockList.Clear();
+            _isAffordableBlockList.Clear();
             //=====================================================================================================================================
             _selectedStaticEntityID = null;
             _selectedEntity = null;
