@@ -13,52 +13,6 @@ namespace MyUI
     public class LevelMessagePanel : BasePanel
     {
         #region Nested Types
-        #endregion
-
-        #region UI Element References
-        #endregion
-
-        #region Runtime State
-        #endregion
-
-        #region Construction & Initialization
-        #endregion
-
-        #region Public API
-        #endregion
-
-        #region Time Control
-        #endregion
-
-        #region UI States
-        #endregion
-
-        #region Helpers
-        #endregion
-
-        private enum UIState
-        {
-            normal,
-            viewBeforeSet,
-            setting,
-            choosing,
-            viewAfterSet,
-        }
-        private UIState _currentUIState;
-        private bool _leftmessageOpen, _operaterOpen, _draggerOpen, _chooserOpen, _rangeOpen, _cansetOpen;
-
-        private static LevelMessagePanel _instance;
-        public static LevelMessagePanel Panel
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new LevelMessagePanel();
-                }
-                return _instance;
-            }
-        }
         private class StaticEntityPlaceData
         {
             GameObject Selector;
@@ -67,16 +21,16 @@ namespace MyUI
             GameObject _respawn;
             TextMeshProUGUI _costText, _countText, _respawnRateText;
             EventTrigger _event;
-        
+
             public EntityID StaticId;
             public EntityData StaticEntityData;
-        
+
             float _respawnTimer;
             float _anchory;
             int _placeTime;
             int _leftNum;
             bool _canSet;
-        
+
             public StaticEntityPlaceData(GameObject selector)
             {
                 Selector = selector;
@@ -94,7 +48,7 @@ namespace MyUI
             {
                 StaticId = staticId;
                 StaticEntityData = GameDataService.EntityRepository.Get(staticId);
-                
+
                 _respawnTimer = 0;
                 _placeTime = 0;
                 _leftNum = num;
@@ -108,8 +62,8 @@ namespace MyUI
                 Selector.gameObject.SetActive(true);
                 _photoImage.sprite = StaticEntityData.HeadImage;
                 _classImage.sprite = Panel._professionsSmall[StaticEntityData.CharacterJob];
-        
-        
+
+
                 _event.triggers.Clear();
                 EventTrigger.Entry point = new EventTrigger.Entry();
                 point.eventID = EventTriggerType.PointerClick;
@@ -283,6 +237,52 @@ namespace MyUI
                     _canSet = false;
                     _photoImage.color = Color.gray;
                 }
+            }
+        }
+        #endregion
+
+        #region UI Element References
+        #endregion
+
+        #region Runtime State
+        #endregion
+
+        #region Construction & Initialization
+        #endregion
+
+        #region Public API
+        #endregion
+
+        #region Time Control
+        #endregion
+
+        #region UI States
+        #endregion
+
+        #region Helpers
+        #endregion
+
+        private enum UIState
+        {
+            normal,
+            viewBeforeSet,
+            setting,
+            choosing,
+            viewAfterSet,
+        }
+        private UIState _currentUIState;
+        private bool _leftmessageOpen, _operaterOpen, _draggerOpen, _chooserOpen, _rangeOpen, _cansetOpen;
+
+        private static LevelMessagePanel _instance;
+        public static LevelMessagePanel Panel
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new LevelMessagePanel();
+                }
+                return _instance;
             }
         }
         private List<StaticEntityPlaceData> _placeDataList;
