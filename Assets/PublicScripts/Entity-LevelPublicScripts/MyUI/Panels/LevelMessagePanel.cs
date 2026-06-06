@@ -291,6 +291,7 @@ namespace MyUI
         private TextMeshProUGUI _spText, _skillChargeNumText;
         private Sprite[] _spMessageAtlas, _skillRangeButton;
         private Skill _selectSkill;
+        private EventTrigger.Entry _callBackClick, _skillRangeClick;
 
         // ===== Floating Text Pool =====
         private Transform _text;
@@ -1859,8 +1860,6 @@ namespace MyUI
             }
         }
         #endregion
-        //operator
-        private EventTrigger.Entry _callBackClick, _skillRangeClick;
     }
 }
 
