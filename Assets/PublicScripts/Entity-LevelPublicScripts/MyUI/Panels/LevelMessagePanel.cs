@@ -928,6 +928,709 @@ namespace MyUI
         #endregion
 
         #region UI States
+        // ===== 5 SwitchTo methods =====
+        private void UIStates_SwitchTo_Normal()
+        {
+            _isSlow = false;
+            SetTimeScale();
+            _currentUIState = UIState.normal;
+            //=====================================================================================================================================
+            _selectedStaticEntityID = null;
+            _selectedEntity = null;
+            //=====================================================================================================================================
+            if (_selectedPlaceData != null)
+            {
+                _selectedPlaceData.SelectorMove(false);
+                _selectedPlaceData = null;
+            }
+            UIStates_ShowSomethingAndOtherClose(null);
+
+        }
+
+        private void UIStates_SwitchTo_ViewBeforeSet(StaticEntityPlaceData staticEntityPlaceData)
+        {
+            _isSlow = true;
+            SetTimeScale();
+            _selectedPlaceData = staticEntityPlaceData;
+            //=====================================================================================================================================
+            _selectedStaticEntityID = staticEntityPlaceData.EntityId;
+            _selectedEntity = null;
+            //=====================================================================================================================================
+            UIStates_ShowSomethingAndOtherClose(new string[2] { "leftmessage", "canset" });
+            if (_currentUIState == UIState.normal)
+            {
+                _currentUIState = UIState.viewBeforeSet;
+                FixedUpdate();
+            }
+            _currentUIState = UIState.viewBeforeSet;
+        }
+
+        private void UIStates_SwitchTo_Setting(StaticEntityPlaceData staticEntityPlaceData)
+        {
+            _isSlow = true;
+            SetTimeScale();
+            _selectedPlaceData = staticEntityPlaceData;
+            //=====================================================================================================================================
+            _selectedStaticEntityID = staticEntityPlaceData.EntityId;
+            _selectedEntity = null;
+            //=====================================================================================================================================
+            UIStates_ShowSomethingAndOtherClose(new string[3] { "leftmessage", "dragger", "canset" });
+            if (_currentUIState == UIState.normal)
+            {
+                _currentUIState = UIState.setting;
+                FixedUpdate();
+            }
+            _currentUIState = UIState.setting;
+        }
+
+        private void UIStates_SwitchTo_Chooseing(StaticEntityPlaceData staticEntityPlaceData)
+        {
+            _isSlow = true;
+            SetTimeScale();
+            _selectedPlaceData = staticEntityPlaceData;
+            //=====================================================================================================================================
+            _selectedStaticEntityID = staticEntityPlaceData.EntityId;
+            _selectedEntity = null;
+            //=====================================================================================================================================
+            UIStates_ShowSomethingAndOtherClose(new string[4] { "leftmessage", "dragger", "choosing", "canset" });
+            if (_currentUIState == UIState.normal)
+            {
+                _currentUIState = UIState.choosing;
+                FixedUpdate();
+            }
+            _currentUIState = UIState.choosing;
+        }
+
+        private void UIStates_SwitchTo_ViewAfterSet(Entity entitySelected)
+        {
+            _isSlow = true;
+            SetTimeScale();
+            //=====================================================================================================================================
+            _selectedEntity = entitySelected;
+            _selectedStaticEntityID = entitySelected.EntityData.ID;
+            //=====================================================================================================================================
+            _selectedPlaceData = null;
+            UIStates_ShowSomethingAndOtherClose(new string[3] { "leftmessage", "operator", "range" });
+            if (_currentUIState == UIState.normal)
+            {
+                _currentUIState = UIState.viewAfterSet;
+                FixedUpdate();
+            }
+            _currentUIState = UIState.viewAfterSet;
+        }
+
+        // ===== State Machine + Dispatch =====
+        private void UIStateMachine()
+        {
+            switch (_currentUIState)
+            {
+                case UIState.normal:
+                    break;
+                case UIState.viewBeforeSet:
+                    UIStates_Update_Canset();
+                    UIStates_Update_Leftmessage();
+                    break;
+                case UIState.setting:
+                    UIStates_Update_Canset();
+                    UIStates_Update_Leftmessage();
+                    break;
+                case UIState.choosing:
+                    UIStates_Update_Canset();
+                    UIStates_Update_Leftmessage();
+                    break;
+                case UIState.viewAfterSet:
+                    UIStates_Update_Range();
+                    UIStates_Update_Leftmessage();
+                    UIStates_Update_Operator();
+                    break;
+            }
+        }
+        private void UIStates_ShowSomethingAndOtherClose(string[] shows)
+        {
+            //"leftmessage", "operator", "dragger","choosing", "range", "canset"
+            bool showHave = shows != null;
+            UIStates_ShowClose_Leftmessage(showHave && shows.Contains("leftmessage"));
+            UIStates_ShowClose_Operator(showHave && shows.Contains("operator"));
+            UIStates_ShowClose_Dragger(showHave && shows.Contains("dragger"));
+            UIStates_ShowClose_Chooser(showHave && shows.Contains("choosing"));
+            UIStates_ShowClose_Range(showHave && shows.Contains("range"));
+            UIStates_ShowClose_Canset(showHave && shows.Contains("canset"));
+        }
+
+        // ===== 6 Panels: ShowClose/Update =====
+        // LeftMessage
+        private void UIStates_ShowClose_Leftmessage(bool show)
+        {
+            //=====================================================================================================================================
+            if (show)
+            {
+                if (!_leftmessageOpen)
+                {
+                    _leftmessageOpen = true;
+                    _leftMessage.SetActive(true);
+                }
+                // 选中态由 _selectedStaticEntityID 统一表达（placeData 与已部署 entity 两种场景都会设置它）
+                if (!_selectedStaticEntityID.HasValue)
+                {
+                    return;
+                }
+                EntityID entityID = _selectedStaticEntityID.Value;
+
+                EntityData entityData = GameDataService.EntityRepository.Get(entityID);
+
+                SwitchShowSkillTalent(_currentShow, entityData);
+                ShowAttackRangeAttributes(entityData.VisionRange);
+                _name.text = entityData.ChineseName;
+                _class.sprite = _professionsLighten[entityData.CharacterJob];
+                UIStates_Update_Leftmessage();
+            }
+            else
+            {
+                if (_leftmessageOpen)
+                {
+                    _leftmessageOpen = false;
+                    _leftMessage.SetActive(false);
+                }
+            }
+            //=====================================================================================================================================
+        }
+        private void UIStates_Update_Leftmessage()
+        {
+            //=====================================================================================================================================
+            Entity entity;
+            bool isBefore;
+            if (_selectedPlaceData != null && _selectedEntity == null)
+            {
+                entity = _selectedPlaceData.StaticEntity;
+                isBefore = true;
+            }
+            else if (_selectedPlaceData == null && _selectedEntity != null)
+            {
+                entity = _selectedEntity;
+                isBefore = false;
+            }
+            else
+            {
+                return;
+            }
+            float atk, def, mgr, currentHp, maxHp;
+            int blo;
+            if (isBefore)
+            {
+                if (entity.AttackBase != null)
+                {
+                    atk = entity.AttackBase.AttackDamageF;
+                }
+                else
+                {
+                    atk = 0;
+                }
+                def = entity.DEF_1;
+                mgr = entity.MagicResistance_1;
+                blo = entity.BlockOccupation_1;
+                currentHp = entity.MaxHp_1;
+                maxHp = entity.MaxHp_1;
+            }
+            else
+            {
+                if (entity.AttackBase != null)
+                {
+                    atk = entity.AttackBase.AttackDamageS;
+                }
+                else
+                {
+                    atk = 0;
+                }
+                def = entity.DEF_2;
+                mgr = entity.MagicResistance_2;
+                blo = entity.BlockOccupation;
+                currentHp = entity.CurrentHp;
+                maxHp = entity.MaxHpS;
+            }
+            _statsText.text = $"����  {(int)atk}\n����  {(int)def}\n����  {(int)mgr}\n�赲  {blo}";
+            float leftLength = _hpSliderSize.width * currentHp / maxHp;
+            _hpSlider.sizeDelta = new Vector2(leftLength - _hpSliderSize.width, _hpSliderSize.height);
+            _hpText.text = $"{(int)currentHp}/{(int)maxHp}";
+            _hpBk.anchoredPosition = new Vector2(leftLength > 81 ? leftLength : 81, 0);
+            //=====================================================================================================================================
+
+        }
+        // Operator
+        private void UIStates_ShowClose_Operator(bool show)
+        {
+            //=====================================================================================================================================
+            if (show)
+            {
+                if (!_operaterOpen)
+                {
+                    _operaterOpen = true;
+                    _operateArea.SetActive(true);
+                }
+                MoveCamera(_selectedEntity.EntityPosition + _deltaX * Vector2.right, 0.1f);
+                if (sea.CanCallBack)
+                {
+                    _callBack.enabled = true;
+                    _callBackClick.callback.RemoveAllListeners();
+                    _callBackClick.callback.AddListener((data) =>
+                    {
+                        _selectedEntity.thisEntityPool.Return(_selectedEntity);
+                        LevelRescurceManager.Manager.ChangeCost((int)(_selectedEntity.GetComponent<InteractableStatic>().CurrentSetCost * 0.5));
+                        _selectedEntity.participateIn = false;
+                        AudioManager.Manager.PlayAudio("escape", 1, false, false);
+                        UIStates_SwitchTo_Normal();
+                    });
+                }
+                else
+                {
+                    _callBack.enabled = false;
+                }
+                if (_selectedEntity.skill != null && _selectedEntity.skill.Length > 0)
+                {
+                    _skillOpen.gameObject.SetActive(true);
+                    _selectSkill = _selectedEntity.skill[0];
+                    _skillOpen.sprite = _selectSkill.SkillImg;
+                    if (_selectSkill.SkillAttackRange != null)
+                    {
+                        _skillRange.gameObject.SetActive(true);
+                        _skillRangeClick.callback.RemoveAllListeners();
+                        _skillRangeClick.callback.AddListener((data) =>
+                        {
+
+                        });
+                    }
+                    else
+                    {
+                        _skillRange.gameObject.SetActive(false);
+                    }
+                }
+                else
+                {
+                    _skillOpen.gameObject.SetActive(false);
+                    _selectSkill = null;
+                }
+                UIStates_Update_Operator();
+            }
+            else
+            {
+                if (_operaterOpen)
+                {
+                    _operaterOpen = false;
+                    _operateArea.SetActive(false);
+                    MoveCamera(_cameraOriginalPos, 0.1f);
+                }
+            }
+            //=====================================================================================================================================
+        }
+        private void UIStates_Update_Operator()
+        {
+            //=====================================================================================================================================
+            if (_selectedEntity == null || !_selectedEntity.participateIn)
+                UIStates_SwitchTo_Normal();
+            //=====================================================================================================================================
+            if (_selectSkill)
+            {
+                if (!_selectSkill.SkillCanBegin())
+                {
+                    _skillOpen.raycastTarget = false;
+                    _skillOpen.color = Color.gray;
+                }
+                else
+                {
+                    if (_selectSkill.SkillOpenMode == 3)
+                    {
+                        _skillOpen.raycastTarget = true;
+                    }
+                    else
+                    {
+                        _skillOpen.raycastTarget = false;
+                    }
+                    _skillOpen.color = Color.white;
+                }
+        
+                (float currentSpRate, int currentChargeNum, bool isSkill) = _selectSkill.SkillMessage;
+                _spMask.fillAmount = currentSpRate;
+                if (currentChargeNum < 1)
+                {
+                    _skillChargeNum.gameObject.SetActive(false);
+                }
+                else
+                {
+                    _skillChargeNum.gameObject.SetActive(true);
+                    _skillChargeNumText.text = currentChargeNum.ToString();
+                }
+                if (!isSkill)
+                {
+                    float tsp;
+                    tsp = _selectSkill.TotalSp;
+                    _spState.sprite = _spMessageAtlas[0];
+                    _stop.enabled = false;
+                    if (!_selectSkill.SPFull())
+                    {
+                        _spMask.enabled = true;
+                        _spMask.color = _lightGreen_half;
+                        _spText.text = $"{(int)(tsp * currentSpRate)}/{(int)tsp}";
+                        if (currentChargeNum == 0 && currentSpRate < 1)
+                        {
+                            _spBk.color = _gray;
+                            _spState.color = _lightGreen;
+                            _spText.color = Color.white;
+                        }
+                        else
+                        {
+                            _spBk.color = _lightGreen;
+                            _spState.color = Color.white;
+                            _spText.color = Color.black;
+                        }
+                    }
+                    else
+                    {
+                        _spMask.enabled = false;
+                        _spText.text = "READY";
+                        _spBk.color = _lightGreen;
+                        _spState.color = Color.white;
+                        _spText.color = Color.black;
+                    }
+                }
+                else
+                {
+                    int consumeType = _selectSkill.SpComsumeMode;
+                    _spBk.color = _orange;
+                    _spState.color = Color.white;
+                    if (consumeType < 3)
+                    {
+                        float tsa = _selectSkill.SkillAmount;
+                        _spMask.enabled = true;
+                        _spMask.color = _orange_half;
+                        _spState.sprite = _spMessageAtlas[consumeType + 1];
+                        _spText.color = Color.white;
+                        if (consumeType == 0)
+                        {
+                            _spText.text = (tsa * currentSpRate).ToString("0.0") + 's';
+                        }
+                        else
+                        {
+                            _spText.text = (tsa * currentSpRate).ToString() + '/' + tsa.ToString();
+                        }
+                    }
+                    else
+                    {
+                        _spMask.enabled = false;
+                        _spState.sprite = _spMessageAtlas[4];
+                        _spText.text = null;
+                    }
+                    if (_selectSkill.CanCloseSkill)
+                    {
+                        _stop.enabled = true;
+                    }
+                    else
+                    {
+                        _stop.enabled = false;
+                    }
+                }
+            }
+        }
+        // Dragger
+        private void UIStates_ShowClose_Dragger(bool show)
+        {
+            if (show)
+            {
+                if (!_draggerOpen)
+                {
+                    _draggerOpen = true;
+                    _target.gameObject.SetActive(true);
+                }
+            }
+            else
+            {
+                if (_draggerOpen)
+                {
+                    _draggerOpen = false;
+                    _target.gameObject.SetActive(false);
+                    _up.enabled = false;
+                    _right.enabled = false;
+                    _left.enabled = false;
+                    _down.enabled = false;
+                }
+            }
+        }
+        private void UIStates_Update_Dragger()
+        {
+            if (_currentUIState == UIState.setting)
+            {
+                Vector3 p = _camera.ScreenToWorldPoint(Input.mousePosition);
+                (int i, int j) = ((int)(p.y + 0.5), (int)(p.x + 0.5));
+                if (_isAffordableBlockList.Contains((i, j)))
+                {
+                    _target.transform.position = new Vector2(j, i);
+                    if (true)
+                    {
+                        _target.color = Color.yellow;
+                    }
+                    else
+                    {
+                        _target.color = Color.green;
+                        _orientation = 0;
+                        UIStates_ShowClose_Chooser(true);
+                        UIStates_ShowClose_Range(true);
+                    }
+                }
+                else
+                {
+                    if (_target.color == Color.green)
+                    {
+                        UIStates_ShowClose_Chooser(false);
+                        UIStates_ShowClose_Range(false);
+                    }
+                    _target.transform.position = new Vector2(p.x, p.y);
+                    _target.color = Color.red;
+                }
+            }
+        }
+        // Chooser
+        private void UIStates_ShowClose_Chooser(bool show)
+        {
+            if (show)
+            {
+                if (!_chooserOpen)
+                {
+                    _chooserOpen = true;
+                    _chooser.gameObject.SetActive(true);
+                }
+                _chooser.transform.position = _target.transform.position;
+            }
+            else
+            {
+                if (_chooserOpen)
+                {
+                    _chooserOpen = false;
+                    _chooser.gameObject.SetActive(false);
+                }
+            }
+        }
+        private void UIStates_Update_Chooser()
+        {
+            Vector3 p = _camera.ScreenToWorldPoint(Input.mousePosition);
+            _target.transform.position = new Vector2(p.x, p.y);
+            if (!_inChooser)
+            {
+                Vector2 dp = p - _chooser.transform.position;
+                if (dp.y > dp.x)
+                {
+                    if (dp.y > -dp.x && _orientation != 0)
+                    {
+                        _orientation = 0;
+                        _up.enabled = true;
+                        _down.enabled = false;
+                        _left.enabled = false;
+                        _right.enabled = false;
+                        UIStates_ShowClose_Range(true);
+                    }
+                    else if (dp.y <= -dp.x && _orientation != 3)
+                    {
+                        _orientation = 3;
+                        _up.enabled = false;
+                        _down.enabled = false;
+                        _left.enabled = true;
+                        _right.enabled = false;
+                        UIStates_ShowClose_Range(true);
+                    }
+                }
+                else
+                {
+                    if (dp.y > -dp.x && _orientation != 1)
+                    {
+                        _orientation = 1;
+                        _up.enabled = false;
+                        _down.enabled = false;
+                        _left.enabled = false;
+                        _right.enabled = true;
+                        UIStates_ShowClose_Range(true);
+                    }
+                    else if (dp.y <= -dp.x && _orientation != 2)
+                    {
+                        _orientation = 2;
+                        _up.enabled = false;
+                        _down.enabled = true;
+                        _left.enabled = false;
+                        _right.enabled = false;
+                        UIStates_ShowClose_Range(true);
+                    }
+                }
+                _chooser.color = new Color(0, 1, 0, 0.4f);
+                _target.color = Color.green;
+            }
+            else
+            {
+                _orientation = -1;
+                _up.enabled = false;
+                _down.enabled = false;
+                _left.enabled = false;
+                _right.enabled = false;
+                _chooser.color = new Color(1, 1, 0, 0.4f);
+                _target.color = Color.yellow;
+                UIStates_ShowClose_Range(false);
+            }
+        }
+        // Range
+        private void UIStates_ShowClose_Range(bool show)
+        {
+            if (show)
+            {
+                if (!_rangeOpen)
+                {
+                    _rangeOpen = true;
+                    _rangeImgCollection.SetActive(true);
+                }
+                UIStates_Update_Range();
+            }
+            else
+            {
+                if (_rangeOpen)
+                {
+                    _rangeOpen = false;
+                    _rangeImgCollection.SetActive(false);
+                }
+            }
+        }
+        private void UIStates_Update_Range()
+        {
+            //=====================================================================================================================================
+            Color color = new Color(255, 160, 0);
+            (int x, int y)[] attackRange;
+            if (_selectedPlaceData != null && _selectedEntity == null)
+            {
+                (int x, int y) pos = ((int)(_chooser.transform.position.x + 0.5), (int)(_chooser.transform.position.y + 0.5));
+            }
+            else if (_selectedPlaceData == null && _selectedEntity != null)
+            {
+                attackRange = _selectedEntity.VisionRange;
+            }
+            else
+            {
+                return;
+            }
+            int rangeImgCount = _rangeImg.Count;
+            if (rangeImgCount >= attackRange.Length)
+            {
+                for (int i = 0; i < attackRange.Length; i++)
+                {
+                    _rangeImg[i].transform.position = new Vector2(attackRange[i].x, attackRange[i].y);
+                    _rangeImg[i].color = color;
+                    _rangeImg[i].enabled = true;
+                }
+                for (int i = attackRange.Length; i < rangeImgCount; i++)
+                {
+                    _rangeImg[i].enabled = false;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < rangeImgCount; i++)
+                {
+                    _rangeImg[i].transform.position = new Vector2(attackRange[i].x, attackRange[i].y);
+                    _rangeImg[i].color = color;
+                    _rangeImg[i].enabled = true;
+                }
+                for (int i = rangeImgCount; i < attackRange.Length; i++)
+                {
+                    _rangeImg.Add(Object.Instantiate(_rangeImg[0], new Vector2(attackRange[i].x, attackRange[i].y), Quaternion.identity, _rangeImgCollection.transform));
+                }
+            }
+            //=====================================================================================================================================
+        }
+        // CanSet
+        private void UIStates_ShowClose_Canset(bool show)
+        {
+            if (show)
+            {
+                if (!_cansetOpen)
+                {
+                    _cansetOpen = true;
+                }
+                UIStates_Update_Canset();
+            }
+            else
+            {
+                if (_cansetOpen)
+                {
+                    _cansetOpen = false;
+                    for (int i = 0; i < _isAffordableBlockList.Count; i++)
+                    {
+                        MapDataManager.Manager.BlockDataMatrix[_isAffordableBlockList[i].i, _isAffordableBlockList[i].j].Material.color = Color.white;
+                    }
+                }
+            }
+        }
+        private void UIStates_Update_Canset()
+        {
+            //=====================================================================================================================================
+            Color lightGreen = new Color(0, 0.4f, 0);
+            FetchMapEntityData();
+            for (int i = 0; i < _isAffordableBlockList.Count; i++)
+            {
+                MapDataManager.Manager.BlockDataMatrix[_isAffordableBlockList[i].i, _isAffordableBlockList[i].j].Material.color = Color.white;
+            }
+            _isAffordableBlockList.Clear();
+            switch (_isAffordableType)
+            {
+                case 0:
+                    for (int i = 0; i < _iSize; i++)
+                    {
+                        for (int j = 0; j < _jSize; j++)
+                        {
+                            if (_lowerCanSetBlock[i, j] && !_staticEntityExistBlock[i, j])
+                            {
+                                _isAffordableBlockList.Add((i, j));
+                            }
+                        }
+                    }
+                    break;
+                case 1:
+                    for (int i = 0; i < _iSize; i++)
+                    {
+                        for (int j = 0; j < _jSize; j++)
+                        {
+                            if (_higherCanSetBlock[i, j] && !_staticEntityExistBlock[i, j])
+                            {
+                                _isAffordableBlockList.Add((i, j));
+                            }
+                        }
+                    }
+                    break;
+                case 2:
+                    for (int i = 0; i < _iSize; i++)
+                    {
+                        for (int j = 0; j < _jSize; j++)
+                        {
+                            if ((_lowerCanSetBlock[i, j] || _higherCanSetBlock[i, j]) && !_staticEntityExistBlock[i, j])
+                            {
+                                _isAffordableBlockList.Add((i, j));
+                            }
+                        }
+                    }
+                    break;
+                case 3:
+                    for (int i = 0; i < _iSize; i++)
+                    {
+                        for (int j = 0; j < _jSize; j++)
+                        {
+                            if ((_lowerCanSetBlock[i, j] || _higherCanSetBlock[i, j]) && _staticEntityExistBlock[i, j])
+                            {
+                                _isAffordableBlockList.Add((i, j));
+                            }
+                        }
+                    }
+                    break;
+                default: break;
+            }
+            //չʾ�ɷ��õķ�Χ
+            for (int i = 0; i < _isAffordableBlockList.Count; i++)
+            {
+                MapDataManager.Manager.BlockDataMatrix[_isAffordableBlockList[i].i, _isAffordableBlockList[i].j].Material.color = lightGreen;
+            }
+            //=====================================================================================================================================
+        }
+
         #endregion
 
         #region Helpers
@@ -1183,694 +1886,6 @@ namespace MyUI
         
         
         
-        }
-        private void UIStates_ShowClose_Leftmessage(bool show)
-        {
-            //=====================================================================================================================================
-            if (show)
-            {
-                if (!_leftmessageOpen)
-                {
-                    _leftmessageOpen = true;
-                    _leftMessage.SetActive(true);
-                }
-                // 选中态由 _selectedStaticEntityID 统一表达（placeData 与已部署 entity 两种场景都会设置它）
-                if (!_selectedStaticEntityID.HasValue)
-                {
-                    return;
-                }
-                EntityID entityID = _selectedStaticEntityID.Value;
-
-                EntityData entityData = GameDataService.EntityRepository.Get(entityID);
-
-                SwitchShowSkillTalent(_currentShow, entityData);
-                ShowAttackRangeAttributes(entityData.VisionRange);
-                _name.text = entityData.ChineseName;
-                _class.sprite = _professionsLighten[entityData.CharacterJob];
-                UIStates_Update_Leftmessage();
-            }
-            else
-            {
-                if (_leftmessageOpen)
-                {
-                    _leftmessageOpen = false;
-                    _leftMessage.SetActive(false);
-                }
-            }
-            //=====================================================================================================================================
-        }
-        private void UIStates_Update_Leftmessage()
-        {
-            //=====================================================================================================================================
-            Entity entity;
-            bool isBefore;
-            if (_selectedPlaceData != null && _selectedEntity == null)
-            {
-                entity = _selectedPlaceData.StaticEntity;
-                isBefore = true;
-            }
-            else if (_selectedPlaceData == null && _selectedEntity != null)
-            {
-                entity = _selectedEntity;
-                isBefore = false;
-            }
-            else
-            {
-                return;
-            }
-            float atk, def, mgr, currentHp, maxHp;
-            int blo;
-            if (isBefore)
-            {
-                if (entity.AttackBase != null)
-                {
-                    atk = entity.AttackBase.AttackDamageF;
-                }
-                else
-                {
-                    atk = 0;
-                }
-                def = entity.DEF_1;
-                mgr = entity.MagicResistance_1;
-                blo = entity.BlockOccupation_1;
-                currentHp = entity.MaxHp_1;
-                maxHp = entity.MaxHp_1;
-            }
-            else
-            {
-                if (entity.AttackBase != null)
-                {
-                    atk = entity.AttackBase.AttackDamageS;
-                }
-                else
-                {
-                    atk = 0;
-                }
-                def = entity.DEF_2;
-                mgr = entity.MagicResistance_2;
-                blo = entity.BlockOccupation;
-                currentHp = entity.CurrentHp;
-                maxHp = entity.MaxHpS;
-            }
-            _statsText.text = $"����  {(int)atk}\n����  {(int)def}\n����  {(int)mgr}\n�赲  {blo}";
-            float leftLength = _hpSliderSize.width * currentHp / maxHp;
-            _hpSlider.sizeDelta = new Vector2(leftLength - _hpSliderSize.width, _hpSliderSize.height);
-            _hpText.text = $"{(int)currentHp}/{(int)maxHp}";
-            _hpBk.anchoredPosition = new Vector2(leftLength > 81 ? leftLength : 81, 0);
-            //=====================================================================================================================================
-
-        }
-        private void UIStates_ShowClose_Operator(bool show)
-        {
-            //=====================================================================================================================================
-            if (show)
-            {
-                if (!_operaterOpen)
-                {
-                    _operaterOpen = true;
-                    _operateArea.SetActive(true);
-                }
-                MoveCamera(_selectedEntity.EntityPosition + _deltaX * Vector2.right, 0.1f);
-                if (sea.CanCallBack)
-                {
-                    _callBack.enabled = true;
-                    _callBackClick.callback.RemoveAllListeners();
-                    _callBackClick.callback.AddListener((data) =>
-                    {
-                        _selectedEntity.thisEntityPool.Return(_selectedEntity);
-                        LevelRescurceManager.Manager.ChangeCost((int)(_selectedEntity.GetComponent<InteractableStatic>().CurrentSetCost * 0.5));
-                        _selectedEntity.participateIn = false;
-                        AudioManager.Manager.PlayAudio("escape", 1, false, false);
-                        UIStates_SwitchTo_Normal();
-                    });
-                }
-                else
-                {
-                    _callBack.enabled = false;
-                }
-                if (_selectedEntity.skill != null && _selectedEntity.skill.Length > 0)
-                {
-                    _skillOpen.gameObject.SetActive(true);
-                    _selectSkill = _selectedEntity.skill[0];
-                    _skillOpen.sprite = _selectSkill.SkillImg;
-                    if (_selectSkill.SkillAttackRange != null)
-                    {
-                        _skillRange.gameObject.SetActive(true);
-                        _skillRangeClick.callback.RemoveAllListeners();
-                        _skillRangeClick.callback.AddListener((data) =>
-                        {
-
-                        });
-                    }
-                    else
-                    {
-                        _skillRange.gameObject.SetActive(false);
-                    }
-                }
-                else
-                {
-                    _skillOpen.gameObject.SetActive(false);
-                    _selectSkill = null;
-                }
-                UIStates_Update_Operator();
-            }
-            else
-            {
-                if (_operaterOpen)
-                {
-                    _operaterOpen = false;
-                    _operateArea.SetActive(false);
-                    MoveCamera(_cameraOriginalPos, 0.1f);
-                }
-            }
-            //=====================================================================================================================================
-        }
-        private void UIStates_Update_Operator()
-        {
-            //=====================================================================================================================================
-            if (_selectedEntity == null || !_selectedEntity.participateIn)
-                UIStates_SwitchTo_Normal();
-            //=====================================================================================================================================
-            if (_selectSkill)
-            {
-                if (!_selectSkill.SkillCanBegin())
-                {
-                    _skillOpen.raycastTarget = false;
-                    _skillOpen.color = Color.gray;
-                }
-                else
-                {
-                    if (_selectSkill.SkillOpenMode == 3)
-                    {
-                        _skillOpen.raycastTarget = true;
-                    }
-                    else
-                    {
-                        _skillOpen.raycastTarget = false;
-                    }
-                    _skillOpen.color = Color.white;
-                }
-        
-                (float currentSpRate, int currentChargeNum, bool isSkill) = _selectSkill.SkillMessage;
-                _spMask.fillAmount = currentSpRate;
-                if (currentChargeNum < 1)
-                {
-                    _skillChargeNum.gameObject.SetActive(false);
-                }
-                else
-                {
-                    _skillChargeNum.gameObject.SetActive(true);
-                    _skillChargeNumText.text = currentChargeNum.ToString();
-                }
-                if (!isSkill)
-                {
-                    float tsp;
-                    tsp = _selectSkill.TotalSp;
-                    _spState.sprite = _spMessageAtlas[0];
-                    _stop.enabled = false;
-                    if (!_selectSkill.SPFull())
-                    {
-                        _spMask.enabled = true;
-                        _spMask.color = _lightGreen_half;
-                        _spText.text = $"{(int)(tsp * currentSpRate)}/{(int)tsp}";
-                        if (currentChargeNum == 0 && currentSpRate < 1)
-                        {
-                            _spBk.color = _gray;
-                            _spState.color = _lightGreen;
-                            _spText.color = Color.white;
-                        }
-                        else
-                        {
-                            _spBk.color = _lightGreen;
-                            _spState.color = Color.white;
-                            _spText.color = Color.black;
-                        }
-                    }
-                    else
-                    {
-                        _spMask.enabled = false;
-                        _spText.text = "READY";
-                        _spBk.color = _lightGreen;
-                        _spState.color = Color.white;
-                        _spText.color = Color.black;
-                    }
-                }
-                else
-                {
-                    int consumeType = _selectSkill.SpComsumeMode;
-                    _spBk.color = _orange;
-                    _spState.color = Color.white;
-                    if (consumeType < 3)
-                    {
-                        float tsa = _selectSkill.SkillAmount;
-                        _spMask.enabled = true;
-                        _spMask.color = _orange_half;
-                        _spState.sprite = _spMessageAtlas[consumeType + 1];
-                        _spText.color = Color.white;
-                        if (consumeType == 0)
-                        {
-                            _spText.text = (tsa * currentSpRate).ToString("0.0") + 's';
-                        }
-                        else
-                        {
-                            _spText.text = (tsa * currentSpRate).ToString() + '/' + tsa.ToString();
-                        }
-                    }
-                    else
-                    {
-                        _spMask.enabled = false;
-                        _spState.sprite = _spMessageAtlas[4];
-                        _spText.text = null;
-                    }
-                    if (_selectSkill.CanCloseSkill)
-                    {
-                        _stop.enabled = true;
-                    }
-                    else
-                    {
-                        _stop.enabled = false;
-                    }
-                }
-            }
-        }
-        private void UIStates_ShowClose_Dragger(bool show)
-        {
-            if (show)
-            {
-                if (!_draggerOpen)
-                {
-                    _draggerOpen = true;
-                    _target.gameObject.SetActive(true);
-                }
-            }
-            else
-            {
-                if (_draggerOpen)
-                {
-                    _draggerOpen = false;
-                    _target.gameObject.SetActive(false);
-                    _up.enabled = false;
-                    _right.enabled = false;
-                    _left.enabled = false;
-                    _down.enabled = false;
-                }
-            }
-        }
-        private void UIStates_Update_Dragger()
-        {
-            if (_currentUIState == UIState.setting)
-            {
-                Vector3 p = _camera.ScreenToWorldPoint(Input.mousePosition);
-                (int i, int j) = ((int)(p.y + 0.5), (int)(p.x + 0.5));
-                if (_isAffordableBlockList.Contains((i, j)))
-                {
-                    _target.transform.position = new Vector2(j, i);
-                    if (true)
-                    {
-                        _target.color = Color.yellow;
-                    }
-                    else
-                    {
-                        _target.color = Color.green;
-                        _orientation = 0;
-                        UIStates_ShowClose_Chooser(true);
-                        UIStates_ShowClose_Range(true);
-                    }
-                }
-                else
-                {
-                    if (_target.color == Color.green)
-                    {
-                        UIStates_ShowClose_Chooser(false);
-                        UIStates_ShowClose_Range(false);
-                    }
-                    _target.transform.position = new Vector2(p.x, p.y);
-                    _target.color = Color.red;
-                }
-            }
-        }
-        private void UIStates_ShowClose_Chooser(bool show)
-        {
-            if (show)
-            {
-                if (!_chooserOpen)
-                {
-                    _chooserOpen = true;
-                    _chooser.gameObject.SetActive(true);
-                }
-                _chooser.transform.position = _target.transform.position;
-            }
-            else
-            {
-                if (_chooserOpen)
-                {
-                    _chooserOpen = false;
-                    _chooser.gameObject.SetActive(false);
-                }
-            }
-        }
-        private void UIStates_Update_Chooser()
-        {
-            Vector3 p = _camera.ScreenToWorldPoint(Input.mousePosition);
-            _target.transform.position = new Vector2(p.x, p.y);
-            if (!_inChooser)
-            {
-                Vector2 dp = p - _chooser.transform.position;
-                if (dp.y > dp.x)
-                {
-                    if (dp.y > -dp.x && _orientation != 0)
-                    {
-                        _orientation = 0;
-                        _up.enabled = true;
-                        _down.enabled = false;
-                        _left.enabled = false;
-                        _right.enabled = false;
-                        UIStates_ShowClose_Range(true);
-                    }
-                    else if (dp.y <= -dp.x && _orientation != 3)
-                    {
-                        _orientation = 3;
-                        _up.enabled = false;
-                        _down.enabled = false;
-                        _left.enabled = true;
-                        _right.enabled = false;
-                        UIStates_ShowClose_Range(true);
-                    }
-                }
-                else
-                {
-                    if (dp.y > -dp.x && _orientation != 1)
-                    {
-                        _orientation = 1;
-                        _up.enabled = false;
-                        _down.enabled = false;
-                        _left.enabled = false;
-                        _right.enabled = true;
-                        UIStates_ShowClose_Range(true);
-                    }
-                    else if (dp.y <= -dp.x && _orientation != 2)
-                    {
-                        _orientation = 2;
-                        _up.enabled = false;
-                        _down.enabled = true;
-                        _left.enabled = false;
-                        _right.enabled = false;
-                        UIStates_ShowClose_Range(true);
-                    }
-                }
-                _chooser.color = new Color(0, 1, 0, 0.4f);
-                _target.color = Color.green;
-            }
-            else
-            {
-                _orientation = -1;
-                _up.enabled = false;
-                _down.enabled = false;
-                _left.enabled = false;
-                _right.enabled = false;
-                _chooser.color = new Color(1, 1, 0, 0.4f);
-                _target.color = Color.yellow;
-                UIStates_ShowClose_Range(false);
-            }
-        }
-        private void UIStates_ShowClose_Range(bool show)
-        {
-            if (show)
-            {
-                if (!_rangeOpen)
-                {
-                    _rangeOpen = true;
-                    _rangeImgCollection.SetActive(true);
-                }
-                UIStates_Update_Range();
-            }
-            else
-            {
-                if (_rangeOpen)
-                {
-                    _rangeOpen = false;
-                    _rangeImgCollection.SetActive(false);
-                }
-            }
-        }
-        private void UIStates_Update_Range()
-        {
-            //=====================================================================================================================================
-            Color color = new Color(255, 160, 0);
-            (int x, int y)[] attackRange;
-            if (_selectedPlaceData != null && _selectedEntity == null)
-            {
-                (int x, int y) pos = ((int)(_chooser.transform.position.x + 0.5), (int)(_chooser.transform.position.y + 0.5));
-            }
-            else if (_selectedPlaceData == null && _selectedEntity != null)
-            {
-                attackRange = _selectedEntity.VisionRange;
-            }
-            else
-            {
-                return;
-            }
-            int rangeImgCount = _rangeImg.Count;
-            if (rangeImgCount >= attackRange.Length)
-            {
-                for (int i = 0; i < attackRange.Length; i++)
-                {
-                    _rangeImg[i].transform.position = new Vector2(attackRange[i].x, attackRange[i].y);
-                    _rangeImg[i].color = color;
-                    _rangeImg[i].enabled = true;
-                }
-                for (int i = attackRange.Length; i < rangeImgCount; i++)
-                {
-                    _rangeImg[i].enabled = false;
-                }
-            }
-            else
-            {
-                for (int i = 0; i < rangeImgCount; i++)
-                {
-                    _rangeImg[i].transform.position = new Vector2(attackRange[i].x, attackRange[i].y);
-                    _rangeImg[i].color = color;
-                    _rangeImg[i].enabled = true;
-                }
-                for (int i = rangeImgCount; i < attackRange.Length; i++)
-                {
-                    _rangeImg.Add(Object.Instantiate(_rangeImg[0], new Vector2(attackRange[i].x, attackRange[i].y), Quaternion.identity, _rangeImgCollection.transform));
-                }
-            }
-            //=====================================================================================================================================
-        }
-        private void UIStates_ShowClose_Canset(bool show)
-        {
-            if (show)
-            {
-                if (!_cansetOpen)
-                {
-                    _cansetOpen = true;
-                }
-                UIStates_Update_Canset();
-            }
-            else
-            {
-                if (_cansetOpen)
-                {
-                    _cansetOpen = false;
-                    for (int i = 0; i < _isAffordableBlockList.Count; i++)
-                    {
-                        MapDataManager.Manager.BlockDataMatrix[_isAffordableBlockList[i].i, _isAffordableBlockList[i].j].Material.color = Color.white;
-                    }
-                }
-            }
-        }
-        private void UIStates_Update_Canset()
-        {
-            //=====================================================================================================================================
-            Color lightGreen = new Color(0, 0.4f, 0);
-            FetchMapEntityData();
-            for (int i = 0; i < _isAffordableBlockList.Count; i++)
-            {
-                MapDataManager.Manager.BlockDataMatrix[_isAffordableBlockList[i].i, _isAffordableBlockList[i].j].Material.color = Color.white;
-            }
-            _isAffordableBlockList.Clear();
-            switch (_isAffordableType)
-            {
-                case 0:
-                    for (int i = 0; i < _iSize; i++)
-                    {
-                        for (int j = 0; j < _jSize; j++)
-                        {
-                            if (_lowerCanSetBlock[i, j] && !_staticEntityExistBlock[i, j])
-                            {
-                                _isAffordableBlockList.Add((i, j));
-                            }
-                        }
-                    }
-                    break;
-                case 1:
-                    for (int i = 0; i < _iSize; i++)
-                    {
-                        for (int j = 0; j < _jSize; j++)
-                        {
-                            if (_higherCanSetBlock[i, j] && !_staticEntityExistBlock[i, j])
-                            {
-                                _isAffordableBlockList.Add((i, j));
-                            }
-                        }
-                    }
-                    break;
-                case 2:
-                    for (int i = 0; i < _iSize; i++)
-                    {
-                        for (int j = 0; j < _jSize; j++)
-                        {
-                            if ((_lowerCanSetBlock[i, j] || _higherCanSetBlock[i, j]) && !_staticEntityExistBlock[i, j])
-                            {
-                                _isAffordableBlockList.Add((i, j));
-                            }
-                        }
-                    }
-                    break;
-                case 3:
-                    for (int i = 0; i < _iSize; i++)
-                    {
-                        for (int j = 0; j < _jSize; j++)
-                        {
-                            if ((_lowerCanSetBlock[i, j] || _higherCanSetBlock[i, j]) && _staticEntityExistBlock[i, j])
-                            {
-                                _isAffordableBlockList.Add((i, j));
-                            }
-                        }
-                    }
-                    break;
-                default: break;
-            }
-            //չʾ�ɷ��õķ�Χ
-            for (int i = 0; i < _isAffordableBlockList.Count; i++)
-            {
-                MapDataManager.Manager.BlockDataMatrix[_isAffordableBlockList[i].i, _isAffordableBlockList[i].j].Material.color = lightGreen;
-            }
-            //=====================================================================================================================================
-        }
-        private void UIStates_ShowSomethingAndOtherClose(string[] shows)
-        {
-            //"leftmessage", "operator", "dragger","choosing", "range", "canset"
-            bool showHave = shows != null;
-            UIStates_ShowClose_Leftmessage(showHave && shows.Contains("leftmessage"));
-            UIStates_ShowClose_Operator(showHave && shows.Contains("operator"));
-            UIStates_ShowClose_Dragger(showHave && shows.Contains("dragger"));
-            UIStates_ShowClose_Chooser(showHave && shows.Contains("choosing"));
-            UIStates_ShowClose_Range(showHave && shows.Contains("range"));
-            UIStates_ShowClose_Canset(showHave && shows.Contains("canset"));
-        }
-        
-        private void UIStates_SwitchTo_Normal()
-        {
-            _isSlow = false;
-            SetTimeScale();
-            _currentUIState = UIState.normal;
-            //=====================================================================================================================================
-            _selectedStaticEntityID = null;
-            _selectedEntity = null;
-            //=====================================================================================================================================
-            if (_selectedPlaceData != null)
-            {
-                _selectedPlaceData.SelectorMove(false);
-                _selectedPlaceData = null;
-            }
-            UIStates_ShowSomethingAndOtherClose(null);
-
-        }
-        private void UIStates_SwitchTo_ViewBeforeSet(StaticEntityPlaceData staticEntityPlaceData)
-        {
-            _isSlow = true;
-            SetTimeScale();
-            _selectedPlaceData = staticEntityPlaceData;
-            //=====================================================================================================================================
-            _selectedStaticEntityID = staticEntityPlaceData.EntityId;
-            _selectedEntity = null;
-            //=====================================================================================================================================
-            UIStates_ShowSomethingAndOtherClose(new string[2] { "leftmessage", "canset" });
-            if (_currentUIState == UIState.normal)
-            {
-                _currentUIState = UIState.viewBeforeSet;
-                FixedUpdate();
-            }
-            _currentUIState = UIState.viewBeforeSet;
-        }
-        private void UIStates_SwitchTo_Setting(StaticEntityPlaceData staticEntityPlaceData)
-        {
-            _isSlow = true;
-            SetTimeScale();
-            _selectedPlaceData = staticEntityPlaceData;
-            //=====================================================================================================================================
-            _selectedStaticEntityID = staticEntityPlaceData.EntityId;
-            _selectedEntity = null;
-            //=====================================================================================================================================
-            UIStates_ShowSomethingAndOtherClose(new string[3] { "leftmessage", "dragger", "canset" });
-            if (_currentUIState == UIState.normal)
-            {
-                _currentUIState = UIState.setting;
-                FixedUpdate();
-            }
-            _currentUIState = UIState.setting;
-        }
-        private void UIStates_SwitchTo_Chooseing(StaticEntityPlaceData staticEntityPlaceData)
-        {
-            _isSlow = true;
-            SetTimeScale();
-            _selectedPlaceData = staticEntityPlaceData;
-            //=====================================================================================================================================
-            _selectedStaticEntityID = staticEntityPlaceData.EntityId;
-            _selectedEntity = null;
-            //=====================================================================================================================================
-            UIStates_ShowSomethingAndOtherClose(new string[4] { "leftmessage", "dragger", "choosing", "canset" });
-            if (_currentUIState == UIState.normal)
-            {
-                _currentUIState = UIState.choosing;
-                FixedUpdate();
-            }
-            _currentUIState = UIState.choosing;
-        }
-        private void UIStates_SwitchTo_ViewAfterSet(Entity entitySelected)
-        {
-            _isSlow = true;
-            SetTimeScale();
-            //=====================================================================================================================================
-            _selectedEntity = entitySelected;
-            _selectedStaticEntityID = entitySelected.EntityData.ID;
-            //=====================================================================================================================================
-            _selectedPlaceData = null;
-            UIStates_ShowSomethingAndOtherClose(new string[3] { "leftmessage", "operator", "range" });
-            if (_currentUIState == UIState.normal)
-            {
-                _currentUIState = UIState.viewAfterSet;
-                FixedUpdate();
-            }
-            _currentUIState = UIState.viewAfterSet;
-        }
-        private void UIStateMachine()
-        {
-            switch (_currentUIState)
-            {
-                case UIState.normal:
-                    break;
-                case UIState.viewBeforeSet:
-                    UIStates_Update_Canset();
-                    UIStates_Update_Leftmessage();
-                    break;
-                case UIState.setting:
-                    UIStates_Update_Canset();
-                    UIStates_Update_Leftmessage();
-                    break;
-                case UIState.choosing:
-                    UIStates_Update_Canset();
-                    UIStates_Update_Leftmessage();
-                    break;
-                case UIState.viewAfterSet:
-                    UIStates_Update_Range();
-                    UIStates_Update_Leftmessage();
-                    UIStates_Update_Operator();
-                    break;
-            }
         }
     }
 }
