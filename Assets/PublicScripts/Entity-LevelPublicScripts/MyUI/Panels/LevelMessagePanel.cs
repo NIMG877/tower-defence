@@ -126,7 +126,7 @@ namespace MyUI
                 _event.triggers.Add(drag);
                 _event.triggers.Add(dragEnd);
             }
-            public int CaculateCost()
+            public int CalculateCost()
             {
                 if (StaticEntityData.RespawnCostUp>0)
                 {
@@ -225,7 +225,7 @@ namespace MyUI
             }
             public void CanSetStateUpDate()
             {
-                int cost = CaculateCost();
+                int cost = CalculateCost();
                 _costText.text = cost.ToString();
                 if (_respawnTimer <= 0 && cost <= LevelRescurceManager.Manager.CostMessage.currentCost && LevelRescurceManager.Manager.CanSetNumLeft - StaticEntityData.MaxOccupyCount >= 0)
                 {
@@ -269,9 +269,9 @@ namespace MyUI
         private GameObject _leftMessage;
         private Image _chooser, _up, _down, _left, _right;
         private Image _class, _target;
-        private RectTransform _self_a, _rangeArea;
-        private List<RectTransform> _range_a;
-        private TextMeshProUGUI _name, _admb;
+        private RectTransform _rangeSelfTile, _rangeArea;
+        private List<RectTransform> _rangeTiles;
+        private TextMeshProUGUI _name, _statsText;
         private RectTransform _hpSlider, _hpBk;
         private (float width, float height) _hpSliderSize;
         private TextMeshProUGUI _hpText;
@@ -417,11 +417,11 @@ namespace MyUI
             _right = GetComponentInChildrenByPath<Image>("leftMessageArea/target/right");
             _class = GetComponentInChildrenByPath<Image>("leftMessageArea/class");
             _target = GetComponentInChildrenByPath<Image>("leftMessageArea/target");
-            _self_a = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/atkRange/area/self");
-            _range_a = new List<RectTransform> { GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/atkRange/area/range") };
+            _rangeSelfTile = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/atkRange/area/self");
+            _rangeTiles = new List<RectTransform> { GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/atkRange/area/range") };
             _rangeArea = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/atkRange/area");
             _name = GetComponentInChildrenByPath<TextMeshProUGUI>("leftMessageArea/name");
-            _admb = GetComponentInChildrenByPath<TextMeshProUGUI>("leftMessageArea/attributes/admb");
+            _statsText = GetComponentInChildrenByPath<TextMeshProUGUI>("leftMessageArea/attributes/admb");
             _hpSlider = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/hpSliderBk/hpSlider");
             _skillTalentRect = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/skillTalent/content/content");
             _skillTalentRectParent = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/skillTalent/content");
@@ -787,7 +787,7 @@ namespace MyUI
         {
             if (_orientation != -1)
             {
-                int cost = EntityManager.Manager.SetStaticEntity(_selectedPlaceData.StaticId, _chooser.transform.position, 1, _orientation).GetComponent<InteractableStatic>().CurrentSetCost = _selectedPlaceData.CaculateCost();
+                int cost = EntityManager.Manager.SetStaticEntity(_selectedPlaceData.StaticId, _chooser.transform.position, 1, _orientation).GetComponent<InteractableStatic>().CurrentSetCost = _selectedPlaceData.CalculateCost();
                 LevelRescurceManager.Manager.ChangeCost(-cost);
                 _selectedPlaceData.SelectorMove(false);
                 _selectedPlaceData.SetNum(1);
@@ -1020,29 +1020,29 @@ namespace MyUI
                 l = dyl > 15 ? 15 : dyl;
             float centerX = (float)(minX + maxX) / 2;
             float centerY = (float)(minY + maxY) / 2;
-            if (_range_a.Count < range.Length)
+            if (_rangeTiles.Count < range.Length)
             {
-                int dc = range.Length - _range_a.Count;
+                int dc = range.Length - _rangeTiles.Count;
                 for (int i = 0; i < dc; i++)
                 {
-                    _range_a.Add(Object.Instantiate(_range_a[0].gameObject, _rangeArea).GetComponent<RectTransform>());
+                    _rangeTiles.Add(Object.Instantiate(_rangeTiles[0].gameObject, _rangeArea).GetComponent<RectTransform>());
                 }
             }
-            else if (_range_a.Count > range.Length)
+            else if (_rangeTiles.Count > range.Length)
             {
-                for (int i = range.Length; i < _range_a.Count; i++)
+                for (int i = range.Length; i < _rangeTiles.Count; i++)
                 {
-                    _range_a[i].gameObject.SetActive(false);
+                    _rangeTiles[i].gameObject.SetActive(false);
                 }
             }
             for (int i = 0; i < range.Length; i++)
             {
-                _range_a[i].sizeDelta = new Vector2(l * (1 - gap), l * (1 - gap));
-                _range_a[i].anchoredPosition = new Vector2(l * (range[i].x - centerX), l * (range[i].y - centerY));
-                _range_a[i].gameObject.SetActive(true);
+                _rangeTiles[i].sizeDelta = new Vector2(l * (1 - gap), l * (1 - gap));
+                _rangeTiles[i].anchoredPosition = new Vector2(l * (range[i].x - centerX), l * (range[i].y - centerY));
+                _rangeTiles[i].gameObject.SetActive(true);
             }
-            _self_a.sizeDelta = new Vector2(l * (1 - gap), l * (1 - gap));
-            _self_a.anchoredPosition = new Vector2(-l * centerX, -l * centerY);
+            _rangeSelfTile.sizeDelta = new Vector2(l * (1 - gap), l * (1 - gap));
+            _rangeSelfTile.anchoredPosition = new Vector2(-l * centerX, -l * centerY);
         
         
         
@@ -1136,7 +1136,7 @@ namespace MyUI
                 currentHp = entity.CurrentHp;
                 maxHp = entity.MaxHpS;
             }
-            _admb.text = $"����  {(int)atk}\n����  {(int)def}\n����  {(int)mgr}\n�赲  {blo}";
+            _statsText.text = $"����  {(int)atk}\n����  {(int)def}\n����  {(int)mgr}\n�赲  {blo}";
             float leftLength = _hpSliderSize.width * currentHp / maxHp;
             _hpSlider.sizeDelta = new Vector2(leftLength - _hpSliderSize.width, _hpSliderSize.height);
             _hpText.text = $"{(int)currentHp}/{(int)maxHp}";
