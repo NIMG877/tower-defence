@@ -895,16 +895,6 @@ namespace MyUI
         #endregion
 
         #region Time Control
-        #endregion
-
-        #region UI States
-        #endregion
-
-        #region Helpers
-        #endregion
-        //operator
-        private EventTrigger.Entry _callBackClick, _skillRangeClick;
-
         private void SetTimeScale()
         {
             if (_isPause)
@@ -924,7 +914,7 @@ namespace MyUI
                 Time.timeScale = 1;
             }
         }
-        
+
         private async void FixedUpdate()
         {
             while (true)
@@ -935,6 +925,15 @@ namespace MyUI
                 await UniTask.WaitForFixedUpdate(LevelResourceSharing.LevelCtk);
             }
         }
+        #endregion
+
+        #region UI States
+        #endregion
+
+        #region Helpers
+        #endregion
+        //operator
+        private EventTrigger.Entry _callBackClick, _skillRangeClick;
         /// <summary>
         /// �жϵ��λ���Ƿ���Է���
         /// </summary>
