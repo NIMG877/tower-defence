@@ -1112,7 +1112,6 @@ namespace MyUI
             //         _operateArea.SetActive(true);
             //     }
             //     MoveCamera(_selectedStaticEntity.EntityPosition + _deltaX * Vector2.right, 0.1f);
-            //     StaticEntityAttributes sea = _selectedStaticEntity.GetComponent<StaticEntityAttributes>();
             //     if (sea.CanCallBack)
             //     {
             //         _callBack.enabled = true;
@@ -1307,7 +1306,7 @@ namespace MyUI
                 if (_canSetBlockList.Contains((i, j)))
                 {
                     _target.transform.position = new Vector2(j, i);
-                    if (true)//_selectedStaticEntityData.StaticEntityAttributes.NeedSelectDirection)
+                    if (true)
                     {
                         _target.color = Color.yellow;
                     }
@@ -1443,7 +1442,6 @@ namespace MyUI
             // if (_selectedStaticEntityData != null && _selectedStaticEntity == null)
             // {
             //     (int x, int y) pos = ((int)(_chooser.transform.position.x + 0.5), (int)(_chooser.transform.position.y + 0.5));
-            //     attackRange = MapDataManager.Manager.RangeCaculator(_selectedStaticEntityData.StaticEntityAttributes.ATK_Range, pos, _orientation);
             // }
             // else if (_selectedStaticEntityData == null && _selectedStaticEntity != null)
             // {
@@ -1508,7 +1506,6 @@ namespace MyUI
         {
             //=====================================================================================================================================
             // Color lightGreen = new Color(0, 0.4f, 0);
-            // _canSetType = _selectedStaticEntityData.StaticEntityAttributes.CanSetType;
             // FetchMapEntityData();
             // for (int i = 0; i < _canSetBlockList.Count; i++)
             // {

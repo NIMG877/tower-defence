@@ -15,7 +15,7 @@ public class EntityPool
         count = Math.Min(10, count);
         Id=id;
         EntityData = GameDataService.EntityRepository.Get(id);
-        isStatic = EntityData.Prefab.TryGetComponent(out StaticEntityAttributes sa);
+        isStatic = EntityData.IsStatic;
         entity_pool = entity_p;
         inp_entities = new List<Entity>(count);
         for (int i = 0; i < count; i++)

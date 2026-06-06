@@ -58,7 +58,7 @@ public class EntityManager : IManagerStartEnd
                 {
                     for (int k = 0; k < _blockMonsters[i, j].Count; k++)
                     {
-                        if (_blockTurrets[i, j][k].TryGetComponent(out MovableEntityAttributes mA) && mA.MoveMethod == 0)
+                        if (_blockTurrets[i, j][k].EntityData.MoveMethod == 0)
                         {
                             m0e[i, j] = true;
                             break;
@@ -68,7 +68,7 @@ public class EntityManager : IManagerStartEnd
                     {
                         for (int k = 0; k < _blockTurrets[i, j].Count; k++)
                         {
-                            if (_blockTurrets[i, j][k].TryGetComponent(out MovableEntityAttributes mA) && mA.MoveMethod == 0)
+                            if (_blockTurrets[i, j][k].EntityData.MoveMethod == 0)
                             {
                                 m0e[i, j] = true;
                                 break;
@@ -84,13 +84,13 @@ public class EntityManager : IManagerStartEnd
     public event OperationsAfterSetEntity OnAfterSetEntity;
 
     /// <summary>
-    /// ·ÅÖÃ¾²Ì¬ÊµÌå
+    /// ï¿½ï¿½ï¿½Ã¾ï¿½Ì¬Êµï¿½ï¿½
     /// </summary>
-    /// <param name="prefab">Ô¤ÖÆÌå</param>
-    /// <param name="destination">·ÅÖÃµØµã</param>
-    /// <param name="camp">ÊµÌåÕóÓª</param>
-    /// <param name="orientation">ÉèÖÃµÄ³¯Ïò:0-up£¬1-right£¬2-down£¬3-left</param>
-    /// <returns>·ÅÖÃ³öµÄÊµÌå</returns>
+    /// <param name="prefab">Ô¤ï¿½ï¿½ï¿½ï¿½</param>
+    /// <param name="destination">ï¿½ï¿½ï¿½ÃµØµï¿½</param>
+    /// <param name="camp">Êµï¿½ï¿½ï¿½ï¿½Óª</param>
+    /// <param name="orientation">ï¿½ï¿½ï¿½ÃµÄ³ï¿½ï¿½ï¿½:0-upï¿½ï¿½1-rightï¿½ï¿½2-downï¿½ï¿½3-left</param>
+    /// <returns>ï¿½ï¿½ï¿½Ã³ï¿½ï¿½ï¿½Êµï¿½ï¿½</returns>
     public Entity SetStaticEntity(EntityID prefab_id, Vector2 destination, int camp, int orientation)
     {
         EntityPool entityPool = EntityPoolManager.Manager.FetchEntityPool(prefab_id);
@@ -117,17 +117,17 @@ public class EntityManager : IManagerStartEnd
             OnAfterSetEntity?.Invoke(staticEntity);
             return staticEntity;
         }
-        Debug.LogError("Î´´´½¨Ô¤ÖÆÌå¶ÔÓ¦µÄÊµÌå³Ø");
+        Debug.LogError("Î´ï¿½ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½Êµï¿½ï¿½ï¿½");
         return null;
     }
     /// <summary>
-    /// ·ÅÖÃÒÆ¶¯ÊµÌå
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½Êµï¿½ï¿½
     /// </summary>
-    /// <param name="prefab">Ô¤ÖÆÌå</param>
-    /// <param name="destination">·ÅÖÃµØµã</param>
-    /// <param name="camp">ÊµÌåÕóÓª</param>
-    /// <param name="pathSerial">Â·¾¶±êºÅ</param>
-    /// <returns>·ÅÖÃ³öµÄÊµÌå</returns>
+    /// <param name="prefab">Ô¤ï¿½ï¿½ï¿½ï¿½</param>
+    /// <param name="destination">ï¿½ï¿½ï¿½ÃµØµï¿½</param>
+    /// <param name="camp">Êµï¿½ï¿½ï¿½ï¿½Óª</param>
+    /// <param name="pathSerial">Â·ï¿½ï¿½ï¿½ï¿½ï¿½</param>
+    /// <returns>ï¿½ï¿½ï¿½Ã³ï¿½ï¿½ï¿½Êµï¿½ï¿½</returns>
     public Entity SetMovableEntity(EntityID prefab_id, Vector2 destination, int camp, int pathSerial)
     {
         EntityPool entityPool = EntityPoolManager.Manager.FetchEntityPool(prefab_id);
@@ -141,15 +141,15 @@ public class EntityManager : IManagerStartEnd
             OnAfterSetEntity?.Invoke(movableEntity);
             return movableEntity;
         }
-        Debug.LogError($"Î´´´½¨{prefab_id.ID_C}-{prefab_id.ID_N}¶ÔÓ¦µÄÊµÌå³Ø");
+        Debug.LogError($"Î´ï¿½ï¿½ï¿½ï¿½{prefab_id.ID_C}-{prefab_id.ID_N}ï¿½ï¿½Ó¦ï¿½ï¿½Êµï¿½ï¿½ï¿½");
         return null;
     }
     /// <summary>
-    /// ´ÓÖ¸¶¨·½¿éËùº¬ÊµÌåÁÐ±íÖÐÉ¾³ýÊµÌå
+    /// ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½Ð±ï¿½ï¿½ï¿½É¾ï¿½ï¿½Êµï¿½ï¿½
     /// </summary>
-    /// <param name="inBlocks">Ö¸¶¨·½¿é</param>
-    /// <param name="entity">ÐèÒªÉ¾³ýµÄÊµÌå</param>
-    /// <param name="camp">ÊµÌåÕóÓª</param>
+    /// <param name="inBlocks">Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</param>
+    /// <param name="entity">ï¿½ï¿½ÒªÉ¾ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½</param>
+    /// <param name="camp">Êµï¿½ï¿½ï¿½ï¿½Óª</param>
     public void RemoveEntityFromBlock((int i, int j)[] inBlocks, Entity entity, int camp)
     {
         for (int i = 0; i < 4; i++)
@@ -172,11 +172,11 @@ public class EntityManager : IManagerStartEnd
         }
     }
     /// <summary>
-    /// ÔÚÖ¸¶¨·½¿éËùº¬ÊµÌåÁÐ±íÖÐÌí¼ÓÊµÌå
+    /// ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½Ð±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½
     /// </summary>
-    /// <param name="inBlocks">Ö¸¶¨·½¿é</param>
-    /// <param name="entity">ÐèÒªÌí¼ÓµÄÊµÌå</param>
-    /// <param name="camp">ÊµÌåÕóÓª</param>
+    /// <param name="inBlocks">Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</param>
+    /// <param name="entity">ï¿½ï¿½Òªï¿½ï¿½ï¿½Óµï¿½Êµï¿½ï¿½</param>
+    /// <param name="camp">Êµï¿½ï¿½ï¿½ï¿½Óª</param>
     public void AddEntityToBlock((int i, int j)[] inBlocks, Entity entity, int camp)
     {
         for (int i = 0; i < 4; i++)
@@ -199,10 +199,10 @@ public class EntityManager : IManagerStartEnd
         }
     }
     /// <summary>
-    /// ½«ÊµÌå´ÓÁÐ±íÖÐÒÆ³ý
+    /// ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½Ð±ï¿½ï¿½ï¿½ï¿½Æ³ï¿½
     /// </summary>
-    /// <param name="entity">ÒªÒÆ³ýµÄÊµÌå</param>
-    /// <param name="camp">ÊµÌåÕóÓª</param>
+    /// <param name="entity">Òªï¿½Æ³ï¿½ï¿½ï¿½Êµï¿½ï¿½</param>
+    /// <param name="camp">Êµï¿½ï¿½ï¿½ï¿½Óª</param>
     public bool RemoveEntityFromList(Entity entity, int camp)
     {
         if (camp == 2)
@@ -243,13 +243,13 @@ public class EntityManager : IManagerStartEnd
         _staticEntities.Add(entity);
     }
     /// <summary>
-    /// »ùÓÚ·¶Î§µÄÊµÌåÑ¡ÔñÆ÷
+    /// ï¿½ï¿½ï¿½Ú·ï¿½Î§ï¿½ï¿½Êµï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½
     /// </summary>
-    /// <param name="range">Ñ¡Ôñ·¶Î§</param>
-    /// <param name="target">Ä¿±êÀàÐÍ£º1-Turret£¬2-Monster</param>
-    /// <param name="square_l">µ¥¸öÕý·½ÐÎµÄ±ß³¤µÄÒ»°ë</param>
-    /// <param name="force">ÊÇ·ñÇ¿ÖÆÑ¡Ôñ£ºÈôÇ¿ÖÆÑ¡Ôñ£¬Ôò»áÑ¡È¡µ½ÓµÓÐ²»¿ÉÑ¡ÔñÊôÐÔµÄÊµÌå</param>
-    /// <returns>Ñ¡Ôñµ½µÄÊµÌåÁÐ±í</returns>
+    /// <param name="range">Ñ¡ï¿½ï¿½Î§</param>
+    /// <param name="target">Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½1-Turretï¿½ï¿½2-Monster</param>
+    /// <param name="square_l">ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎµÄ±ß³ï¿½ï¿½ï¿½Ò»ï¿½ï¿½</param>
+    /// <param name="force">ï¿½Ç·ï¿½Ç¿ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½Ç¿ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡È¡ï¿½ï¿½Óµï¿½Ð²ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½Ôµï¿½Êµï¿½ï¿½</param>
+    /// <returns>Ñ¡ï¿½ñµ½µï¿½Êµï¿½ï¿½ï¿½Ð±ï¿½</returns>
     public List<Entity> EntitySelector_Range((int x, int y)[] range, int selectorCamp, bool sameCamp, float square_l, bool force)
     {
         List<Entity> list = new List<Entity>();
@@ -286,13 +286,13 @@ public class EntityManager : IManagerStartEnd
         return list;
     }
     /// <summary>
-    /// »ùÓÚ°ë¾¶µÄÊµÌåÑ¡ÔñÆ÷
+    /// ï¿½ï¿½ï¿½Ú°ë¾¶ï¿½ï¿½Êµï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½
     /// </summary>
-    /// <param name="pos">Ñ¡ÔñÖÐÐÄ</param>
-    /// <param name="target">Ä¿±êÀàÐÍ:1-Turret£¬2-Monster</param>
-    /// <param name="radius">Ñ¡Ôñ°ë¾¶:´óÓÚ0ÎªÓÐÐ§Öµ£¬Ð¡ÓÚ0ÎªÈ«Ñ¡£¬Ö¸µÄÊÇÔ²ÐÄ¾à</param>
-    /// <param name="force">ÊÇ·ñÇ¿ÖÆÑ¡Ôñ:ÈôÇ¿ÖÆÑ¡Ôñ£¬Ôò»áÑ¡È¡µ½ÓµÓÐ²»¿ÉÑ¡ÔñÊôÐÔµÄÊµÌå</param>
-    /// <returns>Ñ¡Ôñµ½µÄÊµÌåÁÐ±í</returns>
+    /// <param name="pos">Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</param>
+    /// <param name="target">Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:1-Turretï¿½ï¿½2-Monster</param>
+    /// <param name="radius">Ñ¡ï¿½ï¿½ë¾¶:ï¿½ï¿½ï¿½ï¿½0Îªï¿½ï¿½Ð§Öµï¿½ï¿½Ð¡ï¿½ï¿½0ÎªÈ«Ñ¡ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Ô²ï¿½Ä¾ï¿½</param>
+    /// <param name="force">ï¿½Ç·ï¿½Ç¿ï¿½ï¿½Ñ¡ï¿½ï¿½:ï¿½ï¿½Ç¿ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡È¡ï¿½ï¿½Óµï¿½Ð²ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½Ôµï¿½Êµï¿½ï¿½</param>
+    /// <returns>Ñ¡ï¿½ñµ½µï¿½Êµï¿½ï¿½ï¿½Ð±ï¿½</returns>
     public List<Entity> EntitySelector_Radius((float x, float y) pos, int selectorCamp, bool sameCamp, float radius, bool force)
     {
         List<Entity> list = new List<Entity>();

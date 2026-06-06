@@ -8,7 +8,6 @@ public class MoveBase : MonoBehaviour, IPoolOperation
 {
     protected Entity _thisEntity;
     protected AnimationMachine _thisAM;
-    protected MovableEntityAttributes movableEntityAttributes;
     protected MoveParameters[] _currentSection;
     protected Vector2 _unBalancedMoveSpeed;
     protected int _currentPathSerial;
@@ -273,26 +272,17 @@ public class MoveBase : MonoBehaviour, IPoolOperation
     }
     private void AttributesCaculateFirst()
     {
-        _moveSpeedF = movableEntityAttributes.MoveSpeed;
-        _moveMethod = movableEntityAttributes.MoveMethod;
-        _massLevel = movableEntityAttributes.MassLevel;
-        _levelHpComsume = movableEntityAttributes.LevelHpComsume;
+        _moveSpeedF = _thisEntity.EntityData.MoveSpeed;
+        _moveMethod = _thisEntity.EntityData.MoveMethod;
+        _massLevel = _thisEntity.EntityData.MassLevel;
+        _levelHpComsume = _thisEntity.EntityData.MonsterLevelHpConsume;
     }
     public void PreWarm()
     {
         _thisEntity = this.transform.GetComponent<Entity>();
         _thisAM = _thisEntity.entityAM;
         _unBalancedMoveSpeed = Vector2.zero;
-        if (this.TryGetComponent(out MovableEntityAttributes meA))
-        {
-            movableEntityAttributes = meA;
-            AttributesCaculateFirst();
-        }
-        else
-        {
-            Debug.LogError("δʵ");
-            return;
-        }
+        AttributesCaculateFirst();
     }
 
     public virtual void Initialize()

@@ -169,12 +169,7 @@ public class LevelActionManager : IManagerStartEnd
                     {
                         num += action.GapsFromLastRepeat.Length;
                     }
-                    // ԭӦļм¼ǷΪĬϼ¼ؿǣ+1
-                    // else if (_entityIDs[action.EntityPrefabSerial].TryGetComponent(out StaticEntityAttributes sea) && sea.CountOperated)
-                    // {
-                    //     num += action.GapsFromLastRepeat.Length;
-                    // }
-                    
+
                 }
             }
         }

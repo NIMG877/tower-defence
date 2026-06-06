@@ -159,12 +159,12 @@ public class InteractableStatic : MonoBehaviour, IPoolOperation
     }
     public void Initialize()
     {
-        LevelRescurceManager.Manager.CanSetNumLeft -= _thisEntity.GetComponent<StaticEntityAttributes>().CanSetNumOccupy;
+        LevelRescurceManager.Manager.CanSetNumLeft -= _thisEntity.EntityData.MaxOccupyCount;
     }
     public void Dormancy()
     {
         EntityManager.Manager.RemoveEntityFromStaticList(_thisEntity);
         LevelMessagePanel.Panel.EntityBackToSelector(_thisEntity);
-        LevelRescurceManager.Manager.CanSetNumLeft += _thisEntity.GetComponent<StaticEntityAttributes>().CanSetNumOccupy;
+        LevelRescurceManager.Manager.CanSetNumLeft += _thisEntity.EntityData.MaxOccupyCount;
     }
 }
