@@ -619,17 +619,6 @@ namespace MyUI
         #endregion
 
         #region Public API
-        #endregion
-
-        #region Time Control
-        #endregion
-
-        #region UI States
-        #endregion
-
-        #region Helpers
-        #endregion
-
         private static LevelMessagePanel _instance;
         public static LevelMessagePanel Panel
         {
@@ -644,8 +633,6 @@ namespace MyUI
         }
 
         public DamageStatisticData[] DamageStatisticDatas { get { return _damageStatisticDatas; } }
-        //operator
-        private EventTrigger.Entry _callBackClick, _skillRangeClick;
 
         public void InitializeStaticEntityPrefabToSelector(EntityID[] idList, int[] nums)
         {
@@ -748,7 +735,176 @@ namespace MyUI
                 });
             });
         }
-        
+        public void EntityBackTo_selectorRoot(Entity entityToBack)
+        {
+            if (entityToBack.EntityData.CanRespawn)
+            {
+                for (int i = 0; i < _placeDataList.Count; i++)
+                {
+                    if (_placeDataList[i].EntityData.ChineseName == entityToBack.NAME)
+                    {
+                        _placeDataList[i].CallBackNum(1);
+                        if (entityToBack.EntityData.RespawnStrategy == 1)
+                        {
+                            _placeDataList[i].RespawnTiming();
+                        }
+                        return;
+                    }
+                }
+                AddStaticEntityPrefabTo_selectorRoot(new EntityID[1] { entityToBack.EntityData.ID }, new int[1] { 1 });
+            }
+        }
+        public void AcceptDamageMessage(Entity target, Entity origin, float finalDamage, int damageType)
+        {
+            string targetName = "";
+            string originName = "";
+            if (target != null)
+            {
+                targetName = target.EntityData.ChineseName;
+            }
+            if (origin != null)
+            {
+                originName = origin.EntityData.ChineseName;
+            }
+            for (int i = 0; i < _damageStatisticDatas.Length; i++)
+            {
+                if (targetName == _characterChineseName[i] && damageType <= 2)
+                {
+                    _damageStatisticDatas[i].DamageReceive[damageType] += finalDamage;
+                }
+                if (originName == _characterChineseName[i])
+                {
+                    if (damageType <= 2)
+                    {
+                        _damageStatisticDatas[i].Damage[damageType] += finalDamage;
+                    }
+                    else
+                    {
+                        _damageStatisticDatas[i].Healing[0] += finalDamage;
+                    }
+                }
+            }
+        }
+        public void CostTextUpDate()
+        {
+            (int currentCost, int maxCost, float costTimer) cm = LevelRescurceManager.Manager.CostMessage;
+            _currentCost = cm.currentCost;
+            _cost.text = _currentCost.ToString();
+            for (int i = 0; i < _placeDataList.Count; i++)
+            {
+                _placeDataList[i].CanSetStateUpDate();
+            }
+        }
+        public void CanSetNumUpDate()
+        {
+            _isAffordableNum = LevelRescurceManager.Manager.CanSetNumLeft;
+            _isAffordableNumText.text = _isAffordableNum.ToString();
+            for (int i = 0; i < _placeDataList.Count; i++)
+            {
+                _placeDataList[i].CanSetStateUpDate();
+            }
+        }
+        public void LevelHpLeftTextUpdate()
+        {
+            _levelHpLeft.text = LevelRescurceManager.Manager.LevelHpLeft.ToString();
+
+        }
+        public void CurrentNumAndTotalNumUpdate()
+        {
+            _currentNumAndTotalNum.text = LevelRescurceManager.Manager.CurrentOperateCount.ToString() + '/' + LevelRescurceManager.Manager.NeedOperateCount.ToString();
+        }
+        public void ReSelectOrSetStaticEntity()
+        {
+            if (_orientation != -1)
+            {
+                int cost = EntityManager.Manager.SetStaticEntity(_selectedPlaceData.EntityId, _chooser.transform.position, 1, _orientation).GetComponent<InteractableStatic>().CurrentSetCost = _selectedPlaceData.CalculateCost();
+                LevelRescurceManager.Manager.ChangeCost(-cost);
+                _selectedPlaceData.SelectorMove(false);
+                _selectedPlaceData.SetNum(1);
+                _chooser.color = new Color(1, 1, 0, 0.4f);
+                _selectedPlaceData = null;
+                _orientation = -1;
+                UIStates_SwitchTo_Normal();
+            }
+            else
+            {
+                _target.transform.DOMove(_chooser.transform.position, 0.2f).SetUpdate(true);
+            }
+
+        }
+        public override void OnEnter()
+        {
+            base.OnEnter();
+            var team1Members = SaveSystem.GetTeamMembers("Team1");
+            EntityID[] characters = new EntityID[team1Members.Count];
+            for (int i = 0; i < characters.Length; i++) characters[i] = team1Members[i];
+            _characterChineseName = new string[characters.Length];
+            _damageStatisticDatas = new DamageStatisticData[characters.Length];
+            for (int i = 0; i < _damageStatisticDatas.Length; i++)
+            {
+                _damageStatisticDatas[i] = new DamageStatisticData(characters[i], new float[3] { 0, 0, 0 }, new float[1] { 0 }, new float[3] { 0, 0, 0 });
+                _characterChineseName[i] = CharacterCardManager.cardManager.GetCharacterAttribute(characters[i]).ChineseName;
+            }
+            GameObject[] prefab = new GameObject[characters.Length];
+            int[] num = new int[characters.Length];
+            for (int i = 0; i < characters.Length; i++)
+            {
+                prefab[i] = CharacterCardManager.cardManager.GetCharacterAttribute(characters[i]).Prefab;
+                num[i] = 1;
+            }
+            //=====================================================================================================================================
+            InitializeStaticEntityPrefabToSelector(prefab, num);
+            //=====================================================================================================================================
+            _currentUIState = UIState.normal;
+            _leftmessageOpen = false;
+            _operaterOpen = false;
+            _draggerOpen = false;
+            _rangeOpen = false;
+            _cansetOpen = false;
+            _pause.image.sprite = _c;
+            _pauseMask.SetActive(false);
+            _timeMultiple.image.sprite = _x1;
+            _blockDatas = MapDataManager.Manager.BlockDataMatrix;
+            (_iSize, _jSize) = MapDataManager.Manager.MapSize;
+            _rangeImgCollection.SetActive(false);
+            CostSliderAndCanSetNumUpdate();
+            _cameraOriginalPos = _camera.transform.position;
+            _deltaX = _cameraOriginalPos.x - _operateArea.transform.position.x;
+        }
+        public override void OnExit()
+        {
+            base.OnExit();
+            UIStates_SwitchTo_Normal();
+            _isAffordableBlockList.Clear();
+            //=====================================================================================================================================
+            _selectedStaticEntityID = null;
+            _selectedEntity = null;
+            //=====================================================================================================================================
+            _selectedPlaceData = null;
+            _orientation = -1;
+        }
+        public override void OnPause()
+        {
+            base.OnPause();
+            _isPause = false;
+            _is2X = false;
+            _isSlow = false;
+            SetTimeScale();
+            _placeDataList.Clear();
+        }
+        #endregion
+
+        #region Time Control
+        #endregion
+
+        #region UI States
+        #endregion
+
+        #region Helpers
+        #endregion
+        //operator
+        private EventTrigger.Entry _callBackClick, _skillRangeClick;
+
         private void SetTimeScale()
         {
             if (_isPause)
@@ -803,25 +959,6 @@ namespace MyUI
                 }
             }
         }
-        public void ReSelectOrSetStaticEntity()
-        {
-            if (_orientation != -1)
-            {
-                int cost = EntityManager.Manager.SetStaticEntity(_selectedPlaceData.EntityId, _chooser.transform.position, 1, _orientation).GetComponent<InteractableStatic>().CurrentSetCost = _selectedPlaceData.CalculateCost();
-                LevelRescurceManager.Manager.ChangeCost(-cost);
-                _selectedPlaceData.SelectorMove(false);
-                _selectedPlaceData.SetNum(1);
-                _chooser.color = new Color(1, 1, 0, 0.4f);
-                _selectedPlaceData = null;
-                _orientation = -1;
-                UIStates_SwitchTo_Normal();
-            }
-            else
-            {
-                _target.transform.DOMove(_chooser.transform.position, 0.2f).SetUpdate(true);
-            }
-
-        }
         private void FetchMapEntityData()
         {
             switch (_isAffordableType)
@@ -857,26 +994,6 @@ namespace MyUI
                 SlidersManager.Manager.TakeOverSliderMove();
             }, 0, 1, duration).SetUpdate(true);
         }
-        public void EntityBackTo_selectorRoot(Entity entityToBack)
-        {
-            if (entityToBack.EntityData.CanRespawn)
-            {
-                for (int i = 0; i < _placeDataList.Count; i++)
-                {
-                    if (_placeDataList[i].EntityData.ChineseName == entityToBack.NAME)
-                    {
-                        _placeDataList[i].CallBackNum(1);
-                        if (entityToBack.EntityData.RespawnStrategy == 1)
-                        {
-                            _placeDataList[i].RespawnTiming();
-                        }
-                        return;
-                    }
-                }
-                AddStaticEntityPrefabTo_selectorRoot(new EntityID[1] { entityToBack.EntityData.ID }, new int[1] { 1 });
-            }
-        }
-        
         private void SwitchShowSkillTalent(int show, EntityData entityData)
         {
             if (_currentShow != show)
@@ -1755,126 +1872,6 @@ namespace MyUI
                     UIStates_Update_Operator();
                     break;
             }
-        }
-        
-        public void CostTextUpDate()
-        {
-            (int currentCost, int maxCost, float costTimer) cm = LevelRescurceManager.Manager.CostMessage;
-            _currentCost = cm.currentCost;
-            _cost.text = _currentCost.ToString();
-            for (int i = 0; i < _placeDataList.Count; i++)
-            {
-                _placeDataList[i].CanSetStateUpDate();
-            }
-        }
-        public void CanSetNumUpDate()
-        {
-            _isAffordableNum = LevelRescurceManager.Manager.CanSetNumLeft;
-            _isAffordableNumText.text = _isAffordableNum.ToString();
-            for (int i = 0; i < _placeDataList.Count; i++)
-            {
-                _placeDataList[i].CanSetStateUpDate();
-            }
-        }
-        public void LevelHpLeftTextUpdate()
-        {
-            _levelHpLeft.text = LevelRescurceManager.Manager.LevelHpLeft.ToString();
-        
-        }
-        public void CurrentNumAndTotalNumUpdate()
-        {
-            _currentNumAndTotalNum.text = LevelRescurceManager.Manager.CurrentOperateCount.ToString() + '/' + LevelRescurceManager.Manager.NeedOperateCount.ToString();
-        }
-        public void AcceptDamageMessage(Entity target, Entity origin, float finalDamage, int damageType)
-        {
-            string targetName = "";
-            string originName = "";
-            if (target != null)
-            {
-                targetName = target.EntityData.ChineseName;
-            }
-            if (origin != null)
-            {
-                originName = origin.EntityData.ChineseName;
-            }
-            for (int i = 0; i < _damageStatisticDatas.Length; i++)
-            {
-                if (targetName == _characterChineseName[i] && damageType <= 2)
-                {
-                    _damageStatisticDatas[i].DamageReceive[damageType] += finalDamage;
-                }
-                if (originName == _characterChineseName[i])
-                {
-                    if (damageType <= 2)
-                    {
-                        _damageStatisticDatas[i].Damage[damageType] += finalDamage;
-                    }
-                    else
-                    {
-                        _damageStatisticDatas[i].Healing[0] += finalDamage;
-                    }
-                }
-            }
-        }
-        public override void OnEnter()
-        {
-            base.OnEnter();
-            var team1Members = SaveSystem.GetTeamMembers("Team1");
-            EntityID[] characters = new EntityID[team1Members.Count];
-            for (int i = 0; i < characters.Length; i++) characters[i] = team1Members[i];
-            _characterChineseName = new string[characters.Length];
-            _damageStatisticDatas = new DamageStatisticData[characters.Length];
-            for (int i = 0; i < _damageStatisticDatas.Length; i++)
-            {
-                _damageStatisticDatas[i] = new DamageStatisticData(characters[i], new float[3] { 0, 0, 0 }, new float[1] { 0 }, new float[3] { 0, 0, 0 });
-                _characterChineseName[i] = CharacterCardManager.cardManager.GetCharacterAttribute(characters[i]).ChineseName;
-            }
-            GameObject[] prefab = new GameObject[characters.Length];
-            int[] num = new int[characters.Length];
-            for (int i = 0; i < characters.Length; i++)
-            {
-                prefab[i] = CharacterCardManager.cardManager.GetCharacterAttribute(characters[i]).Prefab;
-                num[i] = 1;
-            }
-            //=====================================================================================================================================
-            InitializeStaticEntityPrefabToSelector(prefab, num);
-            //=====================================================================================================================================
-            _currentUIState = UIState.normal;
-            _leftmessageOpen = false;
-            _operaterOpen = false;
-            _draggerOpen = false;
-            _rangeOpen = false;
-            _cansetOpen = false;
-            _pause.image.sprite = _c;
-            _pauseMask.SetActive(false);
-            _timeMultiple.image.sprite = _x1;
-            _blockDatas = MapDataManager.Manager.BlockDataMatrix;
-            (_iSize, _jSize) = MapDataManager.Manager.MapSize;
-            _rangeImgCollection.SetActive(false);
-            CostSliderAndCanSetNumUpdate();
-            _cameraOriginalPos = _camera.transform.position;
-            _deltaX = _cameraOriginalPos.x - _operateArea.transform.position.x;
-        }
-        public override void OnExit()
-        {
-            base.OnExit();
-            UIStates_SwitchTo_Normal();
-            _isAffordableBlockList.Clear();
-            //=====================================================================================================================================
-            _selectedStaticEntityID = null;
-            _selectedEntity = null;
-            //=====================================================================================================================================
-            _selectedPlaceData = null;
-            _orientation = -1;
-        }
-        public override void OnPause()
-        {
-            base.OnPause();
-            _isPause = false;
-            _is2X = false;
-            _isSlow = false;
-            SetTimeScale();
-            _placeDataList.Clear();
         }
     }
 }
