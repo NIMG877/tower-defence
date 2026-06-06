@@ -12,6 +12,30 @@ namespace MyUI
 {
     public class LevelMessagePanel : BasePanel
     {
+        #region Nested Types
+        #endregion
+
+        #region UI Element References
+        #endregion
+
+        #region Runtime State
+        #endregion
+
+        #region Construction & Initialization
+        #endregion
+
+        #region Public API
+        #endregion
+
+        #region Time Control
+        #endregion
+
+        #region UI States
+        #endregion
+
+        #region Helpers
+        #endregion
+
         private enum UIState
         {
             normal,
