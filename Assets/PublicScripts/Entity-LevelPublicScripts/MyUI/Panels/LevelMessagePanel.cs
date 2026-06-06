@@ -852,9 +852,7 @@ namespace MyUI
                 prefab[i] = CharacterCardManager.cardManager.GetCharacterAttribute(characters[i]).Prefab;
                 num[i] = 1;
             }
-            //=====================================================================================================================================
             InitializeStaticEntityPrefabToSelector(prefab, num);
-            //=====================================================================================================================================
             _currentUIState = UIState.normal;
             _leftmessageOpen = false;
             _operaterOpen = false;
@@ -876,10 +874,8 @@ namespace MyUI
             base.OnExit();
             UIStates_SwitchTo_Normal();
             _isAffordableBlockList.Clear();
-            //=====================================================================================================================================
             _selectedStaticEntityID = null;
             _selectedEntity = null;
-            //=====================================================================================================================================
             _selectedPlaceData = null;
             _orientation = -1;
         }
@@ -934,10 +930,8 @@ namespace MyUI
             _isSlow = false;
             SetTimeScale();
             _currentUIState = UIState.normal;
-            //=====================================================================================================================================
             _selectedStaticEntityID = null;
             _selectedEntity = null;
-            //=====================================================================================================================================
             if (_selectedPlaceData != null)
             {
                 _selectedPlaceData.SelectorMove(false);
@@ -952,10 +946,8 @@ namespace MyUI
             _isSlow = true;
             SetTimeScale();
             _selectedPlaceData = staticEntityPlaceData;
-            //=====================================================================================================================================
             _selectedStaticEntityID = staticEntityPlaceData.EntityId;
             _selectedEntity = null;
-            //=====================================================================================================================================
             UIStates_ShowSomethingAndOtherClose(new string[2] { "leftmessage", "canset" });
             if (_currentUIState == UIState.normal)
             {
@@ -970,10 +962,8 @@ namespace MyUI
             _isSlow = true;
             SetTimeScale();
             _selectedPlaceData = staticEntityPlaceData;
-            //=====================================================================================================================================
             _selectedStaticEntityID = staticEntityPlaceData.EntityId;
             _selectedEntity = null;
-            //=====================================================================================================================================
             UIStates_ShowSomethingAndOtherClose(new string[3] { "leftmessage", "dragger", "canset" });
             if (_currentUIState == UIState.normal)
             {
@@ -988,10 +978,8 @@ namespace MyUI
             _isSlow = true;
             SetTimeScale();
             _selectedPlaceData = staticEntityPlaceData;
-            //=====================================================================================================================================
             _selectedStaticEntityID = staticEntityPlaceData.EntityId;
             _selectedEntity = null;
-            //=====================================================================================================================================
             UIStates_ShowSomethingAndOtherClose(new string[4] { "leftmessage", "dragger", "choosing", "canset" });
             if (_currentUIState == UIState.normal)
             {
@@ -1005,10 +993,8 @@ namespace MyUI
         {
             _isSlow = true;
             SetTimeScale();
-            //=====================================================================================================================================
             _selectedEntity = entitySelected;
             _selectedStaticEntityID = entitySelected.EntityData.ID;
-            //=====================================================================================================================================
             _selectedPlaceData = null;
             UIStates_ShowSomethingAndOtherClose(new string[3] { "leftmessage", "operator", "range" });
             if (_currentUIState == UIState.normal)
@@ -1061,7 +1047,6 @@ namespace MyUI
         // LeftMessage
         private void UIStates_ShowClose_Leftmessage(bool show)
         {
-            //=====================================================================================================================================
             if (show)
             {
                 if (!_leftmessageOpen)
@@ -1092,11 +1077,9 @@ namespace MyUI
                     _leftMessage.SetActive(false);
                 }
             }
-            //=====================================================================================================================================
         }
         private void UIStates_Update_Leftmessage()
         {
-            //=====================================================================================================================================
             Entity entity;
             bool isBefore;
             if (_selectedPlaceData != null && _selectedEntity == null)
@@ -1152,13 +1135,11 @@ namespace MyUI
             _hpSlider.sizeDelta = new Vector2(leftLength - _hpSliderSize.width, _hpSliderSize.height);
             _hpText.text = $"{(int)currentHp}/{(int)maxHp}";
             _hpBk.anchoredPosition = new Vector2(leftLength > 81 ? leftLength : 81, 0);
-            //=====================================================================================================================================
 
         }
         // Operator
         private void UIStates_ShowClose_Operator(bool show)
         {
-            //=====================================================================================================================================
             if (show)
             {
                 if (!_operaterOpen)
@@ -1219,14 +1200,11 @@ namespace MyUI
                     MoveCamera(_cameraOriginalPos, 0.1f);
                 }
             }
-            //=====================================================================================================================================
         }
         private void UIStates_Update_Operator()
         {
-            //=====================================================================================================================================
             if (_selectedEntity == null || !_selectedEntity.participateIn)
                 UIStates_SwitchTo_Normal();
-            //=====================================================================================================================================
             if (_selectSkill)
             {
                 if (!_selectSkill.SkillCanBegin())
@@ -1494,7 +1472,6 @@ namespace MyUI
         }
         private void UIStates_Update_Range()
         {
-            //=====================================================================================================================================
             Color color = new Color(255, 160, 0);
             (int x, int y)[] attackRange;
             if (_selectedPlaceData != null && _selectedEntity == null)
@@ -1536,7 +1513,6 @@ namespace MyUI
                     _rangeImg.Add(Object.Instantiate(_rangeImg[0], new Vector2(attackRange[i].x, attackRange[i].y), Quaternion.identity, _rangeImgCollection.transform));
                 }
             }
-            //=====================================================================================================================================
         }
         // CanSet
         private void UIStates_ShowClose_Canset(bool show)
@@ -1563,7 +1539,6 @@ namespace MyUI
         }
         private void UIStates_Update_Canset()
         {
-            //=====================================================================================================================================
             Color lightGreen = new Color(0, 0.4f, 0);
             FetchMapEntityData();
             for (int i = 0; i < _isAffordableBlockList.Count; i++)
@@ -1628,7 +1603,6 @@ namespace MyUI
             {
                 MapDataManager.Manager.BlockDataMatrix[_isAffordableBlockList[i].i, _isAffordableBlockList[i].j].Material.color = lightGreen;
             }
-            //=====================================================================================================================================
         }
 
         #endregion
