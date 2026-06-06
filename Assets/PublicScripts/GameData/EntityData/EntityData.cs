@@ -24,6 +24,9 @@ public class EntityData
     public Sprite HeadImage;
     public Sprite HalfBodyImage;
     public Sprite WholeImage;
+    
+    // 默认阵营
+    public int   DefaultCamp;
 
     // 角色属性（当 entity 是 "c" 类别时使用）
     public int    CharacterRarity;
@@ -52,7 +55,6 @@ public class EntityData
     public float MagicDodge;
     public int   BlockOccupation;
     public int   TauntLevel;
-    public int   DefaultCamp;
 
     // 免疫
     public bool StunImmune;
@@ -66,6 +68,9 @@ public class EntityData
     // 召唤
     public List<EntityID> CanSpawnEntityIds;
     public List<int>      CanSpawnEntityCounts;
+
+    // 是否是静态实体
+    public bool IsStatic;
 
     // 部署
     public int   Cost;
