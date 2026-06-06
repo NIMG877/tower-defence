@@ -1634,33 +1634,6 @@ namespace MyUI
         #endregion
 
         #region Helpers
-        #endregion
-        //operator
-        private EventTrigger.Entry _callBackClick, _skillRangeClick;
-        /// <summary>
-        /// �жϵ��λ���Ƿ���Է���
-        /// </summary>
-        /// <param name="pos">���λ��</param>
-        /// <returns>�Ƿ�ɷ���</returns>
-        private void HideTargetOrEnterNextStage(StaticEntityPlaceData staticEntityPlaceData)
-        {
-            if (_currentUIState == UIState.setting)
-            {
-                if (_target.color == Color.yellow)
-                {
-                    UIStates_SwitchTo_Chooseing(staticEntityPlaceData);
-                }
-                else if (_target.color == Color.green)
-                {
-                    ReSelectOrSetStaticEntity();
-                    UIStates_SwitchTo_Normal();
-                }
-                else
-                {
-                    UIStates_SwitchTo_ViewBeforeSet(staticEntityPlaceData);
-                }
-            }
-        }
         private void FetchMapEntityData()
         {
             switch (_isAffordableType)
@@ -1696,6 +1669,30 @@ namespace MyUI
                 SlidersManager.Manager.TakeOverSliderMove();
             }, 0, 1, duration).SetUpdate(true);
         }
+        /// <summary>
+        /// �жϵ��λ���Ƿ���Է���
+        /// </summary>
+        /// <param name="pos">���λ��</param>
+        /// <returns>�Ƿ�ɷ���</returns>
+        private void HideTargetOrEnterNextStage(StaticEntityPlaceData staticEntityPlaceData)
+        {
+            if (_currentUIState == UIState.setting)
+            {
+                if (_target.color == Color.yellow)
+                {
+                    UIStates_SwitchTo_Chooseing(staticEntityPlaceData);
+                }
+                else if (_target.color == Color.green)
+                {
+                    ReSelectOrSetStaticEntity();
+                    UIStates_SwitchTo_Normal();
+                }
+                else
+                {
+                    UIStates_SwitchTo_ViewBeforeSet(staticEntityPlaceData);
+                }
+            }
+        }
         private void SwitchShowSkillTalent(int show, EntityData entityData)
         {
             if (_currentShow != show)
@@ -1723,7 +1720,7 @@ namespace MyUI
                     }
                 }
             }
-        
+
             // switch (_currentShow)
             // {
             //     case 0:
@@ -1810,23 +1807,6 @@ namespace MyUI
                 _skillTalentRectParent.GetComponent<ScrollRect>().vertical = false;
             }
         }
-        private async void CostSliderAndCanSetNumUpdate()
-        {
-            while (true)
-            {
-                (int currentCost, int maxCost, float costTimer) cm = LevelRescurceManager.Manager.CostMessage;
-                _isAffordableNum = LevelRescurceManager.Manager.CanSetNumLeft;
-                _currentCost = cm.currentCost;
-                _cost.text = _currentCost.ToString();
-                _costSlider.fillAmount = cm.costTimer;
-                _isAffordableNumText.text = _isAffordableNum.ToString();
-                for (int i = 0; i < _placeDataList.Count; i++)
-                {
-                    _placeDataList[i].CanSetStateUpDate();
-                }
-                await UniTask.WaitForFixedUpdate(LevelResourceSharing.LevelCtk);
-            }
-        }
         private void ShowAttackRangeAttributes((int x, int y)[] range0)
         {
             int maxX, minX, maxY, minY;
@@ -1882,11 +1862,31 @@ namespace MyUI
             }
             _rangeSelfTile.sizeDelta = new Vector2(l * (1 - gap), l * (1 - gap));
             _rangeSelfTile.anchoredPosition = new Vector2(-l * centerX, -l * centerY);
-        
-        
-        
-        
+
+
+
+
         }
+        private async void CostSliderAndCanSetNumUpdate()
+        {
+            while (true)
+            {
+                (int currentCost, int maxCost, float costTimer) cm = LevelRescurceManager.Manager.CostMessage;
+                _isAffordableNum = LevelRescurceManager.Manager.CanSetNumLeft;
+                _currentCost = cm.currentCost;
+                _cost.text = _currentCost.ToString();
+                _costSlider.fillAmount = cm.costTimer;
+                _isAffordableNumText.text = _isAffordableNum.ToString();
+                for (int i = 0; i < _placeDataList.Count; i++)
+                {
+                    _placeDataList[i].CanSetStateUpDate();
+                }
+                await UniTask.WaitForFixedUpdate(LevelResourceSharing.LevelCtk);
+            }
+        }
+        #endregion
+        //operator
+        private EventTrigger.Entry _callBackClick, _skillRangeClick;
     }
 }
 
