@@ -301,6 +301,64 @@ namespace MyUI
         #endregion
 
         #region Runtime State
+        // ===== UI State Machine =====
+        private enum UIState
+        {
+            normal,
+            viewBeforeSet,
+            setting,
+            choosing,
+            viewAfterSet,
+        }
+        private UIState _currentUIState;
+        private bool _leftmessageOpen, _operaterOpen, _draggerOpen, _chooserOpen, _rangeOpen, _cansetOpen;
+
+        // ===== Selection State (3-field) =====
+        // 选中状态（三字段联合表达，由 UIState 状态机保证互斥）：
+        //   viewBeforeSet/setting/choosing → _selectedStaticEntityID + _selectedPlaceData
+        //   viewAfterSet                   → _selectedStaticEntityID + _selectedEntity
+        //   normal/无选中                  → 三个全 null
+        private StaticEntityPlaceData _selectedPlaceData;
+        private EntityID? _selectedStaticEntityID;
+        private Entity _selectedEntity;
+
+        // ===== Map/Block Data =====
+        private bool[,] _higherCanSetBlock;
+        private bool[,] _lowerCanSetBlock;
+        private bool[,] _staticEntityExistBlock;
+        private int _canSetType;
+        private List<(int i, int j)> _canSetBlockList;
+        private BlockData[,] _blockDatas;
+        private int _iSize, _jSize;
+
+        // ===== Camera =====
+        private Camera _camera;
+        private Vector3 _cameraOriginalPos;
+        private float _deltaX;
+
+        // ===== Chooser / Orientation =====
+        private bool _inChooser;
+        private int _orientation;
+
+        // ===== Damage Stats =====
+        private string[] _characterChineseName;
+        private DamageStatisticData[] _damageStatisticDatas;
+
+        // ===== Time Control Flags =====
+        private bool _isPause, _is2X, _isSlow;
+
+        // ===== Skill State & Colors =====
+        private int _currentShow;
+        private Color _colorSelect = new Color(0, 0, 0, 0.5882f);
+        private Color _colorUnSelect = new Color(0.3529f, 0.3529f, 0.3529f, 0.7843f);
+        private Color _lightGreen = new Color(0.796f, 0.925f, 0.278f);
+        private Color _lightGreen_half = new Color(0.796f, 0.925f, 0.278f, 0.5f);
+        private Color _orange = new Color(1, 0.412f, 0);
+        private Color _orange_half = new Color(1, 0.412f, 0, 0.5f);
+        private Color _gray = new Color(0.259f, 0.259f, 0.259f);
+
+        // ===== Legacy Unused Flags (kept to avoid breaking reflection/serialization) =====
+        private bool _isShowMessage, _isShowCanSetBlock, _isShowOperate, _isShowAttackRange;
         #endregion
 
         #region Construction & Initialization
@@ -318,17 +376,6 @@ namespace MyUI
         #region Helpers
         #endregion
 
-        private enum UIState
-        {
-            normal,
-            viewBeforeSet,
-            setting,
-            choosing,
-            viewAfterSet,
-        }
-        private UIState _currentUIState;
-        private bool _leftmessageOpen, _operaterOpen, _draggerOpen, _chooserOpen, _rangeOpen, _cansetOpen;
-
         private static LevelMessagePanel _instance;
         public static LevelMessagePanel Panel
         {
@@ -342,43 +389,9 @@ namespace MyUI
             }
         }
 
-        private bool _isPause, _is2X, _isSlow;
-
-        private bool _isShowMessage, _isShowCanSetBlock, _isShowOperate, _isShowAttackRange;
-        // 选中状态（三字段联合表达，由 UIState 状态机保证互斥）：
-        //   viewBeforeSet/setting/choosing → _selectedStaticEntityID + _selectedPlaceData
-        //   viewAfterSet                   → _selectedStaticEntityID + _selectedEntity
-        //   normal/无选中                  → 三个全 null
-        private StaticEntityPlaceData _selectedPlaceData;
-        private EntityID? _selectedStaticEntityID;
-        private Entity _selectedEntity;
-        private bool[,] _higherCanSetBlock;
-        private bool[,] _lowerCanSetBlock;
-        private bool[,] _staticEntityExistBlock;
-        private int _canSetType;
-        private List<(int i, int j)> _canSetBlockList;
-        private BlockData[,] _blockDatas;
-        private int _iSize, _jSize;
-        private Camera _camera;
-        private Vector3 _cameraOriginalPos;
-        private float _deltaX;
-
-        private string[] _characterChineseName;
-        private DamageStatisticData[] _damageStatisticDatas;
         public DamageStatisticData[] DamageStatisticDatas { get { return _damageStatisticDatas; } }
-        //leftMessage
-        private bool _inChooser;
-        private int _orientation;
-        private int _currentShow;
-        private Color _colorSelect = new Color(0, 0, 0, 0.5882f);
-        private Color _colorUnSelect = new Color(0.3529f, 0.3529f, 0.3529f, 0.7843f);
         //operator
         private EventTrigger.Entry _callBackClick, _skillRangeClick;
-        private Color _lightGreen = new Color(0.796f, 0.925f, 0.278f);
-        private Color _lightGreen_half = new Color(0.796f, 0.925f, 0.278f, 0.5f);
-        private Color _orange = new Color(1, 0.412f, 0);
-        private Color _orange_half = new Color(1, 0.412f, 0, 0.5f);
-        private Color _gray = new Color(0.259f, 0.259f, 0.259f);
 
         private LevelMessagePanel() : base(new UIType("Prefabs/UI/MyUIs/LevelMessagePanel"))
         {
