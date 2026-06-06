@@ -115,19 +115,20 @@ namespace MyUI
                 point.eventID = EventTriggerType.PointerClick;
                 point.callback.AddListener((data) =>
                 {
-                    if (Panel._selectedStaticEntityData == null)
+                    if (!Panel._selectedStaticEntityID.HasValue)
                     {
                         Panel.UIStates_SwitchTo_ViewBeforeSet(this);
                         SelectorMove(true);
                     }
-                    else if (Panel._selectedStaticEntityData == this)
+                    else if (Panel._selectedPlaceData == this)
                     {
                         Panel.UIStates_SwitchTo_Normal();
                         SelectorMove(false);
                     }
                     else
                     {
-                        Panel._selectedStaticEntityData.SelectorMove(false);
+                        // 已选中的是别处：可能是 placeData（→下移），也可能是已部署 entity（→无 placeData 可下移）
+                        Panel._selectedPlaceData?.SelectorMove(false);
                         Panel.UIStates_SwitchTo_ViewBeforeSet(this);
                         SelectorMove(true);
                     }
@@ -136,13 +137,13 @@ namespace MyUI
                 dragBegin.eventID = EventTriggerType.BeginDrag;
                 dragBegin.callback.AddListener((data) =>
                 {
-                    if (Panel._selectedStaticEntityData == null)
+                    if (!Panel._selectedStaticEntityID.HasValue)
                     {
                         SelectorMove(true);
                     }
-                    else if (Panel._selectedStaticEntityData != this)
+                    else if (Panel._selectedPlaceData != this)
                     {
-                        Panel._selectedStaticEntityData.SelectorMove(false);
+                        Panel._selectedPlaceData?.SelectorMove(false);
                         SelectorMove(true);
                     }
                     if (_canSet)
@@ -304,8 +305,13 @@ namespace MyUI
         private TextMeshProUGUI _currentNumAndTotalNum, _levelHpLeft;
         
         private bool _isShowMessage, _isShowCanSetBlock, _isShowOperate, _isShowAttackRange;
-        private StaticEntityPlaceData _selectedStaticEntityData;
-        private (string ID_C,int ID_N) _selectedStaticEntity;
+        // 选中状态（三字段联合表达，由 UIState 状态机保证互斥）：
+        //   viewBeforeSet/setting/choosing → _selectedStaticEntityID + _selectedPlaceData
+        //   viewAfterSet                   → _selectedStaticEntityID + _selectedEntity
+        //   normal/无选中                  → 三个全 null
+        private StaticEntityPlaceData _selectedPlaceData;
+        private EntityID? _selectedStaticEntityID;
+        private Entity _selectedEntity;
         private bool[,] _higherCanSetBlock;
         private bool[,] _lowerCanSetBlock;
         private bool[,] _staticEntityExistBlock;
@@ -406,35 +412,35 @@ namespace MyUI
             _buffCards = new List<BuffCard>();
             Transform selectBar = GetComponentInChildrenByPath<Transform>("leftMessageArea/skillTalent/selectBar");
             //=====================================================================================================================================
-            // _skillTalentSwitchButtons = new Image[4];
-            // for (int i = 0; i < _skillTalentSwitchButtons.Length; i++)
-            // {
-            //     _skillTalentSwitchButtons[i] = selectBar.GetChild(i).GetComponent<Image>();
-            //     EventTrigger.Entry click = new EventTrigger.Entry();
-            //     click.eventID = EventTriggerType.PointerClick;
-            //     int index = i;
-            //     click.callback.AddListener((data) =>
-            //     {
-            //         if (_currentShow != index)
-            //         {
-            //             EntityData entityData;
-            //             if (_selectedStaticEntityData != null && _selectedStaticEntity.ID_C == null)
-            //             {
-            //                 entityData = _selectedStaticEntityData.StaticEntityData.Prefab.GetComponent<Entity>();
-            //             }
-            //             else if (_selectedStaticEntityData == null && _selectedStaticEntity.ID_C != null)
-            //             {
-            //                 entityData = GameDataService.EntityRepository.Get(_selectedStaticEntity);
-            //             }
-            //             else
-            //             {
-            //                 return;
-            //             }
-            //             SwitchShowSkillTalent(index, entity);
-            //         }
-            //     });
-            //     _skillTalentSwitchButtons[i].GetComponent<EventTrigger>().triggers.Add(click);
-            // }
+            _skillTalentSwitchButtons = new Image[4];
+            for (int i = 0; i < _skillTalentSwitchButtons.Length; i++)
+            {
+                _skillTalentSwitchButtons[i] = selectBar.GetChild(i).GetComponent<Image>();
+                EventTrigger.Entry click = new EventTrigger.Entry();
+                click.eventID = EventTriggerType.PointerClick;
+                int index = i;
+                click.callback.AddListener((data) =>
+                {
+                    if (_currentShow != index)
+                    {
+                        EntityData entityData;
+                        if (_selectedPlaceData != null && _selectedEntity == null)
+                        {
+                            entityData = _selectedPlaceData.StaticEntityData.Prefab.GetComponent<Entity>().EntityData;
+                        }
+                        else if (_selectedPlaceData == null && _selectedEntity != null)
+                        {
+                            entityData = _selectedEntity.EntityData;
+                        }
+                        else
+                        {
+                            return;
+                        }
+                        SwitchShowSkillTalent(index, entityData);
+                    }
+                });
+                _skillTalentSwitchButtons[i].GetComponent<EventTrigger>().triggers.Add(click);
+            }
             //=====================================================================================================================================
             _selectorSample = GetComponentInChildrenByPath<Transform>("staticEntityArea/content/ses0").gameObject;
             _hpBk = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/hpBk");
@@ -500,27 +506,27 @@ namespace MyUI
             _levelMessageTrigger = UIObject.GetComponent<EventTrigger>();
             
             //=====================================================================================================================================
-            // EventTrigger.Entry blankClick = new EventTrigger.Entry();
-            // blankClick.eventID = EventTriggerType.PointerClick;
-            // blankClick.callback.AddListener((data) =>
-            // {
-            //     if (_currentUIState == UIState.normal)
-            //     {
-            //         Vector2 clickBlock = _camera.ScreenToWorldPoint(Input.mousePosition);
-            //         (int i, int j) = ((int)(clickBlock.y + 0.5), (int)(clickBlock.x + 0.5));
-            //         _selectedStaticEntity = EntityManager.Manager.GetStaticEntityInBlock(i, j);
-            //         if (_selectedStaticEntity != null && _selectedStaticEntity.participateIn)
-            //         {
-            //             UIStates_SwitchTo_ViewAfterSet(_selectedStaticEntity);
-            //         }
-            //     }
-            //     else
-            //     {
-            //         UIStates_SwitchTo_Normal();
-            //     }
-            //
-            // });
-            // _levelMessageTrigger.triggers.Add(blankClick);
+            EventTrigger.Entry blankClick = new EventTrigger.Entry();
+            blankClick.eventID = EventTriggerType.PointerClick;
+            blankClick.callback.AddListener((data) =>
+            {
+                if (_currentUIState == UIState.normal)
+                {
+                    Vector2 clickBlock = _camera.ScreenToWorldPoint(Input.mousePosition);
+                    (int i, int j) = ((int)(clickBlock.y + 0.5), (int)(clickBlock.x + 0.5));
+                    _selectedEntity = EntityManager.Manager.GetStaticEntityInBlock(i, j);
+                    if (_selectedEntity != null && _selectedEntity.participateIn)
+                    {
+                        UIStates_SwitchTo_ViewAfterSet(_selectedEntity);
+                    }
+                }
+                else
+                {
+                    UIStates_SwitchTo_Normal();
+                }
+
+            });
+            _levelMessageTrigger.triggers.Add(blankClick);
             //=====================================================================================================================================
             
             
@@ -761,12 +767,12 @@ namespace MyUI
         {
             if (_orientation != -1)
             {
-                int cost = EntityManager.Manager.SetStaticEntity(_selectedStaticEntityData.StaticId, _chooser.transform.position, 1, _orientation).GetComponent<InteractableStatic>().CurrentSetCost = _selectedStaticEntityData.CaculateCost();
+                int cost = EntityManager.Manager.SetStaticEntity(_selectedPlaceData.StaticId, _chooser.transform.position, 1, _orientation).GetComponent<InteractableStatic>().CurrentSetCost = _selectedPlaceData.CaculateCost();
                 LevelRescurceManager.Manager.ChangeCost(-cost);
-                _selectedStaticEntityData.SelectorMove(false);
-                _selectedStaticEntityData.SetNum(1);
+                _selectedPlaceData.SelectorMove(false);
+                _selectedPlaceData.SetNum(1);
                 _chooser.color = new Color(1, 1, 0, 0.4f);
-                _selectedStaticEntityData = null;
+                _selectedPlaceData = null;
                 _orientation = -1;
                 UIStates_SwitchTo_Normal();
             }
@@ -774,7 +780,7 @@ namespace MyUI
             {
                 _target.transform.DOMove(_chooser.transform.position, 0.2f).SetUpdate(true);
             }
-        
+
         }
         private void FetchMapEntityData()
         {
@@ -1025,176 +1031,169 @@ namespace MyUI
         private void UIStates_ShowClose_Leftmessage(bool show)
         {
             //=====================================================================================================================================
-            // if (show)
-            // {
-            //     if (!_leftmessageOpen)
-            //     {
-            //         _leftmessageOpen = true;
-            //         _leftMessage.SetActive(true);
-            //     }
-            //     (string ID_C,int ID_N) entityID;
-            //     if (_selectedStaticEntityData != null && _selectedStaticEntity.ID_C == null)
-            //     {
-            //         entityID = _selectedStaticEntityData.StaticId;
-            //     }
-            //     else if (_selectedStaticEntityData == null && _selectedStaticEntity.ID_C != null)
-            //     {
-            //         entityID = _selectedStaticEntity;
-            //     }
-            //     else
-            //     {
-            //         return;
-            //     }
-            //
-            //     EntityData entityData = GameDataService.EntityRepository.Get(entityID);
-            //     
-            //     SwitchShowSkillTalent(_currentShow, entity);
-            //     ShowAttackRangeAttributes(entityData.VisionRange);
-            //     _name.text = entityData.ChineseName;
-            //     _class.sprite = _professionsLighten[entityData.CharacterJob];
-            //     UIStates_Update_Leftmessage();
-            // }
-            // else
-            // {
-            //     if (_leftmessageOpen)
-            //     {
-            //         _leftmessageOpen = false;
-            //         _leftMessage.SetActive(false);
-            //     }
-            // }
+            if (show)
+            {
+                if (!_leftmessageOpen)
+                {
+                    _leftmessageOpen = true;
+                    _leftMessage.SetActive(true);
+                }
+                // 选中态由 _selectedStaticEntityID 统一表达（placeData 与已部署 entity 两种场景都会设置它）
+                if (!_selectedStaticEntityID.HasValue)
+                {
+                    return;
+                }
+                EntityID entityID = _selectedStaticEntityID.Value;
+
+                EntityData entityData = GameDataService.EntityRepository.Get(entityID);
+
+                SwitchShowSkillTalent(_currentShow, entityData);
+                ShowAttackRangeAttributes(entityData.VisionRange);
+                _name.text = entityData.ChineseName;
+                _class.sprite = _professionsLighten[entityData.CharacterJob];
+                UIStates_Update_Leftmessage();
+            }
+            else
+            {
+                if (_leftmessageOpen)
+                {
+                    _leftmessageOpen = false;
+                    _leftMessage.SetActive(false);
+                }
+            }
             //=====================================================================================================================================
         }
         private void UIStates_Update_Leftmessage()
         {
             //=====================================================================================================================================
-            // Entity entity;
-            // bool isBefore;
-            // if (_selectedStaticEntityData != null && _selectedStaticEntity == null)
-            // {
-            //     entity = _selectedStaticEntityData.StaticEntity;
-            //     isBefore = true;
-            // }
-            // else if (_selectedStaticEntityData == null && _selectedStaticEntity != null)
-            // {
-            //     entity = _selectedStaticEntity;
-            //     isBefore = false;
-            // }
-            // else
-            // {
-            //     return;
-            // }
-            // float atk, def, mgr, currentHp, maxHp;
-            // int blo;
-            // if (isBefore)
-            // {
-            //     if (entity.AttackBase != null)
-            //     {
-            //         atk = entity.AttackBase.AttackDamageF;
-            //     }
-            //     else
-            //     {
-            //         atk = 0;
-            //     }
-            //     def = entity.DEF_1;
-            //     mgr = entity.MagicResistance_1;
-            //     blo = entity.BlockOccupation_1;
-            //     currentHp = entity.MaxHp_1;
-            //     maxHp = entity.MaxHp_1;
-            // }
-            // else
-            // {
-            //     if (entity.AttackBase != null)
-            //     {
-            //         atk = entity.AttackBase.AttackDamageS;
-            //     }
-            //     else
-            //     {
-            //         atk = 0;
-            //     }
-            //     def = entity.DEF_2;
-            //     mgr = entity.MagicResistance_2;
-            //     blo = entity.BlockOccupation;
-            //     currentHp = entity.CurrentHp;
-            //     maxHp = entity.MaxHpS;
-            // }
-            // _admb.text = $"����  {(int)atk}\n����  {(int)def}\n����  {(int)mgr}\n�赲  {blo}";
-            // float leftLength = _hpSliderSize.width * currentHp / maxHp;
-            // _hpSlider.sizeDelta = new Vector2(leftLength - _hpSliderSize.width, _hpSliderSize.height);
-            // _hpText.text = $"{(int)currentHp}/{(int)maxHp}";
-            // _hpBk.anchoredPosition = new Vector2(leftLength > 81 ? leftLength : 81, 0);
+            Entity entity;
+            bool isBefore;
+            if (_selectedPlaceData != null && _selectedEntity == null)
+            {
+                entity = _selectedPlaceData.StaticEntity;
+                isBefore = true;
+            }
+            else if (_selectedPlaceData == null && _selectedEntity != null)
+            {
+                entity = _selectedEntity;
+                isBefore = false;
+            }
+            else
+            {
+                return;
+            }
+            float atk, def, mgr, currentHp, maxHp;
+            int blo;
+            if (isBefore)
+            {
+                if (entity.AttackBase != null)
+                {
+                    atk = entity.AttackBase.AttackDamageF;
+                }
+                else
+                {
+                    atk = 0;
+                }
+                def = entity.DEF_1;
+                mgr = entity.MagicResistance_1;
+                blo = entity.BlockOccupation_1;
+                currentHp = entity.MaxHp_1;
+                maxHp = entity.MaxHp_1;
+            }
+            else
+            {
+                if (entity.AttackBase != null)
+                {
+                    atk = entity.AttackBase.AttackDamageS;
+                }
+                else
+                {
+                    atk = 0;
+                }
+                def = entity.DEF_2;
+                mgr = entity.MagicResistance_2;
+                blo = entity.BlockOccupation;
+                currentHp = entity.CurrentHp;
+                maxHp = entity.MaxHpS;
+            }
+            _admb.text = $"����  {(int)atk}\n����  {(int)def}\n����  {(int)mgr}\n�赲  {blo}";
+            float leftLength = _hpSliderSize.width * currentHp / maxHp;
+            _hpSlider.sizeDelta = new Vector2(leftLength - _hpSliderSize.width, _hpSliderSize.height);
+            _hpText.text = $"{(int)currentHp}/{(int)maxHp}";
+            _hpBk.anchoredPosition = new Vector2(leftLength > 81 ? leftLength : 81, 0);
             //=====================================================================================================================================
-        
+
         }
         private void UIStates_ShowClose_Operator(bool show)
         {
             //=====================================================================================================================================
-            // if (show)
-            // {
-            //     if (!_operaterOpen)
-            //     {
-            //         _operaterOpen = true;
-            //         _operateArea.SetActive(true);
-            //     }
-            //     MoveCamera(_selectedStaticEntity.EntityPosition + _deltaX * Vector2.right, 0.1f);
-            //     if (sea.CanCallBack)
-            //     {
-            //         _callBack.enabled = true;
-            //         _callBackClick.callback.RemoveAllListeners();
-            //         _callBackClick.callback.AddListener((data) =>
-            //         {
-            //             _selectedStaticEntity.thisEntityPool.Return(_selectedStaticEntity);
-            //             LevelRescurceManager.Manager.ChangeCost((int)(_selectedStaticEntity.GetComponent<InteractableStatic>().CurrentSetCost * 0.5));
-            //             _selectedStaticEntity.participateIn = false;
-            //             AudioManager.Manager.PlayAudio("escape", 1, false, false);
-            //             UIStates_SwitchTo_Normal();
-            //         });
-            //     }
-            //     else
-            //     {
-            //         _callBack.enabled = false;
-            //     }
-            //     if (_selectedStaticEntity.skill != null && _selectedStaticEntity.skill.Length > 0)
-            //     {
-            //         _skillOpen.gameObject.SetActive(true);
-            //         _selectSkill = _selectedStaticEntity.skill[0];
-            //         _skillOpen.sprite = _selectSkill.SkillImg;
-            //         if (_selectSkill.SkillAttackRange != null)
-            //         {
-            //             _skillRange.gameObject.SetActive(true);
-            //             _skillRangeClick.callback.RemoveAllListeners();
-            //             _skillRangeClick.callback.AddListener((data) =>
-            //             {
-            //
-            //             });
-            //         }
-            //         else
-            //         {
-            //             _skillRange.gameObject.SetActive(false);
-            //         }
-            //     }
-            //     else
-            //     {
-            //         _skillOpen.gameObject.SetActive(false);
-            //         _selectSkill = null;
-            //     }
-            //     UIStates_Update_Operator();
-            // }
-            // else
-            // {
-            //     if (_operaterOpen)
-            //     {
-            //         _operaterOpen = false;
-            //         _operateArea.SetActive(false);
-            //         MoveCamera(_cameraOriginalPos, 0.1f);
-            //     }
-            // }
+            if (show)
+            {
+                if (!_operaterOpen)
+                {
+                    _operaterOpen = true;
+                    _operateArea.SetActive(true);
+                }
+                MoveCamera(_selectedEntity.EntityPosition + _deltaX * Vector2.right, 0.1f);
+                if (sea.CanCallBack)
+                {
+                    _callBack.enabled = true;
+                    _callBackClick.callback.RemoveAllListeners();
+                    _callBackClick.callback.AddListener((data) =>
+                    {
+                        _selectedEntity.thisEntityPool.Return(_selectedEntity);
+                        LevelRescurceManager.Manager.ChangeCost((int)(_selectedEntity.GetComponent<InteractableStatic>().CurrentSetCost * 0.5));
+                        _selectedEntity.participateIn = false;
+                        AudioManager.Manager.PlayAudio("escape", 1, false, false);
+                        UIStates_SwitchTo_Normal();
+                    });
+                }
+                else
+                {
+                    _callBack.enabled = false;
+                }
+                if (_selectedEntity.skill != null && _selectedEntity.skill.Length > 0)
+                {
+                    _skillOpen.gameObject.SetActive(true);
+                    _selectSkill = _selectedEntity.skill[0];
+                    _skillOpen.sprite = _selectSkill.SkillImg;
+                    if (_selectSkill.SkillAttackRange != null)
+                    {
+                        _skillRange.gameObject.SetActive(true);
+                        _skillRangeClick.callback.RemoveAllListeners();
+                        _skillRangeClick.callback.AddListener((data) =>
+                        {
+
+                        });
+                    }
+                    else
+                    {
+                        _skillRange.gameObject.SetActive(false);
+                    }
+                }
+                else
+                {
+                    _skillOpen.gameObject.SetActive(false);
+                    _selectSkill = null;
+                }
+                UIStates_Update_Operator();
+            }
+            else
+            {
+                if (_operaterOpen)
+                {
+                    _operaterOpen = false;
+                    _operateArea.SetActive(false);
+                    MoveCamera(_cameraOriginalPos, 0.1f);
+                }
+            }
             //=====================================================================================================================================
         }
         private void UIStates_Update_Operator()
         {
             //=====================================================================================================================================
-            // if (!_selectedStaticEntity.participateIn)
-            //     UIStates_SwitchTo_Normal();
+            if (_selectedEntity == null || !_selectedEntity.participateIn)
+                UIStates_SwitchTo_Normal();
             //=====================================================================================================================================
             if (_selectSkill)
             {
@@ -1461,47 +1460,47 @@ namespace MyUI
         private void UIStates_Update_Range()
         {
             //=====================================================================================================================================
-            // Color color = new Color(255, 160, 0);
-            // (int x, int y)[] attackRange;
-            // if (_selectedStaticEntityData != null && _selectedStaticEntity == null)
-            // {
-            //     (int x, int y) pos = ((int)(_chooser.transform.position.x + 0.5), (int)(_chooser.transform.position.y + 0.5));
-            // }
-            // else if (_selectedStaticEntityData == null && _selectedStaticEntity != null)
-            // {
-            //     attackRange = _selectedStaticEntity.VisionRange;
-            // }
-            // else
-            // {
-            //     return;
-            // }
-            // int rangeImgCount = _rangeImg.Count;
-            // if (rangeImgCount >= attackRange.Length)
-            // {
-            //     for (int i = 0; i < attackRange.Length; i++)
-            //     {
-            //         _rangeImg[i].transform.position = new Vector2(attackRange[i].x, attackRange[i].y);
-            //         _rangeImg[i].color = color;
-            //         _rangeImg[i].enabled = true;
-            //     }
-            //     for (int i = attackRange.Length; i < rangeImgCount; i++)
-            //     {
-            //         _rangeImg[i].enabled = false;
-            //     }
-            // }
-            // else
-            // {
-            //     for (int i = 0; i < rangeImgCount; i++)
-            //     {
-            //         _rangeImg[i].transform.position = new Vector2(attackRange[i].x, attackRange[i].y);
-            //         _rangeImg[i].color = color;
-            //         _rangeImg[i].enabled = true;
-            //     }
-            //     for (int i = rangeImgCount; i < attackRange.Length; i++)
-            //     {
-            //         _rangeImg.Add(Object.Instantiate(_rangeImg[0], new Vector2(attackRange[i].x, attackRange[i].y), Quaternion.identity, _rangeImgCollection.transform));
-            //     }
-            // }
+            Color color = new Color(255, 160, 0);
+            (int x, int y)[] attackRange;
+            if (_selectedPlaceData != null && _selectedEntity == null)
+            {
+                (int x, int y) pos = ((int)(_chooser.transform.position.x + 0.5), (int)(_chooser.transform.position.y + 0.5));
+            }
+            else if (_selectedPlaceData == null && _selectedEntity != null)
+            {
+                attackRange = _selectedEntity.VisionRange;
+            }
+            else
+            {
+                return;
+            }
+            int rangeImgCount = _rangeImg.Count;
+            if (rangeImgCount >= attackRange.Length)
+            {
+                for (int i = 0; i < attackRange.Length; i++)
+                {
+                    _rangeImg[i].transform.position = new Vector2(attackRange[i].x, attackRange[i].y);
+                    _rangeImg[i].color = color;
+                    _rangeImg[i].enabled = true;
+                }
+                for (int i = attackRange.Length; i < rangeImgCount; i++)
+                {
+                    _rangeImg[i].enabled = false;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < rangeImgCount; i++)
+                {
+                    _rangeImg[i].transform.position = new Vector2(attackRange[i].x, attackRange[i].y);
+                    _rangeImg[i].color = color;
+                    _rangeImg[i].enabled = true;
+                }
+                for (int i = rangeImgCount; i < attackRange.Length; i++)
+                {
+                    _rangeImg.Add(Object.Instantiate(_rangeImg[0], new Vector2(attackRange[i].x, attackRange[i].y), Quaternion.identity, _rangeImgCollection.transform));
+                }
+            }
             //=====================================================================================================================================
         }
         private void UIStates_ShowClose_Canset(bool show)
@@ -1529,70 +1528,70 @@ namespace MyUI
         private void UIStates_Update_Canset()
         {
             //=====================================================================================================================================
-            // Color lightGreen = new Color(0, 0.4f, 0);
-            // FetchMapEntityData();
-            // for (int i = 0; i < _canSetBlockList.Count; i++)
-            // {
-            //     MapDataManager.Manager.BlockDataMatrix[_canSetBlockList[i].i, _canSetBlockList[i].j].Material.color = Color.white;
-            // }
-            // _canSetBlockList.Clear();
-            // switch (_canSetType)
-            // {
-            //     case 0:
-            //         for (int i = 0; i < _iSize; i++)
-            //         {
-            //             for (int j = 0; j < _jSize; j++)
-            //             {
-            //                 if (_lowerCanSetBlock[i, j] && !_staticEntityExistBlock[i, j])
-            //                 {
-            //                     _canSetBlockList.Add((i, j));
-            //                 }
-            //             }
-            //         }
-            //         break;
-            //     case 1:
-            //         for (int i = 0; i < _iSize; i++)
-            //         {
-            //             for (int j = 0; j < _jSize; j++)
-            //             {
-            //                 if (_higherCanSetBlock[i, j] && !_staticEntityExistBlock[i, j])
-            //                 {
-            //                     _canSetBlockList.Add((i, j));
-            //                 }
-            //             }
-            //         }
-            //         break;
-            //     case 2:
-            //         for (int i = 0; i < _iSize; i++)
-            //         {
-            //             for (int j = 0; j < _jSize; j++)
-            //             {
-            //                 if ((_lowerCanSetBlock[i, j] || _higherCanSetBlock[i, j]) && !_staticEntityExistBlock[i, j])
-            //                 {
-            //                     _canSetBlockList.Add((i, j));
-            //                 }
-            //             }
-            //         }
-            //         break;
-            //     case 3:
-            //         for (int i = 0; i < _iSize; i++)
-            //         {
-            //             for (int j = 0; j < _jSize; j++)
-            //             {
-            //                 if ((_lowerCanSetBlock[i, j] || _higherCanSetBlock[i, j]) && _staticEntityExistBlock[i, j])
-            //                 {
-            //                     _canSetBlockList.Add((i, j));
-            //                 }
-            //             }
-            //         }
-            //         break;
-            //     default: break;
-            // }
-            // //չʾ�ɷ��õķ�Χ
-            // for (int i = 0; i < _canSetBlockList.Count; i++)
-            // {
-            //     MapDataManager.Manager.BlockDataMatrix[_canSetBlockList[i].i, _canSetBlockList[i].j].Material.color = lightGreen;
-            // }
+            Color lightGreen = new Color(0, 0.4f, 0);
+            FetchMapEntityData();
+            for (int i = 0; i < _canSetBlockList.Count; i++)
+            {
+                MapDataManager.Manager.BlockDataMatrix[_canSetBlockList[i].i, _canSetBlockList[i].j].Material.color = Color.white;
+            }
+            _canSetBlockList.Clear();
+            switch (_canSetType)
+            {
+                case 0:
+                    for (int i = 0; i < _iSize; i++)
+                    {
+                        for (int j = 0; j < _jSize; j++)
+                        {
+                            if (_lowerCanSetBlock[i, j] && !_staticEntityExistBlock[i, j])
+                            {
+                                _canSetBlockList.Add((i, j));
+                            }
+                        }
+                    }
+                    break;
+                case 1:
+                    for (int i = 0; i < _iSize; i++)
+                    {
+                        for (int j = 0; j < _jSize; j++)
+                        {
+                            if (_higherCanSetBlock[i, j] && !_staticEntityExistBlock[i, j])
+                            {
+                                _canSetBlockList.Add((i, j));
+                            }
+                        }
+                    }
+                    break;
+                case 2:
+                    for (int i = 0; i < _iSize; i++)
+                    {
+                        for (int j = 0; j < _jSize; j++)
+                        {
+                            if ((_lowerCanSetBlock[i, j] || _higherCanSetBlock[i, j]) && !_staticEntityExistBlock[i, j])
+                            {
+                                _canSetBlockList.Add((i, j));
+                            }
+                        }
+                    }
+                    break;
+                case 3:
+                    for (int i = 0; i < _iSize; i++)
+                    {
+                        for (int j = 0; j < _jSize; j++)
+                        {
+                            if ((_lowerCanSetBlock[i, j] || _higherCanSetBlock[i, j]) && _staticEntityExistBlock[i, j])
+                            {
+                                _canSetBlockList.Add((i, j));
+                            }
+                        }
+                    }
+                    break;
+                default: break;
+            }
+            //չʾ�ɷ��õķ�Χ
+            for (int i = 0; i < _canSetBlockList.Count; i++)
+            {
+                MapDataManager.Manager.BlockDataMatrix[_canSetBlockList[i].i, _canSetBlockList[i].j].Material.color = lightGreen;
+            }
             //=====================================================================================================================================
         }
         private void UIStates_ShowSomethingAndOtherClose(string[] shows)
@@ -1613,23 +1612,25 @@ namespace MyUI
             SetTimeScale();
             _currentUIState = UIState.normal;
             //=====================================================================================================================================
-            // _selectedStaticEntity = null;
+            _selectedStaticEntityID = null;
+            _selectedEntity = null;
             //=====================================================================================================================================
-            if (_selectedStaticEntityData != null)
+            if (_selectedPlaceData != null)
             {
-                _selectedStaticEntityData.SelectorMove(false);
-                _selectedStaticEntityData = null;
+                _selectedPlaceData.SelectorMove(false);
+                _selectedPlaceData = null;
             }
             UIStates_ShowSomethingAndOtherClose(null);
-        
+
         }
         private void UIStates_SwitchTo_ViewBeforeSet(StaticEntityPlaceData staticEntityPlaceData)
         {
             _isSlow = true;
             SetTimeScale();
-            _selectedStaticEntityData = staticEntityPlaceData;
+            _selectedPlaceData = staticEntityPlaceData;
             //=====================================================================================================================================
-            // _selectedStaticEntity = null;
+            _selectedStaticEntityID = staticEntityPlaceData.StaticId;
+            _selectedEntity = null;
             //=====================================================================================================================================
             UIStates_ShowSomethingAndOtherClose(new string[2] { "leftmessage", "canset" });
             if (_currentUIState == UIState.normal)
@@ -1643,9 +1644,10 @@ namespace MyUI
         {
             _isSlow = true;
             SetTimeScale();
-            _selectedStaticEntityData = staticEntityPlaceData;
+            _selectedPlaceData = staticEntityPlaceData;
             //=====================================================================================================================================
-            // _selectedStaticEntity = null;
+            _selectedStaticEntityID = staticEntityPlaceData.StaticId;
+            _selectedEntity = null;
             //=====================================================================================================================================
             UIStates_ShowSomethingAndOtherClose(new string[3] { "leftmessage", "dragger", "canset" });
             if (_currentUIState == UIState.normal)
@@ -1659,9 +1661,10 @@ namespace MyUI
         {
             _isSlow = true;
             SetTimeScale();
-            _selectedStaticEntityData = staticEntityPlaceData;
+            _selectedPlaceData = staticEntityPlaceData;
             //=====================================================================================================================================
-            // _selectedStaticEntity = null;
+            _selectedStaticEntityID = staticEntityPlaceData.StaticId;
+            _selectedEntity = null;
             //=====================================================================================================================================
             UIStates_ShowSomethingAndOtherClose(new string[4] { "leftmessage", "dragger", "choosing", "canset" });
             if (_currentUIState == UIState.normal)
@@ -1676,9 +1679,10 @@ namespace MyUI
             _isSlow = true;
             SetTimeScale();
             //=====================================================================================================================================
-            // _selectedStaticEntity = entitySelected;
+            _selectedEntity = entitySelected;
+            _selectedStaticEntityID = entitySelected.EntityData.ID;
             //=====================================================================================================================================
-            _selectedStaticEntityData = null;
+            _selectedPlaceData = null;
             UIStates_ShowSomethingAndOtherClose(new string[3] { "leftmessage", "operator", "range" });
             if (_currentUIState == UIState.normal)
             {
@@ -1793,7 +1797,7 @@ namespace MyUI
                 num[i] = 1;
             }
             //=====================================================================================================================================
-            // InitializeStaticEntityPrefabToSelector(prefab, num);
+            InitializeStaticEntityPrefabToSelector(prefab, num);
             //=====================================================================================================================================
             _currentUIState = UIState.normal;
             _leftmessageOpen = false;
@@ -1817,9 +1821,10 @@ namespace MyUI
             UIStates_SwitchTo_Normal();
             _canSetBlockList.Clear();
             //=====================================================================================================================================
-            // _selectedStaticEntity = null;
+            _selectedStaticEntityID = null;
+            _selectedEntity = null;
             //=====================================================================================================================================
-            _selectedStaticEntityData = null;
+            _selectedPlaceData = null;
             _orientation = -1;
         }
         public override void OnPause()
