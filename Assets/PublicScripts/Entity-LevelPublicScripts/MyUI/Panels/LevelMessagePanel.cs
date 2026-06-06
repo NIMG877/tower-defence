@@ -362,43 +362,22 @@ namespace MyUI
         #endregion
 
         #region Construction & Initialization
-        #endregion
-
-        #region Public API
-        #endregion
-
-        #region Time Control
-        #endregion
-
-        #region UI States
-        #endregion
-
-        #region Helpers
-        #endregion
-
-        private static LevelMessagePanel _instance;
-        public static LevelMessagePanel Panel
+        private LevelMessagePanel() : base(new UIType("Prefabs/UI/MyUIs/LevelMessagePanel"))
         {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new LevelMessagePanel();
-                }
-                return _instance;
-            }
+            InitCoreResources();
+            InitTimeControl();
+            InitTopStatusBar();
+            InitLeftMessagePanel();
+            InitOperatorPanel();
+            InitSelectorArea();
+            InitFloatingTextPool();
+            InitEventTriggers();
         }
 
-        public DamageStatisticData[] DamageStatisticDatas { get { return _damageStatisticDatas; } }
-        //operator
-        private EventTrigger.Entry _callBackClick, _skillRangeClick;
-
-        private LevelMessagePanel() : base(new UIType("Prefabs/UI/MyUIs/LevelMessagePanel"))
+        private void InitCoreResources()
         {
             _camera = LevelResourceSharing.MainCamera;
             _rangeImgCollection = new GameObject("rangeImgCollection");
-            
-            
             _x1 = Resources.Load<Sprite>("Prefabs/UI/MyUIs/UISprites/LevelMessagePanel/1X");
             _x2 = Resources.Load<Sprite>("Prefabs/UI/MyUIs/UISprites/LevelMessagePanel/2X");
             _c = Resources.Load<Sprite>("Prefabs/UI/MyUIs/UISprites/LevelMessagePanel/continue_black");
@@ -407,86 +386,15 @@ namespace MyUI
             _professionsLighten = Resources.LoadAll<Sprite>("Prefabs/UI/MyUIs/UISprites/CharacterHandSprites/atlas_profession_lighten");
             _spMessageAtlas = Resources.LoadAll<Sprite>("Prefabs/UI/MyUIs/UISprites/LevelMessagePanel/atlas_spState");
             _skillRangeButton = new Sprite[2] { Resources.Load<Sprite>("Prefabs/UI/MyUIs/UISprites/LevelMessagePanel/sprite_skill_range_off"), Resources.Load<Sprite>("Prefabs/UI/MyUIs/UISprites/LevelMessagePanel/sprite_skill_range_on") };
-            
-            
-            _leftMessage = GetComponentInChildrenByPath<Transform>("leftMessageArea").gameObject;
-            _chooser = GetComponentInChildrenByPath<Image>("leftMessageArea/chooser");
-            _up = GetComponentInChildrenByPath<Image>("leftMessageArea/target/up");
-            _down = GetComponentInChildrenByPath<Image>("leftMessageArea/target/down");
-            _left = GetComponentInChildrenByPath<Image>("leftMessageArea/target/left");
-            _right = GetComponentInChildrenByPath<Image>("leftMessageArea/target/right");
-            _class = GetComponentInChildrenByPath<Image>("leftMessageArea/class");
-            _target = GetComponentInChildrenByPath<Image>("leftMessageArea/target");
-            _rangeSelfTile = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/atkRange/area/self");
-            _rangeTiles = new List<RectTransform> { GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/atkRange/area/range") };
-            _rangeArea = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/atkRange/area");
-            _name = GetComponentInChildrenByPath<TextMeshProUGUI>("leftMessageArea/name");
-            _statsText = GetComponentInChildrenByPath<TextMeshProUGUI>("leftMessageArea/attributes/admb");
-            _hpSlider = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/hpSliderBk/hpSlider");
-            _skillTalentRect = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/skillTalent/content/content");
-            _skillTalentRectParent = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/skillTalent/content");
-            _skillCard = new SkillCard(new Vector2(0, 0), _skillTalentRect, Color.white, _skillTalentRect.rect.width);
-            _subpCard = new SubpCard(new Vector2(0, 0), _skillTalentRect, Color.white, _skillTalentRect.rect.width);
-            _subpCard.SubpRT.gameObject.SetActive(false);
-            _talentCards = new List<TalentCard>();
-            _buffCards = new List<BuffCard>();
-            Transform selectBar = GetComponentInChildrenByPath<Transform>("leftMessageArea/skillTalent/selectBar");
-            //=====================================================================================================================================
-            _skillTalentSwitchButtons = new Image[4];
-            for (int i = 0; i < _skillTalentSwitchButtons.Length; i++)
-            {
-                _skillTalentSwitchButtons[i] = selectBar.GetChild(i).GetComponent<Image>();
-                EventTrigger.Entry click = new EventTrigger.Entry();
-                click.eventID = EventTriggerType.PointerClick;
-                int index = i;
-                click.callback.AddListener((data) =>
-                {
-                    if (_currentShow != index)
-                    {
-                        EntityData entityData;
-                        if (_selectedPlaceData != null && _selectedEntity == null)
-                        {
-                            entityData = _selectedPlaceData.EntityData.Prefab.GetComponent<Entity>().EntityData;
-                        }
-                        else if (_selectedPlaceData == null && _selectedEntity != null)
-                        {
-                            entityData = _selectedEntity.EntityData;
-                        }
-                        else
-                        {
-                            return;
-                        }
-                        SwitchShowSkillTalent(index, entityData);
-                    }
-                });
-                _skillTalentSwitchButtons[i].GetComponent<EventTrigger>().triggers.Add(click);
-            }
-            //=====================================================================================================================================
-            _selectorSample = GetComponentInChildrenByPath<Transform>("staticEntityArea/content/ses0").gameObject;
-            _hpBk = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/hpBk");
-            _hpText = GetComponentInChildrenByPath<TextMeshProUGUI>("leftMessageArea/attributes/hpBk/hpText");
             _rangeImg = new List<SpriteRenderer>() { Object.Instantiate(Resources.Load<GameObject>("Prefabs/EffectPrefabs/rangeImg"), _rangeImgCollection.transform).GetComponent<SpriteRenderer>() };
-            
-            _operateArea = GetComponentInChildrenByPath<Transform>("operateArea").gameObject;
-            _callBack = GetComponentInChildrenByPath<Image>("operateArea/callback");
-            _skillOpen = GetComponentInChildrenByPath<Image>("operateArea/skillOpen");
-            _skillRange = GetComponentInChildrenByPath<Image>("operateArea/skillRange");
-            _spBk = GetComponentInChildrenByPath<Image>("operateArea/skillOpen/sp/spBk");
-            _spState = GetComponentInChildrenByPath<Image>("operateArea/skillOpen/sp/spBk/spState");
-            _spText = GetComponentInChildrenByPath<TextMeshProUGUI>("operateArea/skillOpen/sp/spText");
-            _spMask = GetComponentInChildrenByPath<Image>("operateArea/skillOpen/spmask");
-            _stop = GetComponentInChildrenByPath<Image>("operateArea/skillOpen/stop");
-            _skillChargeNum = GetComponentInChildrenByPath<Image>("operateArea/skillOpen/skillChargeNum");
-            _skillChargeNumText = GetComponentInChildrenByPath<TextMeshProUGUI>("operateArea/skillOpen/skillChargeNum/skillChargeText");
-            _text = GetComponentInChildrenByPath<Transform>("texts");
-            _cost = GetComponentInChildrenByPath<TextMeshProUGUI>("staticEntityArea/resource/cost");
-            _costSlider = GetComponentInChildrenByPath<Image>("staticEntityArea/resource/costSlider");
-            _isAffordableNumText = GetComponentInChildrenByPath<TextMeshProUGUI>("staticEntityArea/numLeft/canSetNum");
-            _currentNumAndTotalNum = GetComponentInChildrenByPath<TextMeshProUGUI>("count_total_healthleft/c_t");
-            _levelHpLeft = GetComponentInChildrenByPath<TextMeshProUGUI>("count_total_healthleft/t_hp");
-            _content = GetComponentInChildrenByPath<Transform>("staticEntityArea/content");
-            _pauseMask = GetComponentInChildrenByPath<Transform>("pauseMask").gameObject;
-            
+            _rangeImgCollection.transform.SetParent(LevelResourceSharing.LM);
+            _placeDataList = new List<StaticEntityPlaceData>();
+            _selectorObjects = new List<GameObject>();
+            _isAffordableBlockList = new List<(int i, int j)>();
+        }
+
+        private void InitTimeControl()
+        {
             _timeMultiple = GetComponentInChildrenByPath<Button>("timeMultiple");
             _timeMultiple.onClick.AddListener(() =>
             {
@@ -522,54 +430,89 @@ namespace MyUI
                 Time.timeScale = 0;
                 NoticeManager.NM.LaunchMessageBox("ȷ���˳��ؿ���", () => LevelActionManager.Manager.MissionEnd(false), () => SetTimeScale());
             });
-            
-            _levelMessageTrigger = UIObject.GetComponent<EventTrigger>();
-            
-            //=====================================================================================================================================
-            EventTrigger.Entry blankClick = new EventTrigger.Entry();
-            blankClick.eventID = EventTriggerType.PointerClick;
-            blankClick.callback.AddListener((data) =>
-            {
-                if (_currentUIState == UIState.normal)
-                {
-                    Vector2 clickBlock = _camera.ScreenToWorldPoint(Input.mousePosition);
-                    (int i, int j) = ((int)(clickBlock.y + 0.5), (int)(clickBlock.x + 0.5));
-                    _selectedEntity = EntityManager.Manager.GetStaticEntityInBlock(i, j);
-                    if (_selectedEntity != null && _selectedEntity.participateIn)
-                    {
-                        UIStates_SwitchTo_ViewAfterSet(_selectedEntity);
-                    }
-                }
-                else
-                {
-                    UIStates_SwitchTo_Normal();
-                }
+        }
 
-            });
-            _levelMessageTrigger.triggers.Add(blankClick);
-            //=====================================================================================================================================
-            
-            
-            
-            _hpSliderSize = (_hpSlider.rect.width, _hpSlider.rect.height);
-            
-            
-            string[] textsName = new string[6] { "textDamage", "textHeal", "textAddCost", "textReduceCost", "spAdd", "miss" };
-            _textsInPool = new List<TextMeshProUGUI>[textsName.Length];
-            for (int i = 0; i < textsName.Length; i++)
+        private void InitTopStatusBar()
+        {
+            _cost = GetComponentInChildrenByPath<TextMeshProUGUI>("staticEntityArea/resource/cost");
+            _costSlider = GetComponentInChildrenByPath<Image>("staticEntityArea/resource/costSlider");
+            _isAffordableNumText = GetComponentInChildrenByPath<TextMeshProUGUI>("staticEntityArea/numLeft/canSetNum");
+            _currentNumAndTotalNum = GetComponentInChildrenByPath<TextMeshProUGUI>("count_total_healthleft/c_t");
+            _levelHpLeft = GetComponentInChildrenByPath<TextMeshProUGUI>("count_total_healthleft/t_hp");
+            _pauseMask = GetComponentInChildrenByPath<Transform>("pauseMask").gameObject;
+        }
+
+        private void InitLeftMessagePanel()
+        {
+            _leftMessage = GetComponentInChildrenByPath<Transform>("leftMessageArea").gameObject;
+            _chooser = GetComponentInChildrenByPath<Image>("leftMessageArea/chooser");
+            _up = GetComponentInChildrenByPath<Image>("leftMessageArea/target/up");
+            _down = GetComponentInChildrenByPath<Image>("leftMessageArea/target/down");
+            _left = GetComponentInChildrenByPath<Image>("leftMessageArea/target/left");
+            _right = GetComponentInChildrenByPath<Image>("leftMessageArea/target/right");
+            _class = GetComponentInChildrenByPath<Image>("leftMessageArea/class");
+            _target = GetComponentInChildrenByPath<Image>("leftMessageArea/target");
+            _rangeSelfTile = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/atkRange/area/self");
+            _rangeTiles = new List<RectTransform> { GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/atkRange/area/range") };
+            _rangeArea = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/atkRange/area");
+            _name = GetComponentInChildrenByPath<TextMeshProUGUI>("leftMessageArea/name");
+            _statsText = GetComponentInChildrenByPath<TextMeshProUGUI>("leftMessageArea/attributes/admb");
+            _hpSlider = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/hpSliderBk/hpSlider");
+            _skillTalentRect = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/skillTalent/content/content");
+            _skillTalentRectParent = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/skillTalent/content");
+            _skillCard = new SkillCard(new Vector2(0, 0), _skillTalentRect, Color.white, _skillTalentRect.rect.width);
+            _subpCard = new SubpCard(new Vector2(0, 0), _skillTalentRect, Color.white, _skillTalentRect.rect.width);
+            _subpCard.SubpRT.gameObject.SetActive(false);
+            _talentCards = new List<TalentCard>();
+            _buffCards = new List<BuffCard>();
+            Transform selectBar = GetComponentInChildrenByPath<Transform>("leftMessageArea/skillTalent/selectBar");
+            _skillTalentSwitchButtons = new Image[4];
+            for (int i = 0; i < _skillTalentSwitchButtons.Length; i++)
             {
-                _textsInPool[i] = new List<TextMeshProUGUI>() { GetComponentInChildrenByPath<TextMeshProUGUI>($"texts/{textsName[i]}") };
-                for (int j = 0; j < 4; j++)
+                _skillTalentSwitchButtons[i] = selectBar.GetChild(i).GetComponent<Image>();
+                EventTrigger.Entry click = new EventTrigger.Entry();
+                click.eventID = EventTriggerType.PointerClick;
+                int index = i;
+                click.callback.AddListener((data) =>
                 {
-                    _textsInPool[i].Add(Object.Instantiate(_textsInPool[i][0], _text));
-                }
+                    if (_currentShow != index)
+                    {
+                        EntityData entityData;
+                        if (_selectedPlaceData != null && _selectedEntity == null)
+                        {
+                            entityData = _selectedPlaceData.EntityData.Prefab.GetComponent<Entity>().EntityData;
+                        }
+                        else if (_selectedPlaceData == null && _selectedEntity != null)
+                        {
+                            entityData = _selectedEntity.EntityData;
+                        }
+                        else
+                        {
+                            return;
+                        }
+                        SwitchShowSkillTalent(index, entityData);
+                    }
+                });
+                _skillTalentSwitchButtons[i].GetComponent<EventTrigger>().triggers.Add(click);
             }
-            
-            
-            _placeDataList = new List<StaticEntityPlaceData>();
-            _selectorObjects = new List<GameObject>();
-            _isAffordableBlockList = new List<(int i, int j)>();
-            _rangeImgCollection.transform.SetParent(LevelResourceSharing.LM);
+            _hpBk = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/hpBk");
+            _hpText = GetComponentInChildrenByPath<TextMeshProUGUI>("leftMessageArea/attributes/hpBk/hpText");
+            _hpSliderSize = (_hpSlider.rect.width, _hpSlider.rect.height);
+        }
+
+        private void InitOperatorPanel()
+        {
+            _operateArea = GetComponentInChildrenByPath<Transform>("operateArea").gameObject;
+            _callBack = GetComponentInChildrenByPath<Image>("operateArea/callback");
+            _skillOpen = GetComponentInChildrenByPath<Image>("operateArea/skillOpen");
+            _skillRange = GetComponentInChildrenByPath<Image>("operateArea/skillRange");
+            _spBk = GetComponentInChildrenByPath<Image>("operateArea/skillOpen/sp/spBk");
+            _spState = GetComponentInChildrenByPath<Image>("operateArea/skillOpen/sp/spBk/spState");
+            _spText = GetComponentInChildrenByPath<TextMeshProUGUI>("operateArea/skillOpen/sp/spText");
+            _spMask = GetComponentInChildrenByPath<Image>("operateArea/skillOpen/spmask");
+            _stop = GetComponentInChildrenByPath<Image>("operateArea/skillOpen/stop");
+            _skillChargeNum = GetComponentInChildrenByPath<Image>("operateArea/skillOpen/skillChargeNum");
+            _skillChargeNumText = GetComponentInChildrenByPath<TextMeshProUGUI>("operateArea/skillOpen/skillChargeNum/skillChargeText");
             _callBackClick = new EventTrigger.Entry();
             _callBackClick.eventID = EventTriggerType.PointerClick;
             _callBack.GetComponent<EventTrigger>().triggers.Add(_callBackClick);
@@ -596,6 +539,53 @@ namespace MyUI
                 AudioManager.Manager.PlayAudio("skill_boostclose", 1, false, false);
             });
             _stop.GetComponent<EventTrigger>().triggers.Add(skillstop);
+        }
+
+        private void InitSelectorArea()
+        {
+            _selectorSample = GetComponentInChildrenByPath<Transform>("staticEntityArea/content/ses0").gameObject;
+            _content = GetComponentInChildrenByPath<Transform>("staticEntityArea/content");
+        }
+
+        private void InitFloatingTextPool()
+        {
+            _text = GetComponentInChildrenByPath<Transform>("texts");
+            string[] textsName = new string[6] { "textDamage", "textHeal", "textAddCost", "textReduceCost", "spAdd", "miss" };
+            _textsInPool = new List<TextMeshProUGUI>[textsName.Length];
+            for (int i = 0; i < textsName.Length; i++)
+            {
+                _textsInPool[i] = new List<TextMeshProUGUI>() { GetComponentInChildrenByPath<TextMeshProUGUI>($"texts/{textsName[i]}") };
+                for (int j = 0; j < 4; j++)
+                {
+                    _textsInPool[i].Add(Object.Instantiate(_textsInPool[i][0], _text));
+                }
+            }
+        }
+
+        private void InitEventTriggers()
+        {
+            _levelMessageTrigger = UIObject.GetComponent<EventTrigger>();
+            EventTrigger.Entry blankClick = new EventTrigger.Entry();
+            blankClick.eventID = EventTriggerType.PointerClick;
+            blankClick.callback.AddListener((data) =>
+            {
+                if (_currentUIState == UIState.normal)
+                {
+                    Vector2 clickBlock = _camera.ScreenToWorldPoint(Input.mousePosition);
+                    (int i, int j) = ((int)(clickBlock.y + 0.5), (int)(clickBlock.x + 0.5));
+                    _selectedEntity = EntityManager.Manager.GetStaticEntityInBlock(i, j);
+                    if (_selectedEntity != null && _selectedEntity.participateIn)
+                    {
+                        UIStates_SwitchTo_ViewAfterSet(_selectedEntity);
+                    }
+                }
+                else
+                {
+                    UIStates_SwitchTo_Normal();
+                }
+            });
+            _levelMessageTrigger.triggers.Add(blankClick);
+
             EventTrigger chooserTrigger = _chooser.GetComponent<EventTrigger>();
             EventTrigger.Entry chooserEnter = new EventTrigger.Entry();
             chooserEnter.eventID = EventTriggerType.PointerEnter;
@@ -626,6 +616,36 @@ namespace MyUI
             chooserTrigger.triggers.Add(dir);
             chooserTrigger.triggers.Add(dend);
         }
+        #endregion
+
+        #region Public API
+        #endregion
+
+        #region Time Control
+        #endregion
+
+        #region UI States
+        #endregion
+
+        #region Helpers
+        #endregion
+
+        private static LevelMessagePanel _instance;
+        public static LevelMessagePanel Panel
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new LevelMessagePanel();
+                }
+                return _instance;
+            }
+        }
+
+        public DamageStatisticData[] DamageStatisticDatas { get { return _damageStatisticDatas; } }
+        //operator
+        private EventTrigger.Entry _callBackClick, _skillRangeClick;
 
         public void InitializeStaticEntityPrefabToSelector(EntityID[] idList, int[] nums)
         {
