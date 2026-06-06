@@ -210,7 +210,7 @@ public class Entity : MonoBehaviour, IPoolOperation
     public void Die()
     {
         OnBeforeDieAnimation?.Invoke();
-        entityAM.TrySetState(6, false);
+        entityAM.TrySetState(EntityState.Die, false);
         participateIn = false;
         if (Camp == 1)
         {
@@ -499,7 +499,7 @@ public class Entity : MonoBehaviour, IPoolOperation
     }
     public virtual void Initialize()
     {
-        entityAM.TrySetState(5, false);
+        entityAM.TrySetState(EntityState.Start, false);
         current_hp_rate = 1;
         participateIn = true;
         hurtable = 0;

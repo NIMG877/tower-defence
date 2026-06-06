@@ -7,16 +7,6 @@ using System;
 
 public class AnimationMachine : MonoBehaviour, IPoolOperation
 {
-    private enum EntityState
-    {
-        Default,
-        Idle,
-        Move,
-        Attack_Wait,
-        Attack,
-        Start,
-        Die,
-    }
     private EntityState currentState;
     private EntityState targetState;
     private List<EntityState> states_ban;
@@ -35,25 +25,17 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     private AnimationReferenceAsset[] Attack;
     public delegate void OperationsOnAttackAnimationBegin();
     /// <summary>
-    /// ÔÚ¹¥»÷¶¯»­¸Õ¿ªÊ¼Ê±±»µ÷ÓÃ£¬¿ÉÓÃÓÚ»ùÓÚ¹¥»÷¶¯»­¿ªÊ¼µÄ¼ì²â£¬Èç¼¼ÄÜ¿ªÆôÊ±¸ü»»¶¯»­
+    /// ï¿½Ú¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¿ï¿½Ê¼Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Ã£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú»ï¿½ï¿½Ú¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½Ä¼ï¿½â£¬ï¿½ç¼¼ï¿½Ü¿ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     public event OperationsOnAttackAnimationBegin OnAttackAnimationBegin;
-    public int CurrentState
+    /// <summary>
+    /// å½“å‰çŠ¶æ€ã€‚ç›´æ¥è¿”å› <see cref="EntityState"/> enum å€¼ï¼Œä¸å†åšäºŒæ¬¡ int æ˜ å°„ã€‚
+    /// æ—§ç‰ˆä¼šæŠŠ Attack å’Œ Attack_Wait éƒ½æ˜ å°„ä¸º 3ï¼ŒStart æ˜ å°„ä¸º 4ï¼ŒDie æ˜ å°„ä¸º 5ï¼Œ
+    /// ä¸å†…éƒ¨ enum ç´¢å¼•ï¼ˆ5/6ï¼‰ä¸ä¸€è‡´â€”â€”ç°å·²ä¿®å¤ã€‚
+    /// </summary>
+    public EntityState CurrentState
     {
-        get
-        {
-            return currentState switch
-            {
-                EntityState.Default => 0,
-                EntityState.Idle => 1,
-                EntityState.Move => 2,
-                EntityState.Attack => 3,
-                EntityState.Attack_Wait => 3,
-                EntityState.Start => 4,
-                EntityState.Die => 5,
-                _ => 0,
-            };
-        }
+        get { return currentState; }
     }
     public (bool left, bool up) CurrentDirection { get { return _direction; } }
 
@@ -67,27 +49,27 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
             }
             else if (_attackStaticWaitTime > -100)
             {
-                Debug.Log($"{thisEntity}½áÊø¹¥»÷¾²ÖÍµÈ´ı½×¶Î");
+                Debug.Log($"{thisEntity}ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÍµÈ´ï¿½ï¿½×¶ï¿½");
                 _attackAnimationIndex = 0;
                 _attackStaticWaitTime = -100;
                 if (Attack_End)
                 {
                     skeleton.state.SetAnimation(0, Attack_End, false);
-                    //´Ë´¦ÆÆÀıµ¥¶Àµ÷ÓÃSetAnimation£¬ÎªÁËÄÜ¹»ÔÚFixedUpdateÖĞ¼ì²â¹¥»÷µÈ´ıÊÂ¼şµÄ¹éÁãºóÉèÖÃ¶¯»­
+                    //ï¿½Ë´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½SetAnimationï¿½ï¿½Îªï¿½ï¿½ï¿½Ü¹ï¿½ï¿½ï¿½FixedUpdateï¿½Ğ¼ï¿½â¹¥ï¿½ï¿½ï¿½È´ï¿½ï¿½Â¼ï¿½ï¿½Ä¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¶ï¿½ï¿½ï¿½
                 }
                 else
                 {
                     skeleton.state.SetAnimation(0, Idle, false);
-                    //´Ë´¦ÆÆÀıµ¥¶Àµ÷ÓÃSetAnimation£¬ÎªÁËÄÜ¹»ÔÚFixedUpdateÖĞ¼ì²â¹¥»÷µÈ´ıÊÂ¼şµÄ¹éÁãºóÉèÖÃ¶¯»­
+                    //ï¿½Ë´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½SetAnimationï¿½ï¿½Îªï¿½ï¿½ï¿½Ü¹ï¿½ï¿½ï¿½FixedUpdateï¿½Ğ¼ï¿½â¹¥ï¿½ï¿½ï¿½È´ï¿½ï¿½Â¼ï¿½ï¿½Ä¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¶ï¿½ï¿½ï¿½
                 }
             }
         }
 
     }
     /// <summary>
-    /// ÉèÖÃÑÕÉ«
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«
     /// </summary>
-    /// <param name="type">ÉèÖÃÖÖÀà£º0-ÏÔÊ¾£¬1-ÏûÊ§£¬2-ÉÁºì</param>
+    /// <param name="type">ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½à£º0-ï¿½ï¿½Ê¾ï¿½ï¿½1-ï¿½ï¿½Ê§ï¿½ï¿½2-ï¿½ï¿½ï¿½ï¿½</param>
     private void SetColor(int type, float duration)
     {
         switch (type)
@@ -125,9 +107,9 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         }
     }
     /// <summary>
-    /// ÖØÖÃ¶¯»­¡¾0-default,1-idle,2-move,30-attack_remote,31-attack_close,32-attack_begin,33-attack_end,4-start,5-die¡¿
+    /// ï¿½ï¿½ï¿½Ã¶ï¿½ï¿½ï¿½ï¿½ï¿½0-default,1-idle,2-move,30-attack_remote,31-attack_close,32-attack_begin,33-attack_end,4-start,5-dieï¿½ï¿½
     /// </summary>
-    /// <param name="resets">ĞèÖØÖÃµÄ¶¯»­ĞòºÅ</param>
+    /// <param name="resets">ï¿½ï¿½ï¿½ï¿½ï¿½ÃµÄ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</param>
     public void ResetAnimation(int[] resets)
     {
         foreach (int index in resets)
@@ -143,63 +125,51 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 case 33: Attack_End = o_attack_end; break;
                 case 4: Start = o_start; break;
                 case 5: Die = o_die; break;
-                default: Debug.LogWarning($"ÔİÎŞ±ê¼ÇÎª{index}µÄ¶¯»­"); break;
+                default: Debug.LogWarning($"ï¿½ï¿½ï¿½Ş±ï¿½ï¿½Îª{index}ï¿½Ä¶ï¿½ï¿½ï¿½"); break;
             }
         }
     }
     /// <summary>
-    /// ½«×´Ì¬ÉèÎª½ûÓÃ
+    /// ï¿½ï¿½×´Ì¬ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½
     /// </summary>
     /// <param name="statesToBan">0-Default 1-Idle 2-Move 3-Attack</param>
-    public void AddStateToBan(int[] statesToBan)
+    public void AddStateToBan(EntityState[] statesToBan)
     {
         for (int i = 0; i < statesToBan.Length; i++)
         {
-            switch (statesToBan[i])
+            if (!states_ban.Contains(statesToBan[i]))
             {
-                case 0: states_ban.Add(EntityState.Default); break;
-                case 1: states_ban.Add(EntityState.Idle); break;
-                case 2: states_ban.Add(EntityState.Move); break;
-                case 3: states_ban.Add(EntityState.Attack); break;
-                default: Debug.LogWarning($"ÔİÎŞ±ê¼ÇÎª{statesToBan[i]}µÄ×´Ì¬»òÎŞ·¨½«±ê¼ÇÎª{statesToBan[i]}µÄ×´Ì¬ÉèÎª½ûÓÃ"); break;
+                states_ban.Add(statesToBan[i]);
             }
         }
     }
     /// <summary>
-    /// ½â³ıÒ»²ã×´Ì¬½ûÓÃ
+    /// ï¿½ï¿½ï¿½Ò»ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     /// <param name="statesfromBan">0-Default 1-Idle 2-Move 3-Attack</param>
-    public void RemoveStateFromBan(int[] statesfromBan)
+    public void RemoveStateFromBan(EntityState[] statesfromBan)
     {
-        foreach (int index in statesfromBan)
+        foreach (var state in statesfromBan)
         {
-            switch (index)
-            {
-                case 0: states_ban.Remove(EntityState.Default); break;
-                case 1: states_ban.Remove(EntityState.Idle); break;
-                case 2: states_ban.Remove(EntityState.Move); break;
-                case 3: states_ban.Remove(EntityState.Attack); break;
-                default: Debug.LogWarning($"ÔİÎŞ±ê¼ÇÎª{index}µÄ×´Ì¬»òÎŞ·¨½«±ê¼ÇÎª{index}µÄ×´Ì¬ÉèÎª½ûÓÃ"); break;
-            }
+            states_ban.Remove(state);
         }
     }
     /// <summary>
-    /// ³¢ÊÔ×ª»»¶¯»­×´Ì¬»ú¡¾0-default,1-idle,2-move,3-attack_wait,4-attack,5-start,6-die¡¿
+    /// ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½0-default,1-idle,2-move,3-attack_wait,4-attack,5-start,6-dieï¿½ï¿½
     /// </summary>
-    /// <param name="stateIndex">³¢ÊÔ×ª»»µÄ×´Ì¬±àÂë</param>
-    /// <param name="forceChange">ÊÇ·ñÇ¿ÖÆ×ª»»</param>
-    /// <returns>·µ»ØÊÇ·ñ×ª»»³É¹¦</returns>
-    public bool TrySetState(int stateIndex, bool forceChange)
+    /// <param name="stateIndex">ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½</param>
+    /// <param name="forceChange">ï¿½Ç·ï¿½Ç¿ï¿½ï¿½×ªï¿½ï¿½</param>
+    /// <returns>ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½×ªï¿½ï¿½ï¿½É¹ï¿½</returns>
+    public bool TrySetState(EntityState state, bool forceChange)
     {
-        EntityState tryset = (EntityState)stateIndex;
-        if (!forceChange && tryset > currentState && !states_ban.Contains(tryset))
+        if (!forceChange && state > currentState && !states_ban.Contains(state))
         {
-            SetState(tryset);
+            SetState(state);
             return true;
         }
-        else if (forceChange && currentState != EntityState.Die && !states_ban.Contains(tryset))
+        else if (forceChange && currentState != EntityState.Die && !states_ban.Contains(state))
         {
-            SetState(tryset);
+            SetState(state);
             return true;
         }
         else
@@ -228,9 +198,9 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         }
     }
     /// <summary>
-    /// ÉèÖÃÊµÌå³¯Ïò
+    /// ï¿½ï¿½ï¿½ï¿½Êµï¿½å³¯ï¿½ï¿½
     /// </summary>
-    /// <param name="target">Ä¿±ê³¯Ïòµã</param>
+    /// <param name="target">Ä¿ï¿½ê³¯ï¿½ï¿½ï¿½</param>
     public void SetDirection(Vector2 target)
     {
         void SetDirectionBase()
@@ -354,7 +324,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         }
         else
         {
-            Debug.LogWarning($"ÔİÎ´¶¨ÒåÃûÎª{e.Data.Name}µÄ¶¯»­ÊÂ¼ş");
+            Debug.LogWarning($"ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª{e.Data.Name}ï¿½Ä¶ï¿½ï¿½ï¿½ï¿½Â¼ï¿½");
         }
     }
     private void HandleAnimationStateStart(Spine.TrackEntry trackEntry)
@@ -383,7 +353,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         {
             currentState = EntityState.Attack_Wait;
             _attackStaticWaitTime = 0.05f;
-            //Debug.Log($"{thisEntity}½øÈë{_attackStaticWaitTime}sµÄ¹¥»÷¾²ÖÍµÈ´ı½×¶Î");
+            //Debug.Log($"{thisEntity}ï¿½ï¿½ï¿½ï¿½{_attackStaticWaitTime}sï¿½Ä¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÍµÈ´ï¿½ï¿½×¶ï¿½");
             if (Attack.Length > 1)
             {
                 _attackAnimationIndex = (_attackAnimationIndex + 1) % Attack.Length;
@@ -458,7 +428,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         }
         else
         {
-            Debug.LogError("ÕÒ²»µ½¹Ç÷À¶¯»­");
+            Debug.LogError("ï¿½Ò²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
         }
     }
     public void Initialize()

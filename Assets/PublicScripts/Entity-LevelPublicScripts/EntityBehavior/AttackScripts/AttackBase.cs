@@ -168,7 +168,7 @@ public class AttackBase : MonoBehaviour, IPoolOperation
         {
             _attackTimer -= Time.fixedDeltaTime * _baseAttackTimeF / BaseAttackTimeS;
         }
-        else if (_thisEntity.entityAM.CurrentState < 4 && TryToAttack(AttackTargetSelect(AttackNumS, AttackMinNumS), false, true))
+        else if (_thisEntity.entityAM.CurrentState != EntityState.Start && _thisEntity.entityAM.CurrentState != EntityState.Die && TryToAttack(AttackTargetSelect(AttackNumS, AttackMinNumS), false, true))
         {
             _attackTimer = _baseAttackTimeF;
         }
@@ -212,7 +212,7 @@ public class AttackBase : MonoBehaviour, IPoolOperation
                 if (attackTargets.Length == 0)
                 {
                     OnAttackInterrupt?.Invoke();
-                    _thisEntity.entityAM.TrySetState(1, true);
+                    _thisEntity.entityAM.TrySetState(EntityState.Idle, true);
                     _attackTimer = 0;
                     return;
                 }

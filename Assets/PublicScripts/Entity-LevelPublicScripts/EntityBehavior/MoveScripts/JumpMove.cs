@@ -27,10 +27,10 @@ public class JumpMove : MoveBase
                 ArriveEnd();
                 return;
             }
-            if (_thisAM.CurrentState != 2 && _thisEntity.entityResistList.Count == 0)
+            if (_thisAM.CurrentState != EntityState.Move && _thisEntity.entityResistList.Count == 0)
             {
                 _thisAM.Move = _jumpBegin;
-                if (_thisAM.TrySetState(2, false))
+                if (_thisAM.TrySetState(EntityState.Move, false))
                 {
                     Jump(this.transform.position, _currentSection[_currentPointSerial].targetPosition);
                 }
@@ -54,7 +54,7 @@ public class JumpMove : MoveBase
         Vector2 dir = to - from;
         await UniTask.WaitForSeconds(jumpBeginT);
         _thisAM.Move = _jump;
-        _thisAM.TrySetState(2, true);
+        _thisAM.TrySetState(EntityState.Move, true);
         float dt = 0;
         while (dt < jumpT)
         {
@@ -65,7 +65,7 @@ public class JumpMove : MoveBase
         }
         this.transform.position = to;
         _thisAM.Move = _jumpEnd;
-        _thisAM.TrySetState(2, true);
+        _thisAM.TrySetState(EntityState.Move, true);
         await UniTask.WaitForSeconds(jumpEndT);
         if (_currentSection[_currentPointSerial].whetherToEnterPortal)
         {
@@ -80,7 +80,7 @@ public class JumpMove : MoveBase
             _currentPointSerial = 0;
         }
         _jumpGapTimer = _jumpGap;
-        _thisAM.TrySetState(1, true);
+        _thisAM.TrySetState(EntityState.Idle, true);
     }
     public override void FindPath()
     {

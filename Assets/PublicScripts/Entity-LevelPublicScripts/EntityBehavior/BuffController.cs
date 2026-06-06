@@ -339,10 +339,10 @@ public class BuffController : MonoBehaviour, IPoolOperation
                 if (_abnormalStateTime[0] <= 0 && _abnormalStateTime[0] > -5)
                 {
                     _abnormalStateTime[0] = abnormalTime;
-                    _thisEntity.entityAM.AddStateToBan(new int[1] { 2 });
-                    if (_thisEntity.entityAM.CurrentState == 2)
+                    _thisEntity.entityAM.AddStateToBan(new[] { EntityState.Move });
+                    if (_thisEntity.entityAM.CurrentState == EntityState.Move)
                     {
-                        _thisEntity.entityAM.TrySetState(1, true);
+                        _thisEntity.entityAM.TrySetState(EntityState.Idle, true);
                     }
                 }
                 else if (_abnormalStateTime[0] < abnormalTime)
@@ -354,8 +354,8 @@ public class BuffController : MonoBehaviour, IPoolOperation
                 if (_abnormalStateTime[1] <= 0 && _abnormalStateTime[1] > -5)
                 {
                     _abnormalStateTime[1] = abnormalTime;
-                    _thisEntity.entityAM.AddStateToBan(new int[2] { 2, 3 });
-                    _thisEntity.entityAM.TrySetState(1, true);
+                    _thisEntity.entityAM.AddStateToBan(new[] { EntityState.Move, EntityState.Attack });
+                    _thisEntity.entityAM.TrySetState(EntityState.Idle, true);
                 }
                 else if (_abnormalStateTime[1] < abnormalTime)
                 {
@@ -366,10 +366,10 @@ public class BuffController : MonoBehaviour, IPoolOperation
                 if (_abnormalStateTime[2] <= 0 && _abnormalStateTime[2] > -5)
                 {
                     _abnormalStateTime[2] = abnormalTime;
-                    _thisEntity.entityAM.AddStateToBan(new int[1] { 3 });
-                    if (_thisEntity.entityAM.CurrentState == 3)
+                    _thisEntity.entityAM.AddStateToBan(new[] { EntityState.Attack });
+                    if (_thisEntity.entityAM.CurrentState == EntityState.Attack)
                     {
-                        print(_thisEntity.entityAM.TrySetState(1, true));
+                        print(_thisEntity.entityAM.TrySetState(EntityState.Idle, true));
                     }
                 }
                 else if (_abnormalStateTime[2] < abnormalTime)
@@ -401,15 +401,15 @@ public class BuffController : MonoBehaviour, IPoolOperation
             {
                 case 0:
                     _abnormalStateTime[0] = 0;
-                    _thisEntity.entityAM.RemoveStateFromBan(new int[1] { 2 });
+                    _thisEntity.entityAM.RemoveStateFromBan(new[] { EntityState.Move });
                     break;
                 case 1:
                     _abnormalStateTime[1] = 0;
-                    _thisEntity.entityAM.RemoveStateFromBan(new int[2] { 2, 3 });
+                    _thisEntity.entityAM.RemoveStateFromBan(new[] { EntityState.Move, EntityState.Attack });
                     break;
                 case 2:
                     _abnormalStateTime[2] = 0;
-                    _thisEntity.entityAM.RemoveStateFromBan(new int[1] { 3 });
+                    _thisEntity.entityAM.RemoveStateFromBan(new[] { EntityState.Attack });
                     break;
                 case 3:
                     _abnormalStateTime[3] = 0;

@@ -96,9 +96,9 @@ public class MoveBase : MonoBehaviour, IPoolOperation
                     if (targetPos.x != -100)
                     {
                         _thisEntity.entityResistList.Add(entitiesAround[i]);
-                        if (_thisAM.CurrentState == 2)
+                        if (_thisAM.CurrentState == EntityState.Move)
                         {
-                            _thisAM.TrySetState(1, true);
+                            _thisAM.TrySetState(EntityState.Idle, true);
                         }
                         _thisEntity.EntityPosition = targetPos;
                         return;
@@ -230,11 +230,11 @@ public class MoveBase : MonoBehaviour, IPoolOperation
                 ArriveEnd();
                 return;
             }
-            if (_thisAM.CurrentState != 2 && _thisEntity.entityResistList.Count == 0)
+            if (_thisAM.CurrentState != EntityState.Move && _thisEntity.entityResistList.Count == 0)
             {
-                _thisAM.TrySetState(2, false);
+                _thisAM.TrySetState(EntityState.Move, false);
             }
-            if (_thisAM.CurrentState == 2)
+            if (_thisAM.CurrentState == EntityState.Move)
             {
                 MovePosition();
                 if (_currentPointSerial == _currentSection.Length)
@@ -245,7 +245,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
                     OperationsOnReachSectionEnd?.Invoke();
                     if (_forceUnmoveTime > 0)
                     {
-                        _thisAM.TrySetState(1, true);
+                        _thisAM.TrySetState(EntityState.Idle, true);
                     }
                 }
             }
@@ -257,7 +257,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
     }
     protected virtual void ArriveEnd()
     {
-        _thisAM.TrySetState(0, true);
+        _thisAM.TrySetState(EntityState.Default, true);
         _thisAM.ArriveEnd();
         _thisEntity.participateIn = false;
         if (_levelHpComsume > 0)
