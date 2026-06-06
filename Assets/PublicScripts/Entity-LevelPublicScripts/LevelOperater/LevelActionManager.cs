@@ -169,7 +169,7 @@ public class LevelActionManager : IManagerStartEnd
                     {
                         num += action.GapsFromLastRepeat.Length;
                     }
-                    // 原本对应属性文件中有记录是否为默认记录关卡敌人数，如是，则+1
+                    // 原应募屑录欠为默霞录乜牵+1
                     // else if (_entityIDs[action.EntityPrefabSerial].TryGetComponent(out StaticEntityAttributes sea) && sea.CountOperated)
                     // {
                     //     num += action.GapsFromLastRepeat.Length;
@@ -182,7 +182,7 @@ public class LevelActionManager : IManagerStartEnd
     }
     public void AddToWaveEntities(Entity entity)
     {
-        if (entity.EntityData.monster_isPrimary)
+        if (entity.EntityData.MonsterIsPrimary)
             _waveEntities.Add(entity);
     }
     public void RemoveFromWaveEntities(Entity entity)

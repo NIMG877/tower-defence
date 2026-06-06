@@ -31,13 +31,8 @@ namespace MyUI
             set
             {
                 _teamName = value;
-                var team = SaveSystem.GetTeam(_teamName);
-                _selectedCharacters = team != null
-                    ? new List<EntityID>(team.members)
-                    : new List<EntityID>();
-                _selectedCharacterSkill = team != null
-                    ? new List<int>(team.skillSelects)
-                    : new List<int>();
+                _selectedCharacters    = new List<EntityID>(SaveSystem.GetTeamMembers(_teamName));
+                _selectedCharacterSkill = new List<int>(SaveSystem.GetTeamSkillSelects(_teamName));
             }
         }
         private int _selectIndex;
@@ -126,13 +121,7 @@ namespace MyUI
                         _selectedCharacterSkill.RemoveAt(i);
                     }
                 }
-                var team = SaveSystem.GetTeam(_teamName);
-                if (team != null)
-                {
-                    team.members = new List<EntityID>(_selectedCharacters);
-                    team.skillSelects = new List<int>(_selectedCharacterSkill);
-                    SaveSystem.Save();
-                }
+                SaveSystem.SetTeamMembers(_teamName, _selectedCharacters, _selectedCharacterSkill);
                 PanelManager.Pop(1);
             });
 
@@ -331,17 +320,17 @@ namespace MyUI
             EntityData entityData = CharacterCardManager.cardManager.GetCharacterAttribute(characterId);
             _englishName.text = entityData.EnglishName;
             _name.text = entityData.ChineseName;
-            _hpText.text = entityData.maxHP.ToString();
-            _atkText.text = entityData.attack.ToString();
-            _phdText.text = entityData.defence.ToString();
-            _mgrText.text = entityData.magicResistance.ToString();
-            _reStartText.text = entityData.respawnTime.ToString();
-            _costText.text = entityData.cost.ToString();
-            _occupyText.text = entityData.blockOccupation.ToString();
-            _atkBTText.text = entityData.baseAttackTime.ToString();
+            _hpText.text = entityData.MaxHp.ToString();
+            _atkText.text = entityData.Attack.ToString();
+            _phdText.text = entityData.Defense.ToString();
+            _mgrText.text = entityData.MagicResistance.ToString();
+            _reStartText.text = entityData.RespawnTime.ToString();
+            _costText.text = entityData.Cost.ToString();
+            _occupyText.text = entityData.BlockOccupation.ToString();
+            _atkBTText.text = entityData.BaseAttackTime.ToString();
             _nullMask.SetActive(false);
             int characterIndex = _selectedCharacters.IndexOf(characterId);
-            Skill[] skills = entityData.prefab.GetComponents<Skill>();
+            Skill[] skills = entityData.Prefab.GetComponents<Skill>();
             if (skills.Length == 0)
             {
                 for (int i = 0; i < 3; i++)
@@ -382,7 +371,7 @@ namespace MyUI
                 _skillSelectRT.gameObject.SetActive(true);
                 _skillContent.vertical = _skillArea.rect.height < _content.rect.height;
             }
-            Talent[] talents = entityData.prefab.GetComponents<Talent>();
+            Talent[] talents = entityData.Prefab.GetComponents<Talent>();
             if (talents.Length <= _talentCardList.Count)
             {
                 for (int i = 0; i < talents.Length; i++)

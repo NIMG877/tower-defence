@@ -139,7 +139,7 @@ public class AttackBase : MonoBehaviour, IPoolOperation
     public virtual void Initialize()
     {
         _attackTimer = 0;
-        DamageType = _thisEntity.EntityData.damageType;
+        DamageType = _thisEntity.EntityData.DamageType;
     }
     public virtual void PreWarm()
     {
@@ -150,14 +150,14 @@ public class AttackBase : MonoBehaviour, IPoolOperation
     private void AttributesCaculateFirst()
     {
         EntityData entityData = _thisEntity.EntityData;
-        // EntityData.visionRange_L 已改为 List<Vector2Int>（序列化稳定）。_attackRangeF 保留命名元组数组的运行时形态（只在本类用，序列化无关）
-        var src = entityData.visionRange_L;
+        // EntityData.VisionRange 已改为 List<Vector2Int>（序列化稳定）。_attackRangeF 保留命名元组数组的运行时形态（只在本类用，序列化无关）
+        var src = entityData.VisionRange;
         _attackRangeF = new (int x, int y)[src.Count];
         for (int i = 0; i < src.Count; i++) _attackRangeF[i] = (src[i].x, src[i].y);
-        _attackRadiusF = entityData.visionRadius;
-        _attackDamageF = entityData.attack;
-        _baseAttackTimeF = entityData.baseAttackTime;
-        _attackNumF = entityData.attackNum;
+        _attackRadiusF = entityData.VisionRadius;
+        _attackDamageF = entityData.Attack;
+        _baseAttackTimeF = entityData.BaseAttackTime;
+        _attackNumF = entityData.AttackNum;
     }
 
     protected virtual void FixedUpdate()

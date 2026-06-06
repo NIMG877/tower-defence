@@ -108,14 +108,14 @@ public class CharacterCardManager
             skillImg.enabled = true;
             name.enabled = true;
             EntityData characterData = _characterOwn[characterID];
-            int index = characterData.character_rarity - 1;
+            int index = characterData.CharacterRarity - 1;
             bk.sprite = _bk[index];
-            photo.sprite = characterData.halfbodyImg;
+            photo.sprite = characterData.HalfBodyImage;
             light.sprite = _light[index];
             lh.sprite = _lh[index];
             uh.sprite = _uh[index];
-            classImg.sprite = _class[characterData.character_job];
-            Skill[] skills = characterData.prefab.GetComponents<Skill>();
+            classImg.sprite = _class[characterData.CharacterJob];
+            Skill[] skills = characterData.Prefab.GetComponents<Skill>();
             if (skills.Length > 0)
             {
                 skillImg.sprite = skills[0].SkillImg;
@@ -136,14 +136,14 @@ public class CharacterCardManager
             if (_characterOwn.ContainsKey(characterId))
             {
                 CharacterCardElements card = new CharacterCardElements(Object.Instantiate(_cardForbidNullPrefab, toTransform));
-                int index = _characterOwn[characterId].character_rarity - 1;
+                int index = _characterOwn[characterId].CharacterRarity - 1;
                 card.Bk.sprite = _bk[index];
-                card.Photo.sprite = _characterOwn[characterId].halfbodyImg;
+                card.Photo.sprite = _characterOwn[characterId].HalfBodyImage;
                 card.Light.sprite = _light[index];
                 card.Lh.sprite = _lh[index];
                 card.Uh.sprite = _uh[index];
-                card.ClassImg.sprite = _class[_characterOwn[characterId].character_job];
-                Skill[] skills = _characterOwn[characterId].prefab.GetComponents<Skill>();
+                card.ClassImg.sprite = _class[_characterOwn[characterId].CharacterJob];
+                Skill[] skills = _characterOwn[characterId].Prefab.GetComponents<Skill>();
                 if (skills.Length > 0)
                 {
                     card.SkillImg.sprite = skills[0].SkillImg;
@@ -168,7 +168,7 @@ public class CharacterCardManager
     }
     public void ResetCardForbidNullSkill(EntityID characterId)
     {
-        Skill[] skills = _characterOwn[characterId].prefab.GetComponents<Skill>();
+        Skill[] skills = _characterOwn[characterId].Prefab.GetComponents<Skill>();
         if (skills.Length > 0)
         {
             _cardsForbidNull[characterId].SkillImg.sprite = skills[0].SkillImg;

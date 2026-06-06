@@ -56,8 +56,9 @@ namespace MyUI
         }
         public void UpdateCharacterTab()
         {
-            var team = SaveSystem.GetTeam(_teamName);
-            _selectedCharacter = team != null ? team.members.ToArray() : new EntityID[0];
+            var members = SaveSystem.GetTeamMembers(_teamName);
+            _selectedCharacter = new EntityID[members.Count];
+            for (int i = 0; i < _selectedCharacter.Length; i++) _selectedCharacter[i] = members[i];
             for (int i = 0; i < _selectedCharacter.Length; i++)
             {
                 CharacterCardManager.cardManager.SetCharacterCardAllowNull(_characterTabs[i], _selectedCharacter[i]);

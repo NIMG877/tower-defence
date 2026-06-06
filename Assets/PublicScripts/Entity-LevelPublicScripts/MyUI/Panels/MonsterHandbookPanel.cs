@@ -25,7 +25,7 @@ namespace MyUI
         }
         private ScrollRect _monsterList;
         private Image[] _images;
-        private EntityData[] _monsterDatas;
+        private IReadOnlyList<EntityData> _monsterDatas;
         private float _cellHeight, _cellSpace, _viewHeight, _canScrollHeight;
         private int _totalLineNum, _currentMaxLineNum, _onePageLineNum, _colNum, _currentSelectSerial;
         private TextMeshProUGUI _labelText, _nameText, _idText, _massText, _descriptionText, _skillDescriptionText, _talentDescription;
@@ -79,7 +79,7 @@ namespace MyUI
         private void ResetMonsterList()
         {
             _currentMaxLineNum = _onePageLineNum;
-            int totalNum = _monsterDatas.Length;
+            int totalNum = _monsterDatas.Count;
             _totalLineNum = (int)Math.Ceiling(totalNum / (float)_colNum);
             Vector2 size = _monsterList.content.sizeDelta;
             size.y = _cellHeight * _totalLineNum + _cellSpace * (_totalLineNum - 1);
@@ -87,7 +87,7 @@ namespace MyUI
             int minttH = Math.Min(totalNum, _images.Length);
             for (int i = 0; i < minttH; i++)
             {
-                _images[i].sprite = _monsterDatas[i].headImg;
+                _images[i].sprite = _monsterDatas[i].HeadImage;
                 _images[i].gameObject.SetActive(true);
             }
             for (int i = minttH; i < _images.Length; i++)
@@ -151,10 +151,10 @@ namespace MyUI
             {
                 _images[i + _imagesL - _colNum] = images[i];
             }
-            int m = Math.Min(_currentMaxLineNum * _colNum + _colNum, _monsterDatas.Length);
+            int m = Math.Min(_currentMaxLineNum * _colNum + _colNum, _monsterDatas.Count);
             for (int i = _currentMaxLineNum * _colNum; i < m; i++)
             {
-                images[i - _currentMaxLineNum * _colNum].sprite = _monsterDatas[i].headImg;
+                images[i - _currentMaxLineNum * _colNum].sprite = _monsterDatas[i].HeadImage;
             }
             for (int i = m; i < _currentMaxLineNum * _colNum + _colNum; i++)
             {
@@ -192,7 +192,7 @@ namespace MyUI
             }
             for (int i = (_currentMaxLineNum - _onePageLineNum) * _colNum; i < (_currentMaxLineNum - _onePageLineNum) * _colNum + _colNum; i++)
             {
-                images[i - (_currentMaxLineNum - _onePageLineNum) * _colNum].sprite = _monsterDatas[i].headImg;
+                images[i - (_currentMaxLineNum - _onePageLineNum) * _colNum].sprite = _monsterDatas[i].HeadImage;
                 images[i - (_currentMaxLineNum - _onePageLineNum) * _colNum].gameObject.SetActive(true);
             }
         }
@@ -202,18 +202,18 @@ namespace MyUI
             {
                 _currentSelectSerial = monsterAttributeIndex;
                 EntityData monsterData = _monsterDatas[monsterAttributeIndex];
-                _radarDataController.Set6Data(new float[6] { monsterData.maxHP, monsterData.attack, 1 / monsterData.baseAttackTime, monsterData.defence, monsterData.magicResistance, monsterData.moveSpeed });
-                _labelText.text = monsterData.monster_label;
+                _radarDataController.Set6Data(new float[6] { monsterData.MaxHp, monsterData.Attack, 1 / monsterData.BaseAttackTime, monsterData.Defense, monsterData.MagicResistance, monsterData.MoveSpeed });
+                _labelText.text = monsterData.MonsterLabel;
                 _nameText.text = monsterData.ChineseName;
                 _idText.text = $"{monsterData.ID.ID_C}-{monsterData.ID.ID_N}";
-                _massText.text = "���� " + monsterData.massLevel.ToString();
-                _descriptionText.text = monsterData.description;
-                _headImg.sprite = monsterData.headImg;
-                if (monsterData.monster_status == 0)
+                _massText.text = "���� " + monsterData.MassLevel.ToString();
+                _descriptionText.text = monsterData.Description;
+                _headImg.sprite = monsterData.HeadImage;
+                if (monsterData.MonsterStatus == 0)
                 {
                     _elitorbossImg.enabled = false;
                 }
-                else if (monsterData.monster_status == 1)
+                else if (monsterData.MonsterStatus == 1)
                 {
                     _elitorbossImg.sprite = _elitSprite;
                     _elitorbossImg.enabled = true;
@@ -228,8 +228,8 @@ namespace MyUI
                 float space = 5;
                 _descriptionText.rectTransform.sizeDelta = new Vector2(_descriptionText.rectTransform.sizeDelta.x, desHeight);
                 float ch = desHeight + space;
-                Skill[] skills = monsterData.prefab.GetComponents<Skill>();
-                Talent[] talents = monsterData.prefab.GetComponents<Talent>();
+                Skill[] skills = monsterData.Prefab.GetComponents<Skill>();
+                Talent[] talents = monsterData.Prefab.GetComponents<Talent>();
                 if (skills.Length > 0)
                 {
                     _skillDescriptionText.text = "�� " + skills[0].SkillDescription;

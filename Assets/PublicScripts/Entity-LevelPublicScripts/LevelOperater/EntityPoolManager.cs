@@ -15,7 +15,7 @@ public class EntityPool
         count = Math.Min(10, count);
         Id=id;
         EntityData = GameDataService.EntityRepository.Get(id);
-        isStatic = EntityData.prefab.TryGetComponent(out StaticEntityAttributes sa);
+        isStatic = EntityData.Prefab.TryGetComponent(out StaticEntityAttributes sa);
         entity_pool = entity_p;
         inp_entities = new List<Entity>(count);
         for (int i = 0; i < count; i++)
@@ -25,7 +25,7 @@ public class EntityPool
     }
     private Entity CreateNewEntity()
     {
-        GameObject gameObject = UnityEngine.Object.Instantiate(EntityData.prefab, entity_pool);
+        GameObject gameObject = UnityEngine.Object.Instantiate(EntityData.Prefab, entity_pool);
         gameObject.SetActive(false);
         if (isStatic)
             gameObject.AddComponent<InteractableStatic>();
@@ -121,8 +121,8 @@ public class EntityPoolManager : IManagerStartEnd
             void GenerateCanSpawnEntityPool(EntityID id)
             {
                 EntityData entityData = GameDataService.EntityRepository.Get(id);
-                var rIdList = entityData.canSpawnEntityID_L;
-                var rNum = entityData.canSpawnEntityNum_L;
+                var rIdList = entityData.CanSpawnEntityIds;
+                var rNum = entityData.CanSpawnEntityCounts;
                 for (int j = 0; j < rIdList.Count; j++)
                 {
                     EntityPool rEP = FetchEntityPool(rIdList[j]);

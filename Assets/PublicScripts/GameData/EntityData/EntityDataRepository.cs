@@ -2,61 +2,61 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// 实体数据仓库：在 <see cref="EntityData"/> 数组上构建两个索引（精确查 + 切片查），提供 O(1) 查询。
-/// 由 <see cref="GameDataService"/> 持有，调用方通过 <c>GameDataService.Instance.EntityRepository</c> 访问。
+/// 实体数据仓库：在 <see cref="EntityData"/> 集合上构建两个索引（精确查 + 分类查），提供 O(1) 查询。
+/// 由 <see cref="GameDataService"/> 持有，调用方通过 <c>GameDataService.EntityRepository</c> 访问。
 ///
 /// 设计要点：
 /// - 数据形状（<see cref="EntityData"/>）与 SO（<see cref="EntityDataCollection"/>）分离后，Repository 是唯一的查询入口
 /// - 懒构建：第一次访问 <c>EntityRepository</c> 时构建索引；之后 O(1) 查询
 /// - 单次扫描同时建两个索引，构建复杂度 O(n)
+/// - 分类索引不假设 DTO 排序：按 DTO 原序建 <c>List&lt;EntityData&gt;</c>，对 <c>xlsx2json.py</c> 的输出顺序无要求
 /// </summary>
 public class EntityDataRepository
 {
-    readonly EntityData[] _all;
-    readonly Dictionary<string, (int left, int right)> _classRange;  // 闭区间 [left, right]
-    readonly Dictionary<EntityID, int> _byId;                        // 精确查找
+    readonly Dictionary<EntityID, EntityData> _byId;
+    readonly Dictionary<string, List<EntityData>> _byCategory;
 
-    /// <summary>从原始数组构建仓库。同时建立分类区间索引和精确 ID 索引。</summary>
-    public static EntityDataRepository Build(EntityData[] source)
+    /// <summary>从原始数组构建仓库。同时建立分类索引和精确 ID 索引。</summary>
+    public static EntityDataRepository Build(IReadOnlyList<EntityData> source)
     {
-        if (source == null) source = Array.Empty<EntityData>();
-        var byId  = new Dictionary<EntityID, int>(source.Length);
-        var range = new Dictionary<string, (int left, int right)>();
-        for (int i = 0; i < source.Length; i++)
+        var byId = new Dictionary<EntityID, EntityData>();
+        var byCategory = new Dictionary<string, List<EntityData>>();
+        if (source != null)
         {
-            byId[source[i].ID] = i;
-            if (range.TryGetValue(source[i].ID.ID_C, out var r))
-                range[source[i].ID.ID_C] = (r.left, i);
-            else
-                range[source[i].ID.ID_C] = (i, i);
+            for (int i = 0; i < source.Count; i++)
+            {
+                var d = source[i];
+                byId[d.ID] = d;
+                if (!byCategory.TryGetValue(d.ID.ID_C, out var list))
+                {
+                    list = new List<EntityData>();
+                    byCategory[d.ID.ID_C] = list;
+                }
+                list.Add(d);
+            }
         }
-        return new EntityDataRepository(source, range, byId);
+        return new EntityDataRepository(byId, byCategory);
     }
 
     private EntityDataRepository(
-        EntityData[] all,
-        Dictionary<string, (int left, int right)> classRange,
-        Dictionary<EntityID, int> byId)
+        Dictionary<EntityID, EntityData> byId,
+        Dictionary<string, List<EntityData>> byCategory)
     {
-        _all = all;
-        _classRange = classRange;
         _byId = byId;
+        _byCategory = byCategory;
     }
 
-    public int Count => _all.Length;
+    /// <summary>实体总数（精确 ID 索引的 size）。</summary>
+    public int Count => _byId.Count;
 
     /// <summary>按精确 ID 查询。找不到返回 <c>default(EntityData)</c>（所有字段为零值）。</summary>
     public EntityData Get(EntityID id)
-        => _byId.TryGetValue(id, out var i) ? _all[i] : default;
+        => _byId.TryGetValue(id, out var d) ? d : default;
 
-    /// <summary>按分类查询（返回该分类下所有实体的副本数组）。找不到返回空数组。</summary>
-    public EntityData[] GetByCategory(string idC)
+    /// <summary>按分类查询（只读列表，避免外部 mutation 索引）。找不到返回空数组。</summary>
+    public IReadOnlyList<EntityData> GetByCategory(string idC)
     {
         if (string.IsNullOrEmpty(idC)) return Array.Empty<EntityData>();
-        if (!_classRange.TryGetValue(idC, out var r)) return Array.Empty<EntityData>();
-        var len = r.right - r.left + 1;
-        var dst = new EntityData[len];
-        Array.Copy(_all, r.left, dst, 0, len);
-        return dst;
+        return _byCategory.TryGetValue(idC, out var list) ? list : Array.Empty<EntityData>();
     }
 }

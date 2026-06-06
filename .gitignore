@@ -97,6 +97,7 @@ Desktop.ini
 /Assets/DataTools/
 /Assets/Scenes/
 /Assets/Resources/
+
 # ========== 必须保留的（不要忽略） ==========
 # 这些不需要写规则，因为默认就是被跟踪的，但要确认没被上面的规则误伤：
 #   - *.cs 及其 .meta

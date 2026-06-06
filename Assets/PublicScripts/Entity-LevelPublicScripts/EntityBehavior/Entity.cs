@@ -181,20 +181,20 @@ public class Entity : MonoBehaviour, IPoolOperation
     private void AttributesCaculateFirst()
     {
         print($"EntityData.ID: {EntityData.ID}");
-        print(EntityData.visionRange_L);
-        _visionRangeF = new (int x, int y)[EntityData.visionRange_L.Count];   // EntityData.visionRange_L 改为 List<Vector2Int> 后：.Length → .Count
+        print(EntityData.VisionRange);
+        _visionRangeF = new (int x, int y)[EntityData.VisionRange.Count];   // EntityData.VisionRange 改为 List<Vector2Int> 后：.Length → .Count
         for (int i = 0; i < _visionRangeF.Length; i++)
         {
-            _visionRangeF[i] = (EntityData.visionRange_L[i].x, EntityData.visionRange_L[i].y);
+            _visionRangeF[i] = (EntityData.VisionRange[i].x, EntityData.VisionRange[i].y);
         }
-        _visionRadiusF = EntityData.visionRadius;
-        max_hp_first = EntityData.maxHP;
-        def_first = EntityData.defence;
-        magic_resistance_first = EntityData.magicResistance;
-        _phDoge_first = EntityData.physicalDoge;
-        _mgDoge_first = EntityData.magicResistance;
-        block_occupation_first = EntityData.blockOccupation;
-        taunt_level_first = EntityData.tauntLevel;
+        _visionRadiusF = EntityData.VisionRadius;
+        max_hp_first = EntityData.MaxHp;
+        def_first = EntityData.Defense;
+        magic_resistance_first = EntityData.MagicResistance;
+        _phDoge_first = EntityData.PhysicalDodge;
+        _mgDoge_first = EntityData.MagicResistance;
+        block_occupation_first = EntityData.BlockOccupation;
+        taunt_level_first = EntityData.TauntLevel;
     }
     private void AttributesCaculateSecond()
     {

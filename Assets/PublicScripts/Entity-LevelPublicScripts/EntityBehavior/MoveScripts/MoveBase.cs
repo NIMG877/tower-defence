@@ -122,8 +122,8 @@ public class MoveBase : MonoBehaviour, IPoolOperation
                 Vector2 originPos = _thisEntity.EntityPosition;
                 _thisEntity.EntityPosition = _thisEntity.EntityPosition + (_unBalancedMoveSpeed - _unBalancedMoveSpeed.normalized * 0.5f * MIU_G * Time.fixedDeltaTime) * Time.fixedDeltaTime;
                 _unBalancedMoveSpeed -= _unBalancedMoveSpeed.normalized * MIU_G * Time.fixedDeltaTime;
-                int xConstrain = 0;//-1：高台在实体左边，1：高台在实体右边
-                int yConstrain = 0;//-1：高台在实体下边，1：高台在实体上边
+                int xConstrain = 0;//-1台实撸1台实冶
+                int yConstrain = 0;//-1台实卤撸1台实媳
                 (int x, int y) xyConstrain = (0, 0);
                 (int i, int j) pos = ((int)(originPos.y + 0.5), (int)(originPos.x + 0.5));
                 for (int i = 0; i < _thisEntity.InBlocks.Length; i++)
@@ -290,7 +290,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
         }
         else
         {
-            Debug.LogError("未绑定实体属性");
+            Debug.LogError("未实");
             return;
         }
     }
@@ -303,7 +303,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
     public void Dormancy()
     {
         _unBalancedMoveSpeed = Vector2.zero;
-        if (_thisEntity.EntityData.monster_countOperated)
+        if (_thisEntity.EntityData.MonsterCountOperated)
         {
             LevelRescurceManager.Manager.CurrentOperateCount += 1;
         }

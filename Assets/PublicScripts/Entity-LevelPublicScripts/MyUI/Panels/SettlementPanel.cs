@@ -93,13 +93,13 @@ namespace MyUI
             normalState.gameObject.SetActive(true);
             pullState.gameObject.SetActive(false);
             levelName.text = _levelName;
-            accomplishState.text = _win ? "行动成功" : "行动失败";
+            accomplishState.text = _win ? "卸晒" : "卸失";
             timer.text = _timer.ToString("0.0");
             if (_damageStatisticDatas != null)
             {
                 for (int i = 0; i < _damageStatisticDatas.Length; i++)
                 {
-                    characterImages[i].sprite = CharacterCardManager.cardManager.GetCharacterAttribute(_damageStatisticDatas[i].CharacterID).headImg;
+                    characterImages[i].sprite = CharacterCardManager.cardManager.GetCharacterAttribute(_damageStatisticDatas[i].CharacterID).HeadImage;
                     characterImages[i].transform.parent.gameObject.SetActive(true);
                 }
                 for (int i = _damageStatisticDatas.Length; i < characterImages.Length; i++)
@@ -114,7 +114,7 @@ namespace MyUI
             EntityData entityAttributes = CharacterCardManager.cardManager.GetCharacterAttribute(damageStatisticData.CharacterID);
             normalState.gameObject.SetActive(false);
             pullState.gameObject.SetActive(true);
-            tImg.sprite = entityAttributes.wholeImg;
+            tImg.sprite = entityAttributes.WholeImage;
             characterName.text = entityAttributes.ChineseName;
             if (damageStatisticData.Td > 0)
             {

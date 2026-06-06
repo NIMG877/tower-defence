@@ -52,7 +52,7 @@ public static class StaticDataValidator
                 issues.Add($"index {i}: duplicate ID {key}");
 
             // 3. prefab 引用（角色/怪物必须有 prefab）
-            if (d.prefab == null)
+            if (d.Prefab == null)
                 nullPrefabCount++;
         }
 
@@ -61,8 +61,8 @@ public static class StaticDataValidator
         for (int i = 0; i < data.Length; i++)
         {
             var d = data[i];
-            if (d.canSpawnEntityID_L == null) continue;
-            foreach (var spawnId in d.canSpawnEntityID_L)
+            if (d.CanSpawnEntityIds == null) continue;
+            foreach (var spawnId in d.CanSpawnEntityIds)
             {
                 if (string.IsNullOrEmpty(spawnId.ID_C)) continue;
                 var spawnKey = $"{spawnId.ID_C}-{spawnId.ID_N}";

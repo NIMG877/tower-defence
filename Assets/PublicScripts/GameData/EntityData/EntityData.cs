@@ -6,77 +6,80 @@ using UnityEngine;
 /// 单个实体的全部静态数据（角色属性 / 怪物属性 / 塔属性 / 召唤物属性）。
 /// 由 <see cref="EntityDataCollection"/>（ScriptableObject）持有、由 <see cref="EntityDataRepository"/> 提供查询。
 /// 全局命名空间，跨层共享（可被存档、网络包、测试夹具复用）。
+///
+/// 命名约定：公开字段 PascalCase；类型为 <c>class</c>（引用语义），默认值为 <c>null</c>。
+/// 内部 List 字段在反序列化后由 Unity 填充，运行时访问前需确认已初始化。
 /// </summary>
 [Serializable]
-public struct EntityData
+public class EntityData
 {
     // 身份
     public EntityID ID;
     public string ChineseName;
     public string EnglishName;
-    public string description;
+    public string Description;
 
     // 美术资源
-    public GameObject prefab;
-    public Sprite headImg;
-    public Sprite halfbodyImg;
-    public Sprite wholeImg;
+    public GameObject Prefab;
+    public Sprite HeadImage;
+    public Sprite HalfBodyImage;
+    public Sprite WholeImage;
 
     // 角色属性（当 entity 是 "c" 类别时使用）
-    public int    character_rarity;
-    public string character_influence;
-    public int    character_job;          // 0=先锋,1=近卫,...,9=_
-    public string character_subjob;
+    public int    CharacterRarity;
+    public string CharacterInfluence;
+    public int    CharacterJob;          // 0=先锋,1=近卫,...,9=_
+    public string CharacterSubJob;
 
     // 怪物属性（当 entity 是 "m" 类别时使用）
-    public int    monster_status;
-    public string monster_label;
-    public bool   monster_isPrimary;
-    public bool   monster_countOperated;
-    public int    monster_levelHPConsume;
+    public int    MonsterStatus;
+    public string MonsterLabel;
+    public bool   MonsterIsPrimary;
+    public bool   MonsterCountOperated;
+    public int    MonsterLevelHpConsume;
 
     // 战斗属性
-    public List<Vector2Int> visionRange_L;
-    public float visionRadius;
-    public float attack;
-    public float baseAttackTime;
-    public int   attackNum;
-    public int   damageType;            // 0=物伤,1=法伤,...
-    public float maxHP;
-    public float defence;
-    public float magicResistance;
-    public float physicalDoge;
-    public float magicDoge;
-    public int   blockOccupation;
-    public int   tauntLevel;
-    public int   defaultCamp;
+    public List<Vector2Int> VisionRange;
+    public float VisionRadius;
+    public float Attack;
+    public float BaseAttackTime;
+    public int   AttackNum;
+    public int   DamageType;            // 0=物伤,1=法伤,...
+    public float MaxHp;
+    public float Defense;
+    public float MagicResistance;
+    public float PhysicalDodge;
+    public float MagicDodge;
+    public int   BlockOccupation;
+    public int   TauntLevel;
+    public int   DefaultCamp;
 
     // 免疫
-    public bool stunImmune;
-    public bool silenceImmune;
-    public bool sleepImmune;
-    public bool frozenImmune;
-    public bool levitateImmune;
-    public bool disarmedCombatImmune;
-    public bool fearedImmune;
+    public bool StunImmune;
+    public bool SilenceImmune;
+    public bool SleepImmune;
+    public bool FrozenImmune;
+    public bool LevitateImmune;
+    public bool DisarmedCombatImmune;
+    public bool FearedImmune;
 
     // 召唤
-    public List<EntityID> canSpawnEntityID_L;
-    public List<int>      canSpawnEntityNum_L;
+    public List<EntityID> CanSpawnEntityIds;
+    public List<int>      CanSpawnEntityCounts;
 
     // 部署
-    public int   cost;
-    public bool  canCallBack;
-    public bool  needSelectDirection;
-    public int   canSetType;
-    public float respawnTime;
-    public int   respawnStrategy;       // 0=默认,1=唯一,2=禁用,3=_
-    public bool  canRespawn;
-    public float respawnCostUp;
-    public int   canSetNumOccupy;
+    public int   Cost;
+    public bool  CanCallBack;
+    public bool  NeedsDirectionSelection;
+    public int   CanSetType;
+    public float RespawnTime;
+    public int   RespawnStrategy;       // 0=默认,1=唯一,2=禁用,3=_
+    public bool  CanRespawn;
+    public float RespawnCostUp;
+    public int   MaxOccupyCount;
 
     // 移动
-    public float moveSpeed;
-    public int   massLevel;
-    public int   moveMethod;
+    public float MoveSpeed;
+    public int   MassLevel;
+    public int   MoveMethod;
 }

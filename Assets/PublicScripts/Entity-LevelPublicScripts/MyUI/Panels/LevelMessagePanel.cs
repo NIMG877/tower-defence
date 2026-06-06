@@ -82,8 +82,8 @@ namespace MyUI
                 else
                     _countText.text = "";
                 Selector.gameObject.SetActive(true);
-                _photoImage.sprite = StaticEntityData.headImg;
-                _classImage.sprite = Panel._professionsSmall[StaticEntityData.character_job];
+                _photoImage.sprite = StaticEntityData.HeadImage;
+                _classImage.sprite = Panel._professionsSmall[StaticEntityData.CharacterJob];
         
         
                 _event.triggers.Clear();
@@ -149,19 +149,19 @@ namespace MyUI
             }
             public int CaculateCost()
             {
-                if (StaticEntityData.respawnCostUp>0)
+                if (StaticEntityData.RespawnCostUp>0)
                 {
                     if (_placeTime == 0)
                     {
-                        return StaticEntityData.cost;
+                        return StaticEntityData.Cost;
                     }
                     if (_placeTime == 1)
                     {
-                        return (int)(StaticEntityData.cost * (1+StaticEntityData.respawnCostUp/100));
+                        return (int)(StaticEntityData.Cost * (1+StaticEntityData.RespawnCostUp/100));
                     }
-                    return (int)(StaticEntityData.cost * (1+StaticEntityData.respawnCostUp/100)*((1+StaticEntityData.respawnCostUp/100)));
+                    return (int)(StaticEntityData.Cost * (1+StaticEntityData.RespawnCostUp/100)*((1+StaticEntityData.RespawnCostUp/100)));
                 }
-                return StaticEntityData.cost;
+                return StaticEntityData.Cost;
             }
             public void DeltaNum(int delta)
             {
@@ -207,7 +207,7 @@ namespace MyUI
             {
                 DeltaNum(-setNum);
                 _placeTime++;
-                if (StaticEntityData.respawnStrategy == 0 || (StaticEntityData.respawnStrategy == 2 && _leftNum == 0))
+                if (StaticEntityData.RespawnStrategy == 0 || (StaticEntityData.RespawnStrategy == 2 && _leftNum == 0))
                 {
                     RespawnTiming();
                 }
@@ -215,14 +215,14 @@ namespace MyUI
             public void CallBackNum(int callBackNum)
             {
                 DeltaNum(callBackNum);
-                if (StaticEntityData.respawnStrategy == 1)
+                if (StaticEntityData.RespawnStrategy == 1)
                 {
                     RespawnTiming();
                 }
             }
             public async void RespawnTiming()
             {
-                float tt = StaticEntityData.respawnTime;
+                float tt = StaticEntityData.RespawnTime;
                 _respawnTimer = tt;
                 _respawn.SetActive(true);
                 while (_respawnTimer > 0)
@@ -248,7 +248,7 @@ namespace MyUI
             {
                 int cost = CaculateCost();
                 _costText.text = cost.ToString();
-                if (_respawnTimer <= 0 && cost <= LevelRescurceManager.Manager.CostMessage.currentCost && LevelRescurceManager.Manager.CanSetNumLeft - StaticEntityData.canSetNumOccupy >= 0)
+                if (_respawnTimer <= 0 && cost <= LevelRescurceManager.Manager.CostMessage.currentCost && LevelRescurceManager.Manager.CanSetNumLeft - StaticEntityData.MaxOccupyCount >= 0)
                 {
                     _canSet = true;
                     _photoImage.color = Color.white;
@@ -396,7 +396,7 @@ namespace MyUI
             //             EntityData entityData;
             //             if (_selectedStaticEntityData != null && _selectedStaticEntity.ID_C == null)
             //             {
-            //                 entityData = _selectedStaticEntityData.StaticEntityData.prefab.GetComponent<Entity>();
+            //                 entityData = _selectedStaticEntityData.StaticEntityData.Prefab.GetComponent<Entity>();
             //             }
             //             else if (_selectedStaticEntityData == null && _selectedStaticEntity.ID_C != null)
             //             {
@@ -789,14 +789,14 @@ namespace MyUI
         }
         public void EntityBackToSelector(Entity entityToBack)
         {
-            if (entityToBack.EntityData.canRespawn)
+            if (entityToBack.EntityData.CanRespawn)
             {
                 for (int i = 0; i < _placeDataList.Count; i++)
                 {
                     if (_placeDataList[i].StaticEntityData.ChineseName == entityToBack.NAME)
                     {
                         _placeDataList[i].CallBackNum(1);
-                        if (entityToBack.EntityData.respawnStrategy == 1)
+                        if (entityToBack.EntityData.RespawnStrategy == 1)
                         {
                             _placeDataList[i].RespawnTiming();
                         }
@@ -1025,9 +1025,9 @@ namespace MyUI
             //     EntityData entityData = GameDataService.EntityRepository.Get(entityID);
             //     
             //     SwitchShowSkillTalent(_currentShow, entity);
-            //     ShowAttackRangeAttributes(entityData.visionRange_L);
+            //     ShowAttackRangeAttributes(entityData.VisionRange);
             //     _name.text = entityData.ChineseName;
-            //     _class.sprite = _professionsLighten[entityData.character_job];
+            //     _class.sprite = _professionsLighten[entityData.CharacterJob];
             //     UIStates_Update_Leftmessage();
             // }
             // else
@@ -1754,7 +1754,9 @@ namespace MyUI
         public override void OnEnter()
         {
             base.OnEnter();
-            EntityID[] characters = (SaveSystem.GetTeam("Team1")?.members ?? new List<EntityID>()).ToArray();
+            var team1Members = SaveSystem.GetTeamMembers("Team1");
+            EntityID[] characters = new EntityID[team1Members.Count];
+            for (int i = 0; i < characters.Length; i++) characters[i] = team1Members[i];
             _characterChineseName = new string[characters.Length];
             _damageStatisticDatas = new DamageStatisticData[characters.Length];
             for (int i = 0; i < _damageStatisticDatas.Length; i++)
@@ -1766,7 +1768,7 @@ namespace MyUI
             int[] num = new int[characters.Length];
             for (int i = 0; i < characters.Length; i++)
             {
-                prefab[i] = CharacterCardManager.cardManager.GetCharacterAttribute(characters[i]).prefab;
+                prefab[i] = CharacterCardManager.cardManager.GetCharacterAttribute(characters[i]).Prefab;
                 num[i] = 1;
             }
             //=====================================================================================================================================

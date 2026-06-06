@@ -23,20 +23,16 @@ public static class GameDataService
 
     // 缓存
     static EntityDataCollection   _entityCollection;
-    static EntityDataRepository   _entityRepo;
     static IReadOnlyDictionary<string, string> _audioPaths;
 
-    /// <summary>实体数据仓库（懒构建 + 懒加载 SO）。</summary>
+    /// <summary>实体数据仓库（懒加载 SO；不缓存 Build 结果，17 条数据重建成本可忽略）</summary>
     public static EntityDataRepository EntityRepository
     {
         get
         {
-            if (_entityRepo != null) return _entityRepo;
             if (_entityCollection == null)
                 _entityCollection = Resources.Load<EntityDataCollection>(EntityCollectionPath);
-            var data = _entityCollection != null ? _entityCollection.EntityBasicDatas : null;
-            _entityRepo = EntityDataRepository.Build(data);
-            return _entityRepo;
+            return EntityDataRepository.Build(_entityCollection != null ? _entityCollection.EntityBasicDatas : null);
         }
     }
 
@@ -75,7 +71,6 @@ public static class GameDataService
     public static void ResetCache()
     {
         _entityCollection = null;
-        _entityRepo = null;
         _audioPaths = null;
     }
 }
