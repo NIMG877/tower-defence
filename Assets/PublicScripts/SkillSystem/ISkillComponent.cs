@@ -15,14 +15,6 @@ namespace SkillSystem
         public GameObject tempContainer;       // for spawn effects
     }
 
-    // PLACEHOLDER — replaced by Task 2.3's real implementation.
-    // Task 2.3 should DELETE this stub and provide the full SkillRuntime in its own file.
-    // Kept here so the project still compiles between Task 1.6 and Task 2.3.
-    public class SkillRuntime
-    {
-        public SkillConfig config;
-    }
-
     public interface ISkillComponent
     {
         void OnInit(SkillContext ctx, ParamList parameters);
