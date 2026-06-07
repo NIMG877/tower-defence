@@ -82,6 +82,7 @@ namespace SkillSystem
                     if (inst is ITickingComponent t) runtime.tickingComponents.Add(t);
                 }
             }
+            runtime.isInitialized = true;
             _skills.Add(runtime);
         }
 
