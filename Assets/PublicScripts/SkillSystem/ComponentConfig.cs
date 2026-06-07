@@ -70,4 +70,58 @@ namespace SkillSystem
             return defaultValue;
         }
     }
+
+    public enum TriggerEvent
+    {
+        OnPreWarm, OnInitialize,
+        OnBeforeAttack, OnAfterAttack,
+        OnBeforeTakeDamage, OnAfterTakeDamage,
+        OnAttackSuccessfully, OnAttackInterrupt,
+        OnBeforeHurt, OnAfterHurt,
+        OnAttackAnimBegin,
+        OnBeforeDieAnimation, OnDeath,
+        OnIntervalTick,
+        OnSkillBegin, OnSkillEnd,
+    }
+
+    public enum ConditionOp
+    {
+        None, Equal, NotEqual,
+        Greater, GreaterOrEqual, Less, LessOrEqual,
+        HasBuff, NotHasBuff,
+        IsInAbnormalState, NotInAbnormalState,
+        HasBlackboardKey, NotHasBlackboardKey,
+    }
+
+    [Serializable]
+    public class ConditionConfig
+    {
+        public TriggerEvent triggerEvent;
+        public ConditionOp op = ConditionOp.None;
+        public string leftKey;
+        public string rightValue;
+    }
+
+    [Serializable]
+    public class StageConfig
+    {
+        public string name;
+        public float enterDuration = -1f;
+        public ConditionConfig[] transitionOn = Array.Empty<ConditionConfig>();
+        public string nextStageOnTransition;
+        public ComponentConfig[] enterEffects = Array.Empty<ComponentConfig>();
+        public ComponentConfig[] tickEffects = Array.Empty<ComponentConfig>();
+        public ComponentConfig[] exitEffects = Array.Empty<ComponentConfig>();
+    }
+
+    // Stub: ComponentConfig added now. Other phases add the rest of the fields.
+    [Serializable]
+    public class ComponentConfig
+    {
+        public string componentType;
+        public ConditionConfig[] triggers = Array.Empty<ConditionConfig>();
+        public ParamList parameters = new ParamList();
+        public StageConfig[] stages; // optional, for StageStateMachine
+        public ComponentConfig[] subComponents; // optional, for wrapper components
+    }
 }
