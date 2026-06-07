@@ -12,6 +12,9 @@ namespace SkillSystem
         public bool isInitialized;
         public bool isActive; // true while skill is firing (SPEngine.IsActive)
 
+        public void OpenActiveWindow()  { isActive = true;  }
+        public void CloseActiveWindow() { isActive = false; }
+
         public SkillContext MakeContext(ISkillComponent component, SkillEvent evt = null)
         {
             return new SkillContext

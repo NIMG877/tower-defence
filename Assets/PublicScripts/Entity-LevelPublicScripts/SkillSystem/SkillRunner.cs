@@ -62,7 +62,9 @@ namespace SkillSystem
             var runtime = new SkillRuntime { config = cfg };
             if (cfg.sp != null && cfg.sp.totalSp > 0)
             {
-                runtime.spEngine = new SPEngine(cfg.sp, () => OnSkillFire(runtime));
+                runtime.spEngine = new SPEngine(cfg.sp);
+                runtime.spEngine.OnBegin += () => OnSkillBeginWindow(runtime);
+                runtime.spEngine.OnEnd   += () => OnSkillEndWindow(runtime);
             }
             if (cfg.components != null)
             {
@@ -86,10 +88,16 @@ namespace SkillSystem
             _skills.Add(runtime);
         }
 
-        private void OnSkillFire(SkillRuntime runtime)
+        private void OnSkillBeginWindow(SkillRuntime runtime)
         {
-            runtime.isActive = true;
-            DispatchToSkill(runtime, new SkillBeginEvent { skill = runtime });
+            runtime.OpenActiveWindow();
+            DispatchEvent(new SkillBeginEvent { skill = runtime });
+        }
+
+        private void OnSkillEndWindow(SkillRuntime runtime)
+        {
+            DispatchEvent(new SkillEndEvent { skill = runtime });
+            runtime.CloseActiveWindow();
         }
 
         private void Subscribe()
@@ -140,6 +148,7 @@ namespace SkillSystem
             for (int i = 0; i < _skills.Count; i++)
             {
                 var s = _skills[i];
+                if (!s.isActive) continue;
                 for (int c = 0; c < s.tickingComponents.Count; c++)
                 {
                     var ctx = s.MakeContext(s.tickingComponents[c], new IntervalTickEvent { dt = dt });
@@ -220,6 +229,16 @@ namespace SkillSystem
 
         private void DispatchToSkill(SkillRuntime s, SkillEvent evt, TriggerEvent te = TriggerEvent.OnInitialize)
         {
+            // Active-window gate: a skill's components only see events while the skill is firing,
+            // with these exceptions:
+            //   - SkillBeginEvent / SkillEndEvent are always dispatched (they are the mechanism that flips isActive)
+            //   - DeathEvent / BeforeDieAnimationEvent are always dispatched (death is global; cannot be stranded by a closed window)
+            bool alwaysDispatch = evt is SkillBeginEvent
+                               || evt is SkillEndEvent
+                               || evt is DeathEvent
+                               || evt is BeforeDieAnimationEvent;
+            if (!s.isActive && !alwaysDispatch) return;
+
             for (int i = 0; i < s.components.Count; i++)
             {
                 var comp = s.components[i];

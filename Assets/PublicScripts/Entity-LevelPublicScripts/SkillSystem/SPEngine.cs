@@ -5,7 +5,6 @@ namespace SkillSystem
     public class SPEngine
     {
         private readonly SPConfig _cfg;
-        private readonly Action _onFire;
         private float _currentSp;
         private int _currentCharge;
         private float _currentDuration;
@@ -13,15 +12,19 @@ namespace SkillSystem
         private int _recoverForbid;
         private bool _wasFiredThisTick;
 
+        /// <summary>Fires when the skill begins (after charge consumed, before any duration consume).</summary>
+        public event Action OnBegin;
+        /// <summary>Fires when the skill ends, either via duration expiry or instant-fire path.</summary>
+        public event Action OnEnd;
+
         public float CurrentSp => _currentSp;
         public int CurrentCharge => _currentCharge;
         public bool IsActive => _isActive;
         public bool IsRecoverForbidden => _recoverForbid > 0;
 
-        public SPEngine(SPConfig cfg, Action onFire)
+        public SPEngine(SPConfig cfg)
         {
             _cfg = cfg ?? new SPConfig();
-            _onFire = onFire ?? (() => { });
             _currentSp = _cfg.initialSp;
             _currentCharge = 0;
             _currentDuration = 0f;
@@ -95,9 +98,10 @@ namespace SkillSystem
             else _currentSp = 0f;
             _isActive = true;
             if (_cfg.skillDuration > 0f) _currentDuration = _cfg.skillDuration;
-            else { _isActive = false; _wasFiredThisTick = true; }
+            _wasFiredThisTick = true;
             if (_cfg.recoverForbidDuringSkill) _recoverForbid++;
-            _onFire();
+            OnBegin?.Invoke();
+            if (_cfg.skillDuration <= 0f) EndSkill();
         }
 
         public void EndSkill()
@@ -106,6 +110,7 @@ namespace SkillSystem
             _isActive = false;
             _currentDuration = 0f;
             if (_cfg.recoverForbidDuringSkill && _recoverForbid > 0) _recoverForbid--;
+            OnEnd?.Invoke();
         }
 
         public void SetRecoverForbid(bool forbid)
