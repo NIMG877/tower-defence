@@ -87,16 +87,18 @@ They happen to have the same lifetime for non-instant skills, but for instant sk
 
 ### `SkillRuntime` (Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/SkillRuntime.cs)
 
-Add:
+**Note**: A `public bool isActive` field already exists at line 13 with the comment "true while skill is firing (SPEngine.IsActive)", and `SkillRunner.OnSkillFire` already sets it to `true` and dispatches `SkillBeginEvent` (lines 89–93). This is a half-implementation. The work to complete it:
 
-```csharp
-public bool isActive;
+- Add helper methods (optional but recommended for symmetry with the new `OnBegin`/`OnEnd` flow):
 
-public void OpenActiveWindow()  { isActive = true;  }
-public void CloseActiveWindow() { isActive = false; }
-```
+  ```csharp
+  public void OpenActiveWindow()  { isActive = true;  }
+  public void CloseActiveWindow() { isActive = false; }
+  ```
 
-These are called by `SkillRunner` in response to `SPEngine.OnBegin` / `OnEnd`.
+- Wire `CloseActiveWindow()` into the new "skill ended" event flow (the close path is the missing half). `OpenActiveWindow()` already happens via the existing `OnSkillFire`; we will move it to the new `OnBegin` path for symmetry.
+
+The field itself is the one already declared; no new field needed.
 
 ### `SkillRunner` (Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/SkillRunner.cs)
 
@@ -212,8 +214,8 @@ Existing `AttackBoostComponentTests`, `ApplyBuffComponentTests`, etc. should con
 | File | Change |
 |---|---|
 | `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/SPEngine.cs` | Add `OnBegin`/`OnEnd` events; rewrite `FireSkill`/`EndSkill` |
-| `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/SkillRuntime.cs` | Add `isActive` field + `OpenActiveWindow`/`CloseActiveWindow` methods |
-| `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/SkillRunner.cs` | Subscribe to SPEngine events; add `OnSkillBeginWindow`/`OnSkillEndWindow`; gate `DispatchToSkill` and `FixedUpdate` tick loop |
+| `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/SkillRuntime.cs` | Field `isActive` already exists; add `OpenActiveWindow`/`CloseActiveWindow` helpers (optional symmetry) |
+| `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/SkillRunner.cs` | Move open-window logic from `OnSkillFire` to a new `OnSkillBeginWindow` (subscribed via `SPEngine.OnBegin`); add `OnSkillEndWindow`; gate `DispatchToSkill` and `FixedUpdate` tick loop |
 | `Assets/Tests/SkillSystem/SkillRuntimeWindowTests.cs` | New test file (8 tests) |
 
 ## Out of Scope
