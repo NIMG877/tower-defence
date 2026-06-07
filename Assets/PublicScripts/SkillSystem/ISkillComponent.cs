@@ -32,4 +32,13 @@ namespace SkillSystem
     }
 
     public interface ITickingComponent : ISkillComponent { }
+
+    public static class SkillSystemBootstrap
+    {
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        public static void Init()
+        {
+            ComponentAutoRegistry.EnsureRegistered();
+        }
+    }
 }
