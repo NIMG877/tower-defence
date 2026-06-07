@@ -41,7 +41,7 @@ public class EntityManager : IManagerStartEnd
             bool[,] se = new bool[_iSize, _jSize];
             for (int i = 0; i < _staticEntities.Count; i++)
             {
-                Vector2 pos = _staticEntities[i].EntityPosition;
+                Vector2 pos = _staticEntities[i].Movement.Position;
                 se[(int)(pos.y + 0.5), (int)(pos.x + 0.5)] = true;
             }
             return se;
@@ -273,8 +273,8 @@ public class EntityManager : IManagerStartEnd
             for (int jndex = 0; jndex < entities.Count; jndex++)
             {
                 Entity entity = entities[jndex];
-                if (entity.participateIn
-                    && (force || (entity.selectable == 0 && ((!entity.isolate && sameCamp) || (!entity.dormant && !sameCamp))))
+                if (entity.Stats.IsActive
+                    && (force || (entity.Stats.Selectable == 0 && ((!entity.Stats.IsIsolated && sameCamp) || (!entity.Stats.IsDormant && !sameCamp))))
                     && Mathf.Abs(entity.transform.position.x - range[index].x) <= square_l
                     && Mathf.Abs(entity.transform.position.y - range[index].y) <= square_l
                     && !list.Contains(entity))
@@ -319,8 +319,8 @@ public class EntityManager : IManagerStartEnd
             for (int i = 0; i < entityList.Count; i++)
             {
                 Entity entity = entityList[i];
-                if (entity.participateIn
-                   && (force || (entity.selectable == 0 && ((!entity.isolate && sameCamp) || (!entity.dormant && !sameCamp))))
+                if (entity.Stats.IsActive
+                   && (force || (entity.Stats.Selectable == 0 && ((!entity.Stats.IsIsolated && sameCamp) || (!entity.Stats.IsDormant && !sameCamp))))
                    && (radius < 0 || Vector2.Distance(new Vector2(pos.x, pos.y), entity.transform.position) <= radius))
                 {
                     list.Add(entity);

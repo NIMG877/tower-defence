@@ -575,7 +575,7 @@ namespace MyUI
                     Vector2 clickBlock = _camera.ScreenToWorldPoint(Input.mousePosition);
                     (int i, int j) = ((int)(clickBlock.y + 0.5), (int)(clickBlock.x + 0.5));
                     _selectedEntity = EntityManager.Manager.GetStaticEntityInBlock(i, j);
-                    if (_selectedEntity != null && _selectedEntity.participateIn)
+                    if (_selectedEntity != null && _selectedEntity.Stats.IsActive)
                     {
                         UIStates_SwitchTo_ViewAfterSet(_selectedEntity);
                     }
@@ -846,14 +846,14 @@ namespace MyUI
                 _damageStatisticDatas[i] = new DamageStatisticData(characters[i], new float[3] { 0, 0, 0 }, new float[1] { 0 }, new float[3] { 0, 0, 0 });
                 _characterChineseName[i] = CharacterCardManager.cardManager.GetCharacterAttribute(characters[i]).ChineseName;
             }
-            GameObject[] prefab = new GameObject[characters.Length];
+            EntityData[] prefab = new EntityData[characters.Length];
             int[] num = new int[characters.Length];
             for (int i = 0; i < characters.Length; i++)
             {
-                prefab[i] = CharacterCardManager.cardManager.GetCharacterAttribute(characters[i]).Prefab;
+                prefab[i] = CharacterCardManager.cardManager.GetCharacterAttribute(characters[i]);
                 num[i] = 1;
             }
-            InitializeStaticEntityPrefabToSelector(prefab, num);
+            InitializeStaticEntityPrefabToSelector(characters, num);
             _currentUIState = UIState.normal;
             _leftmessageOpen = false;
             _operaterOpen = false;
@@ -1081,130 +1081,130 @@ namespace MyUI
         }
         private void UIStates_Update_Leftmessage()
         {
-            Entity entity;
-            bool isBefore;
-            if (_selectedPlaceData != null && _selectedEntity == null)
-            {
-                entity = _selectedPlaceData.StaticEntity;
-                isBefore = true;
-            }
-            else if (_selectedPlaceData == null && _selectedEntity != null)
-            {
-                entity = _selectedEntity;
-                isBefore = false;
-            }
-            else
-            {
-                return;
-            }
-            float atk, def, mgr, currentHp, maxHp;
-            int blo;
-            if (isBefore)
-            {
-                if (entity.AttackBase != null)
-                {
-                    atk = entity.AttackBase.AttackDamageF;
-                }
-                else
-                {
-                    atk = 0;
-                }
-                def = entity.DEF_1;
-                mgr = entity.MagicResistance_1;
-                blo = entity.BlockOccupation_1;
-                currentHp = entity.MaxHp_1;
-                maxHp = entity.MaxHp_1;
-            }
-            else
-            {
-                if (entity.AttackBase != null)
-                {
-                    atk = entity.AttackBase.AttackDamageS;
-                }
-                else
-                {
-                    atk = 0;
-                }
-                def = entity.DEF_2;
-                mgr = entity.MagicResistance_2;
-                blo = entity.BlockOccupation;
-                currentHp = entity.CurrentHp;
-                maxHp = entity.MaxHpS;
-            }
-            _statsText.text = $"����  {(int)atk}\n����  {(int)def}\n����  {(int)mgr}\n�赲  {blo}";
-            float leftLength = _hpSliderSize.width * currentHp / maxHp;
-            _hpSlider.sizeDelta = new Vector2(leftLength - _hpSliderSize.width, _hpSliderSize.height);
-            _hpText.text = $"{(int)currentHp}/{(int)maxHp}";
-            _hpBk.anchoredPosition = new Vector2(leftLength > 81 ? leftLength : 81, 0);
+            // Entity entity;
+            // bool isBefore;
+            // if (_selectedPlaceData != null && _selectedEntity == null)
+            // {
+            //     entity = _selectedPlaceData.StaticEntity;
+            //     isBefore = true;
+            // }
+            // else if (_selectedPlaceData == null && _selectedEntity != null)
+            // {
+            //     entity = _selectedEntity;
+            //     isBefore = false;
+            // }
+            // else
+            // {
+            //     return;
+            // }
+            // float atk, def, mgr, currentHp, maxHp;
+            // int blo;
+            // if (isBefore)
+            // {
+            //     if (entity.AttackBase != null)
+            //     {
+            //         atk = entity.AttackBase.AttackDamageF;
+            //     }
+            //     else
+            //     {
+            //         atk = 0;
+            //     }
+            //     def = entity.DEF_1;
+            //     mgr = entity.MagicResistance_1;
+            //     blo = entity.BlockOccupation_1;
+            //     currentHp = entity.MaxHp_1;
+            //     maxHp = entity.MaxHp_1;
+            // }
+            // else
+            // {
+            //     if (entity.AttackBase != null)
+            //     {
+            //         atk = entity.AttackBase.AttackDamageS;
+            //     }
+            //     else
+            //     {
+            //         atk = 0;
+            //     }
+            //     def = entity.DEF_2;
+            //     mgr = entity.MagicResistance_2;
+            //     blo = entity.BlockOccupation;
+            //     currentHp = entity.CurrentHp;
+            //     maxHp = entity.MaxHpS;
+            // }
+            // _statsText.text = $"����  {(int)atk}\n����  {(int)def}\n����  {(int)mgr}\n�赲  {blo}";
+            // float leftLength = _hpSliderSize.width * currentHp / maxHp;
+            // _hpSlider.sizeDelta = new Vector2(leftLength - _hpSliderSize.width, _hpSliderSize.height);
+            // _hpText.text = $"{(int)currentHp}/{(int)maxHp}";
+            // _hpBk.anchoredPosition = new Vector2(leftLength > 81 ? leftLength : 81, 0);
 
         }
         // Operator
         private void UIStates_ShowClose_Operator(bool show)
         {
-            if (show)
-            {
-                if (!_operaterOpen)
-                {
-                    _operaterOpen = true;
-                    _operateArea.SetActive(true);
-                }
-                MoveCamera(_selectedEntity.EntityPosition + _deltaX * Vector2.right, 0.1f);
-                if (sea.CanCallBack)
-                {
-                    _callBack.enabled = true;
-                    _callBackClick.callback.RemoveAllListeners();
-                    _callBackClick.callback.AddListener((data) =>
-                    {
-                        _selectedEntity.thisEntityPool.Return(_selectedEntity);
-                        LevelRescurceManager.Manager.ChangeCost((int)(_selectedEntity.GetComponent<InteractableStatic>().CurrentSetCost * 0.5));
-                        _selectedEntity.participateIn = false;
-                        AudioManager.Manager.PlayAudio("escape", 1, false, false);
-                        UIStates_SwitchTo_Normal();
-                    });
-                }
-                else
-                {
-                    _callBack.enabled = false;
-                }
-                if (_selectedEntity.skill != null && _selectedEntity.skill.Length > 0)
-                {
-                    _skillOpen.gameObject.SetActive(true);
-                    _selectSkill = _selectedEntity.skill[0];
-                    _skillOpen.sprite = _selectSkill.SkillImg;
-                    if (_selectSkill.SkillAttackRange != null)
-                    {
-                        _skillRange.gameObject.SetActive(true);
-                        _skillRangeClick.callback.RemoveAllListeners();
-                        _skillRangeClick.callback.AddListener((data) =>
-                        {
+            // if (show)
+            // {
+            //     if (!_operaterOpen)
+            //     {
+            //         _operaterOpen = true;
+            //         _operateArea.SetActive(true);
+            //     }
+            //     MoveCamera(_selectedEntity.EntityPosition + _deltaX * Vector2.right, 0.1f);
+            //     if (sea.CanCallBack)
+            //     {
+            //         _callBack.enabled = true;
+            //         _callBackClick.callback.RemoveAllListeners();
+            //         _callBackClick.callback.AddListener((data) =>
+            //         {
+            //             _selectedEntity.thisEntityPool.Return(_selectedEntity);
+            //             LevelRescurceManager.Manager.ChangeCost((int)(_selectedEntity.GetComponent<InteractableStatic>().CurrentSetCost * 0.5));
+            //             _selectedEntity.Stats.IsActive = false;
+            //             AudioManager.Manager.PlayAudio("escape", 1, false, false);
+            //             UIStates_SwitchTo_Normal();
+            //         });
+            //     }
+            //     else
+            //     {
+            //         _callBack.enabled = false;
+            //     }
+            //     if (_selectedEntity.skill != null && _selectedEntity.skill.Length > 0)
+            //     {
+            //         _skillOpen.gameObject.SetActive(true);
+            //         _selectSkill = _selectedEntity.skill[0];
+            //         _skillOpen.sprite = _selectSkill.SkillImg;
+            //         if (_selectSkill.SkillAttackRange != null)
+            //         {
+            //             _skillRange.gameObject.SetActive(true);
+            //             _skillRangeClick.callback.RemoveAllListeners();
+            //             _skillRangeClick.callback.AddListener((data) =>
+            //             {
 
-                        });
-                    }
-                    else
-                    {
-                        _skillRange.gameObject.SetActive(false);
-                    }
-                }
-                else
-                {
-                    _skillOpen.gameObject.SetActive(false);
-                    _selectSkill = null;
-                }
-                UIStates_Update_Operator();
-            }
-            else
-            {
-                if (_operaterOpen)
-                {
-                    _operaterOpen = false;
-                    _operateArea.SetActive(false);
-                    MoveCamera(_cameraOriginalPos, 0.1f);
-                }
-            }
+            //             });
+            //         }
+            //         else
+            //         {
+            //             _skillRange.gameObject.SetActive(false);
+            //         }
+            //     }
+            //     else
+            //     {
+            //         _skillOpen.gameObject.SetActive(false);
+            //         _selectSkill = null;
+            //     }
+            //     UIStates_Update_Operator();
+            // }
+            // else
+            // {
+            //     if (_operaterOpen)
+            //     {
+            //         _operaterOpen = false;
+            //         _operateArea.SetActive(false);
+            //         MoveCamera(_cameraOriginalPos, 0.1f);
+            //     }
+            // }
         }
         private void UIStates_Update_Operator()
         {
-            if (_selectedEntity == null || !_selectedEntity.participateIn)
+            if (_selectedEntity == null || !_selectedEntity.Stats.IsActive)
                 UIStates_SwitchTo_Normal();
             if (_selectSkill)
             {
@@ -1474,14 +1474,14 @@ namespace MyUI
         private void UIStates_Update_Range()
         {
             Color color = new Color(255, 160, 0);
-            (int x, int y)[] attackRange;
+            (int x, int y)[] attackRange=new (int x, int y)[0];
             if (_selectedPlaceData != null && _selectedEntity == null)
             {
                 (int x, int y) pos = ((int)(_chooser.transform.position.x + 0.5), (int)(_chooser.transform.position.y + 0.5));
             }
             else if (_selectedPlaceData == null && _selectedEntity != null)
             {
-                attackRange = _selectedEntity.VisionRange;
+                attackRange = _selectedEntity.Vision.Range;
             }
             else
             {
@@ -1782,14 +1782,14 @@ namespace MyUI
                 _skillTalentRectParent.GetComponent<ScrollRect>().vertical = false;
             }
         }
-        private void ShowAttackRangeAttributes((int x, int y)[] range0)
+        private void ShowAttackRangeAttributes(List<Vector2Int> range0)
         {
             int maxX, minX, maxY, minY;
             maxX = -1000;
             maxY = -1000;
             minX = 1000;
             minY = 1000;
-            (int x, int y)[] range = new (int x, int y)[range0.Length];
+            (int x, int y)[] range = new (int x, int y)[range0.Count];
             for (int i = 0; i < range.Length; i++)
             {
                 range[i] = (range0[i].y, -range0[i].x);

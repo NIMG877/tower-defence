@@ -162,7 +162,7 @@ public class AttackBase : MonoBehaviour, IPoolOperation
 
     protected virtual void FixedUpdate()
     {
-        if (!_thisEntity.participateIn)
+        if (!_thisEntity.Stats.IsActive)
             return;
         if (_attackTimer > 0)
         {
@@ -205,7 +205,7 @@ public class AttackBase : MonoBehaviour, IPoolOperation
     {
         if (canInterrupt)
         {
-            attackTargets = _thisEntity.EntityUpDate(attackTargets);
+            attackTargets = _thisEntity.Combat.EntityUpdate(attackTargets);
             if (attackTargets.Length == 0)
             {
                 attackTargets = AttackTargetSelect(AttackNumS, AttackMinNumS);
@@ -246,33 +246,33 @@ public class AttackBase : MonoBehaviour, IPoolOperation
     {
         List<Entity> tmpTarget;
         bool samecomp;
-        if (_thisEntity.Camp == 1 && DamageType != 3)
+        if (_thisEntity.Movement.Camp == 1 && DamageType != 3)
         {
-            tmpTarget = new List<Entity>(_thisEntity.monstersInRange);
+            tmpTarget = new List<Entity>(_thisEntity.Vision.NearbyMonsters);
             samecomp = false;
         }
-        else if (_thisEntity.Camp == 1 && DamageType == 3)
+        else if (_thisEntity.Movement.Camp == 1 && DamageType == 3)
         {
-            tmpTarget = new List<Entity>(_thisEntity.turretsInRange);
+            tmpTarget = new List<Entity>(_thisEntity.Vision.NearbyTurrets);
             samecomp = true;
         }
-        else if (_thisEntity.Camp == 2 && DamageType != 3)
+        else if (_thisEntity.Movement.Camp == 2 && DamageType != 3)
         {
-            tmpTarget = new List<Entity>(_thisEntity.turretsInRange);
+            tmpTarget = new List<Entity>(_thisEntity.Vision.NearbyTurrets);
             samecomp = false;
         }
-        else if (_thisEntity.Camp == 2 && DamageType == 3)
+        else if (_thisEntity.Movement.Camp == 2 && DamageType == 3)
         {
-            tmpTarget = new List<Entity>(_thisEntity.monstersInRange);
+            tmpTarget = new List<Entity>(_thisEntity.Vision.NearbyMonsters);
             samecomp = true;
         }
         else
         {
-            tmpTarget = new List<Entity>(_thisEntity.monstersInRange);
-            tmpTarget.AddRange(_thisEntity.turretsInRange);
+            tmpTarget = new List<Entity>(_thisEntity.Vision.NearbyMonsters);
+            tmpTarget.AddRange(_thisEntity.Vision.NearbyTurrets);
             samecomp = false;
         }
-        tmpTarget = _thisEntity.PriorityOrder(tmpTarget, EntityOrderLogic);
+        tmpTarget = _thisEntity.Combat.PriorityOrder(tmpTarget, EntityOrderLogic);
         OnBeforeTargetSelect?.Invoke(tmpTarget, ref selectNum_Max, ref selectNum_Min, ref samecomp);
         if (tmpTarget.Count > 0 && selectNum_Max >= 0)//��AttackNum==-1ʱ������Ĭ��Ϊ��Χ��ȫ������
         {

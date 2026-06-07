@@ -143,11 +143,11 @@ public class CharacterCardManager
                 card.Lh.sprite = _lh[index];
                 card.Uh.sprite = _uh[index];
                 card.ClassImg.sprite = _class[_characterOwn[characterId].CharacterJob];
-                Skill[] skills = _characterOwn[characterId].Prefab.GetComponents<Skill>();
-                if (skills.Length > 0)
-                {
-                    card.SkillImg.sprite = skills[0].SkillImg;
-                }
+                // Skill[] skills = _characterOwn[characterId].prefab.GetComponents<Skill>();
+                // if (skills.Length > 0)
+                // {
+                //     card.SkillImg.sprite = skills[0].SkillImg;
+                // }
                 card.Name.text = _characterOwn[characterId].ChineseName;
                 _cardsForbidNull.Add(characterId, card);
                 return card.CharacterButton;
@@ -168,11 +168,11 @@ public class CharacterCardManager
     }
     public void ResetCardForbidNullSkill(EntityID characterId)
     {
-        Skill[] skills = _characterOwn[characterId].Prefab.GetComponents<Skill>();
-        if (skills.Length > 0)
-        {
-            _cardsForbidNull[characterId].SkillImg.sprite = skills[0].SkillImg;
-        }
+        // Skill[] skills = _characterOwn[characterId].prefab.GetComponents<Skill>();
+        // if (skills.Length > 0)
+        // {
+        //     _cardsForbidNull[characterId].SkillImg.sprite = skills[0].SkillImg;
+        // }
     }
     public EntityData GetCharacterAttribute(EntityID characterId)
     {

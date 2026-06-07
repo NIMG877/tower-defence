@@ -13,7 +13,7 @@ public class NormalMove : MoveBase
             _thisAM.SetDirection(_currentSection[_currentPointSerial].targetPosition);
             if (deltas < d)
             {
-                _thisEntity.EntityPosition += (_currentSection[_currentPointSerial].targetPosition - _thisEntity.EntityPosition).normalized * deltas;
+                _thisEntity.Movement.Position += (_currentSection[_currentPointSerial].targetPosition - _thisEntity.Movement.Position).normalized * deltas;
                 CountPriority();
                 deltas = 0;
                 break;

@@ -6,22 +6,22 @@ using UnityEngine.UI;
 public class Skill : MonoBehaviour, IPoolOperation
 {
     protected Entity _thisEntity;
-    [Header("¼¼ÄÜÏÔÊ¾UIÏà¹Ø")]
-    [SerializeField, Tooltip("¼¼ÄÜÃû³Æ")] private string _skillName;
-    [SerializeField, Tooltip("¼¼ÄÜÍ¼±ê")] private Sprite _skillImg;
-    [SerializeField, Tooltip("¼¼ÄÜÃèÊö"), TextArea(2, 5)] private string _skillDescription;
-    [Header("¼¼ÄÜ»ù´¡ÊôÐÔÉèÖÃ")]
-    [SerializeField, Tooltip("¼¼Á¦»Ø¸´Ä£Ê½:0-×ÔÈ»»Ø¸´,1-¹¥»÷»Ø¸´,2-ÊÜ»÷»Ø¸´,3-ÆäËü»Ø¸´·½·¨")] protected int _spRecoverMode;
-    [SerializeField, Tooltip("¼¼Á¦ÏûºÄÄ£Ê½:0-×ÔÈ»ÏûºÄ,1-¹¥»÷ÏûºÄ,2-ÊÜ»÷ÏûºÄ,3-²»ÏûºÄ,4-ÆäËüÏûºÄ·½·¨")] protected int _spConsumeMode;
-    [SerializeField, Tooltip("¼¼ÄÜ¿ªÆôÄ£Ê½:0-×ÔÈ»¿ªÆô,1-¹¥»÷¿ªÆô,2-ÊÜ»÷¿ªÆô,3-ÊÖ¶¯¿ªÆô,4-ÆäËü¿ªÆô·½·¨")] protected int _skillOpenMode;
-    [SerializeField, Tooltip("¼¼ÄÜ³äÄÜ²ãÊý")] protected int _chargeNum;
-    [SerializeField, Tooltip("×Ü¼¼Á¦ÐèÇó")] protected int _totalSp;
-    [SerializeField, Tooltip("³õÊ¼¼¼Á¦")] protected int _initialSp;
-    [SerializeField, Tooltip("¼¼ÄÜÁ¿:µ±Öµ´óÓÚ0Ê±Õý³£ÏûºÄ£¬µÈÓÚ0Ê±Ë²¼äÏûºÄ")] protected float _skillAmount;
-    [SerializeField, Tooltip("¼¼ÄÜÆÚ¼ä³ÖÓÐ×è»Ø")] protected bool _recoverForbidDuringSkill;
-    [SerializeField, Tooltip("¼¼ÄÜ¿ÉÊÖ¶¯¹Ø±Õ")] protected bool _canCloseSkill;
-    [Header("¼¼ÄÜÏêÏ¸ÉèÖÃ")]
-    [SerializeField, Tooltip("¼¼ÄÜÆÚ¼ä¹¥»÷·¶Î§")] protected Vector2Int[] _skillAttackRange;
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾UIï¿½ï¿½ï¿½")]
+    [SerializeField, Tooltip("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")] private string _skillName;
+    [SerializeField, Tooltip("ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½")] private Sprite _skillImg;
+    [SerializeField, Tooltip("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"), TextArea(2, 5)] private string _skillDescription;
+    [Header("ï¿½ï¿½ï¿½Ü»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
+    [SerializeField, Tooltip("ï¿½ï¿½ï¿½ï¿½ï¿½Ø¸ï¿½Ä£Ê½:0-ï¿½ï¿½È»ï¿½Ø¸ï¿½,1-ï¿½ï¿½ï¿½ï¿½ï¿½Ø¸ï¿½,2-ï¿½Ü»ï¿½ï¿½Ø¸ï¿½,3-ï¿½ï¿½ï¿½ï¿½ï¿½Ø¸ï¿½ï¿½ï¿½ï¿½ï¿½")] protected int _spRecoverMode;
+    [SerializeField, Tooltip("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½:0-ï¿½ï¿½È»ï¿½ï¿½ï¿½ï¿½,1-ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,2-ï¿½Ü»ï¿½ï¿½ï¿½ï¿½ï¿½,3-ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,4-ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä·ï¿½ï¿½ï¿½")] protected int _spConsumeMode;
+    [SerializeField, Tooltip("ï¿½ï¿½ï¿½Ü¿ï¿½ï¿½ï¿½Ä£Ê½:0-ï¿½ï¿½È»ï¿½ï¿½ï¿½ï¿½,1-ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,2-ï¿½Ü»ï¿½ï¿½ï¿½ï¿½ï¿½,3-ï¿½Ö¶ï¿½ï¿½ï¿½ï¿½ï¿½,4-ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")] protected int _skillOpenMode;
+    [SerializeField, Tooltip("ï¿½ï¿½ï¿½Ü³ï¿½ï¿½Ü²ï¿½ï¿½ï¿½")] protected int _chargeNum;
+    [SerializeField, Tooltip("ï¿½Ü¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")] protected int _totalSp;
+    [SerializeField, Tooltip("ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½")] protected int _initialSp;
+    [SerializeField, Tooltip("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½0Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½0Ê±Ë²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")] protected float _skillAmount;
+    [SerializeField, Tooltip("ï¿½ï¿½ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")] protected bool _recoverForbidDuringSkill;
+    [SerializeField, Tooltip("ï¿½ï¿½ï¿½Ü¿ï¿½ï¿½Ö¶ï¿½ï¿½Ø±ï¿½")] protected bool _canCloseSkill;
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½ï¿½ï¿½")]
+    [SerializeField, Tooltip("ï¿½ï¿½ï¿½ï¿½ï¿½Ú¼ä¹¥ï¿½ï¿½ï¿½ï¿½Î§")] protected Vector2Int[] _skillAttackRange;
     private float _currentSkillAmount;
     private int _recoverForbid;
     private float _currentSp;
@@ -184,7 +184,7 @@ public class Skill : MonoBehaviour, IPoolOperation
         }
         if (SkillAttackRange != null && SkillAttackRange.Length > 0)
         {
-            _thisEntity.VisionRange = SkillAttackRange;
+            _thisEntity.Vision.Range = SkillAttackRange;
         }
         return true;
     }
@@ -196,7 +196,7 @@ public class Skill : MonoBehaviour, IPoolOperation
         }
         if (SkillAttackRange != null)
         {
-            _thisEntity.VisionRange = _thisEntity.VisionRange_1;
+            _thisEntity.Vision.Range = _thisEntity.Vision.BaseRange;
         }
         _currentSkillAmount = 0;
     }
@@ -209,15 +209,15 @@ public class Skill : MonoBehaviour, IPoolOperation
     }
     public virtual void Initialize()
     {
-        //½«µ±Ç°¼¼Á¦ÉèÖÃÎª³õÊ¼¼¼Á¦
+        //ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½
         _currentSp = _initialSp;
-        //ÉèÖÃ¼¼ÄÜ³äÄÜ²ãÊý
+        //ï¿½ï¿½ï¿½Ã¼ï¿½ï¿½Ü³ï¿½ï¿½Ü²ï¿½ï¿½ï¿½
         _currentChargeNum = 0;
-        //È¡Ïû×è»Ø
+        //È¡ï¿½ï¿½ï¿½ï¿½ï¿½
         _recoverForbid = 0;
-        //½«µ±Ç°¼¼ÄÜÁ¿ÖÃÎª0
+        //ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª0
         _currentSkillAmount = 0;
-        //¸ù¾Ý²»Í¬µÄ¼¼Á¦»Ø¸´Ä£Ê½ÉèÖÃ
+        //ï¿½ï¿½ï¿½Ý²ï¿½Í¬ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½Ø¸ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½
         switch (_spRecoverMode)
         {
             case 1:
@@ -239,7 +239,7 @@ public class Skill : MonoBehaviour, IPoolOperation
             default: break;
         }
 
-        //¸ù¾Ý²»Í¬µÄ¼¼Á¦ÏûºÄÄ£Ê½ÉèÖÃ
+        //ï¿½ï¿½ï¿½Ý²ï¿½Í¬ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½
         switch (_spConsumeMode)
         {
             case 1:
@@ -247,7 +247,7 @@ public class Skill : MonoBehaviour, IPoolOperation
                 {
                     SkillAmountConsume(1, false);
                 });
-                break;//Èç¹û¼¼Á¦ÏûºÄÄ£Ê½ÊÇ¹¥»÷ÏûºÄ£¬ÉèÖÃµ¥´ÎÏûºÄÁ¿
+                break;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½Ç¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             case 2:
                 _thisEntity.OnAfterHurt += new Entity.OperationsAfterHurt((Entity origin, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType, bool isDeadly) =>
                 {
@@ -256,14 +256,14 @@ public class Skill : MonoBehaviour, IPoolOperation
                         SkillAmountConsume(1, false);
                     }
                 });
-                break;//Èç¹û¼¼Á¦ÏûºÄÄ£Ê½ÊÇÊÜ»÷ÏûºÄ£¬ÉèÖÃµ¥´ÎÏûºÄÁ¿
+                break;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½Ü»ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             case 3:
                 _skillAmount = 1;
                 break;
             default: break;
         }
 
-        //¸ù¾Ý²»Í¬µÄ¼¼ÄÜ¿ªÆôÄ£Ê½ÉèÖÃ
+        //ï¿½ï¿½ï¿½Ý²ï¿½Í¬ï¿½Ä¼ï¿½ï¿½Ü¿ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½
         switch (_skillOpenMode)
         {
             case 1:

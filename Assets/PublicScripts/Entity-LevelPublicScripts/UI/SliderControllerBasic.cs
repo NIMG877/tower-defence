@@ -78,7 +78,7 @@ public class SliderControllerBasic
     }
     public void FixedUpdate()
     {
-        if (_hostEntity.participateIn)
+        if (_hostEntity.Stats.IsActive)
         {
             if (_fill.enabled && _moveSlider)
             {

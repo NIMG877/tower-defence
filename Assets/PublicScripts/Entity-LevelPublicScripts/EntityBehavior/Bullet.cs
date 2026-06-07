@@ -12,7 +12,7 @@ public struct BulletData
     public float BulletSpeed;
     public int BulletType;
     public bool AllowNoTarget;
-    [Header("µ±BulletType=1Ê±ÌîÐ´Öµ²ÅÉúÐ§")]
+    [Header("ï¿½ï¿½BulletType=1Ê±ï¿½ï¿½Ð´Öµï¿½ï¿½ï¿½ï¿½Ð§")]
     public float DevitationXRate;
     public float DevitationYValue;
 }
@@ -85,8 +85,8 @@ public class Bullet
         Vector2 bulletStartPos = _bulletObject.transform.position;
         Transform bulletTransform = _bulletObject.transform;
         Transform bulletTrailTransform = _bulletTrailObject.transform;
-        if (_targetEntity != null && _targetEntity.participateIn)
-            _targetPos = _targetEntity.EntityPosition + 0.4f * Vector2.up;
+        if (_targetEntity != null && _targetEntity.Stats.IsActive)
+            _targetPos = _targetEntity.Movement.Position + 0.4f * Vector2.up;
         float distance = Vector2.Distance(bulletStartPos, _targetPos);
         if (distance == 0)
         {
@@ -97,15 +97,15 @@ public class Bullet
         float rate = 0;
         while (true)
         {
-            if (!_allowNoEntityTarget && (_targetEntity == null || !_targetEntity.participateIn))
+            if (!_allowNoEntityTarget && (_targetEntity == null || !_targetEntity.Stats.IsActive))
             {
                 DestroyBullet();
                 return;
             }
             rate += rateSpeed * Time.fixedDeltaTime;
             Vector2 targetPo;
-            if (_targetEntity != null && _targetEntity.participateIn)
-                _targetPos = _targetEntity.EntityPosition + 0.4f * Vector2.up;
+            if (_targetEntity != null && _targetEntity.Stats.IsActive)
+                _targetPos = _targetEntity.Movement.Position + 0.4f * Vector2.up;
             if (rate < 1)
             {
                 switch (_bulletType)
@@ -138,7 +138,7 @@ public class Bullet
     }
     private void BulletArriveEnd()
     {
-        if (_targetEntity != null && _targetEntity.participateIn)
+        if (_targetEntity != null && _targetEntity.Stats.IsActive)
         {
             _onBeforeTakeDamage?.Invoke(_targetEntity, ref _multiplyer, ref _defPenetrate, ref _mgrPenetrate, ref _defPenetrate_value, ref _mgrPenetrate, ref _damageType, 0);
             bool isDeadly = _targetEntity.TakeDamage(_originEntity, _damage, _multiplyer, _defPenetrate, _mgrPenetrate, _defPenetrate_value, _mgrPenetrate_value, _damageType, 0);

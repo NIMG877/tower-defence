@@ -6,6 +6,6 @@ public class HpSliderController : SliderControllerBasic
 {
     protected override void SetRateOperations()
     {
-        SetRate(_hostEntity.CurrentHpRate);
+        SetRate(_hostEntity.Stats.CurrentHpRate);
     }
 }

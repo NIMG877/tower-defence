@@ -68,7 +68,7 @@ public class EntityPool
         }
         poolOperations = outEntity.GetComponents<IPoolOperation>();
         outEntity.Camp = camp;
-        outEntity.EntityPosition = destination;
+        outEntity.Movement.SetPosition(destination, true);
         outEntity.gameObject.SetActive(true);
         for (int i = poolOperations.Length - 1; i >= 0; i--)
         {

@@ -267,7 +267,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 break;
             case EntityState.Attack:
                 OnAttackAnimationBegin?.Invoke();
-                if (thisEntity.entityResistList.Count == 0)
+                if (thisEntity.Movement.ResistList.Count == 0)
                 {
                     Attack = Attack_Remote;
                 }

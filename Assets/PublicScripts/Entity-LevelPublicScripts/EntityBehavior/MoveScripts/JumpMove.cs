@@ -27,7 +27,7 @@ public class JumpMove : MoveBase
                 ArriveEnd();
                 return;
             }
-            if (_thisAM.CurrentState != EntityState.Move && _thisEntity.entityResistList.Count == 0)
+            if (_thisAM.CurrentState != EntityState.Move && _thisEntity.Movement.ResistList.Count == 0)
             {
                 _thisAM.Move = _jumpBegin;
                 if (_thisAM.TrySetState(EntityState.Move, false))
@@ -58,7 +58,7 @@ public class JumpMove : MoveBase
         float dt = 0;
         while (dt < jumpT)
         {
-            _thisEntity.EntityPosition = from + dir * dt / jumpT;
+            _thisEntity.Movement.Position = from + dir * dt / jumpT;
             CountPriority();
             await UniTask.WaitForFixedUpdate();
             dt += Time.fixedDeltaTime;

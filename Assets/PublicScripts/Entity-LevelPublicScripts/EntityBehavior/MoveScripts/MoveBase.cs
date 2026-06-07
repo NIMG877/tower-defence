@@ -34,15 +34,15 @@ public class MoveBase : MonoBehaviour, IPoolOperation
     public MoveParameters[] CurrentSection { get { return _currentSection; } }
     protected void FixedUpdate()
     {
-        if (!_thisEntity.participateIn)
+        if (!_thisEntity.Stats.IsActive)
             return;
-        if (_thisEntity.entityResistList.Count == 0)
+        if (_thisEntity.Movement.ResistList.Count == 0)
         {
             FindEntitiesAroundAndTryToBeBlock();
         }
-        else if (_thisEntity.entityResistList[0].participateIn == false)
+        else if (_thisEntity.Movement.ResistList[0].Stats.IsActive == false)
         {
-            RelieveBlock(_thisEntity.entityResistList[0]);
+            RelieveBlock(_thisEntity.Movement.ResistList[0]);
         }
         Move();
         UnBalancedMove();
@@ -71,7 +71,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
             length += Vector2.Distance(_currentSection[i].targetPosition, _currentSection[i + 1].targetPosition);
         }
         length += PathDataManager.Manager.GetLength(_currentPathSerial, _currentSectionSerial + 1, _moveMethod);
-        _thisEntity.Priority = -length * 0.1f;
+        _thisEntity.Movement.Priority = -length * 0.1f;
     }
     public void SetMoveParameters(int pathSerial, int sectionSerial, int pointSerial)
     {
@@ -83,10 +83,10 @@ public class MoveBase : MonoBehaviour, IPoolOperation
     }
     private void FindEntitiesAroundAndTryToBeBlock()
     {
-        if (_thisEntity.BlockOccupation >= 0)
+        if (_thisEntity.Stats.BlockOccupationS >= 0)
         {
             List<Entity> entitiesAround = new List<Entity>();
-            entitiesAround = EntityManager.Manager.EntitySelector_Radius((this.transform.position.x, this.transform.position.y), _thisEntity.Camp, false, 0.5f + EntityManager.EntityR, true);
+            entitiesAround = EntityManager.Manager.EntitySelector_Radius((this.transform.position.x, this.transform.position.y), _thisEntity.Movement.Camp, false, 0.5f + EntityManager.EntityR, true);
 
             for (int i = 0; i < entitiesAround.Count; i++)
             {
@@ -95,12 +95,12 @@ public class MoveBase : MonoBehaviour, IPoolOperation
                     Vector2 targetPos = entitiesAround[i].InteractableStatic.TryAddToEntityResistList(_thisEntity);
                     if (targetPos.x != -100)
                     {
-                        _thisEntity.entityResistList.Add(entitiesAround[i]);
+                        _thisEntity.Movement.ResistList.Add(entitiesAround[i]);
                         if (_thisAM.CurrentState == EntityState.Move)
                         {
                             _thisAM.TrySetState(EntityState.Idle, true);
                         }
-                        _thisEntity.EntityPosition = targetPos;
+                        _thisEntity.Movement.Position = targetPos;
                         return;
                     }
                 }
@@ -110,7 +110,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
     }
     public void RelieveBlock(Entity entity)
     {
-        _thisEntity.entityResistList.Remove(entity);
+        _thisEntity.Movement.ResistList.Remove(entity);
     }
     private void UnBalancedMove()
     {
@@ -118,17 +118,17 @@ public class MoveBase : MonoBehaviour, IPoolOperation
         {
             if (_unBalancedMoveSpeed.magnitude > 0.1f)
             {
-                Vector2 originPos = _thisEntity.EntityPosition;
-                _thisEntity.EntityPosition = _thisEntity.EntityPosition + (_unBalancedMoveSpeed - _unBalancedMoveSpeed.normalized * 0.5f * MIU_G * Time.fixedDeltaTime) * Time.fixedDeltaTime;
+                Vector2 originPos = _thisEntity.Movement.Position;
+                _thisEntity.Movement.Position = _thisEntity.Movement.Position + (_unBalancedMoveSpeed - _unBalancedMoveSpeed.normalized * 0.5f * MIU_G * Time.fixedDeltaTime) * Time.fixedDeltaTime;
                 _unBalancedMoveSpeed -= _unBalancedMoveSpeed.normalized * MIU_G * Time.fixedDeltaTime;
                 int xConstrain = 0;//-1̨ʵߣ1̨ʵұ
                 int yConstrain = 0;//-1̨ʵ±ߣ1̨ʵϱ
                 (int x, int y) xyConstrain = (0, 0);
                 (int i, int j) pos = ((int)(originPos.y + 0.5), (int)(originPos.x + 0.5));
-                for (int i = 0; i < _thisEntity.InBlocks.Length; i++)
+                for (int i = 0; i < _thisEntity.Movement.InBlocks.Length; i++)
                 {
-                    int ii = _thisEntity.InBlocks[i].i;
-                    int jj = _thisEntity.InBlocks[i].j;
+                    int ii = _thisEntity.Movement.InBlocks[i].i;
+                    int jj = _thisEntity.Movement.InBlocks[i].j;
                     if (ii != -1 && MapDataManager.Manager.GetPosBlock(ii, jj).Highland)
                     {
                         if (ii != pos.i && jj != pos.j)
@@ -146,26 +146,26 @@ public class MoveBase : MonoBehaviour, IPoolOperation
                 if (xConstrain != 0 && yConstrain != 0)
                 {
                     _unBalancedMoveSpeed = Vector2.zero;
-                    _thisEntity.EntityPosition = new Vector2(pos.j + (0.5f - entityR) * xConstrain, pos.i + (0.5f - entityR) * yConstrain);
+                    _thisEntity.Movement.Position = new Vector2(pos.j + (0.5f - entityR) * xConstrain, pos.i + (0.5f - entityR) * yConstrain);
                 }
                 else if (xConstrain != 0)
                 {
                     float x = pos.j + 0.5f * xConstrain - entityR * xConstrain;
-                    float y = (x - originPos.x) * (_thisEntity.EntityPosition.y - originPos.y) / (_thisEntity.EntityPosition.x - originPos.x) + originPos.y;
+                    float y = (x - originPos.x) * (_thisEntity.Movement.Position.y - originPos.y) / (_thisEntity.Movement.Position.x - originPos.x) + originPos.y;
                     _unBalancedMoveSpeed.x = 0;
-                    _thisEntity.EntityPosition = new Vector2(x, y);
+                    _thisEntity.Movement.Position = new Vector2(x, y);
                 }
                 else if (yConstrain != 0)
                 {
                     float y = pos.i + 0.5f * yConstrain - entityR * yConstrain;
-                    float x = (y - originPos.y) * (_thisEntity.EntityPosition.x - originPos.x) / (_thisEntity.EntityPosition.y - originPos.y) + originPos.x;
+                    float x = (y - originPos.y) * (_thisEntity.Movement.Position.x - originPos.x) / (_thisEntity.Movement.Position.y - originPos.y) + originPos.x;
                     _unBalancedMoveSpeed.y = 0;
-                    _thisEntity.EntityPosition = new Vector2(x, y);
+                    _thisEntity.Movement.Position = new Vector2(x, y);
                 }
                 else if (xyConstrain != (0, 0))
                 {
                     _unBalancedMoveSpeed = Vector2.zero;
-                    _thisEntity.EntityPosition = new Vector2(pos.j + (0.5f - entityR) * xyConstrain.x, pos.i + (0.5f - entityR) * xyConstrain.y);
+                    _thisEntity.Movement.Position = new Vector2(pos.j + (0.5f - entityR) * xyConstrain.x, pos.i + (0.5f - entityR) * xyConstrain.y);
                 }
             }
             else
@@ -230,7 +230,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
                 ArriveEnd();
                 return;
             }
-            if (_thisAM.CurrentState != EntityState.Move && _thisEntity.entityResistList.Count == 0)
+            if (_thisAM.CurrentState != EntityState.Move && _thisEntity.Movement.ResistList.Count == 0)
             {
                 _thisAM.TrySetState(EntityState.Move, false);
             }
@@ -259,7 +259,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
     {
         _thisAM.TrySetState(EntityState.Default, true);
         _thisAM.ArriveEnd();
-        _thisEntity.participateIn = false;
+        _thisEntity.Stats.IsActive = false;
         if (_levelHpComsume > 0)
         {
             LevelRescurceManager.Manager.LevelHpLeft -= LevelHpConsume;

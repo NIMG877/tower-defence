@@ -7,87 +7,87 @@ using static PlasticGui.PlasticTableCell;
 public enum BuffType
 {
     /// <summary>
-    /// ¹¥»÷Á¦±ä»¯£¬Öµ
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä»¯ï¿½ï¿½Öµ
     /// </summary>
     atk_delta_value,
     /// <summary>
-    /// ¹¥»÷Á¦±ä»¯£¬°Ù·Ö±È
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä»¯ï¿½ï¿½ï¿½Ù·Ö±ï¿½
     /// </summary>
     atk_delta_percent,
     /// <summary>
-    /// ·ÀÓùÁ¦±ä»¯£¬Öµ
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä»¯ï¿½ï¿½Öµ
     /// </summary>
     def_delta_value,
     /// <summary>
-    /// ·ÀÓùÁ¦±ä»¯£¬°Ù·Ö±È
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä»¯ï¿½ï¿½ï¿½Ù·Ö±ï¿½
     /// </summary>
     def_delta_percent,
     /// <summary>
-    /// ·¨¿¹±ä»¯£¬Öµ
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ä»¯ï¿½ï¿½Öµ
     /// </summary>
     mgr_delta_value,
     /// <summary>
-    /// ·¨¿¹±ä»¯£¬°Ù·Ö±È
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ä»¯ï¿½ï¿½ï¿½Ù·Ö±ï¿½
     /// </summary>
     mgr_delta_percent,
     /// <summary>
-    /// ×î´óÉúÃüÉÏÏÞ±ä»¯£¬Öµ
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ±ä»¯ï¿½ï¿½Öµ
     /// </summary>
     mhp_delta_value,
     /// <summary>
-    /// ×î´óÉúÃüÉÏÏÞ±ä»¯£¬°Ù·Ö±È
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ±ä»¯ï¿½ï¿½ï¿½Ù·Ö±ï¿½
     /// </summary>
     mhp_delta_percent,
     /// <summary>
-    /// ÎïÀí´àÈõ±ä»¯£¬¸ÅÂÊ
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä»¯ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     phd_delta_rate,
     /// <summary>
-    /// ·¨Êõ´àÈõ±ä»¯£¬¸ÅÂÊ
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä»¯ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     mgd_delta_rate,
     /// <summary>
-    /// ÎïÀíÉÁ±Ü±ä»¯£¬¸ÅÂÊ
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü±ä»¯ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     phdoge_delta_rate,
     /// <summary>
-    /// ·¨ÊõÉÁ±Ü±ä»¯£¬¸ÅÂÊ
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü±ä»¯ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     mgdoge_delta_rate,
     /// <summary>
-    /// ¹¥»÷¼ä¸ô±ä»¯£¬Öµ
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä»¯ï¿½ï¿½Öµ
     /// </summary>
     batkt_delta_value,
     /// <summary>
-    /// ¹¥»÷¼ä¸ô±ä»¯£¬°Ù·Ö±È
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä»¯ï¿½ï¿½ï¿½Ù·Ö±ï¿½
     /// </summary>
     batkt_delta_percent,
     /// <summary>
-    /// ¹¥»÷ËÙ¶È±ä»¯£¬Öµ
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶È±ä»¯ï¿½ï¿½Öµ
     /// </summary>
     atkspd_delta_value,
     /// <summary>
-    /// ×èµ²Êý±ä»¯£¬Öµ
+    /// ï¿½èµ²ï¿½ï¿½ï¿½ä»¯ï¿½ï¿½Öµ
     /// </summary>
     blo_delta_value,
     /// <summary>
-    /// ×î´ó¹¥»÷ÊýÁ¿±ä»¯£¬Öµ
+    /// ï¿½ï¿½ó¹¥»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä»¯ï¿½ï¿½Öµ
     /// </summary>
     atkn_delta_value,
     /// <summary>
-    /// ×îÐ¡¹¥»÷ÊýÁ¿±ä»¯£¬Öµ
+    /// ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä»¯ï¿½ï¿½Öµ
     /// </summary>
     atkminn_delta_value,
     /// <summary>
-    /// ÉúÃü»Ø¸´±ä»¯£¬Öµ
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½Ø¸ï¿½ï¿½ä»¯ï¿½ï¿½Öµ
     /// </summary>
     hprecover_delta_value,
     /// <summary>
-    /// ÒÆ¶¯ËÙ¶È±ä»¯£¬Öµ
+    /// ï¿½Æ¶ï¿½ï¿½Ù¶È±ä»¯ï¿½ï¿½Öµ
     /// </summary>
     mspeed_delta_value,
     /// <summary>
-    /// ÒÆ¶¯ËÙ¶È±ä»¯£¬°Ù·Ö±È
+    /// ï¿½Æ¶ï¿½ï¿½Ù¶È±ä»¯ï¿½ï¿½ï¿½Ù·Ö±ï¿½
     /// </summary>
     mspeed_delta_percent,
 }
@@ -161,17 +161,17 @@ public class BuffController : MonoBehaviour, IPoolOperation
     }
 
 
-    #region///buff¹ÜÀí
+    #region///buffï¿½ï¿½ï¿½ï¿½
     /// <summary>
-    /// buff´´½¨
+    /// buffï¿½ï¿½ï¿½ï¿½
     /// </summary>
-    /// <param name="buffTypes">ÖÖÀà,percentÀàÌîÐ´xÊ±µÄº¬ÒåÎª100x%</param>
-    /// <param name="buffEffect">ÌØÐ§</param>
-    /// <param name="buffName">Ãû³Æ</param>
+    /// <param name="buffTypes">ï¿½ï¿½ï¿½ï¿½,percentï¿½ï¿½ï¿½ï¿½Ð´xÊ±ï¿½Äºï¿½ï¿½ï¿½Îª100x%</param>
+    /// <param name="buffEffect">ï¿½ï¿½Ð§</param>
+    /// <param name="buffName">ï¿½ï¿½ï¿½ï¿½</param>
     /// <param name="buffValue">Öµ</param>
-    /// <param name="buffTime">Ê±¼ä£¬Ð¡µÈÓÚ-5ÎªÓÀ¾Ã</param>
-    /// <param name="isWhiteList">°×Ãûµ¥</param>
-    /// <returns>buffÊý¾Ý</returns>
+    /// <param name="buffTime">Ê±ï¿½ä£¬Ð¡ï¿½ï¿½ï¿½ï¿½-5Îªï¿½ï¿½ï¿½ï¿½</param>
+    /// <param name="isWhiteList">ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</param>
+    /// <returns>buffï¿½ï¿½ï¿½ï¿½</returns>
     public Buff CreateBuff(BuffType[] buffTypes, GameObject buffEffect, string buffName, float[] buffValue, float buffTime, bool isWhiteList)
     {
         Buff addBuff;
@@ -221,9 +221,9 @@ public class BuffController : MonoBehaviour, IPoolOperation
         }
     }
     /// <summary>
-    /// µ¥¸öbuffÏú»Ù
+    /// ï¿½ï¿½ï¿½ï¿½buffï¿½ï¿½ï¿½ï¿½
     /// </summary>
-    /// <param name="destroyBuff">ÐèÒªÏú»ÙµÄbuffÊý¾Ý</param>
+    /// <param name="destroyBuff">ï¿½ï¿½Òªï¿½ï¿½ï¿½Ùµï¿½buffï¿½ï¿½ï¿½ï¿½</param>
     public void DestroyBuff(Buff destroyBuff)
     {
         SetBuffValues(new float[destroyBuff.buff_types.Length], destroyBuff);
@@ -235,10 +235,10 @@ public class BuffController : MonoBehaviour, IPoolOperation
         }
     }
     /// <summary>
-    /// »ñÈ¡buff
+    /// ï¿½ï¿½È¡buff
     /// </summary>
-    /// <param name="buffName">ÐèÒª»ñÈ¡µÄbuffÃû³Æ</param>
-    /// <returns>»ñÈ¡µ½µÄbuff£¬ÈôÃ»ÓÐ»ñÈ¡µ½ÔòÎªnull</returns>
+    /// <param name="buffName">ï¿½ï¿½Òªï¿½ï¿½È¡ï¿½ï¿½buffï¿½ï¿½ï¿½ï¿½</param>
+    /// <returns>ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½buffï¿½ï¿½ï¿½ï¿½Ã»ï¿½Ð»ï¿½È¡ï¿½ï¿½ï¿½ï¿½Îªnull</returns>
     public Buff FetchBuff(string buffName)
     {
         foreach (Buff buff in normal_buffs)
@@ -258,10 +258,10 @@ public class BuffController : MonoBehaviour, IPoolOperation
         return null;
     }
     /// <summary>
-    /// ÉèÖÃBuffÊýÖµ
+    /// ï¿½ï¿½ï¿½ï¿½Buffï¿½ï¿½Öµ
     /// </summary>
-    /// <param name="newBuffValues">ÒªÉèÖÃµÄBuffÊýÖµ£¨³¤¶È±ØÐëÓëÔ­ÊýÖµ³¤¶ÈÏàµÈ£©</param>
-    /// <param name="setTarget">ÐèÒªÉèÖÃµÄÄ¿±êBuff</param>
+    /// <param name="newBuffValues">Òªï¿½ï¿½ï¿½Ãµï¿½Buffï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½È±ï¿½ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È£ï¿½</param>
+    /// <param name="setTarget">ï¿½ï¿½Òªï¿½ï¿½ï¿½Ãµï¿½Ä¿ï¿½ï¿½Buff</param>
     public void SetBuffValues(float[] newBuffValues, Buff setTarget)
     {
         for (int i = 0; i < newBuffValues.Length; i++)
@@ -325,12 +325,12 @@ public class BuffController : MonoBehaviour, IPoolOperation
         }
     }
     #endregion
-    #region///Òì³£×´Ì¬
+    #region///ï¿½ì³£×´Ì¬
     /// <summary>
-    /// Ìí¼ÓÒì³£×´Ì¬
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ì³£×´Ì¬
     /// </summary>
-    /// <param name="abnormalTime">Ìí¼ÓÒì³£×´Ì¬³ÖÐøÊ±¼ä,ÖµÐ¡ÓÚµÈÓÚ-5±íÊ¾³ÖÐøÊ±¼äÎÞÏÞ</param>
-    /// <param name="abnormalType">Ìí¼ÓÒì³£×´Ì¬ÀàÐÍ:0-Êø¸¿,1-Ê§ºâ,2-½ÉÐµ,3-ÎÞµÐ</param>
+    /// <param name="abnormalTime">ï¿½ï¿½ï¿½ï¿½ï¿½ì³£×´Ì¬ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½,ÖµÐ¡ï¿½Úµï¿½ï¿½ï¿½-5ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</param>
+    /// <param name="abnormalType">ï¿½ï¿½ï¿½ï¿½ï¿½ì³£×´Ì¬ï¿½ï¿½ï¿½ï¿½:0-ï¿½ï¿½ï¿½ï¿½,1-Ê§ï¿½ï¿½,2-ï¿½ï¿½Ðµ,3-ï¿½Þµï¿½</param>
     public void AddAbnormalState(float abnormalTime, int abnormalType)
     {
         switch (abnormalType)
@@ -381,8 +381,8 @@ public class BuffController : MonoBehaviour, IPoolOperation
                 if (_abnormalStateTime[3] <= 0 && _abnormalStateTime[3] > -5)
                 {
                     _abnormalStateTime[3] = abnormalTime;
-                    _thisEntity.selectable += 1;
-                    _thisEntity.hurtable += 1;
+                    _thisEntity.Stats.AddSelectable(1);
+                    _thisEntity.Stats.AddHurtable(1);
                 }
                 else if (_abnormalStateTime[3] < abnormalTime)
                 {
@@ -413,8 +413,8 @@ public class BuffController : MonoBehaviour, IPoolOperation
                     break;
                 case 3:
                     _abnormalStateTime[3] = 0;
-                    _thisEntity.hurtable -= 1;
-                    _thisEntity.selectable -= 1;
+                    _thisEntity.Stats.AddHurtable(-1);
+                    _thisEntity.Stats.AddSelectable(-1);
                     break;
                 default: break;
             }
@@ -443,7 +443,7 @@ public class BuffController : MonoBehaviour, IPoolOperation
         }
     }
     #endregion
-    #region///DOTÉËº¦
+    #region///DOTï¿½Ëºï¿½
     public void CreateDOT(Entity originEntity, GameObject dotEffect, string name, float duration, float frequency, float timer, float damage, int damageType, bool isDeadly)
     {
         int index = ContainDOT(name);
@@ -502,13 +502,13 @@ public class BuffController : MonoBehaviour, IPoolOperation
                 }
                 else
                 {
-                    if (_thisEntity.CurrentHp - 1 > _dotDatas[i].Damage)
+                    if (_thisEntity.Stats.CurrentHp - 1 > _dotDatas[i].Damage)
                     {
                         _thisEntity.TakeDamage(null, _dotDatas[i].Damage, 1, 0, 0, 0, 0, _dotDatas[i].DamageType, 2);
                     }
-                    else if (_thisEntity.CurrentHp > 1)
+                    else if (_thisEntity.Stats.CurrentHp > 1)
                     {
-                        _thisEntity.TakeDamage(null, _thisEntity.CurrentHp - 1, 1, 0, 0, 0, 0, _dotDatas[i].DamageType, 2);
+                        _thisEntity.TakeDamage(null, _thisEntity.Stats.CurrentHp - 1, 1, 0, 0, 0, 0, _dotDatas[i].DamageType, 2);
                     }
                     _dotDatas[i].Timer = _dotDatas[i].Frequency - Time.fixedDeltaTime;
                 }

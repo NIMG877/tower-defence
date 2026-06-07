@@ -16,18 +16,18 @@ public class InteractableStatic : MonoBehaviour, IPoolOperation
     public int CurrentSetCost { set { _currentSetCost = value; } get { return _currentSetCost; } }
     public void CountPriority()
     {
-        _thisEntity.Priority = _buildOrder;
+        _thisEntity.Movement.Priority = _buildOrder;
     }
     public Vector2 TryAddToEntityResistList(Entity movableEntity)
     {
-        if (_blockOccupationNum + movableEntity.BlockOccupation > _thisEntity.BlockOccupation)
+        if (_blockOccupationNum + movableEntity.Stats.BlockOccupationS > _thisEntity.Stats.BlockOccupationS)
         {
             return 100 * Vector2.left;
         }
         else
         {
-            Vector2 thisP = _thisEntity.EntityPosition;
-            Vector2 moveP = movableEntity.EntityPosition;
+            Vector2 thisP = _thisEntity.Movement.Position;
+            Vector2 moveP = movableEntity.Movement.Position;
             Vector2 AC;
             float blockMinD = 0.495f;
             if (Vector2.Distance(moveP, thisP) - EntityManager.EntityR >= blockMinD)
@@ -71,18 +71,18 @@ public class InteractableStatic : MonoBehaviour, IPoolOperation
                     yFree = false;
                 }
             }
-            if (_thisEntity.entityResistList.Count > 0)
+            if (_thisEntity.Movement.ResistList.Count > 0)
             {
                 Vector2 DiC;
                 Vector2 correctVector = new Vector2();
                 bool needCorrect = false;
-                for (int i = 0; i < _thisEntity.entityResistList.Count; i++)
+                for (int i = 0; i < _thisEntity.Movement.ResistList.Count; i++)
                 {
-                    DiC = _thisEntity.entityResistList[i].transform.position;
+                    DiC = _thisEntity.Movement.ResistList[i].transform.position;
                     DiC = moveP - DiC;
                     if (DiC.magnitude < 0.1)
                     {
-                        Vector2 ADi = _thisEntity.entityResistList[i].transform.position;
+                        Vector2 ADi = _thisEntity.Movement.ResistList[i].transform.position;
                         ADi -= thisP;
                         correctVector += new Vector2(ADi.y, -ADi.x).normalized;
                         needCorrect = true;
@@ -97,7 +97,7 @@ public class InteractableStatic : MonoBehaviour, IPoolOperation
                     AC = AC.magnitude * (0.2f * correctVector.normalized + AC).normalized;
                 }
             }
-            _thisEntity.entityResistList.Add(movableEntity);
+            _thisEntity.Movement.ResistList.Add(movableEntity);
             ++_blockOccupationNum;
             if (xFree && yFree)
             {
@@ -123,7 +123,7 @@ public class InteractableStatic : MonoBehaviour, IPoolOperation
 
     private void FixedUpdate()
     {
-        if (_thisEntity.participateIn)
+        if (_thisEntity.Stats.IsActive)
         {
             UpdateBlockEntityListAndBlockOccupationNum();
         }
@@ -131,24 +131,24 @@ public class InteractableStatic : MonoBehaviour, IPoolOperation
     private void UpdateBlockEntityListAndBlockOccupationNum()
     {
         _blockOccupationNum = 0;
-        for (int i = _thisEntity.entityResistList.Count - 1; i >= 0; i--)
+        for (int i = _thisEntity.Movement.ResistList.Count - 1; i >= 0; i--)
         {
-            if (_thisEntity.entityResistList[i].participateIn && Vector2.Distance(_thisEntity.EntityPosition, _thisEntity.entityResistList[i].EntityPosition) <= 0.5 + EntityManager.EntityR)
+            if (_thisEntity.Movement.ResistList[i].Stats.IsActive && Vector2.Distance(_thisEntity.Movement.Position, _thisEntity.Movement.ResistList[i].Movement.Position) <= 0.5 + EntityManager.EntityR)
             {
-                if (_blockOccupationNum + _thisEntity.entityResistList[i].BlockOccupation <= _thisEntity.BlockOccupation)
+                if (_blockOccupationNum + _thisEntity.Movement.ResistList[i].Stats.BlockOccupationS <= _thisEntity.Stats.BlockOccupationS)
                 {
-                    _blockOccupationNum += _thisEntity.entityResistList[i].BlockOccupation;
+                    _blockOccupationNum += _thisEntity.Movement.ResistList[i].Stats.BlockOccupationS;
                 }
                 else
                 {
-                    _thisEntity.entityResistList[i].MoveBase.RelieveBlock(_thisEntity);
-                    _thisEntity.entityResistList.RemoveAt(i);
+                    _thisEntity.Movement.ResistList[i].MoveBase.RelieveBlock(_thisEntity);
+                    _thisEntity.Movement.ResistList.RemoveAt(i);
                 }
             }
             else
             {
-                _thisEntity.entityResistList[i].MoveBase.RelieveBlock(_thisEntity);
-                _thisEntity.entityResistList.RemoveAt(i);
+                _thisEntity.Movement.ResistList[i].MoveBase.RelieveBlock(_thisEntity);
+                _thisEntity.Movement.ResistList.RemoveAt(i);
             }
         }
     }
