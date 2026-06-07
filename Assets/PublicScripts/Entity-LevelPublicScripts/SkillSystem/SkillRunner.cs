@@ -8,7 +8,7 @@ namespace SkillSystem
         private Entity _entity;
         private readonly List<SkillRuntime> _skills = new List<SkillRuntime>();
         public Blackboard sharedBlackboard = new Blackboard();
-        public GameObject TempContainer;
+        public Transform TempContainer;
 
         public IReadOnlyList<SkillRuntime> Skills => _skills;
 
