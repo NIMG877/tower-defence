@@ -1,3 +1,6 @@
 {
-	"name": "GameData"
+    "name": "GameData",
+    "references": [
+        "GUID:3e30fdc770aeb3f4abda0846c0e98335"
+    ]
 }
