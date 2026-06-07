@@ -5,8 +5,8 @@ namespace SkillSystem
 {
     public enum SkillKind { Passive, ActiveSkill, Aura, OnDeath }
 
-    [Serializable]
-    public class SkillConfig
+    [CreateAssetMenu(fileName = "SkillConfig", menuName = "SkillSystem/Skill Config", order = 0)]
+    public class SkillConfig : ScriptableObject
     {
         public string skillId;
         public string skillName;
