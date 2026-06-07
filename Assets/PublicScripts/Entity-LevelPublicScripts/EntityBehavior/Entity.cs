@@ -202,6 +202,10 @@ public class Entity : MonoBehaviour, IPoolOperation
         _vision.InitializeFromData(EntityData);
         Stats.AttributesCaculateFirst(EntityData);
         Movement.Initialize();
+
+        // === SkillRunner 生命周期接入（Phase 2 迁移期，与旧 Skill[]/Talent[] 共存） ===
+        if (TryGetComponent<SkillSystem.SkillRunner>(out var skillRunner))
+            skillRunner.PreWarm();
     }
 
     public virtual void Initialize()
@@ -223,6 +227,10 @@ public class Entity : MonoBehaviour, IPoolOperation
         {
             SlidersManager.Manager.SetSlider<SpSliderController>(this, 10, camp2 ? 3 : 4, 1, camp2, canmove);
         }
+
+        // === SkillRunner 生命周期接入（Phase 2 迁移期，与旧 Skill[]/Talent[] 共存） ===
+        if (TryGetComponent<SkillSystem.SkillRunner>(out var skillRunner))
+            skillRunner.OnInitialize();
     }
 
     public virtual void Dormancy()
@@ -242,5 +250,9 @@ public class Entity : MonoBehaviour, IPoolOperation
         {
             LevelActionManager.Manager.RemoveFromWaveEntities(this);
         }
+
+        // === SkillRunner 生命周期接入（Phase 2 迁移期，与旧 Skill[]/Talent[] 共存） ===
+        if (TryGetComponent<SkillSystem.SkillRunner>(out var skillRunner))
+            skillRunner.OnTeardown();
     }
 }
