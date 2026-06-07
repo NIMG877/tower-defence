@@ -194,6 +194,19 @@ namespace SkillSystem
         public string rightValue;             // e.g. "0.3", "2", "true"
     }
 
+    // A stage's parameter shape used by StageStateMachineComponent (§4.4)
+    [Serializable]
+    public class StageConfig
+    {
+        public string name;                       // debug name, e.g. "Charging"
+        public float enterDuration = -1;          // <=0 = no auto-advance; >0 = advance after this many seconds
+        public ConditionConfig[] transitionOn;    // event + condition that forces transition
+        public string nextStageOnTransition;      // name of stage to jump to (empty = exit SM)
+        public ComponentConfig[] enterEffects;    // fired once on stage enter
+        public ComponentConfig[] tickEffects;     // fired every tick while in this stage
+        public ComponentConfig[] exitEffects;     // fired once on stage exit
+    }
+
     public enum TriggerEvent
     {
         OnPreWarm,           // once, on SkillRunner.PreWarm
@@ -210,8 +223,8 @@ namespace SkillSystem
         OnBeforeDieAnimation,// Entity.OnBeforeDieAnimation
         OnDeath,             // once, after death
         OnIntervalTick,      // periodic (TickRate set in ParamList)
-        OnSkillBegin,        // this skill's SPEngine fired
-        OnSkillEnd,          // this skill's SPEngine ended
+        OnSkillBegin,        // this skill's SPEngine fired (only delivered to components in the same SkillRuntime)
+        OnSkillEnd,          // this skill's SPEngine ended  (only delivered to components in the same SkillRuntime)
     }
 
     public enum ConditionOp
@@ -333,7 +346,7 @@ The 28+ existing scripts map to the following **~40 components**. Each component
 | `AttackBoostComponent` | `AttackBoost` | Kroos `Skill1` | Sets `multiplyer *= f`, `cumbo += n` on `OnBeforeAttack` |
 | `CampDamageModifierComponent` | `CampDamageModifier` | Wither `Talent1` | If target.camp matches, set `multiplyer = X` on `OnBeforeTakeDamage` |
 | `AttackRangeOverrideComponent` | `AttackRangeOverride` | Skill.cs base | Sets `Entity.Vision.Range = skillAttackRange` while skill active |
-| `TargetSelectionModifierComponent` | `TargetSelectionModifier` | TBD uses | Modifies `OnBeforeTargetSelect` / `OnAfterTargetSelect` lists |
+| `TargetSelectionModifierComponent` | `TargetSelectionModifier` | Reserved for future | Modifies `OnBeforeTargetSelect` / `OnAfterTargetSelect` lists |
 
 #### 4.3.2 Buff / state application
 
@@ -342,7 +355,7 @@ The 28+ existing scripts map to the following **~40 components**. Each component
 | `ApplyBuffComponent` | `ApplyBuff` | ZombieTalent, CreeperTalent | Creates buff on self/targets with type/values/duration |
 | `PeriodicAuraBuffComponent` | `PeriodicAuraBuff` | ZombieTalent aura | Per-tick: add/remove buff to entities in radius |
 | `SetAbnormalStateComponent` | `SetAbnormalState` | CreeperTalent, HeadSeter | Adds/removes abnormal state on self |
-| `HealOnEventComponent` | `HealOnEvent` | TBD uses | Self-heal on event with `target.hpDelta` formula |
+| `HealOnEventComponent` | `HealOnEvent` | Reserved for future | Self-heal on event with `target.hpDelta` formula |
 
 #### 4.3.3 Animation
 
@@ -382,7 +395,7 @@ The 28+ existing scripts map to the following **~40 components**. Each component
 |---|---|---|---|
 | `SelfDamageOnEventComponent` | `SelfDamageOnEvent` | WitherTalent1 | On `OnAfterTakeDamage(isDeadly)`, apply self damage |
 | `LockHpShieldComponent` | `LockHpShield` | WitherTalent1 | HP-floor shield; while active, prevents HP from going below threshold |
-| `DamageThresholdComponent` | `DamageThreshold` | TBD uses | Conditionally apply effect only when incoming damage exceeds threshold |
+| `DamageThresholdComponent` | `DamageThreshold` | Reserved for future | Conditionally apply effect only when incoming damage exceeds threshold |
 
 #### 4.3.8 Visual / VFX
 
@@ -396,9 +409,9 @@ The 28+ existing scripts map to the following **~40 components**. Each component
 
 | Component | TypeName | Replaces | Notes |
 |---|---|---|---|
-| `RandomSelectorComponent` | `RandomSelector` | TBD uses | Among N sub-effects, pick one randomly per trigger |
+| `RandomSelectorComponent` | `RandomSelector` | Reserved for future | Among N sub-effects, pick one randomly per trigger |
 | `ConditionalBranchComponent` | `ConditionalBranch` | Witch (poison vs damage) | Evaluate blackboard cond, dispatch to one of two sub-effects |
-| `DelayedEffectComponent` | `DelayedEffect` | TBD uses | Schedule sub-effect after N seconds |
+| `DelayedEffectComponent` | `DelayedEffect` | Reserved for future | Schedule sub-effect after N seconds |
 
 ### 4.4 StageStateMachineComponent — the critical complex-behavior case
 
@@ -642,8 +655,33 @@ The 28+ existing scripts map 1-to-1 to **a small set of `SkillConfig` data entri
 | `Wither/WitherTalent1.cs` | `CampDamageModifier` (camp==2, mult=10) + `SelfDamageOnEvent` (isDeadly → 5000) + `LockHpShield` (active flag, threshold) |
 | `Skeleton/SkeletonTalent1.cs` | `OnBeforeAttack` → `SpawnBullet` (with callback) + `CoroutineLoop` (queue targets, trigger extra attack) |
 | `Slime/SlimeTalent1.cs` | `OnBeforeDieAnimation` → `DeathSpawn` (spawnEntityID, spawnNum, spawnGap) |
-| `Beef/BeefSkill.cs`, `BeefTalent.cs` | TBD per existing behavior |
-| 19+ other skill/talent files | TBD per existing behavior |
+
+#### 9.1 Remaining 19+ scripts to migrate (enumerated)
+
+| Existing script | Migration plan status |
+|---|---|
+| `Kroos/Talent1.cs` | TBD — analyze `Initialize` overrides during implementation |
+| `Melan/Skill1.cs` | TBD |
+| `Melan/Talent1.cs` | TBD |
+| `Spot/Skill1.cs` | TBD |
+| `Spot/Talent1.cs` | TBD |
+| `Ebnhlz/EbnhlzSkill3.cs` | TBD |
+| `Ebnhlz/EbnhlzTalent1.cs` | TBD |
+| `Ebnhlz/EbnhlzTalent2.cs` | TBD |
+| `Eyjafjalla/Skill1.cs` | TBD |
+| `Eyjafjalla/Skill2.cs` | TBD |
+| `Eyjafjalla/Talent1.cs` | TBD |
+| `Beef/BeefSkill.cs` | TBD |
+| `Beef/BeefTalent.cs` | TBD |
+| `HeadSeter/HeadSeterTalent1.cs` | TBD |
+| `Wither/WitherTalent2.cs` | TBD |
+| `Wither/WitherTalent3.cs` | TBD |
+| `WitherPedestal/WitherPedestalTalent1.cs` | TBD |
+| `Origin/Wdslm/MachineTalent1.cs` | TBD |
+| `Origin/Wdslm/WdslmSkill2.cs` | TBD |
+| `Origin/Wdslm/WdslmSkill3.cs` | TBD |
+
+Each "TBD" entry requires a code-reading pass during implementation to identify which components and parameters are needed. The implementation plan (§15 DoD) requires all 19+ to be migrated and snapshot-tested before merge.
 
 **Each migration entry is verified by the test suite (see §10) running the entity through the same event sequence and comparing observable state.**
 
