@@ -105,7 +105,6 @@ public class Entity : MonoBehaviour, IPoolOperation
     {
         if (!Stats.IsActive)
             return;
-        Stats.AttributesCaculateSecond();
         Stats.RecoverTick();
         Stats.CheckDeath();
         Vision.Refresh();
@@ -215,7 +214,6 @@ public class Entity : MonoBehaviour, IPoolOperation
         TempContainer = new GameObject("TempContainer").transform;
         TempContainer.position = this.transform.position;
         TempContainer.parent = this.transform;
-        Stats.AttributesCaculateSecond();
         if (Camp == 2)
         {
             LevelActionManager.Manager.AddToWaveEntities(this);

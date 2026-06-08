@@ -4,14 +4,19 @@ using MyUI;
 /// <summary>
 /// 实体属性子系统（POCO）。
 /// 持有：
-///   1. 基础属性（_Base/原 _first，来自 EntityData）
-///   2. 含 buff 的计算属性（_S/原 _second）
+///   1. 战斗基准属性（_xxxBase：EntityData 原始值 + 关卡环境"基础数值修改" buff，整场战斗不变；储存字段）
+///   2. 含战斗过程 buff 的计算属性（XxxS：computed property，每次访问实时计算 _xxxBase + 战斗 buff）
 ///   3. 状态（HP rate、participateIn、hurtable、selectable、isolate、dormant）
+///
+/// 数据计算流水线（两类 buff 都走现成 BuffController.buffValue）：
+///   EntityData 原始值 → [+ 关卡环境基础 buff] → _xxxBase（字段）→ [+ 战斗过程 buff] → XxxS（property）
 ///
 /// 设计要点：
 ///   - POCO，无 MonoBehaviour 依赖。构造接受 Entity 引用作为事件桥。
 ///   - 事件触发走 Entity 上的 internal RaiseOnXxx 桥方法——保留 Entity.OnBeforeHurt/OnAfterHurt/OnBeforeDieAnimation 公开事件 API。
 ///   - BuffController 由 Entity 在 PreWarm 中通过 BindBuffController 显式注入（EntityStats 构造早于 BuffController 获取）。
+///   - AttributesCaculateFirst 在 PreWarm 时调用一次，整场战斗不再重算（除非重新进入关卡重建实体）。
+///   - XxxS 为 computed property，buff 变化时无需手动重算；移除后调用方不可能读到陈旧值。
 /// </summary>
 public class EntityStats
 {
@@ -26,15 +31,6 @@ public class EntityStats
     private float _magicDodgeBase;
     private int _blockOccupationBase;
     private int _tauntLevelBase;
-
-    // === 计算属性（含 buff；原 _second） ===
-    private float _maxHpS;
-    private float _defS;
-    private float _magicResistanceS;
-    private float _physicalDodgeS;
-    private float _magicDodgeS;
-    private int _blockOccupationS;
-    private int _tauntLevelS;
 
     // === 状态 ===
     private float _currentHpRate;
@@ -63,17 +59,18 @@ public class EntityStats
     public float MaxHpBase => _maxHpBase;
     public int BlockOccupationBase => _blockOccupationBase;
 
-    // === 计算属性读（替代 Entity.DEF_2 等） ===
-    public float MaxHpS => _maxHpS;
-    public float DefS => _defS;
-    public float MagicResistanceS => _magicResistanceS;
-    public float PhysicalDodgeS => _physicalDodgeS;
-    public float MagicDodgeS => _magicDodgeS;
-    public int BlockOccupationS => _blockOccupationS;
-    public int TauntLevel => _tauntLevelS;
+    // === 计算属性（computed property：_xxxBase + 战斗过程 buff，O(1) 实时计算） ===
+    // 流水线末段，无中间储存；buff 变化时无需手动重算，调用方不可能读到陈旧值。
+    public float MaxHpS => Math.Max(0.001f, _maxHpBase + _buffController.buffValue[BuffType.mhp_delta_value] + _maxHpBase * _buffController.buffValue[BuffType.mhp_delta_percent]);
+    public float DefS => _defBase + Math.Max(0, _buffController.buffValue[BuffType.def_delta_value] + _defBase * _buffController.buffValue[BuffType.def_delta_percent]);
+    public float MagicResistanceS => Math.Max(0, _magicResistanceBase + _buffController.buffValue[BuffType.mgr_delta_value] + _magicResistanceBase * _buffController.buffValue[BuffType.mgr_delta_percent]);
+    public float PhysicalDodgeS => 1 - (1 - _physicalDodgeBase) * (1 - _buffController.buffValue[BuffType.phdoge_delta_rate]);
+    public float MagicDodgeS => 1 - (1 - _magicDodgeBase) * (1 - _buffController.buffValue[BuffType.mgdoge_delta_rate]);
+    public int BlockOccupationS => Math.Max(0, _blockOccupationBase + (int)_buffController.buffValue[BuffType.blo_delta_value]);
+    public int TauntLevel => _tauntLevelBase;  // 嘲讽等级无战斗 buff
 
     // === HP ===
-    public float CurrentHp => _currentHpRate * _maxHpS;
+    public float CurrentHp => _currentHpRate * MaxHpS;
     public float CurrentHpRate
     {
         get => _currentHpRate;
@@ -104,30 +101,33 @@ public class EntityStats
     public void AddSelectable(int delta) { _selectable += delta; }
     public void AddHurtable(int delta) { _hurtable += delta; }
 
-    // === 从 EntityData 装填基础属性（原 AttributesCaculateFirst 的属性部分） ===
+    // === 从 EntityData 装填战斗基准属性（PreWarm 时调用一次，整场战斗不变） ===
+    // 流水线：EntityData 原始值 → [关卡环境"基础数值修改" buff] → _xxxBase
+    // 战斗过程 buff 通过 XxxS computed property 在访问时实时计算。
     public void AttributesCaculateFirst(EntityData data)
     {
-        _maxHpBase = data.MaxHp;
-        _defBase = data.Defense;
-        _magicResistanceBase = data.MagicResistance;
-        _physicalDodgeBase = data.PhysicalDodge;
-        // 注：原 Entity.cs:196 写的是 _mgDoge_first = EntityData.MagicResistance——明显 copy-paste bug（应为 MagicDodge）。
-        // 重构期保留原行为以避免引入静默差异；留待 Task 2.5 清理 PR 修复。
-        _magicDodgeBase = data.MagicResistance;
-        _blockOccupationBase = data.BlockOccupation;
-        _tauntLevelBase = data.TauntLevel;
-    }
+        // 1. 从 EntityData 读取原始值（局部变量，便于下一步插值）
+        float maxHp = data.MaxHp;
+        float def = data.Defense;
+        float magicResistance = data.MagicResistance;
+        float physicalDodge = data.PhysicalDodge;
+        float magicDodge = data.MagicDodge;
+        int blockOccupation = data.BlockOccupation;
+        int tauntLevel = data.TauntLevel;
 
-    // === 用 buff 重新计算所有 _second 属性（原 Entity.AttributesCaculateSecond） ===
-    public void AttributesCaculateSecond()
-    {
-        _maxHpS = Math.Max(0.001f, _maxHpBase + _buffController.buffValue[BuffType.mhp_delta_value] + _maxHpBase * _buffController.buffValue[BuffType.mhp_delta_percent]);
-        _defS = _defBase + Math.Max(0, _buffController.buffValue[BuffType.def_delta_value] + _defBase * _buffController.buffValue[BuffType.def_delta_percent]);
-        _magicResistanceS = Math.Max(0, _magicResistanceBase + _buffController.buffValue[BuffType.mgr_delta_value] + _magicResistanceBase * _buffController.buffValue[BuffType.mgr_delta_percent]);
-        _physicalDodgeS = 1 - (1 - _physicalDodgeBase) * (1 - _buffController.buffValue[BuffType.phdoge_delta_rate]);
-        _magicDodgeS = 1 - (1 - _magicDodgeBase) * (1 - _buffController.buffValue[BuffType.mgdoge_delta_rate]);
-        _blockOccupationS = Math.Max(0, _blockOccupationBase + (int)_buffController.buffValue[BuffType.blo_delta_value]);
-        _tauntLevelS = _tauntLevelBase;
+        // 2. [关卡环境"基础数值修改" buff]——使用现成 BuffController.buffValue，语法与 Second 阶段一致。
+        //    预期 BuffType 新增：mhp_base_delta_value / mhp_base_delta_percent / def_base_delta_value / ...
+        //    储存尚未实现，暂跳过。储存就位后，在此累加 buff value 即可。
+        // TODO(level-base-buffs): 接入 _buffController.buffValue[BuffType.xxx_base_delta_value] / xxx_base_delta_percent
+
+        // 3. 写入 _xxxBase（base-buff 系统就位后，这里存的就是"原始值 + 关卡环境 buff"的结果）
+        _maxHpBase = maxHp;
+        _defBase = def;
+        _magicResistanceBase = magicResistance;
+        _physicalDodgeBase = physicalDodge;
+        _magicDodgeBase = magicDodge;
+        _blockOccupationBase = blockOccupation;
+        _tauntLevelBase = tauntLevel;
     }
 
     // === HP 自然恢复（原 Entity.FixedUpdate 中 current_hp_rate < 1 分支） ===
@@ -170,16 +170,16 @@ public class EntityStats
         float minRate = 0.05f;
         float damageC1 = damageType switch
         {
-            0 => Math.Max(damage * minRate, damage - _defS),
-            1 => Math.Max(damage * minRate, damage * (1 - _magicResistanceS / 100)),
+            0 => Math.Max(damage * minRate, damage - DefS),
+            1 => Math.Max(damage * minRate, damage * (1 - MagicResistanceS / 100)),
             2 => damage,
             3 => damage,
             _ => 0,
         };
         float finalDamage = damageType switch
         {
-            0 => Math.Max(damage * multiplyer * minRate, damage * multiplyer - (1 - defPenetrate) * (_defS - defPenetrate_value)) * Math.Max(0, 1 + _buffController.buffValue[BuffType.phd_delta_rate]),
-            1 => Math.Max(damage * multiplyer * minRate, damage * multiplyer * (1 - (1 - mgrPenetrate) * (_magicResistanceS - mgrPenetrate_value) / 100)) * Math.Max(0, 1 + _buffController.buffValue[BuffType.mgd_delta_rate]),
+            0 => Math.Max(damage * multiplyer * minRate, damage * multiplyer - (1 - defPenetrate) * (DefS - defPenetrate_value)) * Math.Max(0, 1 + _buffController.buffValue[BuffType.phd_delta_rate]),
+            1 => Math.Max(damage * multiplyer * minRate, damage * multiplyer * (1 - (1 - mgrPenetrate) * (MagicResistanceS - mgrPenetrate_value) / 100)) * Math.Max(0, 1 + _buffController.buffValue[BuffType.mgd_delta_rate]),
             2 => damage * multiplyer,
             3 => damage * multiplyer,
             _ => 0,
@@ -190,7 +190,7 @@ public class EntityStats
         if (damageType <= 2)
         {
             //判断闪避
-            if ((damageType == 0 && RandomHelper.Helper.RandomP(_physicalDodgeS)) || (damageType == 1 && RandomHelper.Helper.RandomP(_magicDodgeS)))
+            if ((damageType == 0 && RandomHelper.Helper.RandomP(PhysicalDodgeS)) || (damageType == 1 && RandomHelper.Helper.RandomP(MagicDodgeS)))
             {
                 LevelMessagePanel.Panel.ShowText(_entity.transform.position, 5, 0);
                 return false;
