@@ -21,6 +21,7 @@ namespace SkillSystem
         public int CurrentCharge => _currentCharge;
         public bool IsActive => _isActive;
         public bool IsRecoverForbidden => _recoverForbid > 0;
+        public float CurrentDuration => _currentDuration;
 
         public SPEngine(SPConfig cfg)
         {
