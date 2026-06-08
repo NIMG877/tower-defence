@@ -314,14 +314,13 @@ namespace MyUI
         private UIState _currentUIState;
         private bool _leftmessageOpen, _operaterOpen, _draggerOpen, _chooserOpen, _rangeOpen, _cansetOpen;
 
-        // ===== Selection State (3-field) =====
-        // 选中状态（三字段联合表达，由 UIState 状态机保证互斥）：
+        // ===== Selection State (2-field) =====
+        // 选中状态（两字段联合表达，由 UIState 状态机保证互斥）：
         //   viewBeforeSet/setting/choosing → _selectedStaticEntityID + _selectedPlaceData
-        //   viewAfterSet                   → _selectedStaticEntityID + _selectedEntity
-        //   normal/无选中                  → 三个全 null
+        //   viewAfterSet                   → _selectedStaticEntityID
+        //   normal/无选中                  → 两个全 null
         private StaticEntityPlaceData _selectedPlaceData;
         private EntityID? _selectedStaticEntityID;
-        private Entity _selectedEntity;
 
         // ===== Map/Block Data =====
         private bool[,] _higherCanSetBlock;
@@ -476,21 +475,9 @@ namespace MyUI
                 int index = i;
                 click.callback.AddListener((data) =>
                 {
-                    if (_currentShow != index)
+                    if (_currentShow != index && _selectedStaticEntityID.HasValue)
                     {
-                        EntityData entityData;
-                        if (_selectedPlaceData != null && _selectedEntity == null)
-                        {
-                            entityData = _selectedPlaceData.EntityData.Prefab.GetComponent<Entity>().EntityData;
-                        }
-                        else if (_selectedPlaceData == null && _selectedEntity != null)
-                        {
-                            entityData = _selectedEntity.EntityData;
-                        }
-                        else
-                        {
-                            return;
-                        }
+                        EntityData entityData = GameDataService.EntityRepository.Get(_selectedStaticEntityID.Value);
                         SwitchShowSkillTalent(index, entityData);
                     }
                 });
@@ -574,10 +561,10 @@ namespace MyUI
                 {
                     Vector2 clickBlock = _camera.ScreenToWorldPoint(Input.mousePosition);
                     (int i, int j) = ((int)(clickBlock.y + 0.5), (int)(clickBlock.x + 0.5));
-                    _selectedEntity = EntityManager.Manager.GetStaticEntityInBlock(i, j);
-                    if (_selectedEntity != null && _selectedEntity.Stats.IsActive)
+                    Entity entity = EntityManager.Manager.GetStaticEntityInBlock(i, j);
+                    if (entity != null && entity.Stats.IsActive)
                     {
-                        UIStates_SwitchTo_ViewAfterSet(_selectedEntity);
+                        UIStates_SwitchTo_ViewAfterSet(entity.EntityData.ID);
                     }
                 }
                 else
@@ -876,7 +863,6 @@ namespace MyUI
             UIStates_SwitchTo_Normal();
             _isAffordableBlockList.Clear();
             _selectedStaticEntityID = null;
-            _selectedEntity = null;
             _selectedPlaceData = null;
             _orientation = -1;
         }
@@ -932,7 +918,6 @@ namespace MyUI
             SetTimeScale();
             _currentUIState = UIState.normal;
             _selectedStaticEntityID = null;
-            _selectedEntity = null;
             if (_selectedPlaceData != null)
             {
                 _selectedPlaceData.SelectorMove(false);
@@ -948,7 +933,6 @@ namespace MyUI
             SetTimeScale();
             _selectedPlaceData = staticEntityPlaceData;
             _selectedStaticEntityID = staticEntityPlaceData.EntityId;
-            _selectedEntity = null;
             UIStates_ShowSomethingAndOtherClose(new string[2] { "leftmessage", "canset" });
             if (_currentUIState == UIState.normal)
             {
@@ -964,7 +948,6 @@ namespace MyUI
             SetTimeScale();
             _selectedPlaceData = staticEntityPlaceData;
             _selectedStaticEntityID = staticEntityPlaceData.EntityId;
-            _selectedEntity = null;
             UIStates_ShowSomethingAndOtherClose(new string[3] { "leftmessage", "dragger", "canset" });
             if (_currentUIState == UIState.normal)
             {
@@ -980,7 +963,6 @@ namespace MyUI
             SetTimeScale();
             _selectedPlaceData = staticEntityPlaceData;
             _selectedStaticEntityID = staticEntityPlaceData.EntityId;
-            _selectedEntity = null;
             UIStates_ShowSomethingAndOtherClose(new string[4] { "leftmessage", "dragger", "choosing", "canset" });
             if (_currentUIState == UIState.normal)
             {
@@ -990,12 +972,11 @@ namespace MyUI
             _currentUIState = UIState.choosing;
         }
 
-        private void UIStates_SwitchTo_ViewAfterSet(Entity entitySelected)
+        private void UIStates_SwitchTo_ViewAfterSet(EntityID entityID)
         {
             _isSlow = true;
             SetTimeScale();
-            _selectedEntity = entitySelected;
-            _selectedStaticEntityID = entitySelected.EntityData.ID;
+            _selectedStaticEntityID = entityID;
             _selectedPlaceData = null;
             UIStates_ShowSomethingAndOtherClose(new string[3] { "leftmessage", "operator", "range" });
             if (_currentUIState == UIState.normal)
@@ -1204,8 +1185,6 @@ namespace MyUI
         }
         private void UIStates_Update_Operator()
         {
-            if (_selectedEntity == null || !_selectedEntity.Stats.IsActive)
-                UIStates_SwitchTo_Normal();
             if (_selectSkill)
             {
                 if (!_selectSkill.SkillCanBegin())
@@ -1474,14 +1453,15 @@ namespace MyUI
         private void UIStates_Update_Range()
         {
             Color color = new Color(255, 160, 0);
-            (int x, int y)[] attackRange=new (int x, int y)[0];
-            if (_selectedPlaceData != null && _selectedEntity == null)
+            (int x, int y)[] attackRange;
+            if (_selectedStaticEntityID.HasValue)
             {
-                (int x, int y) pos = ((int)(_chooser.transform.position.x + 0.5), (int)(_chooser.transform.position.y + 0.5));
-            }
-            else if (_selectedPlaceData == null && _selectedEntity != null)
-            {
-                attackRange = _selectedEntity.Vision.Range;
+                List<Vector2Int> visionRange = GameDataService.EntityRepository.Get(_selectedStaticEntityID.Value).VisionRange;
+                attackRange = new (int x, int y)[visionRange.Count];
+                for (int i = 0; i < visionRange.Count; i++)
+                {
+                    attackRange[i] = (visionRange[i].y, -visionRange[i].x);
+                }
             }
             else
             {
