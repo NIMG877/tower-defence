@@ -7,17 +7,22 @@ namespace SkillSystem.Components
     public class PeriodicAuraBuffComponent : ITickingComponent
     {
         private float _radius;
-        private string _buffTypesRaw, _buffValuesRaw, _effectName, _buffId;
+        private string _effectName, _buffId;
         private float _priority = -10f;
         private bool _toAllies = true;
+        private BuffType[] _types = Array.Empty<BuffType>();
+        private float[] _values = Array.Empty<float>();
         private readonly List<Entity> _tracked = new List<Entity>();
         private readonly List<Buff> _trackedBuffs = new List<Buff>();
+        // Parallel HashSet so per-tick membership checks are O(1) instead of O(n).
+        // Kept in lockstep with _tracked by Add/Remove in OnTick and Clear in OnTeardown.
+        private readonly HashSet<Entity> _trackedSet = new HashSet<Entity>();
 
         public void OnInit(SkillContext ctx, ParamList p)
         {
             _radius = p.GetFloat("radius", 0f);
-            _buffTypesRaw = p.GetString("buffTypes", "");
-            _buffValuesRaw = p.GetString("buffValues", "");
+            _types = BuffParamParser.ParseBuffTypes(p.GetString("buffTypes", ""));
+            _values = BuffParamParser.ParseFloats(p.GetString("buffValues", ""));
             _effectName = p.GetString("effectName", "");
             _buffId = p.GetString("buffId", "aura_buff");
             _priority = p.GetFloat("priority", -10f);
@@ -31,6 +36,7 @@ namespace SkillSystem.Components
                 _tracked[i].buffController?.DestroyBuff(_trackedBuffs[i]);
             _tracked.Clear();
             _trackedBuffs.Clear();
+            _trackedSet.Clear();
         }
 
         public void OnTick(SkillContext ctx, float dt)
@@ -43,43 +49,26 @@ namespace SkillSystem.Components
 
             for (int i = _tracked.Count - 1; i >= 0; i--)
             {
-                if (!inRange.Contains(_tracked[i]))
+                var tracked = _tracked[i];
+                if (!inRange.Contains(tracked))
                 {
-                    _tracked[i].buffController?.DestroyBuff(_trackedBuffs[i]);
+                    tracked.buffController?.DestroyBuff(_trackedBuffs[i]);
                     _tracked.RemoveAt(i);
                     _trackedBuffs.RemoveAt(i);
+                    _trackedSet.Remove(tracked);
                 }
             }
             for (int i = 0; i < inRange.Count; i++)
             {
-                if (!_tracked.Contains(inRange[i]) && inRange[i].buffController != null)
+                var e = inRange[i];
+                if (!_trackedSet.Contains(e) && e.buffController != null)
                 {
-                    var types = ParseBuffTypes(_buffTypesRaw);
-                    var vals = ParseFloats(_buffValuesRaw);
-                    var b = inRange[i].buffController.CreateBuff(types, null, _buffId, vals, _priority, true);
-                    _tracked.Add(inRange[i]);
+                    var b = e.buffController.CreateBuff(_types, null, _buffId, _values, _priority, true);
+                    _tracked.Add(e);
                     _trackedBuffs.Add(b);
+                    _trackedSet.Add(e);
                 }
             }
-        }
-
-        private static BuffType[] ParseBuffTypes(string csv)
-        {
-            if (string.IsNullOrEmpty(csv)) return Array.Empty<BuffType>();
-            var parts = csv.Split(',');
-            var arr = new BuffType[parts.Length];
-            for (int i = 0; i < parts.Length; i++)
-                arr[i] = (BuffType)Enum.Parse(typeof(BuffType), parts[i].Trim());
-            return arr;
-        }
-        private static float[] ParseFloats(string csv)
-        {
-            if (string.IsNullOrEmpty(csv)) return Array.Empty<float>();
-            var parts = csv.Split(',');
-            var arr = new float[parts.Length];
-            for (int i = 0; i < parts.Length; i++)
-                arr[i] = float.Parse(parts[i].Trim());
-            return arr;
         }
     }
 }

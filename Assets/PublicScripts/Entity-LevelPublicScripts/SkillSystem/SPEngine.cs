@@ -10,7 +10,6 @@ namespace SkillSystem
         private float _currentDuration;
         private bool _isActive;
         private int _recoverForbid;
-        private bool _wasFiredThisTick;
 
         /// <summary>Fires when the skill begins (after charge consumed, before any duration consume).</summary>
         public event Action OnBegin;
@@ -33,7 +32,6 @@ namespace SkillSystem
 
         public void OnTick(float dt, float dtMultiplier)
         {
-            _wasFiredThisTick = false;
             // Recovery
             if (_cfg.recoverMode == SpRecoverMode.Natural && _recoverForbid == 0 && !_isActive)
             {
@@ -99,7 +97,6 @@ namespace SkillSystem
             else _currentSp = 0f;
             _isActive = true;
             if (_cfg.skillDuration > 0f) _currentDuration = _cfg.skillDuration;
-            _wasFiredThisTick = true;
             if (_cfg.recoverForbidDuringSkill) _recoverForbid++;
             OnBegin?.Invoke();
             if (_cfg.skillDuration <= 0f) EndSkill();
@@ -112,12 +109,6 @@ namespace SkillSystem
             _currentDuration = 0f;
             if (_cfg.recoverForbidDuringSkill && _recoverForbid > 0) _recoverForbid--;
             OnEnd?.Invoke();
-        }
-
-        public void SetRecoverForbid(bool forbid)
-        {
-            if (forbid) _recoverForbid++;
-            else if (_recoverForbid > 0) _recoverForbid--;
         }
 
         private void AddSp(float v)

@@ -218,16 +218,15 @@ namespace SkillSystem
 
         public void DispatchEvent(SkillEvent evt)
         {
-            var te = TriggerEventFor(evt);
             for (int i = 0; i < _skills.Count; i++)
             {
                 var s = _skills[i];
                 if (!s.isInitialized) continue;
-                DispatchToSkill(s, evt, te);
+                DispatchToSkill(s, evt);
             }
         }
 
-        private void DispatchToSkill(SkillRuntime s, SkillEvent evt, TriggerEvent te = TriggerEvent.OnInitialize)
+        private void DispatchToSkill(SkillRuntime s, SkillEvent evt)
         {
             // Active-window gate: a skill's components only see events while the skill is firing,
             // with these exceptions:
@@ -246,30 +245,6 @@ namespace SkillSystem
                 ctx.sharedBlackboard = sharedBlackboard;
                 ctx.entity = _entity;
                 comp.OnTrigger(ctx);
-            }
-        }
-
-        private static TriggerEvent TriggerEventFor(SkillEvent evt)
-        {
-            switch (evt)
-            {
-                case PreWarmEvent _: return TriggerEvent.OnPreWarm;
-                case InitializeEvent _: return TriggerEvent.OnInitialize;
-                case BeforeAttackEvent _: return TriggerEvent.OnBeforeAttack;
-                case AfterAttackEvent _: return TriggerEvent.OnAfterAttack;
-                case BeforeTakeDamageEvent _: return TriggerEvent.OnBeforeTakeDamage;
-                case AfterTakeDamageEvent _: return TriggerEvent.OnAfterTakeDamage;
-                case AttackSuccessfullyEvent _: return TriggerEvent.OnAttackSuccessfully;
-                case AttackInterruptEvent _: return TriggerEvent.OnAttackInterrupt;
-                case BeforeHurtEvent _: return TriggerEvent.OnBeforeHurt;
-                case AfterHurtEvent _: return TriggerEvent.OnAfterHurt;
-                case AttackAnimBeginEvent _: return TriggerEvent.OnAttackAnimBegin;
-                case BeforeDieAnimationEvent _: return TriggerEvent.OnBeforeDieAnimation;
-                case DeathEvent _: return TriggerEvent.OnDeath;
-                case IntervalTickEvent _: return TriggerEvent.OnIntervalTick;
-                case SkillBeginEvent _: return TriggerEvent.OnSkillBegin;
-                case SkillEndEvent _: return TriggerEvent.OnSkillEnd;
-                default: return TriggerEvent.OnInitialize;
             }
         }
     }

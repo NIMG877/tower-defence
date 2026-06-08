@@ -37,11 +37,14 @@ namespace SkillSystem.Components
             var ents = EntityManager.Manager.EntitySelector_Radius(
                 (pos.x, pos.y), camp, _sameCamp, _radius, _force);
 
-            if (_selectSelf && !ents.Contains(ctx.entity)) ents.Add(ctx.entity);
+            // Copy before mutating: the manager may return a pooled/shared list, and downstream
+            // consumers read the value we write. Operating on a local copy keeps both sides safe.
+            var result = new List<Entity>(ents);
+            if (_selectSelf && !result.Contains(ctx.entity)) result.Add(ctx.entity);
 
             // Convention: clear before write so re-trigger does not accumulate stale state.
             ctx.blackboard.Remove(_outputKey);
-            ctx.blackboard.Set(_outputKey, ents);
+            ctx.blackboard.Set(_outputKey, result);
         }
 
         public void OnTick(SkillContext ctx, float dt) { }
