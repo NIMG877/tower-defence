@@ -1062,62 +1062,19 @@ namespace MyUI
         }
         private void UIStates_Update_Leftmessage()
         {
-            // Entity entity;
-            // bool isBefore;
-            // if (_selectedPlaceData != null && _selectedEntity == null)
-            // {
-            //     entity = _selectedPlaceData.StaticEntity;
-            //     isBefore = true;
-            // }
-            // else if (_selectedPlaceData == null && _selectedEntity != null)
-            // {
-            //     entity = _selectedEntity;
-            //     isBefore = false;
-            // }
-            // else
-            // {
-            //     return;
-            // }
-            // float atk, def, mgr, currentHp, maxHp;
-            // int blo;
-            // if (isBefore)
-            // {
-            //     if (entity.AttackBase != null)
-            //     {
-            //         atk = entity.AttackBase.AttackDamageF;
-            //     }
-            //     else
-            //     {
-            //         atk = 0;
-            //     }
-            //     def = entity.DEF_1;
-            //     mgr = entity.MagicResistance_1;
-            //     blo = entity.BlockOccupation_1;
-            //     currentHp = entity.MaxHp_1;
-            //     maxHp = entity.MaxHp_1;
-            // }
-            // else
-            // {
-            //     if (entity.AttackBase != null)
-            //     {
-            //         atk = entity.AttackBase.AttackDamageS;
-            //     }
-            //     else
-            //     {
-            //         atk = 0;
-            //     }
-            //     def = entity.DEF_2;
-            //     mgr = entity.MagicResistance_2;
-            //     blo = entity.BlockOccupation;
-            //     currentHp = entity.CurrentHp;
-            //     maxHp = entity.MaxHpS;
-            // }
-            // _statsText.text = $"����  {(int)atk}\n����  {(int)def}\n����  {(int)mgr}\n�赲  {blo}";
-            // float leftLength = _hpSliderSize.width * currentHp / maxHp;
-            // _hpSlider.sizeDelta = new Vector2(leftLength - _hpSliderSize.width, _hpSliderSize.height);
-            // _hpText.text = $"{(int)currentHp}/{(int)maxHp}";
-            // _hpBk.anchoredPosition = new Vector2(leftLength > 81 ? leftLength : 81, 0);
+            if (!_selectedStaticEntityID.HasValue)
+                return;
+            EntityData entityData = GameDataService.EntityRepository.Get(_selectedStaticEntityID.Value);
 
+            // 基础属性（取自 EntityData 模板数据）
+            _statsText.text = $"攻击  {(int)entityData.Attack}\n防御  {(int)entityData.Defense}\n法抗  {(int)entityData.MagicResistance}\n阻挡  {entityData.BlockOccupation}";
+
+            // HP：模板数据不含运行时 CurrentHp，按满血显示；后续接入运行时数据时改这里
+            float maxHp = entityData.MaxHp;
+            float leftLength = _hpSliderSize.width;
+            _hpSlider.sizeDelta = new Vector2(leftLength - _hpSliderSize.width, _hpSliderSize.height);
+            _hpText.text = $"{(int)maxHp}/{(int)maxHp}";
+            _hpBk.anchoredPosition = new Vector2(_hpSliderSize.width > 81 ? _hpSliderSize.width : 81, 0);
         }
         // Operator
         private void UIStates_ShowClose_Operator(bool show)
