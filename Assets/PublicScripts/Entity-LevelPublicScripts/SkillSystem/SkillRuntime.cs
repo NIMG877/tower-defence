@@ -25,15 +25,5 @@ namespace SkillSystem
                 blackboard = blackboard,
             };
         }
-
-        public bool MatchesTrigger(TriggerEvent te)
-        {
-            if (config.globalConditions == null) return true;
-            for (int i = 0; i < config.globalConditions.Length; i++)
-            {
-                if (config.globalConditions[i].triggerEvent == te) return true;
-            }
-            return config.globalConditions.Length == 0;
-        }
     }
 }

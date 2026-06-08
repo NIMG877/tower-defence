@@ -11,7 +11,6 @@ namespace SkillSystem
         [TextArea(2, 5)] public string description;
 
         public SPConfig sp;
-        public ConditionConfig[] globalConditions = Array.Empty<ConditionConfig>();
         public ComponentConfig[] components = Array.Empty<ComponentConfig>();
     }
 }

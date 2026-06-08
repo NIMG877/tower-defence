@@ -103,25 +103,10 @@ namespace SkillSystem
     }
 
     [Serializable]
-    public class StageConfig
-    {
-        public string name;
-        public float enterDuration = -1f;
-        public ConditionConfig[] transitionOn = Array.Empty<ConditionConfig>();
-        public string nextStageOnTransition;
-        public ComponentConfig[] enterEffects = Array.Empty<ComponentConfig>();
-        public ComponentConfig[] tickEffects = Array.Empty<ComponentConfig>();
-        public ComponentConfig[] exitEffects = Array.Empty<ComponentConfig>();
-    }
-
-    // Stub: ComponentConfig added now. Other phases add the rest of the fields.
-    [Serializable]
     public class ComponentConfig
     {
         public string componentType;
-        public ConditionConfig[] triggers = Array.Empty<ConditionConfig>();
         public ParamList parameters = new ParamList();
-        public StageConfig[] stages; // optional, for StageStateMachine
-        public ComponentConfig[] subComponents; // optional, for wrapper components
+        public ConditionConfig[] triggers = Array.Empty<ConditionConfig>();
     }
 }
