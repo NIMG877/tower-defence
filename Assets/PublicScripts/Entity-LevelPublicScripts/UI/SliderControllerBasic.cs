@@ -25,7 +25,7 @@ public class SliderControllerBasic
         smooth = _slider.transform.Find("Smooth").GetComponent<Image>();
         _backGround = _slider.transform.Find("Background").GetComponent<Image>();
     }
-    public void SetHostEntity(Entity hostEntity, float smoothSpeed, int type, int positionLayer, bool hideWhenFull, bool moveSlider)
+    public virtual void SetHostEntity(Entity hostEntity, float smoothSpeed, int type, int positionLayer, bool hideWhenFull, bool moveSlider)
     {
         value = 0;
         value_s = 0;
