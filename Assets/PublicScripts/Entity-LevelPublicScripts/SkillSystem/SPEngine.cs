@@ -39,7 +39,7 @@ namespace SkillSystem
                 _currentSp = Math.Min(_currentSp + dt * dtMultiplier, _cfg.totalSp);
             }
             // Duration consume
-            if (_isActive && _cfg.consumeMode == SpConsumeMode.Duration)
+            if (_isActive && _cfg.consumeMode == SpConsumeMode.Natural)
             {
                 _currentDuration -= dt;
                 if (_currentDuration <= 0f)
@@ -49,7 +49,7 @@ namespace SkillSystem
                 }
             }
             // Natural open
-            if (!_isActive && _cfg.openMode == SkillOpenMode.Natural && CanBegin())
+            if (!_isActive && _cfg.openMode == SkillOpenMode.Auto && CanBegin())
             {
                 FireSkill();
             }

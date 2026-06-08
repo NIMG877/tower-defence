@@ -1,11 +1,10 @@
 using System;
-using UnityEngine;
 
 namespace SkillSystem
 {
     public enum SpRecoverMode { Natural, OnAttackHit, OnAfterHurt }
-    public enum SpConsumeMode { Duration, OnAttackHit, OnAfterHurt, Instant }
-    public enum SkillOpenMode { Natural, OnAttackAnimBegin, OnBeforeHurt, Manual, OnAttackHit }
+    public enum SpConsumeMode { Natural, OnAttackHit, OnAfterHurt, Instant }
+    public enum SkillOpenMode { Auto, OnAttackAnimBegin, OnBeforeHurt, Manual, OnAttackHit }
 
     [Serializable]
     public class SPConfig
@@ -18,10 +17,9 @@ namespace SkillSystem
         [Tooltip(">0 = active for that long after fire; <=0 = instant fire.")]
         public float skillDuration;
         public SpRecoverMode recoverMode = SpRecoverMode.Natural;
-        public SpConsumeMode consumeMode = SpConsumeMode.Duration;
-        public SkillOpenMode openMode = SkillOpenMode.Natural;
+        public SpConsumeMode consumeMode = SpConsumeMode.Natural;
+        public SkillOpenMode openMode = SkillOpenMode.Auto;
         public bool recoverForbidDuringSkill;
         public bool canManualClose;
-        public Vector2Int[] skillAttackRange = Array.Empty<Vector2Int>();
     }
 }

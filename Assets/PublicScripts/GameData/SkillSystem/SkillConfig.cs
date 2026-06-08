@@ -3,15 +3,12 @@ using UnityEngine;
 
 namespace SkillSystem
 {
-    public enum SkillKind { Passive, ActiveSkill, Aura, OnDeath }
-
     [CreateAssetMenu(fileName = "SkillConfig", menuName = "SkillSystem/Skill Config", order = 0)]
     public class SkillConfig : ScriptableObject
     {
         public string skillId;
         public string skillName;
         [TextArea(2, 5)] public string description;
-        public SkillKind kind = SkillKind.Passive;
 
         public SPConfig sp;
         public ConditionConfig[] globalConditions = Array.Empty<ConditionConfig>();
