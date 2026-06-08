@@ -6,15 +6,15 @@ using UnityEngine;
 public interface IManagerStartEnd
 {
     /// <summary>
-    /// Managers³õÊ¼»¯µ÷ÓÃº¯Êý
+    /// Managersï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½Ãºï¿½ï¿½ï¿½
     /// </summary>
     void Initialize();
     /// <summary>
-    /// Managers¿ªÊ¼µ÷ÓÃº¯Êý
+    /// Managersï¿½ï¿½Ê¼ï¿½ï¿½ï¿½Ãºï¿½ï¿½ï¿½
     /// </summary>
     void ToStart();
     /// <summary>
-    /// Managers½áÊøµ÷ÓÃº¯Êý
+    /// Managersï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ãºï¿½ï¿½ï¿½
     /// </summary>
     void ToEnd();
 }
@@ -25,6 +25,7 @@ public class LevelResourceSharing
     public static Transform LM;
     public static LevelData LD;
     public static Camera MainCamera;
+    public static Camera UICamera;
     private static CancellationTokenSource _levelCts;
 
     public static void LevelInitialize()
@@ -33,6 +34,9 @@ public class LevelResourceSharing
         MainCamera = GameObject.Find("MCam").GetComponent<Camera>();
         MainCamera.transform.position = new Vector3(LD.CameraPos.x, LD.CameraPos.y, -1);
         MainCamera.orthographicSize = LD.CameraSize;
+        UICamera = GameObject.Find("UICam").GetComponent<Camera>();
+        UICamera.transform.position = new Vector3(LD.CameraPos.x, LD.CameraPos.y, 0);
+        UICamera.orthographicSize = LD.CameraSize;
         EntityManager.Manager.Initialize();
         EntityPoolManager.Manager.Initialize();
         EffectManager.Manager.Initialize();
