@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,23 +5,59 @@ public class SpSliderController : SliderControllerBasic
 {
     private Color _skillFillColor;
     private Color _normalFillColor;
+    private SkillSystem.SkillRunner _skillRunner;
+
     public override void SliderInitialize(GameObject sliderObject)
     {
         base.SliderInitialize(sliderObject);
         _skillFillColor = _slider.transform.Find("SkillFill").GetComponent<Image>().color;
         _normalFillColor = _slider.transform.Find("Fill").GetComponent<Image>().color;
     }
+
+    public override void SetHostEntity(Entity hostEntity, float smoothSpeed, int type,
+        int positionLayer, bool hideWhenFull, bool moveSlider)
+    {
+        base.SetHostEntity(hostEntity, smoothSpeed, type, positionLayer, hideWhenFull, moveSlider);
+        hostEntity.TryGetComponent<SkillSystem.SkillRunner>(out _skillRunner);
+    }
+
     protected override void SetRateOperations()
     {
-        (float currentRate, int currentChargrNum, bool isSkill) = _hostEntity.skill[0].SkillMessage;
-        if (!isSkill)
+        if (_skillRunner == null || _skillRunner.Skills.Count == 0)
         {
-            _fill.color = _normalFillColor;
+            SetRate(0f);
+            return;
+        }
+        var runtime = _skillRunner.Skills[0];
+        var sp = runtime.spEngine;
+        if (sp == null)
+        {
+            SetRate(0f);
+            return;
+        }
+
+        bool isActive = sp.IsActive;
+        float rate;
+        if (isActive)
+        {
+            var cfg = runtime.config != null ? runtime.config.sp : null;
+            float skillDuration = cfg != null ? cfg.skillDuration : 0f;
+            rate = skillDuration > 0f
+                ? Mathf.Clamp01(sp.CurrentDuration / skillDuration)
+                : 1f;
         }
         else
         {
-            _fill.color = _skillFillColor;
+            var cfg = runtime.config != null ? runtime.config.sp : null;
+            if (cfg == null || cfg.totalSp <= 0)
+            {
+                SetRate(0f);
+                return;
+            }
+            rate = Mathf.Clamp01(sp.CurrentSp / cfg.totalSp);
         }
-        SetRate(currentRate);
+
+        _fill.color = isActive ? _skillFillColor : _normalFillColor;
+        SetRate(rate);
     }
 }
