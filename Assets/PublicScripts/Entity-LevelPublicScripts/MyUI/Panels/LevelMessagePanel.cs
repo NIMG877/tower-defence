@@ -171,7 +171,6 @@ namespace MyUI
                     _remainingCount = 0;
                     _selectorRoot.SetActive(false);
                 }
-                //�޸���ʾ����������ʾ
             }
             public void SelectorMove(bool up)
             {
@@ -700,12 +699,6 @@ namespace MyUI
                 }
             }
         }
-        /// <summary>
-        /// ��ʾ��ֵ
-        /// </summary>
-        /// <param name="pos">��ʾλ��</param>
-        /// <param name="textType">��ֵ����:0-Damage, 1-Heal, 2-AddCost, 3-ReduceCost, 4-spAdd, 5-miss</param>
-        /// <param name="value">ֵ</param>
         public void ShowText(Vector2 entityPos, int textType, int value)
         {
             TextMeshProUGUI textMeshProUGUI;
@@ -1589,7 +1582,6 @@ namespace MyUI
                     break;
                 default: break;
             }
-            //չʾ�ɷ��õķ�Χ
             for (int i = 0; i < _isAffordableBlockList.Count; i++)
             {
                 MapDataManager.Manager.BlockDataMatrix[_isAffordableBlockList[i].i, _isAffordableBlockList[i].j].Material.color = lightGreen;
@@ -1636,11 +1628,6 @@ namespace MyUI
                 SlidersManager.Manager.TakeOverSliderMove();
             }, 0, 1, duration).SetUpdate(true);
         }
-        /// <summary>
-        /// �жϵ��λ���Ƿ���Է���
-        /// </summary>
-        /// <param name="pos">���λ��</param>
-        /// <returns>�Ƿ�ɷ���</returns>
         private void HideTargetOrEnterNextStage(StaticEntityPlaceData staticEntityPlaceData)
         {
             if (_currentUIState == UIState.setting)
