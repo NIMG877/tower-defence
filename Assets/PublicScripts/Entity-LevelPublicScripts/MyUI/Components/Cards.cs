@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using SkillSystem;
 
 namespace MyUI
 {
@@ -35,51 +36,57 @@ namespace MyUI
             skillName.color = textColor;
             description.color = textColor;
         }
-        public void UpdateSkillCardMessage(Skill skill)
+        public void UpdateSkillCardMessage(SkillConfig config, SkillRuntime runtime = null)
         {
-            skillImage.sprite = skill.SkillImg;
-            skillName.text = skill.SkillName;
-            description.text = skill.SkillDescription;
-            skillAmountText.text = skill.SkillAmount.ToString();
-            switch (skill.SpRecoverMode)
+            if (config == null) return;
+            if (config.icon != null) skillImage.sprite = config.icon;
+            skillName.text = config.skillName;
+            description.text = config.description;
+            var sp = config.sp;
+            float skillDuration = sp != null ? sp.skillDuration : 0f;
+            if (skillDuration > 0f)
             {
-                case 0: spRecoverModeText.text = "×Ô¶¯»Ø¸´"; break;
-                case 1: spRecoverModeText.text = "¹¥»÷»Ø¸´"; break;
-                case 2: spRecoverModeText.text = "ÊÜ»÷»Ø¸´"; break;
-                default: break;
-            }
-            switch (skill.SkillOpenMode)
-            {
-                case 0: skillOpenModeText.text = "×Ô¶¯´¥·¢"; break;
-                case 1: skillOpenModeText.text = "¹¥»÷´¥·¢"; break;
-                case 2: skillOpenModeText.text = "ÊÜ»÷´¥·¢"; break;
-                case 3: skillOpenModeText.text = "ÊÖ¶¯´¥·¢"; break;
-                default: break;
-            }
-            switch (skill.SpComsumeMode)
-            {
-                default: break;
-            }
-            if (skill.TotalSp > 0)
-            {
-                totalSpText.transform.parent.gameObject.SetActive(true);
-                totalSpText.text = skill.TotalSp.ToString();
+                skillAmountText.text = skillDuration.ToString("0.#");
             }
             else
             {
-                totalSpText.transform.parent.gameObject.SetActive(false);
+                skillAmountText.transform.parent.gameObject.SetActive(false);
             }
-            if (skill.InitialSp > 0)
+            if (sp != null)
             {
-                sp0Text.transform.parent.gameObject.SetActive(true);
-                sp0Text.text = skill.InitialSp.ToString();
+                switch (sp.recoverMode)
+                {
+                    case SpRecoverMode.Natural: spRecoverModeText.text = "è‡ªåŠ¨å›žå¤"; break;
+                    case SpRecoverMode.OnAttackHit: spRecoverModeText.text = "æ”»å‡»å›žå¤"; break;
+                    case SpRecoverMode.OnAfterHurt: spRecoverModeText.text = "å—å‡»å›žå¤"; break;
+                }
+                switch (sp.openMode)
+                {
+                    case SkillOpenMode.Auto: skillOpenModeText.text = "è‡ªåŠ¨è§¦å‘"; break;
+                    case SkillOpenMode.OnAttackAnimBegin: skillOpenModeText.text = "æ”»å‡»æ—¶è§¦å‘"; break;
+                    case SkillOpenMode.OnBeforeHurt: skillOpenModeText.text = "å—å‡»æ—¶è§¦å‘"; break;
+                    case SkillOpenMode.Manual: skillOpenModeText.text = "æ‰‹åŠ¨è§¦å‘"; break;
+                    case SkillOpenMode.OnAttackHit: skillOpenModeText.text = "å‘½ä¸­è§¦å‘"; break;
+                }
+                if (sp.totalSp > 0)
+                {
+                    totalSpText.transform.parent.gameObject.SetActive(true);
+                    totalSpText.text = sp.totalSp.ToString();
+                }
+                else
+                {
+                    totalSpText.transform.parent.gameObject.SetActive(false);
+                }
+                if (sp.initialSp > 0)
+                {
+                    sp0Text.transform.parent.gameObject.SetActive(true);
+                    sp0Text.text = sp.initialSp.ToString();
+                }
+                else
+                {
+                    sp0Text.transform.parent.gameObject.SetActive(false);
+                }
             }
-            else
-            {
-                sp0Text.transform.parent.gameObject.SetActive(false);
-            }
-            description.rectTransform.sizeDelta = new Vector2(description.rectTransform.rect.width, description.preferredHeight);
-            SkillRT.sizeDelta = new Vector2(SkillRT.rect.width, 25.2f + description.preferredHeight);
         }
     }
     public class TalentCard
@@ -134,7 +141,7 @@ namespace MyUI
         private float rate = 0.5625f;
         private Dictionary<BuffType, string> buffs = new Dictionary<BuffType, string>()
         {
-            {BuffType.atkminn_delta_value,"×îÐ¡¹¥»÷Êý" }
+            {BuffType.atkminn_delta_value,"ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" }
         };
         public BuffCard(Vector2 skillCardAnchorPos, RectTransform parent, Color textColor, float width)
         {
