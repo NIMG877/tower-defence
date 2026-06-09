@@ -24,6 +24,7 @@ namespace MyUI
 
             public EntityID EntityId;
             public EntityData EntityData;
+            public EntityStats EntityStats;
 
             float _respawnTimer;
             float _selectorYAnchor;
@@ -48,6 +49,18 @@ namespace MyUI
             {
                 EntityId = staticId;
                 EntityData = GameDataService.EntityRepository.Get(staticId);
+                // 从实体池取一个示例 Entity，缓存其 EntityStats。
+                // EntityPool.GetEntity() 不摘出，仅返回 inp_entities[0] 的引用；
+                // EntityStats 持有者是同一实例，后续 XxxS 计算始终读到最新值。
+                EntityPool pool = EntityPoolManager.Manager.FetchEntityPool(staticId);
+                if (pool != null)
+                {
+                    Entity sample = pool.GetEntity();
+                    if (sample != null)
+                    {
+                        EntityStats = sample.Stats;
+                    }
+                }
 
                 _respawnTimer = 0;
                 _deployCount = 0;
@@ -314,12 +327,13 @@ namespace MyUI
         private UIState _currentUIState;
         private bool _leftmessageOpen, _operaterOpen, _draggerOpen, _chooserOpen, _rangeOpen, _cansetOpen;
 
-        // ===== Selection State (2-field) =====
-        // 选中状态（两字段联合表达，由 UIState 状态机保证互斥）：
-        //   viewBeforeSet/setting/choosing → _selectedStaticEntityID + _selectedPlaceData
-        //   viewAfterSet                   → _selectedStaticEntityID
-        //   normal/无选中                  → 两个全 null
+        // ===== Selection State (3-field) =====
+        // 选中状态（三字段联合表达，由 UIState 状态机保证互斥）：
+        //   viewBeforeSet/setting/choosing → _selectedStaticEntityID + _selectedPlaceData（池里 Stats）
+        //   viewAfterSet                   → _selectedStaticEntityID + _selectedEntity（已部署，实时 Stats）
+        //   normal/无选中                  → 三个全 null
         private StaticEntityPlaceData _selectedPlaceData;
+        private Entity _selectedEntity;
         private EntityID? _selectedStaticEntityID;
 
         // ===== Map/Block Data =====
@@ -564,7 +578,8 @@ namespace MyUI
                     Entity entity = EntityManager.Manager.GetStaticEntityInBlock(i, j);
                     if (entity != null && entity.Stats.IsActive)
                     {
-                        UIStates_SwitchTo_ViewAfterSet(entity.EntityData.ID);
+                        // 已部署的 entity：直接传 Entity 进去拿实时 Stats，不再走 EntityID → Repository 的模板回退
+                        UIStates_SwitchTo_ViewAfterSet(entity.EntityData.ID, entity);
                     }
                 }
                 else
@@ -864,6 +879,7 @@ namespace MyUI
             _isAffordableBlockList.Clear();
             _selectedStaticEntityID = null;
             _selectedPlaceData = null;
+            _selectedEntity = null;
             _orientation = -1;
         }
         public override void OnPause()
@@ -918,6 +934,7 @@ namespace MyUI
             SetTimeScale();
             _currentUIState = UIState.normal;
             _selectedStaticEntityID = null;
+            _selectedEntity = null;
             if (_selectedPlaceData != null)
             {
                 _selectedPlaceData.SelectorMove(false);
@@ -972,11 +989,12 @@ namespace MyUI
             _currentUIState = UIState.choosing;
         }
 
-        private void UIStates_SwitchTo_ViewAfterSet(EntityID entityID)
+        private void UIStates_SwitchTo_ViewAfterSet(EntityID entityID, Entity entity = null)
         {
             _isSlow = true;
             SetTimeScale();
             _selectedStaticEntityID = entityID;
+            _selectedEntity = entity;
             _selectedPlaceData = null;
             UIStates_ShowSomethingAndOtherClose(new string[3] { "leftmessage", "operator", "range" });
             if (_currentUIState == UIState.normal)
@@ -1065,16 +1083,39 @@ namespace MyUI
             if (!_selectedStaticEntityID.HasValue)
                 return;
             EntityData entityData = GameDataService.EntityRepository.Get(_selectedStaticEntityID.Value);
+            EntityStats stats = GetCurrentEntityStats();
 
-            // 基础属性（取自 EntityData 模板数据）
-            _statsText.text = $"攻击  {(int)entityData.Attack}\n防御  {(int)entityData.Defense}\n法抗  {(int)entityData.MagicResistance}\n阻挡  {entityData.BlockOccupation}";
+            // === 战斗属性 ===
+            // Attack 暂未接入 EntityStats（战斗 base 在 AttackBase 子系统），先用模板值；
+            // Def / MagicResistance / BlockOccupation 切到 XxxS（含战斗过程 buff）。
+            float attack = entityData.Attack;
+            float def = stats != null ? stats.DefS : entityData.Defense;
+            float mgr = stats != null ? stats.MagicResistanceS : entityData.MagicResistance;
+            int blo = stats != null ? stats.BlockOccupationS : entityData.BlockOccupation;
+            _statsText.text = $"攻击  {(int)attack}\n防御  {(int)def}\n法抗  {(int)mgr}\n阻挡  {blo}";
 
-            // HP：模板数据不含运行时 CurrentHp，按满血显示；后续接入运行时数据时改这里
-            float maxHp = entityData.MaxHp;
+            // === HP：取自 EntityStats 实时值 ===
+            // _selectedEntity（已部署）→ 真实 CurrentHp；否则（池里的 placeData）→ 按满血显示。
+            float maxHp = stats != null ? stats.MaxHpS : entityData.MaxHp;
+            float currentHp = (stats != null && stats.IsActive) ? stats.CurrentHp : maxHp;
             float leftLength = _hpSliderSize.width;
-            _hpSlider.sizeDelta = new Vector2(leftLength - _hpSliderSize.width, _hpSliderSize.height);
-            _hpText.text = $"{(int)maxHp}/{(int)maxHp}";
-            _hpBk.anchoredPosition = new Vector2(_hpSliderSize.width > 81 ? _hpSliderSize.width : 81, 0);
+            float hpRatio = maxHp > 0 ? currentHp / maxHp : 0;
+
+            _hpSlider.sizeDelta = new Vector2(leftLength * (hpRatio-1), _hpSliderSize.height);
+            _hpText.text = $"{(int)currentHp}/{(int)maxHp}";
+            _hpBk.anchoredPosition = new Vector2(leftLength * hpRatio > 81 ? leftLength *  hpRatio : 81, 0);
+        }
+
+        /// <summary>
+        /// 当前选中态的 EntityStats：已部署 entity 优先（实时），否则取 placeData 缓存（池）。
+        /// </summary>
+        private EntityStats GetCurrentEntityStats()
+        {
+            if (_selectedEntity != null)
+            {
+                return _selectedEntity.Stats;
+            }
+            return _selectedPlaceData?.EntityStats;
         }
         // Operator
         private void UIStates_ShowClose_Operator(bool show)
