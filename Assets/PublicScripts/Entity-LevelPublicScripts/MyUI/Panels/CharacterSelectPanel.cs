@@ -330,8 +330,8 @@ namespace MyUI
             _atkBTText.text = entityData.BaseAttackTime.ToString();
             _nullMask.SetActive(false);
             int characterIndex = _selectedCharacters.IndexOf(characterId);
-            Skill[] skills = entityData.Prefab.GetComponents<Skill>();
-            if (skills.Length == 0)
+            var skills = entityData.Skills;
+            if (skills.Count == 0)
             {
                 for (int i = 0; i < 3; i++)
                 {
@@ -343,7 +343,7 @@ namespace MyUI
             }
             else
             {
-                for (int i = 0; i < skills.Length; i++)
+                for (int i = 0; i < skills.Count; i++)
                 {
                     int index = i;
                     _skillSelectorActions[i] = () =>
@@ -359,7 +359,7 @@ namespace MyUI
                     _skillSelectorCards[i].SkillRT.gameObject.SetActive(true);
                     _noneSkillInfo[i].SetActive(false);
                 }
-                for (int i = skills.Length; i < 3; i++)
+                for (int i = skills.Count; i < 3; i++)
                 {
                     _skillSelectorCards[i].SkillRT.gameObject.SetActive(false);
                     _noneSkillInfo[i].SetActive(true);
