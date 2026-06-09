@@ -494,7 +494,7 @@ namespace MyUI
                     if (_currentShow != index && _selectedStaticEntityID.HasValue)
                     {
                         EntityData entityData = GameDataService.EntityRepository.Get(_selectedStaticEntityID.Value);
-                        SwitchShowSkillTalent(index, entityData);
+                        SwitchShowSkillTalent(index, entityData, _selectedEntity);
                     }
                 });
                 _skillTalentSwitchButtons[i].GetComponent<EventTrigger>().triggers.Add(click);
@@ -1071,7 +1071,7 @@ namespace MyUI
 
                 EntityData entityData = GameDataService.EntityRepository.Get(entityID);
 
-                SwitchShowSkillTalent(_currentShow, entityData);
+                SwitchShowSkillTalent(_currentShow, entityData, _selectedEntity);
                 ShowAttackRangeAttributes(entityData.VisionRange);
                 _name.text = entityData.ChineseName;
                 _class.sprite = _professionsLighten[entityData.CharacterJob];
@@ -1663,7 +1663,8 @@ namespace MyUI
                 }
             }
         }
-        private void SwitchShowSkillTalent(int show, EntityData entityData)
+        // entity 选填：池预览（viewBeforeSet 等）传 null，viewAfterSet 传 _selectedEntity 以拿到运行时数据。
+        private void SwitchShowSkillTalent(int show, EntityData entityData, Entity entity = null)
         {
             if (_currentShow != show)
             {
@@ -1691,82 +1692,111 @@ namespace MyUI
                 }
             }
 
-            // switch (_currentShow)
-            // {
-            //     case 0:
-            //         if (entityData.Skills != null && entityData.Skills.Count > 0)
-            //         {
-            //             _skillCard.SkillRT.gameObject.SetActive(true);
-            //             _skillCard.UpdateSkillCardMessage(entityData.Skills[0]);
-            //         }
-            //         else
-            //         {
-            //             _skillCard.SkillRT.gameObject.SetActive(false);
-            //         }
-            //         break;
-            //     case 1:
-            //         _subpCard.SubpRT.gameObject.SetActive(true);
-            //         _subpCard.UpdateSubpCardMessage(entityData);
-            //         break;
-            //     case 2:
-            //         Talent[] ts = entity.Talents;
-            //         if (ts.Length <= _talentCards.Count)
-            //         {
-            //             for (int i = 0; i < ts.Length; i++)
-            //             {
-            //                 _talentCards[i].TalentRT.gameObject.SetActive(true);
-            //                 _talentCards[i].UpdateTalentCardMessage(ts[i]);
-            //             }
-            //             for (int i = ts.Length; i < _talentCards.Count; i++)
-            //             {
-            //                 _talentCards[i].TalentRT.gameObject.SetActive(false);
-            //             }
-            //         }
-            //         else
-            //         {
-            //             for (int i = 0; i < _talentCards.Count; i++)
-            //             {
-            //                 _talentCards[i].TalentRT.gameObject.SetActive(true);
-            //                 _talentCards[i].UpdateTalentCardMessage(ts[i]);
-            //             }
-            //             for (int i = _talentCards.Count; i < ts.Length; i++)
-            //             {
-            //                 TalentCard ti = new TalentCard(new Vector2(0, 0), _skillTalentRect, Color.white, _skillTalentRect.rect.width);
-            //                 ti.UpdateTalentCardMessage(ts[i]);
-            //                 _talentCards.Add(ti);
-            //             }
-            //         }
-            //         break;
-            //     case 3:
-            //         List<Buff> bs = entity.buffController.Buffs;
-            //         if (bs.Count <= _buffCards.Count)
-            //         {
-            //             for (int i = 0; i < bs.Count; i++)
-            //             {
-            //                 _buffCards[i].BuffRT.gameObject.SetActive(true);
-            //                 _buffCards[i].UpdateBuffCardMessage(bs[i]);
-            //             }
-            //             for (int i = bs.Count; i < _buffCards.Count; i++)
-            //             {
-            //                 _buffCards[i].BuffRT.gameObject.SetActive(false);
-            //             }
-            //         }
-            //         else
-            //         {
-            //             for (int i = 0; i < _buffCards.Count; i++)
-            //             {
-            //                 _buffCards[i].BuffRT.gameObject.SetActive(true);
-            //                 _buffCards[i].UpdateBuffCardMessage(bs[i]);
-            //             }
-            //             for (int i = _buffCards.Count; i < bs.Count; i++)
-            //             {
-            //                 BuffCard bi = new BuffCard(new Vector2(0, 0), _skillTalentRect, Color.white, _skillTalentRect.rect.width);
-            //                 bi.UpdateBuffCardMessage(bs[i]);
-            //                 _buffCards.Add(bi);
-            //             }
-            //         }
-            //         break;
-            // }
+            switch (_currentShow)
+            {
+                case 0:
+                    // Skill: 优先用 live entity 的 SkillRuntime（未来可显示 SP 实时状态），回退到模板
+                    SkillSystem.SkillConfig skillConfig = null;
+                    SkillSystem.SkillRuntime skillRuntime = null;
+                    if (entity != null && entity.SkillRunner != null && entity.SkillRunner.Skills != null && entity.SkillRunner.Skills.Count > 0)
+                    {
+                        skillRuntime = entity.SkillRunner.Skills[0];
+                        skillConfig = skillRuntime.config;
+                    }
+                    else if (entityData.Skills != null && entityData.Skills.Count > 0)
+                    {
+                        skillConfig = entityData.Skills[0];
+                    }
+                    if (skillConfig != null)
+                    {
+                        _skillCard.SkillRT.gameObject.SetActive(true);
+                        _skillCard.UpdateSkillCardMessage(skillConfig, skillRuntime);
+                    }
+                    else
+                    {
+                        _skillCard.SkillRT.gameObject.SetActive(false);
+                    }
+                    break;
+                case 1:
+                    _subpCard.SubpRT.gameObject.SetActive(true);
+                    _subpCard.UpdateSubpCardMessage(entityData);
+                    break;
+                case 2:
+                    // Talent: live entity 优先（运行时实际挂载的 Talent 组件），回退到 entityData.Prefab（池预览）
+                    // 原版用 entity.Talents 字段，但该字段目前未被 PreWarm/Initialize 填充，会 NRE。改用 GetComponents 直接取。
+                    Talent[] ts;
+                    if (entity != null)
+                    {
+                        ts = entity.GetComponents<Talent>();
+                    }
+                    else if (entityData.Prefab != null)
+                    {
+                        ts = entityData.Prefab.GetComponents<Talent>();
+                    }
+                    else
+                    {
+                        ts = new Talent[0];
+                    }
+                    if (ts.Length <= _talentCards.Count)
+                    {
+                        for (int i = 0; i < ts.Length; i++)
+                        {
+                            _talentCards[i].TalentRT.gameObject.SetActive(true);
+                            _talentCards[i].UpdateTalentCardMessage(ts[i]);
+                        }
+                        for (int i = ts.Length; i < _talentCards.Count; i++)
+                        {
+                            _talentCards[i].TalentRT.gameObject.SetActive(false);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < _talentCards.Count; i++)
+                        {
+                            _talentCards[i].TalentRT.gameObject.SetActive(true);
+                            _talentCards[i].UpdateTalentCardMessage(ts[i]);
+                        }
+                        for (int i = _talentCards.Count; i < ts.Length; i++)
+                        {
+                            TalentCard ti = new TalentCard(new Vector2(0, 0), _skillTalentRect, Color.white, _skillTalentRect.rect.width);
+                            ti.UpdateTalentCardMessage(ts[i]);
+                            _talentCards.Add(ti);
+                        }
+                    }
+                    break;
+                case 3:
+                    // Buff: 来自 live entity 的 BuffController（运行时数据，池预览无；该路径下显示空）
+                    List<Buff> bs = (entity != null && entity.buffController != null)
+                        ? entity.buffController.Buffs
+                        : new List<Buff>();
+                    if (bs.Count <= _buffCards.Count)
+                    {
+                        for (int i = 0; i < bs.Count; i++)
+                        {
+                            _buffCards[i].BuffRT.gameObject.SetActive(true);
+                            _buffCards[i].UpdateBuffCardMessage(bs[i]);
+                        }
+                        for (int i = bs.Count; i < _buffCards.Count; i++)
+                        {
+                            _buffCards[i].BuffRT.gameObject.SetActive(false);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < _buffCards.Count; i++)
+                        {
+                            _buffCards[i].BuffRT.gameObject.SetActive(true);
+                            _buffCards[i].UpdateBuffCardMessage(bs[i]);
+                        }
+                        for (int i = _buffCards.Count; i < bs.Count; i++)
+                        {
+                            BuffCard bi = new BuffCard(new Vector2(0, 0), _skillTalentRect, Color.white, _skillTalentRect.rect.width);
+                            bi.UpdateBuffCardMessage(bs[i]);
+                            _buffCards.Add(bi);
+                        }
+                    }
+                    break;
+            }
             LayoutRebuilder.ForceRebuildLayoutImmediate(_skillTalentRect);
             if (_skillTalentRect.rect.height > _skillTalentRectParent.rect.height)
             {
