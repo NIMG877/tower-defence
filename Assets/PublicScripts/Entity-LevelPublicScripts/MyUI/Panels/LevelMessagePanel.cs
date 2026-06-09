@@ -348,6 +348,8 @@ namespace MyUI
         // ===== Camera =====
         private Camera _camera;
         private Vector3 _cameraOriginalPos;
+        private Camera _uiCamera;
+        private Vector3 _uiCameraOriginalPos;
         private float _deltaX;
 
         // ===== Chooser / Orientation =====
@@ -870,6 +872,8 @@ namespace MyUI
             _rangeImgCollection.SetActive(false);
             CostSliderAndCanSetNumUpdate();
             _cameraOriginalPos = _camera.transform.position;
+            _uiCamera = LevelResourceSharing.UICamera;
+            _uiCameraOriginalPos = _uiCamera.transform.position;
             _deltaX = _cameraOriginalPos.x - _operateArea.transform.position.x;
         }
         public override void OnExit()
@@ -1120,66 +1124,61 @@ namespace MyUI
         // Operator
         private void UIStates_ShowClose_Operator(bool show)
         {
-            // if (show)
-            // {
-            //     if (!_operaterOpen)
-            //     {
-            //         _operaterOpen = true;
-            //         _operateArea.SetActive(true);
-            //     }
-            //     MoveCamera(_selectedEntity.EntityPosition + _deltaX * Vector2.right, 0.1f);
-            //     if (sea.CanCallBack)
-            //     {
-            //         _callBack.enabled = true;
-            //         _callBackClick.callback.RemoveAllListeners();
-            //         _callBackClick.callback.AddListener((data) =>
-            //         {
-            //             _selectedEntity.thisEntityPool.Return(_selectedEntity);
-            //             LevelRescurceManager.Manager.ChangeCost((int)(_selectedEntity.GetComponent<InteractableStatic>().CurrentSetCost * 0.5));
-            //             _selectedEntity.Stats.IsActive = false;
-            //             AudioManager.Manager.PlayAudio("escape", 1, false, false);
-            //             UIStates_SwitchTo_Normal();
-            //         });
-            //     }
-            //     else
-            //     {
-            //         _callBack.enabled = false;
-            //     }
-            //     if (_selectedEntity.skill != null && _selectedEntity.skill.Length > 0)
-            //     {
-            //         _skillOpen.gameObject.SetActive(true);
-            //         _selectSkill = _selectedEntity.skill[0];
-            //         _skillOpen.sprite = _selectSkill.SkillImg;
-            //         if (_selectSkill.SkillAttackRange != null)
-            //         {
-            //             _skillRange.gameObject.SetActive(true);
-            //             _skillRangeClick.callback.RemoveAllListeners();
-            //             _skillRangeClick.callback.AddListener((data) =>
-            //             {
+            if (show)
+            {
+                if (_selectedEntity == null) return;
+                if (!_operaterOpen)
+                {
+                    _operaterOpen = true;
+                    _operateArea.SetActive(true);
+                }
+                // 镜头横移：把 _selectedEntity 横向对齐到 _operateArea 锚点，y 跟随实体世界位置
+                MoveCamera(_selectedEntity.EntityPosition + _deltaX * Vector2.right, 0.1f);
 
-            //             });
-            //         }
-            //         else
-            //         {
-            //             _skillRange.gameObject.SetActive(false);
-            //         }
-            //     }
-            //     else
-            //     {
-            //         _skillOpen.gameObject.SetActive(false);
-            //         _selectSkill = null;
-            //     }
-            //     UIStates_Update_Operator();
-            // }
-            // else
-            // {
-            //     if (_operaterOpen)
-            //     {
-            //         _operaterOpen = false;
-            //         _operateArea.SetActive(false);
-            //         MoveCamera(_cameraOriginalPos, 0.1f);
-            //     }
-            // }
+                // 撤退按钮：仅当该 entity 配置为可撤退时启用；点击 → 池回收 + 50% 退款
+                bool canCallBack = _selectedEntity.EntityData.CanCallBack;
+                _callBack.enabled = canCallBack;
+                _callBackClick.callback.RemoveAllListeners();
+                if (canCallBack)
+                {
+                    _callBackClick.callback.AddListener((data) =>
+                    {
+                        // 先退款再回收：CurrentSetCost 在 Return() 后仍可读（SetActive(false) 不销毁组件），
+                        // 但语义上"先退一半费用再还池"更符合玩家认知。
+                        LevelRescurceManager.Manager.ChangeCost(
+                            (int)(_selectedEntity.GetComponent<InteractableStatic>().CurrentSetCost * 0.5f));
+                        _selectedEntity.thisEntityPool.Return(_selectedEntity);
+                        AudioManager.Manager.PlayAudio("escape", 1, false, false);
+                        UIStates_SwitchTo_Normal();
+                    });
+                }
+
+                // 技能按钮与技能范围预览（旧 Skill MonoBehaviour 数据源，与 SkillSystem 并存期）
+                if (_selectedEntity.skill != null && _selectedEntity.skill.Length > 0)
+                {
+                    _skillOpen.gameObject.SetActive(true);
+                    _selectSkill = _selectedEntity.skill[0];
+                    _skillOpen.sprite = _selectSkill.SkillImg;
+                    _skillRange.gameObject.SetActive(_selectSkill.SkillAttackRange != null);
+                }
+                else
+                {
+                    _skillOpen.gameObject.SetActive(false);
+                    _selectSkill = null;
+                    _skillRange.gameObject.SetActive(false);
+                }
+                UIStates_Update_Operator();
+            }
+            else
+            {
+                // 离开 viewAfterSet：仅在面板确实处于打开态时才推回镜头，避免状态机反复切回时抖动
+                if (_operaterOpen)
+                {
+                    _operaterOpen = false;
+                    _operateArea.SetActive(false);
+                    MoveCamera(_cameraOriginalPos, 0.1f);
+                }
+            }
         }
         private void UIStates_Update_Operator()
         {
@@ -1618,7 +1617,9 @@ namespace MyUI
             DOTween.To((value) =>
             {
                 Vector2 tmp = (1 - value) * currentPos + value * targetPos;
+                // MCam 与 UICam 同步平移 x/y；两机 z 不同（MCam=-1, UICam=0），各自锁回原 z 不插值
                 _camera.transform.position = new Vector3(tmp.x, tmp.y, _cameraOriginalPos.z);
+                _uiCamera.transform.position = new Vector3(tmp.x, tmp.y, _uiCameraOriginalPos.z);
                 SlidersManager.Manager.TakeOverSliderMove();
             }, 0, 1, duration).SetUpdate(true);
         }

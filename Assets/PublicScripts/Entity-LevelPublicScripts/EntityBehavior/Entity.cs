@@ -202,6 +202,9 @@ public class Entity : MonoBehaviour, IPoolOperation
         Stats.AttributesCaculateFirst(EntityData);
         Movement.Initialize();
 
+        // === 旧 Skill[] 填充（与 SkillSystem 并存期，过渡给 LevelMessagePanel 的旧 UI 读 _selectSkill） ===
+        this.skill = GetComponents<Skill>();
+
         // === SkillRunner 生命周期接入（Phase 2 迁移期，与旧 Skill[]/Talent[] 共存） ===
         if (TryGetComponent<SkillSystem.SkillRunner>(out var skillRunner))
             skillRunner.PreWarm();
