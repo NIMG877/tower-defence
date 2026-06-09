@@ -5,7 +5,7 @@ public class SpSliderController : SliderControllerBasic
 {
     private Color _skillFillColor;
     private Color _normalFillColor;
-    private SkillSystem.SkillRunner _skillRunner;
+    private EntitySkillRunner _skillRunner;
 
     public override void SliderInitialize(GameObject sliderObject)
     {
@@ -18,7 +18,7 @@ public class SpSliderController : SliderControllerBasic
         int positionLayer, bool hideWhenFull, bool moveSlider)
     {
         base.SetHostEntity(hostEntity, smoothSpeed, type, positionLayer, hideWhenFull, moveSlider);
-        hostEntity.TryGetComponent<SkillSystem.SkillRunner>(out _skillRunner);
+        _skillRunner = hostEntity.SkillRunner;
     }
 
     protected override void SetRateOperations()

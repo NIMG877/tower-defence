@@ -29,6 +29,7 @@ public class Entity : MonoBehaviour, IPoolOperation
     private EntityVision _vision;
     private EntityMovement _movement;
     private EntityCombat _combat;
+    private EntitySkillRunner _skillRunner;
 
     private int _camp;
 
@@ -40,6 +41,8 @@ public class Entity : MonoBehaviour, IPoolOperation
     public EntityMovement Movement { get { return _movement; } }
     /// <summary>战斗子系统：EntityUpdate/PriorityOrder。</summary>
     public EntityCombat Combat { get { return _combat; } }
+    /// <summary>技能子系统：SkillRuntime 列表 + 事件桥 + SP/组件 tick。</summary>
+    public EntitySkillRunner SkillRunner { get { return _skillRunner; } }
 
     public string NAME { get { return EntityData.ChineseName; } }
 
@@ -108,6 +111,7 @@ public class Entity : MonoBehaviour, IPoolOperation
         Stats.RecoverTick();
         Stats.CheckDeath();
         Vision.Refresh();
+        if (_skillRunner != null) _skillRunner.Tick(Time.fixedDeltaTime);
     }
 
     public void Die()
@@ -197,17 +201,15 @@ public class Entity : MonoBehaviour, IPoolOperation
         _vision = new EntityVision(this);
         _movement = new EntityMovement(this);
         _combat = new EntityCombat(this);
+        _skillRunner = new EntitySkillRunner(this);
 
         _vision.InitializeFromData(EntityData);
         Stats.AttributesCaculateFirst(EntityData);
         Movement.Initialize();
+        _skillRunner.PreWarm();
 
         // === 旧 Skill[] 填充（与 SkillSystem 并存期，过渡给 LevelMessagePanel 的旧 UI 读 _selectSkill） ===
         this.skill = GetComponents<Skill>();
-
-        // === SkillRunner 生命周期接入（Phase 2 迁移期，与旧 Skill[]/Talent[] 共存） ===
-        if (TryGetComponent<SkillSystem.SkillRunner>(out var skillRunner))
-            skillRunner.PreWarm();
     }
 
     public virtual void Initialize()
@@ -229,9 +231,7 @@ public class Entity : MonoBehaviour, IPoolOperation
             SlidersManager.Manager.SetSlider<SpSliderController>(this, 10, camp2 ? 3 : 4, 1, camp2, canmove);
         }
 
-        // === SkillRunner 生命周期接入（Phase 2 迁移期，与旧 Skill[]/Talent[] 共存） ===
-        if (TryGetComponent<SkillSystem.SkillRunner>(out var skillRunner))
-            skillRunner.OnInitialize();
+        _skillRunner.OnInitialize();
     }
 
     public virtual void Dormancy()
@@ -252,8 +252,6 @@ public class Entity : MonoBehaviour, IPoolOperation
             LevelActionManager.Manager.RemoveFromWaveEntities(this);
         }
 
-        // === SkillRunner 生命周期接入（Phase 2 迁移期，与旧 Skill[]/Talent[] 共存） ===
-        if (TryGetComponent<SkillSystem.SkillRunner>(out var skillRunner))
-            skillRunner.OnTeardown();
+        _skillRunner.OnTeardown();
     }
 }
