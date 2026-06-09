@@ -1155,6 +1155,11 @@ namespace MyUI
                         // 但语义上"先退一半费用再还池"更符合玩家认知。
                         LevelRescurceManager.Manager.ChangeCost(
                             (int)(_selectedEntity.GetComponent<InteractableStatic>().CurrentSetCost * 0.5f));
+                        // 关键：设 IsActive = false 是给 Slider 自清理的信号。
+                        // 死亡路径里 EntityStats.BeginDie 会把 _participateIn 置 false（IsActive 走 false 分支 → slider ReturnSlider）；
+                        // 撤退路径没有 BeginDie 这一步，Entity.Dormancy 也不动 _participateIn，slider 看不到任何"已离场"信号，
+                        // 就会引用一个 SetActive(false) 的 Entity 永远卡着。这一行对齐死亡路径的信号。
+                        _selectedEntity.Stats.IsActive = false;
                         _selectedEntity.thisEntityPool.Return(_selectedEntity);
                         AudioManager.Manager.PlayAudio("escape", 1, false, false);
                         UIStates_SwitchTo_Normal();
