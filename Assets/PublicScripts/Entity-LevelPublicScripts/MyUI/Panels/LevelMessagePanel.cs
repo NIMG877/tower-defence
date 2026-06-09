@@ -302,7 +302,8 @@ namespace MyUI
         private Image _callBack, _skillOpen, _skillRange, _spBk, _spState, _spMask, _stop, _skillChargeNum;
         private TextMeshProUGUI _spText, _skillChargeNumText;
         private Sprite[] _spMessageAtlas, _skillRangeButton;
-        private Skill _selectSkill;
+        private SkillSystem.SkillConfig _selectSkillConfig;
+        private SkillSystem.SkillRuntime _selectSkillRuntime;
         private EventTrigger.Entry _callBackClick, _skillRangeClick;
 
         // ===== Floating Text Pool =====
@@ -523,9 +524,10 @@ namespace MyUI
             skillOpenClick.eventID = EventTriggerType.PointerClick;
             skillOpenClick.callback.AddListener((data) =>
             {
-                if (_selectSkill.SkillCanBegin())
+                var sp = _selectSkillRuntime != null ? _selectSkillRuntime.spEngine : null;
+                if (sp != null && sp.CanBegin())
                 {
-                    _selectSkill.SkillBegin();
+                    sp.FireSkill();
                     UIStates_SwitchTo_Normal();
                 }
             });
@@ -537,7 +539,8 @@ namespace MyUI
             skillstop.eventID = EventTriggerType.PointerClick;
             skillstop.callback.AddListener((data) =>
             {
-                _selectSkill.SkillEnd();
+                if (_selectSkillRuntime != null && _selectSkillRuntime.spEngine != null)
+                    _selectSkillRuntime.spEngine.EndSkill();
                 UIStates_SwitchTo_Normal();
                 AudioManager.Manager.PlayAudio("skill_boostclose", 1, false, false);
             });
@@ -1159,18 +1162,22 @@ namespace MyUI
                     });
                 }
 
-                // 技能按钮与技能范围预览（旧 Skill MonoBehaviour 数据源，与 SkillSystem 并存期）
-                if (_selectedEntity.skill != null && _selectedEntity.skill.Length > 0)
+                // 技能按钮与技能范围预览（新 SkillSystem 数据源：EntitySkillRunner / SkillRuntime / SPConfig）
+                var runner = _selectedEntity.SkillRunner;
+                if (runner != null && runner.Skills != null && runner.Skills.Count > 0)
                 {
+                    _selectSkillRuntime = runner.Skills[0];
+                    _selectSkillConfig = _selectSkillRuntime.config;
                     _skillOpen.gameObject.SetActive(true);
-                    _selectSkill = _selectedEntity.skill[0];
-                    _skillOpen.sprite = _selectSkill.SkillImg;
-                    _skillRange.gameObject.SetActive(_selectSkill.SkillAttackRange != null);
+                    _skillOpen.sprite = _selectSkillConfig.icon;
+                    var range = _selectSkillConfig.sp != null ? _selectSkillConfig.sp.skillAttackRange : null;
+                    _skillRange.gameObject.SetActive(range != null && range.Length > 0);
                 }
                 else
                 {
+                    _selectSkillRuntime = null;
+                    _selectSkillConfig = null;
                     _skillOpen.gameObject.SetActive(false);
-                    _selectSkill = null;
                     _skillRange.gameObject.SetActive(false);
                 }
                 UIStates_Update_Operator();
@@ -1183,70 +1190,71 @@ namespace MyUI
                     _operaterOpen = false;
                     _operateArea.SetActive(false);
                     MoveCamera(_cameraOriginalPos, 0.1f);
+                    _selectSkillConfig = null;
+                    _selectSkillRuntime = null;
                 }
             }
         }
         private void UIStates_Update_Operator()
         {
-            if (_selectSkill)
+            if (_selectSkillRuntime == null
+                || _selectSkillRuntime.spEngine == null
+                || _selectSkillConfig == null
+                || _selectSkillConfig.sp == null)
+                return;
+            var sp = _selectSkillRuntime.spEngine;
+            var cfg = _selectSkillConfig.sp;
+
+            bool canBegin = sp.CanBegin();
+            if (!canBegin)
             {
-                if (!_selectSkill.SkillCanBegin())
+                _skillOpen.raycastTarget = false;
+                _skillOpen.color = Color.gray;
+            }
+            else
+            {
+                if (cfg.openMode == SkillSystem.SkillOpenMode.Manual)
+                {
+                    _skillOpen.raycastTarget = true;
+                }
+                else
                 {
                     _skillOpen.raycastTarget = false;
-                    _skillOpen.color = Color.gray;
                 }
-                else
+                _skillOpen.color = Color.white;
+            }
+
+            float currentSpRate = cfg.totalSp > 0 ? Mathf.Clamp01(sp.CurrentSp / cfg.totalSp) : 0f;
+            int currentChargeNum = sp.CurrentCharge;
+            bool isSkill = sp.IsActive;
+            _spMask.fillAmount = currentSpRate;
+            if (currentChargeNum < 1)
+            {
+                _skillChargeNum.gameObject.SetActive(false);
+            }
+            else
+            {
+                _skillChargeNum.gameObject.SetActive(true);
+                _skillChargeNumText.text = currentChargeNum.ToString();
+            }
+            if (!isSkill)
+            {
+                float tsp = cfg.totalSp;
+                _spState.sprite = _spMessageAtlas[0];
+                _stop.enabled = false;
+                if (!(sp.CurrentSp >= cfg.totalSp || (cfg.chargeNum > 1 && sp.CurrentCharge >= cfg.chargeNum)))
                 {
-                    if (_selectSkill.SkillOpenMode == 3)
+                    _spMask.enabled = true;
+                    _spMask.color = _lightGreen_half;
+                    _spText.text = $"{(int)(tsp * currentSpRate)}/{(int)tsp}";
+                    if (currentChargeNum == 0 && currentSpRate < 1)
                     {
-                        _skillOpen.raycastTarget = true;
+                        _spBk.color = _gray;
+                        _spState.color = _lightGreen;
+                        _spText.color = Color.white;
                     }
                     else
                     {
-                        _skillOpen.raycastTarget = false;
-                    }
-                    _skillOpen.color = Color.white;
-                }
-        
-                (float currentSpRate, int currentChargeNum, bool isSkill) = _selectSkill.SkillMessage;
-                _spMask.fillAmount = currentSpRate;
-                if (currentChargeNum < 1)
-                {
-                    _skillChargeNum.gameObject.SetActive(false);
-                }
-                else
-                {
-                    _skillChargeNum.gameObject.SetActive(true);
-                    _skillChargeNumText.text = currentChargeNum.ToString();
-                }
-                if (!isSkill)
-                {
-                    float tsp;
-                    tsp = _selectSkill.TotalSp;
-                    _spState.sprite = _spMessageAtlas[0];
-                    _stop.enabled = false;
-                    if (!_selectSkill.SPFull())
-                    {
-                        _spMask.enabled = true;
-                        _spMask.color = _lightGreen_half;
-                        _spText.text = $"{(int)(tsp * currentSpRate)}/{(int)tsp}";
-                        if (currentChargeNum == 0 && currentSpRate < 1)
-                        {
-                            _spBk.color = _gray;
-                            _spState.color = _lightGreen;
-                            _spText.color = Color.white;
-                        }
-                        else
-                        {
-                            _spBk.color = _lightGreen;
-                            _spState.color = Color.white;
-                            _spText.color = Color.black;
-                        }
-                    }
-                    else
-                    {
-                        _spMask.enabled = false;
-                        _spText.text = "READY";
                         _spBk.color = _lightGreen;
                         _spState.color = Color.white;
                         _spText.color = Color.black;
@@ -1254,39 +1262,47 @@ namespace MyUI
                 }
                 else
                 {
-                    int consumeType = _selectSkill.SpComsumeMode;
-                    _spBk.color = _orange;
+                    _spMask.enabled = false;
+                    _spText.text = "READY";
+                    _spBk.color = _lightGreen;
                     _spState.color = Color.white;
-                    if (consumeType < 3)
+                    _spText.color = Color.black;
+                }
+            }
+            else
+            {
+                int consumeType = (int)cfg.consumeMode;
+                _spBk.color = _orange;
+                _spState.color = Color.white;
+                if (consumeType < 3)
+                {
+                    float tsa = cfg.skillDuration;
+                    _spMask.enabled = true;
+                    _spMask.color = _orange_half;
+                    _spState.sprite = _spMessageAtlas[consumeType + 1];
+                    _spText.color = Color.white;
+                    if (consumeType == 0)
                     {
-                        float tsa = _selectSkill.SkillAmount;
-                        _spMask.enabled = true;
-                        _spMask.color = _orange_half;
-                        _spState.sprite = _spMessageAtlas[consumeType + 1];
-                        _spText.color = Color.white;
-                        if (consumeType == 0)
-                        {
-                            _spText.text = (tsa * currentSpRate).ToString("0.0") + 's';
-                        }
-                        else
-                        {
-                            _spText.text = (tsa * currentSpRate).ToString() + '/' + tsa.ToString();
-                        }
+                        _spText.text = (tsa * currentSpRate).ToString("0.0") + 's';
                     }
                     else
                     {
-                        _spMask.enabled = false;
-                        _spState.sprite = _spMessageAtlas[4];
-                        _spText.text = null;
+                        _spText.text = (tsa * currentSpRate).ToString() + '/' + tsa.ToString();
                     }
-                    if (_selectSkill.CanCloseSkill)
-                    {
-                        _stop.enabled = true;
-                    }
-                    else
-                    {
-                        _stop.enabled = false;
-                    }
+                }
+                else
+                {
+                    _spMask.enabled = false;
+                    _spState.sprite = _spMessageAtlas[4];
+                    _spText.text = null;
+                }
+                if (cfg.canManualClose)
+                {
+                    _stop.enabled = true;
+                }
+                else
+                {
+                    _stop.enabled = false;
                 }
             }
         }
@@ -1678,10 +1694,10 @@ namespace MyUI
             // switch (_currentShow)
             // {
             //     case 0:
-            //         if (entityData.skill != null && entity.skill.Length > 0)
+            //         if (entityData.Skills != null && entityData.Skills.Count > 0)
             //         {
             //             _skillCard.SkillRT.gameObject.SetActive(true);
-            //             _skillCard.UpdateSkillCardMessage(entity.skill[0]);
+            //             _skillCard.UpdateSkillCardMessage(entityData.Skills[0]);
             //         }
             //         else
             //         {
