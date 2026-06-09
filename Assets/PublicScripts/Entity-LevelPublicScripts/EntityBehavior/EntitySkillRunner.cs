@@ -38,17 +38,54 @@ public class EntitySkillRunner
             BuildSkillRuntime(cfg);
         }
 
-        Subscribe();
+        // 事件订阅不在 PreWarm 一次完成；改为每次部署 OnInitialize / OnTeardown 配对，
+        // 避免池化复用路径下订阅丢失（Bug B）。
         DispatchEvent(new PreWarmEvent());
     }
 
     public void OnInitialize()
     {
+        // 1) 重新订阅事件（每次部署配对，池化复用路径不会丢订阅）
+        Subscribe();
+
+        // 2) 复位每个 SPEngine（currentSp / charge / duration / isActive / recoverForbid）
+        for (int i = 0; i < _skills.Count; i++)
+        {
+            _skills[i].spEngine?.Reset();
+        }
+
+        // 3) 重新初始化组件（先 OnTeardown 清残，再 OnInit 用保存的参数重置）
+        for (int i = 0; i < _skills.Count; i++)
+        {
+            var s = _skills[i];
+            for (int c = 0; c < s.components.Count; c++)
+            {
+                var comp = s.components[c];
+                if (c < s.componentParams.Count)
+                {
+                    var teardownCtx = s.MakeContext(comp, null);
+                    comp.OnTeardown(teardownCtx);
+
+                    var initCtx = s.MakeContext(comp, null);
+                    comp.OnInit(initCtx, s.componentParams[c]);
+                }
+            }
+        }
+
+        // 4) 清空 per-Entity 共享黑板
+        sharedBlackboard.Clear();
+
+        // 5) 派发 InitializeEvent 给组件
         DispatchEvent(new InitializeEvent());
     }
 
     public void OnTeardown()
     {
+        // 退订事件（与 OnInitialize.Subscribe 配对；C# event += / -= 必须成对）
+        Unsubscribe();
+
+        // 调组件 OnTeardown 清残，但 _skills 列表与 spEngine 保留以便下次 OnInitialize 复用
+        // （重建会丢事件订阅、丢组件参数、丢 component 列表对齐）
         for (int i = 0; i < _skills.Count; i++)
         {
             var s = _skills[i];
@@ -58,8 +95,6 @@ public class EntitySkillRunner
                 s.components[c].OnTeardown(ctx);
             }
         }
-        Unsubscribe();
-        _skills.Clear();
     }
 
     /// <summary>
@@ -110,6 +145,7 @@ public class EntitySkillRunner
                 var ctx = runtime.MakeContext(inst, null);
                 inst.OnInit(ctx, ccfg.parameters);
                 runtime.components.Add(inst);
+                runtime.componentParams.Add(ccfg.parameters);
                 if (inst is ITickingComponent t) runtime.tickingComponents.Add(t);
             }
         }

@@ -9,6 +9,8 @@ namespace SkillSystem
         public Blackboard blackboard = new Blackboard();
         public List<ISkillComponent> components = new List<ISkillComponent>();
         public List<ITickingComponent> tickingComponents = new List<ITickingComponent>();
+        // 与 components 并行：保存每个组件的初始参数，供 OnInitialize 时 re-OnInit。
+        public List<ParamList> componentParams = new List<ParamList>();
         public bool isInitialized;
         public bool isActive; // true while skill is firing (SPEngine.IsActive)
 

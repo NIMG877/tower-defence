@@ -30,6 +30,19 @@ namespace SkillSystem
             _currentDuration = 0f;
         }
 
+        /// <summary>
+        /// 复位到初始状态。池化实体重新部署时由 EntitySkillRunner.OnInitialize 调用，
+        /// 不会重建事件订阅（订阅生命周期在 OnInitialize/OnTeardown）。
+        /// </summary>
+        public void Reset()
+        {
+            _currentSp = _cfg.initialSp;
+            _currentCharge = 0;
+            _currentDuration = 0f;
+            _isActive = false;
+            _recoverForbid = 0;
+        }
+
         public void OnTick(float dt, float dtMultiplier)
         {
             // Recovery
