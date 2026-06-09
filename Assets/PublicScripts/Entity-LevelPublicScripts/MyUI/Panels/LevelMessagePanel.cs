@@ -1029,6 +1029,14 @@ namespace MyUI
                     UIStates_Update_Leftmessage();
                     break;
                 case UIState.viewAfterSet:
+                    // 死亡检测（轮询）：_selectedEntity 失活（被致命伤害打挂、淡出中）时立刻关掉操作面板，
+                    // 行为对齐撤退路径。该守卫只在 viewAfterSet 触发：其它态（pool 预览）的 EntityStats
+                    // 来自 _selectedPlaceData 缓存，池中实体 IsActive 恒为 false，会误判。
+                    if (_selectedEntity == null || !_selectedEntity.Stats.IsActive)
+                    {
+                        UIStates_SwitchTo_Normal();
+                        break;
+                    }
                     UIStates_Update_Range();
                     UIStates_Update_Leftmessage();
                     UIStates_Update_Operator();
