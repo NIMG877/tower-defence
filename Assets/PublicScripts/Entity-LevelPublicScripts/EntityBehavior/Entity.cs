@@ -21,7 +21,6 @@ public class Entity : MonoBehaviour, IPoolOperation
     [HideInInspector] public AttackBase AttackBase;
     [HideInInspector] public MoveBase MoveBase;
     public InteractableStatic InteractableStatic;
-    [HideInInspector] public Skill[] skill;
     [HideInInspector] public Talent[] Talents;
 
     // === 子系统持有 ===
@@ -207,9 +206,6 @@ public class Entity : MonoBehaviour, IPoolOperation
         Stats.AttributesCaculateFirst(EntityData);
         Movement.Initialize();
         _skillRunner.PreWarm();
-
-        // === 旧 Skill[] 填充（与 SkillSystem 并存期，过渡给 LevelMessagePanel 的旧 UI 读 _selectSkill） ===
-        this.skill = GetComponents<Skill>();
     }
 
     public virtual void Initialize()
