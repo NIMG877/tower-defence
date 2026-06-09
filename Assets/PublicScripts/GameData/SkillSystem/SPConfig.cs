@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace SkillSystem
 {
-    public enum SpRecoverMode { Natural, OnAttackHit, OnAfterHurt }
-    public enum SpConsumeMode { Natural, OnAttackHit, OnAfterHurt, Instant }
-    public enum SkillOpenMode { Auto, OnAttackAnimBegin, OnBeforeHurt, Manual, OnAttackHit }
+    public enum SpRecoverMode { Natural, OnAttackSuccessfully, OnAfterHurt }
+    public enum SpConsumeMode { Natural, OnAttackSuccessfully, OnAfterHurt, Instant }
+    public enum SkillOpenMode { Auto, OnAttackAnimBegin, OnBeforeHurt, Manual, OnAttackSuccessfully }
 
     [Serializable]
     public class SPConfig

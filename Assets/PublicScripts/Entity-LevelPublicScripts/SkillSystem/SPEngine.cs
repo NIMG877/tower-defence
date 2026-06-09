@@ -46,9 +46,9 @@ namespace SkillSystem
         public void OnTick(float dt, float dtMultiplier)
         {
             // Recovery
-            if (_cfg.recoverMode == SpRecoverMode.Natural && _recoverForbid == 0 && !_isActive)
+            if (_cfg.recoverMode == SpRecoverMode.Natural)
             {
-                _currentSp = Math.Min(_currentSp + dt * dtMultiplier, _cfg.totalSp);
+                AddSp(dt * dtMultiplier);
             }
             // Duration consume
             if (_isActive && _cfg.consumeMode == SpConsumeMode.Natural)
@@ -69,8 +69,9 @@ namespace SkillSystem
 
         public void OnAttackSuccessfully()
         {
-            if (_cfg.recoverMode == SpRecoverMode.OnAttackHit) AddSp(1f);
-            if (_cfg.consumeMode == SpConsumeMode.OnAttackHit && _isActive) ConsumeChargeForHit();
+            if (_cfg.openMode == SkillOpenMode.OnAttackSuccessfully && CanBegin()) FireSkill();
+            if (_cfg.recoverMode == SpRecoverMode.OnAttackSuccessfully) AddSp(1f);
+            if (_cfg.consumeMode == SpConsumeMode.OnAttackSuccessfully && _isActive) ConsumeChargeForHit();    
         }
 
         public void OnAfterHurt(int applyType)
@@ -89,11 +90,6 @@ namespace SkillSystem
         {
             if (applyType != 0 && applyType != 1) return;
             if (_cfg.openMode == SkillOpenMode.OnBeforeHurt && CanBegin()) FireSkill();
-        }
-
-        public void OnAttackHit()
-        {
-            if (_cfg.openMode == SkillOpenMode.OnAttackHit && CanBegin()) FireSkill();
         }
 
         public bool CanBegin()
@@ -126,6 +122,7 @@ namespace SkillSystem
 
         private void AddSp(float v)
         {
+            if (_recoverForbid > 0) return;
             if (_cfg.chargeNum <= 1)
             {
                 _currentSp = Math.Min(_currentSp + v, _cfg.totalSp);
@@ -149,7 +146,7 @@ namespace SkillSystem
         private void ConsumeChargeForHit()
         {
             // In a duration-based skill that consumes on hit, just end it
-            if (_cfg.consumeMode == SpConsumeMode.OnAttackHit) EndSkill();
+            if (_cfg.consumeMode == SpConsumeMode.OnAttackSuccessfully) EndSkill();
         }
     }
 }

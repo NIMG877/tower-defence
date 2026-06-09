@@ -57,7 +57,7 @@ namespace MyUI
                 switch (sp.recoverMode)
                 {
                     case SpRecoverMode.Natural: spRecoverModeText.text = "自动回复"; break;
-                    case SpRecoverMode.OnAttackHit: spRecoverModeText.text = "攻击回复"; break;
+                    case SpRecoverMode.OnAttackSuccessfully: spRecoverModeText.text = "攻击回复"; break;
                     case SpRecoverMode.OnAfterHurt: spRecoverModeText.text = "受击回复"; break;
                 }
                 switch (sp.openMode)
@@ -66,7 +66,7 @@ namespace MyUI
                     case SkillOpenMode.OnAttackAnimBegin: skillOpenModeText.text = "攻击时触发"; break;
                     case SkillOpenMode.OnBeforeHurt: skillOpenModeText.text = "受击时触发"; break;
                     case SkillOpenMode.Manual: skillOpenModeText.text = "手动触发"; break;
-                    case SkillOpenMode.OnAttackHit: skillOpenModeText.text = "命中触发"; break;
+                    case SkillOpenMode.OnAttackSuccessfully: skillOpenModeText.text = "命中触发"; break;
                 }
                 if (sp.totalSp > 0)
                 {
