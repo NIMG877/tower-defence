@@ -26,7 +26,6 @@ namespace SkillSystem.Components
 
         public void OnTrigger(SkillContext ctx)
         {
-            if (!(ctx.currentEvent is BeforeDieAnimationEvent)) return;
             if (ctx.entity == null) return;
             _ = SpawnAsync(ctx);
         }
