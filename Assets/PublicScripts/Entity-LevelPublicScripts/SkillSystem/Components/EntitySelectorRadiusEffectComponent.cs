@@ -19,6 +19,20 @@ namespace SkillSystem.Components
             _subParameters = p;
         }
 
+        /// <summary>
+        /// IMPORTANT: This component constructs sub-components ad-hoc and forwards
+        /// <c>ctx.currentEvent</c> into them. That bypasses the dispatcher's
+        /// trigger-bucket guarantee — the sub-component sees whatever event type
+        /// the parent received.
+        ///
+        /// When configuring this component, the sub-component declared in
+        /// <c>subComponentType</c> MUST be able to handle every event type
+        /// declared in this parent's <c>triggers[]</c>. Otherwise the sub-
+        /// component's direct cast on <c>ctx.currentEvent</c> will NRE.
+        ///
+        /// Tracked for a later refactor; see spec
+        /// docs/superpowers/specs/2026-06-10-skill-trigger-bucket-dispatch-design.md §6.4.
+        /// </summary>
         public void OnTrigger(SkillContext ctx)
         {
             if (ctx.entity == null || string.IsNullOrEmpty(_subComponentType)) return;
