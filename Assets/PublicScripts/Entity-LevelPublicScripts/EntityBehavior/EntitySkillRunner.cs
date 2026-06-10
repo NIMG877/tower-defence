@@ -306,19 +306,20 @@ public class EntitySkillRunner
 
     private void DispatchToSkill(SkillRuntime s, SkillEvent evt)
     {
-        // Active-window gate: a skill's components only see events while the skill is firing,
-        // with these exceptions:
-        //   - PreWarmEvent / InitializeEvent are always dispatched (lifecycle events; the active window is not yet open)
-        //   - SkillBeginEvent / SkillEndEvent are always dispatched (they are the mechanism that flips isActive)
-        bool alwaysDispatch = evt is PreWarmEvent
-                           || evt is InitializeEvent
-                           || evt is SkillBeginEvent
-                           || evt is SkillEndEvent;
-        if (!s.isActive && !alwaysDispatch) return;
+        // Active-window gate: a skill's components only see events while the
+        // skill is firing, EXCEPT for these four lifecycle events which always
+        // bypass the gate. They still need to be declared in config.triggers[]
+        // to be received — bypass is gate-only, not bucket-only.
+        bool bypassActiveGate = evt is PreWarmEvent
+                             || evt is InitializeEvent
+                             || evt is SkillBeginEvent
+                             || evt is SkillEndEvent;
+        if (!s.isActive && !bypassActiveGate) return;
 
-        for (int i = 0; i < s.components.Count; i++)
+        if (!s.componentsByTrigger.TryGetValue(evt.TriggerEvent, out var list)) return;
+        for (int i = 0; i < list.Count; i++)
         {
-            var comp = s.components[i];
+            var comp = list[i];
             var ctx = s.MakeContext(comp, evt);
             ctx.sharedBlackboard = sharedBlackboard;
             ctx.entity = _entity;
