@@ -2,7 +2,13 @@ using UnityEngine;
 
 namespace SkillSystem
 {
-    public abstract class SkillEvent { }
+    public abstract class SkillEvent
+    {
+        // Every concrete SkillEvent must declare which TriggerEvent enum value
+        // it routes to. Abstract (not virtual) so the compiler catches missing
+        // overrides — that's the safety net for the dispatch bridge table.
+        public abstract TriggerEvent TriggerEvent { get; }
+    }
 
     public class SkillContext
     {
