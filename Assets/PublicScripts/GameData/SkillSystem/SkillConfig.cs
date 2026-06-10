@@ -10,7 +10,7 @@ namespace SkillSystem
         public string skillName;
         [TextArea(2, 5)] public string description;
 
-        [Tooltip("技能图标，UI 上技能卡 / 按钮使用。")]
+        [Tooltip("技能图标")]
         public Sprite icon;
 
         public SPConfig sp;
