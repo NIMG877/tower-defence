@@ -79,7 +79,7 @@ namespace SkillSystem
         OnAttackSuccessfully, OnAttackInterrupt,
         OnBeforeHurt, OnAfterHurt,
         OnAttackAnimBegin,
-        OnBeforeDieAnimation, OnDeath,
+        OnBeforeDieAnimation,
         OnSkillBegin, OnSkillEnd,
     }
 
