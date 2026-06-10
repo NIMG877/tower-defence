@@ -31,6 +31,11 @@ public class EntityStats
     private float _magicDodgeBase;
     private int _blockOccupationBase;
     private int _tauntLevelBase;
+    private float _attackBase;
+    private float _baseAttackTimeBase;
+    private int _attackNumBase;
+    private int _attackMinNumBase;
+    private float _moveSpeedBase;
 
     // === 状态 ===
     private float _currentHpRate;
@@ -58,6 +63,11 @@ public class EntityStats
     public float MagicResistanceBase => _magicResistanceBase;
     public float MaxHpBase => _maxHpBase;
     public int BlockOccupationBase => _blockOccupationBase;
+    public float AttackBase => _attackBase;
+    public float BaseAttackTimeBase => _baseAttackTimeBase;
+    public int AttackNumBase => _attackNumBase;
+    public int AttackMinNumBase => _attackMinNumBase;
+    public float MoveSpeedBase => _moveSpeedBase;
 
     // === 计算属性（computed property：_xxxBase + 战斗过程 buff，O(1) 实时计算） ===
     // 流水线末段，无中间储存；buff 变化时无需手动重算，调用方不可能读到陈旧值。
@@ -68,6 +78,20 @@ public class EntityStats
     public float MagicDodgeS => 1 - (1 - _magicDodgeBase) * (1 - _buffController.buffValue[BuffType.mgdoge_delta_rate]);
     public int BlockOccupationS => Math.Max(0, _blockOccupationBase + (int)_buffController.buffValue[BuffType.blo_delta_value]);
     public int TauntLevel => _tauntLevelBase;  // 嘲讽等级无战斗 buff
+    public float AttackS => Math.Max(0, _attackBase + _buffController.buffValue[BuffType.atk_delta_value] + _attackBase * _buffController.buffValue[BuffType.atk_delta_percent]);
+    public float BaseAttackTimeS => Math.Max(0.001f, (_baseAttackTimeBase + _buffController.buffValue[BuffType.batkt_delta_value] + _baseAttackTimeBase * _buffController.buffValue[BuffType.batkt_delta_percent]) * 100 / Math.Max(1, 100 + _buffController.buffValue[BuffType.atkspd_delta_value]));
+    public int AttackNumS
+    {
+        get
+        {
+            if (_attackNumBase >= 0)
+                return Math.Max(0, _attackNumBase + (int)_buffController.buffValue[BuffType.atkn_delta_value]);
+            else
+                return -1;
+        }
+    }
+    public int AttackMinNumS => Math.Max(0, _attackMinNumBase + (int)_buffController.buffValue[BuffType.atkminn_delta_value]);
+    public float MoveSpeedS => Math.Max(0.01f, _moveSpeedBase + _buffController.buffValue[BuffType.mspeed_delta_value] + _moveSpeedBase * _buffController.buffValue[BuffType.mspeed_delta_percent]);
 
     // === HP ===
     public float CurrentHp => _currentHpRate * MaxHpS;
@@ -114,6 +138,11 @@ public class EntityStats
         float magicDodge = data.MagicDodge;
         int blockOccupation = data.BlockOccupation;
         int tauntLevel = data.TauntLevel;
+        float attack = data.Attack;
+        float baseAttackTime = data.BaseAttackTime;
+        int attackNum = data.AttackNum;
+        int attackMinNum = 0;  // EntityData 未暴露此字段，留 0 兼容（无 atkminn_delta_value 数据源时恒为 0）
+        float moveSpeed = data.MoveSpeed;
 
         // 2. [关卡环境"基础数值修改" buff]——使用现成 BuffController.buffValue，语法与 Second 阶段一致。
         //    预期 BuffType 新增：mhp_base_delta_value / mhp_base_delta_percent / def_base_delta_value / ...
@@ -128,6 +157,11 @@ public class EntityStats
         _magicDodgeBase = magicDodge;
         _blockOccupationBase = blockOccupation;
         _tauntLevelBase = tauntLevel;
+        _attackBase = attack;
+        _baseAttackTimeBase = baseAttackTime;
+        _attackNumBase = attackNum;
+        _attackMinNumBase = attackMinNum;
+        _moveSpeedBase = moveSpeed;
     }
 
     // === HP 自然恢复（原 Entity.FixedUpdate 中 current_hp_rate < 1 分支） ===

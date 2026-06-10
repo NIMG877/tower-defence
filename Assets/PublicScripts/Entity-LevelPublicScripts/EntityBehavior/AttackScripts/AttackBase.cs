@@ -79,38 +79,35 @@ public class AttackBase : MonoBehaviour, IPoolOperation
     {
         get
         {
-            return _attackDamageF;
+            return _thisEntity.Stats.AttackBase;
         }
     }
     public float AttackDamageS
     {
         get
         {
-            return Math.Max(0, _attackDamageF + _thisEntity.buffController.buffValue[BuffType.atk_delta_value] + _attackDamageF * _thisEntity.buffController.buffValue[BuffType.atk_delta_percent]);
+            return _thisEntity.Stats.AttackS;
         }
     }
     public float BaseAttackTimeS
     {
         get
         {
-            return Math.Max(0.001f, (_baseAttackTimeF + _thisEntity.buffController.buffValue[BuffType.batkt_delta_value] + _baseAttackTimeF * _thisEntity.buffController.buffValue[BuffType.batkt_delta_percent]) * 100 / Math.Max(1, 100 + _thisEntity.buffController.buffValue[BuffType.atkspd_delta_value]));
+            return _thisEntity.Stats.BaseAttackTimeS;
         }
     }
     public int AttackNumS
     {
         get
         {
-            if (_attackNumF >= 0)
-                return Math.Max(0, _attackNumF + (int)_thisEntity.buffController.buffValue[BuffType.atkn_delta_value]);
-            else
-                return -1;
+            return _thisEntity.Stats.AttackNumS;
         }
     }
     public int AttackMinNumS
     {
         get
         {
-            return Math.Max(0, _attackMinNumF + (int)_thisEntity.buffController.buffValue[BuffType.atkminn_delta_value]);
+            return _thisEntity.Stats.AttackMinNumS;
         }
     }
 
@@ -119,10 +116,6 @@ public class AttackBase : MonoBehaviour, IPoolOperation
 
     private (int x, int y)[] _attackRangeF;
     private float _attackRadiusF;
-    private float _attackDamageF;
-    private float _baseAttackTimeF;
-    private int _attackNumF;
-    private int _attackMinNumF;
 
 
     public virtual void Dormancy()
@@ -155,9 +148,7 @@ public class AttackBase : MonoBehaviour, IPoolOperation
         _attackRangeF = new (int x, int y)[src.Count];
         for (int i = 0; i < src.Count; i++) _attackRangeF[i] = (src[i].x, src[i].y);
         _attackRadiusF = entityData.VisionRadius;
-        _attackDamageF = entityData.Attack;
-        _baseAttackTimeF = entityData.BaseAttackTime;
-        _attackNumF = entityData.AttackNum;
+        // AttackDamage / BaseAttackTime / AttackNum / AttackMinNum 已迁出至 EntityStats（XxxBase 在 PreWarm 阶段 AttributesCaculateFirst 写入）
     }
 
     protected virtual void FixedUpdate()
@@ -166,16 +157,16 @@ public class AttackBase : MonoBehaviour, IPoolOperation
             return;
         if (_attackTimer > 0)
         {
-            _attackTimer -= Time.fixedDeltaTime * _baseAttackTimeF / BaseAttackTimeS;
+            _attackTimer -= Time.fixedDeltaTime * _thisEntity.Stats.BaseAttackTimeBase / BaseAttackTimeS;
         }
         else if (_thisEntity.entityAM.CurrentState != EntityState.Start && _thisEntity.entityAM.CurrentState != EntityState.Die && TryToAttack(AttackTargetSelect(AttackNumS, AttackMinNumS), false, true))
         {
-            _attackTimer = _baseAttackTimeF;
+            _attackTimer = _thisEntity.Stats.BaseAttackTimeBase;
         }
     }
     public bool ForceResetAttack()
     {
-        _attackTimer = _baseAttackTimeF;
+        _attackTimer = _thisEntity.Stats.BaseAttackTimeBase;
         return TryToAttack(AttackTargetSelect(AttackNumS, AttackMinNumS), true, true);
     }
     public void ResetAttackEffectData()

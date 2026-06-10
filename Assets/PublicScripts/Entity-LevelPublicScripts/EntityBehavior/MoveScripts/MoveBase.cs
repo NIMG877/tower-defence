@@ -15,7 +15,6 @@ public class MoveBase : MonoBehaviour, IPoolOperation
     protected int _currentPointSerial;
     protected int _moveMethod;
     protected int _massLevel;
-    protected float _moveSpeedF;
     protected float _forceUnmoveTime;
     protected int _levelHpComsume;
     private float MIU_G = 2.45f;
@@ -24,7 +23,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
     private Action _reachTempTarget;
     public delegate void OnReachSectionEnd();
     public OnReachSectionEnd OperationsOnReachSectionEnd;
-    public float MoveSpeedS { get { return Math.Max(0.01f, _moveSpeedF + _thisEntity.buffController.buffValue[BuffType.mspeed_delta_value] + _moveSpeedF * _thisEntity.buffController.buffValue[BuffType.mspeed_delta_percent]); } }
+    public float MoveSpeedS { get { return _thisEntity.Stats.MoveSpeedS; } }
     public int CurrentPathSerial { get { return _currentPathSerial; } }
     public int CurrentSectionSerial { get { return _currentSectionSerial; } }
     public int CurrentPointSerial { get { return _currentPointSerial; } }
@@ -272,7 +271,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
     }
     private void AttributesCaculateFirst()
     {
-        _moveSpeedF = _thisEntity.EntityData.MoveSpeed;
+        // MoveSpeed 已迁出至 EntityStats（XxxBase 在 PreWarm 阶段 AttributesCaculateFirst 写入）
         _moveMethod = _thisEntity.EntityData.MoveMethod;
         _massLevel = _thisEntity.EntityData.MassLevel;
         _levelHpComsume = _thisEntity.EntityData.MonsterLevelHpConsume;

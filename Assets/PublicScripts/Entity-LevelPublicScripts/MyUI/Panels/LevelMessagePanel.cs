@@ -1094,9 +1094,9 @@ namespace MyUI
             EntityStats stats = GetCurrentEntityStats();
 
             // === 战斗属性 ===
-            // Attack 暂未接入 EntityStats（战斗 base 在 AttackBase 子系统），先用模板值；
             // Def / MagicResistance / BlockOccupation 切到 XxxS（含战斗过程 buff）。
-            float attack = entityData.Attack;
+            // Attack 已迁入 EntityStats（AttackS），与其它属性同一路径。
+            float attack = stats != null ? stats.AttackS : entityData.Attack;
             float def = stats != null ? stats.DefS : entityData.Defense;
             float mgr = stats != null ? stats.MagicResistanceS : entityData.MagicResistance;
             int blo = stats != null ? stats.BlockOccupationS : entityData.BlockOccupation;
