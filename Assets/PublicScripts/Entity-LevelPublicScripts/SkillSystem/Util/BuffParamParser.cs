@@ -9,23 +9,16 @@ namespace SkillSystem
     /// </summary>
     public static class BuffParamParser
     {
-        public static BuffType[] ParseBuffTypes(string csv)
-        {
-            if (string.IsNullOrEmpty(csv)) return Array.Empty<BuffType>();
-            var parts = csv.Split(',');
-            var arr = new BuffType[parts.Length];
-            for (int i = 0; i < parts.Length; i++)
-                arr[i] = (BuffType)Enum.Parse(typeof(BuffType), parts[i].Trim());
-            return arr;
-        }
+        public static BuffType[] ParseBuffTypes(string csv) => ParseCsv(csv, s => (BuffType)Enum.Parse(typeof(BuffType), s));
+        public static float[] ParseFloats(string csv) => ParseCsv(csv, float.Parse);
 
-        public static float[] ParseFloats(string csv)
+        private static T[] ParseCsv<T>(string csv, Func<string, T> parse)
         {
-            if (string.IsNullOrEmpty(csv)) return Array.Empty<float>();
+            if (string.IsNullOrEmpty(csv)) return Array.Empty<T>();
             var parts = csv.Split(',');
-            var arr = new float[parts.Length];
+            var arr = new T[parts.Length];
             for (int i = 0; i < arr.Length; i++)
-                arr[i] = float.Parse(parts[i].Trim());
+                arr[i] = parse(parts[i].Trim());
             return arr;
         }
     }

@@ -16,9 +16,8 @@ namespace SkillSystem.Components
 
         public void OnTrigger(SkillContext ctx)
         {
-            if (!_active) return;
+            if (!_active || ctx.entity == null) return;
             var bhe = (BeforeHurtEvent)ctx.currentEvent;
-            if (ctx.entity == null) return;
             float hp = ctx.entity.Stats.CurrentHp;
             float dmg = bhe.damage;
             if (hp - dmg < _threshold)

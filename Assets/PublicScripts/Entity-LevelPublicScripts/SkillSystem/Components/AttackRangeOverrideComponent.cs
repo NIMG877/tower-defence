@@ -10,7 +10,7 @@ namespace SkillSystem.Components
         public void OnInit(SkillContext ctx, ParamList p)
         {
             var csv = p.GetString("range", "");
-            if (string.IsNullOrEmpty(csv)) { _range = Array.Empty<(int, int)>(); return; }
+            if (string.IsNullOrEmpty(csv)) return;
             // semicolon separates cells, comma separates (x,y) within a cell.
             var cells = csv.Split(';');
             _range = new (int, int)[cells.Length];
@@ -20,7 +20,9 @@ namespace SkillSystem.Components
                 if (xy.Length == 2 &&
                     int.TryParse(xy[0].Trim(), out var x) &&
                     int.TryParse(xy[1].Trim(), out var y))
+                {
                     _range[i] = (x, y);
+                }
             }
         }
 

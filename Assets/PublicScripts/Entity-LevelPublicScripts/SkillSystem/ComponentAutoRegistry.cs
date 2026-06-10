@@ -29,7 +29,6 @@ namespace SkillSystem
 
         public static void Reset() { lock (_lock) { _done = false; } }
 
-        // Convenience: ensure registry is populated. Call from any code path that needs the registry.
         public static void EnsureRegistered()
         {
             if (!_done) RegisterAll();

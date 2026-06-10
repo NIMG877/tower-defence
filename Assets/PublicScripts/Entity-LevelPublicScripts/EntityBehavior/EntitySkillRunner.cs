@@ -116,10 +116,9 @@ public class EntitySkillRunner
             {
                 // IntervalTickEvent removed: OnTick has dt as an explicit parameter,
                 // and ctx.currentEvent is null inside OnTick by design.
-                var ctx = s.MakeContext(s.tickingComponents[c], null);
-                ctx.sharedBlackboard = sharedBlackboard;
-                ctx.entity = _entity;
-                s.tickingComponents[c].OnTick(ctx, dt);
+                var comp = s.tickingComponents[c];
+                var ctx = PrepareContext(s.MakeContext(comp, null));
+                comp.OnTick(ctx, dt);
             }
         }
     }
@@ -263,7 +262,7 @@ public class EntitySkillRunner
     private void OnAfterTakeDamage(Entity target, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType, bool isDeadly)
     {
         DispatchEvent(new AfterTakeDamageEvent { target = target, multiplyer = multiplyer, defPenetrate = defPenetrate, mgrPenetrate = mgrPenetrate, defPenetrate_value = defPenetrate_value, mgrPenetrate_value = mgrPenetrate_value, damageType = damageType, applyType = applyType, isDeadly = isDeadly });
-        for (int i = 0; i < _skills.Count; i++) _skills[i].spEngine?.OnAfterHurt(applyType);
+        NotifySpEnginesAfterHurt(applyType);
     }
 
     private void OnAttackSuccessfully() { DispatchEvent(new AttackSuccessfullyEvent()); for (int i = 0; i < _skills.Count; i++) _skills[i].spEngine?.OnAttackSuccessfully(); }
@@ -281,7 +280,7 @@ public class EntitySkillRunner
     private void OnAfterHurt(Entity origin, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType, bool isDeadly)
     {
         DispatchEvent(new AfterHurtEvent { origin = origin, damage = damage, multiplyer = multiplyer, defPenetrate = defPenetrate, mgrPenetrate = mgrPenetrate, defPenetrate_value = defPenetrate_value, mgrPenetrate_value = mgrPenetrate_value, damageType = damageType, applyType = applyType, isDeadly = isDeadly });
-        for (int i = 0; i < _skills.Count; i++) _skills[i].spEngine?.OnAfterHurt(applyType);
+        NotifySpEnginesAfterHurt(applyType);
     }
 
     private void OnAttackAnimBegin()
@@ -291,6 +290,12 @@ public class EntitySkillRunner
     }
 
     private void OnBeforeDieAnimation() { DispatchEvent(new BeforeDieAnimationEvent()); }
+
+    // Shared SPEngine fan-out for the AfterHurt hook (used by both OnAfterTakeDamage and OnAfterHurt).
+    private void NotifySpEnginesAfterHurt(int applyType)
+    {
+        for (int i = 0; i < _skills.Count; i++) _skills[i].spEngine?.OnAfterHurt(applyType);
+    }
 
     // ===== Dispatch core =====
 
@@ -320,10 +325,17 @@ public class EntitySkillRunner
         for (int i = 0; i < list.Count; i++)
         {
             var comp = list[i];
-            var ctx = s.MakeContext(comp, evt);
-            ctx.sharedBlackboard = sharedBlackboard;
-            ctx.entity = _entity;
+            var ctx = PrepareContext(s.MakeContext(comp, evt));
             comp.OnTrigger(ctx);
         }
+    }
+
+    // SkillRuntime.MakeContext lives in shared code and can't inject per-Entity state,
+    // so layer entity + sharedBlackboard onto every context handed to a component.
+    private SkillContext PrepareContext(SkillContext ctx)
+    {
+        ctx.sharedBlackboard = sharedBlackboard;
+        ctx.entity = _entity;
+        return ctx;
     }
 }

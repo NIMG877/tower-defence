@@ -1,9 +1,11 @@
+using System;
+
 namespace SkillSystem
 {
     public class ConditionEvalContext
     {
         public Blackboard Blackboard = new Blackboard();
-        public object Event; // optional; concrete SkillEvent types defined in Task 2.1
+        public object Event; // optional; carries the dispatching SkillEvent when present
     }
 
     public static class ConditionEvaluator
@@ -41,7 +43,7 @@ namespace SkillSystem
             var left = ctx.Blackboard.Get<string>(leftKey, "");
             if (float.TryParse(left, out var l) && float.TryParse(rightValueStr, out var r))
                 return l.CompareTo(r);
-            return string.Compare(left, rightValueStr, System.StringComparison.Ordinal);
+            return string.Compare(left, rightValueStr, StringComparison.Ordinal);
         }
     }
 }

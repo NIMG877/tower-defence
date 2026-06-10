@@ -25,9 +25,7 @@ namespace SkillSystem
         public SPEngine(SPConfig cfg)
         {
             _cfg = cfg ?? new SPConfig();
-            _currentSp = _cfg.initialSp;
-            _currentCharge = 0;
-            _currentDuration = 0f;
+            ResetState();
         }
 
         /// <summary>
@@ -35,6 +33,11 @@ namespace SkillSystem
         /// 不会重建事件订阅（订阅生命周期在 OnInitialize/OnTeardown）。
         /// </summary>
         public void Reset()
+        {
+            ResetState();
+        }
+
+        private void ResetState()
         {
             _currentSp = _cfg.initialSp;
             _currentCharge = 0;

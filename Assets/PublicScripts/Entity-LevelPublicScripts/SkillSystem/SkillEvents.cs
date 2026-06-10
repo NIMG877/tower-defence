@@ -8,55 +8,39 @@ namespace SkillSystem
     {
         public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnInitialize;
     }
-    public class BeforeAttackEvent : SkillEvent
+
+    // Shared fields for events that carry a damage-magnitude payload (target + multipliers + types).
+    public abstract class DamageEventBase : SkillEvent
+    {
+        public Entity target;
+        public float multiplyer;
+        public float defPenetrate;
+        public float mgrPenetrate;
+        public float defPenetrate_value;
+        public float mgrPenetrate_value;
+        public int damageType;
+        public int applyType;
+    }
+
+    public class BeforeAttackEvent : DamageEventBase
     {
         public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnBeforeAttack;
-        public Entity target;
-        public float multiplyer = 1f;
-        public float defPenetrate;
-        public float mgrPenetrate;
-        public float defPenetrate_value;
-        public float mgrPenetrate_value;
+        public new float multiplyer = 1f;
         public int cumbo = 1;
-        public int damageType;
-        public int applyType;
     }
-    public class AfterAttackEvent : SkillEvent
+    public class AfterAttackEvent : DamageEventBase
     {
         public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnAfterAttack;
-        public Entity target;
-        public float multiplyer;
-        public float defPenetrate;
-        public float mgrPenetrate;
-        public float defPenetrate_value;
-        public float mgrPenetrate_value;
-        public int damageType;
-        public int applyType;
         public bool isDeadly;
     }
-    public class BeforeTakeDamageEvent : SkillEvent
+    public class BeforeTakeDamageEvent : DamageEventBase
     {
         public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnBeforeTakeDamage;
-        public Entity target;
-        public float multiplyer = 1f;
-        public float defPenetrate;
-        public float mgrPenetrate;
-        public float defPenetrate_value;
-        public float mgrPenetrate_value;
-        public int damageType;
-        public int applyType;
+        public new float multiplyer = 1f;
     }
-    public class AfterTakeDamageEvent : SkillEvent
+    public class AfterTakeDamageEvent : DamageEventBase
     {
         public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnAfterTakeDamage;
-        public Entity target;
-        public float multiplyer;
-        public float defPenetrate;
-        public float mgrPenetrate;
-        public float defPenetrate_value;
-        public float mgrPenetrate_value;
-        public int damageType;
-        public int applyType;
         public bool isDeadly;
     }
     public class AttackSuccessfullyEvent : SkillEvent
@@ -67,9 +51,10 @@ namespace SkillSystem
     {
         public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnAttackInterrupt;
     }
-    public class BeforeHurtEvent : SkillEvent
+
+    // Shared fields for events that carry an incoming-damage payload (origin + damage + multipliers + types).
+    public abstract class HurtEventBase : SkillEvent
     {
-        public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnBeforeHurt;
         public Entity origin;
         public float damage;
         public float multiplyer;
@@ -81,19 +66,14 @@ namespace SkillSystem
         public int applyType;
         public bool isDeadly;
     }
-    public class AfterHurtEvent : SkillEvent
+
+    public class BeforeHurtEvent : HurtEventBase
+    {
+        public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnBeforeHurt;
+    }
+    public class AfterHurtEvent : HurtEventBase
     {
         public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnAfterHurt;
-        public Entity origin;
-        public float damage;
-        public float multiplyer;
-        public float defPenetrate;
-        public float mgrPenetrate;
-        public float defPenetrate_value;
-        public float mgrPenetrate_value;
-        public int damageType;
-        public int applyType;
-        public bool isDeadly;
     }
     public class AttackAnimBeginEvent : SkillEvent
     {

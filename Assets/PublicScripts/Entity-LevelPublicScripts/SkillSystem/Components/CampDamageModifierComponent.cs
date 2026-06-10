@@ -16,7 +16,7 @@ namespace SkillSystem.Components
         {
             var btd = (BeforeTakeDamageEvent)ctx.currentEvent;
             if (btd.target == null) return;
-            // Camp is on the target's Movement.Camp or the attack origin; expose via Blackboard if needed
+            // Camp is on the target's Movement.Camp or the attack origin; expose via Blackboard if needed.
             if (ctx.blackboard != null && ctx.blackboard.Get<int>("attackerCamp") == _requiredCamp)
                 btd.multiplyer = _multiplier;
         }

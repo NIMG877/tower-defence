@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace SkillSystem.Components
 {
@@ -48,7 +47,6 @@ namespace SkillSystem.Components
             _toSelf        = p.GetBool("toSelf", true);
             _inputKey      = p.GetString("blackboardKey", "");
             _endOnSkillEnd = p.GetBool("endOnSkillEnd", true);
-            // 技能结束清除buff的功能待解决，在考虑要不要通过blackboard实现
         }
 
         public void OnTrigger(SkillContext ctx)
@@ -76,7 +74,6 @@ namespace SkillSystem.Components
         public void OnTick(SkillContext ctx, float dt) { }
         public void OnTeardown(SkillContext ctx) { }
 
-        //待使用
         private void DestroyTrackedBuffs()
         {
             for (int i = 0; i < _trackedEntities.Count; i++)
