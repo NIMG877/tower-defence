@@ -105,6 +105,7 @@ namespace SkillSystem
     [Serializable]
     public class ComponentConfig
     {
+        [ComponentTypeRef]
         public string componentType;
         public ParamList parameters = new ParamList();
         public ConditionConfig[] triggers = Array.Empty<ConditionConfig>();
