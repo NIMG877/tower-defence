@@ -63,11 +63,27 @@ namespace SkillSystem.Components
             }
 
             // Original single-target behavior preserved for backward compatibility.
-            var t = _toSelf
+            // The dispatcher routes this component by config.triggers[]; the event
+            // type that arrives depends on the config, so we extract `target` from
+            // whichever event payload carries one. Falls back to ctx.entity when
+            // the event doesn't carry a target field (or _toSelf is true).
+            Entity t = _toSelf
                 ? ctx.entity
-                : (ctx.currentEvent is BeforeTakeDamageEvent btd ? btd.target : null);
+                : (ExtractTargetFromEvent(ctx.currentEvent) ?? ctx.entity);
             if (t == null || t.buffController == null) return null;
             return new List<Entity> { t };
+        }
+
+        private static Entity ExtractTargetFromEvent(SkillEvent evt)
+        {
+            return evt switch
+            {
+                BeforeTakeDamageEvent btd => btd.target,
+                AfterTakeDamageEvent  atd => atd.target,
+                BeforeAttackEvent     bae => bae.target,
+                AfterAttackEvent      aae => aae.target,
+                _ => null,
+            };
         }
     }
 }
