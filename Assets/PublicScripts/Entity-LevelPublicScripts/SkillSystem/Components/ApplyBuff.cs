@@ -28,6 +28,7 @@ namespace SkillSystem.Components
         private BuffType[] _types = Array.Empty<BuffType>();
         private float[] _values = Array.Empty<float>();
         private bool _endOnSkillEnd;
+        private bool _isWhiteList;
 
         // Parallel lists tracking buffs this component created while
         // _endOnSkillEnd is on. The target Entity is captured because
@@ -47,6 +48,8 @@ namespace SkillSystem.Components
             _toSelf        = p.GetBool("toSelf", true);
             _inputKey      = p.GetString("blackboardKey", "");
             _endOnSkillEnd = p.GetBool("endOnSkillEnd", true);
+            _isWhiteList   = p.GetBool("isWhiteList", false);
+            ctx.skill.spEngine.OnEnd += DestroyTrackedBuffs;
         }
 
         public void OnTrigger(SkillContext ctx)
@@ -62,7 +65,7 @@ namespace SkillSystem.Components
             {
                 var t = targets[i];
                 if (t == null || t.buffController == null) continue;
-                Buff created = t.buffController.CreateBuff(_types, null, _buffId, _values, _buffTime, true);
+                Buff created = t.buffController.CreateBuff(_types, null, _buffId, _values, _buffTime, _isWhiteList);
                 if (_endOnSkillEnd && created != null)
                 {
                     _trackedEntities.Add(t);
@@ -72,7 +75,10 @@ namespace SkillSystem.Components
         }
 
         public void OnTick(SkillContext ctx, float dt) { }
-        public void OnTeardown(SkillContext ctx) { }
+        public void OnTeardown(SkillContext ctx)
+        {
+            ctx.skill.spEngine.OnEnd -= DestroyTrackedBuffs;
+        }
 
         private void DestroyTrackedBuffs()
         {
