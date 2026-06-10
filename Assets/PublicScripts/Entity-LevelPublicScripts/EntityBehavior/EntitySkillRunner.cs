@@ -150,6 +150,38 @@ public class EntitySkillRunner
                 runtime.components.Add(inst);
                 runtime.componentParams.Add(ccfg.parameters);
                 if (inst is ITickingComponent t) runtime.tickingComponents.Add(t);
+
+                // Bucket by trigger. Each ConditionConfig contributes one entry;
+                // the same component instance can land in multiple buckets when
+                // its config declares multiple triggers — that's expected.
+                int triggerCount = 0;
+                if (ccfg.triggers != null)
+                {
+                    for (int tIdx = 0; tIdx < ccfg.triggers.Length; tIdx++)
+                    {
+                        var trig = ccfg.triggers[tIdx];
+                        if (trig == null) continue;
+                        var te = trig.triggerEvent;
+                        if (!runtime.componentsByTrigger.TryGetValue(te, out var list))
+                        {
+                            list = new List<ISkillComponent>();
+                            runtime.componentsByTrigger[te] = list;
+                        }
+                        list.Add(inst);
+                        triggerCount++;
+                    }
+                }
+
+                // Warn when a non-ticking component declared no triggers — it
+                // will never receive OnTrigger. ITickingComponent gets an
+                // implicit pass because OnTick is its primary channel.
+                if (triggerCount == 0 && !(inst is ITickingComponent))
+                {
+                    Debug.LogWarning(
+                        $"[SkillRuntime] Component {ccfg.componentType} in skill {cfg.skillId} "
+                        + "declares no triggers — it will never receive OnTrigger. "
+                        + "Add ConditionConfig entries to triggers[] if this is unintended.");
+                }
             }
         }
         runtime.isInitialized = true;
