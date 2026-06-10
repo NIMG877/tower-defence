@@ -137,15 +137,15 @@ public class EntitySkillRunner
         {
             for (int i = 0; i < cfg.components.Length; i++)
             {
-                var ccfg = cfg.components[i];
+                ComponentConfig ccfg = cfg.components[i];
                 if (ccfg == null || string.IsNullOrEmpty(ccfg.componentType)) continue;
-                var inst = ComponentFactory.Create(ccfg.componentType);
+                ISkillComponent  inst = ComponentFactory.Create(ccfg.componentType);
                 if (inst == null)
                 {
                     Debug.LogError($"[EntitySkillRunner] Unknown component type: {ccfg.componentType} in skill {cfg.skillId}");
                     continue;
                 }
-                var ctx = runtime.MakeContext(inst, null);
+                SkillContext ctx = runtime.MakeContext(inst, null);
                 inst.OnInit(ctx, ccfg.parameters);
                 runtime.components.Add(inst);
                 runtime.componentParams.Add(ccfg.parameters);
