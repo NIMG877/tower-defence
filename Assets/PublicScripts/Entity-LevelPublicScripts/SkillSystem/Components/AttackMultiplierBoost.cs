@@ -12,7 +12,7 @@ namespace SkillSystem.Components
 
         public void OnTrigger(SkillContext ctx)
         {
-            if (!(ctx.currentEvent is BeforeAttackEvent bae)) return;
+            var bae = (BeforeAttackEvent)ctx.currentEvent;
             bae.multiplyer *= _multiplier;
         }
 
