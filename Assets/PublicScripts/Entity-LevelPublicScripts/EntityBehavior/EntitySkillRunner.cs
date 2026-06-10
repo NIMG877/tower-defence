@@ -273,12 +273,12 @@ public class EntitySkillRunner
     {
         // Active-window gate: a skill's components only see events while the skill is firing,
         // with these exceptions:
+        //   - PreWarmEvent / InitializeEvent are always dispatched (lifecycle events; the active window is not yet open)
         //   - SkillBeginEvent / SkillEndEvent are always dispatched (they are the mechanism that flips isActive)
-        //   - DeathEvent / BeforeDieAnimationEvent are always dispatched (death is global; cannot be stranded by a closed window)
-        bool alwaysDispatch = evt is SkillBeginEvent
-                           || evt is SkillEndEvent
-                           || evt is DeathEvent
-                           || evt is BeforeDieAnimationEvent;
+        bool alwaysDispatch = evt is PreWarmEvent
+                           || evt is InitializeEvent
+                           || evt is SkillBeginEvent
+                           || evt is SkillEndEvent;
         if (!s.isActive && !alwaysDispatch) return;
 
         for (int i = 0; i < s.components.Count; i++)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace SkillSystem.Components
 {
@@ -32,6 +33,7 @@ namespace SkillSystem.Components
 
         public void OnTrigger(SkillContext ctx)
         {
+            Debug.Log($"ApplyBuffComponent triggered: buffId={_buffId}, types=[{string.Join(", ", _types)}], values=[{string.Join(", ", _values)}], priority={_priority}, toSelf={_toSelf}, inputKey={_inputKey}");
             if (ctx.entity == null) return;
             if (_types.Length == 0) return;
 
