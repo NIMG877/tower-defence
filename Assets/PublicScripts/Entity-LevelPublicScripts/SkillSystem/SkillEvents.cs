@@ -80,10 +80,6 @@ namespace SkillSystem
     public class AttackAnimBeginEvent : SkillEvent { }
     public class BeforeDieAnimationEvent : SkillEvent { }
     public class DeathEvent : SkillEvent { }
-    public class IntervalTickEvent : SkillEvent
-    {
-        public float dt;
-    }
     public class SkillBeginEvent : SkillEvent
     {
         public SkillRuntime skill;

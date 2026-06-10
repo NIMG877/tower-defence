@@ -80,7 +80,6 @@ namespace SkillSystem
         OnBeforeHurt, OnAfterHurt,
         OnAttackAnimBegin,
         OnBeforeDieAnimation, OnDeath,
-        OnIntervalTick,
         OnSkillBegin, OnSkillEnd,
     }
 

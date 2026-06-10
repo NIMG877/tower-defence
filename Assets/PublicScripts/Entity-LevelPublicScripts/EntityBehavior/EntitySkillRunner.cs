@@ -114,8 +114,11 @@ public class EntitySkillRunner
             if (!s.isActive) continue;
             for (int c = 0; c < s.tickingComponents.Count; c++)
             {
-                var ctx = s.MakeContext(s.tickingComponents[c], new IntervalTickEvent { dt = dt });
+                // IntervalTickEvent removed: OnTick has dt as an explicit parameter,
+                // and ctx.currentEvent is null inside OnTick by design.
+                var ctx = s.MakeContext(s.tickingComponents[c], null);
                 ctx.sharedBlackboard = sharedBlackboard;
+                ctx.entity = _entity;
                 s.tickingComponents[c].OnTick(ctx, dt);
             }
         }
