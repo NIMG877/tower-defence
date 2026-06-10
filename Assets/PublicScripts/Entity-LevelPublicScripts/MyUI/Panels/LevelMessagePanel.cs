@@ -340,8 +340,8 @@ namespace MyUI
         private bool[,] _higherCanSetBlock;
         private bool[,] _lowerCanSetBlock;
         private bool[,] _staticEntityExistBlock;
-        private int _isAffordableType;
-        private List<(int i, int j)> _isAffordableBlockList;
+        private int _canSetType;
+        private List<(int i, int j)> _canSetBlockList;
         private BlockData[,] _blockDatas;
         private int _iSize, _jSize;
 
@@ -406,7 +406,7 @@ namespace MyUI
             _rangeImgCollection.transform.SetParent(LevelResourceSharing.LM);
             _placeDataList = new List<StaticEntityPlaceData>();
             _selectorObjects = new List<GameObject>();
-            _isAffordableBlockList = new List<(int i, int j)>();
+            _canSetBlockList = new List<(int i, int j)>();
         }
 
         private void InitTimeControl()
@@ -876,7 +876,7 @@ namespace MyUI
         {
             base.OnExit();
             UIStates_SwitchTo_Normal();
-            _isAffordableBlockList.Clear();
+            _canSetBlockList.Clear();
             _selectedStaticEntityID = null;
             _selectedPlaceData = null;
             _selectedEntity = null;
@@ -1336,7 +1336,7 @@ namespace MyUI
             {
                 Vector3 p = _camera.ScreenToWorldPoint(Input.mousePosition);
                 (int i, int j) = ((int)(p.y + 0.5), (int)(p.x + 0.5));
-                if (_isAffordableBlockList.Contains((i, j)))
+                if (_canSetBlockList.Contains((i, j)))
                 {
                     _target.transform.position = new Vector2(j, i);
                     if (true)
@@ -1530,23 +1530,26 @@ namespace MyUI
                 if (_cansetOpen)
                 {
                     _cansetOpen = false;
-                    for (int i = 0; i < _isAffordableBlockList.Count; i++)
+                    for (int i = 0; i < _canSetBlockList.Count; i++)
                     {
-                        MapDataManager.Manager.BlockDataMatrix[_isAffordableBlockList[i].i, _isAffordableBlockList[i].j].Material.color = Color.white;
+                        MapDataManager.Manager.BlockDataMatrix[_canSetBlockList[i].i, _canSetBlockList[i].j].Material.color = Color.white;
                     }
                 }
             }
         }
         private void UIStates_Update_Canset()
         {
+            // 0=地面 1=高台 2=均可放置（来自 EntityData.CanSetType）
+            _canSetType = _selectedPlaceData != null ? _selectedPlaceData.EntityData.CanSetType : 0;
+
             Color lightGreen = new Color(0, 0.4f, 0);
             FetchMapEntityData();
-            for (int i = 0; i < _isAffordableBlockList.Count; i++)
+            for (int i = 0; i < _canSetBlockList.Count; i++)
             {
-                MapDataManager.Manager.BlockDataMatrix[_isAffordableBlockList[i].i, _isAffordableBlockList[i].j].Material.color = Color.white;
+                MapDataManager.Manager.BlockDataMatrix[_canSetBlockList[i].i, _canSetBlockList[i].j].Material.color = Color.white;
             }
-            _isAffordableBlockList.Clear();
-            switch (_isAffordableType)
+            _canSetBlockList.Clear();
+            switch (_canSetType)
             {
                 case 0:
                     for (int i = 0; i < _iSize; i++)
@@ -1555,7 +1558,7 @@ namespace MyUI
                         {
                             if (_lowerCanSetBlock[i, j] && !_staticEntityExistBlock[i, j])
                             {
-                                _isAffordableBlockList.Add((i, j));
+                                _canSetBlockList.Add((i, j));
                             }
                         }
                     }
@@ -1567,7 +1570,7 @@ namespace MyUI
                         {
                             if (_higherCanSetBlock[i, j] && !_staticEntityExistBlock[i, j])
                             {
-                                _isAffordableBlockList.Add((i, j));
+                                _canSetBlockList.Add((i, j));
                             }
                         }
                     }
@@ -1579,28 +1582,16 @@ namespace MyUI
                         {
                             if ((_lowerCanSetBlock[i, j] || _higherCanSetBlock[i, j]) && !_staticEntityExistBlock[i, j])
                             {
-                                _isAffordableBlockList.Add((i, j));
-                            }
-                        }
-                    }
-                    break;
-                case 3:
-                    for (int i = 0; i < _iSize; i++)
-                    {
-                        for (int j = 0; j < _jSize; j++)
-                        {
-                            if ((_lowerCanSetBlock[i, j] || _higherCanSetBlock[i, j]) && _staticEntityExistBlock[i, j])
-                            {
-                                _isAffordableBlockList.Add((i, j));
+                                _canSetBlockList.Add((i, j));
                             }
                         }
                     }
                     break;
                 default: break;
             }
-            for (int i = 0; i < _isAffordableBlockList.Count; i++)
+            for (int i = 0; i < _canSetBlockList.Count; i++)
             {
-                MapDataManager.Manager.BlockDataMatrix[_isAffordableBlockList[i].i, _isAffordableBlockList[i].j].Material.color = lightGreen;
+                MapDataManager.Manager.BlockDataMatrix[_canSetBlockList[i].i, _canSetBlockList[i].j].Material.color = lightGreen;
             }
         }
 
@@ -1609,7 +1600,7 @@ namespace MyUI
         #region Helpers
         private void FetchMapEntityData()
         {
-            switch (_isAffordableType)
+            switch (_canSetType)
             {
                 case 0:
                     _lowerCanSetBlock = MapDataManager.Manager.LowerCanSetBlock;
@@ -1620,11 +1611,6 @@ namespace MyUI
                     _staticEntityExistBlock = EntityManager.Manager.StaticEntityExistBlock;
                     break;
                 case 2:
-                    _lowerCanSetBlock = MapDataManager.Manager.LowerCanSetBlock;
-                    _higherCanSetBlock = MapDataManager.Manager.HigherCanSetBlock;
-                    _staticEntityExistBlock = EntityManager.Manager.StaticEntityExistBlock;
-                    break;
-                case 3:
                     _lowerCanSetBlock = MapDataManager.Manager.LowerCanSetBlock;
                     _higherCanSetBlock = MapDataManager.Manager.HigherCanSetBlock;
                     _staticEntityExistBlock = EntityManager.Manager.StaticEntityExistBlock;
