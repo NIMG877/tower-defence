@@ -14,7 +14,8 @@ namespace SkillSystem.Components
 
         public void OnTrigger(SkillContext ctx)
         {
-            if (!(ctx.currentEvent is AfterTakeDamageEvent atd) || !atd.isDeadly) return;
+            var atd = (AfterTakeDamageEvent)ctx.currentEvent;
+            if (!atd.isDeadly) return;
             if (ctx.entity == null) return;
             ctx.entity.TakeDamage(ctx.entity, _damage, 1f, 0, 0, 0, 0, _damageType, 0);
         }
