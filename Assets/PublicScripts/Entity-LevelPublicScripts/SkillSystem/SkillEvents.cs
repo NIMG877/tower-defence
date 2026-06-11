@@ -81,14 +81,24 @@ namespace SkillSystem
     {
         public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnBeforeDieAnimation;
     }
-    public class SkillBeginEvent : SkillEvent
+    public class AbilityBeginEvent : SkillEvent
     {
-        public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnSkillBegin;
-        public SkillRuntime skill;
+        public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnAbilityBegin;
+        public AbilityRuntime ability;
     }
-    public class SkillEndEvent : SkillEvent
+    public class AbilityEndEvent : SkillEvent
     {
-        public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnSkillEnd;
-        public SkillRuntime skill;
+        public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnAbilityEnd;
+        public AbilityRuntime ability;
+    }
+    public class AbilityAddedEvent : SkillEvent
+    {
+        public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnAbilityAdded;
+        public AbilityRuntime ability;
+    }
+    public class AbilityRemovedEvent : SkillEvent
+    {
+        public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnAbilityRemoved;
+        public AbilityRuntime ability;
     }
 }

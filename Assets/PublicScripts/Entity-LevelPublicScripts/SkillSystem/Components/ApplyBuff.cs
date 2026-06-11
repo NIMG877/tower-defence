@@ -10,9 +10,9 @@ namespace SkillSystem.Components
     /// from that key and applies the buff to each entry.
     ///
     /// <para>When <c>endOnSkillEnd</c> is true, every buff this component creates is
-    /// tracked and destroyed on <see cref="SkillEndEvent"/> (or on
+    /// tracked and destroyed on <see cref="AbilityEndEvent"/> (or on
     /// <see cref="OnTeardown"/> if the skill never ends cleanly, e.g. pool
-    /// dormancy mid-skill). The config MUST also declare <c>OnSkillEnd</c> in
+    /// dormancy mid-skill). The config MUST also declare <c>OnAbilityEnd</c> in
     /// its <c>triggers[]</c>, because <c>EntitySkillRunner.DispatchToSkill</c>
     /// only routes events that have a matching trigger bucket — bypassing the
     /// active-window gate isn't the same as bypassing the bucket lookup.</para>
