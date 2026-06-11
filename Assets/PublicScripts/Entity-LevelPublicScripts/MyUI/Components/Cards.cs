@@ -12,14 +12,14 @@ namespace MyUI
     {
         public RectTransform SkillRT;
         private Image skillImage, spRecoverModeImage, skillOpenModeImage, skillAmountImage;
-        private TextMeshProUGUI skillName, sp0Text, totalSpText, spRecoverModeText, skillOpenModeText, skillAmountText, description;
+        private TextMeshProUGUI abilityNameText, sp0Text, totalSpText, spRecoverModeText, skillOpenModeText, skillAmountText, description;
         public SkillCard(Vector2 skillCardAnchorPos, RectTransform parent, Color textColor, float outerWidth)
         {
             RectTransform skillCard = Resources.Load<RectTransform>("Prefabs/UI/MyUIs/Components/skillCard");
             SkillRT = Object.Instantiate(skillCard.gameObject, parent).GetComponent<RectTransform>();
             SkillRT.sizeDelta = new Vector2(outerWidth, 0);
             SkillRT.Find("content1").GetComponent<RectTransform>().sizeDelta = new Vector2(outerWidth - 50, 0);
-            skillName = SkillRT.Find("content1/skillName").GetComponent<TextMeshProUGUI>();
+            abilityNameText = SkillRT.Find("content1/skillName").GetComponent<TextMeshProUGUI>();
             Transform skillImgArea = SkillRT.Find("skillImgArea");
             skillImage = skillImgArea.Find("skillImg").GetComponent<Image>();
             sp0Text = skillImage.transform.Find("sp0/text").GetComponent<TextMeshProUGUI>();
@@ -33,14 +33,14 @@ namespace MyUI
             skillOpenModeText = skillOpenModeImage.GetComponentInChildren<TextMeshProUGUI>();
             skillAmountImage = content2.Find("skillAmount").GetComponent<Image>();
             skillAmountText = skillAmountImage.GetComponentInChildren<TextMeshProUGUI>();
-            skillName.color = textColor;
+            abilityNameText.color = textColor;
             description.color = textColor;
         }
-        public void UpdateSkillCardMessage(SkillConfig config, SkillRuntime runtime = null)
+        public void UpdateAbilityCardMessage(AbilityConfig config, AbilityRuntime runtime = null)
         {
             if (config == null) return;
             if (config.icon != null) skillImage.sprite = config.icon;
-            skillName.text = config.skillName;
+            abilityNameText.text = config.abilityName;
             description.text = config.description;
             var sp = config.sp;
             float skillDuration = sp != null ? sp.skillDuration : 0f;
