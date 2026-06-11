@@ -116,9 +116,10 @@ callers.
 Every `ComponentConfig` has a `triggers[]` array of `ConditionConfig`
 entries. Each entry declares a `triggerEvent` plus a condition
 expression. At dispatch time, an entry's expression is evaluated
-against the entity's shared blackboard; if it passes,
-`OnTrigger` runs on the bound component. Failing entries are
-skipped silently.
+against the entity's shared blackboard (a per-entity key/value
+store that components read and write); if it passes, `OnTrigger`
+runs on the bound component. Failing entries are skipped (the
+`ConditionEvaluator` logs at most one warning per unknown op, ever).
 
 ### Expression shape
 
@@ -155,9 +156,11 @@ The trimmed `ConditionOp` whitelist (per commit `54c3465`):
 
 Any `ConditionOp` value outside the live whitelist is logged once
 (across the application lifetime) as a warning and treated as
-"passes". The legacy `HasBuff` / `IsInAbnormalState` /
-`HasBlackboardKey` values are still in the enum for `.asset`
-forward-compat but are no-ops at runtime.
+"passes" (i.e., the trigger fires unconditionally — the legacy
+default). The legacy `HasBuff` / `NotHasBuff` / `IsInAbnormalState` /
+`NotInAbnormalState` / `HasBlackboardKey` / `NotHasBlackboardKey`
+values are still in the enum for `.asset` forward-compat but
+behave as "always passes" at runtime (with the one-shot warning).
 
 ### Two coexisting expression forms
 
