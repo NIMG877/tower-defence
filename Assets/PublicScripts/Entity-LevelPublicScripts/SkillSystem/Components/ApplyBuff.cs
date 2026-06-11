@@ -24,7 +24,7 @@ namespace SkillSystem.Components
         private string _buffId = "skill_buff";
         private float _buffTime = -10f;
         private bool _toSelf = true;
-        private string _inputKey;            // blackboard key (optional)
+        private string _inputTargetKey;            // blackboard key (optional)
         private BuffType[] _types = Array.Empty<BuffType>();
         private float[] _values = Array.Empty<float>();
         private bool _endOnSkillEnd;
@@ -53,7 +53,7 @@ namespace SkillSystem.Components
             _buffId         = p.GetString("buffId", "skill_buff");
             _buffTime       = p.GetFloat("buffTime", -10f);
             _toSelf         = p.GetBool("toSelf", true);
-            _inputKey       = p.GetString("blackboardKey", "");
+            _inputTargetKey       = p.GetString("blackboardKey", "");
             _endOnSkillEnd  = p.GetBool("endOnSkillEnd", true);
             _isWhiteList    = p.GetBool("isWhiteList", false);
             _outputTargetKey = p.GetString("outputTarget", "");
@@ -165,9 +165,9 @@ namespace SkillSystem.Components
         // dispatch orders.
         private List<Entity> ResolveTargets(SkillContext ctx)
         {
-            if (!string.IsNullOrEmpty(_inputKey))
+            if (!string.IsNullOrEmpty(_inputTargetKey))
             {
-                return ctx.sharedBlackboard.Get<List<Entity>>(_inputKey, null);
+                return ctx.sharedBlackboard.Get<List<Entity>>(_inputTargetKey, null);
             }
 
             // Original single-target behavior preserved for backward compatibility.
