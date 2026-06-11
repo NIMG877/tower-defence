@@ -113,29 +113,62 @@ callers.
 
 ## Conditional triggers
 
-Every `ComponentConfig` also has a `triggers[]` array of
-`ConditionConfig` rows. Each row has four fields:
+Every `ComponentConfig` has a `triggers[]` array of `ConditionConfig`
+entries. Each entry declares a `triggerEvent` plus a condition
+expression. At dispatch time, an entry's expression is evaluated
+against the entity's shared blackboard; if it passes,
+`OnTrigger` runs on the bound component. Failing entries are
+skipped silently.
 
-| Field | Meaning |
-|---|---|
-| `triggerEvent` | which event the row's `OnTrigger` fires on (e.g. `OnBeforeAttack`, `OnAfterTakeDamage`) |
-| `op` | the comparison operator |
-| `leftKey` | blackboard key the operator reads from |
-| `rightValue` | the value to compare against, stored as a string |
+### Expression shape
 
-Operator semantics (from `ConditionEvaluator.cs`):
+```
+ConditionConfig  { triggerEvent, List<ConditionGroup> groups }
+   |                  |
+   |                  +- groups is OR across ConditionGroup entries
+   |                     (any group passing = the whole config passes)
+   |
+   +- dispatch-time entry point: ConditionEvaluator.Evaluate(groups, ctx)
+
+ConditionGroup   { List<ConditionUnit> units }
+   |
+   +- units is AND across ConditionUnit entries
+      (all units passing = the group passes)
+
+ConditionUnit    { op, leftKey, rightValue }
+   |
+   +- a single comparison: op(leftKey, rightValue)
+```
+
+An empty `groups` list is treated as "always passes" (unconditional
+trigger), equivalent to the legacy `op: 0` (None) short-circuit.
+
+### Operator semantics (from `ConditionEvaluator.cs`)
+
+The trimmed `ConditionOp` whitelist (per commit `54c3465`):
 
 | `op` | Comparison |
 |---|---|
+| `None` | always passes (unit-level) |
 | `Equal`, `NotEqual` | string `==` / `!=` on the key's value |
 | `Greater` / `GreaterOrEqual` / `Less` / `LessOrEqual` | `float.TryParse` on both sides, falls back to ordinal string compare if either is unparseable |
-| `None` | the row is skipped (always passes). |
 
-Conditions only compare blackboard values — they don't inspect the
-entity or probe key presence. Richer checks (`HasBuff`, abnormal-state
-tests, key-presence probes, ...) belong in the component: it writes
-the value to the blackboard first, then a condition reads it. The
-`ConditionOp` enum is whitelisted to the operators above; richer ops
-were removed because they were either no-ops at runtime or, in the
-case of `HasBlackboardKey` / `NotHasBlackboardKey`, replaceable by
-`Equal` / `NotEqual` against a sentinel value.
+Any `ConditionOp` value outside the live whitelist is logged once
+(across the application lifetime) as a warning and treated as
+"passes". The legacy `HasBuff` / `IsInAbnormalState` /
+`HasBlackboardKey` values are still in the enum for `.asset`
+forward-compat but are no-ops at runtime.
+
+### Two coexisting expression forms
+
+Designers have two ways to express multi-condition triggers; the
+choice is a data-authoring concern, not a dispatch concern:
+
+1. **Nested AND/OR** inside one `ConditionConfig.groups[]` (the new
+   shape). Use this when the goal is "fire at most once per event
+   if any matching condition is true".
+
+2. **Repeated `triggers[]` entries** with the same `triggerEvent`
+   (the pre-existing pattern). Use this when the goal is "fire once
+   per passing entry". The runtime does not dedup these — each
+   passing entry produces one `OnTrigger` call.
