@@ -23,12 +23,12 @@ public class SpSliderController : SliderControllerBasic
 
     protected override void SetRateOperations()
     {
-        if (_skillRunner == null || _skillRunner.Skills.Count == 0)
+        if (_skillRunner == null || _skillRunner.Abilities.Count == 0)
         {
             SetRate(0f);
             return;
         }
-        var runtime = _skillRunner.Skills[0];
+        var runtime = _skillRunner.Abilities[0];
         var sp = runtime.spEngine;
         if (sp == null)
         {

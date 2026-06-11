@@ -330,8 +330,8 @@ namespace MyUI
             _atkBTText.text = entityData.BaseAttackTime.ToString();
             _nullMask.SetActive(false);
             int characterIndex = _selectedCharacters.IndexOf(characterId);
-            var skills = entityData.Skills;
-            if (skills.Count == 0)
+            var abilities = entityData.Abilities;
+            if (abilities.Count == 0)
             {
                 for (int i = 0; i < 3; i++)
                 {
@@ -343,7 +343,7 @@ namespace MyUI
             }
             else
             {
-                for (int i = 0; i < skills.Count; i++)
+                for (int i = 0; i < abilities.Count; i++)
                 {
                     int index = i;
                     _skillSelectorActions[i] = () =>
@@ -355,11 +355,11 @@ namespace MyUI
                         _selectedCharacterSkill[characterIndex] = index;
                         CharacterCardManager.cardManager.ResetCardForbidNullSkill(characterId);
                     };
-                    _skillSelectorCards[i].UpdateSkillCardMessage(skills[i]);
+                    _skillSelectorCards[i].UpdateSkillCardMessage(abilities[i]);
                     _skillSelectorCards[i].SkillRT.gameObject.SetActive(true);
                     _noneSkillInfo[i].SetActive(false);
                 }
-                for (int i = skills.Count; i < 3; i++)
+                for (int i = abilities.Count; i < 3; i++)
                 {
                     _skillSelectorCards[i].SkillRT.gameObject.SetActive(false);
                     _noneSkillInfo[i].SetActive(true);

@@ -302,8 +302,8 @@ namespace MyUI
         private Image _callBack, _skillOpen, _skillRange, _spBk, _spState, _spMask, _stop, _skillChargeNum;
         private TextMeshProUGUI _spText, _skillChargeNumText;
         private Sprite[] _spMessageAtlas, _skillRangeButton;
-        private SkillSystem.SkillConfig _selectSkillConfig;
-        private SkillSystem.SkillRuntime _selectSkillRuntime;
+        private SkillSystem.AbilityConfig _selectAbilityConfig;
+        private SkillSystem.AbilityRuntime _selectAbilityRuntime;
         private EventTrigger.Entry _callBackClick, _skillRangeClick;
 
         // ===== Floating Text Pool =====
@@ -524,7 +524,7 @@ namespace MyUI
             skillOpenClick.eventID = EventTriggerType.PointerClick;
             skillOpenClick.callback.AddListener((data) =>
             {
-                var sp = _selectSkillRuntime != null ? _selectSkillRuntime.spEngine : null;
+                var sp = _selectAbilityRuntime != null ? _selectAbilityRuntime.spEngine : null;
                 if (sp != null && sp.CanBegin())
                 {
                     sp.FireSkill();
@@ -539,8 +539,8 @@ namespace MyUI
             skillstop.eventID = EventTriggerType.PointerClick;
             skillstop.callback.AddListener((data) =>
             {
-                if (_selectSkillRuntime != null && _selectSkillRuntime.spEngine != null)
-                    _selectSkillRuntime.spEngine.EndSkill();
+                if (_selectAbilityRuntime != null && _selectAbilityRuntime.spEngine != null)
+                    _selectAbilityRuntime.spEngine.EndSkill();
                 UIStates_SwitchTo_Normal();
                 AudioManager.Manager.PlayAudio("skill_boostclose", 1, false, false);
             });
@@ -1162,21 +1162,21 @@ namespace MyUI
                     });
                 }
 
-                // 技能按钮与技能范围预览（新 SkillSystem 数据源：EntitySkillRunner / SkillRuntime / SPConfig）
+                // 技能按钮与技能范围预览（新 SkillSystem 数据源：EntitySkillRunner / AbilityRuntime / SPConfig）
                 var runner = _selectedEntity.SkillRunner;
-                if (runner != null && runner.Skills != null && runner.Skills.Count > 0)
+                if (runner != null && runner.Abilities != null && runner.Abilities.Count > 0)
                 {
-                    _selectSkillRuntime = runner.Skills[0];
-                    _selectSkillConfig = _selectSkillRuntime.config;
+                    _selectAbilityRuntime = runner.Abilities[0];
+                    _selectAbilityConfig = _selectAbilityRuntime.config;
                     _skillOpen.gameObject.SetActive(true);
-                    _skillOpen.sprite = _selectSkillConfig.icon;
-                    var range = _selectSkillConfig.sp != null ? _selectSkillConfig.sp.skillAttackRange : null;
+                    _skillOpen.sprite = _selectAbilityConfig.icon;
+                    var range = _selectAbilityConfig.sp != null ? _selectAbilityConfig.sp.skillAttackRange : null;
                     _skillRange.gameObject.SetActive(range != null && range.Length > 0);
                 }
                 else
                 {
-                    _selectSkillRuntime = null;
-                    _selectSkillConfig = null;
+                    _selectAbilityRuntime = null;
+                    _selectAbilityConfig = null;
                     _skillOpen.gameObject.SetActive(false);
                     _skillRange.gameObject.SetActive(false);
                 }
@@ -1190,20 +1190,20 @@ namespace MyUI
                     _operaterOpen = false;
                     _operateArea.SetActive(false);
                     MoveCamera(_cameraOriginalPos, 0.1f);
-                    _selectSkillConfig = null;
-                    _selectSkillRuntime = null;
+                    _selectAbilityConfig = null;
+                    _selectAbilityRuntime = null;
                 }
             }
         }
         private void UIStates_Update_Operator()
         {
-            if (_selectSkillRuntime == null
-                || _selectSkillRuntime.spEngine == null
-                || _selectSkillConfig == null
-                || _selectSkillConfig.sp == null)
+            if (_selectAbilityRuntime == null
+                || _selectAbilityRuntime.spEngine == null
+                || _selectAbilityConfig == null
+                || _selectAbilityConfig.sp == null)
                 return;
-            var sp = _selectSkillRuntime.spEngine;
-            var cfg = _selectSkillConfig.sp;
+            var sp = _selectAbilityRuntime.spEngine;
+            var cfg = _selectAbilityConfig.sp;
 
             bool canBegin = sp.CanBegin();
             if (!canBegin)
@@ -1681,22 +1681,22 @@ namespace MyUI
             switch (_currentShow)
             {
                 case 0:
-                    // Skill: 优先用 live entity 的 SkillRuntime（未来可显示 SP 实时状态），回退到模板
-                    SkillSystem.SkillConfig skillConfig = null;
-                    SkillSystem.SkillRuntime skillRuntime = null;
-                    if (entity != null && entity.SkillRunner != null && entity.SkillRunner.Skills != null && entity.SkillRunner.Skills.Count > 0)
+                    // Skill: 优先用 live entity 的 AbilityRuntime（未来可显示 SP 实时状态），回退到模板
+                    SkillSystem.AbilityConfig abilityConfig = null;
+                    SkillSystem.AbilityRuntime abilityRuntime = null;
+                    if (entity != null && entity.SkillRunner != null && entity.SkillRunner.Abilities != null && entity.SkillRunner.Abilities.Count > 0)
                     {
-                        skillRuntime = entity.SkillRunner.Skills[0];
-                        skillConfig = skillRuntime.config;
+                        abilityRuntime = entity.SkillRunner.Abilities[0];
+                        abilityConfig = abilityRuntime.config;
                     }
-                    else if (entityData.Skills != null && entityData.Skills.Count > 0)
+                    else if (entityData.Abilities != null && entityData.Abilities.Count > 0)
                     {
-                        skillConfig = entityData.Skills[0];
+                        abilityConfig = entityData.Abilities[0];
                     }
-                    if (skillConfig != null)
+                    if (abilityConfig != null)
                     {
                         _skillCard.SkillRT.gameObject.SetActive(true);
-                        _skillCard.UpdateSkillCardMessage(skillConfig, skillRuntime);
+                        _skillCard.UpdateSkillCardMessage(abilityConfig, abilityRuntime);
                     }
                     else
                     {
