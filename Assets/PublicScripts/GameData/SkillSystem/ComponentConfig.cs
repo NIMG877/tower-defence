@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SkillSystem
@@ -83,23 +84,42 @@ namespace SkillSystem
         OnSkillBegin, OnSkillEnd,
     }
 
-    // Whitelist kept narrow: conditions can only compare blackboard values.
-    // Anything richer (HasBuff, abnormal-state checks, key-presence probes, ...)
-    // is the component's job — it writes the value to the blackboard first,
-    // then this evaluator reads it.
     public enum ConditionOp
     {
         None, Equal, NotEqual,
         Greater, GreaterOrEqual, Less, LessOrEqual,
+        HasBuff, NotHasBuff,
+        IsInAbnormalState, NotInAbnormalState,
+        HasBlackboardKey, NotHasBlackboardKey,
     }
 
+    // A single comparison: op(leftKey, rightValue). The runtime semantics
+    // are documented in ConditionEvaluator.EvaluateUnit.
+    [Serializable]
+    public class ConditionUnit
+    {
+        public ConditionOp op = ConditionOp.None;
+        public string leftKey;
+        public string rightValue;
+    }
+
+    // A list of units combined with AND. An empty list is treated as
+    // "passes" (matches the legacy op: 0 / None short-circuit).
+    [Serializable]
+    public class ConditionGroup
+    {
+        public List<ConditionUnit> units = new List<ConditionUnit>();
+    }
+
+    // A trigger expression: outer list is OR across groups, inner list
+    // is AND across units. Empty groups list is treated as "always
+    // passes". Designer-facing field; the runtime bucket projects
+    // `cond.groups` (the List<ConditionGroup>) for fast iteration.
     [Serializable]
     public class ConditionConfig
     {
         public TriggerEvent triggerEvent;
-        public ConditionOp op = ConditionOp.None;
-        public string leftKey;
-        public string rightValue;
+        public List<ConditionGroup> groups = new List<ConditionGroup>();
     }
 
     [Serializable]
