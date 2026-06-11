@@ -105,8 +105,9 @@ visualisation (`groups → Group 0 → units → Unit 0`).
 
 ### 1.3 Semantics
 
-- `Evaluate(ConditionConfig, ConditionEvalContext)`:
-  - Empty / null `groups` → `true` (no condition, always passes).
+- `Evaluate(List<ConditionGroup>, ConditionEvalContext)` (the
+  dispatch-time entry point — the bucket's stored form):
+  - Empty / null groups → `true` (no condition, always passes).
   - Otherwise: iterate `groups`; return `true` on the first group that
     evaluates `true` (short-circuit OR).
   - If no group passes, return `false`.
@@ -146,24 +147,36 @@ After the field-shape change:
 ### 2.1 Bucket Data Structure
 
 `SkillRuntime.componentsByTrigger` value type changes from
-`List<ISkillComponent>` to `List<(ISkillComponent comp, ConditionConfig cond)>`:
+`List<ISkillComponent>` to `List<(ISkillComponent comp, List<ConditionGroup> groups)>`:
 
 ```csharp
-public Dictionary<TriggerEvent, List<(ISkillComponent comp, ConditionConfig cond)>>
+public Dictionary<TriggerEvent, List<(ISkillComponent comp, List<ConditionGroup> groups)>>
     componentsByTrigger
-    = new Dictionary<TriggerEvent, List<(ISkillComponent, ConditionConfig)>>();
+    = new Dictionary<TriggerEvent, List<(ISkillComponent, List<ConditionGroup>)>>();
 ```
 
-Keyed by `TriggerEvent` (unchanged); value is now a list of
-`(component, condition)` pairs so each `ConditionConfig` is independently
-evaluable.
+Keyed by `TriggerEvent` (unchanged); value is a list of
+`(component, conditionExpression)` pairs. The bucket stores only the
+condition expression (`List<ConditionGroup>`) — not the full
+`ConditionConfig` — because `ConditionConfig.triggerEvent` is
+redundant with the dictionary key. Storing the projected expression:
+
+- prevents the bucket entry's `triggerEvent` from disagreeing with
+  the key (impossible by construction);
+- makes the bucket's job explicit: "groups to evaluate when this
+  event fires";
+- keeps the dispatch loop tight (no `.groups` indirection in
+  the hot path).
 
 ### 2.2 Build Phase
 
 In `EntitySkillRunner.BuildSkillRuntime` (around line 157-172), each
-`ConditionConfig` in `ccfg.triggers` produces exactly one entry in the
-appropriate bucket. Multiple `ConditionConfig` entries for the same
-`(component, triggerEvent)` produce multiple bucket entries — see §2.4.
+`ConditionConfig` in `ccfg.triggers` is projected to `(inst, groups)`
+and appended to the appropriate bucket. Multiple `ConditionConfig`
+entries for the same `(component, triggerEvent)` produce multiple
+bucket entries — see §2.4. The projection from `ConditionConfig` to
+`List<ConditionGroup>` is the only point where the triggerEvent/groups
+distinction matters; once in the bucket, only the groups are carried.
 
 ### 2.3 Dispatch Phase (the actual gate)
 
@@ -181,7 +194,7 @@ private void DispatchToSkill(SkillRuntime s, SkillEvent evt)
     if (!s.isActive && !bypassActiveGate) return;
     if (!s.componentsByTrigger.TryGetValue(evt.TriggerEvent, out var list)) return;
 
-    // All (comp, cond) for this event share the same eval context.
+    // All (comp, groups) for this event share the same eval context.
     var evalCtx = new ConditionEvalContext
     {
         sharedBlackboard = sharedBlackboard,
@@ -191,8 +204,8 @@ private void DispatchToSkill(SkillRuntime s, SkillEvent evt)
 
     for (int i = 0; i < list.Count; i++)
     {
-        var (comp, cond) = list[i];
-        if (!ConditionEvaluator.Evaluate(cond, evalCtx)) continue;
+        var (comp, groups) = list[i];
+        if (!ConditionEvaluator.Evaluate(groups, evalCtx)) continue;
         var ctx = PrepareContext(s.MakeContext(comp, evt));
         comp.OnTrigger(ctx);
     }
@@ -310,14 +323,18 @@ were in stale plan docs).
 
 ### 4.2 `Evaluate` Signature
 
-```csharp
-public static bool Evaluate(ConditionConfig cond, ConditionEvalContext ctx)
-{
-    if (cond == null) return true;
-    if (cond.groups == null || cond.groups.Count == 0) return true;
+The primary entry point takes a `List<ConditionGroup>` (the bucket's
+stored form) — not a `ConditionConfig`. This makes the runtime API
+match the bucket's data shape (§2.1) and removes a layer of
+indirection.
 
-    for (int g = 0; g < cond.groups.Count; g++)
-        if (EvaluateGroup(cond.groups[g], ctx)) return true;
+```csharp
+public static bool Evaluate(List<ConditionGroup> groups, ConditionEvalContext ctx)
+{
+    if (groups == null || groups.Count == 0) return true;
+
+    for (int g = 0; g < groups.Count; g++)
+        if (EvaluateGroup(groups[g], ctx)) return true;
     return false;
 }
 
@@ -458,7 +475,7 @@ the trimmed whitelist from commit `54c3465` (only `None` /
   delete `SkillContext.blackboard` field; update `sharedBlackboard` comment.
 - `Assets/PublicScripts/Entity-LevelPublicScripts/EntityBehavior/EntitySkillRunner.cs` —
   `DispatchToSkill` inserts the Evaluate gate; `BuildSkillRuntime`
-  emits `(comp, cond)` tuples.
+  projects `ConditionConfig` to `(comp, groups)` tuples for the bucket.
 - 5 component files (7 touch-points total): `ctx.blackboard` →
   `ctx.sharedBlackboard`.
 - `docs/skill-components/README.md` — "Conditional triggers" section
