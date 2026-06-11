@@ -92,7 +92,7 @@ int 字段的 `mult`: `field = field * value` 走纯 int 运算;设计师应避�
 | 情况 | 行为 |
 |---|---|
 | `fields` 为空 | 合法 no-op,直接 return |
-| `fields` / `values` / `methods` 长度不等 | LogError("length mismatch: fields={n1}, values={n2}, methods={n3}"),按 `Min(n1,n2,n3)` 处理 |
+| `fields` / `values` / `methods` 长度不等 | LogWarning("length mismatch: fields={n1}, values={n2}, methods={n3}"),按 `Min(n1,n2,n3)` 处理 |
 | 字段名未知 | LogWarning,跳过该条 |
 | 方法名未知 | LogWarning,跳过该条 |
 | 数值解析失败 | LogWarning,跳过该条 |
@@ -128,7 +128,7 @@ public class SetAttackCombo : ISkillComponent { /* 不变 */ }
    - `bae.cumbo = 3` 生效
    - `bae.damageType = 2` 生效
 3. 边界用例:
-   - CSV 错位(3 fields, 2 values)→ LogError 后应用前 2 条,不崩
+   - CSV 错位(3 fields, 2 values)→ LogWarning 后应用前 2 条,不崩
    - 字段名拼错 `multipler` → LogWarning,跳过该条
    - `cumbo` 挂到 `OnAfterAttack` → LogInfo 跳过
    - `methods=multiply` 拼错 → LogWarning,跳过该条

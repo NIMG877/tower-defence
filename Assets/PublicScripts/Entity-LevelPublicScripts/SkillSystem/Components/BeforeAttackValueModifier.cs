@@ -35,8 +35,10 @@ namespace SkillSystem.Components
 
             // Pre-parse values by attempting both float and int. Each index's type is locked
             // by the field's known type (see OnTrigger switch), so we keep both arrays and
-            // ignore the other at apply time. A mis-typed value (e.g. "abc" for an int field)
-            // is caught at apply time and logged + skipped.
+            // ignore the other at apply time. A non-numeric value silently becomes 0 in
+            // both arrays; the wrong-type slot is never read at apply time (e.g. a value
+            // parsed into _intValues is only read for an int field), so the other array's
+            // 0 is harmless.
             string[] rawValues = SplitCsv(parameters.GetString("values", ""));
             int n = rawValues.Length;
             _floatValues = new float[n];
