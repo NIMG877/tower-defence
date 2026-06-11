@@ -1,37 +1,51 @@
+using System;
 using System.Collections.Generic;
 
 namespace SkillSystem
 {
-    public class SkillRuntime
+    public class AbilityRuntime
     {
-        public SkillConfig config;
+        public AbilityConfig config;
+        public AbilityKind Kind => config.Kind;
+        public string runtimeId;
         public SPEngine spEngine;
+        public bool isActive;
+
         public List<ISkillComponent> components = new List<ISkillComponent>();
         public List<ITickingComponent> tickingComponents = new List<ITickingComponent>();
-        // 与 components 并行：保存每个组件的初始参数，供 OnInitialize 时 re-OnInit。
         public List<ParamList> componentParams = new List<ParamList>();
-        // Trigger 分桶：BuildSkillRuntime 一次性填充，OnInitialize/OnTeardown 不重建。
-        // key 是 ConditionConfig.triggerEvent 的 enum；value 是按 config 声明顺序排好的
-        // (component, conditionExpression) 对，conditionExpression 是从 ConditionConfig
-        // 投影出的 List<ConditionGroup>（见 §2.1 of the spec）。
+
+        // Trigger 分桶:BuildAbilityRuntime 一次性填充,与 SkillRuntime 的 bucket 形状一致。
         public Dictionary<TriggerEvent, List<(ISkillComponent comp, List<ConditionGroup> groups)>>
             componentsByTrigger
             = new Dictionary<TriggerEvent, List<(ISkillComponent, List<ConditionGroup>)>>();
-        public bool isInitialized;
-        public bool isActive; // true while skill is firing (SPEngine.IsActive)
 
-        public void OpenActiveWindow()  { isActive = true;  }
-        public void CloseActiveWindow() { isActive = false; }
+        public bool isInitialized;
+
+        // Wire/UnwireRuntime 存放在这里;EntitySkillRunner 负责 set/clear 这个字段。
+        // 见 spec §3.2。
+        public Action _wireTeardown;
 
         public SkillContext MakeContext(ISkillComponent component, SkillEvent evt = null)
         {
             return new SkillContext
             {
-                skill = this,
+                skill = this,   // 字段名保留 'skill' (SkillContext 兼容旧组件)
                 component = component,
                 currentEvent = evt,
                 // sharedBlackboard 由 EntitySkillRunner.PrepareContext 注入。
             };
         }
+
+        public void SetActive(bool value)
+        {
+            if (isActive == value) return;
+            isActive = value;
+            if (value) OnAbilityBegin?.Invoke();
+            else OnAbilityEnd?.Invoke();
+        }
+
+        public event Action OnAbilityBegin;
+        public event Action OnAbilityEnd;
     }
 }
