@@ -29,6 +29,13 @@ namespace SkillSystem.Components
         private float[] _values = Array.Empty<float>();
         private bool _endOnSkillEnd;
         private bool _isWhiteList;
+        // Output keys (optional). When set, OnTrigger appends this round's
+        // targets and created buffs (null-padded for skipped/failed targets)
+        // to the per-Entity shared blackboard at these keys. Lists are
+        // accumulated across OnTrigger calls within the same skill window.
+        // Empty string = skip write.
+        private string _outputTargetKey;
+        private string _outputBuffKey;
 
         // Parallel lists tracking buffs this component created while
         // _endOnSkillEnd is on. The target Entity is captured because
@@ -41,14 +48,16 @@ namespace SkillSystem.Components
 
         public void OnInit(SkillContext ctx, ParamList p)
         {
-            _types         = BuffParamParser.ParseBuffTypes(p.GetString("buffTypes", ""));
-            _values        = BuffParamParser.ParseFloats(p.GetString("buffValues", ""));
-            _buffId        = p.GetString("buffId", "skill_buff");
-            _buffTime      = p.GetFloat("buffTime", -10f);
-            _toSelf        = p.GetBool("toSelf", true);
-            _inputKey      = p.GetString("blackboardKey", "");
-            _endOnSkillEnd = p.GetBool("endOnSkillEnd", true);
-            _isWhiteList   = p.GetBool("isWhiteList", false);
+            _types          = BuffParamParser.ParseBuffTypes(p.GetString("buffTypes", ""));
+            _values         = BuffParamParser.ParseFloats(p.GetString("buffValues", ""));
+            _buffId         = p.GetString("buffId", "skill_buff");
+            _buffTime       = p.GetFloat("buffTime", -10f);
+            _toSelf         = p.GetBool("toSelf", true);
+            _inputKey       = p.GetString("blackboardKey", "");
+            _endOnSkillEnd  = p.GetBool("endOnSkillEnd", true);
+            _isWhiteList    = p.GetBool("isWhiteList", false);
+            _outputTargetKey = p.GetString("outputTarget", "");
+            _outputBuffKey   = p.GetString("outputBuff", "");
             ctx.skill.spEngine.OnEnd += DestroyTrackedBuffs;
         }
 
@@ -61,16 +70,74 @@ namespace SkillSystem.Components
             List<Entity> targets = ResolveTargets(ctx);
             if (targets == null) return;
 
+            // Per-round collected lists. Sized to the target list so the
+            // downstream blackboard write is one AddRange each. Targets with
+            // no buffController are still appended (so callers can see
+            // "we tried"); the matching buff slot is null-padded. The output
+            // keys are honored in the AppendToBlackboard calls below.
+            var roundTargets = new List<Entity>(targets.Count);
+            var roundBuffs   = new List<Buff>(targets.Count);
+            bool needWrite = !string.IsNullOrEmpty(_outputTargetKey)
+                          || !string.IsNullOrEmpty(_outputBuffKey);
+
             for (int i = 0; i < targets.Count; i++)
             {
                 var t = targets[i];
-                if (t == null || t.buffController == null) continue;
+                if (t == null)
+                {
+                    if (needWrite)
+                    {
+                        roundTargets.Add(null);
+                        roundBuffs.Add(null);
+                    }
+                    continue;
+                }
+                if (t.buffController == null)
+                {
+                    if (needWrite)
+                    {
+                        roundTargets.Add(t);
+                        roundBuffs.Add(null);
+                    }
+                    continue;
+                }
                 Buff created = t.buffController.CreateBuff(_types, null, _buffId, _values, _buffTime, _isWhiteList);
                 if (_endOnSkillEnd && created != null)
                 {
                     _trackedEntities.Add(t);
                     _trackedBuffs.Add(created);
                 }
+                if (needWrite)
+                {
+                    roundTargets.Add(t);
+                    roundBuffs.Add(created);   // may be null if CreateBuff failed
+                }
+            }
+
+            AppendToBlackboard(ctx, roundTargets, roundBuffs);
+        }
+
+        // Accumulate this round's targets/buffs into the per-Entity shared
+        // blackboard at the configured output keys. Existing lists at those
+        // keys are read, extended, and written back — so repeated OnTrigger
+        // calls (multi-round skills, multi-trigger entries) accumulate.
+        // Missing keys / wrong-typed values fall back to a fresh list.
+        // Skipped entirely when both output keys are empty.
+        private void AppendToBlackboard(SkillContext ctx, List<Entity> roundTargets, List<Buff> roundBuffs)
+        {
+            if (!string.IsNullOrEmpty(_outputTargetKey))
+            {
+                var acc = ctx.sharedBlackboard.Get<List<Entity>>(_outputTargetKey, null)
+                       ?? new List<Entity>();
+                acc.AddRange(roundTargets);
+                ctx.sharedBlackboard.Set(_outputTargetKey, acc);
+            }
+            if (!string.IsNullOrEmpty(_outputBuffKey))
+            {
+                var acc = ctx.sharedBlackboard.Get<List<Buff>>(_outputBuffKey, null)
+                       ?? new List<Buff>();
+                acc.AddRange(roundBuffs);
+                ctx.sharedBlackboard.Set(_outputBuffKey, acc);
             }
         }
 
