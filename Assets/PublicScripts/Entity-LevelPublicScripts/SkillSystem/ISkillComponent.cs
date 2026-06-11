@@ -16,8 +16,10 @@ namespace SkillSystem
         public SkillRuntime skill;
         public ISkillComponent component;
         public SkillEvent currentEvent;
-        public Blackboard blackboard;          // per-skill
-        public Blackboard sharedBlackboard;    // per-Entity SkillRunner
+        // The only blackboard. Per-Entity, set by EntitySkillRunner.PrepareContext
+        // from the per-Entity sharedBlackboard field on the runner. Components
+        // read this directly; there is no per-skill blackboard.
+        public Blackboard sharedBlackboard;
         public GameObject tempContainer;       // for spawn effects
     }
 
