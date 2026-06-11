@@ -8,7 +8,9 @@ namespace Tests.EditMode
     {
         private AbilityConfig MakeCfg(AbilityKind kind = AbilityKind.Talent)
         {
-            return ScriptableObject.CreateInstance<AbilityConfig>();
+            var cfg = ScriptableObject.CreateInstance<AbilityConfig>();
+            cfg.Kind = kind;
+            return cfg;
         }
 
         [Test]
