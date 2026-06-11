@@ -16,7 +16,7 @@ namespace SkillSystem
         [Tooltip("Max charges. >1 enables multi-charge behavior.")]
         public int chargeNum = 1;
         [Tooltip(">0 = active for that long after fire; <=0 = instant fire.")]
-        public float skillDuration;
+        public float skillAmount;
         public SpRecoverMode recoverMode = SpRecoverMode.Natural;
         public SpConsumeMode consumeMode = SpConsumeMode.Natural;
         public SkillOpenMode openMode = SkillOpenMode.Auto;

@@ -7,20 +7,20 @@ namespace SkillSystem
         private readonly SPConfig _cfg;
         private float _currentSp;
         private int _currentCharge;
-        private float _currentDuration;
+        private float _currentAmount;
         private bool _isActive;
         private int _recoverForbid;
 
-        /// <summary>Fires when the skill begins (after charge consumed, before any duration consume).</summary>
+        /// <summary>Fires when the skill begins (after charge consumed, before any amount consume).</summary>
         public event Action OnBegin;
-        /// <summary>Fires when the skill ends, either via duration expiry or instant-fire path.</summary>
+        /// <summary>Fires when the skill ends, either via amount expiry or instant-fire path.</summary>
         public event Action OnEnd;
 
         public float CurrentSp => _currentSp;
         public int CurrentCharge => _currentCharge;
         public bool IsActive => _isActive;
         public bool IsRecoverForbidden => _recoverForbid > 0;
-        public float CurrentDuration => _currentDuration;
+        public float CurrentAmount => _currentAmount;
 
         public SPEngine(SPConfig cfg)
         {
@@ -41,7 +41,7 @@ namespace SkillSystem
         {
             _currentSp = _cfg.initialSp;
             _currentCharge = 0;
-            _currentDuration = 0f;
+            _currentAmount = 0f;
             _isActive = false;
             _recoverForbid = 0;
         }
@@ -53,15 +53,10 @@ namespace SkillSystem
             {
                 AddSp(dt * dtMultiplier);
             }
-            // Duration consume
+            // Amount consume
             if (_isActive && _cfg.consumeMode == SpConsumeMode.Natural)
             {
-                _currentDuration -= dt;
-                if (_currentDuration <= 0f)
-                {
-                    _currentDuration = 0f;
-                    EndSkill();
-                }
+                CounsumeAmount(dt);
             }
             // Natural open
             if (!_isActive && _cfg.openMode == SkillOpenMode.Auto && CanBegin())
@@ -74,14 +69,14 @@ namespace SkillSystem
         {
             if (_cfg.openMode == SkillOpenMode.OnAttackSuccessfully && CanBegin()) FireSkill();
             if (_cfg.recoverMode == SpRecoverMode.OnAttackSuccessfully) AddSp(1f);
-            if (_cfg.consumeMode == SpConsumeMode.OnAttackSuccessfully && _isActive) ConsumeChargeForHit();    
+            if (_cfg.consumeMode == SpConsumeMode.OnAttackSuccessfully && _isActive) CounsumeAmount(1f);    
         }
 
         public void OnAfterHurt(int applyType)
         {
             if (applyType != 0 && applyType != 1) return;
             if (_cfg.recoverMode == SpRecoverMode.OnAfterHurt) AddSp(1f);
-            if (_cfg.consumeMode == SpConsumeMode.OnAfterHurt && _isActive) ConsumeChargeForHit();
+            if (_cfg.consumeMode == SpConsumeMode.OnAfterHurt && _isActive) CounsumeAmount(1f);
         }
 
         public void OnAttackAnimBegin()
@@ -108,17 +103,16 @@ namespace SkillSystem
             if (_currentCharge > 0) _currentCharge--;
             else _currentSp = 0f;
             _isActive = true;
-            if (_cfg.skillDuration > 0f) _currentDuration = _cfg.skillDuration;
+            if (_cfg.skillAmount > 0f) _currentAmount = _cfg.skillAmount;
             if (_cfg.recoverForbidDuringSkill) _recoverForbid++;
             OnBegin?.Invoke();
-            if (_cfg.skillDuration <= 0f) EndSkill();
+            if (_cfg.skillAmount <= 0f) EndSkill();
         }
 
         public void EndSkill()
         {
             if (!_isActive) return;
             _isActive = false;
-            _currentDuration = 0f;
             if (_cfg.recoverForbidDuringSkill && _recoverForbid > 0) _recoverForbid--;
             OnEnd?.Invoke();
         }
@@ -146,10 +140,15 @@ namespace SkillSystem
             }
         }
 
-        private void ConsumeChargeForHit()
+        private void CounsumeAmount(float v)
         {
-            // In a duration-based skill that consumes on hit, just end it
-            if (_cfg.consumeMode == SpConsumeMode.OnAttackSuccessfully) EndSkill();
+            if (!_isActive) return;
+            _currentAmount -= v;
+            if (_currentAmount <= 0f)
+            {
+                _currentAmount = 0f;
+                EndSkill();
+            }
         }
     }
 }

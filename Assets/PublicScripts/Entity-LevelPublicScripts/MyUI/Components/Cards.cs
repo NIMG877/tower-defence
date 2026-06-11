@@ -43,10 +43,10 @@ namespace MyUI
             abilityNameText.text = config.abilityName;
             description.text = config.description;
             var sp = config.sp;
-            float skillDuration = sp != null ? sp.skillDuration : 0f;
-            if (skillDuration > 0f)
+            float skillAmount = sp != null ? sp.skillAmount : 0f;
+            if (skillAmount > 0f)
             {
-                skillAmountText.text = skillDuration.ToString("0.#");
+                skillAmountText.text = skillAmount.ToString("0.#");
             }
             else
             {

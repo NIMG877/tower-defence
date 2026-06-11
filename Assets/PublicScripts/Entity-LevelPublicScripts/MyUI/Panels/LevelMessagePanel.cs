@@ -1276,7 +1276,7 @@ namespace MyUI
                 _spState.color = Color.white;
                 if (consumeType < 3)
                 {
-                    float tsa = cfg.skillDuration;
+                    float tsa = cfg.skillAmount;
                     _spMask.enabled = true;
                     _spMask.color = _orange_half;
                     _spState.sprite = _spMessageAtlas[consumeType + 1];

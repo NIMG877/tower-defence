@@ -102,7 +102,7 @@ public class EntitySkillRunner
         for (int i = 0; i < _abilities.Count; i++)
         {
             var a = _abilities[i];
-            if (a.isActive) a.SetActive(false);
+            a.SetActive(false);
         }
 
         // 2) 调组件 OnTeardown 清残
@@ -225,16 +225,6 @@ public class EntitySkillRunner
     {
         if (cfg == null) return null;
 
-        // 配置校验
-        if ((cfg.Kind == AbilityKind.Talent || cfg.Kind == AbilityKind.ExtraAbility) && cfg.sp != null)
-        {
-            Debug.LogError($"[EntitySkillRunner] BuildAbilityRuntime: {cfg.Kind} '{cfg.abilityId}' has sp != null, aborting");
-            return null;
-        }
-        if (cfg.Kind == AbilityKind.Skill && cfg.sp == null)
-        {
-            Debug.LogWarning($"[EntitySkillRunner] BuildAbilityRuntime: Skill '{cfg.abilityId}' has sp == null, treating as passive");
-        }
 
         var runtime = new AbilityRuntime { config = cfg };
         runtime.runtimeId = GenerateRuntimeId(cfg);
@@ -284,7 +274,7 @@ public class EntitySkillRunner
         }
 
         // SPEngine + 钩到 SetActive
-        if (cfg.sp != null)
+        if (cfg.Kind == AbilityKind.Skill)
         {
             runtime.spEngine = new SPEngine(cfg.sp);
             runtime.spEngine.OnBegin += () => runtime.SetActive(true);
@@ -390,10 +380,13 @@ public class EntitySkillRunner
     private void OnAfterTakeDamage(Entity target, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType, bool isDeadly)
     {
         DispatchEvent(new AfterTakeDamageEvent { target = target, multiplyer = multiplyer, defPenetrate = defPenetrate, mgrPenetrate = mgrPenetrate, defPenetrate_value = defPenetrate_value, mgrPenetrate_value = mgrPenetrate_value, damageType = damageType, applyType = applyType, isDeadly = isDeadly });
-        NotifySpEnginesAfterHurt(applyType);
     }
 
-    private void OnAttackSuccessfully() { DispatchEvent(new AttackSuccessfullyEvent()); for (int i = 0; i < _abilities.Count; i++) _abilities[i].spEngine?.OnAttackSuccessfully(); }
+    private void OnAttackSuccessfully() 
+    { 
+        DispatchEvent(new AttackSuccessfullyEvent()); 
+        for (int i = 0; i < _abilities.Count; i++) _abilities[i].spEngine?.OnAttackSuccessfully(); 
+    }
     private void OnAttackInterrupt() { DispatchEvent(new AttackInterruptEvent()); }
 
     private void OnBeforeHurt(Entity origin, ref float damage, ref float multiplyer, ref float defPenetrate, ref float mgrPenetrate, ref float defPenetrate_value, ref float mgrPenetrate_value, ref int damageType, int applyType)
@@ -408,7 +401,7 @@ public class EntitySkillRunner
     private void OnAfterHurt(Entity origin, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType, bool isDeadly)
     {
         DispatchEvent(new AfterHurtEvent { origin = origin, damage = damage, multiplyer = multiplyer, defPenetrate = defPenetrate, mgrPenetrate = mgrPenetrate, defPenetrate_value = defPenetrate_value, mgrPenetrate_value = mgrPenetrate_value, damageType = damageType, applyType = applyType, isDeadly = isDeadly });
-        NotifySpEnginesAfterHurt(applyType);
+        for (int i = 0; i < _abilities.Count; i++) _abilities[i].spEngine?.OnAfterHurt(applyType);
     }
 
     private void OnAttackAnimBegin()
@@ -418,11 +411,6 @@ public class EntitySkillRunner
     }
 
     private void OnBeforeDieAnimation() { DispatchEvent(new BeforeDieAnimationEvent()); }
-
-    private void NotifySpEnginesAfterHurt(int applyType)
-    {
-        for (int i = 0; i < _abilities.Count; i++) _abilities[i].spEngine?.OnAfterHurt(applyType);
-    }
 
     // ===== Dispatch core =====
 
