@@ -17,10 +17,6 @@ namespace SkillSystem
 
             switch (cond.op)
             {
-                case ConditionOp.HasBlackboardKey:
-                    return ctx.Blackboard.Has(cond.leftKey);
-                case ConditionOp.NotHasBlackboardKey:
-                    return !ctx.Blackboard.Has(cond.leftKey);
                 case ConditionOp.Equal:
                     return ctx.Blackboard.Get<string>(cond.leftKey) == cond.rightValue;
                 case ConditionOp.NotEqual:

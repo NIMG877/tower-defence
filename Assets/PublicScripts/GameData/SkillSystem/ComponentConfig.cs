@@ -83,14 +83,14 @@ namespace SkillSystem
         OnSkillBegin, OnSkillEnd,
     }
 
-    // Whitelist kept narrow: conditions can only read the blackboard. Anything
-    // richer (HasBuff, abnormal-state checks, ...) is the component's job —
-    // it writes the value to the blackboard first, then this evaluator reads it.
+    // Whitelist kept narrow: conditions can only compare blackboard values.
+    // Anything richer (HasBuff, abnormal-state checks, key-presence probes, ...)
+    // is the component's job — it writes the value to the blackboard first,
+    // then this evaluator reads it.
     public enum ConditionOp
     {
         None, Equal, NotEqual,
         Greater, GreaterOrEqual, Less, LessOrEqual,
-        HasBlackboardKey, NotHasBlackboardKey,
     }
 
     [Serializable]

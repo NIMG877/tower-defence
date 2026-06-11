@@ -127,14 +127,15 @@ Operator semantics (from `ConditionEvaluator.cs`):
 
 | `op` | Comparison |
 |---|---|
-| `HasBlackboardKey`, `NotHasBlackboardKey` | checks key presence |
 | `Equal`, `NotEqual` | string `==` / `!=` on the key's value |
 | `Greater` / `GreaterOrEqual` / `Less` / `LessOrEqual` | `float.TryParse` on both sides, falls back to ordinal string compare if either is unparseable |
 | `None` | the row is skipped (always passes). |
 
-Conditions only read the blackboard — they don't inspect the entity.
-Richer checks (`HasBuff`, abnormal-state tests, ...) belong in the
-component: it writes the value to the blackboard first, then a
-condition reads it. The `ConditionOp` enum is whitelisted to the
-operators above; richer ops were removed because they were no-ops
-at runtime.
+Conditions only compare blackboard values — they don't inspect the
+entity or probe key presence. Richer checks (`HasBuff`, abnormal-state
+tests, key-presence probes, ...) belong in the component: it writes
+the value to the blackboard first, then a condition reads it. The
+`ConditionOp` enum is whitelisted to the operators above; richer ops
+were removed because they were either no-ops at runtime or, in the
+case of `HasBlackboardKey` / `NotHasBlackboardKey`, replaceable by
+`Equal` / `NotEqual` against a sentinel value.
