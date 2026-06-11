@@ -2,12 +2,12 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Make `triggers[]` a real conditional gate at dispatch time, add nested AND/OR composition in `ConditionConfig` (3 new `[Serializable]` classes), and unify on a single per-Entity blackboard by deleting `SkillRuntime.blackboard` and migrating 5 components from `ctx.blackboard` to `ctx.sharedBlackboard`.
+**Goal:** Make `triggers[]` a real conditional gate at dispatch time, add nested AND/OR composition in `ConditionConfig` (3 new `[Serializable]` classes), and unify on a single per-Entity blackboard by deleting `SkillRuntime.blackboard` and migrating 6 components from `ctx.blackboard` to `ctx.sharedBlackboard`.
 
 **Architecture:**
 - Data layer: `ConditionConfig` keeps its `triggerEvent` for designer / `.asset` use; bucket stores the projected `List<ConditionGroup>` (the `groups` field) since `triggerEvent` is redundant with the dictionary key.
 - Dispatch: `DispatchToSkill` constructs one `ConditionEvalContext` per event and single-pass-iterates the bucket, calling `ConditionEvaluator.Evaluate(groups, ctx)` for each entry. No dedup; multiple entries with the same `(component, triggerEvent)` produce multiple `OnTrigger` calls.
-- Blackboard: the only allowed blackboard is the per-Entity shared one. `SkillRuntime.blackboard` and `SkillContext.blackboard` are removed; 5 component files rename `ctx.blackboard` → `ctx.sharedBlackboard`.
+- Blackboard: the only allowed blackboard is the per-Entity shared one. `SkillRuntime.blackboard` and `SkillContext.blackboard` are removed; 6 component files rename `ctx.blackboard` → `ctx.sharedBlackboard`.
 
 **Tech Stack:** Unity 2020+ (C# 8.0), no test infrastructure (project ships no EditMode/PlayMode test runner as of 2026-06-11). Verification = Unity Editor compile + subagent spec/code review + PlayMode smoke.
 
@@ -24,7 +24,7 @@
 - `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/SkillRuntime.cs` — delete `blackboard` field; change `componentsByTrigger` value type to `List<(ISkillComponent, List<ConditionGroup>)>`; remove `blackboard` assignment in `MakeContext`.
 - `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/ISkillComponent.cs` — delete `SkillContext.blackboard` field; update `sharedBlackboard` comment.
 - `Assets/PublicScripts/Entity-LevelPublicScripts/EntityBehavior/EntitySkillRunner.cs` — `BuildSkillRuntime` projects `ConditionConfig` to `(inst, groups)`; `DispatchToSkill` builds `ConditionEvalContext` and single-pass-iterates the bucket calling `ConditionEvaluator.Evaluate(groups, ctx)`.
-- 5 component files (7 touch-points): `ctx.blackboard` → `ctx.sharedBlackboard`:
+- 6 component files (7 touch-points): `ctx.blackboard` → `ctx.sharedBlackboard`:
   - `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/ApplyBuff.cs` (line 103)
   - `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/PlayParticleComponent.cs` (line 20)
   - `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/EntitySelector.cs` (lines 46, 47)
@@ -467,7 +467,7 @@ field-shape updates that don't compile in isolation:
     reached via SkillContext.sharedBlackboard. MakeContext no longer
     assigns the per-skill field.
 
-EntitySkillRunner dispatch and 5 component files (still reading
+EntitySkillRunner dispatch and 6 component files (still reading
 SkillContext.blackboard) will not compile until Tasks 5 and 7 land.
 That is expected — the next tasks close those gaps."
 ```
@@ -536,9 +536,9 @@ namespace SkillSystem
 }
 ```
 
-- [ ] **Step 3: Open Unity and confirm 5 component files now fail to compile**
+- [ ] **Step 3: Open Unity and confirm 6 component files now fail to compile**
 
-Open the project. **Expected**: 5 component files (`ApplyBuff.cs`, `PlayParticleComponent.cs`, `EntitySelector.cs`, `EntitySelectorRadiusEffectComponent.cs`, `CampDamageModifierComponent.cs`, `CoroutineLoopComponent.cs`) fail to compile because they read `ctx.blackboard`. **`EntitySelectorRadiusEffectComponent.cs` has one read at line 51 (`blackboard = ctx.blackboard`) which passes the value to a sub-component — the fix is to pass `ctx.sharedBlackboard` instead, but the rename is a Task 6 step. At this point, the project will not compile.** This is the trigger for Task 6.
+Open the project. **Expected**: 6 component files (`ApplyBuff.cs`, `PlayParticleComponent.cs`, `EntitySelector.cs`, `EntitySelectorRadiusEffectComponent.cs`, `CampDamageModifierComponent.cs`, `CoroutineLoopComponent.cs`) fail to compile because they read `ctx.blackboard`. **`EntitySelectorRadiusEffectComponent.cs` has one read at line 51 (`blackboard = ctx.blackboard`) which passes the value to a sub-component — the fix is to pass `ctx.sharedBlackboard` instead, but the rename is a Task 6 step. At this point, the project will not compile.** This is the trigger for Task 6.
 
 - [ ] **Step 4: Commit**
 
@@ -556,7 +556,7 @@ failure is the trigger for the next task."
 
 ---
 
-### Task 5: Rename `ctx.blackboard` to `ctx.sharedBlackboard` in 5 component files
+### Task 5: Rename `ctx.blackboard` to `ctx.sharedBlackboard` in 6 component files
 
 **Files:**
 - Modify (mechanical rename, 7 touch-points total):
@@ -588,7 +588,7 @@ For each touch-point, replace `ctx.blackboard` with `ctx.sharedBlackboard`. Use 
 
 - [ ] **Step 3: Open Unity and confirm Console is clean**
 
-Open the project. The 5 component files should now compile. **The project as a whole still does not compile** — `EntitySkillRunner.cs` is still using the old `List<ISkillComponent>` bucket value type. That is the trigger for Task 7.
+Open the project. The 6 component files should now compile. **The project as a whole still does not compile** — `EntitySkillRunner.cs` is still using the old `List<ISkillComponent>` bucket value type. That is the trigger for Task 7.
 
 - [ ] **Step 4: Commit**
 
@@ -913,7 +913,7 @@ If nothing needed fixing, this step is a no-op.
 - **Spec coverage:** §1 → Tasks 1, 2. §2 → Tasks 3, 6, 8. §3 → Tasks 4, 5. §4 → Task 2. §5 → Task 8.
 - **Type consistency:** `ConditionUnit` / `ConditionGroup` / `ConditionConfig` are introduced in Task 1 and referenced identically in Tasks 2, 3, 6, 7. `ConditionEvaluator.Evaluate(List<ConditionGroup>, ConditionEvalContext)` is defined in Task 2 and called identically in Task 6. `List<(ISkillComponent, List<ConditionGroup>)>` is the bucket value type from Task 3 and is the receiving end in Task 6.
 - **Placeholder scan:** 0 hits for "TBD" / "TODO" / "implement later" / "类似".
-- **Compile ordering:** Tasks 1, 2, 3, 4 are in a state where the project does not compile cleanly mid-task. **This is intentional and expected**: each task is sized to leave the codebase at a known compile state (a "Task 4 is finished" state is "5 component files fail to compile"; a "Task 5 is finished" state is "project compiles, EntitySkillRunner does not"; a "Task 6 is finished" state is "project compiles cleanly"). If a task is paused and resumed, the operator should be able to tell at a glance which tasks have completed and where the project is. The "expected compile state" paragraphs in Steps 3-4 of each task document this.
+- **Compile ordering:** Tasks 1, 2, 3, 4 are in a state where the project does not compile cleanly mid-task. **This is intentional and expected**: each task is sized to leave the codebase at a known compile state (a "Task 4 is finished" state is "6 component files fail to compile"; a "Task 5 is finished" state is "project compiles, EntitySkillRunner does not"; a "Task 6 is finished" state is "project compiles cleanly"). If a task is paused and resumed, the operator should be able to tell at a glance which tasks have completed and where the project is. The "expected compile state" paragraphs in Steps 3-4 of each task document this.
 - **Hot-path performance note:** the dispatch loop allocates one `ConditionEvalContext` per `DispatchToSkill` call. This matches the pre-fix allocation profile (no `HashSet` is allocated per call — see spec §2.5). If profiling shows this is a problem, the context can be pooled. Defer until evidence.
 - **No test files created:** project has no test runner. PlayMode smoke in Task 8 Step 3 is the only runtime verification.
 
