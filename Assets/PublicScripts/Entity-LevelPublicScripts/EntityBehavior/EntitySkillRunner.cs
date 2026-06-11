@@ -174,7 +174,8 @@ public class EntitySkillRunner
         }
 
         var runtime = BuildAbilityRuntime(cfg);
-        _abilities.Add(runtime);
+        // BuildAbilityRuntime 已经把 runtime 加入 _abilities (single source of truth)。
+        // 这里不要重复 Add,否则同一个 ref 出现两次 (PreWarm / 幂等分支 都会受影响)。
         runtime.SetActive(true);
         DispatchEvent(new AbilityAddedEvent { ability = runtime });
         return runtime.runtimeId;
@@ -293,8 +294,9 @@ public class EntitySkillRunner
         WireRuntime(runtime);
 
         runtime.isInitialized = true;
-        // 注意:调用者(PreWarm 循环、AddExtraAbility)负责把 runtime 加入 _abilities。
-        // BuildAbilityRuntime 不应重复 Add,否则会双倍插入(同一个 ref 出现两次)。
+        // single source of truth:BuildAbilityRuntime 负责把 runtime 加入 _abilities。
+        // 调用者(PreWarm 循环、AddExtraAbility)拿到的 runtime 已经在 list 里,不要再 Add。
+        _abilities.Add(runtime);
         return runtime;
     }
 
