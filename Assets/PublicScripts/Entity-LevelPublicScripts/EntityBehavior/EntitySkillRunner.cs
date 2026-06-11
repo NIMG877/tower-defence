@@ -150,9 +150,13 @@ public class EntitySkillRunner
                 runtime.componentParams.Add(ccfg.parameters);
                 if (inst is ITickingComponent t) runtime.tickingComponents.Add(t);
 
-                // Bucket by trigger. Each ConditionConfig contributes one entry;
-                // the same component instance can land in multiple buckets when
-                // its config declares multiple triggers — that's expected.
+                // Bucket by trigger. Each ConditionConfig contributes one entry; the
+                // same component instance can land in multiple buckets when its
+                // config declares multiple triggers — that's expected.
+                //
+                // We project ConditionConfig -> (inst, cond.groups) here so the
+                // runtime bucket only carries what Evaluate needs. The triggerEvent
+                // is already encoded in the bucket key.
                 int triggerCount = 0;
                 if (ccfg.triggers != null)
                 {
@@ -163,10 +167,10 @@ public class EntitySkillRunner
                         var te = trig.triggerEvent;
                         if (!runtime.componentsByTrigger.TryGetValue(te, out var list))
                         {
-                            list = new List<ISkillComponent>();
+                            list = new List<(ISkillComponent, List<ConditionGroup>)>();
                             runtime.componentsByTrigger[te] = list;
                         }
-                        list.Add(inst);
+                        list.Add((inst, trig.groups));
                         triggerCount++;
                     }
                 }
@@ -320,11 +324,25 @@ public class EntitySkillRunner
                              || evt is SkillBeginEvent
                              || evt is SkillEndEvent;
         if (!s.isActive && !bypassActiveGate) return;
-
         if (!s.componentsByTrigger.TryGetValue(evt.TriggerEvent, out var list)) return;
+
+        // All (comp, groups) for this event share the same eval context.
+        var evalCtx = new ConditionEvalContext
+        {
+            sharedBlackboard = sharedBlackboard,
+            entity = _entity,
+            currentEvent = evt,
+        };
+
+        // Single-pass over the bucket. No dedup: a component with N
+        // ConditionConfig entries for the same triggerEvent produces up
+        // to N OnTrigger calls (one per passing entry). Designers who
+        // want at-most-one should put the OR inside a single
+        // ConditionConfig's groups (see spec §2.4).
         for (int i = 0; i < list.Count; i++)
         {
-            var comp = list[i];
+            var (comp, groups) = list[i];
+            if (!ConditionEvaluator.Evaluate(groups, evalCtx)) continue;
             var ctx = PrepareContext(s.MakeContext(comp, evt));
             comp.OnTrigger(ctx);
         }
