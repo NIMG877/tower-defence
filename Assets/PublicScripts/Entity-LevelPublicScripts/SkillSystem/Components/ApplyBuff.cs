@@ -27,7 +27,6 @@ namespace SkillSystem.Components
         private string _inputTargetKey;            // blackboard key (optional)
         private BuffType[] _types = Array.Empty<BuffType>();
         private float[] _values = Array.Empty<float>();
-        private bool _endOnSkillEnd;
         private bool _isWhiteList;
         // Output keys (optional). When set, OnTrigger appends this round's
         // targets and created buffs (null-padded for skipped/failed targets)
@@ -37,15 +36,6 @@ namespace SkillSystem.Components
         private string _outputTargetKey;
         private string _outputBuffKey;
 
-        // Parallel lists tracking buffs this component created while
-        // _endOnSkillEnd is on. The target Entity is captured because
-        // DestroyBuff lives on the target's BuffController, not the caster's.
-        // Follows the PeriodicAuraBuffComponent pattern (parallel List<Entity>
-        // + List<Buff>) — stays empty when _endOnSkillEnd is false, so the
-        // allocation cost is opt-in.
-        private readonly List<Entity> _trackedEntities = new List<Entity>();
-        private readonly List<Buff> _trackedBuffs = new List<Buff>();
-
         public void OnInit(SkillContext ctx, ParamList p)
         {
             _types          = BuffParamParser.ParseBuffTypes(p.GetString("buffTypes", ""));
@@ -53,12 +43,10 @@ namespace SkillSystem.Components
             _buffId         = p.GetString("buffId", "skill_buff");
             _buffTime       = p.GetFloat("buffTime", -10f);
             _toSelf         = p.GetBool("toSelf", true);
-            _inputTargetKey       = p.GetString("blackboardKey", "");
-            _endOnSkillEnd  = p.GetBool("endOnSkillEnd", true);
             _isWhiteList    = p.GetBool("isWhiteList", false);
+            _inputTargetKey = p.GetString("blackboardKey", "");
             _outputTargetKey = p.GetString("outputTarget", "");
             _outputBuffKey   = p.GetString("outputBuff", "");
-            ctx.skill.spEngine.OnEnd += DestroyTrackedBuffs;
         }
 
         public void OnTrigger(SkillContext ctx)
@@ -77,44 +65,23 @@ namespace SkillSystem.Components
             // keys are honored in the AppendToBlackboard calls below.
             var roundTargets = new List<Entity>(targets.Count);
             var roundBuffs   = new List<Buff>(targets.Count);
-            bool needWrite = !string.IsNullOrEmpty(_outputTargetKey)
-                          || !string.IsNullOrEmpty(_outputBuffKey);
+            bool needWrite = !string.IsNullOrEmpty(_outputTargetKey) && !string.IsNullOrEmpty(_outputBuffKey);
 
             for (int i = 0; i < targets.Count; i++)
             {
-                var t = targets[i];
-                if (t == null)
-                {
-                    if (needWrite)
-                    {
-                        roundTargets.Add(null);
-                        roundBuffs.Add(null);
-                    }
-                    continue;
-                }
-                if (t.buffController == null)
-                {
-                    if (needWrite)
-                    {
-                        roundTargets.Add(t);
-                        roundBuffs.Add(null);
-                    }
-                    continue;
-                }
+                Entity t = targets[i];
+                if(t == null || t.buffController == null) continue;
                 Buff created = t.buffController.CreateBuff(_types, null, _buffId, _values, _buffTime, _isWhiteList);
-                if (_endOnSkillEnd && created != null)
-                {
-                    _trackedEntities.Add(t);
-                    _trackedBuffs.Add(created);
-                }
                 if (needWrite)
                 {
                     roundTargets.Add(t);
                     roundBuffs.Add(created);   // may be null if CreateBuff failed
                 }
             }
-
-            AppendToBlackboard(ctx, roundTargets, roundBuffs);
+            if (needWrite)
+            {
+                AppendToBlackboard(ctx, roundTargets, roundBuffs);
+            }
         }
 
         // Accumulate this round's targets/buffs into the per-Entity shared
@@ -125,39 +92,16 @@ namespace SkillSystem.Components
         // Skipped entirely when both output keys are empty.
         private void AppendToBlackboard(SkillContext ctx, List<Entity> roundTargets, List<Buff> roundBuffs)
         {
-            if (!string.IsNullOrEmpty(_outputTargetKey))
-            {
-                var acc = ctx.sharedBlackboard.Get<List<Entity>>(_outputTargetKey, null)
-                       ?? new List<Entity>();
-                acc.AddRange(roundTargets);
-                ctx.sharedBlackboard.Set(_outputTargetKey, acc);
-            }
-            if (!string.IsNullOrEmpty(_outputBuffKey))
-            {
-                var acc = ctx.sharedBlackboard.Get<List<Buff>>(_outputBuffKey, null)
-                       ?? new List<Buff>();
-                acc.AddRange(roundBuffs);
-                ctx.sharedBlackboard.Set(_outputBuffKey, acc);
-            }
+            List<Entity> bbTarget = ctx.sharedBlackboard.Get<List<Entity>>(_outputTargetKey, null) ?? new List<Entity>();
+            bbTarget.AddRange(roundTargets);
+            ctx.sharedBlackboard.Set(_outputTargetKey, bbTarget);
+            List<Buff> bbBuff = ctx.sharedBlackboard.Get<List<Buff>>(_outputBuffKey, null) ?? new List<Buff>();
+            bbBuff.AddRange(roundBuffs);
+            ctx.sharedBlackboard.Set(_outputBuffKey, bbBuff);
         }
 
         public void OnTick(SkillContext ctx, float dt) { }
-        public void OnTeardown(SkillContext ctx)
-        {
-            ctx.skill.spEngine.OnEnd -= DestroyTrackedBuffs;
-        }
-
-        private void DestroyTrackedBuffs()
-        {
-            for (int i = 0; i < _trackedEntities.Count; i++)
-            {
-                var e = _trackedEntities[i];
-                if (e == null || e.buffController == null) continue;
-                e.buffController.DestroyBuff(_trackedBuffs[i]);
-            }
-            _trackedEntities.Clear();
-            _trackedBuffs.Clear();
-        }
+        public void OnTeardown(SkillContext ctx) { }
 
         // Blackboard-read path: when blackboardKey is set, the target list is read
         // from the key. If the key is missing/empty, the component skips silently —
@@ -175,23 +119,9 @@ namespace SkillSystem.Components
             // type that arrives depends on the config, so we extract `target` from
             // whichever event payload carries one. Falls back to ctx.entity when
             // the event doesn't carry a target field (or _toSelf is true).
-            Entity t = _toSelf
-                ? ctx.entity
-                : (ExtractTargetFromEvent(ctx.currentEvent) ?? ctx.entity);
+            Entity t = _toSelf ? ctx.entity : null;
             if (t == null || t.buffController == null) return null;
             return new List<Entity> { t };
-        }
-
-        private static Entity ExtractTargetFromEvent(SkillEvent evt)
-        {
-            return evt switch
-            {
-                BeforeTakeDamageEvent btd => btd.target,
-                AfterTakeDamageEvent  atd => atd.target,
-                BeforeAttackEvent     bae => bae.target,
-                AfterAttackEvent      aae => aae.target,
-                _ => null,
-            };
         }
     }
 }
