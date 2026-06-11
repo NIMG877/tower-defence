@@ -1,5 +1,6 @@
 namespace SkillSystem.Components
 {
+    [System.Obsolete("Use BeforeAttackValueModifier")]
     [RegisterComponent("AttackMultiplierBoost")]
     public class AttackMultiplierBoost : ISkillComponent
     {
