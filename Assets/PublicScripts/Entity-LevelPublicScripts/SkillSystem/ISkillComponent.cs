@@ -13,7 +13,9 @@ namespace SkillSystem
     public class SkillContext
     {
         public Entity entity;
-        public SkillRuntime skill;
+        // 字段名保留 'skill' (legacy 组件可能会反射访问),但类型是 AbilityRuntime。
+        // AbilityRuntime.MakeContext 里 `skill = this` 把 AbilityRuntime 自己填进来。
+        public AbilityRuntime skill;
         public ISkillComponent component;
         public SkillEvent currentEvent;
         // The only blackboard. Per-Entity, set by EntitySkillRunner.PrepareContext

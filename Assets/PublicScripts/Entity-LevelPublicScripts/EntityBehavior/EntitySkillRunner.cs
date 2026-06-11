@@ -293,7 +293,8 @@ public class EntitySkillRunner
         WireRuntime(runtime);
 
         runtime.isInitialized = true;
-        _abilities.Add(runtime);
+        // 注意:调用者(PreWarm 循环、AddExtraAbility)负责把 runtime 加入 _abilities。
+        // BuildAbilityRuntime 不应重复 Add,否则会双倍插入(同一个 ref 出现两次)。
         return runtime;
     }
 
