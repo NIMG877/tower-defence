@@ -89,6 +89,6 @@ public class EntityData
     public int   MassLevel;
     public int   MoveMethod;
 
-    // 技能 / 天赋（数据驱动框架）
-    public List<SkillConfig> Skills = new List<SkillConfig>();
+    // 技能 / 天赋 / 额外能力（数据驱动框架）
+    public List<AbilityConfig> Abilities = new List<AbilityConfig>();
 }
