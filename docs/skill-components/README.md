@@ -29,6 +29,7 @@ array (a `ParamList`). Each entry is a `(key, type, value)` triple:
 | `Vector2Int` | `x,y` (comma) | `1,1` |
 | `BuffTypeCsv` | `BuffType` enum names, comma-separated | `AtkSpeed,Bleed` |
 | `FloatCsv` | Plain floats, comma-separated | `0.5,1.0,-0.25` |
+| `StringCsv` | Plain strings, comma-separated (whitespace trimmed) | `multiplyer,cumbo` |
 | `BlackboardKey` | Free-form key string | `targets.list` |
 
 ## DamageType encoding (convention)
@@ -58,8 +59,10 @@ callers.
 
 ### Damage / combat
 
-- [AttackMultiplierBoost](AttackMultiplierBoost.md) — multiplicative
-  boost to `bae.multiplyer` on `BeforeAttackEvent`.
+- [AttackEventValueModifier](AttackEventValueModifier.md) — generic
+  CSV-driven rewriter for `DamageEventBase` event fields
+  (`multiplyer`, `damageType`, `cumbo`, etc.). Supersedes the
+  removed `AttackMultiplierBoost` and `SetAttackCombo`.
 - [CampDamageModifier](CampDamageModifier.md) — multiplies damage when
   the target's camp matches `requiredCamp`.
 - [DamageRadiusFalloff](DamageRadiusFalloff.md) — tier-based AOE damage
@@ -68,8 +71,6 @@ callers.
   `threshold` on a hit.
 - [SelfDamageOnEvent](SelfDamageOnEvent.md) — damages self after a
   lethal hit.
-- [SetAttackCombo](SetAttackCombo.md) — absolute combo count assigned
-  to `bae.cumbo`.
 
 ### Selection / blackboard
 
