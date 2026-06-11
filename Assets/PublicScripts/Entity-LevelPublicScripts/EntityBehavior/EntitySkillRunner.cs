@@ -3,71 +3,78 @@ using UnityEngine;
 using SkillSystem;
 
 /// <summary>
-/// 技能子系统（POCO）。持有 SkillRuntime 列表并 tick SP / 组件；
+/// 技能子系统（POCO）。持有 AbilityRuntime 列表并 tick SP / 组件；
 /// 订阅 Entity 事件（攻击 / 受击 / 死亡 / 动画）并桥成 SkillEvent 分发。
 ///
 /// 设计要点：
 ///   - POCO，无 MonoBehaviour 依赖。构造接受 Entity 引用作为事件桥。
 ///   - 由 Entity 在 PreWarm 中显式构造，OnInitialize / OnTeardown / Tick 由 Entity 生命周期驱动。
 ///   - 实体 prefab 上不挂载该组件（迁移自原 SkillSystem.SkillRunner MonoBehaviour）。
-///   - TempContainer 字段已移除：原本只是缓存 Entity.TempContainer，组件内无任何使用点。
 /// </summary>
 public class EntitySkillRunner
 {
     private readonly Entity _entity;
-    private readonly List<SkillRuntime> _skills = new List<SkillRuntime>();
+    private readonly List<AbilityRuntime> _abilities = new List<AbilityRuntime>();
     public Blackboard sharedBlackboard = new Blackboard();
 
-    public IReadOnlyList<SkillRuntime> Skills => _skills;
+    // runtimeId 生成 (extras 用,见 spec §5.5)
+    private int _extraCounter = 0;
+
+    public IReadOnlyList<AbilityRuntime> Abilities => _abilities;
 
     public EntitySkillRunner(Entity entity)
     {
         _entity = entity;
     }
 
+    // Test-only constructor. 不订阅 Entity 事件,只挂一个空的 blackboard。
+    // EditMode tests 用这个构造一个不依赖 prefab 的 runner。
+    internal EntitySkillRunner(Blackboard blackboard)
+    {
+        _entity = null;
+        sharedBlackboard = blackboard ?? new Blackboard();
+    }
+
     public void PreWarm()
     {
         ComponentAutoRegistry.EnsureRegistered();
         var data = _entity != null ? _entity.EntityData : null;
-        if (data == null || data.Skills == null) return;
+        if (data == null || data.Abilities == null) return;
 
-        for (int i = 0; i < data.Skills.Count; i++)
+        for (int i = 0; i < data.Abilities.Count; i++)
         {
-            var cfg = data.Skills[i];
+            var cfg = data.Abilities[i];
             if (cfg == null) continue;
-            BuildSkillRuntime(cfg);
+            BuildAbilityRuntime(cfg);
         }
 
-        // 事件订阅不在 PreWarm 一次完成；改为每次部署 OnInitialize / OnTeardown 配对，
-        // 避免池化复用路径下订阅丢失（Bug B）。
         DispatchEvent(new PreWarmEvent());
     }
 
     public void OnInitialize()
     {
-        // 1) 重新订阅事件（每次部署配对，池化复用路径不会丢订阅）
+        // 1) 重新订阅事件
         Subscribe();
 
-        // 2) 复位每个 SPEngine（currentSp / charge / duration / isActive / recoverForbid）
-        for (int i = 0; i < _skills.Count; i++)
+        // 2) 复位每个 SPEngine
+        for (int i = 0; i < _abilities.Count; i++)
         {
-            _skills[i].spEngine?.Reset();
+            _abilities[i].spEngine?.Reset();
         }
 
-        // 3) 重新初始化组件（先 OnTeardown 清残，再 OnInit 用保存的参数重置）
-        for (int i = 0; i < _skills.Count; i++)
+        // 3) 重新初始化组件
+        for (int i = 0; i < _abilities.Count; i++)
         {
-            var s = _skills[i];
-            for (int c = 0; c < s.components.Count; c++)
+            var a = _abilities[i];
+            for (int c = 0; c < a.components.Count; c++)
             {
-                var comp = s.components[c];
-                if (c < s.componentParams.Count)
+                var comp = a.components[c];
+                if (c < a.componentParams.Count)
                 {
-                    var teardownCtx = s.MakeContext(comp, null);
+                    var teardownCtx = a.MakeContext(comp, null);
                     comp.OnTeardown(teardownCtx);
-
-                    var initCtx = s.MakeContext(comp, null);
-                    comp.OnInit(initCtx, s.componentParams[c]);
+                    var initCtx = a.MakeContext(comp, null);
+                    comp.OnInit(initCtx, a.componentParams[c]);
                 }
             }
         }
@@ -75,25 +82,45 @@ public class EntitySkillRunner
         // 4) 清空 per-Entity 共享黑板
         sharedBlackboard.Clear();
 
-        // 5) 派发 InitializeEvent 给组件
+        // 5) 派发 InitializeEvent
         DispatchEvent(new InitializeEvent());
+
+        // 6) 激活 Talents。Talent 的 SetActive(true) 触发 OnAbilityBegin,广播给所有 ability。
+        // Skills 等待 SPEngine;extras 还没 runtime。
+        for (int i = 0; i < _abilities.Count; i++)
+        {
+            var a = _abilities[i];
+            if (a.Kind == AbilityKind.Talent) a.SetActive(true);
+        }
     }
 
     public void OnTeardown()
     {
-        // 退订事件（与 OnInitialize.Subscribe 配对；C# event += / -= 必须成对）
         Unsubscribe();
 
-        // 调组件 OnTeardown 清残，但 _skills 列表与 spEngine 保留以便下次 OnInitialize 复用
-        // （重建会丢事件订阅、丢组件参数、丢 component 列表对齐）
-        for (int i = 0; i < _skills.Count; i++)
+        // 1) 所有 active 的 ability 翻成 inactive (会触发 OnAbilityEnd,广播)
+        for (int i = 0; i < _abilities.Count; i++)
         {
-            var s = _skills[i];
-            for (int c = 0; c < s.components.Count; c++)
+            var a = _abilities[i];
+            if (a.isActive) a.SetActive(false);
+        }
+
+        // 2) 调组件 OnTeardown 清残
+        for (int i = 0; i < _abilities.Count; i++)
+        {
+            var a = _abilities[i];
+            for (int c = 0; c < a.components.Count; c++)
             {
-                var ctx = s.MakeContext(s.components[c], null);
-                s.components[c].OnTeardown(ctx);
+                var ctx = a.MakeContext(a.components[c], null);
+                a.components[c].OnTeardown(ctx);
             }
+        }
+
+        // 3) Unwire + 清空列表 (下次 OnInitialize 走 PreWarm 重建)
+        for (int i = _abilities.Count - 1; i >= 0; i--)
+        {
+            UnwireRuntime(_abilities[i]);
+            _abilities.RemoveAt(i);
         }
     }
 
@@ -102,46 +129,125 @@ public class EntitySkillRunner
     /// </summary>
     public void Tick(float dt)
     {
-        // 1) per-skill SP tick
-        for (int i = 0; i < _skills.Count; i++)
+        // 1) per-ability SP tick
+        for (int i = 0; i < _abilities.Count; i++)
         {
-            _skills[i].spEngine?.OnTick(dt, 1f);
+            _abilities[i].spEngine?.OnTick(dt, 1f);
         }
         // 2) per-component tick
-        for (int i = 0; i < _skills.Count; i++)
+        for (int i = 0; i < _abilities.Count; i++)
         {
-            var s = _skills[i];
-            if (!s.isActive) continue;
-            for (int c = 0; c < s.tickingComponents.Count; c++)
+            var a = _abilities[i];
+            if (!a.isActive) continue;
+            for (int c = 0; c < a.tickingComponents.Count; c++)
             {
-                // IntervalTickEvent removed: OnTick has dt as an explicit parameter,
-                // and ctx.currentEvent is null inside OnTick by design.
-                var comp = s.tickingComponents[c];
-                var ctx = PrepareContext(s.MakeContext(comp, null));
+                var comp = a.tickingComponents[c];
+                var ctx = PrepareContext(a.MakeContext(comp, null));
                 comp.OnTick(ctx, dt);
             }
         }
     }
 
-    private void BuildSkillRuntime(SkillConfig cfg)
+    // ===== Public API: Add/Remove ExtraAbility =====
+
+    public string AddExtraAbility(AbilityConfig cfg)
     {
-        var runtime = new SkillRuntime { config = cfg };
-        if (cfg.sp != null && cfg.sp.totalSp > 0)
+        if (cfg == null)
         {
-            runtime.spEngine = new SPEngine(cfg.sp);
-            runtime.spEngine.OnBegin += () => OnSkillBeginWindow(runtime);
-            runtime.spEngine.OnEnd   += () => OnSkillEndWindow(runtime);
+            Debug.LogError("[EntitySkillRunner] AddExtraAbility: cfg is null");
+            return null;
         }
+        if (cfg.Kind != AbilityKind.ExtraAbility)
+        {
+            Debug.LogError($"[EntitySkillRunner] AddExtraAbility: cfg.Kind must be ExtraAbility (got {cfg.Kind})");
+            return null;
+        }
+
+        // 幂等:同 cfg 已存在则返回旧 id
+        for (int i = 0; i < _abilities.Count; i++)
+        {
+            var a = _abilities[i];
+            if (a.Kind == AbilityKind.ExtraAbility && a.config == cfg)
+            {
+                return a.runtimeId;
+            }
+        }
+
+        var runtime = BuildAbilityRuntime(cfg);
+        _abilities.Add(runtime);
+        runtime.SetActive(true);
+        DispatchEvent(new AbilityAddedEvent { ability = runtime });
+        return runtime.runtimeId;
+    }
+
+    public bool RemoveExtraAbility(string runtimeId)
+    {
+        if (string.IsNullOrEmpty(runtimeId)) return false;
+        int idx = -1;
+        for (int i = 0; i < _abilities.Count; i++)
+        {
+            if (_abilities[i].runtimeId == runtimeId) { idx = i; break; }
+        }
+        if (idx < 0) return false;
+        var a = _abilities[idx];
+        if (a.Kind != AbilityKind.ExtraAbility)
+        {
+            Debug.LogError("[EntitySkillRunner] RemoveExtraAbility: only ExtraAbility is removable");
+            return false;
+        }
+        DispatchEvent(new AbilityRemovedEvent { ability = a });
+        a.SetActive(false);
+        for (int c = 0; c < a.components.Count; c++)
+        {
+            var ctx = a.MakeContext(a.components[c], null);
+            a.components[c].OnTeardown(ctx);
+        }
+        UnwireRuntime(a);
+        _abilities.RemoveAt(idx);
+        return true;
+    }
+
+    public bool HasExtraAbility(string runtimeId)
+    {
+        if (string.IsNullOrEmpty(runtimeId)) return false;
+        for (int i = 0; i < _abilities.Count; i++)
+        {
+            var a = _abilities[i];
+            if (a.runtimeId == runtimeId && a.Kind == AbilityKind.ExtraAbility) return true;
+        }
+        return false;
+    }
+
+    // ===== Build / Wire =====
+
+    private AbilityRuntime BuildAbilityRuntime(AbilityConfig cfg)
+    {
+        if (cfg == null) return null;
+
+        // 配置校验
+        if ((cfg.Kind == AbilityKind.Talent || cfg.Kind == AbilityKind.ExtraAbility) && cfg.sp != null)
+        {
+            Debug.LogError($"[EntitySkillRunner] BuildAbilityRuntime: {cfg.Kind} '{cfg.abilityId}' has sp != null, aborting");
+            return null;
+        }
+        if (cfg.Kind == AbilityKind.Skill && cfg.sp == null)
+        {
+            Debug.LogWarning($"[EntitySkillRunner] BuildAbilityRuntime: Skill '{cfg.abilityId}' has sp == null, treating as passive");
+        }
+
+        var runtime = new AbilityRuntime { config = cfg };
+        runtime.runtimeId = GenerateRuntimeId(cfg);
+
         if (cfg.components != null)
         {
             for (int i = 0; i < cfg.components.Length; i++)
             {
                 ComponentConfig ccfg = cfg.components[i];
                 if (ccfg == null || string.IsNullOrEmpty(ccfg.componentType)) continue;
-                ISkillComponent  inst = ComponentFactory.Create(ccfg.componentType);
+                ISkillComponent inst = ComponentFactory.Create(ccfg.componentType);
                 if (inst == null)
                 {
-                    Debug.LogError($"[EntitySkillRunner] Unknown component type: {ccfg.componentType} in skill {cfg.skillId}");
+                    Debug.LogError($"[EntitySkillRunner] Unknown component type: {ccfg.componentType} in ability {cfg.abilityId}");
                     continue;
                 }
                 SkillContext ctx = runtime.MakeContext(inst, null);
@@ -150,13 +256,6 @@ public class EntitySkillRunner
                 runtime.componentParams.Add(ccfg.parameters);
                 if (inst is ITickingComponent t) runtime.tickingComponents.Add(t);
 
-                // Bucket by trigger. Each ConditionConfig contributes one entry; the
-                // same component instance can land in multiple buckets when its
-                // config declares multiple triggers — that's expected.
-                //
-                // We project ConditionConfig -> (inst, cond.groups) here so the
-                // runtime bucket only carries what Evaluate needs. The triggerEvent
-                // is already encoded in the bucket key.
                 int triggerCount = 0;
                 if (ccfg.triggers != null)
                 {
@@ -174,33 +273,55 @@ public class EntitySkillRunner
                         triggerCount++;
                     }
                 }
-
-                // Warn when a non-ticking component declared no triggers — it
-                // will never receive OnTrigger. ITickingComponent gets an
-                // implicit pass because OnTick is its primary channel.
                 if (triggerCount == 0 && !(inst is ITickingComponent))
                 {
                     Debug.LogWarning(
-                        $"[SkillRuntime] Component {ccfg.componentType} in skill {cfg.skillId} "
-                        + "declares no triggers — it will never receive OnTrigger. "
-                        + "Add ConditionConfig entries to triggers[] if this is unintended.");
+                        $"[AbilityRuntime] Component {ccfg.componentType} in ability {cfg.abilityId} "
+                        + "declares no triggers — it will never receive OnTrigger.");
                 }
             }
         }
+
+        // SPEngine + 钩到 SetActive
+        if (cfg.sp != null)
+        {
+            runtime.spEngine = new SPEngine(cfg.sp);
+            runtime.spEngine.OnBegin += () => runtime.SetActive(true);
+            runtime.spEngine.OnEnd   += () => runtime.SetActive(false);
+        }
+
+        WireRuntime(runtime);
+
         runtime.isInitialized = true;
-        _skills.Add(runtime);
+        _abilities.Add(runtime);
+        return runtime;
     }
 
-    private void OnSkillBeginWindow(SkillRuntime runtime)
+    private string GenerateRuntimeId(AbilityConfig cfg)
     {
-        runtime.OpenActiveWindow();
-        DispatchEvent(new SkillBeginEvent { skill = runtime });
+        if (cfg.Kind != AbilityKind.ExtraAbility) return cfg.abilityId;
+        return $"{cfg.abilityId}_{_extraCounter++}";
     }
 
-    private void OnSkillEndWindow(SkillRuntime runtime)
+    private void WireRuntime(AbilityRuntime runtime)
     {
-        DispatchEvent(new SkillEndEvent { skill = runtime });
-        runtime.CloseActiveWindow();
+        System.Action beginHandler = () =>
+            DispatchEvent(new AbilityBeginEvent { ability = runtime });
+        System.Action endHandler = () =>
+            DispatchEvent(new AbilityEndEvent   { ability = runtime });
+        runtime.OnAbilityBegin += beginHandler;
+        runtime.OnAbilityEnd   += endHandler;
+        runtime._wireTeardown  = () =>
+        {
+            runtime.OnAbilityBegin -= beginHandler;
+            runtime.OnAbilityEnd   -= endHandler;
+        };
+    }
+
+    private void UnwireRuntime(AbilityRuntime runtime)
+    {
+        runtime._wireTeardown?.Invoke();
+        runtime._wireTeardown = null;
     }
 
     private void Subscribe()
@@ -269,7 +390,7 @@ public class EntitySkillRunner
         NotifySpEnginesAfterHurt(applyType);
     }
 
-    private void OnAttackSuccessfully() { DispatchEvent(new AttackSuccessfullyEvent()); for (int i = 0; i < _skills.Count; i++) _skills[i].spEngine?.OnAttackSuccessfully(); }
+    private void OnAttackSuccessfully() { DispatchEvent(new AttackSuccessfullyEvent()); for (int i = 0; i < _abilities.Count; i++) _abilities[i].spEngine?.OnAttackSuccessfully(); }
     private void OnAttackInterrupt() { DispatchEvent(new AttackInterruptEvent()); }
 
     private void OnBeforeHurt(Entity origin, ref float damage, ref float multiplyer, ref float defPenetrate, ref float mgrPenetrate, ref float defPenetrate_value, ref float mgrPenetrate_value, ref int damageType, int applyType)
@@ -278,7 +399,7 @@ public class EntitySkillRunner
         DispatchEvent(evt);
         damage = evt.damage; multiplyer = evt.multiplyer; defPenetrate = evt.defPenetrate; mgrPenetrate = evt.mgrPenetrate;
         defPenetrate_value = evt.defPenetrate_value; mgrPenetrate_value = evt.mgrPenetrate_value; damageType = evt.damageType;
-        for (int i = 0; i < _skills.Count; i++) _skills[i].spEngine?.OnBeforeHurt(applyType);
+        for (int i = 0; i < _abilities.Count; i++) _abilities[i].spEngine?.OnBeforeHurt(applyType);
     }
 
     private void OnAfterHurt(Entity origin, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType, bool isDeadly)
@@ -290,43 +411,39 @@ public class EntitySkillRunner
     private void OnAttackAnimBegin()
     {
         DispatchEvent(new AttackAnimBeginEvent());
-        for (int i = 0; i < _skills.Count; i++) _skills[i].spEngine?.OnAttackAnimBegin();
+        for (int i = 0; i < _abilities.Count; i++) _abilities[i].spEngine?.OnAttackAnimBegin();
     }
 
     private void OnBeforeDieAnimation() { DispatchEvent(new BeforeDieAnimationEvent()); }
 
-    // Shared SPEngine fan-out for the AfterHurt hook (used by both OnAfterTakeDamage and OnAfterHurt).
     private void NotifySpEnginesAfterHurt(int applyType)
     {
-        for (int i = 0; i < _skills.Count; i++) _skills[i].spEngine?.OnAfterHurt(applyType);
+        for (int i = 0; i < _abilities.Count; i++) _abilities[i].spEngine?.OnAfterHurt(applyType);
     }
 
     // ===== Dispatch core =====
 
     public void DispatchEvent(SkillEvent evt)
     {
-        for (int i = 0; i < _skills.Count; i++)
+        for (int i = 0; i < _abilities.Count; i++)
         {
-            var s = _skills[i];
-            if (!s.isInitialized) continue;
-            DispatchToSkill(s, evt);
+            var a = _abilities[i];
+            if (!a.isInitialized) continue;
+            DispatchToAbility(a, evt);
         }
     }
 
-    private void DispatchToSkill(SkillRuntime s, SkillEvent evt)
+    private void DispatchToAbility(AbilityRuntime a, SkillEvent evt)
     {
-        // Active-window gate: a skill's components only see events while the
-        // skill is firing, EXCEPT for these four lifecycle events which always
-        // bypass the gate. They still need to be declared in config.triggers[]
-        // to be received — bypass is gate-only, not bucket-only.
         bool bypassActiveGate = evt is PreWarmEvent
                              || evt is InitializeEvent
-                             || evt is SkillBeginEvent
-                             || evt is SkillEndEvent;
-        if (!s.isActive && !bypassActiveGate) return;
-        if (!s.componentsByTrigger.TryGetValue(evt.TriggerEvent, out var list)) return;
+                             || evt is AbilityBeginEvent
+                             || evt is AbilityEndEvent
+                             || evt is AbilityAddedEvent
+                             || evt is AbilityRemovedEvent;
+        if (!a.isActive && !bypassActiveGate) return;
+        if (!a.componentsByTrigger.TryGetValue(evt.TriggerEvent, out var list)) return;
 
-        // All (comp, groups) for this event share the same eval context.
         var evalCtx = new ConditionEvalContext
         {
             sharedBlackboard = sharedBlackboard,
@@ -334,22 +451,15 @@ public class EntitySkillRunner
             currentEvent = evt,
         };
 
-        // Single-pass over the bucket. No dedup: a component with N
-        // ConditionConfig entries for the same triggerEvent produces up
-        // to N OnTrigger calls (one per passing entry). Designers who
-        // want at-most-one should put the OR inside a single
-        // ConditionConfig's groups (see spec §2.4).
         for (int i = 0; i < list.Count; i++)
         {
             var (comp, groups) = list[i];
             if (!ConditionEvaluator.Evaluate(groups, evalCtx)) continue;
-            var ctx = PrepareContext(s.MakeContext(comp, evt));
+            var ctx = PrepareContext(a.MakeContext(comp, evt));
             comp.OnTrigger(ctx);
         }
     }
 
-    // SkillRuntime.MakeContext lives in shared code and can't inject per-Entity state,
-    // so layer entity + sharedBlackboard onto every context handed to a component.
     private SkillContext PrepareContext(SkillContext ctx)
     {
         ctx.sharedBlackboard = sharedBlackboard;

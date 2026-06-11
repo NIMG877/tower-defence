@@ -228,7 +228,7 @@ public class Entity : MonoBehaviour, IPoolOperation
         bool canmove = MoveBase;
         bool camp2 = Camp == 2;
         SlidersManager.Manager.SetSlider<HpSliderController>(this, 4, camp2 ? 0 : 1, 0, camp2, canmove);
-        if (EntityData != null && EntityData.Skills != null && EntityData.Skills.Count == 1)
+        if (EntityData != null && EntityData.Abilities != null && EntityData.Abilities.Count == 1)
         {
             SlidersManager.Manager.SetSlider<SpSliderController>(this, 10, camp2 ? 3 : 4, 1, camp2, canmove);
         }
