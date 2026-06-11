@@ -16,15 +16,18 @@ Two related gaps in the skill-system trigger pipeline:
    `docs/skill-components/README.md:114-135` advertises the conditional
    behaviour; the runtime does not match the documentation.
 
-2. **The `triggers[]` bucket has a duplication bug.**
-   `EntitySkillRunner.BuildSkillRuntime:169` does
-   `list.Add(inst)` without dedup. A designer who configures two
-   `ConditionConfig` entries with the same `(component, triggerEvent)` —
-   e.g. to express "hp > 0.3 OR has_debuff" via repetition — gets
-   `OnTrigger` called twice for the same component on the same event.
-   This is a real footgun, not theoretical: the `AttackMultiplierBoost` /
-   `SetAttackCombo` rows in `SK_Kroos_1.asset` were historical examples
-   (now removed in commit `a822214`).
+2. **`ConditionConfig` can only express a single condition.** Designers
+   who need "hp > 0.3 AND camp == 1" or "hp > 0.3 OR has_debuff" have
+   no in-data way to write it: the existing data shape is
+   `op / leftKey / rightValue` (one op, two operands). This makes
+   the trigger system unergonomic for everything beyond trivial
+   one-condition gating.
+
+A separate issue: a component may legitimately configure two
+`ConditionConfig` entries with the same `triggerEvent` (e.g. to
+express OR across independent conditions without nesting). The
+historical runtime calls `OnTrigger` once per matching entry — this
+behaviour is preserved by this spec; it is not a bug.
 
 Two blackboards coexist (`SkillRuntime.blackboard` per-skill,
 `EntitySkillRunner.sharedBlackboard` per-Entity) and 5 components read
@@ -34,9 +37,14 @@ explicitly stated this during brainstorming: "技能系统所有对于blackboard
 ## Goal
 
 Make `ConditionConfig` an actual conditional gate at dispatch time,
-express AND/OR composition in the data model (eliminating the bucket
-duplication footgun by replacing the repetition pattern with proper
-nesting), and unify on a single per-Entity blackboard.
+add nested AND/OR composition in the data model so designers can
+express multi-condition triggers in-data (instead of having to use
+the `triggers[]` repetition pattern), and unify on a single
+per-Entity blackboard.
+
+Multiple `ConditionConfig` entries on the same `(component, triggerEvent)`
+remain legal and produce one `OnTrigger` per passing entry — no
+dedup is added.
 
 ## Non-Goals
 
@@ -154,18 +162,14 @@ evaluable.
 
 In `EntitySkillRunner.BuildSkillRuntime` (around line 157-172), each
 `ConditionConfig` in `ccfg.triggers` produces exactly one entry in the
-appropriate bucket. **No deduplication at build time** — see §2.4 for
-why the old duplication bug disappears by construction.
+appropriate bucket. Multiple `ConditionConfig` entries for the same
+`(component, triggerEvent)` produce multiple bucket entries — see §2.4.
 
 ### 2.3 Dispatch Phase (the actual gate)
 
 `EntitySkillRunner.DispatchToSkill` is the single insertion point for
-the new gate. The implementation must avoid a subtle bug: if a
-component has multiple `ConditionConfig` entries for the same
-`triggerEvent` and the *first* one fails, the *second* one (which
-might pass) must still be allowed to trigger `OnTrigger`. The naive
-"evaluate-as-you-dedupe" order makes the first-fail-wins; the correct
-order is **evaluate all, then fire once per component if any passed**.
+the new gate. Single-pass over the bucket — no dedup, no
+`HashSet` allocation, no per-event bookkeeping.
 
 ```csharp
 private void DispatchToSkill(SkillRuntime s, SkillEvent evt)
@@ -185,62 +189,49 @@ private void DispatchToSkill(SkillRuntime s, SkillEvent evt)
         currentEvent = evt,
     };
 
-    // Two-pass over the bucket:
-    //   pass 1: evaluate every (comp, cond); mark comp "should-fire" if any of its conds passes
-    //   pass 2: for each "should-fire" comp, call OnTrigger exactly once
-    // The set is keyed by comp, not by (comp, cond), so two entries
-    // pointing at the same comp collapse into one OnTrigger.
-    var shouldFire = new HashSet<ISkillComponent>();
     for (int i = 0; i < list.Count; i++)
     {
         var (comp, cond) = list[i];
-        if (shouldFire.Contains(comp)) continue;     // already known to fire
-        if (ConditionEvaluator.Evaluate(cond, evalCtx))
-            shouldFire.Add(comp);
-    }
-    foreach (var comp in shouldFire)
-    {
+        if (!ConditionEvaluator.Evaluate(cond, evalCtx)) continue;
         var ctx = PrepareContext(s.MakeContext(comp, evt));
         comp.OnTrigger(ctx);
     }
 }
 ```
 
-Note the **order**: evaluate first, dedup second. Reversing the order
-would mean a failing condition "consumes" the component for this
-event, even if a later condition on the same component would have
-passed.
+A component with N `ConditionConfig` entries for the same
+`triggerEvent` produces up to N `OnTrigger` calls per event (one per
+passing entry). This is intentional and matches the pre-fix
+behaviour; designers who want "at most one `OnTrigger` per event"
+should use the nested `groups` shape (§1) to express OR conditions
+inside a single `ConditionConfig`.
 
-### 2.4 Why the Duplication Bug Is Gone
+### 2.4 Design Compatibility: Multiple `ConditionConfig` per Component
 
-Old (broken) behaviour: a designer who wanted "hp > 0.3 OR has_debuff"
-expressed it by repeating the same `triggerEvent` twice in `triggers[]`.
-The builder appended `(inst, c1)` and `(inst, c2)` as two entries;
-dispatch called `OnTrigger` twice. This was the documented footgun
-behind this spec.
+A component can configure multiple `ConditionConfig` entries for the
+same `triggerEvent` — this is a legal expression form, not a bug.
+Each entry is independently evaluated; each passing entry produces
+one `OnTrigger` call.
 
-New behaviour: the same intent is expressed via **one** `ConditionConfig`
-with `groups = [[{Greater, "hpRate", "0.3"}], [{Equal, "has_debuff", "1"}]]`.
-The builder appends one entry. Dispatch evaluates the AND/OR tree and
-calls `OnTrigger` once if any group passes.
+This means:
 
-The dedup in §2.3 is a safety net for **misconfigured** triggers
-(designer accidentally repeats the same `triggerEvent` despite the
-new nesting option). With the two-pass order above, misconfiguration
-is silently downgraded to "any one of the repeated conditions passes
-→ fire once", which is the closest semantically-sensible behaviour
-short of rejecting the configuration outright. It is not
-load-bearing for correct configurations and is not an officially
-supported expression form.
+- A designer who wants "fire at most once per event" must put their
+  AND/OR conditions **inside** a single `ConditionConfig`'s `groups`
+  (§1).
+- A designer who *intentionally* wants "fire multiple times" (e.g.
+  two unrelated conditions each running its own buff application)
+  uses two separate `ConditionConfig` entries and accepts the
+  multiple `OnTrigger` calls.
+
+The runtime does not enforce "at most one fire" — that is a
+data-authoring concern, not a dispatch concern.
 
 ### 2.5 Hot-Path Performance
 
-- `HashSet<ISkillComponent>` is allocated per `DispatchToSkill` call.
-  In the worst case (a hot event like `OnBeforeAttack` firing per
-  attack), this is one allocation per event. If profiling shows this
-  is a problem, the set can be reused across calls (field on
-  `EntitySkillRunner` cleared at the start of each dispatch). Defer
-  until profiling evidence exists.
+The single-pass dispatch loop in §2.3 has no per-event allocation
+beyond the `ConditionEvalContext` instance. No `HashSet` is
+allocated. This is the same allocation profile as the pre-fix
+dispatcher (which also didn't allocate per call).
 
 ---
 
@@ -408,9 +399,9 @@ the trimmed whitelist from commit `54c3465` (only `None` /
 
 - **Spec reviewer**: confirms the implementation matches §1-§4 of this
   document; flags any deviation.
-- **Code-quality reviewer**: checks the dispatch hot path (`HashSet`
-  allocation, evaluator nesting depth, null safety on `groups` /
-  `units`).
+- **Code-quality reviewer**: checks the dispatch hot path
+  (`ConditionEvalContext` allocation, evaluator nesting depth, null
+  safety on `groups` / `units`).
 
 ### 5.3 Layer 3: PlayMode Smoke (designer in Editor)
 
@@ -489,20 +480,19 @@ the trimmed whitelist from commit `54c3465` (only `None` /
 2. **`SkillRuntime.blackboard` lifecycle** — deleted, not aliased.
 3. **`ConditionEvalContext` interface** — reshape (rename + add fields);
    not a clean-slate replacement.
-4. **Trigger semantics** — the AND/OR shape in `ConditionConfig.groups`
-   is the **only** supported way to express multi-condition triggers.
-   The "repeat the same `triggerEvent` to express OR" pattern is a
-   pre-fix misconfiguration (root cause of the duplication bug
-   described in the Problem section); designers who currently rely on
-   it must migrate to nested `groups` before the field shape lands.
-   The `HashSet<ISkillComponent>` dedup in §2.3 is a runtime safety
-   net that fires `OnTrigger` at most once per component per event
-   regardless of how many `ConditionConfig` entries point at the same
-   component for the same `triggerEvent` — it does not make the
-   misconfiguration express the same intent as a nested OR (the
-   conditions on the repeated entries are not merged, each is
-   evaluated independently and the first one to pass wins, but only
-   one `OnTrigger` call is produced).
+4. **Trigger semantics** — there are two valid expression forms for
+   multi-condition triggers:
+   - **Nested AND/OR** inside one `ConditionConfig.groups[]` (the new
+     shape from §1). Use this when the goal is "fire at most once per
+     event if any matching condition is true".
+   - **Repeated `triggers[]` entries** with the same `triggerEvent`
+     (the pre-existing pattern). Use this when the goal is "fire once
+     per passing entry". The runtime does not dedup these — each
+     passing entry produces one `OnTrigger` call.
+
+   The new AND/OR shape is a *cleaner* expression form, not a
+   replacement for the repetition pattern. Both forms coexist; the
+   choice is a data-authoring concern.
 5. **AND/OR shape** — three classes (`ConditionConfig` / `ConditionGroup` /
    `ConditionUnit`) rather than `List<List<ConditionUnit>>` (Unity
    serialiser doesn't accept nested `List<T>`).
