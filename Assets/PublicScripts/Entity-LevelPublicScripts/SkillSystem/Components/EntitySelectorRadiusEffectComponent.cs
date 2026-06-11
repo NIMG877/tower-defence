@@ -48,7 +48,6 @@ namespace SkillSystem.Components
                 {
                     entity = ents[i],
                     currentEvent = ctx.currentEvent,
-                    blackboard = ctx.sharedBlackboard,
                     sharedBlackboard = ctx.sharedBlackboard
                 };
                 sub.OnInit(subCtx, _subParameters);
