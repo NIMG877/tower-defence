@@ -33,7 +33,9 @@ namespace SkillSystem
                     return CompareNumeric(ctx, cond.leftKey, cond.rightValue) < 0;
                 case ConditionOp.LessOrEqual:
                     return CompareNumeric(ctx, cond.leftKey, cond.rightValue) <= 0;
-                // HasBuff / IsInAbnormalState — implemented in Phase 2 when SkillEvent carries BuffController ref
+                // Richer checks (HasBuff, abnormal state, ...) belong in the component:
+                // it writes the value to the blackboard first, then this evaluator reads it.
+                // This default is only reachable if a new ConditionOp is added without a case here.
                 default: return true;
             }
         }

@@ -130,6 +130,11 @@ Operator semantics (from `ConditionEvaluator.cs`):
 | `HasBlackboardKey`, `NotHasBlackboardKey` | checks key presence |
 | `Equal`, `NotEqual` | string `==` / `!=` on the key's value |
 | `Greater` / `GreaterOrEqual` / `Less` / `LessOrEqual` | `float.TryParse` on both sides, falls back to ordinal string compare if either is unparseable |
-| `HasBuff` / `NotHasBuff` | **currently a no-op at runtime** (see `ConditionEvaluator.cs:36-37`); the value is stored but ignored. |
-| `IsInAbnormalState` / `NotInAbnormalState` | **currently a no-op at runtime** (same line); the value is stored but ignored. |
 | `None` | the row is skipped (always passes). |
+
+Conditions only read the blackboard — they don't inspect the entity.
+Richer checks (`HasBuff`, abnormal-state tests, ...) belong in the
+component: it writes the value to the blackboard first, then a
+condition reads it. The `ConditionOp` enum is whitelisted to the
+operators above; richer ops were removed because they were no-ops
+at runtime.
