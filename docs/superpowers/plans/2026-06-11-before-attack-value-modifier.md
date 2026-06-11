@@ -34,20 +34,20 @@ No new tests, no Inspector schema changes, no other components touched.
 
 - [ ] **Step 1.1: Add `[Obsolete]` to `AttackMultiplierBoost.cs`**
 
-Open the file. Find the line `[RegisterComponent("AttackMultiplierBoost")]`. Insert the `[Obsolete]` attribute immediately above it (no blank line between, to keep the attributes grouped):
+Open the file. Find the line `[RegisterComponent("AttackMultiplierBoost")]`. Insert the `[System.Obsolete]` attribute immediately above it (no blank line between, to keep the attributes grouped). **Use the fully-qualified form `[System.Obsolete]`** — these files have no `using System;` directive, so the unqualified `[Obsolete]` would not compile:
 
 ```csharp
-    [Obsolete("Use BeforeAttackValueModifier")]
+    [System.Obsolete("Use BeforeAttackValueModifier")]
     [RegisterComponent("AttackMultiplierBoost")]
     public class AttackMultiplierBoost : ISkillComponent
 ```
 
 - [ ] **Step 1.2: Add `[Obsolete]` to `SetAttackCombo.cs`**
 
-Open the file. Find the line `[RegisterComponent("SetAttackCombo")]`. Insert the `[Obsolete]` attribute immediately above it:
+Open the file. Find the line `[RegisterComponent("SetAttackCombo")]`. Insert the `[System.Obsolete]` attribute immediately above it (fully-qualified for the same reason as Step 1.1):
 
 ```csharp
-    [Obsolete("Use BeforeAttackValueModifier")]
+    [System.Obsolete("Use BeforeAttackValueModifier")]
     [RegisterComponent("SetAttackCombo")]
     public class SetAttackCombo : ISkillComponent
 ```
