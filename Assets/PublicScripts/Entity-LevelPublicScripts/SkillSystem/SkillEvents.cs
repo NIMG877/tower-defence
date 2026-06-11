@@ -25,8 +25,7 @@ namespace SkillSystem
     public class BeforeAttackEvent : DamageEventBase
     {
         public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnBeforeAttack;
-        public new float multiplyer = 1f;
-        public int cumbo = 1;
+        public int cumbo;
     }
     public class AfterAttackEvent : DamageEventBase
     {
@@ -36,7 +35,6 @@ namespace SkillSystem
     public class BeforeTakeDamageEvent : DamageEventBase
     {
         public override TriggerEvent TriggerEvent => SkillSystem.TriggerEvent.OnBeforeTakeDamage;
-        public new float multiplyer = 1f;
     }
     public class AfterTakeDamageEvent : DamageEventBase
     {
