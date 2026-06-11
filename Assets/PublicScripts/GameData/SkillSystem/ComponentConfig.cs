@@ -81,7 +81,17 @@ namespace SkillSystem
         OnBeforeHurt, OnAfterHurt,
         OnAttackAnimBegin,
         OnBeforeDieAnimation,
-        OnSkillBegin, OnSkillEnd,
+        // Renamed from OnSkillBegin/OnSkillEnd: now fire on any isActive transition.
+        OnAbilityBegin, OnAbilityEnd,
+        // New: broadcast when an ExtraAbility is added/removed.
+        OnAbilityAdded, OnAbilityRemoved,
+    }
+
+    public enum AbilityKind
+    {
+        Skill,
+        Talent,
+        ExtraAbility,
     }
 
     public enum ConditionOp
