@@ -355,7 +355,7 @@ namespace MyUI
                         _selectedCharacterSkill[characterIndex] = index;
                         CharacterCardManager.cardManager.ResetCardForbidNullSkill(characterId);
                     };
-                    _skillSelectorCards[i].UpdateSkillCardMessage(abilities[i]);
+                    _skillSelectorCards[i].UpdateAbilityCardMessage(abilities[i]);
                     _skillSelectorCards[i].SkillRT.gameObject.SetActive(true);
                     _noneSkillInfo[i].SetActive(false);
                 }

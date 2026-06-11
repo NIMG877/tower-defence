@@ -1696,7 +1696,7 @@ namespace MyUI
                     if (abilityConfig != null)
                     {
                         _skillCard.SkillRT.gameObject.SetActive(true);
-                        _skillCard.UpdateSkillCardMessage(abilityConfig, abilityRuntime);
+                        _skillCard.UpdateAbilityCardMessage(abilityConfig, abilityRuntime);
                     }
                     else
                     {

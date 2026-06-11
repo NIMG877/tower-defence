@@ -228,7 +228,7 @@ namespace MyUI
                 float space = 5;
                 _descriptionText.rectTransform.sizeDelta = new Vector2(_descriptionText.rectTransform.sizeDelta.x, desHeight);
                 float ch = desHeight + space;
-                var skills = monsterData.Skills;
+                var skills = monsterData.Abilities;
                 Talent[] talents = monsterData.Prefab.GetComponents<Talent>();
                 if (skills != null && skills.Count > 0)
                 {
