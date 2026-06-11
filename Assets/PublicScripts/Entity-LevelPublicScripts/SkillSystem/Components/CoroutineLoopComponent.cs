@@ -34,8 +34,8 @@ namespace SkillSystem.Components
         {
             while (_isRunning)
             {
-                if (!string.IsNullOrEmpty(_stopConditionKey) && ctx.blackboard != null
-                    && !ctx.blackboard.Has(_stopConditionKey))
+                if (!string.IsNullOrEmpty(_stopConditionKey) && ctx.sharedBlackboard != null
+                    && !ctx.sharedBlackboard.Has(_stopConditionKey))
                 {
                     _isRunning = false;
                     return;

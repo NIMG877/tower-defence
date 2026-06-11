@@ -17,7 +17,7 @@ namespace SkillSystem.Components
         public void OnTrigger(SkillContext ctx)
         {
             // Editor/migration phase binds the actual ParticleSystem reference; here we expose a Blackboard indirection.
-            var ps = ctx.blackboard != null ? ctx.blackboard.Get<ParticleSystem>("__particleSystem", null) : null;
+            var ps = ctx.sharedBlackboard != null ? ctx.sharedBlackboard.Get<ParticleSystem>("__particleSystem", null) : null;
             if (ps == null) return;
             if (_play) ps.Play(true);
             if (_stop) ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);

@@ -100,7 +100,7 @@ namespace SkillSystem.Components
         {
             if (!string.IsNullOrEmpty(_inputKey))
             {
-                return ctx.blackboard.Get<List<Entity>>(_inputKey, null);
+                return ctx.sharedBlackboard.Get<List<Entity>>(_inputKey, null);
             }
 
             // Original single-target behavior preserved for backward compatibility.

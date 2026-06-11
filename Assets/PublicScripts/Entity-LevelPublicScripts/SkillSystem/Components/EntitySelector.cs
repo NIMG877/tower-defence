@@ -43,8 +43,8 @@ namespace SkillSystem.Components
             if (_selectSelf && !result.Contains(ctx.entity)) result.Add(ctx.entity);
 
             // Convention: clear before write so re-trigger does not accumulate stale state.
-            ctx.blackboard.Remove(_outputKey);
-            ctx.blackboard.Set(_outputKey, result);
+            ctx.sharedBlackboard.Remove(_outputKey);
+            ctx.sharedBlackboard.Set(_outputKey, result);
         }
 
         public void OnTick(SkillContext ctx, float dt) { }
