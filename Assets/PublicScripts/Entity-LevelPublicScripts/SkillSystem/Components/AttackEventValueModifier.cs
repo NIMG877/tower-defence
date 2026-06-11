@@ -4,8 +4,10 @@ using UnityEngine;
 namespace SkillSystem.Components
 {
     /// <summary>
-    /// Generic field-rewriter for <see cref="BeforeAttackEvent"/> (and other <see cref="DamageEventBase"/>
-    /// events). Reads three parallel CSVs from <c>OnInit</c>:
+    /// Generic field-rewriter for <see cref="DamageEventBase"/> events (covers
+    /// <see cref="BeforeAttackEvent"/>, <see cref="AfterAttackEvent"/>,
+    /// <see cref="BeforeTakeDamageEvent"/>, <see cref="AfterTakeDamageEvent"/>).
+    /// Reads three parallel CSVs from <c>OnInit</c>:
     /// <list type="bullet">
     ///   <item><c>fields</c> — comma-separated field names (whitelisted; see below)</item>
     ///   <item><c>values</c> — comma-separated numeric values (float or int, per field type)</item>
@@ -14,11 +16,13 @@ namespace SkillSystem.Components
     /// Each triple at the same index is applied in order. <c>cumbo</c> is only meaningful on
     /// <see cref="BeforeAttackEvent"/> and is silently skipped on other DamageEventBase events.
     ///
-    /// <para>Supersedes <c>AttackMultiplierBoost</c> (<c>multiplyer *= N</c>) and
-    /// <c>SetAttackCombo</c> (<c>cumbo = N</c>), both of which remain [Obsolete].</para>
+    /// <para>Supersedes the removed <c>AttackMultiplierBoost</c> (<c>multiplyer *= N</c>) and
+    /// <c>SetAttackCombo</c> (<c>cumbo = N</c>), both of which were folded into this component
+    /// as CSV triples (<c>fields=multiplyer, methods=mult</c> /
+    /// <c>fields=cumbo, methods=set</c>).</para>
     /// </summary>
-    [RegisterComponent("BeforeAttackValueModifier")]
-    public class BeforeAttackValueModifier : ISkillComponent
+    [RegisterComponent("AttackEventValueModifier")]
+    public class AttackEventValueModifier : ISkillComponent
     {
         private string[] _fields = Array.Empty<string>();
         // Per-type parsed values; one slot per field index. Type determined by the field's
@@ -57,7 +61,7 @@ namespace SkillSystem.Components
             int min = Math.Min(Math.Min(fLen, vLen), mLen);
             if (fLen != vLen || vLen != mLen)
             {
-                Debug.LogWarning($"BeforeAttackValueModifier: length mismatch fields={fLen} values={vLen} methods={mLen}; applying first {min} entries");
+                Debug.LogWarning($"AttackEventValueModifier: length mismatch fields={fLen} values={vLen} methods={mLen}; applying first {min} entries");
             }
             if (min < _fields.Length)
             {
@@ -72,7 +76,7 @@ namespace SkillSystem.Components
         {
             if (ctx.currentEvent is not DamageEventBase dab)
             {
-                Debug.LogError("BeforeAttackValueModifier: current event is not a DamageEventBase; skipping");
+                Debug.LogError("AttackEventValueModifier: current event is not a DamageEventBase; skipping");
                 return;
             }
             BeforeAttackEvent bae = dab as BeforeAttackEvent;
@@ -108,13 +112,13 @@ namespace SkillSystem.Components
                     case "cumbo":
                         if (bae == null)
                         {
-                            Debug.Log($"BeforeAttackValueModifier: 'cumbo' skipped — event is not BeforeAttackEvent");
+                            Debug.Log($"AttackEventValueModifier: 'cumbo' skipped — event is not BeforeAttackEvent");
                             break;
                         }
                         bae.cumbo = ApplyInt(bae.cumbo, _intValues[i], _floatValues[i], method, field);
                         break;
                     default:
-                        Debug.LogWarning($"BeforeAttackValueModifier: unknown field '{field}'; skipped");
+                        Debug.LogWarning($"AttackEventValueModifier: unknown field '{field}'; skipped");
                         break;
                 }
             }
@@ -133,7 +137,7 @@ namespace SkillSystem.Components
                 case "add":  return current + value;
                 case "set":  return value;
                 default:
-                    Debug.LogWarning($"BeforeAttackValueModifier: unknown method '{method}' for field '{field}'; skipped");
+                    Debug.LogWarning($"AttackEventValueModifier: unknown method '{method}' for field '{field}'; skipped");
                     return current;
             }
         }
@@ -149,7 +153,7 @@ namespace SkillSystem.Components
                 case "add":  return current + intValue;
                 case "set":  return intValue;
                 default:
-                    Debug.LogWarning($"BeforeAttackValueModifier: unknown method '{method}' for field '{field}'; skipped");
+                    Debug.LogWarning($"AttackEventValueModifier: unknown method '{method}' for field '{field}'; skipped");
                     return current;
             }
         }
