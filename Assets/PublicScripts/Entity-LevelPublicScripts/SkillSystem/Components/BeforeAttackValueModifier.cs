@@ -1,0 +1,163 @@
+using System;
+using UnityEngine;
+
+namespace SkillSystem.Components
+{
+    /// <summary>
+    /// Generic field-rewriter for <see cref="BeforeAttackEvent"/> (and other <see cref="DamageEventBase"/>
+    /// events). Reads three parallel CSVs from <c>OnInit</c>:
+    /// <list type="bullet">
+    ///   <item><c>fields</c> — comma-separated field names (whitelisted; see below)</item>
+    ///   <item><c>values</c> — comma-separated numeric values (float or int, per field type)</item>
+    ///   <item><c>methods</c> — comma-separated operators: <c>mult</c> / <c>add</c> / <c>set</c></item>
+    /// </list>
+    /// Each triple at the same index is applied in order. <c>cumbo</c> is only meaningful on
+    /// <see cref="BeforeAttackEvent"/> and is silently skipped on other DamageEventBase events.
+    ///
+    /// <para>Supersedes <c>AttackMultiplierBoost</c> (<c>multiplyer *= N</c>) and
+    /// <c>SetAttackCombo</c> (<c>cumbo = N</c>), both of which remain [Obsolete].</para>
+    /// </summary>
+    [RegisterComponent("BeforeAttackValueModifier")]
+    public class BeforeAttackValueModifier : ISkillComponent
+    {
+        private string[] _fields = Array.Empty<string>();
+        // Per-type parsed values; one slot per field index. Type determined by the field's
+        // known type — float fields read _floatValues[i], int fields read _intValues[i].
+        // Only one is ever populated per index.
+        private float[] _floatValues = Array.Empty<float>();
+        private int[] _intValues = Array.Empty<int>();
+        private string[] _methods = Array.Empty<string>();
+
+        public void OnInit(SkillContext ctx, ParamList parameters)
+        {
+            _fields = SplitCsv(parameters.GetString("fields", ""));
+            _methods = SplitCsv(parameters.GetString("methods", ""));
+
+            // Pre-parse values by attempting both float and int. Each index's type is locked
+            // by the field's known type (see OnTrigger switch), so we keep both arrays and
+            // ignore the other at apply time. A mis-typed value (e.g. "abc" for an int field)
+            // is caught at apply time and logged + skipped.
+            string[] rawValues = SplitCsv(parameters.GetString("values", ""));
+            int n = rawValues.Length;
+            _floatValues = new float[n];
+            _intValues = new int[n];
+            for (int i = 0; i < n; i++)
+            {
+                float.TryParse(rawValues[i], out _floatValues[i]);
+                int.TryParse(rawValues[i], out _intValues[i]);
+            }
+
+            // Length-mismatch guard: log once, then trim to min length so OnTrigger
+            // can index safely. Lenient by design (per spec §"CSV 错误处理").
+            int fLen = _fields.Length;
+            int vLen = rawValues.Length;
+            int mLen = _methods.Length;
+            int min = Math.Min(Math.Min(fLen, vLen), mLen);
+            if (fLen != vLen || vLen != mLen)
+            {
+                Debug.LogWarning($"BeforeAttackValueModifier: length mismatch fields={fLen} values={vLen} methods={mLen}; applying first {min} entries");
+            }
+            if (min < _fields.Length)
+            {
+                Array.Resize(ref _fields, min);
+                Array.Resize(ref _floatValues, min);
+                Array.Resize(ref _intValues, min);
+                Array.Resize(ref _methods, min);
+            }
+        }
+
+        public void OnTrigger(SkillContext ctx)
+        {
+            if (ctx.currentEvent is not DamageEventBase dab)
+            {
+                Debug.LogError("BeforeAttackValueModifier: current event is not a DamageEventBase; skipping");
+                return;
+            }
+            BeforeAttackEvent bae = dab as BeforeAttackEvent;
+
+            for (int i = 0; i < _fields.Length; i++)
+            {
+                string field = _fields[i];
+                string method = _methods[i];
+
+                switch (field)
+                {
+                    case "multiplyer":
+                        dab.multiplyer = ApplyFloat(dab.multiplyer, _floatValues[i], method, field);
+                        break;
+                    case "defPenetrate":
+                        dab.defPenetrate = ApplyFloat(dab.defPenetrate, _floatValues[i], method, field);
+                        break;
+                    case "mgrPenetrate":
+                        dab.mgrPenetrate = ApplyFloat(dab.mgrPenetrate, _floatValues[i], method, field);
+                        break;
+                    case "defPenetrate_value":
+                        dab.defPenetrate_value = ApplyFloat(dab.defPenetrate_value, _floatValues[i], method, field);
+                        break;
+                    case "mgrPenetrate_value":
+                        dab.mgrPenetrate_value = ApplyFloat(dab.mgrPenetrate_value, _floatValues[i], method, field);
+                        break;
+                    case "damageType":
+                        dab.damageType = ApplyInt(dab.damageType, _intValues[i], _floatValues[i], method, field);
+                        break;
+                    case "applyType":
+                        dab.applyType = ApplyInt(dab.applyType, _intValues[i], _floatValues[i], method, field);
+                        break;
+                    case "cumbo":
+                        if (bae == null)
+                        {
+                            Debug.Log($"BeforeAttackValueModifier: 'cumbo' skipped — event is not BeforeAttackEvent");
+                            break;
+                        }
+                        bae.cumbo = ApplyInt(bae.cumbo, _intValues[i], _floatValues[i], method, field);
+                        break;
+                    default:
+                        Debug.LogWarning($"BeforeAttackValueModifier: unknown field '{field}'; skipped");
+                        break;
+                }
+            }
+        }
+
+        public void OnTick(SkillContext ctx, float dt) { }
+        public void OnTeardown(SkillContext ctx) { }
+
+        // ---- helpers ----
+
+        private static float ApplyFloat(float current, float value, string method, string field)
+        {
+            switch (method)
+            {
+                case "mult": return current * value;
+                case "add":  return current + value;
+                case "set":  return value;
+                default:
+                    Debug.LogWarning($"BeforeAttackValueModifier: unknown method '{method}' for field '{field}'; skipped");
+                    return current;
+            }
+        }
+
+        // Int overload also takes the float-parsed value for the 'mult' case so a designer
+        // who typed "1.5" for cumbo still gets a sensible (rounded) result instead of a parse
+        // failure. 'add' and 'set' prefer the int-parsed value to keep designer intent exact.
+        private static int ApplyInt(int current, int intValue, float floatValue, string method, string field)
+        {
+            switch (method)
+            {
+                case "mult": return Mathf.RoundToInt(current * floatValue);
+                case "add":  return current + intValue;
+                case "set":  return intValue;
+                default:
+                    Debug.LogWarning($"BeforeAttackValueModifier: unknown method '{method}' for field '{field}'; skipped");
+                    return current;
+            }
+        }
+
+        private static string[] SplitCsv(string csv)
+        {
+            if (string.IsNullOrEmpty(csv)) return Array.Empty<string>();
+            var parts = csv.Split(',');
+            for (int i = 0; i < parts.Length; i++) parts[i] = parts[i].Trim();
+            return parts;
+        }
+    }
+}
