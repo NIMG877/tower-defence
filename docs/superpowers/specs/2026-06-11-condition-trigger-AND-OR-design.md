@@ -160,7 +160,12 @@ why the old duplication bug disappears by construction.
 ### 2.3 Dispatch Phase (the actual gate)
 
 `EntitySkillRunner.DispatchToSkill` is the single insertion point for
-the new gate. Pseudocode (replaces the existing `for` loop):
+the new gate. The implementation must avoid a subtle bug: if a
+component has multiple `ConditionConfig` entries for the same
+`triggerEvent` and the *first* one fails, the *second* one (which
+might pass) must still be allowed to trigger `OnTrigger`. The naive
+"evaluate-as-you-dedupe" order makes the first-fail-wins; the correct
+order is **evaluate all, then fire once per component if any passed**.
 
 ```csharp
 private void DispatchToSkill(SkillRuntime s, SkillEvent evt)
@@ -180,19 +185,31 @@ private void DispatchToSkill(SkillRuntime s, SkillEvent evt)
         currentEvent = evt,
     };
 
-    // Per-event dedup: same component appearing in N entries for the
-    // same triggerEvent fires OnTrigger at most once. (See §2.4.)
-    var fired = new HashSet<ISkillComponent>();
+    // Two-pass over the bucket:
+    //   pass 1: evaluate every (comp, cond); mark comp "should-fire" if any of its conds passes
+    //   pass 2: for each "should-fire" comp, call OnTrigger exactly once
+    // The set is keyed by comp, not by (comp, cond), so two entries
+    // pointing at the same comp collapse into one OnTrigger.
+    var shouldFire = new HashSet<ISkillComponent>();
     for (int i = 0; i < list.Count; i++)
     {
         var (comp, cond) = list[i];
-        if (!fired.Add(comp)) continue;            // already fired this comp
-        if (!ConditionEvaluator.Evaluate(cond, evalCtx)) continue;
+        if (shouldFire.Contains(comp)) continue;     // already known to fire
+        if (ConditionEvaluator.Evaluate(cond, evalCtx))
+            shouldFire.Add(comp);
+    }
+    foreach (var comp in shouldFire)
+    {
         var ctx = PrepareContext(s.MakeContext(comp, evt));
         comp.OnTrigger(ctx);
     }
 }
 ```
+
+Note the **order**: evaluate first, dedup second. Reversing the order
+would mean a failing condition "consumes" the component for this
+event, even if a later condition on the same component would have
+passed.
 
 ### 2.4 Why the Duplication Bug Is Gone
 
@@ -207,11 +224,14 @@ with `groups = [[{Greater, "hpRate", "0.3"}], [{Equal, "has_debuff", "1"}]]`.
 The builder appends one entry. Dispatch evaluates the AND/OR tree and
 calls `OnTrigger` once if any group passes.
 
-The `HashSet<ISkillComponent>` dedup in §2.3 is a safety net for
-**misconfigured** triggers (designer accidentally repeats the same
-`triggerEvent` despite the new nesting option). It is not load-bearing
-for correct configurations and is not an officially supported
-expression form.
+The dedup in §2.3 is a safety net for **misconfigured** triggers
+(designer accidentally repeats the same `triggerEvent` despite the
+new nesting option). With the two-pass order above, misconfiguration
+is silently downgraded to "any one of the repeated conditions passes
+→ fire once", which is the closest semantically-sensible behaviour
+short of rejecting the configuration outright. It is not
+load-bearing for correct configurations and is not an officially
+supported expression form.
 
 ### 2.5 Hot-Path Performance
 
