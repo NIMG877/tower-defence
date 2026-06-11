@@ -196,20 +196,22 @@ private void DispatchToSkill(SkillRuntime s, SkillEvent evt)
 
 ### 2.4 Why the Duplication Bug Is Gone
 
-Old behaviour: a designer who wanted "hp > 0.3 OR has_debuff" repeated
-the same `triggerEvent` twice in `triggers[]`. The builder appended
-`(inst, c1)` and `(inst, c2)` as two entries; dispatch called
-`OnTrigger` twice.
+Old (broken) behaviour: a designer who wanted "hp > 0.3 OR has_debuff"
+expressed it by repeating the same `triggerEvent` twice in `triggers[]`.
+The builder appended `(inst, c1)` and `(inst, c2)` as two entries;
+dispatch called `OnTrigger` twice. This was the documented footgun
+behind this spec.
 
-New behaviour: the same designer writes **one** `ConditionConfig` with
-`groups = [[{Greater, "hpRate", "0.3"}], [{Equal, "has_debuff", "1"}]]`.
+New behaviour: the same intent is expressed via **one** `ConditionConfig`
+with `groups = [[{Greater, "hpRate", "0.3"}], [{Equal, "has_debuff", "1"}]]`.
 The builder appends one entry. Dispatch evaluates the AND/OR tree and
 calls `OnTrigger` once if any group passes.
 
 The `HashSet<ISkillComponent>` dedup in §2.3 is a safety net for
 **misconfigured** triggers (designer accidentally repeats the same
 `triggerEvent` despite the new nesting option). It is not load-bearing
-for correct configurations.
+for correct configurations and is not an officially supported
+expression form.
 
 ### 2.5 Hot-Path Performance
 
@@ -467,10 +469,20 @@ the trimmed whitelist from commit `54c3465` (only `None` /
 2. **`SkillRuntime.blackboard` lifecycle** — deleted, not aliased.
 3. **`ConditionEvalContext` interface** — reshape (rename + add fields);
    not a clean-slate replacement.
-4. **Trigger semantics** — designer-facing: same component configured
-   with multiple `ConditionConfig` for the same `triggerEvent` is
-   valid for OR-via-repetition; runtime dedup fires `OnTrigger` at
-   most once per component per event regardless.
+4. **Trigger semantics** — the AND/OR shape in `ConditionConfig.groups`
+   is the **only** supported way to express multi-condition triggers.
+   The "repeat the same `triggerEvent` to express OR" pattern is a
+   pre-fix misconfiguration (root cause of the duplication bug
+   described in the Problem section); designers who currently rely on
+   it must migrate to nested `groups` before the field shape lands.
+   The `HashSet<ISkillComponent>` dedup in §2.3 is a runtime safety
+   net that fires `OnTrigger` at most once per component per event
+   regardless of how many `ConditionConfig` entries point at the same
+   component for the same `triggerEvent` — it does not make the
+   misconfiguration express the same intent as a nested OR (the
+   conditions on the repeated entries are not merged, each is
+   evaluated independently and the first one to pass wins, but only
+   one `OnTrigger` call is produced).
 5. **AND/OR shape** — three classes (`ConditionConfig` / `ConditionGroup` /
    `ConditionUnit`) rather than `List<List<ConditionUnit>>` (Unity
    serialiser doesn't accept nested `List<T>`).
