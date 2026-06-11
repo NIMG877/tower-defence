@@ -1,14 +1,14 @@
-# BeforeAttackValueModifier Implementation Plan
+# AttackEventValueModifier Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add a generic `BeforeAttackValueModifier` skill component that rewrites fields on `BeforeAttackEvent` (and other `DamageEventBase` events) using three parallel CSV parameters; mark `AttackMultiplierBoost` and `SetAttackCombo` as `[Obsolete]`.
+**Goal:** Add a generic `AttackEventValueModifier` skill component that rewrites fields on `BeforeAttackEvent` (and other `DamageEventBase` events) using three parallel CSV parameters; mark `AttackMultiplierBoost` and `SetAttackCombo` as `[Obsolete]`.
 
 **Architecture:** New single-file component with hardcoded `switch` over an 8-field whitelist. Three ParamList string CSVs (`fields`, `values`, `methods`) drive the rewrite. CSV is parsed once in `OnInit` into typed arrays; `OnTrigger` only does typed math. Old components get `[Obsolete]` for future migration.
 
 **Tech Stack:** Unity C# (Unity Editor for compile verification), existing `SkillSystem.Components` patterns, `BuffParamParser.ParseFloats` for float CSV.
 
-**Spec:** `docs/superpowers/specs/2026-06-11-before-attack-value-modifier-design.md`
+**Spec:** `docs/superpowers/specs/2026-06-11-attack-event-value-modifier-design.md`
 
 **Test strategy note:** This Unity project has no unit test infrastructure for skill components. Verification = (1) Unity Editor compile passes with no new errors, (2) PlayMode manual smoke test per spec §"验证". Each task below includes a "verify" step that tells the engineer what to look for in the Editor.
 
@@ -18,7 +18,7 @@
 
 | File | Change | Purpose |
 |---|---|---|
-| `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/BeforeAttackValueModifier.cs` | Create | New generic field-rewriter component |
+| `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/AttackEventValueModifier.cs` | Create | New generic field-rewriter component |
 | `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/AttackMultiplierBoost.cs` | Edit (add `[Obsolete]`) | Mark for future migration |
 | `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/SetAttackCombo.cs` | Edit (add `[Obsolete]`) | Mark for future migration |
 
@@ -37,7 +37,7 @@ No new tests, no Inspector schema changes, no other components touched.
 Open the file. Find the line `[RegisterComponent("AttackMultiplierBoost")]`. Insert the `[System.Obsolete]` attribute immediately above it (no blank line between, to keep the attributes grouped). **Use the fully-qualified form `[System.Obsolete]`** — these files have no `using System;` directive, so the unqualified `[Obsolete]` would not compile:
 
 ```csharp
-    [System.Obsolete("Use BeforeAttackValueModifier")]
+    [System.Obsolete("Use AttackEventValueModifier")]
     [RegisterComponent("AttackMultiplierBoost")]
     public class AttackMultiplierBoost : ISkillComponent
 ```
@@ -47,7 +47,7 @@ Open the file. Find the line `[RegisterComponent("AttackMultiplierBoost")]`. Ins
 Open the file. Find the line `[RegisterComponent("SetAttackCombo")]`. Insert the `[System.Obsolete]` attribute immediately above it (fully-qualified for the same reason as Step 1.1):
 
 ```csharp
-    [System.Obsolete("Use BeforeAttackValueModifier")]
+    [System.Obsolete("Use AttackEventValueModifier")]
     [RegisterComponent("SetAttackCombo")]
     public class SetAttackCombo : ISkillComponent
 ```
@@ -62,8 +62,8 @@ grep -n "Obsolete" Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Co
 
 Expected:
 ```
-Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/AttackMultiplierBoost.cs:3:    [Obsolete("Use BeforeAttackValueModifier")]
-Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/SetAttackCombo.cs:3:    [Obsolete("Use BeforeAttackValueModifier")]
+Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/AttackMultiplierBoost.cs:3:    [Obsolete("Use AttackEventValueModifier")]
+Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/SetAttackCombo.cs:3:    [Obsolete("Use AttackEventValueModifier")]
 ```
 
 - [ ] **Step 1.4: Commit**
@@ -72,7 +72,7 @@ Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/SetAttackC
 git add Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/AttackMultiplierBoost.cs Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/SetAttackCombo.cs
 git commit -m "chore: mark AttackMultiplierBoost/SetAttackCombo as [Obsolete]
 
-Use BeforeAttackValueModifier for new skill configs. Both old components
+Use AttackEventValueModifier for new skill configs. Both old components
 remain functional for backward compatibility; zero .asset references today.
 
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
@@ -80,14 +80,14 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 
 ---
 
-## Task 2: Create `BeforeAttackValueModifier.cs`
+## Task 2: Create `AttackEventValueModifier.cs`
 
 **Files:**
-- Create: `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/BeforeAttackValueModifier.cs`
+- Create: `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/AttackEventValueModifier.cs`
 
 - [ ] **Step 2.1: Create the file with full implementation**
 
-Create `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/BeforeAttackValueModifier.cs` with the following content (full file, no placeholders):
+Create `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/AttackEventValueModifier.cs` with the following content (full file, no placeholders):
 
 ```csharp
 using System;
@@ -109,8 +109,8 @@ namespace SkillSystem.Components
     /// <para>Supersedes <c>AttackMultiplierBoost</c> (<c>multiplyer *= N</c>) and
     /// <c>SetAttackCombo</c> (<c>cumbo = N</c>), both of which remain [Obsolete].</para>
     /// </summary>
-    [RegisterComponent("BeforeAttackValueModifier")]
-    public class BeforeAttackValueModifier : ISkillComponent
+    [RegisterComponent("AttackEventValueModifier")]
+    public class AttackEventValueModifier : ISkillComponent
     {
         private string[] _fields = Array.Empty<string>();
         // Per-type parsed values; one slot per field index. Type determined by the field's
@@ -147,7 +147,7 @@ namespace SkillSystem.Components
             int min = Math.Min(Math.Min(fLen, vLen), mLen);
             if (fLen != vLen || vLen != mLen)
             {
-                Debug.LogWarning($"BeforeAttackValueModifier: length mismatch fields={fLen} values={vLen} methods={mLen}; applying first {min} entries");
+                Debug.LogWarning($"AttackEventValueModifier: length mismatch fields={fLen} values={vLen} methods={mLen}; applying first {min} entries");
             }
             if (min < _fields.Length)
             {
@@ -162,7 +162,7 @@ namespace SkillSystem.Components
         {
             if (ctx.currentEvent is not DamageEventBase dab)
             {
-                Debug.LogError("BeforeAttackValueModifier: current event is not a DamageEventBase; skipping");
+                Debug.LogError("AttackEventValueModifier: current event is not a DamageEventBase; skipping");
                 return;
             }
             BeforeAttackEvent bae = dab as BeforeAttackEvent;
@@ -198,13 +198,13 @@ namespace SkillSystem.Components
                     case "cumbo":
                         if (bae == null)
                         {
-                            Debug.Log($"BeforeAttackValueModifier: 'cumbo' skipped — event is not BeforeAttackEvent");
+                            Debug.Log($"AttackEventValueModifier: 'cumbo' skipped — event is not BeforeAttackEvent");
                             break;
                         }
                         bae.cumbo = ApplyInt(bae.cumbo, _intValues[i], _floatValues[i], method, field);
                         break;
                     default:
-                        Debug.LogWarning($"BeforeAttackValueModifier: unknown field '{field}'; skipped");
+                        Debug.LogWarning($"AttackEventValueModifier: unknown field '{field}'; skipped");
                         break;
                 }
             }
@@ -223,7 +223,7 @@ namespace SkillSystem.Components
                 case "add":  return current + value;
                 case "set":  return value;
                 default:
-                    Debug.LogWarning($"BeforeAttackValueModifier: unknown method '{method}' for field '{field}'; skipped");
+                    Debug.LogWarning($"AttackEventValueModifier: unknown method '{method}' for field '{field}'; skipped");
                     return current;
             }
         }
@@ -239,7 +239,7 @@ namespace SkillSystem.Components
                 case "add":  return current + intValue;
                 case "set":  return intValue;
                 default:
-                    Debug.LogWarning($"BeforeAttackValueModifier: unknown method '{method}' for field '{field}'; skipped");
+                    Debug.LogWarning($"AttackEventValueModifier: unknown method '{method}' for field '{field}'; skipped");
                     return current;
             }
         }
@@ -258,11 +258,11 @@ namespace SkillSystem.Components
 - [ ] **Step 2.2: Verify file content (no copy-paste drift)**
 
 ```bash
-ls -la Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/BeforeAttackValueModifier.cs
-grep -c "RegisterComponent" Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/BeforeAttackValueModifier.cs
+ls -la Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/AttackEventValueModifier.cs
+grep -c "RegisterComponent" Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/AttackEventValueModifier.cs
 ```
 
-Expected: file exists, `grep` returns `1` (one `[RegisterComponent("BeforeAttackValueModifier")]`).
+Expected: file exists, `grep` returns `1` (one `[RegisterComponent("AttackEventValueModifier")]`).
 
 - [ ] **Step 2.3: Verify the new component is registered**
 
@@ -271,8 +271,8 @@ Expected: file exists, `grep` returns `1` (one `[RegisterComponent("BeforeAttack
 - [ ] **Step 2.4: Commit**
 
 ```bash
-git add Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/BeforeAttackValueModifier.cs
-git commit -m "feat: add BeforeAttackValueModifier (generalized event-field rewriter)
+git add Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/AttackEventValueModifier.cs
+git commit -m "feat: add AttackEventValueModifier (generalized event-field rewriter)
 
 Replaces AttackMultiplierBoost and SetAttackCombo (both now [Obsolete])
 with a single component parameterized by 3 parallel CSVs:
@@ -304,7 +304,7 @@ Open the project at `e:\Unity\projects\TD` in Unity Editor. Wait for the asset d
 
 Open `Window → General → Console` (or `Ctrl+Shift+C`).
 
-**Expected:** zero red errors. A `[Obsolete]` warning may appear if any code in the project references the renamed components — `grep` confirmed zero such references, so the only expected message is the `BeforeAttackValueModifier` file compiling cleanly.
+**Expected:** zero red errors. A `[Obsolete]` warning may appear if any code in the project references the renamed components — `grep` confirmed zero such references, so the only expected message is the `AttackEventValueModifier` file compiling cleanly.
 
 If errors appear, read the stack trace and fix per the message. Common failures and fixes:
 - `CS0103: name 'DamageEventBase' does not exist` → check `using SkillSystem;` is at top of file (it is, per Step 2.1)
@@ -312,7 +312,7 @@ If errors appear, read the stack trace and fix per the message. Common failures 
 
 - [ ] **Step 3.3: Verify `[RegisterComponent]` shows up**
 
-In the Console, clear all messages, then in the Project window navigate to any existing `ComponentConfig` `.asset` (search `t:ComponentConfig`). Click the `componentType` dropdown — `BeforeAttackValueModifier` should appear alongside the existing 22 components.
+In the Console, clear all messages, then in the Project window navigate to any existing `ComponentConfig` `.asset` (search `t:ComponentConfig`). Click the `componentType` dropdown — `AttackEventValueModifier` should appear alongside the existing 22 components.
 
 If it does NOT appear:
 - Confirm `ComponentAutoRegistry.EnsureRegistered()` runs (called from `SkillSystemBootstrap.Init`, which has `[RuntimeInitializeOnLoadMethod]`) — it runs at play time, not edit time, so the dropdown may not reflect the new component in Edit mode
@@ -334,7 +334,7 @@ This task is a manual gate. The user is responsible for running it; the plan rec
 
 In the Project window, right-click → `Create → Skill System → SkillConfig` (or use an existing test asset). On the new asset:
 - Add a `ComponentConfig` entry
-- Set `componentType = BeforeAttackValueModifier`
+- Set `componentType = AttackEventValueModifier`
 - Add `parameters`:
   - `fields = multiplyer,cumbo,damageType` (string)
   - `values = 1.5,3,2` (string)
@@ -349,7 +349,7 @@ Attach the test config to any testable entity in a playtest scene. Easiest: use 
 
 Enter Play mode. Trigger the skill (or wait for it to auto-fire per the entity's AI).
 
-In Visual Studio / Rider with Unity debugger attached, set a breakpoint inside `BeforeAttackValueModifier.OnTrigger` at the `multiplyer` case. Confirm:
+In Visual Studio / Rider with Unity debugger attached, set a breakpoint inside `AttackEventValueModifier.OnTrigger` at the `multiplyer` case. Confirm:
 - `dab.multiplyer` was multiplied by 1.5 (e.g., original 1.0 → 1.5)
 - `dab.cumbo` was set to 3
 - `dab.damageType` was set to 2
@@ -384,7 +384,7 @@ No commit. Report test results to the user. If any case fails, halt and investig
 - §"类型解析规则" → Task 2 Step 2.1 (both `float.TryParse` and `int.TryParse` in `OnInit`, helper selection in switch)
 - §"OnTrigger 行为" → Task 2 Step 2.1 (cast `DamageEventBase`, secondary cast for `cumbo`, switch with 8 cases)
 - §"CSV 错误处理" → Task 2 Step 2.1 (length mismatch `LogWarning` + trim; unknown field `LogWarning`; unknown method `LogWarning`; empty fields is no-op)
-- §"旧组件 Obsolete 化" → Task 1 (both files get `[Obsolete("Use BeforeAttackValueModifier")]`)
+- §"旧组件 Obsolete 化" → Task 1 (both files get `[Obsolete("Use AttackEventValueModifier")]`)
 - §"文件清单" → Task 1 + Task 2
 - §"验证" → Task 3 (compile) + Task 4 (PlayMode)
 

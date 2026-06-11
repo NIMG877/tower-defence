@@ -1,4 +1,4 @@
-# BeforeAttackValueModifier 设计
+# AttackEventValueModifier 设计
 
 **日期:** 2026-06-11
 **状态:** Approved
@@ -6,11 +6,11 @@
 
 ## 目的
 
-`AttackMultiplierBoost` 和 `SetAttackCombo` 两个组件底层操作相同——都在 `BeforeAttackEvent` 触发时改写事件字段。差异只在字段名和方法算子。本设计引入一个通用组件 `BeforeAttackValueModifier`,把"字段名 + 改写值 + 改写方法"三个维度参数化,统一覆盖这两种(以及未来更多)改写需求。
+`AttackMultiplierBoost` 和 `SetAttackCombo` 两个组件底层操作相同——都在 `BeforeAttackEvent` 触发时改写事件字段。差异只在字段名和方法算子。本设计引入一个通用组件 `AttackEventValueModifier`,把"字段名 + 改写值 + 改写方法"三个维度参数化,统一覆盖这两种(以及未来更多)改写需求。
 
 ## 范围
 
-- **新增:** 1 个新组件 `BeforeAttackValueModifier`
+- **新增:** 1 个新组件 `AttackEventValueModifier`
 - **修改:** 给 `AttackMultiplierBoost` 和 `SetAttackCombo` 加 `[Obsolete]` 标签(无功能改动)
 - **不改:** 其他 20 个组件、ParamList 系统、Inspector 渲染、任何 `.asset`
 
@@ -21,7 +21,7 @@
 - 前缀 `BeforeAttack` = 操作对象(改写 BeforeAttackEvent 字段);对照 `SetAbnormalState`/`SetAttackCombo` 的命名风格
 - 后缀 `ValueModifier` = 操作语义(对值进行改写)。不能用 `Set*`(仅覆写)、不能用 `*Boost`(仅乘性)→ 中性的 `Modifier`
 
-最终: `BeforeAttackValueModifier`
+最终: `AttackEventValueModifier`
 
 ## Inputs(三个平行 CSV,ParamList 字符串键值对)
 
@@ -62,7 +62,7 @@ int 字段的 `mult`: `field = field * value` 走纯 int 运算;设计师应避�
 
 - float 字段:`float.TryParse(valueCsv[i], out v)` → 入 `_floatValues`
 - int 字段:`int.TryParse(valueCsv[i], out v)` → 入 `_intValues`
-- 解析失败:LogWarning("BeforeAttackValueModifier: cannot parse '{value}' for field '{field}'"),跳过该条
+- 解析失败:LogWarning("AttackEventValueModifier: cannot parse '{value}' for field '{field}'"),跳过该条
 - 复用 `BuffParamParser.ParseFloats` 解析 float CSV(已存在,见 `Util/BuffParamParser.cs`)
 - int 解析就地 `int.TryParse`(当前无 `ParseInts` helper;若后续要扩,可加入 `BuffParamParser`,但本设计不动)
 
@@ -100,11 +100,11 @@ int 字段的 `mult`: `field = field * value` 走纯 int 运算;设计师应避�
 ## 旧组件 Obsolete 化
 
 ```csharp
-[Obsolete("Use BeforeAttackValueModifier")]
+[Obsolete("Use AttackEventValueModifier")]
 [RegisterComponent("AttackMultiplierBoost")]
 public class AttackMultiplierBoost : ISkillComponent { /* 不变 */ }
 
-[Obsolete("Use BeforeAttackValueModifier")]
+[Obsolete("Use AttackEventValueModifier")]
 [RegisterComponent("SetAttackCombo")]
 public class SetAttackCombo : ISkillComponent { /* 不变 */ }
 ```
@@ -113,13 +113,13 @@ public class SetAttackCombo : ISkillComponent { /* 不变 */ }
 
 ## 文件清单
 
-- **新增:** `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/BeforeAttackValueModifier.cs`
+- **新增:** `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/AttackEventValueModifier.cs`
 - **修改:** `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/AttackMultiplierBoost.cs`(加 `[Obsolete]`)
 - **修改:** `Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/Components/SetAttackCombo.cs`(加 `[Obsolete]`)
 
 ## 验证(Unity 无单测,PlayMode 手工)
 
-1. 建 SkillConfig,挂 `BeforeAttackValueModifier`,`OnBeforeAttack` 触发,参数:
+1. 建 SkillConfig,挂 `AttackEventValueModifier`,`OnBeforeAttack` 触发,参数:
    - `fields=multiplyer,cumbo,damageType`
    - `values=1.5,3,2`
    - `methods=mult,set,set`
