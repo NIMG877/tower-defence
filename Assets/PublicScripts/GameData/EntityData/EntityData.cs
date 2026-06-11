@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using SkillSystem;
+using AbilitySystem;
 
 /// <summary>
 /// 单个实体的全部静态数据（角色属性 / 怪物属性 / 塔属性 / 召唤物属性）。

@@ -21,7 +21,7 @@ public class Entity : MonoBehaviour, IPoolOperation
     [HideInInspector] public AttackBase AttackBase;
     [HideInInspector] public MoveBase MoveBase;
     public InteractableStatic InteractableStatic;
-    [HideInInspector] public Skill[] skill; // [transitional] prefab scripts read this; remove when prefab Skill subclasses (WdslmSkill3 / MachineTalent1 / etc.) migrate to SkillSystem
+    [HideInInspector] public Skill[] abilities; // [transitional] prefab scripts read this; remove when prefab Skill subclasses (WdslmSkill3 / MachineTalent1 / etc.) migrate to AbilitySystem
     [HideInInspector] public Talent[] Talents;
 
     // === 子系统持有 ===
@@ -29,7 +29,7 @@ public class Entity : MonoBehaviour, IPoolOperation
     private EntityVision _vision;
     private EntityMovement _movement;
     private EntityCombat _combat;
-    private EntitySkillRunner _skillRunner;
+    private EntityAbilityRunner _skillRunner;
 
     private int _camp;
 
@@ -42,7 +42,7 @@ public class Entity : MonoBehaviour, IPoolOperation
     /// <summary>战斗子系统：EntityUpdate/PriorityOrder。</summary>
     public EntityCombat Combat { get { return _combat; } }
     /// <summary>技能子系统：SkillRuntime 列表 + 事件桥 + SP/组件 tick。</summary>
-    public EntitySkillRunner SkillRunner { get { return _skillRunner; } }
+    public EntityAbilityRunner SkillRunner { get { return _skillRunner; } }
 
     public string NAME { get { return EntityData.ChineseName; } }
 
@@ -201,15 +201,15 @@ public class Entity : MonoBehaviour, IPoolOperation
         _vision = new EntityVision(this);
         _movement = new EntityMovement(this);
         _combat = new EntityCombat(this);
-        _skillRunner = new EntitySkillRunner(this);
+        _skillRunner = new EntityAbilityRunner(this);
 
         _vision.InitializeFromData(EntityData);
         Stats.AttributesCaculateFirst(EntityData);
         Movement.Initialize();
 
         // [transitional] prefab Skill subclasses (WdslmSkill3 / MachineTalent1 / etc.) read this.
-        // Remove when those prefab scripts migrate to SkillSystem.
-        this.skill = GetComponents<Skill>();
+        // Remove when those prefab scripts migrate to AbilitySystem.
+        this.abilities = GetComponents<Skill>();
 
         _skillRunner.PreWarm();
     }

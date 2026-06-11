@@ -228,14 +228,14 @@ namespace MyUI
                 float space = 5;
                 _descriptionText.rectTransform.sizeDelta = new Vector2(_descriptionText.rectTransform.sizeDelta.x, desHeight);
                 float ch = desHeight + space;
-                var skills = monsterData.Abilities;
+                var abilities = monsterData.Abilities;
                 Talent[] talents = monsterData.Prefab.GetComponents<Talent>();
-                if (skills != null && skills.Count > 0)
+                if (abilities != null && abilities.Count > 0)
                 {
-                    _skillDescriptionText.text = "● " + skills[0].description;
-                    for (int i = 1; i < skills.Count; i++)
+                    _skillDescriptionText.text = "● " + abilities[0].description;
+                    for (int i = 1; i < abilities.Count; i++)
                     {
-                        _skillDescriptionText.text += "\n● " + skills[i].description;
+                        _skillDescriptionText.text += "\n● " + abilities[i].description;
                     }
                     float skillDesHeight = _skillDescriptionText.preferredHeight;
                     _skillDescriptionText.rectTransform.sizeDelta = new Vector2(_skillDescriptionText.rectTransform.sizeDelta.x, skillDesHeight);

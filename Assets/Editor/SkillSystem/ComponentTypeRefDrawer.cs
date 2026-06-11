@@ -7,7 +7,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace SkillSystem
+namespace AbilitySystem
 {
     [CustomPropertyDrawer(typeof(ComponentTypeRefAttribute))]
     public class ComponentTypeRefDrawer : PropertyDrawer

@@ -289,7 +289,7 @@ namespace MyUI
         private TextMeshProUGUI _hpText;
         private Sprite[] _professionsSmall, _professionsLighten;
         private RectTransform _skillTalentRect, _skillTalentRectParent;
-        private SkillCard _skillCard;
+        private AbilityCard _abilityCard;
         private SubpCard _subpCard;
         private List<TalentCard> _talentCards;
         private List<BuffCard> _buffCards;
@@ -302,8 +302,8 @@ namespace MyUI
         private Image _callBack, _skillOpen, _skillRange, _spBk, _spState, _spMask, _stop, _skillChargeNum;
         private TextMeshProUGUI _spText, _skillChargeNumText;
         private Sprite[] _spMessageAtlas, _skillRangeButton;
-        private SkillSystem.AbilityConfig _selectAbilityConfig;
-        private SkillSystem.AbilityRuntime _selectAbilityRuntime;
+        private AbilitySystem.AbilityConfig _selectAbilityConfig;
+        private AbilitySystem.AbilityRuntime _selectAbilityRuntime;
         private EventTrigger.Entry _callBackClick, _skillRangeClick;
 
         // ===== Floating Text Pool =====
@@ -476,7 +476,7 @@ namespace MyUI
             _hpSlider = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/attributes/hpSliderBk/hpSlider");
             _skillTalentRect = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/skillTalent/content/content");
             _skillTalentRectParent = GetComponentInChildrenByPath<RectTransform>("leftMessageArea/skillTalent/content");
-            _skillCard = new SkillCard(new Vector2(0, 0), _skillTalentRect, Color.white, _skillTalentRect.rect.width);
+            _abilityCard = new AbilityCard(new Vector2(0, 0), _skillTalentRect, Color.white, _skillTalentRect.rect.width);
             _subpCard = new SubpCard(new Vector2(0, 0), _skillTalentRect, Color.white, _skillTalentRect.rect.width);
             _subpCard.SubpRT.gameObject.SetActive(false);
             _talentCards = new List<TalentCard>();
@@ -494,7 +494,7 @@ namespace MyUI
                     if (_currentShow != index && _selectedStaticEntityID.HasValue)
                     {
                         EntityData entityData = GameDataService.EntityRepository.Get(_selectedStaticEntityID.Value);
-                        SwitchShowSkillTalent(index, entityData, _selectedEntity);
+                        SwitchShowAbilityTalent(index, entityData, _selectedEntity);
                     }
                 });
                 _skillTalentSwitchButtons[i].GetComponent<EventTrigger>().triggers.Add(click);
@@ -527,7 +527,7 @@ namespace MyUI
                 var sp = _selectAbilityRuntime != null ? _selectAbilityRuntime.spEngine : null;
                 if (sp != null && sp.CanBegin())
                 {
-                    sp.FireSkill();
+                    sp.StartAbility();
                     UIStates_SwitchTo_Normal();
                 }
             });
@@ -540,7 +540,7 @@ namespace MyUI
             skillstop.callback.AddListener((data) =>
             {
                 if (_selectAbilityRuntime != null && _selectAbilityRuntime.spEngine != null)
-                    _selectAbilityRuntime.spEngine.EndSkill();
+                    _selectAbilityRuntime.spEngine.EndAbility();
                 UIStates_SwitchTo_Normal();
                 AudioManager.Manager.PlayAudio("skill_boostclose", 1, false, false);
             });
@@ -1071,7 +1071,7 @@ namespace MyUI
 
                 EntityData entityData = GameDataService.EntityRepository.Get(entityID);
 
-                SwitchShowSkillTalent(_currentShow, entityData, _selectedEntity);
+                SwitchShowAbilityTalent(_currentShow, entityData, _selectedEntity);
                 ShowAttackRangeAttributes(entityData.VisionRange);
                 _name.text = entityData.ChineseName;
                 _class.sprite = _professionsLighten[entityData.CharacterJob];
@@ -1162,7 +1162,7 @@ namespace MyUI
                     });
                 }
 
-                // 技能按钮与技能范围预览（新 SkillSystem 数据源：EntitySkillRunner / AbilityRuntime / SPConfig）
+                // 技能按钮与技能范围预览（新 AbilitySystem 数据源：EntityAbilityRunner / AbilityRuntime / SPConfig）
                 var runner = _selectedEntity.SkillRunner;
                 if (runner != null && runner.Abilities != null && runner.Abilities.Count > 0)
                 {
@@ -1170,7 +1170,7 @@ namespace MyUI
                     _selectAbilityConfig = _selectAbilityRuntime.config;
                     _skillOpen.gameObject.SetActive(true);
                     _skillOpen.sprite = _selectAbilityConfig.icon;
-                    var range = _selectAbilityConfig.sp != null ? _selectAbilityConfig.sp.skillAttackRange : null;
+                    var range = _selectAbilityConfig.sp != null ? _selectAbilityConfig.sp.abilityAttackRange : null;
                     _skillRange.gameObject.SetActive(range != null && range.Length > 0);
                 }
                 else
@@ -1213,7 +1213,7 @@ namespace MyUI
             }
             else
             {
-                if (cfg.openMode == SkillSystem.SkillOpenMode.Manual)
+                if (cfg.openMode == AbilitySystem.AbilityOpenMode.Manual)
                 {
                     _skillOpen.raycastTarget = true;
                 }
@@ -1276,7 +1276,7 @@ namespace MyUI
                 _spState.color = Color.white;
                 if (consumeType < 3)
                 {
-                    float tsa = cfg.skillAmount;
+                    float tsa = cfg.abilityAmount;
                     _spMask.enabled = true;
                     _spMask.color = _orange_half;
                     _spState.sprite = _spMessageAtlas[consumeType + 1];
@@ -1650,12 +1650,12 @@ namespace MyUI
             }
         }
         // entity 选填：池预览（viewBeforeSet 等）传 null，viewAfterSet 传 _selectedEntity 以拿到运行时数据。
-        private void SwitchShowSkillTalent(int show, EntityData entityData, Entity entity = null)
+        private void SwitchShowAbilityTalent(int show, EntityData entityData, Entity entity = null)
         {
             if (_currentShow != show)
             {
                 _currentShow = show;
-                _skillCard.SkillRT.gameObject.SetActive(false);
+                _abilityCard.AbilityRT.gameObject.SetActive(false);
                 _subpCard.SubpRT.gameObject.SetActive(false);
                 for (int i = 0; i < _talentCards.Count; i++)
                 {
@@ -1682,8 +1682,8 @@ namespace MyUI
             {
                 case 0:
                     // Skill: 优先用 live entity 的 AbilityRuntime（未来可显示 SP 实时状态），回退到模板
-                    SkillSystem.AbilityConfig abilityConfig = null;
-                    SkillSystem.AbilityRuntime abilityRuntime = null;
+                    AbilitySystem.AbilityConfig abilityConfig = null;
+                    AbilitySystem.AbilityRuntime abilityRuntime = null;
                     if (entity != null && entity.SkillRunner != null && entity.SkillRunner.Abilities != null && entity.SkillRunner.Abilities.Count > 0)
                     {
                         abilityRuntime = entity.SkillRunner.Abilities[0];
@@ -1695,12 +1695,12 @@ namespace MyUI
                     }
                     if (abilityConfig != null)
                     {
-                        _skillCard.SkillRT.gameObject.SetActive(true);
-                        _skillCard.UpdateAbilityCardMessage(abilityConfig, abilityRuntime);
+                        _abilityCard.AbilityRT.gameObject.SetActive(true);
+                        _abilityCard.UpdateAbilityCardMessage(abilityConfig, abilityRuntime);
                     }
                     else
                     {
-                        _skillCard.SkillRT.gameObject.SetActive(false);
+                        _abilityCard.AbilityRT.gameObject.SetActive(false);
                     }
                     break;
                 case 1:

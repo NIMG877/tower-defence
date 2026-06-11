@@ -5,7 +5,7 @@ public class SpSliderController : SliderControllerBasic
 {
     private Color _skillFillColor;
     private Color _normalFillColor;
-    private EntitySkillRunner _skillRunner;
+    private EntityAbilityRunner _skillRunner;
 
     public override void SliderInitialize(GameObject sliderObject)
     {
@@ -41,9 +41,9 @@ public class SpSliderController : SliderControllerBasic
         if (isActive)
         {
             var cfg = runtime.config != null ? runtime.config.sp : null;
-            float skillAmount = cfg != null ? cfg.skillAmount : 0f;
-            rate = skillAmount > 0f
-                ? Mathf.Clamp01(sp.CurrentAmount / skillAmount)
+            float abilityAmount = cfg != null ? cfg.abilityAmount : 0f;
+            rate = abilityAmount > 0f
+                ? Mathf.Clamp01(sp.CurrentAmount / abilityAmount)
                 : 1f;
         }
         else

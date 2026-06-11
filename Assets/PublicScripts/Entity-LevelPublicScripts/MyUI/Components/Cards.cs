@@ -4,29 +4,29 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using SkillSystem;
+using AbilitySystem;
 
 namespace MyUI
 {
-    public class SkillCard
+    public class AbilityCard
     {
-        public RectTransform SkillRT;
+        public RectTransform AbilityRT;
         private Image skillImage, spRecoverModeImage, skillOpenModeImage, skillAmountImage;
         private TextMeshProUGUI abilityNameText, sp0Text, totalSpText, spRecoverModeText, skillOpenModeText, skillAmountText, description;
-        public SkillCard(Vector2 skillCardAnchorPos, RectTransform parent, Color textColor, float outerWidth)
+        public AbilityCard(Vector2 skillCardAnchorPos, RectTransform parent, Color textColor, float outerWidth)
         {
             RectTransform skillCard = Resources.Load<RectTransform>("Prefabs/UI/MyUIs/Components/skillCard");
-            SkillRT = Object.Instantiate(skillCard.gameObject, parent).GetComponent<RectTransform>();
-            SkillRT.sizeDelta = new Vector2(outerWidth, 0);
-            SkillRT.Find("content1").GetComponent<RectTransform>().sizeDelta = new Vector2(outerWidth - 50, 0);
-            abilityNameText = SkillRT.Find("content1/skillName").GetComponent<TextMeshProUGUI>();
-            Transform skillImgArea = SkillRT.Find("skillImgArea");
+            AbilityRT = Object.Instantiate(skillCard.gameObject, parent).GetComponent<RectTransform>();
+            AbilityRT.sizeDelta = new Vector2(outerWidth, 0);
+            AbilityRT.Find("content1").GetComponent<RectTransform>().sizeDelta = new Vector2(outerWidth - 50, 0);
+            abilityNameText = AbilityRT.Find("content1/skillName").GetComponent<TextMeshProUGUI>();
+            Transform skillImgArea = AbilityRT.Find("skillImgArea");
             skillImage = skillImgArea.Find("skillImg").GetComponent<Image>();
             sp0Text = skillImage.transform.Find("sp0/text").GetComponent<TextMeshProUGUI>();
             totalSpText = skillImage.transform.Find("totalSp/text").GetComponent<TextMeshProUGUI>();
-            description = SkillRT.Find("content1/description").GetComponent<TextMeshProUGUI>();
+            description = AbilityRT.Find("content1/description").GetComponent<TextMeshProUGUI>();
             description.rectTransform.sizeDelta = new Vector2(outerWidth - 50, 0);
-            Transform content2 = SkillRT.Find("content1/content2");
+            Transform content2 = AbilityRT.Find("content1/content2");
             spRecoverModeImage = content2.Find("spRecoverMode").GetComponent<Image>();
             spRecoverModeText = spRecoverModeImage.GetComponentInChildren<TextMeshProUGUI>();
             skillOpenModeImage = content2.Find("skillOpenMode").GetComponent<Image>();
@@ -43,10 +43,10 @@ namespace MyUI
             abilityNameText.text = config.abilityName;
             description.text = config.description;
             var sp = config.sp;
-            float skillAmount = sp != null ? sp.skillAmount : 0f;
-            if (skillAmount > 0f)
+            float abilityAmount = sp != null ? sp.abilityAmount : 0f;
+            if (abilityAmount > 0f)
             {
-                skillAmountText.text = skillAmount.ToString("0.#");
+                skillAmountText.text = abilityAmount.ToString("0.#");
             }
             else
             {
@@ -62,11 +62,11 @@ namespace MyUI
                 }
                 switch (sp.openMode)
                 {
-                    case SkillOpenMode.Auto: skillOpenModeText.text = "自动触发"; break;
-                    case SkillOpenMode.OnAttackAnimBegin: skillOpenModeText.text = "攻击时触发"; break;
-                    case SkillOpenMode.OnBeforeHurt: skillOpenModeText.text = "受击时触发"; break;
-                    case SkillOpenMode.Manual: skillOpenModeText.text = "手动触发"; break;
-                    case SkillOpenMode.OnAttackSuccessfully: skillOpenModeText.text = "命中触发"; break;
+                    case AbilityOpenMode.Auto: skillOpenModeText.text = "自动触发"; break;
+                    case AbilityOpenMode.OnAttackAnimBegin: skillOpenModeText.text = "攻击时触发"; break;
+                    case AbilityOpenMode.OnBeforeHurt: skillOpenModeText.text = "受击时触发"; break;
+                    case AbilityOpenMode.Manual: skillOpenModeText.text = "手动触发"; break;
+                    case AbilityOpenMode.OnAttackSuccessfully: skillOpenModeText.text = "命中触发"; break;
                 }
                 if (sp.totalSp > 0)
                 {
