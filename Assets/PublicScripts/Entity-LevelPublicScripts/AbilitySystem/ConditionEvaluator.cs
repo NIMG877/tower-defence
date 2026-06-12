@@ -4,9 +4,8 @@ namespace AbilitySystem
 {
     // The runtime context for one dispatch pass. sharedBlackboard is
     // the per-Entity shared blackboard (EntityAbilityRunner.sharedBlackboard
-    // is injected at dispatch time). entity and currentEvent are
-    // exposed for future ConditionOp extensions (HasBuff etc.); this
-    // spec does not read them.
+    // is injected at dispatch time). entity and currentEvent are reserved
+    // for future ConditionOp extensions; this spec does not read them.
     public class ConditionEvalContext
     {
         // sharedBlackboard is intentionally uninitialized: caller MUST set it.

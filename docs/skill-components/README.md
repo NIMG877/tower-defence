@@ -139,10 +139,7 @@ The trimmed `ConditionOp` whitelist (per commit `54c3465`):
 Any `ConditionOp` value outside the live whitelist is logged once
 (across the application lifetime) as a warning and treated as
 "passes" (i.e., the trigger fires unconditionally — the legacy
-default). The legacy `HasBuff` / `NotHasBuff` / `IsInAbnormalState` /
-`NotInAbnormalState` / `HasBlackboardKey` / `NotHasBlackboardKey`
-values are still in the enum for `.asset` forward-compat but
-behave as "always passes" at runtime (with the one-shot warning).
+default).
 
 ### Two coexisting expression forms
 

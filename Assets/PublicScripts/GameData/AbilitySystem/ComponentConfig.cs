@@ -257,9 +257,6 @@ namespace AbilitySystem
     {
         None, Equal, NotEqual,
         Greater, GreaterOrEqual, Less, LessOrEqual,
-        HasBuff, NotHasBuff,
-        IsInAbnormalState, NotInAbnormalState,
-        HasBlackboardKey, NotHasBlackboardKey,
     }
 
     // A single comparison: op(leftKey, rightValue). The runtime semantics
