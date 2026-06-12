@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace AbilitySystem
 {
@@ -10,7 +9,11 @@ namespace AbilitySystem
     // spec does not read them.
     public class ConditionEvalContext
     {
-        public Blackboard sharedBlackboard = new Blackboard();
+        // sharedBlackboard is intentionally uninitialized: caller MUST set it.
+        // A forgotten assignment would silently use a fresh empty Blackboard and
+        // break the per-Entity handoff. The one call site (EntitySkillRunner)
+        // always sets it explicitly.
+        public Blackboard sharedBlackboard;
         public Entity entity;
         public AbilityEvent currentEvent;
     }
@@ -81,17 +84,14 @@ namespace AbilitySystem
         }
 
         // One-shot warning per unknown op value across the application
-        // lifetime. Bounded log spam if configuration is reused.
-        private static readonly HashSet<ConditionOp> _warnedOps = new HashSet<ConditionOp>();
+        // lifetime. Backwards-compatible: unknown op -> pass.
         private static bool WarnUnknownOpAndPass(ConditionOp op)
         {
-            if (_warnedOps.Add(op))
-            {
-                Debug.LogWarning(
-                    $"ConditionEvaluator: unknown ConditionOp {(int)op} treated as 'pass'. " +
-                    "If this fires, a new op was added without a case in Evaluate.");
-            }
-            return true;   // backwards-compatible: unknown op -> pass
+            OneShotWarn.WarnOnce(
+                "cond-op:" + (int)op,
+                $"ConditionEvaluator: unknown ConditionOp {(int)op} treated as 'pass'. " +
+                "If this fires, a new op was added without a case in Evaluate.");
+            return true;
         }
     }
 }

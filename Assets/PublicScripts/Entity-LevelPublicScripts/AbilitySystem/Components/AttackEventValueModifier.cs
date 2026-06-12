@@ -22,7 +22,7 @@ namespace AbilitySystem.Components
     /// <c>fields=cumbo, methods=set</c>).</para>
     /// </summary>
     [RegisterComponent("AttackEventValueModifier")]
-    public class AttackEventValueModifier : IAbilityComponent
+    public class AttackEventValueModifier : AbilityComponentBase
     {
         private Func<string[]> _fields;
         // Per-type parsed values; one slot per field index. Type determined by the field's
@@ -32,37 +32,25 @@ namespace AbilitySystem.Components
         private Func<int[]> _intValues;
         private Func<string[]> _methods;
 
-        public void OnInit(AbilityContext ctx, ParamList parameters)
+        public override void OnInit(AbilityContext ctx, ParamList parameters)
         {
             var bb = ctx.sharedBlackboard;
             var rawFields  = parameters.GetStringLazy("fields",  "", bb);
             var rawValues  = parameters.GetStringLazy("values",  "", bb);
             var rawMethods = parameters.GetStringLazy("methods", "", bb);
-            _fields  = () => SplitCsv(rawFields());
-            _methods = () => SplitCsv(rawMethods());
+            _fields  = () => CsvParser.SplitStrings(rawFields());
+            _methods = () => CsvParser.SplitStrings(rawMethods());
             // Pre-parse values by attempting both float and int. Each index's type is locked
             // by the field's known type (see OnTrigger switch), so we keep both arrays and
             // ignore the other at apply time. A non-numeric value silently becomes 0 in
             // both arrays; the wrong-type slot is never read at apply time (e.g. a value
             // parsed into _intValues is only read for an int field), so the other array's
             // 0 is harmless.
-            _floatValues = () =>
-            {
-                var arr = SplitCsv(rawValues());
-                var f = new float[arr.Length];
-                for (int i = 0; i < arr.Length; i++) float.TryParse(arr[i], out f[i]);
-                return f;
-            };
-            _intValues = () =>
-            {
-                var arr = SplitCsv(rawValues());
-                var n = new int[arr.Length];
-                for (int i = 0; i < arr.Length; i++) int.TryParse(arr[i], out n[i]);
-                return n;
-            };
+            _floatValues = () => CsvParser.Split<float>(rawValues(), ParseFloatOrZero);
+            _intValues   = () => CsvParser.Split<int>  (rawValues(), ParseIntOrZero);
         }
 
-        public void OnTrigger(AbilityContext ctx)
+        public override void OnTrigger(AbilityContext ctx)
         {
             if (ctx.currentEvent is not DamageEventBase dab)
             {
@@ -82,33 +70,44 @@ namespace AbilitySystem.Components
                 Debug.LogWarning($"AttackEventValueModifier: length mismatch fields={fLen} values={vLen} methods={mLen}; applying first {min} entries");
             }
 
+            // Snapshot the arrays once so we don't re-run the lazy getters inside the loop.
+            string[] fields  = _fields();
+            float[]  floats  = _floatValues();
+            int[]    ints    = _intValues();
+            string[] methods = _methods();
+
             for (int i = 0; i < min; i++)
             {
-                string field = _fields()[i];
-                string method = _methods()[i];
+                string field  = fields[i];
+                string method = methods[i];
+                if (!MathOps.TryParse(method, out var op))
+                {
+                    WarnUnknownMethodOnce(method, field);
+                    continue;
+                }
 
                 switch (field)
                 {
                     case "multiplyer":
-                        dab.multiplyer = ApplyFloat(dab.multiplyer, _floatValues()[i], method, field);
+                        dab.multiplyer = MathOps.Apply(dab.multiplyer, floats[i], op);
                         break;
                     case "defPenetrate":
-                        dab.defPenetrate = ApplyFloat(dab.defPenetrate, _floatValues()[i], method, field);
+                        dab.defPenetrate = MathOps.Apply(dab.defPenetrate, floats[i], op);
                         break;
                     case "mgrPenetrate":
-                        dab.mgrPenetrate = ApplyFloat(dab.mgrPenetrate, _floatValues()[i], method, field);
+                        dab.mgrPenetrate = MathOps.Apply(dab.mgrPenetrate, floats[i], op);
                         break;
                     case "defPenetrate_value":
-                        dab.defPenetrate_value = ApplyFloat(dab.defPenetrate_value, _floatValues()[i], method, field);
+                        dab.defPenetrate_value = MathOps.Apply(dab.defPenetrate_value, floats[i], op);
                         break;
                     case "mgrPenetrate_value":
-                        dab.mgrPenetrate_value = ApplyFloat(dab.mgrPenetrate_value, _floatValues()[i], method, field);
+                        dab.mgrPenetrate_value = MathOps.Apply(dab.mgrPenetrate_value, floats[i], op);
                         break;
                     case "damageType":
-                        dab.damageType = ApplyInt(dab.damageType, _intValues()[i], _floatValues()[i], method, field);
+                        dab.damageType = MathOps.ApplyIntMixed(dab.damageType, ints[i], floats[i], op);
                         break;
                     case "applyType":
-                        dab.applyType = ApplyInt(dab.applyType, _intValues()[i], _floatValues()[i], method, field);
+                        dab.applyType = MathOps.ApplyIntMixed(dab.applyType, ints[i], floats[i], op);
                         break;
                     case "cumbo":
                         if (bae == null)
@@ -116,7 +115,7 @@ namespace AbilitySystem.Components
                             Debug.Log($"AttackEventValueModifier: 'cumbo' skipped — event is not BeforeAttackEvent");
                             break;
                         }
-                        bae.cumbo = ApplyInt(bae.cumbo, _intValues()[i], _floatValues()[i], method, field);
+                        bae.cumbo = MathOps.ApplyIntMixed(bae.cumbo, ints[i], floats[i], op);
                         break;
                     default:
                         Debug.LogWarning($"AttackEventValueModifier: unknown field '{field}'; skipped");
@@ -125,48 +124,19 @@ namespace AbilitySystem.Components
             }
         }
 
-        public void OnTick(AbilityContext ctx, float dt) { }
-        public void OnTeardown(AbilityContext ctx) { }
-
         // ---- helpers ----
 
-        private static float ApplyFloat(float current, float value, string method, string field)
-        {
-            switch (method)
-            {
-                case "mult": return current * value;
-                case "add":  return current + value;
-                case "set":  return value;
-                case "div":  return current / value;
-                default:
-                    Debug.LogWarning($"AttackEventValueModifier: unknown method '{method}' for field '{field}'; skipped");
-                    return current;
-            }
-        }
+        private static float ParseFloatOrZero(string s) => float.TryParse(s, out var v) ? v : 0f;
+        private static int   ParseIntOrZero  (string s) => int.TryParse(s,   out var v) ? v : 0;
 
-        // Int overload also takes the float-parsed value for the 'mult' case so a designer
-        // who typed "1.5" for cumbo still gets a sensible (rounded) result instead of a parse
-        // failure. 'add' and 'set' prefer the int-parsed value to keep designer intent exact.
-        private static int ApplyInt(int current, int intValue, float floatValue, string method, string field)
+        // Bounded-log warning for unknown method strings (e.g. typo in a designer-authored
+        // methods=... CSV). OneShotWarn keeps a single log per unique (method,field) pair
+        // across the app lifetime.
+        private static void WarnUnknownMethodOnce(string method, string field)
         {
-            switch (method)
-            {
-                case "mult": return Mathf.RoundToInt(current * floatValue);
-                case "add":  return current + intValue;
-                case "set":  return intValue;
-                case "div":  return Mathf.RoundToInt(current / floatValue);
-                default:
-                    Debug.LogWarning($"AttackEventValueModifier: unknown method '{method}' for field '{field}'; skipped");
-                    return current;
-            }
-        }
-
-        private static string[] SplitCsv(string csv)
-        {
-            if (string.IsNullOrEmpty(csv)) return Array.Empty<string>();
-            var parts = csv.Split(',');
-            for (int i = 0; i < parts.Length; i++) parts[i] = parts[i].Trim();
-            return parts;
+            OneShotWarn.WarnOnce(
+                "aevm-unknown-method:" + method + ":" + field,
+                $"AttackEventValueModifier: unknown method '{method}' for field '{field}'; skipped");
         }
     }
 }

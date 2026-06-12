@@ -14,8 +14,9 @@ namespace AbilitySystem
         // 当为 true 时，运行时 GetXxxLazy 把 `value` 当作 Blackboard 的 key 名而非字面量;
         // 每次调用返回的 Func<T> 都会重新去 Blackboard 取值(按 `type` 期望的类型)。
         // 仅对 GetXxxLazy 系列生效;老的 eager GetXxx 永远按字面量解析,忽略此标记。
-        public ParamValueType type;
         public bool fromBlackboard;
+        public ParamValueType type;
+        
     }
 
     [Serializable]
@@ -148,14 +149,16 @@ namespace AbilitySystem
 
         private static Vector2Int ParseVector2Int(string raw, Vector2Int defaultValue)
         {
-            if (string.IsNullOrEmpty(raw)) return defaultValue;
-            var parts = raw.Split(',');
-            if (parts.Length == 2 &&
-                int.TryParse(parts[0], out var x) &&
-                int.TryParse(parts[1], out var y))
-                return new Vector2Int(x, y);
-            return defaultValue;
+            // Tolerant parse via CsvParser: 0 on failure (a malformed coord becomes
+            // the zero vector, not an exception, so a typo doesn't break a skill's
+            // whole loadout). We need exactly 2 ints; any other shape returns default.
+            var parts = CsvParser.Split<int>(raw, ParseIntOrZero);
+            return parts.Length == 2
+                ? new Vector2Int(parts[0], parts[1])
+                : defaultValue;
         }
+
+        private static int ParseIntOrZero(string s) => int.TryParse(s, out var v) ? v : 0;
 
         // 按 ParamEntry.type 把字符串解析成对应的 boxed 值。defaultValue 若与目标类型匹配
         // 则用作 parse 失败的 fallback,否则用类型的自然零值。Unity 资产类型
@@ -208,28 +211,22 @@ namespace AbilitySystem
             };
         }
 
-        // 一次性 warn 集合,仿 ConditionEvaluator._warnedOps 模式,避免运行时日志刷屏。
-        private static readonly HashSet<string> _warnedMissingBlackboard = new();
-        private static readonly HashSet<string> _warnedTypeMismatch = new();
-
+        // 一次性 warn: 走 OneShotWarn,共享应用级 HashSet(按 category 前缀分桶避免
+        // "missing-bb:foo" 和 "type-mismatch:foo" 互相吞掉)。
         private static void WarnMissingBlackboardOnce(string paramKey)
         {
-            if (_warnedMissingBlackboard.Add(paramKey))
-            {
-                Debug.LogWarning(
-                    $"[ParamList] Param '{paramKey}' has fromBlackboard=true but caller did not pass a Blackboard to GetXxxLazy. " +
-                    "Returning defaultValue. Pass ctx.sharedBlackboard to enable blackboard-sourced reads.");
-            }
+            OneShotWarn.WarnOnce(
+                "bb-missing:" + paramKey,
+                $"[ParamList] Param '{paramKey}' has fromBlackboard=true but caller did not pass a Blackboard to GetXxxLazy. " +
+                "Returning defaultValue. Pass ctx.sharedBlackboard to enable blackboard-sourced reads.");
         }
 
         private static void WarnBlackboardTypeMismatchOnce(string bbKey)
         {
-            if (_warnedTypeMismatch.Add(bbKey))
-            {
-                Debug.LogWarning(
-                    $"[ParamList] Blackboard key '{bbKey}' value runtime type does not match the requested type. " +
-                    "Returning defaultValue.");
-            }
+            OneShotWarn.WarnOnce(
+                "bb-type:" + bbKey,
+                $"[ParamList] Blackboard key '{bbKey}' value runtime type does not match the requested type. " +
+                "Returning defaultValue.");
         }
     }
 

@@ -17,11 +17,10 @@ namespace AbilitySystem
         public AbilityRuntime ability;
         public IAbilityComponent component;
         public AbilityEvent currentEvent;
-        // The only blackboard. Per-Entity, set by EntityAbilityRunner.PrepareContext
-        // from the per-Entity sharedBlackboard field on the runner. Components
-        // read this directly; there is no per-ability blackboard.
+        // The only blackboard. Per-Entity, set by EntityAbilityRunner via MakeContext
+        // (passed in as a parameter). Components read this directly; there is no
+        // per-ability blackboard.
         public Blackboard sharedBlackboard;
-        public GameObject tempContainer;       // for spawn effects
     }
 
     public interface IAbilityComponent

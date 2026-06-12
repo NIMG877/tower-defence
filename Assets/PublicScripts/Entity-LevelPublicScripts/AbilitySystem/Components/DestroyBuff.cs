@@ -27,19 +27,19 @@ namespace AbilitySystem.Components
     /// preserved through the read.
     /// </summary>
     [RegisterComponent("DestroyBuff")]
-    public class DestroyBuff : IAbilityComponent
+    public class DestroyBuff : AbilityComponentBase
     {
         private Func<string> _inputTargetKey;
         private Func<string> _inputBuffKey;
 
-        public void OnInit(AbilityContext ctx, ParamList p)
+        public override void OnInit(AbilityContext ctx, ParamList p)
         {
             var bb = ctx.sharedBlackboard;
             _inputTargetKey = p.GetStringLazy("inputTarget", "", bb);
             _inputBuffKey   = p.GetStringLazy("inputBuff",   "", bb);
         }
 
-        public void OnTrigger(AbilityContext ctx)
+        public override void OnTrigger(AbilityContext ctx)
         {
             if (string.IsNullOrEmpty(_inputTargetKey()) || string.IsNullOrEmpty(_inputBuffKey())) return;
             if (ctx.sharedBlackboard == null) return;
@@ -63,8 +63,5 @@ namespace AbilitySystem.Components
             ctx.sharedBlackboard.Remove(_inputTargetKey());
             ctx.sharedBlackboard.Remove(_inputBuffKey());
         }
-
-        public void OnTick(AbilityContext ctx, float dt) { }
-        public void OnTeardown(AbilityContext ctx) { }
     }
 }

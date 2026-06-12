@@ -14,17 +14,16 @@ namespace AbilitySystem.Components
     /// <para><b>"add" / "mult" / "div"</b>: reads the existing value at the key, applies
     /// the operation with the configured value, and writes the result back. Only
     /// supported for numeric existing values (int/float/double); bool/string/Vector2Int
-    /// log a warning and skip. Math semantics for each method mirror
-    /// <see cref="AttackEventValueModifier"/>.</para>
+    /// log a warning and skip. Math semantics mirror <see cref="MathOps.Apply{T}"/>.</para>
     /// </summary>
     [RegisterComponent("WriteBlackboard")]
-    public class WriteBlackboard : IAbilityComponent
+    public class WriteBlackboard : AbilityComponentBase
     {
         private Func<string>  _key;
         private Func<object> _value;
         private Func<string>  _method;
 
-        public void OnInit(AbilityContext ctx, ParamList p)
+        public override void OnInit(AbilityContext ctx, ParamList p)
         {
             var bb = ctx.sharedBlackboard;
             _key    = p.GetStringLazy("key",    "",    bb);
@@ -32,7 +31,7 @@ namespace AbilitySystem.Components
             _method = p.GetStringLazy("method", "set", bb);
         }
 
-        public void OnTrigger(AbilityContext ctx)
+        public override void OnTrigger(AbilityContext ctx)
         {
             if (ctx.sharedBlackboard == null) return;
             string key = _key();
@@ -57,9 +56,6 @@ namespace AbilitySystem.Components
             }
         }
 
-        public void OnTick(AbilityContext ctx, float dt) { }
-        public void OnTeardown(AbilityContext ctx) { }
-
         // "add" / "mult" / "div" path. Reads existing at key, parses value to existing's type,
         // applies the op, writes back. No existing value = no-op (designer should set first
         // or use method="set" to seed). Null value also no-ops (otherwise a missing param
@@ -71,53 +67,26 @@ namespace AbilitySystem.Components
             if (existing == null) return;
 
             Type t = existing.GetType();
+            if (!MathOps.TryParse(method, out var op))
+            {
+                // Already filtered by OnTrigger default-case, but defensive.
+                Debug.LogWarning($"WriteBlackboard: unknown method '{method}'; skipping");
+                return;
+            }
             try
             {
                 if (t == typeof(int))
-                    bb.Set(key, ApplyOpInt((int)existing, Convert.ToInt32(value), method));
+                    bb.Set(key, MathOps.Apply((int)existing, Convert.ToInt32(value), op));
                 else if (t == typeof(float))
-                    bb.Set(key, ApplyOpFloat((float)existing, Convert.ToSingle(value), method));
+                    bb.Set(key, MathOps.Apply((float)existing, Convert.ToSingle(value), op));
                 else if (t == typeof(double))
-                    bb.Set(key, ApplyOpDouble((double)existing, Convert.ToDouble(value), method));
+                    bb.Set(key, MathOps.Apply((double)existing, Convert.ToDouble(value), op));
                 else
                     Debug.LogWarning($"WriteBlackboard: method='{method}' unsupported for type {t.Name}; skipping");
             }
             catch (Exception ex)
             {
                 Debug.LogWarning($"WriteBlackboard: failed to convert value to {t.Name}: {ex.Message}; skipping");
-            }
-        }
-
-        private static int ApplyOpInt(int current, int value, string method)
-        {
-            switch (method)
-            {
-                case "add":  return current + value;
-                case "mult": return current * value;
-                case "div":  return current / value;
-                default:     return current;
-            }
-        }
-
-        private static float ApplyOpFloat(float current, float value, string method)
-        {
-            switch (method)
-            {
-                case "add":  return current + value;
-                case "mult": return current * value;
-                case "div":  return current / value;
-                default:     return current;
-            }
-        }
-
-        private static double ApplyOpDouble(double current, double value, string method)
-        {
-            switch (method)
-            {
-                case "add":  return current + value;
-                case "mult": return current * value;
-                case "div":  return current / value;
-                default:     return current;
             }
         }
     }

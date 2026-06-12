@@ -118,7 +118,8 @@ public class EntityAbilityRunner
         // 3) 清空 per-Entity 共享黑板
         sharedBlackboard.Clear();
 
-        // 4) 重新初始化组件
+        // 4) 重新初始化组件，并派发InitializeEvent
+        InitializeEvent evt= new InitializeEvent();
         for (int i = 0; i < _abilities.Count; i++)
         {
             var a = _abilities[i];
@@ -127,16 +128,14 @@ public class EntityAbilityRunner
                 var comp = a.components[c];
                 if (c < a.componentParams.Count)
                 {
-                    var teardownCtx = PrepareContext(a.MakeContext(comp, null));
+                    var teardownCtx = a.MakeContext(comp, null, sharedBlackboard, _entity);
                     comp.OnTeardown(teardownCtx);
-                    var initCtx = PrepareContext(a.MakeContext(comp, null));
+                    var initCtx = a.MakeContext(comp, null, sharedBlackboard, _entity);
                     comp.OnInit(initCtx, a.componentParams[c]);
+                    DispatchToAbility(a,evt);
                 }
             }
         }
-
-        // 5) 派发 InitializeEvent
-        DispatchEvent(new InitializeEvent());
     }
 
     public void OnTeardown()
@@ -156,7 +155,7 @@ public class EntityAbilityRunner
             var a = _abilities[i];
             for (int c = 0; c < a.components.Count; c++)
             {
-                var ctx = PrepareContext(a.MakeContext(a.components[c], null));
+                var ctx = a.MakeContext(a.components[c], null, sharedBlackboard, _entity);
                 a.components[c].OnTeardown(ctx);
             }
         }
@@ -192,7 +191,7 @@ public class EntityAbilityRunner
             for (int c = 0; c < a.tickingComponents.Count; c++)
             {
                 var comp = a.tickingComponents[c];
-                var ctx = PrepareContext(a.MakeContext(comp, null));
+                var ctx = a.MakeContext(comp, null, sharedBlackboard, _entity);
                 comp.OnTick(ctx, dt);
             }
         }
@@ -223,7 +222,7 @@ public class EntityAbilityRunner
         var runtime = BuildAbilityRuntime(cfg, AbilityKind.ExtraAbility);
         for (int i=0;i<runtime.components.Count;i++)
         {
-            var ctx = PrepareContext(runtime.MakeContext(runtime.components[i], null));
+            var ctx = runtime.MakeContext(runtime.components[i], null, sharedBlackboard, _entity);
             runtime.components[i].OnInit(ctx, runtime.componentParams[i]);
         }   
         // BuildAbilityRuntime 已经把 runtime 加入 _abilities (single source of truth)。
@@ -250,7 +249,7 @@ public class EntityAbilityRunner
         a.SetActive(false);
         for (int c = 0; c < a.components.Count; c++)
         {
-            var ctx = a.MakeContext(a.components[c], null);
+            var ctx = a.MakeContext(a.components[c], null, sharedBlackboard, _entity);
             a.components[c].OnTeardown(ctx);
         }
         UnwireRuntime(a);
@@ -295,7 +294,7 @@ public class EntityAbilityRunner
                     Debug.LogError($"[EntityAbilityRunner] Unknown component type: {ccfg.componentType} in ability {cfg.abilityId}");
                     continue;
                 }
-                AbilityContext ctx = PrepareContext(runtime.MakeContext(inst, null));
+                AbilityContext ctx = runtime.MakeContext(inst, null, sharedBlackboard, _entity);
                 //inst.OnInit(ctx, ccfg.parameters);
                 runtime.components.Add(inst);
                 runtime.componentParams.Add(ccfg.parameters);
@@ -498,15 +497,8 @@ public class EntityAbilityRunner
         {
             var (comp, groups) = list[i];
             if (!ConditionEvaluator.Evaluate(groups, evalCtx)) continue;
-            var ctx = PrepareContext(a.MakeContext(comp, evt));
+            var ctx = a.MakeContext(comp, evt, sharedBlackboard, _entity);
             comp.OnTrigger(ctx);
         }
-    }
-
-    private AbilityContext PrepareContext(AbilityContext ctx)
-    {
-        ctx.sharedBlackboard = sharedBlackboard;
-        ctx.entity = _entity;
-        return ctx;
     }
 }

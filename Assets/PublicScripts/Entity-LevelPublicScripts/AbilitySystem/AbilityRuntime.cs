@@ -26,14 +26,19 @@ namespace AbilitySystem
         // 见 spec §3.2。
         public Action _wireTeardown;
 
-        public AbilityContext MakeContext(IAbilityComponent component, AbilityEvent evt = null)
+        public AbilityContext MakeContext(
+            IAbilityComponent component,
+            AbilityEvent evt = null,
+            Blackboard sharedBlackboard = null,
+            Entity entity = null)
         {
             return new AbilityContext
             {
-                ability = this,   // AbilityContext.ability 字段填入 AbilityRuntime 自己
+                ability = this,
                 component = component,
                 currentEvent = evt,
-                // sharedBlackboard 由 EntityAbilityRunner.PrepareContext 注入。
+                sharedBlackboard = sharedBlackboard,
+                entity = entity,
             };
         }
 

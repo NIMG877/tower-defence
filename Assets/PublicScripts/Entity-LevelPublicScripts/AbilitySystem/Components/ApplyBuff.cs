@@ -11,15 +11,15 @@ namespace AbilitySystem.Components
     ///
     /// <para>When <c>endOnSkillEnd</c> is true, every buff this component creates is
     /// tracked and destroyed on <see cref="AbilityEndEvent"/> (or on
-    /// <see cref="OnTeardown"/> if the skill never ends cleanly, e.g. pool
-    /// dormancy mid-skill). The config MUST also declare <c>OnAbilityEnd</c> in
-    /// its <c>triggers[]</c>, because <c>EntityAbilityRunner.DispatchToAbility</c>
+    /// <see cref="IAbilityComponent.OnTeardown"/> if the skill never ends cleanly,
+    /// e.g. pool dormancy mid-skill). The config MUST also declare <c>OnAbilityEnd</c>
+    /// in its <c>triggers[]</c>, because <c>EntityAbilityRunner.DispatchToAbility</c>
     /// only routes events that have a matching trigger bucket — bypassing the
     /// active-window gate isn't the same as bypassing the bucket lookup.</para>
     /// See docs/superpowers/specs/2026-06-08-skill-blackboard-component-pattern.md.
     /// </summary>
     [RegisterComponent("ApplyBuff")]
-    public class ApplyBuff : IAbilityComponent
+    public class ApplyBuff : AbilityComponentBase
     {
         private Func<string> _buffId;
         private Func<float> _buffTime;
@@ -36,13 +36,13 @@ namespace AbilitySystem.Components
         private Func<string> _outputTargetKey;
         private Func<string> _outputBuffKey;
 
-        public void OnInit(AbilityContext ctx, ParamList p)
+        public override void OnInit(AbilityContext ctx, ParamList p)
         {
             var bb = ctx.sharedBlackboard;
             var rawTypes  = p.GetStringLazy("buffTypes",  "", bb);
             var rawValues = p.GetStringLazy("buffValues", "", bb);
-            _types  = () => BuffParamParser.ParseBuffTypes(rawTypes());
-            _values = () => BuffParamParser.ParseFloats(rawValues());
+            _types  = () => CsvParser.Split(rawTypes(),  s => (BuffType)Enum.Parse(typeof(BuffType), s));
+            _values = () => CsvParser.Split(rawValues(), float.Parse);
             _buffId          = p.GetStringLazy("buffId",        "skill_buff", bb);
             _buffTime        = p.GetFloatLazy ("buffTime",      -10f,         bb);
             _toSelf          = p.GetBoolLazy  ("toSelf",        true,         bb);
@@ -52,7 +52,7 @@ namespace AbilitySystem.Components
             _outputBuffKey   = p.GetStringLazy("outputBuff",    "",           bb);
         }
 
-        public void OnTrigger(AbilityContext ctx)
+        public override void OnTrigger(AbilityContext ctx)
         {
             if (ctx.entity == null) return;
             if (_types().Length == 0) return;
@@ -102,9 +102,6 @@ namespace AbilitySystem.Components
             bbBuff.AddRange(roundBuffs);
             ctx.sharedBlackboard.Set(_outputBuffKey(), bbBuff);
         }
-
-        public void OnTick(AbilityContext ctx, float dt) { }
-        public void OnTeardown(AbilityContext ctx) { }
 
         // Blackboard-read path: when blackboardKey is set, the target list is read
         // from the key. If the key is missing/empty, the component skips silently —
