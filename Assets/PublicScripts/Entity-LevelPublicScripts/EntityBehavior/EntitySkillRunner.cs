@@ -167,8 +167,6 @@ public class EntityAbilityRunner
 
         var runtime = BuildAbilityRuntime(cfg);
         // BuildAbilityRuntime 已经把 runtime 加入 _abilities (single source of truth)。
-        // 这里不要重复 Add,否则同一个 ref 出现两次 (PreWarm / 幂等分支 都会受影响)。
-        runtime.SetActive(true);
         DispatchEvent(new AbilityAddedEvent { ability = runtime });
         return runtime.runtimeId;
     }
@@ -266,12 +264,9 @@ public class EntityAbilityRunner
         }
 
         // SPEngine + 钩到 SetActive
-        if (cfg.Kind == AbilityKind.Skill)
-        {
-            runtime.spEngine = new SPEngine(cfg.sp);
-            runtime.spEngine.OnBegin += () => runtime.SetActive(true);
-            runtime.spEngine.OnEnd   += () => runtime.SetActive(false);
-        }
+        runtime.spEngine = new SPEngine(cfg.sp);
+        runtime.spEngine.OnBegin += () => runtime.SetActive(true);
+        runtime.spEngine.OnEnd   += () => runtime.SetActive(false);
 
         WireRuntime(runtime);
 
