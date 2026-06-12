@@ -74,17 +74,18 @@ namespace AbilitySystem
 
     public enum TriggerEvent
     {
+        // 生命周期事件
         OnPreWarm, OnInitialize,
+        OnAbilityBegin, OnAbilityEnd,
+        OnAbilityAdded, OnAbilityRemoved,
+        // 攻击相关事件
         OnBeforeAttack, OnAfterAttack,
         OnBeforeTakeDamage, OnAfterTakeDamage,
         OnAttackSuccessfully, OnAttackInterrupt,
+        // 受击相关事件
         OnBeforeHurt, OnAfterHurt,
-        OnAttackAnimBegin,
-        OnBeforeDieAnimation,
-        // Renamed from OnSkillBegin/OnSkillEnd: now fire on any isActive transition.
-        OnAbilityBegin, OnAbilityEnd,
-        // New: broadcast when an ExtraAbility is added/removed.
-        OnAbilityAdded, OnAbilityRemoved,
+        // 动画相关事件
+        OnAttackAnimBegin,OnBeforeDieAnimation,
     }
 
     public enum AbilityKind

@@ -84,14 +84,6 @@ public class EntityAbilityRunner
 
         // 5) 派发 InitializeEvent
         DispatchEvent(new InitializeEvent());
-
-        // 6) 激活 Talents。Talent 的 SetActive(true) 触发 OnAbilityBegin,广播给所有 ability。
-        // Skills 等待 SPEngine;extras 还没 runtime。
-        for (int i = 0; i < _abilities.Count; i++)
-        {
-            var a = _abilities[i];
-            if (a.Kind == AbilityKind.Talent) a.SetActive(true);
-        }
     }
 
     public void OnTeardown()
