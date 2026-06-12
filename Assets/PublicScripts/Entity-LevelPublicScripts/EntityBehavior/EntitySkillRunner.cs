@@ -14,13 +14,58 @@ using AbilitySystem;
 public class EntityAbilityRunner
 {
     private readonly Entity _entity;
+    // 内部唯一来源 —— PreWarm/Add/Remove/Teardown 都改这一个列表,不分 Kind。
+    // 对外按语义切分为 Skills / Talents / ExtraAbilities 三个只读视图(下方缓存实现)。
     private readonly List<AbilityRuntime> _abilities = new List<AbilityRuntime>();
+    private readonly List<AbilityRuntime> _skillsCache = new List<AbilityRuntime>();
+    private readonly List<AbilityRuntime> _talentsCache = new List<AbilityRuntime>();
+    private readonly List<AbilityRuntime> _extrasCache = new List<AbilityRuntime>();
+    private bool _abilitiesCacheDirty = true;
+
     public Blackboard sharedBlackboard = new Blackboard();
 
     // runtimeId 生成 (extras 用,见 spec §5.5)
     private int _extraCounter = 0;
 
-    public IReadOnlyList<AbilityRuntime> Abilities => _abilities;
+    /// <summary>技能列表(AbilityKind.Skill)。PreWarm 时从 <c>EntityData.Skills</c> 注入。</summary>
+    public IReadOnlyList<AbilityRuntime> Skills
+    {
+        get { EnsureAbilitiesCache(); return _skillsCache; }
+    }
+    /// <summary>天赋列表(AbilityKind.Talent)。PreWarm 时从 <c>EntityData.Talents</c> 注入。</summary>
+    public IReadOnlyList<AbilityRuntime> Talents
+    {
+        get { EnsureAbilitiesCache(); return _talentsCache; }
+    }
+    /// <summary>额外能力列表(AbilityKind.ExtraAbility)。由 <see cref="AddExtraAbility"/> 运行时加入,可用 <see cref="RemoveExtraAbility"/> 移除。</summary>
+    public IReadOnlyList<AbilityRuntime> ExtraAbilities
+    {
+        get { EnsureAbilitiesCache(); return _extrasCache; }
+    }
+
+    private void EnsureAbilitiesCache()
+    {
+        if (!_abilitiesCacheDirty) return;
+        _skillsCache.Clear();
+        _talentsCache.Clear();
+        _extrasCache.Clear();
+        for (int i = 0; i < _abilities.Count; i++)
+        {
+            var a = _abilities[i];
+            switch (a.Kind)
+            {
+                case AbilityKind.Skill: _skillsCache.Add(a); break;
+                case AbilityKind.Talent: _talentsCache.Add(a); break;
+                case AbilityKind.ExtraAbility: _extrasCache.Add(a); break;
+            }
+        }
+        _abilitiesCacheDirty = false;
+    }
+
+    private void InvalidateAbilitiesCache()
+    {
+        _abilitiesCacheDirty = true;
+    }
 
     public EntityAbilityRunner(Entity entity)
     {
@@ -122,6 +167,11 @@ public class EntityAbilityRunner
             UnwireRuntime(_abilities[i]);
             _abilities.RemoveAt(i);
         }
+        // 缓存也清干净,避免下次 PreWarm 前外部访问到陈旧 list
+        _skillsCache.Clear();
+        _talentsCache.Clear();
+        _extrasCache.Clear();
+        _abilitiesCacheDirty = false;
     }
 
     /// <summary>
@@ -200,6 +250,7 @@ public class EntityAbilityRunner
         }
         UnwireRuntime(a);
         _abilities.RemoveAt(idx);
+        InvalidateAbilitiesCache();
         return true;
     }
 
@@ -282,6 +333,7 @@ public class EntityAbilityRunner
         // single source of truth:BuildAbilityRuntime 负责把 runtime 加入 _abilities。
         // 调用者(PreWarm 循环、AddExtraAbility)拿到的 runtime 已经在 list 里,不要再 Add。
         _abilities.Add(runtime);
+        InvalidateAbilitiesCache();
         return runtime;
     }
 

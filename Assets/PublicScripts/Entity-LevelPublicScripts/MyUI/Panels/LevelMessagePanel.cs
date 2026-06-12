@@ -1164,9 +1164,9 @@ namespace MyUI
 
                 // 技能按钮与技能范围预览（新 AbilitySystem 数据源：EntityAbilityRunner / AbilityRuntime / SPConfig）
                 var runner = _selectedEntity.SkillRunner;
-                if (runner != null && runner.Abilities != null && runner.Abilities.Count > 0)
+                if (runner != null && runner.Skills != null && runner.Skills.Count > 0)
                 {
-                    _selectAbilityRuntime = runner.Abilities[0];
+                    _selectAbilityRuntime = runner.Skills[0];
                     _selectAbilityConfig = _selectAbilityRuntime.config;
                     _skillOpen.gameObject.SetActive(true);
                     _skillOpen.sprite = _selectAbilityConfig.icon;
@@ -1684,9 +1684,9 @@ namespace MyUI
                     // Skill: 优先用 live entity 的 AbilityRuntime（未来可显示 SP 实时状态），回退到模板
                     AbilitySystem.AbilityConfig abilityConfig = null;
                     AbilitySystem.AbilityRuntime abilityRuntime = null;
-                    if (entity != null && entity.SkillRunner != null && entity.SkillRunner.Abilities != null && entity.SkillRunner.Abilities.Count > 0)
+                    if (entity != null && entity.SkillRunner != null && entity.SkillRunner.Skills != null && entity.SkillRunner.Skills.Count > 0)
                     {
-                        abilityRuntime = entity.SkillRunner.Abilities[0];
+                        abilityRuntime = entity.SkillRunner.Skills[0];
                         abilityConfig = abilityRuntime.config;
                     }
                     else if (entityData.Skills != null && entityData.Skills.Count > 0)
