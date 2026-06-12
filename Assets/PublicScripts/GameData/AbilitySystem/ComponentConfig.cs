@@ -122,6 +122,20 @@ namespace AbilitySystem
             return () => parsed;
         }
 
+        // 通用版:把 entry.value 按 ParamEntry.type 解析为 object 后闭包返回,用于"值的类型由
+        // ParamEntry 决定"的场景(典型:WriteBlackboard 组件,designer 在 ParamList 里通过
+        // ParamEntry.type 指定写入 BB 的类型)。三分支语义同其它 GetXxxLazy:不存在/字面量
+        // 缓存/fromBlackboard 每次重读;fromBlackboard 路径走 MakeBlackboardGetter<object>,
+        // (object)v 是 upcast 永不会 InvalidCastException,无需 try/catch。
+        public Func<object> GetValueLazy(string key, object defaultValue = null, Blackboard bb = null)
+        {
+            var entry = FindEntry(key);
+            if (entry == null) return () => defaultValue;
+            if (entry.fromBlackboard) return MakeBlackboardGetter(entry, defaultValue, bb);
+            object parsed = ParseAsType(entry, defaultValue);
+            return () => parsed;
+        }
+
         // ========= 内部 helpers =========
 
         private ParamEntry FindEntry(string key)
@@ -141,6 +155,34 @@ namespace AbilitySystem
                 int.TryParse(parts[1], out var y))
                 return new Vector2Int(x, y);
             return defaultValue;
+        }
+
+        // 按 ParamEntry.type 把字符串解析成对应的 boxed 值。defaultValue 若与目标类型匹配
+        // 则用作 parse 失败的 fallback,否则用类型的自然零值。Unity 资产类型
+        // (AnimationRef/Prefab/EntityId/Color) 无对应 parser,降级为存字符串 — designer
+        // 责任保证 BB 写入有意义。
+        private static object ParseAsType(ParamEntry entry, object defaultValue)
+        {
+            switch (entry.type)
+            {
+                case ParamValueType.Int:
+                    int di = defaultValue is int x ? x : 0;
+                    return int.TryParse(entry.value, out var i) ? i : di;
+                case ParamValueType.Float:
+                    float df = defaultValue is float y ? y : 0f;
+                    return float.TryParse(entry.value, out var f) ? f : df;
+                case ParamValueType.Bool:
+                    return !string.IsNullOrEmpty(entry.value) && bool.TryParse(entry.value, out var b)
+                        ? b
+                        : defaultValue is bool z && z;
+                case ParamValueType.String:
+                    return entry.value ?? defaultValue as string ?? "";
+                case ParamValueType.Vector2Int:
+                    Vector2Int dv = defaultValue is Vector2Int v ? v : default;
+                    return ParseVector2Int(entry.value, dv);
+                default:
+                    return entry.value ?? defaultValue;
+            }
         }
 
         // fromBlackboard=true 路径的取值器工厂。bb==null 时降级到常量 defaultValue + 一次性 warn,
