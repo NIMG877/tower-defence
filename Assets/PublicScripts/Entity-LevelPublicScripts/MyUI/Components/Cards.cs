@@ -103,10 +103,10 @@ namespace MyUI
             talentName = TalentRT.Find("talentName/name").GetComponent<TextMeshProUGUI>();
             description.color = textColor;
         }
-        public void UpdateTalentCardMessage(Talent talent)
+        public void UpdateTalentCardMessage(AbilityConfig talent)
         {
-            talentName.text = talent.TalentName;
-            description.text = talent.TalentDescription;
+            talentName.text = talent.abilityName;
+            description.text = talent.description;
             description.rectTransform.sizeDelta = new Vector2(description.rectTransform.rect.width, description.preferredHeight);
             TalentRT.sizeDelta = new Vector2(TalentRT.rect.width, 17 + description.preferredHeight);
         }

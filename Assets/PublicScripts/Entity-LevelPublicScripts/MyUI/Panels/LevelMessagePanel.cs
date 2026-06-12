@@ -1708,20 +1708,21 @@ namespace MyUI
                     _subpCard.UpdateSubpCardMessage(entityData);
                     break;
                 case 2:
-                    // Talent: live entity 优先（运行时实际挂载的 Talent 组件），回退到 entityData.Prefab（池预览）
-                    // 原版用 entity.Talents 字段，但该字段目前未被 PreWarm/Initialize 填充，会 NRE。改用 GetComponents 直接取。
-                    Talent[] ts;
-                    if (entity != null)
+                    // Talent: live entity 优先（运行时实际挂载的 AbilityRuntime 缓存视图），回退到 entityData.Talents（数据层模板）
+                    AbilitySystem.AbilityConfig[] ts;
+                    if (entity != null && entity.SkillRunner != null)
                     {
-                        ts = entity.GetComponents<Talent>();
+                        var runtimes = entity.SkillRunner.Talents;
+                        ts = new AbilitySystem.AbilityConfig[runtimes.Count];
+                        for (int i = 0; i < runtimes.Count; i++) ts[i] = runtimes[i].config;
                     }
-                    else if (entityData.Prefab != null)
+                    else if (entityData.Talents != null)
                     {
-                        ts = entityData.Prefab.GetComponents<Talent>();
+                        ts = entityData.Talents.ToArray();
                     }
                     else
                     {
-                        ts = new Talent[0];
+                        ts = new AbilitySystem.AbilityConfig[0];
                     }
                     if (ts.Length <= _talentCards.Count)
                     {

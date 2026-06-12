@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using AbilitySystem;
 
 namespace MyUI
 {
@@ -371,15 +372,16 @@ namespace MyUI
                 _skillSelectRT.gameObject.SetActive(true);
                 _skillContent.vertical = _skillArea.rect.height < _content.rect.height;
             }
-            Talent[] talents = entityData.Prefab.GetComponents<Talent>();
-            if (talents.Length <= _talentCardList.Count)
+            List<AbilityConfig> talents = entityData.Talents;
+            if (talents == null) talents = new List<AbilityConfig>();
+            if (talents.Count <= _talentCardList.Count)
             {
-                for (int i = 0; i < talents.Length; i++)
+                for (int i = 0; i < talents.Count; i++)
                 {
                     _talentCardList[i].TalentRT.gameObject.SetActive(true);
                     _talentCardList[i].UpdateTalentCardMessage(talents[i]);
                 }
-                for (int i = talents.Length; i < _talentCardList.Count; i++)
+                for (int i = talents.Count; i < _talentCardList.Count; i++)
                 {
                     _talentCardList[i].TalentRT.gameObject.SetActive(false);
                 }
@@ -391,7 +393,7 @@ namespace MyUI
                     _talentCardList[i].TalentRT.gameObject.SetActive(true);
                     _talentCardList[i].UpdateTalentCardMessage(talents[i]);
                 }
-                for (int i = _talentCardList.Count; i < talents.Length; i++)
+                for (int i = _talentCardList.Count; i < talents.Count; i++)
                 {
                     TalentCard card = new TalentCard(new Vector2(0, 0), _talentContent, Color.black, 210);
                     card.UpdateTalentCardMessage(talents[i]);

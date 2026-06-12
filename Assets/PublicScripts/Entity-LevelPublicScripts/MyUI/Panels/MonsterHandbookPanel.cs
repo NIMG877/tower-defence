@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using AbilitySystem;
 
 namespace MyUI
 {
@@ -229,7 +230,7 @@ namespace MyUI
                 _descriptionText.rectTransform.sizeDelta = new Vector2(_descriptionText.rectTransform.sizeDelta.x, desHeight);
                 float ch = desHeight + space;
                 var abilities = monsterData.Skills;
-                Talent[] talents = monsterData.Prefab.GetComponents<Talent>();
+                List<AbilityConfig> talents = monsterData.Talents;
                 if (abilities != null && abilities.Count > 0)
                 {
                     _skillDescriptionText.text = "● " + abilities[0].description;
@@ -251,12 +252,12 @@ namespace MyUI
                     _skillDescriptionText.gameObject.SetActive(false);
                     _skillImg.gameObject.SetActive(false);
                 }
-                if (talents.Length > 0)
+                if (talents != null && talents.Count > 0)
                 {
-                    _talentDescription.text = "�� " + talents[0].TalentDescription;
-                    for (int i = 1; i < talents.Length; i++)
+                    _talentDescription.text = "�� " + talents[0].description;
+                    for (int i = 1; i < talents.Count; i++)
                     {
-                        _talentDescription.text += "\n�� " + talents[i].TalentDescription;
+                        _talentDescription.text += "\n�� " + talents[i].description;
                     }
                     float talentDesHeight = _talentDescription.preferredHeight;
                     _talentDescription.rectTransform.sizeDelta = new Vector2(_talentDescription.rectTransform.sizeDelta.x, talentDesHeight);
