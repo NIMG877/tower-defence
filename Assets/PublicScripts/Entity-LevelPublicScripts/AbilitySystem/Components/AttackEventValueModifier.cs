@@ -11,7 +11,7 @@ namespace AbilitySystem.Components
     /// <list type="bullet">
     ///   <item><c>fields</c> — comma-separated field names (whitelisted; see below)</item>
     ///   <item><c>values</c> — comma-separated numeric values (float or int, per field type)</item>
-    ///   <item><c>methods</c> — comma-separated operators: <c>mult</c> / <c>add</c> / <c>set</c></item>
+    ///   <item><c>methods</c> — comma-separated operators: <c>mult</c> / <c>add</c> / <c>set</c> / <c>div</c></item>
     /// </list>
     /// Each triple at the same index is applied in order. <c>cumbo</c> is only meaningful on
     /// <see cref="BeforeAttackEvent"/> and is silently skipped on other DamageEventBase events.
@@ -136,6 +136,7 @@ namespace AbilitySystem.Components
                 case "mult": return current * value;
                 case "add":  return current + value;
                 case "set":  return value;
+                case "div":  return current / value;
                 default:
                     Debug.LogWarning($"AttackEventValueModifier: unknown method '{method}' for field '{field}'; skipped");
                     return current;
@@ -152,6 +153,7 @@ namespace AbilitySystem.Components
                 case "mult": return Mathf.RoundToInt(current * floatValue);
                 case "add":  return current + intValue;
                 case "set":  return intValue;
+                case "div":  return Mathf.RoundToInt(current / floatValue);
                 default:
                     Debug.LogWarning($"AttackEventValueModifier: unknown method '{method}' for field '{field}'; skipped");
                     return current;
