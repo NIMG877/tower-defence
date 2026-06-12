@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace AbilitySystem.Components
@@ -28,22 +29,23 @@ namespace AbilitySystem.Components
     [RegisterComponent("DestroyBuff")]
     public class DestroyBuff : IAbilityComponent
     {
-        private string _inputTargetKey;
-        private string _inputBuffKey;
+        private Func<string> _inputTargetKey;
+        private Func<string> _inputBuffKey;
 
         public void OnInit(AbilityContext ctx, ParamList p)
         {
-            _inputTargetKey = p.GetString("inputTarget", "");
-            _inputBuffKey   = p.GetString("inputBuff",   "");
+            var bb = ctx.sharedBlackboard;
+            _inputTargetKey = p.GetStringLazy("inputTarget", "", bb);
+            _inputBuffKey   = p.GetStringLazy("inputBuff",   "", bb);
         }
 
         public void OnTrigger(AbilityContext ctx)
         {
-            if (string.IsNullOrEmpty(_inputTargetKey) || string.IsNullOrEmpty(_inputBuffKey)) return;
+            if (string.IsNullOrEmpty(_inputTargetKey()) || string.IsNullOrEmpty(_inputBuffKey())) return;
             if (ctx.sharedBlackboard == null) return;
 
-            var targets = ctx.sharedBlackboard.Get<List<Entity>>(_inputTargetKey, null);
-            var buffs   = ctx.sharedBlackboard.Get<List<Buff>>(_inputBuffKey, null);
+            var targets = ctx.sharedBlackboard.Get<List<Entity>>(_inputTargetKey(), null);
+            var buffs   = ctx.sharedBlackboard.Get<List<Buff>>(_inputBuffKey(), null);
             if (targets == null || buffs == null) return;
 
             int n = targets.Count < buffs.Count ? targets.Count : buffs.Count;
@@ -58,8 +60,8 @@ namespace AbilitySystem.Components
 
             // Consume: clear both keys so a second OnTrigger call in the same
             // skill window doesn't re-destroy the same buffs.
-            ctx.sharedBlackboard.Remove(_inputTargetKey);
-            ctx.sharedBlackboard.Remove(_inputBuffKey);
+            ctx.sharedBlackboard.Remove(_inputTargetKey());
+            ctx.sharedBlackboard.Remove(_inputBuffKey());
         }
 
         public void OnTick(AbilityContext ctx, float dt) { }

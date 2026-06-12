@@ -21,42 +21,46 @@ namespace AbilitySystem.Components
     [RegisterComponent("ApplyBuff")]
     public class ApplyBuff : IAbilityComponent
     {
-        private string _buffId = "skill_buff";
-        private float _buffTime = -10f;
-        private bool _toSelf = true;
-        private string _inputTargetKey;            // blackboard key (optional)
-        private BuffType[] _types = Array.Empty<BuffType>();
-        private float[] _values = Array.Empty<float>();
-        private bool _isWhiteList;
+        private Func<string> _buffId;
+        private Func<float> _buffTime;
+        private Func<bool> _toSelf;
+        private Func<string> _inputTargetKey;            // blackboard key (optional)
+        private Func<BuffType[]> _types;
+        private Func<float[]> _values;
+        private Func<bool> _isWhiteList;
         // Output keys (optional). When set, OnTrigger appends this round's
         // targets and created buffs (null-padded for skipped/failed targets)
         // to the per-Entity shared blackboard at these keys. Lists are
         // accumulated across OnTrigger calls within the same skill window.
         // Empty string = skip write.
-        private string _outputTargetKey;
-        private string _outputBuffKey;
+        private Func<string> _outputTargetKey;
+        private Func<string> _outputBuffKey;
 
         public void OnInit(AbilityContext ctx, ParamList p)
         {
-            _types          = BuffParamParser.ParseBuffTypes(p.GetString("buffTypes", ""));
-            _values         = BuffParamParser.ParseFloats(p.GetString("buffValues", ""));
-            _buffId         = p.GetString("buffId", "skill_buff");
-            _buffTime       = p.GetFloat("buffTime", -10f);
-            _toSelf         = p.GetBool("toSelf", true);
-            _isWhiteList    = p.GetBool("isWhiteList", false);
-            _inputTargetKey = p.GetString("blackboardKey", "");
-            _outputTargetKey = p.GetString("outputTarget", "");
-            _outputBuffKey   = p.GetString("outputBuff", "");
+            var bb = ctx.sharedBlackboard;
+            var rawTypes  = p.GetStringLazy("buffTypes",  "", bb);
+            var rawValues = p.GetStringLazy("buffValues", "", bb);
+            _types  = () => BuffParamParser.ParseBuffTypes(rawTypes());
+            _values = () => BuffParamParser.ParseFloats(rawValues());
+            _buffId          = p.GetStringLazy("buffId",        "skill_buff", bb);
+            _buffTime        = p.GetFloatLazy ("buffTime",      -10f,         bb);
+            _toSelf          = p.GetBoolLazy  ("toSelf",        true,         bb);
+            _isWhiteList     = p.GetBoolLazy  ("isWhiteList",   false,        bb);
+            _inputTargetKey  = p.GetStringLazy("blackboardKey", "",           bb);
+            _outputTargetKey = p.GetStringLazy("outputTarget",  "",           bb);
+            _outputBuffKey   = p.GetStringLazy("outputBuff",    "",           bb);
         }
 
         public void OnTrigger(AbilityContext ctx)
         {
             if (ctx.entity == null) return;
-
-            if (_types.Length == 0) return;
+            if (_types().Length == 0) return;
 
             List<Entity> targets = ResolveTargets(ctx);
             if (targets == null) return;
+
+            bool needWrite = !string.IsNullOrEmpty(_outputTargetKey()) && !string.IsNullOrEmpty(_outputBuffKey());
 
             // Per-round collected lists. Sized to the target list so the
             // downstream blackboard write is one AddRange each. Targets with
@@ -65,13 +69,12 @@ namespace AbilitySystem.Components
             // keys are honored in the AppendToBlackboard calls below.
             var roundTargets = new List<Entity>(targets.Count);
             var roundBuffs   = new List<Buff>(targets.Count);
-            bool needWrite = !string.IsNullOrEmpty(_outputTargetKey) && !string.IsNullOrEmpty(_outputBuffKey);
 
             for (int i = 0; i < targets.Count; i++)
             {
                 Entity t = targets[i];
                 if(t == null || t.buffController == null) continue;
-                Buff created = t.buffController.CreateBuff(_types, null, _buffId, _values, _buffTime, _isWhiteList);
+                Buff created = t.buffController.CreateBuff(_types(), null, _buffId(), _values(), _buffTime(), _isWhiteList());
                 if (needWrite)
                 {
                     roundTargets.Add(t);
@@ -92,12 +95,12 @@ namespace AbilitySystem.Components
         // Skipped entirely when both output keys are empty.
         private void AppendToBlackboard(AbilityContext ctx, List<Entity> roundTargets, List<Buff> roundBuffs)
         {
-            List<Entity> bbTarget = ctx.sharedBlackboard.Get<List<Entity>>(_outputTargetKey, null) ?? new List<Entity>();
+            List<Entity> bbTarget = ctx.sharedBlackboard.Get<List<Entity>>(_outputTargetKey(), null) ?? new List<Entity>();
             bbTarget.AddRange(roundTargets);
-            ctx.sharedBlackboard.Set(_outputTargetKey, bbTarget);
-            List<Buff> bbBuff = ctx.sharedBlackboard.Get<List<Buff>>(_outputBuffKey, null) ?? new List<Buff>();
+            ctx.sharedBlackboard.Set(_outputTargetKey(), bbTarget);
+            List<Buff> bbBuff = ctx.sharedBlackboard.Get<List<Buff>>(_outputBuffKey(), null) ?? new List<Buff>();
             bbBuff.AddRange(roundBuffs);
-            ctx.sharedBlackboard.Set(_outputBuffKey, bbBuff);
+            ctx.sharedBlackboard.Set(_outputBuffKey(), bbBuff);
         }
 
         public void OnTick(AbilityContext ctx, float dt) { }
@@ -109,9 +112,9 @@ namespace AbilitySystem.Components
         // dispatch orders.
         private List<Entity> ResolveTargets(AbilityContext ctx)
         {
-            if (!string.IsNullOrEmpty(_inputTargetKey))
+            if (!string.IsNullOrEmpty(_inputTargetKey()))
             {
-                return ctx.sharedBlackboard.Get<List<Entity>>(_inputTargetKey, null);
+                return ctx.sharedBlackboard.Get<List<Entity>>(_inputTargetKey(), null);
             }
 
             // Original single-target behavior preserved for backward compatibility.
@@ -119,7 +122,7 @@ namespace AbilitySystem.Components
             // type that arrives depends on the config, so we extract `target` from
             // whichever event payload carries one. Falls back to ctx.entity when
             // the event doesn't carry a target field (or _toSelf is true).
-            Entity t = _toSelf ? ctx.entity : null;
+            Entity t = _toSelf() ? ctx.entity : null;
             if (t == null || t.buffController == null) return null;
             return new List<Entity> { t };
         }
