@@ -87,6 +87,13 @@ callers.
   (`multiplyer`, `damageType`, `cumbo`, etc.). Supersedes the
   removed `AttackMultiplierBoost` and `SetAttackCombo`.
 
+### Random
+
+- [RandomRoll](RandomRoll.md) — per-event random roll. Three modes
+  (`probability` / `value` / `list`) selected by the `mode` param;
+  result is written to a per-Entity Blackboard key. Use for
+  probability gates, random damage multipliers, weighted drops, etc.
+
 ### BlackBoard utility
 
 - [WriteBlackboard](WriteBlackboard.md) — generic BB write. `set` for
