@@ -115,7 +115,7 @@ public class CharacterCardManager
             lh.sprite = _lh[index];
             uh.sprite = _uh[index];
             classImg.sprite = _class[characterData.CharacterJob];
-            var abilities = characterData.Abilities;
+            var abilities = characterData.Skills;
             if (abilities != null && abilities.Count > 0 && abilities[0].icon != null)
             {
                 skillImg.sprite = abilities[0].icon;

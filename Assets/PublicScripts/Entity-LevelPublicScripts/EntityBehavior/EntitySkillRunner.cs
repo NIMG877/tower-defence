@@ -39,16 +39,24 @@ public class EntityAbilityRunner
     {
         ComponentAutoRegistry.EnsureRegistered();
         var data = _entity != null ? _entity.EntityData : null;
-        if (data == null || data.Abilities == null) return;
+        if (data == null) return;
 
-        for (int i = 0; i < data.Abilities.Count; i++)
-        {
-            var cfg = data.Abilities[i];
-            if (cfg == null) continue;
-            BuildAbilityRuntime(cfg);
-        }
+        // Talents 在前,Skills 在后(语义优先 + 保持"天赋在技能前"的传统顺序)
+        PreWarmList(data.Talents, AbilityKind.Talent);
+        PreWarmList(data.Skills, AbilityKind.Skill);
 
         DispatchEvent(new PreWarmEvent());
+    }
+
+    private void PreWarmList(List<AbilityConfig> configs, AbilityKind kind)
+    {
+        if (configs == null) return;
+        for (int i = 0; i < configs.Count; i++)
+        {
+            var cfg = configs[i];
+            if (cfg == null) continue;
+            BuildAbilityRuntime(cfg, kind);
+        }
     }
 
     public void OnInitialize()
@@ -149,11 +157,8 @@ public class EntityAbilityRunner
             Debug.LogError("[EntityAbilityRunner] AddExtraAbility: cfg is null");
             return null;
         }
-        if (cfg.Kind != AbilityKind.ExtraAbility)
-        {
-            Debug.LogError($"[EntityAbilityRunner] AddExtraAbility: cfg.Kind must be ExtraAbility (got {cfg.Kind})");
-            return null;
-        }
+        // Kind 不再校验(已 HideInInspector,运行时由入口强制赋值);AddExtraAbility
+        // 入口语义即"显式添加 ExtraAbility",信任调用方。
 
         // 幂等:同 cfg 已存在则返回旧 id
         for (int i = 0; i < _abilities.Count; i++)
@@ -165,7 +170,7 @@ public class EntityAbilityRunner
             }
         }
 
-        var runtime = BuildAbilityRuntime(cfg);
+        var runtime = BuildAbilityRuntime(cfg, AbilityKind.ExtraAbility);
         // BuildAbilityRuntime 已经把 runtime 加入 _abilities (single source of truth)。
         DispatchEvent(new AbilityAddedEvent { ability = runtime });
         return runtime.runtimeId;
@@ -211,13 +216,16 @@ public class EntityAbilityRunner
 
     // ===== Build / Wire =====
 
-    private AbilityRuntime BuildAbilityRuntime(AbilityConfig cfg)
+    private AbilityRuntime BuildAbilityRuntime(AbilityConfig cfg, AbilityKind kind)
     {
         if (cfg == null) return null;
 
+        // 强制覆盖 Kind —— 来源是 PreWarm 的列表(Skill/Talent)或 AddExtraAbility(ExtraAbility)。
+        // 设计师不在 Inspector 上设 Kind(已 HideInInspector),这里无条件赋值确保 runtime.Kind 准确。
+        cfg.Kind = kind;
 
         var runtime = new AbilityRuntime { config = cfg };
-        runtime.runtimeId = GenerateRuntimeId(cfg);
+        runtime.runtimeId = GenerateRuntimeId(cfg, kind);
 
         if (cfg.components != null)
         {
@@ -277,9 +285,9 @@ public class EntityAbilityRunner
         return runtime;
     }
 
-    private string GenerateRuntimeId(AbilityConfig cfg)
+    private string GenerateRuntimeId(AbilityConfig cfg, AbilityKind kind)
     {
-        if (cfg.Kind != AbilityKind.ExtraAbility) return cfg.abilityId;
+        if (kind != AbilityKind.ExtraAbility) return cfg.abilityId;
         return $"{cfg.abilityId}_{_extraCounter++}";
     }
 

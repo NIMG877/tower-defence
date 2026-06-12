@@ -1689,9 +1689,9 @@ namespace MyUI
                         abilityRuntime = entity.SkillRunner.Abilities[0];
                         abilityConfig = abilityRuntime.config;
                     }
-                    else if (entityData.Abilities != null && entityData.Abilities.Count > 0)
+                    else if (entityData.Skills != null && entityData.Skills.Count > 0)
                     {
-                        abilityConfig = entityData.Abilities[0];
+                        abilityConfig = entityData.Skills[0];
                     }
                     if (abilityConfig != null)
                     {

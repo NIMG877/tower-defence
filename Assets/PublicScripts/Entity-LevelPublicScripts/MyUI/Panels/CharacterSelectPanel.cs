@@ -330,7 +330,7 @@ namespace MyUI
             _atkBTText.text = entityData.BaseAttackTime.ToString();
             _nullMask.SetActive(false);
             int characterIndex = _selectedCharacters.IndexOf(characterId);
-            var abilities = entityData.Abilities;
+            var abilities = entityData.Skills;
             if (abilities.Count == 0)
             {
                 for (int i = 0; i < 3; i++)

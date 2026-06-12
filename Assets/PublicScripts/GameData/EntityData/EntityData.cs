@@ -89,6 +89,11 @@ public class EntityData
     public int   MassLevel;
     public int   MoveMethod;
 
-    // 技能 / 天赋 / 额外能力（数据驱动框架）
-    public List<AbilityConfig> Abilities = new List<AbilityConfig>();
+    // 技能 / 天赋（静态数据驱动框架）
+    // Skills: 技能,SPEngine 充能式触发
+    // Talents: 天赋,出生即生效(可扩展为 SPEngine 驱动)
+    // 字段分开存储;PreWarm 时按列表来源赋值 AbilityRuntime.Kind
+    // ExtraAbility 继续走运行时 AddExtraAbility 路径,不在这里
+    public List<AbilityConfig> Skills = new List<AbilityConfig>();
+    public List<AbilityConfig> Talents = new List<AbilityConfig>();
 }
