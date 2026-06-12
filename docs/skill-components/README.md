@@ -1,22 +1,29 @@
 # Skill Components
 
-Parameter reference for every `ISkillComponent` in the project. One file
-per component; this README is the index.
+Parameter reference for the four `IAbilityComponent` implementations in
+the project. One file per component; this README is the index.
 
-When you need to look up what a `key:` row in a `SkillConfig.asset`
-means, click the component name in the list below.
+When you need to look up what a `key:` row in a `ComponentConfig.parameters`
+asset means, click the component name in the list below.
 
 ## Storage
 
 All component parameters live in the `ComponentConfig.parameters.entries[]`
-array (a `ParamList`). Each entry is a `(key, type, value)` triple:
+array (a `ParamList`). Each entry is a `(key, type, value, fromBlackboard)`
+quadruple:
 
 - **key** — the parameter name (must match what the component's `OnInit`
-  reads via `p.GetXxx(key, defaultValue)`).
-- **type** — a `ParamValueType` enum tag (`Int`, `Float`, `Bool`, `String`,
-  `Vector2Int`). Pure documentation; the runtime always uses the typed
-  getter implied by the component's `OnInit`.
-- **value** — the parameter's value, stored as a string.
+  reads via `p.GetXxxLazy(key, defaultValue, ctx.sharedBlackboard)`).
+- **type** — a `ParamValueType` enum tag that controls how `value` is
+  parsed at OnInit and (for components using `GetValueLazy`) at apply time.
+- **value** — the parameter's value, stored as a string. Parsed per `type`
+  on the appropriate typed getter.
+- **fromBlackboard** (bool, default `false`) — when `true`, the runtime
+  treats `value` as a BlackBoard key name, not a literal. The typed
+  getter re-reads the BlackBoard on every invocation, so the same config
+  can yield different results across `OnTrigger` calls. See
+  `WriteBlackboard` and the `paramlist-lazy-blackboard-getter` memory
+  for the full mechanic.
 
 ## Type encoding
 
@@ -24,13 +31,28 @@ array (a `ParamList`). Each entry is a `(key, type, value)` triple:
 |---|---|---|
 | `Int` | Decimal integer | `5` |
 | `Float` | `float.ToString("R")` (round-trip) | `1.5` |
-| `Bool` | `True` / `False` (capitalised, matches `bool.TryParse`) | `True` |
-| `String` | Literal text | `skill_buff` |
+| `Bool` | `True` / `False` (matches `bool.TryParse`) | `True` |
+| `String` | Literal text (BB keys are stored under this tag) | `skill_buff` |
 | `Vector2Int` | `x,y` (comma) | `1,1` |
-| `BuffTypeCsv` | `BuffType` enum names, comma-separated | `AtkSpeed,Bleed` |
-| `FloatCsv` | Plain floats, comma-separated | `0.5,1.0,-0.25` |
-| `StringCsv` | Plain strings, comma-separated (whitespace trimmed) | `multiplyer,cumbo` |
-| `BlackboardKey` | Free-form key string | `targets.list` |
+| `AnimationRef` | Asset path / reference string | `Animations/Swing` |
+| `Prefab` | Asset path / reference string | `Prefabs/Bullet` |
+| `EntityId` | Entity id string | `hero_warrior` |
+| `Color` | Hex / `R,G,B,A` string | `#FF8800FF` |
+
+The last 4 have no typed `GetXxxLazy` and currently are only consumed by
+`WriteBlackboard` (which falls through to storing the string as-is).
+
+## CSV form
+
+Some components accept CSV strings for parallel-array params. The storage
+type is still `String`; the component splits on `,` and trims whitespace
+inside its closure (per the lazy migration):
+
+| Convention | Format | Example | Used by |
+|---|---|---|---|
+| `BuffTypeCsv` | `BuffType` enum names, comma-separated | `AtkSpeed,Bleed` | `ApplyBuff` |
+| `FloatCsv` | Plain floats, comma-separated | `0.5,1.0,-0.25` | `ApplyBuff`, `AttackEventValueModifier` |
+| `StringCsv` | Plain strings, comma-separated | `multiplyer,cumbo` | `AttackEventValueModifier` |
 
 ## DamageType encoding (convention)
 
@@ -50,66 +72,26 @@ callers.
 
 ## Components
 
-### Buff / aura
+### Buffs
 
-- [ApplyBuff](ApplyBuff.md) — applies buffs to one or more entities.
-- [PeriodicAuraBuff](PeriodicAuraBuff.md) — periodically applies buffs
-  to entities in a radius. **⚠** the `priority` field is actually
-  the buff duration (historical name).
+- [ApplyBuff](ApplyBuff.md) — applies one or more buffs to one or more
+  targets. Optional `blackboardKey` input + `outputTarget` / `outputBuff`
+  output for chained consumption.
+- [DestroyBuff](DestroyBuff.md) — destroys buffs from a BlackBoard
+  pair that `ApplyBuff` wrote.
 
-### Damage / combat
+### Combat
 
 - [AttackEventValueModifier](AttackEventValueModifier.md) — generic
   CSV-driven rewriter for `DamageEventBase` event fields
   (`multiplyer`, `damageType`, `cumbo`, etc.). Supersedes the
   removed `AttackMultiplierBoost` and `SetAttackCombo`.
-- [CampDamageModifier](CampDamageModifier.md) — multiplies damage when
-  the target's camp matches `requiredCamp`.
-- [DamageRadiusFalloff](DamageRadiusFalloff.md) — tier-based AOE damage
-  with knockback impulse.
-- [LockHpShield](LockHpShield.md) — prevents HP from dropping below
-  `threshold` on a hit.
-- [SelfDamageOnEvent](SelfDamageOnEvent.md) — damages self after a
-  lethal hit.
 
-### Selection / blackboard
+### BlackBoard utility
 
-- [EntitySelector](EntitySelector.md) — selects entities in a radius
-  and writes the list to a blackboard key.
-- [EntitySelectorRadiusEffect](EntitySelectorRadiusEffect.md) — selects
-  entities in a radius and forwards a sub-component to each.
-
-### Animation / VFX
-
-- [PlayAnimation](PlayAnimation.md) — plays a specific animation state.
-- [ResetAnimation](ResetAnimation.md) — resets a list of animation
-  state indices.
-- [SwapAnimation](SwapAnimation.md) — *(no parameters; animation
-  assets are bound by the migration tool).*
-- [PlayParticle](PlayParticle.md) — plays or stops a particle system
-  sourced from the blackboard.
-- [FlashMove](FlashMove.md) — flashes the entity by a distance. **⚠**
-  `moveDis = 0` is a known edge case.
-
-### Spawn / lifecycle
-
-- [DeathSpawn](DeathSpawn.md) — spawns N entities of a given `EntityID`
-  on trigger.
-- [SpawnBullet](SpawnBullet.md) — *(bullet data is bound by the
-  migration tool; only `speed` is a parameter).*
-- [SelfDestruct](SelfDestruct.md) — self-destructs the entity after
-  `duration` seconds.
-- [CoroutineLoop](CoroutineLoop.md) — runs a coroutine loop until a
-  blackboard key disappears.
-
-### State / utility
-
-- [SetAbnormalState](SetAbnormalState.md) — adds or removes an
-  abnormal state.
-- [AttackRangeOverride](AttackRangeOverride.md) — overrides the
-  entity's attack range with a set of cells.
-- [SetAttackEffectData](SetAttackEffectData.md) — *(no parameters;
-  effect data is bound by the migration tool).*
+- [WriteBlackboard](WriteBlackboard.md) — generic BB write. `set` for
+  write-as-is (type from `ParamEntry.type`); `add` / `mult` / `div` for
+  modify-numeric. `key` and `value` both support `fromBlackboard=true`.
 
 ## Conditional triggers
 

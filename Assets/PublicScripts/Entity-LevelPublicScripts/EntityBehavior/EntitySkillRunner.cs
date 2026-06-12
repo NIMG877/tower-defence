@@ -115,7 +115,10 @@ public class EntityAbilityRunner
             _abilities[i].spEngine?.Reset();
         }
 
-        // 3) 重新初始化组件
+        // 3) 清空 per-Entity 共享黑板
+        sharedBlackboard.Clear();
+
+        // 4) 重新初始化组件
         for (int i = 0; i < _abilities.Count; i++)
         {
             var a = _abilities[i];
@@ -124,16 +127,13 @@ public class EntityAbilityRunner
                 var comp = a.components[c];
                 if (c < a.componentParams.Count)
                 {
-                    var teardownCtx = a.MakeContext(comp, null);
+                    var teardownCtx = PrepareContext(a.MakeContext(comp, null));
                     comp.OnTeardown(teardownCtx);
-                    var initCtx = a.MakeContext(comp, null);
+                    var initCtx = PrepareContext(a.MakeContext(comp, null));
                     comp.OnInit(initCtx, a.componentParams[c]);
                 }
             }
         }
-
-        // 4) 清空 per-Entity 共享黑板
-        sharedBlackboard.Clear();
 
         // 5) 派发 InitializeEvent
         DispatchEvent(new InitializeEvent());
@@ -156,7 +156,7 @@ public class EntityAbilityRunner
             var a = _abilities[i];
             for (int c = 0; c < a.components.Count; c++)
             {
-                var ctx = a.MakeContext(a.components[c], null);
+                var ctx = PrepareContext(a.MakeContext(a.components[c], null));
                 a.components[c].OnTeardown(ctx);
             }
         }
@@ -221,6 +221,11 @@ public class EntityAbilityRunner
         }
 
         var runtime = BuildAbilityRuntime(cfg, AbilityKind.ExtraAbility);
+        for (int i=0;i<runtime.components.Count;i++)
+        {
+            var ctx = PrepareContext(runtime.MakeContext(runtime.components[i], null));
+            runtime.components[i].OnInit(ctx, runtime.componentParams[i]);
+        }   
         // BuildAbilityRuntime 已经把 runtime 加入 _abilities (single source of truth)。
         DispatchEvent(new AbilityAddedEvent { ability = runtime });
         return runtime.runtimeId;
@@ -290,8 +295,8 @@ public class EntityAbilityRunner
                     Debug.LogError($"[EntityAbilityRunner] Unknown component type: {ccfg.componentType} in ability {cfg.abilityId}");
                     continue;
                 }
-                AbilityContext ctx = runtime.MakeContext(inst, null);
-                inst.OnInit(ctx, ccfg.parameters);
+                AbilityContext ctx = PrepareContext(runtime.MakeContext(inst, null));
+                //inst.OnInit(ctx, ccfg.parameters);
                 runtime.components.Add(inst);
                 runtime.componentParams.Add(ccfg.parameters);
                 if (inst is ITickingComponent t) runtime.tickingComponents.Add(t);

@@ -38,7 +38,6 @@ namespace AbilitySystem.Components
             var rawFields  = parameters.GetStringLazy("fields",  "", bb);
             var rawValues  = parameters.GetStringLazy("values",  "", bb);
             var rawMethods = parameters.GetStringLazy("methods", "", bb);
-
             _fields  = () => SplitCsv(rawFields());
             _methods = () => SplitCsv(rawMethods());
             // Pre-parse values by attempting both float and int. Each index's type is locked
