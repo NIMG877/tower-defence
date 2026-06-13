@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AbilitySystem.Components;
 
 namespace AbilitySystem
 {
@@ -12,10 +13,10 @@ namespace AbilitySystem
 
     public static class ComponentFactory
     {
-        private static readonly Dictionary<string, Func<IAbilityComponent>> _registry =
-            new Dictionary<string, Func<IAbilityComponent>>();
+        private static readonly Dictionary<string, Func<AbilityComponentBase>> _registry =
+            new Dictionary<string, Func<AbilityComponentBase>>();
 
-        public static void Register(string typeName, Func<IAbilityComponent> ctor)
+        public static void Register(string typeName, Func<AbilityComponentBase> ctor)
         {
             if (string.IsNullOrEmpty(typeName))
                 throw new ArgumentException("typeName must not be empty", nameof(typeName));
@@ -24,7 +25,7 @@ namespace AbilitySystem
             _registry[typeName] = ctor;
         }
 
-        public static IAbilityComponent Create(string typeName)
+        public static AbilityComponentBase Create(string typeName)
         {
             if (string.IsNullOrEmpty(typeName)) return null;
             return _registry.TryGetValue(typeName, out var ctor) ? ctor() : null;

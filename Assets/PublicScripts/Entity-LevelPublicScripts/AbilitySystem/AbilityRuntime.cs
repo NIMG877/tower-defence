@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AbilitySystem.Components;
 
 namespace AbilitySystem
 {
@@ -11,15 +12,14 @@ namespace AbilitySystem
         public SPEngine spEngine;
         public bool isActive;
 
-        public List<IAbilityComponent> components = new List<IAbilityComponent>();
-        public List<ITickingComponent> tickingComponents = new List<ITickingComponent>();
+        public List<AbilityComponentBase> components = new List<AbilityComponentBase>();
         public List<ParamList> componentParams = new List<ParamList>();
 
         // Trigger 分桶:BuildAbilityRuntime 一次性填充,key 是 TriggerEvent,value 是
         // (component, condition groups) 对的列表。
-        public Dictionary<TriggerEvent, List<(IAbilityComponent comp, List<ConditionGroup> groups)>>
+        public Dictionary<TriggerEvent, List<(AbilityComponentBase comp, List<ConditionGroup> groups)>>
             componentsByTrigger
-            = new Dictionary<TriggerEvent, List<(IAbilityComponent, List<ConditionGroup>)>>();
+            = new Dictionary<TriggerEvent, List<(AbilityComponentBase, List<ConditionGroup>)>>();
 
         public bool isInitialized;
 
@@ -28,7 +28,7 @@ namespace AbilitySystem
         public Action _wireTeardown;
 
         public AbilityContext MakeContext(
-            IAbilityComponent component,
+            AbilityComponentBase component,
             AbilityEvent evt = null,
             Blackboard sharedBlackboard = null,
             Entity entity = null)

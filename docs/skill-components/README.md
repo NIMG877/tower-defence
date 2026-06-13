@@ -1,6 +1,6 @@
 # Skill Components
 
-Parameter reference for the four `IAbilityComponent` implementations in
+Parameter reference for the four `AbilityComponentBase` implementations in
 the project. One file per component; this README is the index.
 
 When you need to look up what a `key:` row in a `ComponentConfig.parameters`

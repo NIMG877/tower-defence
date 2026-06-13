@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using AbilitySystem.Components;
 
 namespace AbilitySystem
 {
@@ -14,14 +15,14 @@ namespace AbilitySystem
             lock (_lock)
             {
                 if (_done) return;
-                var asm = Assembly.GetAssembly(typeof(IAbilityComponent));
+                var asm = Assembly.GetAssembly(typeof(AbilityComponentBase));
                 foreach (var type in asm.GetTypes())
                 {
                     var attr = type.GetCustomAttribute<RegisterComponentAttribute>();
                     if (attr == null) continue;
-                    if (!typeof(IAbilityComponent).IsAssignableFrom(type)) continue;
+                    if (!typeof(AbilityComponentBase).IsAssignableFrom(type)) continue;
                     if (type.IsAbstract || type.IsInterface) continue;
-                    ComponentFactory.Register(attr.TypeName, () => (IAbilityComponent)Activator.CreateInstance(type));
+                    ComponentFactory.Register(attr.TypeName, () => (AbilityComponentBase)Activator.CreateInstance(type));
                 }
                 _done = true;
             }

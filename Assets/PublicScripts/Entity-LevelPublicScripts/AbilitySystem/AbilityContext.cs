@@ -1,4 +1,5 @@
 using UnityEngine;
+using AbilitySystem.Components;
 
 namespace AbilitySystem
 {
@@ -15,7 +16,7 @@ namespace AbilitySystem
         public Entity entity;
         // Filled by AbilityRuntime.MakeContext (the runtime passes itself as 'ability').
         public AbilityRuntime ability;
-        public IAbilityComponent component;
+        public AbilityComponentBase component;
         public AbilityEvent currentEvent;
         // The only blackboard. Per-Entity, set by EntityAbilityRunner via MakeContext
         // (passed in as a parameter). Components read this directly; there is no
@@ -23,16 +24,10 @@ namespace AbilitySystem
         public Blackboard sharedBlackboard;
     }
 
-    public interface IAbilityComponent
-    {
-        void OnInit(AbilityContext ctx, ParamList parameters);
-        void OnTrigger(AbilityContext ctx);
-        void OnTick(AbilityContext ctx, float dt);
-        void OnTeardown(AbilityContext ctx);
-    }
-
-    public interface ITickingComponent : IAbilityComponent { }
-
+    /// <summary>
+    /// 在场景加载前触发 <see cref="ComponentAutoRegistry.EnsureRegistered"/>,
+    /// 让所有标了 <see cref="RegisterComponentAttribute"/> 的组件类被扫进工厂。
+    /// </summary>
     public static class AbilitySystemBootstrap
     {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using AbilitySystem;
+using AbilitySystem.Components;
 
 /// <summary>
 /// 技能子系统（POCO）。持有 AbilityRuntime 列表并 tick SP / 组件；
@@ -188,9 +189,9 @@ public class EntityAbilityRunner
         {
             var a = _abilities[i];
             if (!a.isActive) continue;
-            for (int c = 0; c < a.tickingComponents.Count; c++)
+            for (int c = 0; c < a.components.Count; c++)
             {
-                var comp = a.tickingComponents[c];
+                var comp = a.components[c];
                 var ctx = a.MakeContext(comp, null, sharedBlackboard, _entity);
                 comp.OnTick(ctx, dt);
             }
@@ -286,7 +287,7 @@ public class EntityAbilityRunner
             {
                 ComponentConfig ccfg = cfg.components[i];
                 if (ccfg == null || string.IsNullOrEmpty(ccfg.componentType)) continue;
-                IAbilityComponent inst = ComponentFactory.Create(ccfg.componentType);
+                AbilityComponentBase inst = ComponentFactory.Create(ccfg.componentType);
                 if (inst == null)
                 {
                     Debug.LogError($"[EntityAbilityRunner] Unknown component type: {ccfg.componentType} in ability {cfg.abilityId}");
@@ -295,7 +296,6 @@ public class EntityAbilityRunner
                 AbilityContext ctx = runtime.MakeContext(inst, null, sharedBlackboard, _entity);
                 runtime.components.Add(inst);
                 runtime.componentParams.Add(ccfg.parameters);
-                if (inst is ITickingComponent t) runtime.tickingComponents.Add(t);
 
                 int triggerCount = 0;
                 if (ccfg.triggers != null)
@@ -307,14 +307,14 @@ public class EntityAbilityRunner
                         var te = trig.triggerEvent;
                         if (!runtime.componentsByTrigger.TryGetValue(te, out var list))
                         {
-                            list = new List<(IAbilityComponent, List<ConditionGroup>)>();
+                            list = new List<(AbilityComponentBase, List<ConditionGroup>)>();
                             runtime.componentsByTrigger[te] = list;
                         }
                         list.Add((inst, trig.groups));
                         triggerCount++;
                     }
                 }
-                if (triggerCount == 0 && !(inst is ITickingComponent))
+                if (triggerCount == 0)
                 {
                     Debug.LogWarning(
                         $"[AbilityRuntime] Component {ccfg.componentType} in ability {cfg.abilityId} "
