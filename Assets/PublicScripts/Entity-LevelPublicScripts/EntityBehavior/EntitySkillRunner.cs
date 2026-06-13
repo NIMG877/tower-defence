@@ -224,9 +224,10 @@ public class EntityAbilityRunner
         {
             var ctx = runtime.MakeContext(runtime.components[i], null, sharedBlackboard, _entity);
             runtime.components[i].OnInit(ctx, runtime.componentParams[i]);
+            DispatchToAbility(runtime, new InitializeEvent());
         }   
         // BuildAbilityRuntime 已经把 runtime 加入 _abilities (single source of truth)。
-        DispatchEvent(new AbilityAddedEvent { ability = runtime });
+        DispatchToAbility(runtime, new AbilityAddedEvent { ability = runtime });  
         return runtime.runtimeId;
     }
 
@@ -245,7 +246,7 @@ public class EntityAbilityRunner
             Debug.LogError("[EntityAbilityRunner] RemoveExtraAbility: only ExtraAbility is removable");
             return false;
         }
-        DispatchEvent(new AbilityRemovedEvent { ability = a });
+        DispatchToAbility(a, new AbilityRemovedEvent { ability = a });
         a.SetActive(false);
         for (int c = 0; c < a.components.Count; c++)
         {
@@ -350,9 +351,9 @@ public class EntityAbilityRunner
     private void WireRuntime(AbilityRuntime runtime)
     {
         System.Action beginHandler = () =>
-            DispatchEvent(new AbilityBeginEvent { ability = runtime });
+            DispatchToAbility(runtime, new AbilityBeginEvent { ability = runtime });
         System.Action endHandler = () =>
-            DispatchEvent(new AbilityEndEvent   { ability = runtime });
+            DispatchToAbility(runtime, new AbilityEndEvent   { ability = runtime });
         runtime.OnAbilityBegin += beginHandler;
         runtime.OnAbilityEnd   += endHandler;
         runtime._wireTeardown  = () =>
@@ -485,6 +486,8 @@ public class EntityAbilityRunner
                              || evt is AbilityRemovedEvent;
         if (!a.isActive && !bypassActiveGate) return;
         if (!a.componentsByTrigger.TryGetValue(evt.TriggerEvent, out var list)) return;
+
+        Debug.Log($"[EntityAbilityRunner] Dispatching event {evt.TriggerEvent} to ability {a.config.abilityName}");
 
         var evalCtx = new ConditionEvalContext
         {
