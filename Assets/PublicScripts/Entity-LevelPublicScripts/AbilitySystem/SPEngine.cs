@@ -105,7 +105,6 @@ namespace AbilitySystem
             if (_cfg.abilityAmount > 0f) _currentAmount = _cfg.abilityAmount;
             if (_cfg.recoverForbidDuringAbility) _recoverForbid++;
             OnBegin?.Invoke();
-            if (_cfg.abilityAmount <= 0f) EndAbility();
         }
 
         public void EndAbility()
