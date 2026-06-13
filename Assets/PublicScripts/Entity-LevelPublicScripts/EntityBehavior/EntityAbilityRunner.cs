@@ -133,9 +133,9 @@ public class EntityAbilityRunner
                     comp.OnTeardown(teardownCtx);
                     var initCtx = a.MakeContext(comp, null, sharedBlackboard, _entity);
                     comp.OnInit(initCtx, a.componentParams[c]);
-                    DispatchToAbility(a,evt);
                 }
             }
+            DispatchToAbility(a,evt);
         }
     }
 
@@ -223,8 +223,8 @@ public class EntityAbilityRunner
         {
             var ctx = runtime.MakeContext(runtime.components[i], null, sharedBlackboard, _entity);
             runtime.components[i].OnInit(ctx, runtime.componentParams[i]);
-            DispatchToAbility(runtime, new InitializeEvent());
         }   
+        DispatchToAbility(runtime, new InitializeEvent());
         DispatchToAbility(runtime, new AbilityAddedEvent { ability = runtime });  
         return runtime.runtimeId;
     }
