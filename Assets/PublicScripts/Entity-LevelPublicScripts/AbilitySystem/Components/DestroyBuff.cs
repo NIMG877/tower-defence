@@ -21,10 +21,10 @@ namespace AbilitySystem.Components
     /// ApplyBuff's "this round" semantics: the lists are a per-round handoff,
     /// and leaving them in place would risk double-destroy on a re-trigger.</para>
     ///
-    /// Null/empty list entries are skipped (entity without buffController,
-    /// or a null Buff slot from a failed CreateBuff). The null-pad contract
-    /// from ApplyBuff's <c>outputTarget</c> / <c>outputBuff</c> writers is
-    /// preserved through the read.
+    /// Null entries on either side are skipped defensively: a null <c>Buff</c>
+    /// can come from a failed <c>CreateBuff</c> upstream; a null <c>Entity</c> /
+    /// missing <c>buffController</c> should not happen in practice (ApplyBuff
+    /// skips such targets when writing) but is guarded anyway.
     /// </summary>
     [RegisterComponent("DestroyBuff")]
     public class DestroyBuff : AbilityComponentBase
@@ -58,7 +58,7 @@ namespace AbilitySystem.Components
                 e.buffController.DestroyBuff(b);
             }
 
-            // Consume: clear both keys so a second OnTrigger call in the same
+            // Per-round handoff: clear both keys so a second OnTrigger in the same
             // skill window doesn't re-destroy the same buffs.
             ctx.sharedBlackboard.Remove(_inputTargetKey());
             ctx.sharedBlackboard.Remove(_inputBuffKey());

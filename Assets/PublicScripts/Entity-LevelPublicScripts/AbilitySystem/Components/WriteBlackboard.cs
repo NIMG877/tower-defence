@@ -69,7 +69,7 @@ namespace AbilitySystem.Components
             Type t = existing.GetType();
             if (!MathOps.TryParse(method, out var op))
             {
-                // Already filtered by OnTrigger default-case, but defensive.
+                // Defensive: OnTrigger's switch already rejects unknown methods.
                 Debug.LogWarning($"WriteBlackboard: unknown method '{method}'; skipping");
                 return;
             }

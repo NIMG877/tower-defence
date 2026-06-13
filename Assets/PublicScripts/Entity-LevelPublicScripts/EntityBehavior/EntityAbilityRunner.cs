@@ -14,7 +14,7 @@ using AbilitySystem;
 public class EntityAbilityRunner
 {
     private readonly Entity _entity;
-    // 内部唯一来源 —— PreWarm/Add/Remove/Teardown 都改这一个列表,不分 Kind。
+    // 单一来源:PreWarm/Add/Remove/Teardown 都改这一个列表,不分 Kind;
     // 对外按语义切分为 Skills / Talents / ExtraAbilities 三个只读视图(下方缓存实现)。
     private readonly List<AbilityRuntime> _abilities = new List<AbilityRuntime>();
     private readonly List<AbilityRuntime> _skillsCache = new List<AbilityRuntime>();
@@ -160,7 +160,7 @@ public class EntityAbilityRunner
             }
         }
 
-        // 3) Unwire + 清空列表 (下次 OnInitialize 走 PreWarm 重建)
+        // 3) Unwire + 清空列表 (下次 PreWarm 重建)
         for (int i = _abilities.Count - 1; i >= 0; i--)
         {
             UnwireRuntime(_abilities[i]);
@@ -206,8 +206,6 @@ public class EntityAbilityRunner
             Debug.LogError("[EntityAbilityRunner] AddExtraAbility: cfg is null");
             return null;
         }
-        // Kind 不再校验(已 HideInInspector,运行时由入口强制赋值);AddExtraAbility
-        // 入口语义即"显式添加 ExtraAbility",信任调用方。
 
         // 幂等:同 cfg 已存在则返回旧 id
         for (int i = 0; i < _abilities.Count; i++)
@@ -226,7 +224,6 @@ public class EntityAbilityRunner
             runtime.components[i].OnInit(ctx, runtime.componentParams[i]);
             DispatchToAbility(runtime, new InitializeEvent());
         }   
-        // BuildAbilityRuntime 已经把 runtime 加入 _abilities (single source of truth)。
         DispatchToAbility(runtime, new AbilityAddedEvent { ability = runtime });  
         return runtime.runtimeId;
     }
@@ -296,7 +293,6 @@ public class EntityAbilityRunner
                     continue;
                 }
                 AbilityContext ctx = runtime.MakeContext(inst, null, sharedBlackboard, _entity);
-                //inst.OnInit(ctx, ccfg.parameters);
                 runtime.components.Add(inst);
                 runtime.componentParams.Add(ccfg.parameters);
                 if (inst is ITickingComponent t) runtime.tickingComponents.Add(t);

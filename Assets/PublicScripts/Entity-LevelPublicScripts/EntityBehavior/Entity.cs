@@ -41,7 +41,7 @@ public class Entity : MonoBehaviour, IPoolOperation
     public EntityMovement Movement { get { return _movement; } }
     /// <summary>战斗子系统：EntityUpdate/PriorityOrder。</summary>
     public EntityCombat Combat { get { return _combat; } }
-    /// <summary>技能子系统：SkillRuntime 列表 + 事件桥 + SP/组件 tick。</summary>
+    /// <summary>技能子系统：AbilityRuntime 列表 + 事件桥 + SP/组件 tick。</summary>
     public EntityAbilityRunner SkillRunner { get { return _skillRunner; } }
 
     public string NAME { get { return EntityData.ChineseName; } }

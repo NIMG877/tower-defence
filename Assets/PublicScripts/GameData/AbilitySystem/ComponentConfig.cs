@@ -12,8 +12,10 @@ namespace AbilitySystem
         public string key;
         public string value;
         // 当为 true 时，运行时 GetXxxLazy 把 `value` 当作 Blackboard 的 key 名而非字面量;
-        // 每次调用返回的 Func<T> 都会重新去 Blackboard 取值(按 `type` 期望的类型)。
+        // 每次调用返回的 Func<T> 都会重新去 Blackboard 取值。
         // 仅对 GetXxxLazy 系列生效;老的 eager GetXxx 永远按字面量解析,忽略此标记。
+        // 注:有类型版(GetIntLazy/GetFloatLazy/...)按泛型 T 解析;只有 GetValueLazy
+        // 才按 `type` 解析(适用"值的类型由 ParamEntry 决定"的场景,如 WriteBlackboard)。
         public bool fromBlackboard;
         public ParamValueType type;
         

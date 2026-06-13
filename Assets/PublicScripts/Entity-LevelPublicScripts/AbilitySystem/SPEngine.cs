@@ -30,7 +30,7 @@ namespace AbilitySystem
 
         /// <summary>
         /// 复位到初始状态。池化实体重新部署时由 EntityAbilityRunner.OnInitialize 调用，
-        /// 不会重建事件订阅（订阅生命周期在 OnInitialize/OnTeardown）。
+        /// 不会重建事件订阅（订阅生命周期在 BuildAbilityRuntime/OnTeardown）。
         /// </summary>
         public void Reset()
         {

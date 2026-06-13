@@ -15,7 +15,8 @@ namespace AbilitySystem
         public List<ITickingComponent> tickingComponents = new List<ITickingComponent>();
         public List<ParamList> componentParams = new List<ParamList>();
 
-        // Trigger 分桶:BuildAbilityRuntime 一次性填充,与 SkillRuntime 的 bucket 形状一致。
+        // Trigger 分桶:BuildAbilityRuntime 一次性填充,key 是 TriggerEvent,value 是
+        // (component, condition groups) 对的列表。
         public Dictionary<TriggerEvent, List<(IAbilityComponent comp, List<ConditionGroup> groups)>>
             componentsByTrigger
             = new Dictionary<TriggerEvent, List<(IAbilityComponent, List<ConditionGroup>)>>();

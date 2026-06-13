@@ -59,7 +59,8 @@ namespace AbilitySystem.Components
                 Debug.LogWarning($"AttackEventValueModifier: length mismatch fields={fLen} values={vLen} methods={mLen}; applying first {min} entries");
             }
 
-            // Snapshot the arrays once so we don't re-run the lazy getters inside the loop.
+            // Snapshot the lazy arrays once so each loop iteration reads the same
+            // materialised values (the getters re-evaluate the blackboard each call).
             string[] fields  = _fields();
             float[]  floats  = _floatValues();
             string[] methods = _methods();

@@ -9,14 +9,11 @@ namespace AbilitySystem.Components
     /// When <c>blackboardKey</c> is set, the component reads a <c>List&lt;Entity&gt;</c>
     /// from that key and applies the buff to each entry.
     ///
-    /// <para>When <c>endOnSkillEnd</c> is true, every buff this component creates is
-    /// tracked and destroyed on <see cref="AbilityEndEvent"/> (or on
-    /// <see cref="IAbilityComponent.OnTeardown"/> if the skill never ends cleanly,
-    /// e.g. pool dormancy mid-skill). The config MUST also declare <c>OnAbilityEnd</c>
-    /// in its <c>triggers[]</c>, because <c>EntityAbilityRunner.DispatchToAbility</c>
-    /// only routes events that have a matching trigger bucket — bypassing the
-    /// active-window gate isn't the same as bypassing the bucket lookup.</para>
-    /// See docs/superpowers/specs/2026-06-08-skill-blackboard-component-pattern.md.
+    /// <para>When both <c>outputTarget</c> and <c>outputBuff</c> are set, this
+    /// component hands the (target, created-buff) pair off to the per-Entity
+    /// shared blackboard at those keys so a downstream <c>DestroyBuff</c> (or
+    /// similar consumer) can act on them. Buffs created here are not auto-destroyed
+    /// — lifecycle is the consumer's responsibility.</para>
     /// </summary>
     [RegisterComponent("ApplyBuff")]
     public class ApplyBuff : AbilityComponentBase
@@ -28,10 +25,12 @@ namespace AbilitySystem.Components
         private Func<BuffType[]> _types;
         private Func<float[]> _values;
         private Func<bool> _isWhiteList;
-        // Output keys (optional). When set, OnTrigger appends this round's
-        // targets and created buffs (null-padded for skipped/failed targets)
-        // to the per-Entity shared blackboard at these keys. Lists are
-        // accumulated across OnTrigger calls within the same skill window.
+        // Output keys (optional). When both are set, OnTrigger appends this round's
+        // (target, created-buff) pairs to the per-Entity shared blackboard at these
+        // keys. Targets without a buffController are skipped entirely (not appended),
+        // so the two output lists stay parallel and only contain entries that ran
+        // through CreateBuff — a null buff slot means CreateBuff returned null.
+        // Lists are accumulated across OnTrigger calls within the same skill window.
         // Empty string = skip write.
         private Func<string> _outputTargetKey;
         private Func<string> _outputBuffKey;
@@ -61,10 +60,10 @@ namespace AbilitySystem.Components
             bool needWrite = !string.IsNullOrEmpty(_outputTargetKey()) && !string.IsNullOrEmpty(_outputBuffKey());
 
             // Per-round collected lists. Sized to the target list so the
-            // downstream blackboard write is one AddRange each. Targets with
-            // no buffController are still appended (so callers can see
-            // "we tried"); the matching buff slot is null-padded. The output
-            // keys are honored in the AppendToBlackboard calls below.
+            // downstream blackboard write is one AddRange each. Targets without
+            // a buffController are skipped (continue above), so the two lists
+            // stay aligned: index i in roundTargets matches index i in roundBuffs.
+            // A null in roundBuffs means CreateBuff returned null for that target.
             var roundTargets = new List<Entity>(targets.Count);
             var roundBuffs   = new List<Buff>(targets.Count);
 

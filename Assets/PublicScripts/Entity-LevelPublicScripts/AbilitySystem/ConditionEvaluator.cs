@@ -10,7 +10,7 @@ namespace AbilitySystem
     {
         // sharedBlackboard is intentionally uninitialized: caller MUST set it.
         // A forgotten assignment would silently use a fresh empty Blackboard and
-        // break the per-Entity handoff. The one call site (EntitySkillRunner)
+        // break the per-Entity handoff. The one call site (EntityAbilityRunner)
         // always sets it explicitly.
         public Blackboard sharedBlackboard;
         public Entity entity;

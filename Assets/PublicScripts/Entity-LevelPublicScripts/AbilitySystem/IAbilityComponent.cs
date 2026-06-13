@@ -13,7 +13,7 @@ namespace AbilitySystem
     public class AbilityContext
     {
         public Entity entity;
-        // 字段名 'ability'：AbilityRuntime.MakeContext 里 `ability = this` 把 AbilityRuntime 自己填进来。
+        // Filled by AbilityRuntime.MakeContext (the runtime passes itself as 'ability').
         public AbilityRuntime ability;
         public IAbilityComponent component;
         public AbilityEvent currentEvent;

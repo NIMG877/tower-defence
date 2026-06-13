@@ -74,7 +74,6 @@ namespace AbilitySystem.Components
             {
                 var parts = CsvParser.SplitStrings(input);
                 if (parts.Length == 0) return;
-                // RandomL 内部处理 [0,1] 含上界 1.0 的 len 越界边角(% len 折回 0)。
                 ctx.sharedBlackboard.Set(key, RandomHelper.Helper.RandomL(parts));
                 return;
             }
