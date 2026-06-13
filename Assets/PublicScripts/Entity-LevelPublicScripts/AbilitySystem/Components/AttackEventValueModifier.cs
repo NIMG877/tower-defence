@@ -10,7 +10,7 @@ namespace AbilitySystem.Components
     /// Reads three parallel CSVs from <c>OnInit</c>:
     /// <list type="bullet">
     ///   <item><c>fields</c> — comma-separated field names (whitelisted; see below)</item>
-    ///   <item><c>values</c> — comma-separated numeric values (float or int, per field type)</item>
+    ///   <item><c>values</c> — comma-separated numeric values (stored as float; int fields cast on apply)</item>
     ///   <item><c>methods</c> — comma-separated operators: <c>mult</c> / <c>add</c> / <c>set</c> / <c>div</c></item>
     /// </list>
     /// Each triple at the same index is applied in order. <c>cumbo</c> is only meaningful on
@@ -25,11 +25,10 @@ namespace AbilitySystem.Components
     public class AttackEventValueModifier : AbilityComponentBase
     {
         private Func<string[]> _fields;
-        // Per-type parsed values; one slot per field index. Type determined by the field's
-        // known type — float fields read _floatValues[i], int fields read _intValues[i].
-        // Only one is ever populated per index.
+        // All values stored as float; int fields cast at the apply site. Float mantissa
+        // (24 bits) covers every realistic value for damageType / applyType / cumbo
+        // (all small enum-like fields), so no precision loss in practice.
         private Func<float[]> _floatValues;
-        private Func<int[]> _intValues;
         private Func<string[]> _methods;
 
         public override void OnInit(AbilityContext ctx, ParamList parameters)
@@ -38,7 +37,6 @@ namespace AbilitySystem.Components
             _fields      = parameters.GetStringArrayLazy<string>("fields",  null, bb);
             _methods     = parameters.GetStringArrayLazy<string>("methods", null, bb);
             _floatValues = parameters.GetFloatArrayLazy ("values",  null, bb);
-            _intValues   = parameters.GetIntArrayLazy   ("values",  null, bb);
         }
 
         public override void OnTrigger(AbilityContext ctx)
@@ -64,7 +62,6 @@ namespace AbilitySystem.Components
             // Snapshot the arrays once so we don't re-run the lazy getters inside the loop.
             string[] fields  = _fields();
             float[]  floats  = _floatValues();
-            int[]    ints    = _intValues();
             string[] methods = _methods();
 
             for (int i = 0; i < min; i++)
@@ -95,10 +92,10 @@ namespace AbilitySystem.Components
                         dab.mgrPenetrate_value = MathOps.Apply(dab.mgrPenetrate_value, floats[i], op);
                         break;
                     case "damageType":
-                        dab.damageType = MathOps.ApplyIntMixed(dab.damageType, ints[i], floats[i], op);
+                        dab.damageType = MathOps.ApplyIntMixed(dab.damageType, (int)floats[i], floats[i], op);
                         break;
                     case "applyType":
-                        dab.applyType = MathOps.ApplyIntMixed(dab.applyType, ints[i], floats[i], op);
+                        dab.applyType = MathOps.ApplyIntMixed(dab.applyType, (int)floats[i], floats[i], op);
                         break;
                     case "cumbo":
                         if (bae == null)
@@ -106,7 +103,7 @@ namespace AbilitySystem.Components
                             Debug.Log($"AttackEventValueModifier: 'cumbo' skipped — event is not BeforeAttackEvent");
                             break;
                         }
-                        bae.cumbo = MathOps.ApplyIntMixed(bae.cumbo, ints[i], floats[i], op);
+                        bae.cumbo = MathOps.ApplyIntMixed(bae.cumbo, (int)floats[i], floats[i], op);
                         break;
                     default:
                         Debug.LogWarning($"AttackEventValueModifier: unknown field '{field}'; skipped");
