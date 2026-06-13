@@ -39,10 +39,8 @@ namespace AbilitySystem.Components
         public override void OnInit(AbilityContext ctx, ParamList p)
         {
             var bb = ctx.sharedBlackboard;
-            var rawTypes  = p.GetStringLazy("buffTypes",  "", bb);
-            var rawValues = p.GetStringLazy("buffValues", "", bb);
-            _types  = () => CsvParser.Split(rawTypes(),  s => (BuffType)Enum.Parse(typeof(BuffType), s));
-            _values = () => CsvParser.Split(rawValues(), float.Parse);
+            _types  = p.GetStringArrayLazy("buffTypes",  null, bb, s => (BuffType)Enum.Parse(typeof(BuffType), s));
+            _values = p.GetFloatArrayLazy("buffValues", null, bb);
             _buffId          = p.GetStringLazy("buffId",        "skill_buff", bb);
             _buffTime        = p.GetFloatLazy ("buffTime",      -10f,         bb);
             _toSelf          = p.GetBoolLazy  ("toSelf",        true,         bb);

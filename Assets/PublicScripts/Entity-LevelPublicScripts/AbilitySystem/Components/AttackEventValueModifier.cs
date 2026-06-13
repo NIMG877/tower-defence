@@ -35,19 +35,10 @@ namespace AbilitySystem.Components
         public override void OnInit(AbilityContext ctx, ParamList parameters)
         {
             var bb = ctx.sharedBlackboard;
-            var rawFields  = parameters.GetStringLazy("fields",  "", bb);
-            var rawValues  = parameters.GetStringLazy("values",  "", bb);
-            var rawMethods = parameters.GetStringLazy("methods", "", bb);
-            _fields  = () => CsvParser.SplitStrings(rawFields());
-            _methods = () => CsvParser.SplitStrings(rawMethods());
-            // Pre-parse values by attempting both float and int. Each index's type is locked
-            // by the field's known type (see OnTrigger switch), so we keep both arrays and
-            // ignore the other at apply time. A non-numeric value silently becomes 0 in
-            // both arrays; the wrong-type slot is never read at apply time (e.g. a value
-            // parsed into _intValues is only read for an int field), so the other array's
-            // 0 is harmless.
-            _floatValues = () => CsvParser.Split<float>(rawValues(), ParseFloatOrZero);
-            _intValues   = () => CsvParser.Split<int>  (rawValues(), ParseIntOrZero);
+            _fields      = parameters.GetStringArrayLazy<string>("fields",  null, bb);
+            _methods     = parameters.GetStringArrayLazy<string>("methods", null, bb);
+            _floatValues = parameters.GetFloatArrayLazy ("values",  null, bb);
+            _intValues   = parameters.GetIntArrayLazy   ("values",  null, bb);
         }
 
         public override void OnTrigger(AbilityContext ctx)
@@ -125,9 +116,6 @@ namespace AbilitySystem.Components
         }
 
         // ---- helpers ----
-
-        private static float ParseFloatOrZero(string s) => float.TryParse(s, out var v) ? v : 0f;
-        private static int   ParseIntOrZero  (string s) => int.TryParse(s,   out var v) ? v : 0;
 
         // Bounded-log warning for unknown method strings (e.g. typo in a designer-authored
         // methods=... CSV). OneShotWarn keeps a single log per unique (method,field) pair
