@@ -25,6 +25,10 @@ namespace MyUI
             public EntityID EntityId;
             public EntityData EntityData;
             public EntityStats EntityStats;
+            // 缓存池里样本的 EntityVision，镜像 EntityStats 字段：ViewBeforeSet/setting/choosing
+            // 等"池预览"态没有 _selectedEntity 时走这里。池样本的 Range 字段为 null（未调
+            // SetOrientation），预览侧用 BaseRange 喂给 RangeCaculator 当场算。
+            public EntityVision EntityVision;
 
             float _respawnTimer;
             float _selectorYAnchor;
@@ -59,6 +63,7 @@ namespace MyUI
                     if (sample != null)
                     {
                         EntityStats = sample.Stats;
+                        EntityVision = sample.Vision;
                     }
                 }
 
@@ -1072,7 +1077,7 @@ namespace MyUI
                 EntityData entityData = GameDataService.EntityRepository.Get(entityID);
 
                 SwitchShowAbilityTalent(_currentShow, entityData, _selectedEntity);
-                ShowAttackRangeAttributes(entityData.VisionRange);
+                ShowAttackRangeAttributes(GetCurrentVisionRange());
                 _name.text = entityData.ChineseName;
                 _class.sprite = _professionsLighten[entityData.CharacterJob];
                 UIStates_Update_Leftmessage();
@@ -1124,6 +1129,58 @@ namespace MyUI
                 return _selectedEntity.Stats;
             }
             return _selectedPlaceData?.EntityStats;
+        }
+        /// <summary>
+        /// 当前选中态的攻击范围（<c>List&lt;Vector2Int&gt;</c>），供 <c>ShowAttackRangeAttributes</c> 与
+        /// <c>UIStates_Update_Range</c> 共用。两条数据通路分别处理：
+        ///
+        /// <list type="bullet">
+        ///   <item><b>已部署 entity（viewAfterSet）</b>：直接返回 <c>entity.Vision.Range</c>，由
+        ///   <c>SetOrientation</c> / <c>AttackRangeOverride</c> 在 <c>Range</c> setter 里现跑
+        ///   <c>RangeCaculator</c> 维护。</item>
+        ///   <item><b>放置预览（setting/choosing）</b>：chooser 已被激活（<c>_orientation != -1</c>），
+        ///   用 <c>EntityVision.BaseRange</c>（<c>EntityData.VisionRange</c> 拷贝）+ chooser 当前位置 +
+        ///   朝向，调用 <c>MapDataManager.RangeCaculator</c> 即时算出，与 <c>SetStaticEntity</c> 落盘时
+        ///   的输入完全一致。</item>
+        ///   <item><b>viewBeforeSet 等尚无预览数据的场景</b>（chooser 未激活，<c>_orientation == -1</c>）：
+        ///   兜底到 <c>EntityData.VisionRange</c> 模板。</item>
+        /// </list>
+        /// </summary>
+        private List<Vector2Int> GetCurrentVisionRange()
+        {
+            // === 已部署：直接读 Vision.Range（已 SetOrientation / AttackRangeOverride） ===
+            if (_selectedEntity != null)
+            {
+                return TuplesToVector2IntList(_selectedEntity.Vision?.Range);
+            }
+            // === 预览：BaseRange + chooserTile + _orientation 当场跑 RangeCaculator ===
+            if (_selectedPlaceData != null && _orientation != -1 && _chooser != null)
+            {
+                var baseRange = _selectedPlaceData.EntityVision?.BaseRange;
+                if (baseRange != null)
+                {
+                    var chooserPos = _chooser.transform.position;
+                    (int x, int y) tilePos = ((int)(chooserPos.x + 0.5), (int)(chooserPos.y + 0.5));
+                    return TuplesToVector2IntList(
+                        MapDataManager.Manager.RangeCaculator(baseRange, tilePos, _orientation));
+                }
+            }
+            // === 兜底：viewBeforeSet 等无 chooser 的态走模板 ===
+            if (_selectedStaticEntityID.HasValue)
+            {
+                return GameDataService.EntityRepository.Get(_selectedStaticEntityID.Value).VisionRange;
+            }
+            return null;
+        }
+        private static List<Vector2Int> TuplesToVector2IntList((int x, int y)[] tuples)
+        {
+            if (tuples == null) return null;
+            var list = new List<Vector2Int>(tuples.Length);
+            for (int i = 0; i < tuples.Length; i++)
+            {
+                list.Add(new Vector2Int(tuples[i].x, tuples[i].y));
+            }
+            return list;
         }
         // Operator
         private void UIStates_ShowClose_Operator(bool show)
@@ -1341,7 +1398,7 @@ namespace MyUI
                 if (_canSetBlockList.Contains((i, j)))
                 {
                     _target.transform.position = new Vector2(j, i);
-                    if (true)
+                    if (_selectedPlaceData.EntityData.NeedsDirectionSelection)
                     {
                         _target.color = Color.yellow;
                     }
@@ -1477,12 +1534,20 @@ namespace MyUI
             (int x, int y)[] attackRange;
             if (_selectedStaticEntityID.HasValue)
             {
-                List<Vector2Int> visionRange = GameDataService.EntityRepository.Get(_selectedStaticEntityID.Value).VisionRange;
+                var visionRange = GetCurrentVisionRange();
+                if (visionRange == null) return;
+                string visionrange_string="";
+                for(int i = 0; i < visionRange.Count; i++)
+                {
+                    visionrange_string += visionRange[i].ToString() + ";";
+                }
+                Debug.Log("visionRange: " + visionrange_string);
                 attackRange = new (int x, int y)[visionRange.Count];
                 for (int i = 0; i < visionRange.Count; i++)
                 {
-                    attackRange[i] = (visionRange[i].y, -visionRange[i].x);
+                    attackRange[i] = (visionRange[i].x, visionRange[i].y);
                 }
+
             }
             else
             {

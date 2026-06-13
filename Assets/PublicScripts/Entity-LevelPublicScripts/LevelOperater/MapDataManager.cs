@@ -37,9 +37,9 @@ public class MapDataManager : IManagerStartEnd
         public float cost;
         public float priority;
         /// <summary>
-        /// ÖØÖÃ²ÎÊý
+        /// ï¿½ï¿½ï¿½Ã²ï¿½ï¿½ï¿½
         /// </summary>
-        /// <param name="walkableType">¿ÉÍ¨¹ýÀàÐÍ£º0-µØÃæ¿ÉÍ¨¹ý£¬1-½üµØÐü¸¡¿ÉÍ¨¹ý£¬2-·ÉÐÐ¿ÉÍ¨¹ý£¬3-²»¿ÉÍ¨¹ý</param>
+        /// <param name="walkableType">ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½0-ï¿½ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½1-ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½2-ï¿½ï¿½ï¿½Ð¿ï¿½Í¨ï¿½ï¿½ï¿½ï¿½3-ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½</param>
         public void Reset(bool passable)
         {
             plotPosCameFrom = ((int)plotPos.x, (int)plotPos.y);
@@ -162,7 +162,7 @@ public class MapDataManager : IManagerStartEnd
             if (_map.transform.GetChild(i).TryGetComponent(out BlockData blockData))
             {
                 BlockDataMatrix[(int)blockData.transform.position.y, (int)blockData.transform.position.x] = blockData;
-                blockData.Material = blockData.GetComponent<MeshRenderer>().material;//»ñÈ¡²ÄÖÊ
+                blockData.Material = blockData.GetComponent<MeshRenderer>().material;//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½
             }
         }
 
@@ -347,12 +347,12 @@ public class MapDataManager : IManagerStartEnd
                 }
             }
         }
-        //Debug.Log($"-----------µ±Ç°µã{(current.plotPos)}£¬cost{current.cost}£¬À´×Ô{current.plotPosCameFrom}---------------");
+        //Debug.Log($"-----------ï¿½ï¿½Ç°ï¿½ï¿½{(current.plotPos)}ï¿½ï¿½cost{current.cost}ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½{current.plotPosCameFrom}---------------");
         //for (int i = 0; i < iSize; i++)
         //{
         //    for (int j = 0; j < jSize; j++)
         //    {
-        //        Debug.Log($"µã{(j,i)}£¬cost{graph[i, j].cost}£¬À´×Ô{graph[i, j].plotPosCameFrom}");
+        //        Debug.Log($"ï¿½ï¿½{(j,i)}ï¿½ï¿½cost{graph[i, j].cost}ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½{graph[i, j].plotPosCameFrom}");
         //    }
         //}
         //return null;
@@ -380,7 +380,7 @@ public class MapDataManager : IManagerStartEnd
         }
         else
         {
-            Debug.LogWarning("ÎÞÂ·¾¶");
+            Debug.LogWarning("ï¿½ï¿½Â·ï¿½ï¿½");
             return null;
         }
 
@@ -494,12 +494,12 @@ public class MapDataManager : IManagerStartEnd
                 }
             }
         }
-        //Debug.Log($"-----------µ±Ç°µã{(current.plotPos)}£¬cost{current.cost}£¬À´×Ô{current.plotPosCameFrom}---------------");
+        //Debug.Log($"-----------ï¿½ï¿½Ç°ï¿½ï¿½{(current.plotPos)}ï¿½ï¿½cost{current.cost}ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½{current.plotPosCameFrom}---------------");
         //for (int i = 0; i < iSize; i++)
         //{
         //    for (int j = 0; j < jSize; j++)
         //    {
-        //        Debug.Log($"µã{(j,i)}£¬cost{graph[i, j].cost}£¬À´×Ô{graph[i, j].plotPosCameFrom}");
+        //        Debug.Log($"ï¿½ï¿½{(j,i)}ï¿½ï¿½cost{graph[i, j].cost}ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½{graph[i, j].plotPosCameFrom}");
         //    }
         //}
         //return null;
@@ -525,7 +525,7 @@ public class MapDataManager : IManagerStartEnd
         }
         else
         {
-            Debug.LogWarning("ÎÞÂ·¾¶");
+            Debug.LogWarning("ï¿½ï¿½Â·ï¿½ï¿½");
             return null;
         }
 
