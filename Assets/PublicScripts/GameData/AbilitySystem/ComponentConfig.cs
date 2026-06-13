@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Plastic.Newtonsoft.Json;
 using UnityEngine;
 
 namespace AbilitySystem
@@ -206,6 +207,28 @@ namespace AbilitySystem
             return () => parsed;
         }
 
+        // Vector2Int 数组版 Lazy。字面量路径用 ParseVector2IntArray(格式
+        // "[[x,y],[x,y],..." JSON 数组)。BB 路径走 ReadVector2IntArrayFromBB,
+        // 支持 Vector2Int[]/Vector2Int/string 形态。命名上刻意不引入第二个 type
+        // 参数(designer 写"Vector2Int 数组"只有一个类型),与 GetIntArrayLazy /
+        // GetFloatArrayLazy 保持对称。
+        public Func<Vector2Int[]> GetVector2IntArrayLazy(string key, Vector2Int[] defaultValue = null, Blackboard bb = null)
+        {
+            var entry = FindEntry(key);
+            if (entry == null) return () => defaultValue ?? Array.Empty<Vector2Int>();
+            if (entry.fromBlackboard)
+            {
+                if (bb == null)
+                {
+                    WarnMissingBlackboardOnce(entry.key);
+                    return () => defaultValue ?? Array.Empty<Vector2Int>();
+                }
+                return () => ReadVector2IntArrayFromBB(bb, entry.value, defaultValue);
+            }
+            Vector2Int[] parsed = ParseVector2IntArray(entry.value);
+            return () => parsed;
+        }
+
         // ========= 内部 helpers =========
 
         private ParamEntry FindEntry(string key)
@@ -228,6 +251,31 @@ namespace AbilitySystem
         }
 
         private static int ParseIntOrZero(string s) => int.TryParse(s, out var v) ? v : 0;
+
+        // Parse the designer-facing Vector2Int array literal: "[[x,y],[x,y],...".
+        // Newtonsoft.Json does the heavy lifting. Lenient: a malformed group
+        // (wrong coord count / unparsable int) is dropped, and an unparseable
+        // string returns an empty array (same posture as ParseVector2Int).
+        private static Vector2Int[] ParseVector2IntArray(string raw)
+        {
+            if (string.IsNullOrEmpty(raw)) return Array.Empty<Vector2Int>();
+            try
+            {
+                var arr = JsonConvert.DeserializeObject<int[][]>(raw);
+                if (arr == null) return Array.Empty<Vector2Int>();
+                var result = new List<Vector2Int>(arr.Length);
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    var pair = arr[i];
+                    if (pair != null && pair.Length >= 2) result.Add(new Vector2Int(pair[0], pair[1]));
+                }
+                return result.ToArray();
+            }
+            catch
+            {
+                return Array.Empty<Vector2Int>();
+            }
+        }
 
         // 按 ParamEntry.type 把字符串解析成对应的 boxed 值。defaultValue 若与目标类型匹配
         // 则用作 parse 失败的 fallback,否则用类型的自然零值。Unity 资产类型
@@ -385,6 +433,33 @@ namespace AbilitySystem
                 "bb-int-array-type:" + bbKey,
                 $"[ParamList] Blackboard key '{bbKey}' runtime type cannot be read as int[]; " +
                 "expected int[]/int/string. Returning defaultValue.");
+        }
+
+        // GetVector2IntArrayLazy 的 fromBlackboard 容错读,与字面量路径对称:Vector2Int[]
+        // 直返;Vector2Int 单值包 [v];string 走 ParseVector2IntArray(同字面量格式);
+        // 其它类型走独立 warn 桶('bb-vec2i-array-type:')避免和 'bb-type:' /
+        // 'bb-int-array-type:' 互相吞掉。
+        private static Vector2Int[] ReadVector2IntArrayFromBB(Blackboard bb, string bbKey, Vector2Int[] defaultValue)
+        {
+            object v = bb.Get<object>(bbKey, null);
+            if (v == null) return defaultValue ?? Array.Empty<Vector2Int>();
+            switch (v)
+            {
+                case Vector2Int[] arr: return arr;
+                case Vector2Int vi:    return new[] { vi };
+                case string s:         return ParseVector2IntArray(s);
+                default:
+                    WarnBlackboardVector2IntArrayTypeMismatchOnce(bbKey);
+                    return defaultValue ?? Array.Empty<Vector2Int>();
+            }
+        }
+
+        private static void WarnBlackboardVector2IntArrayTypeMismatchOnce(string bbKey)
+        {
+            OneShotWarn.WarnOnce(
+                "bb-vec2i-array-type:" + bbKey,
+                $"[ParamList] Blackboard key '{bbKey}' runtime type cannot be read as Vector2Int[]; " +
+                "expected Vector2Int[]/Vector2Int/string. Returning defaultValue.");
         }
     }
 
