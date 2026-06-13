@@ -51,12 +51,12 @@ namespace AbilitySystem
             // Recovery
             if (_cfg.recoverMode == SpRecoverMode.Natural)
             {
-                AddSp(dt * dtMultiplier);
+                RecoverSp(dt * dtMultiplier);
             }
             // Amount consume
             if (_isActive && _cfg.consumeMode == SpConsumeMode.Natural)
             {
-                CounsumeAmount(dt);
+                ConsumeAmount(dt);
             }
             // Natural open
             if (!_isActive && _cfg.openMode == AbilityOpenMode.Auto && CanBegin())
@@ -67,16 +67,15 @@ namespace AbilitySystem
 
         public void OnAttackSuccessfully()
         {
-            if (_cfg.openMode == AbilityOpenMode.OnAttackSuccessfully && CanBegin()) StartAbility();
-            if (_cfg.recoverMode == SpRecoverMode.OnAttackSuccessfully) AddSp(1f);
-            if (_cfg.consumeMode == SpConsumeMode.OnAttackSuccessfully && _isActive) CounsumeAmount(1f);
+            if (_cfg.recoverMode == SpRecoverMode.OnAttackSuccessfully) RecoverSp(1f);
+            if (_cfg.consumeMode == SpConsumeMode.OnAttackSuccessfully && _isActive) ConsumeAmount(1f);
         }
 
         public void OnAfterHurt(int applyType)
         {
             if (applyType != 0 && applyType != 1) return;
-            if (_cfg.recoverMode == SpRecoverMode.OnAfterHurt) AddSp(1f);
-            if (_cfg.consumeMode == SpConsumeMode.OnAfterHurt && _isActive) CounsumeAmount(1f);
+            if (_cfg.recoverMode == SpRecoverMode.OnAfterHurt) RecoverSp(1f);
+            if (_cfg.consumeMode == SpConsumeMode.OnAfterHurt && _isActive) ConsumeAmount(1f);
         }
 
         public void OnAttackAnimBegin()
@@ -112,12 +111,13 @@ namespace AbilitySystem
         public void EndAbility()
         {
             if (!_isActive) return;
+            _currentAmount = 0f;
             _isActive = false;
             if (_cfg.recoverForbidDuringAbility && _recoverForbid > 0) _recoverForbid--;
             OnEnd?.Invoke();
         }
 
-        private void AddSp(float v)
+        public void RecoverSp(float v)
         {
             if (_recoverForbid > 0) return;
             if (_cfg.chargeNum <= 1)
@@ -140,13 +140,13 @@ namespace AbilitySystem
             }
         }
 
-        private void CounsumeAmount(float v)
+        public void ConsumeAmount(float v)
         {
+            if (_cfg.consumeMode == SpConsumeMode.NoConsume) return;
             if (!_isActive) return;
             _currentAmount -= v;
             if (_currentAmount <= 0f)
             {
-                _currentAmount = 0f;
                 EndAbility();
             }
         }

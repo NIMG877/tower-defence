@@ -66,7 +66,6 @@ namespace MyUI
                     case AbilityOpenMode.OnAttackAnimBegin: skillOpenModeText.text = "攻击时触发"; break;
                     case AbilityOpenMode.OnBeforeHurt: skillOpenModeText.text = "受击时触发"; break;
                     case AbilityOpenMode.Manual: skillOpenModeText.text = "手动触发"; break;
-                    case AbilityOpenMode.OnAttackSuccessfully: skillOpenModeText.text = "命中触发"; break;
                 }
                 if (sp.totalSp > 0)
                 {

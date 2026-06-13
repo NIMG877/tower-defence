@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace AbilitySystem
 {
-    public enum SpRecoverMode { Natural, OnAttackSuccessfully, OnAfterHurt }
-    public enum SpConsumeMode { Natural, OnAttackSuccessfully, OnAfterHurt, Instant }
-    public enum AbilityOpenMode { Auto, OnAttackAnimBegin, OnBeforeHurt, Manual, OnAttackSuccessfully }
+    public enum SpRecoverMode { Natural, OnAttackSuccessfully, OnAfterHurt, Other }
+    public enum SpConsumeMode { Natural, OnAttackSuccessfully, OnAfterHurt, Instant, Other, NoConsume }
+    public enum AbilityOpenMode { Auto, OnAttackAnimBegin, OnBeforeHurt, Manual, Other }
 
     [Serializable]
     public class SPConfig
