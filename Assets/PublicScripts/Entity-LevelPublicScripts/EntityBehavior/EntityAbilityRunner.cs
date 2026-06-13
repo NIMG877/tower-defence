@@ -129,8 +129,6 @@ public class EntityAbilityRunner
                 var comp = a.components[c];
                 if (c < a.componentParams.Count)
                 {
-                    var teardownCtx = a.MakeContext(comp, null, sharedBlackboard, _entity);
-                    comp.OnTeardown(teardownCtx);
                     var initCtx = a.MakeContext(comp, null, sharedBlackboard, _entity);
                     comp.OnInit(initCtx, a.componentParams[c]);
                 }
@@ -161,17 +159,17 @@ public class EntityAbilityRunner
             }
         }
 
-        // 3) Unwire + 清空列表 (下次 PreWarm 重建)
+        // 3) Unwire + 仅清掉 ExtraAbility（运行时 AddExtraAbility 加入的动态能力）。
+        //    Talents/Skills 保留在 _abilities,等下次 OnInitialize 走 spEngine.Reset + 组件 OnTeardown/OnInit 重置。
         for (int i = _abilities.Count - 1; i >= 0; i--)
         {
-            UnwireRuntime(_abilities[i]);
+            var a = _abilities[i];
+            if (a.Kind != AbilityKind.ExtraAbility) continue;
+            UnwireRuntime(a);
             _abilities.RemoveAt(i);
         }
-        // 缓存也清干净,避免下次 PreWarm 前外部访问到陈旧 list
-        _skillsCache.Clear();
-        _talentsCache.Clear();
-        _extrasCache.Clear();
-        _abilitiesCacheDirty = false;
+        // 缓存失效:Extras 列表被改了,下次访问重建。
+        InvalidateAbilitiesCache();
     }
 
     /// <summary>
