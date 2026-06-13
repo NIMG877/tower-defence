@@ -309,6 +309,17 @@ namespace MyUI
         private Sprite[] _spMessageAtlas, _skillRangeButton;
         private AbilitySystem.AbilityConfig _selectAbilityConfig;
         private AbilitySystem.AbilityRuntime _selectAbilityRuntime;
+        // 范围图元池的"当前显示模式":None=池子关;Normal=基础攻击范围;Skill=技能攻击范围。
+        // 单一真理源:UIStates_ShowClose_Range / UIStates_ShowClose_SkillRange / _skillRangeClick
+        // 都通过 SetRangeMode 切换,池子的开/关/写图元逻辑只走 SetRangeMode + RenderRangeToPool
+        // 一条路径,避免多处 Show/Update 互踩残留。
+        private enum RangeDisplayMode { None, Normal, Skill }
+        private RangeDisplayMode _rangeDisplayMode = RangeDisplayMode.None;
+        private Color _rangeDisplayColor;
+        // 技能范围预览的数据源缓存:当前 _selectAbilityRuntime 上 AttackRangeOverride 组件的
+        // ParamList(原始 range 字面量 / BB 引用,ViewAfterSet 期间不会改;玩家重复点击 _skillRange
+        // 时无需重新扫 components)。null = 该技能没有 AttackRangeOverride 组件 / 不可预览。
+        private AbilitySystem.ParamList _skillRangeComponentParams;
         private EventTrigger.Entry _callBackClick, _skillRangeClick;
 
         // ===== Floating Text Pool =====
@@ -539,6 +550,15 @@ namespace MyUI
             _skillOpen.GetComponent<EventTrigger>().triggers.Add(skillOpenClick);
             _skillRangeClick = new EventTrigger.Entry();
             _skillRangeClick.eventID = EventTriggerType.PointerClick;
+            _skillRangeClick.callback.AddListener((data) =>
+            {
+                // toggle 技能期间攻击范围预览。前提：viewAfterSet 下 _selectedEntity != null 且
+                // _skillRangeComponentParams 已被 UIStates_ShowClose_Operator 缓存（_skillRange 按钮
+                // 可见时保证非空）。模式切换交给 SetRangeMode 统一管；sprite 跟当前模式走。
+                if (_selectedEntity == null || _skillRangeComponentParams == null) return;
+                bool isOn = _rangeDisplayMode == RangeDisplayMode.Skill;
+                UIStates_ShowClose_SkillRange(!isOn);
+            });
             _skillRange.GetComponent<EventTrigger>().triggers.Add(_skillRangeClick);
             EventTrigger.Entry skillstop = new EventTrigger.Entry();
             skillstop.eventID = EventTriggerType.PointerClick;
@@ -953,6 +973,10 @@ namespace MyUI
         {
             _isSlow = true;
             SetTimeScale();
+            _selectedEntity = null; // 离开 viewAfterSet 一定清:viewAfterSet 留下的 _selectedEntity
+                                    // 会让 GetCurrentDisplayRange 走"已部署 entity.Range"分支,
+                                    // 在 setting/choosing/viewBeforeSet 这些"池预览"态下显示
+                                    // 错位(显示的是上一个已部署 entity 的范围,不是新拖出的)。
             _selectedPlaceData = staticEntityPlaceData;
             _selectedStaticEntityID = staticEntityPlaceData.EntityId;
             UIStates_ShowSomethingAndOtherClose(new string[2] { "leftmessage", "canset" });
@@ -968,6 +992,8 @@ namespace MyUI
         {
             _isSlow = true;
             SetTimeScale();
+            _selectedEntity = null; // 同 ViewBeforeSet:从 viewAfterSet 直接拖出干员时,
+                                    // 上一帧选中的已部署 entity 引用必须清,否则会显示它的范围。
             _selectedPlaceData = staticEntityPlaceData;
             _selectedStaticEntityID = staticEntityPlaceData.EntityId;
             UIStates_ShowSomethingAndOtherClose(new string[3] { "leftmessage", "dragger", "canset" });
@@ -983,6 +1009,7 @@ namespace MyUI
         {
             _isSlow = true;
             SetTimeScale();
+            _selectedEntity = null; // 同上
             _selectedPlaceData = staticEntityPlaceData;
             _selectedStaticEntityID = staticEntityPlaceData.EntityId;
             UIStates_ShowSomethingAndOtherClose(new string[4] { "leftmessage", "dragger", "choosing", "canset" });
@@ -1227,15 +1254,20 @@ namespace MyUI
                     _selectAbilityConfig = _selectAbilityRuntime.config;
                     _skillOpen.gameObject.SetActive(true);
                     _skillOpen.sprite = _selectAbilityConfig.icon;
-                    // 范围预览:旧版从 SPConfig.abilityAttackRange 读取,该字段已迁移至 AttackRangeOverride(ParamList 驱动)。
-                    // 组件管线接好之前,这里统一隐藏范围预览 UI;接好后把 null 替换为组件查询即可。
-                    Vector2Int[] range = null;
-                    _skillRange.gameObject.SetActive(range != null && range.Length > 0);
+                    // 范围预览:从 AttackRangeOverride 组件的 ParamList 读取原始 range(可能为
+                    // Vector2Int[] 字面量或 BB 引用)。只有当组件存在且 range 非空时才显示
+                    // _skillRange toggle 按钮;首次进入 viewAfterSet 默认预览关闭,off sprite。
+                    _skillRangeComponentParams = FindAttackRangeOverrideParams(_selectAbilityRuntime);
+                    bool hasRange = _skillRangeComponentParams != null
+                                    && _skillRangeComponentParams.HasKey("range");
+                    _skillRange.gameObject.SetActive(hasRange);
+                    _skillRange.sprite = _skillRangeButton[0]; // off
                 }
                 else
                 {
                     _selectAbilityRuntime = null;
                     _selectAbilityConfig = null;
+                    _skillRangeComponentParams = null;
                     _skillOpen.gameObject.SetActive(false);
                     _skillRange.gameObject.SetActive(false);
                 }
@@ -1507,62 +1539,87 @@ namespace MyUI
                 UIStates_ShowClose_Range(false);
             }
         }
-        // Range
+        // Range — 普通攻击范围（保持原签名供 UIStates_ShowSomethingAndOtherClose 调用）。
+        // 内部委托给 SetRangeMode，池子开/关/写图元统一走同一条路径。
         private void UIStates_ShowClose_Range(bool show)
+        {
+            SetRangeMode(show ? RangeDisplayMode.Normal : RangeDisplayMode.None);
+        }
+        // SkillRange — 技能攻击范围预览。show=true 切到 Skill 模式;show=false 回退到 Normal。
+        // viewAfterSet 默认 Normal,关预览时回到基础范围,与 SetRangeMode 一致。
+        private void UIStates_ShowClose_SkillRange(bool show)
         {
             if (show)
             {
-                if (!_rangeOpen)
-                {
-                    _rangeOpen = true;
-                    _rangeImgCollection.SetActive(true);
-                }
-                UIStates_Update_Range();
+                // 必要的健康检查:没选 entity / 该技能没配 AttackRangeOverride 就不开。
+                if (_selectedEntity == null || _skillRangeComponentParams == null) return;
+                SetRangeMode(RangeDisplayMode.Skill);
+                _skillRange.sprite = _skillRangeButton[1]; // on
             }
             else
             {
-                if (_rangeOpen)
-                {
-                    _rangeOpen = false;
-                    _rangeImgCollection.SetActive(false);
-                }
+                SetRangeMode(RangeDisplayMode.Normal);
+                _skillRange.sprite = _skillRangeButton[0]; // off
             }
         }
+        // Range update（viewAfterSet 每帧调一次）。按当前 _rangeDisplayMode 选数据源 + 颜色,
+        // 渲染只走 RenderRangeToPool 一条路径,Normal 和 Skill 不再各写一份。
         private void UIStates_Update_Range()
         {
-            Color color = new Color(255, 160, 0);
-            (int x, int y)[] attackRange;
-            if (_selectedStaticEntityID.HasValue)
+            if (_rangeDisplayMode == RangeDisplayMode.None) return;
+            var tiles = GetCurrentDisplayRange();
+            if (tiles == null) { ClearRangePool(); return; }
+            RenderRangeToPool(tiles);
+        }
+        // 数据源：按当前 _rangeDisplayMode 返回该模式当前帧的格子集（已转 (int x, int y)[]）。
+        // null = 该模式当前没有可显示的数据（典型:Normal 模式下未选 entity）。
+        private (int x, int y)[] GetCurrentDisplayRange()
+        {
+            switch (_rangeDisplayMode)
             {
-                var visionRange = GetCurrentVisionRange();
-                if (visionRange == null) return;
-                string visionrange_string="";
-                for(int i = 0; i < visionRange.Count; i++)
+                case RangeDisplayMode.Normal:
                 {
-                    visionrange_string += visionRange[i].ToString() + ";";
+                    if (!_selectedStaticEntityID.HasValue) return null;
+                    var visionRange = GetCurrentVisionRange();
+                    if (visionRange == null) return null;
+                    var arr = new (int x, int y)[visionRange.Count];
+                    for (int i = 0; i < visionRange.Count; i++) arr[i] = (visionRange[i].x, visionRange[i].y);
+                    return arr;
                 }
-                Debug.Log("visionRange: " + visionrange_string);
-                attackRange = new (int x, int y)[visionRange.Count];
-                for (int i = 0; i < visionRange.Count; i++)
+                case RangeDisplayMode.Skill:
                 {
-                    attackRange[i] = (visionRange[i].x, visionRange[i].y);
+                    if (_selectedEntity == null || _skillRangeComponentParams == null) return null;
+                    // 原始 range 是设计师写的"模板范围",需结合 _selectedEntity 的位置 / 朝向
+                    // 喂给 MapDataManager.RangeCaculator,语义与 SetStaticEntity 落盘时对齐。
+                    // 与 AttackRangeOverride.OnTrigger 行为一致:ctx=SkillRunner.sharedBlackboard
+                    // 让 fromBlackboard=true 的设计能读到运行时 BB。
+                    Vector2Int[] range = _skillRangeComponentParams.GetVector2IntArrayLazy(
+                        "range", null, _selectedEntity.SkillRunner.sharedBlackboard)();
+                    if (range == null || range.Length == 0) return null;
+                    Vector2 origin = _selectedEntity.EntityPosition;
+                    (int x, int y) tilePos = ((int)(origin.x + 0.5), (int)(origin.y + 0.5));
+                    return MapDataManager.Manager.RangeCaculator(
+                        ToTupleRange(range), tilePos, _selectedEntity.Orientation);
                 }
-
+                default:
+                    return null;
             }
-            else
-            {
-                return;
-            }
+        }
+        // 池子写入：按 _rangeDisplayColor 把 tiles 写到 _rangeImg 池子;tiles 长度变化时
+        // 自动扩缩 (_rangeImg 池复用,Add 用 Instantiate)。Normal / Skill 共用此函数,
+        // 颜色与数据源由 SetRangeMode 切换时分别设到 _rangeDisplayColor 与 GetCurrentDisplayRange。
+        private void RenderRangeToPool((int x, int y)[] tiles)
+        {
             int rangeImgCount = _rangeImg.Count;
-            if (rangeImgCount >= attackRange.Length)
+            if (rangeImgCount >= tiles.Length)
             {
-                for (int i = 0; i < attackRange.Length; i++)
+                for (int i = 0; i < tiles.Length; i++)
                 {
-                    _rangeImg[i].transform.position = new Vector2(attackRange[i].x, attackRange[i].y);
-                    _rangeImg[i].color = color;
+                    _rangeImg[i].transform.position = new Vector2(tiles[i].x, tiles[i].y);
+                    _rangeImg[i].color = _rangeDisplayColor;
                     _rangeImg[i].enabled = true;
                 }
-                for (int i = attackRange.Length; i < rangeImgCount; i++)
+                for (int i = tiles.Length; i < rangeImgCount; i++)
                 {
                     _rangeImg[i].enabled = false;
                 }
@@ -1571,15 +1628,64 @@ namespace MyUI
             {
                 for (int i = 0; i < rangeImgCount; i++)
                 {
-                    _rangeImg[i].transform.position = new Vector2(attackRange[i].x, attackRange[i].y);
-                    _rangeImg[i].color = color;
+                    _rangeImg[i].transform.position = new Vector2(tiles[i].x, tiles[i].y);
+                    _rangeImg[i].color = _rangeDisplayColor;
                     _rangeImg[i].enabled = true;
                 }
-                for (int i = rangeImgCount; i < attackRange.Length; i++)
+                for (int i = rangeImgCount; i < tiles.Length; i++)
                 {
-                    _rangeImg.Add(Object.Instantiate(_rangeImg[0], new Vector2(attackRange[i].x, attackRange[i].y), Quaternion.identity, _rangeImgCollection.transform));
+                    var newImg = Object.Instantiate(_rangeImg[0], new Vector2(tiles[i].x, tiles[i].y), Quaternion.identity, _rangeImgCollection.transform);
+                    newImg.color = _rangeDisplayColor;
+                    _rangeImg.Add(newImg);
                 }
             }
+        }
+        // 池子清除：所有图元 enabled=false（保留对象,下次 RenderRangeToPool 复用）。
+        private void ClearRangePool()
+        {
+            int rangeImgCount = _rangeImg.Count;
+            for (int i = 0; i < rangeImgCount; i++) _rangeImg[i].enabled = false;
+        }
+        // 模式切换的唯一入口：负责 (1) 设 _rangeDisplayMode + _rangeDisplayColor
+        // (2) 按 mode 开/关 _rangeImgCollection + _rangeOpen
+        // (3) 立即渲一帧。Normal / Skill / None 三态互斥逻辑全在这里,别处不再有开关池子的代码。
+        private static readonly Color RangeColorNormal = new Color(255, 160, 0);
+        private static readonly Color RangeColorSkill  = new Color(1f, 0.2f, 0.2f);
+        private void SetRangeMode(RangeDisplayMode mode)
+        {
+            _rangeDisplayMode = mode;
+            _rangeDisplayColor = (mode == RangeDisplayMode.Skill) ? RangeColorSkill : RangeColorNormal;
+            if (mode == RangeDisplayMode.None)
+            {
+                if (_rangeOpen) { _rangeOpen = false; _rangeImgCollection.SetActive(false); }
+                ClearRangePool();
+            }
+            else
+            {
+                if (!_rangeOpen) { _rangeOpen = true; _rangeImgCollection.SetActive(true); }
+                UIStates_Update_Range();
+            }
+        }
+        // 在 AbilityRuntime 的 components 列表里找第一个 AttackRangeOverride 类型的组件,
+        // 返回它对应的 ParamList(原始字段,UI 侧缓存以便 toggle 时不再扫 components)。
+        // 找不到返 null(此时 _skillRange 按钮会隐藏,提示"该技能无攻击范围覆盖")。
+        private static AbilitySystem.ParamList FindAttackRangeOverrideParams(AbilitySystem.AbilityRuntime runtime)
+        {
+            if (runtime == null || runtime.components == null) return null;
+            for (int i = 0; i < runtime.components.Count; i++)
+            {
+                if (runtime.components[i] is AbilitySystem.Components.AttackRangeOverride)
+                {
+                    return (i < runtime.componentParams.Count) ? runtime.componentParams[i] : null;
+                }
+            }
+            return null;
+        }
+        private static (int x, int y)[] ToTupleRange(Vector2Int[] range)
+        {
+            var arr = new (int x, int y)[range.Length];
+            for (int i = 0; i < range.Length; i++) arr[i] = (range[i].x, range[i].y);
+            return arr;
         }
         // CanSet
         private void UIStates_ShowClose_Canset(bool show)

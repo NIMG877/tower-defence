@@ -80,9 +80,15 @@ public class Entity : MonoBehaviour, IPoolOperation
     [SerializeField] public Transform TempContainer;
     protected OrderLogic EntityOrderLogic;
     /// <summary>
-    /// 朝向 0-up 1-right 2-down 3-left
+    /// 朝向 0-up 1-right 2-down 3-left。setter 走 <see cref="SetOrientation"/>（带 Vision 同步副作用）。
     /// </summary>
     protected int _orientation;
+    /// <summary>
+    /// 当前朝向（0-up 1-right 2-down 3-left）。仅供 UI 侧读取（如技能攻击范围预览需要
+    /// entity 的当前朝向喂给 <c>MapDataManager.RangeCaculator</c>）。写仍走
+    /// <see cref="SetOrientation"/>。
+    /// </summary>
+    public int Orientation => _orientation;
 
     #region//委托事件
     public delegate void OperationsBeforeHurt(Entity origin, ref float damage, ref float multiplyer, ref float defPenetrate, ref float mgrPenetrate, ref float defPenetrate_value, ref float mgrPenetrate_value, ref int damageType, int applyType);
