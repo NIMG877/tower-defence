@@ -137,6 +137,73 @@ namespace AbilitySystem
             return () => parsed;
         }
 
+        // 数组版 Lazy:字面量同时吃 CSV("1.4,2.5")和单值("1.4")——CsvParser.Split 天然支持。
+        // fromBlackboard 路径容错:BB 里存 float[]/float/string 都能读;其它类型走 warn 桶。
+        public Func<float[]> GetFloatArrayLazy(string key, float[] defaultValue = null, Blackboard bb = null)
+        {
+            var entry = FindEntry(key);
+            if (entry == null) return () => defaultValue ?? Array.Empty<float>();
+            if (entry.fromBlackboard)
+            {
+                if (bb == null)
+                {
+                    WarnMissingBlackboardOnce(entry.key);
+                    return () => defaultValue ?? Array.Empty<float>();
+                }
+                return () => ReadFloatArrayFromBB(bb, entry.value, defaultValue);
+            }
+            float[] parsed = CsvParser.Split(entry.value, float.Parse);
+            return () => parsed;
+        }
+
+        // 字符串数组版 Lazy,CSV/单值都吃,BB 容错 string[]/string。
+        // 带 parser 时把每个 token 解析成 T(典型:Enum.Parse 给 BuffType[]);
+        // 不带 parser 时 T 必须是 string,走 SplitStrings。
+        public Func<T[]> GetStringArrayLazy<T>(string key, T[] defaultValue = null, Blackboard bb = null, Func<string, T> parser = null)
+        {
+            var entry = FindEntry(key);
+            if (entry == null) return () => defaultValue ?? Array.Empty<T>();
+            if (entry.fromBlackboard)
+            {
+                if (bb == null)
+                {
+                    WarnMissingBlackboardOnce(entry.key);
+                    return () => defaultValue ?? Array.Empty<T>();
+                }
+                return () => ReadStringArrayFromBB(bb, entry.value, defaultValue, parser);
+            }
+            if (parser == null)
+            {
+                if (typeof(T) != typeof(string))
+                {
+                    WarnStringArrayParserRequiredOnce(entry.key, typeof(T));
+                    return () => defaultValue ?? Array.Empty<T>();
+                }
+                string[] arr = CsvParser.SplitStrings(entry.value);
+                return () => (T[])(object)arr;
+            }
+            T[] parsed = CsvParser.Split(entry.value, parser);
+            return () => parsed;
+        }
+
+        // 整型数组版 Lazy,CSV/单值都吃,BB 容错 int[]/int/string。
+        public Func<int[]> GetIntArrayLazy(string key, int[] defaultValue = null, Blackboard bb = null)
+        {
+            var entry = FindEntry(key);
+            if (entry == null) return () => defaultValue ?? Array.Empty<int>();
+            if (entry.fromBlackboard)
+            {
+                if (bb == null)
+                {
+                    WarnMissingBlackboardOnce(entry.key);
+                    return () => defaultValue ?? Array.Empty<int>();
+                }
+                return () => ReadIntArrayFromBB(bb, entry.value, defaultValue);
+            }
+            int[] parsed = CsvParser.Split(entry.value, int.Parse);
+            return () => parsed;
+        }
+
         // ========= 内部 helpers =========
 
         private ParamEntry FindEntry(string key)
@@ -227,6 +294,95 @@ namespace AbilitySystem
                 "bb-type:" + bbKey,
                 $"[ParamList] Blackboard key '{bbKey}' value runtime type does not match the requested type. " +
                 "Returning defaultValue.");
+        }
+
+        // GetFloatArrayLazy 的 fromBlackboard 容错读。Get<object> 绕开硬转,运行时 type
+        // switch 拿值;4 种 known case 走对应路径,其它类型走独立 warn 桶('bb-array-type:')
+        // 避免和 'bb-type:' 互相吞掉。
+        private static float[] ReadFloatArrayFromBB(Blackboard bb, string bbKey, float[] defaultValue)
+        {
+            
+            object v = bb.Get<object>(bbKey, null);
+            if (v == null) return defaultValue ?? Array.Empty<float>();
+            switch (v)
+            {
+                case float[] arr: return arr;
+                case float f:     return new[] { f };
+                case string s:    return CsvParser.Split(s, float.Parse);
+                default:
+                    WarnBlackboardArrayTypeMismatchOnce(bbKey);
+                    return defaultValue ?? Array.Empty<float>();
+            }
+        }
+
+        private static void WarnBlackboardArrayTypeMismatchOnce(string bbKey)
+        {
+            OneShotWarn.WarnOnce(
+                "bb-array-type:" + bbKey,
+                $"[ParamList] Blackboard key '{bbKey}' runtime type cannot be read as float[]; " +
+                "expected float[]/float/string. Returning defaultValue.");
+        }
+
+        // GetStringArrayLazy<T> 的 fromBlackboard 容错读,与字面量路径对称:BB 里存
+        // T[] 直返;string 走 CsvParser 拆分(有 parser 跑 parser,T=string 走
+        // SplitStrings);其它类型走独立 warn 桶。
+        private static T[] ReadStringArrayFromBB<T>(Blackboard bb, string bbKey, T[] defaultValue, Func<string, T> parser)
+        {
+            object v = bb.Get<object>(bbKey, null);
+            if (v == null) return defaultValue ?? Array.Empty<T>();
+            switch (v)
+            {
+                case T[] arr:
+                    return arr;
+                case string s:
+                    if (parser != null) return CsvParser.Split(s, parser);
+                    if (typeof(T) == typeof(string)) return (T[])(object)CsvParser.SplitStrings(s);
+                    WarnStringArrayParserRequiredOnce(bbKey, typeof(T));
+                    return defaultValue ?? Array.Empty<T>();
+                default:
+                    WarnBlackboardStringArrayTypeMismatchOnce(bbKey);
+                    return defaultValue ?? Array.Empty<T>();
+            }
+        }
+
+        private static void WarnBlackboardStringArrayTypeMismatchOnce(string bbKey)
+        {
+            OneShotWarn.WarnOnce(
+                "bb-string-array-type:" + bbKey,
+                $"[ParamList] Blackboard key '{bbKey}' runtime type cannot be read as string[]; " +
+                "expected string[]/string. Returning defaultValue.");
+        }
+
+        private static void WarnStringArrayParserRequiredOnce(string key, Type t)
+        {
+            OneShotWarn.WarnOnce(
+                "bb-string-array-parser:" + key,
+                $"[ParamList] GetStringArrayLazy<{t.Name}> needs a Func<string, T> parser to convert each CSV element; " +
+                "supply one, or use T=string (no parser needed). Returning defaultValue.");
+        }
+
+        // GetIntArrayLazy 的 fromBlackboard 容错读。int[] 直返,int 包 [v],string 走 CSV 拆分;其它走独立 warn 桶。
+        private static int[] ReadIntArrayFromBB(Blackboard bb, string bbKey, int[] defaultValue)
+        {
+            object v = bb.Get<object>(bbKey, null);
+            if (v == null) return defaultValue ?? Array.Empty<int>();
+            switch (v)
+            {
+                case int[] arr:  return arr;
+                case int i:      return new[] { i };
+                case string s:   return CsvParser.Split(s, int.Parse);
+                default:
+                    WarnBlackboardIntArrayTypeMismatchOnce(bbKey);
+                    return defaultValue ?? Array.Empty<int>();
+            }
+        }
+
+        private static void WarnBlackboardIntArrayTypeMismatchOnce(string bbKey)
+        {
+            OneShotWarn.WarnOnce(
+                "bb-int-array-type:" + bbKey,
+                $"[ParamList] Blackboard key '{bbKey}' runtime type cannot be read as int[]; " +
+                "expected int[]/int/string. Returning defaultValue.");
         }
     }
 
