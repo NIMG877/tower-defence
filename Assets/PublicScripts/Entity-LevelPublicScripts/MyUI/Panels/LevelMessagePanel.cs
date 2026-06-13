@@ -1170,7 +1170,9 @@ namespace MyUI
                     _selectAbilityConfig = _selectAbilityRuntime.config;
                     _skillOpen.gameObject.SetActive(true);
                     _skillOpen.sprite = _selectAbilityConfig.icon;
-                    var range = _selectAbilityConfig.sp != null ? _selectAbilityConfig.sp.abilityAttackRange : null;
+                    // 范围预览:旧版从 SPConfig.abilityAttackRange 读取,该字段已迁移至 AttackRangeOverrideComponent(ParamList 驱动)。
+                    // 组件管线接好之前,这里统一隐藏范围预览 UI;接好后把 null 替换为组件查询即可。
+                    Vector2Int[] range = null;
                     _skillRange.gameObject.SetActive(range != null && range.Length > 0);
                 }
                 else

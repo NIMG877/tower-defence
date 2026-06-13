@@ -22,7 +22,5 @@ namespace AbilitySystem
         public AbilityOpenMode openMode = AbilityOpenMode.Auto;
         public bool recoverForbidDuringAbility;
         public bool canManualClose;
-        [Tooltip("技能激活时的攻击范围覆盖（相对 Vision.Range）。空表示不覆盖。")]
-        public Vector2Int[] abilityAttackRange;
     }
 }
