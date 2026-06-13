@@ -389,8 +389,6 @@ namespace MyUI
         private Color _orange_half = new Color(1, 0.412f, 0, 0.5f);
         private Color _gray = new Color(0.259f, 0.259f, 0.259f);
 
-        // ===== Legacy Unused Flags (kept to avoid breaking reflection/serialization) =====
-        private bool _isShowMessage, _isShowCanSetBlock, _isShowOperate, _isShowAttackRange;
         #endregion
 
         #region Construction & Initialization
@@ -813,18 +811,18 @@ namespace MyUI
         }
         public void CostTextUpDate()
         {
-            (int currentCost, int maxCost, float costTimer) cm = LevelRescurceManager.Manager.CostMessage;
-            _currentCost = cm.currentCost;
+            _currentCost = LevelRescurceManager.Manager.CostMessage.currentCost;
             _cost.text = _currentCost.ToString();
-            for (int i = 0; i < _placeDataList.Count; i++)
-            {
-                _placeDataList[i].CanSetStateUpDate();
-            }
+            RefreshAllPlaceDataAffordability();
         }
         public void CanSetNumUpDate()
         {
             _isAffordableNum = LevelRescurceManager.Manager.CanSetNumLeft;
             _isAffordableNumText.text = _isAffordableNum.ToString();
+            RefreshAllPlaceDataAffordability();
+        }
+        private void RefreshAllPlaceDataAffordability()
+        {
             for (int i = 0; i < _placeDataList.Count; i++)
             {
                 _placeDataList[i].CanSetStateUpDate();
@@ -864,19 +862,17 @@ namespace MyUI
             var team1Members = SaveSystem.GetTeamMembers("Team1");
             EntityID[] characters = new EntityID[team1Members.Count];
             for (int i = 0; i < characters.Length; i++) characters[i] = team1Members[i];
+            EntityData[] prefab = new EntityData[characters.Length];
             _characterChineseName = new string[characters.Length];
             _damageStatisticDatas = new DamageStatisticData[characters.Length];
-            for (int i = 0; i < _damageStatisticDatas.Length; i++)
-            {
-                _damageStatisticDatas[i] = new DamageStatisticData(characters[i], new float[3] { 0, 0, 0 }, new float[1] { 0 }, new float[3] { 0, 0, 0 });
-                _characterChineseName[i] = CharacterCardManager.cardManager.GetCharacterAttribute(characters[i]).ChineseName;
-            }
-            EntityData[] prefab = new EntityData[characters.Length];
             int[] num = new int[characters.Length];
             for (int i = 0; i < characters.Length; i++)
             {
-                prefab[i] = CharacterCardManager.cardManager.GetCharacterAttribute(characters[i]);
+                EntityData attr = CharacterCardManager.cardManager.GetCharacterAttribute(characters[i]);
+                prefab[i] = attr;
                 num[i] = 1;
+                _damageStatisticDatas[i] = new DamageStatisticData(characters[i], new float[3] { 0, 0, 0 }, new float[1] { 0 }, new float[3] { 0, 0, 0 });
+                _characterChineseName[i] = attr.ChineseName;
             }
             InitializeStaticEntityPrefabToSelector(characters, num);
             _currentUIState = UIState.normal;
@@ -971,54 +967,24 @@ namespace MyUI
 
         private void UIStates_SwitchTo_ViewBeforeSet(StaticEntityPlaceData staticEntityPlaceData)
         {
-            _isSlow = true;
-            SetTimeScale();
-            _selectedEntity = null; // 离开 viewAfterSet 一定清:viewAfterSet 留下的 _selectedEntity
-                                    // 会让 GetCurrentDisplayRange 走"已部署 entity.Range"分支,
-                                    // 在 setting/choosing/viewBeforeSet 这些"池预览"态下显示
-                                    // 错位(显示的是上一个已部署 entity 的范围,不是新拖出的)。
-            _selectedPlaceData = staticEntityPlaceData;
-            _selectedStaticEntityID = staticEntityPlaceData.EntityId;
-            UIStates_ShowSomethingAndOtherClose(new string[2] { "leftmessage", "canset" });
-            if (_currentUIState == UIState.normal)
-            {
-                _currentUIState = UIState.viewBeforeSet;
-                FixedUpdate();
-            }
-            _currentUIState = UIState.viewBeforeSet;
+            // 离开 viewAfterSet 一定清:viewAfterSet 留下的 _selectedEntity 会让
+            // GetCurrentDisplayRange 走"已部署 entity.Range"分支,在 setting/choosing/
+            // viewBeforeSet 这些"池预览"态下显示错位(显示的是上一个已部署 entity 的范围,
+            // 不是新拖出的)。
+            EnterPoolPreviewState(UIState.viewBeforeSet, staticEntityPlaceData,
+                new string[2] { "leftmessage", "canset" });
         }
 
         private void UIStates_SwitchTo_Setting(StaticEntityPlaceData staticEntityPlaceData)
         {
-            _isSlow = true;
-            SetTimeScale();
-            _selectedEntity = null; // 同 ViewBeforeSet:从 viewAfterSet 直接拖出干员时,
-                                    // 上一帧选中的已部署 entity 引用必须清,否则会显示它的范围。
-            _selectedPlaceData = staticEntityPlaceData;
-            _selectedStaticEntityID = staticEntityPlaceData.EntityId;
-            UIStates_ShowSomethingAndOtherClose(new string[3] { "leftmessage", "dragger", "canset" });
-            if (_currentUIState == UIState.normal)
-            {
-                _currentUIState = UIState.setting;
-                FixedUpdate();
-            }
-            _currentUIState = UIState.setting;
+            EnterPoolPreviewState(UIState.setting, staticEntityPlaceData,
+                new string[3] { "leftmessage", "dragger", "canset" });
         }
 
         private void UIStates_SwitchTo_Chooseing(StaticEntityPlaceData staticEntityPlaceData)
         {
-            _isSlow = true;
-            SetTimeScale();
-            _selectedEntity = null; // 同上
-            _selectedPlaceData = staticEntityPlaceData;
-            _selectedStaticEntityID = staticEntityPlaceData.EntityId;
-            UIStates_ShowSomethingAndOtherClose(new string[4] { "leftmessage", "dragger", "choosing", "canset" });
-            if (_currentUIState == UIState.normal)
-            {
-                _currentUIState = UIState.choosing;
-                FixedUpdate();
-            }
-            _currentUIState = UIState.choosing;
+            EnterPoolPreviewState(UIState.choosing, staticEntityPlaceData,
+                new string[4] { "leftmessage", "dragger", "choosing", "canset" });
         }
 
         private void UIStates_SwitchTo_ViewAfterSet(EntityID entityID, Entity entity = null)
@@ -1029,12 +995,31 @@ namespace MyUI
             _selectedEntity = entity;
             _selectedPlaceData = null;
             UIStates_ShowSomethingAndOtherClose(new string[3] { "leftmessage", "operator", "range" });
+            EnterUIStateAndPump(UIState.viewAfterSet);
+        }
+
+        // 4 个"池预览"态共享:清 _selectedEntity、写 placeData + ID、切面板、走状态机循环。
+        private void EnterPoolPreviewState(UIState next, StaticEntityPlaceData placeData, string[] shows)
+        {
+            _isSlow = true;
+            SetTimeScale();
+            _selectedEntity = null;
+            _selectedPlaceData = placeData;
+            _selectedStaticEntityID = placeData.EntityId;
+            UIStates_ShowSomethingAndOtherClose(shows);
+            EnterUIStateAndPump(next);
+        }
+
+        // 从 normal 切到非常驻态时启动 FixedUpdate 轮询;切到同一态也再调一次无副作用
+        // (FixedUpdate 是 async void,第二次直接返回)。
+        private void EnterUIStateAndPump(UIState next)
+        {
             if (_currentUIState == UIState.normal)
             {
-                _currentUIState = UIState.viewAfterSet;
+                _currentUIState = next;
                 FixedUpdate();
             }
-            _currentUIState = UIState.viewAfterSet;
+            _currentUIState = next;
         }
 
         // ===== State Machine + Dispatch =====
@@ -1083,6 +1068,29 @@ namespace MyUI
             UIStates_ShowClose_Canset(showHave && shows.Contains("canset"));
         }
 
+        // 通用 show/hide 守卫:_xxxOpen 已经是 X 状态时不再重复 SetActive;false 路径留给调用方
+        // 写额外的 onClose 副作用。
+        private void ShowClosePanel(ref bool open, GameObject go, bool show, System.Action onClose = null)
+        {
+            if (show)
+            {
+                if (!open)
+                {
+                    open = true;
+                    go.SetActive(true);
+                }
+            }
+            else
+            {
+                if (open)
+                {
+                    open = false;
+                    go.SetActive(false);
+                    onClose?.Invoke();
+                }
+            }
+        }
+
         // ===== 6 Panels: ShowClose/Update =====
         // LeftMessage
         private void UIStates_ShowClose_Leftmessage(bool show)
@@ -1099,12 +1107,15 @@ namespace MyUI
                 {
                     return;
                 }
-                EntityID entityID = _selectedStaticEntityID.Value;
 
-                EntityData entityData = GameDataService.EntityRepository.Get(entityID);
+                EntityData entityData = GetCurrentEntityData();
 
                 SwitchShowAbilityTalent(_currentShow, entityData, _selectedEntity);
-                ShowAttackRangeAttributes(GetCurrentVisionRange());
+                // LeftMessage 小预览固定显示 EntityData.VisionRange(基础范围,相对偏移,
+                // self=(0,0))。不取 GetCurrentVisionRange():后者在 viewAfterSet 下是已
+                // SetOrientation/AttackRangeOverride 的世界坐标,经 RangeCaculator 偏移过,
+                // self 不再位于 (0,0),且范围会随朝向变化,不符合"小预览"语义。
+                ShowAttackRangeAttributes(entityData.VisionRange);
                 _name.text = entityData.ChineseName;
                 _class.sprite = _professionsLighten[entityData.CharacterJob];
                 UIStates_Update_Leftmessage();
@@ -1122,7 +1133,7 @@ namespace MyUI
         {
             if (!_selectedStaticEntityID.HasValue)
                 return;
-            EntityData entityData = GameDataService.EntityRepository.Get(_selectedStaticEntityID.Value);
+            EntityData entityData = GetCurrentEntityData();
             EntityStats stats = GetCurrentEntityStats();
 
             // === 战斗属性 ===
@@ -1158,8 +1169,20 @@ namespace MyUI
             return _selectedPlaceData?.EntityStats;
         }
         /// <summary>
-        /// 当前选中态的攻击范围（<c>List&lt;Vector2Int&gt;</c>），供 <c>ShowAttackRangeAttributes</c> 与
-        /// <c>UIStates_Update_Range</c> 共用。两条数据通路分别处理：
+        /// 当前选中态的 EntityData：已部署 entity 优先，否则取 placeData 缓存。避免每个调用点
+        /// 重复走 <c>GameDataService.EntityRepository.Get(_selectedStaticEntityID.Value)</c>。
+        /// </summary>
+        private EntityData GetCurrentEntityData()
+        {
+            if (_selectedEntity != null)
+            {
+                return _selectedEntity.EntityData;
+            }
+            return _selectedPlaceData?.EntityData;
+        }
+        /// <summary>
+        /// 当前选中态的攻击范围（<c>List&lt;Vector2Int&gt;</c>），供操作员面板的世界图元
+        /// （<c>UIStates_Update_Range</c>）使用。三条数据通路分别处理：
         ///
         /// <list type="bullet">
         ///   <item><b>已部署 entity（viewAfterSet）</b>：直接返回 <c>entity.Vision.Range</c>，由
@@ -1172,6 +1195,8 @@ namespace MyUI
         ///   <item><b>viewBeforeSet 等尚无预览数据的场景</b>（chooser 未激活，<c>_orientation == -1</c>）：
         ///   兜底到 <c>EntityData.VisionRange</c> 模板。</item>
         /// </list>
+        /// LeftMessage 小预览不调本方法,直接用 <see cref="EntityData.VisionRange"/>(基础范围,
+        /// 相对偏移,self=(0,0)),不随朝向变化。
         /// </summary>
         private List<Vector2Int> GetCurrentVisionRange()
         {
@@ -1195,7 +1220,7 @@ namespace MyUI
             // === 兜底：viewBeforeSet 等无 chooser 的态走模板 ===
             if (_selectedStaticEntityID.HasValue)
             {
-                return GameDataService.EntityRepository.Get(_selectedStaticEntityID.Value).VisionRange;
+                return GetCurrentEntityData()?.VisionRange;
             }
             return null;
         }
@@ -1214,17 +1239,18 @@ namespace MyUI
         {
             if (show)
             {
-                if (_selectedEntity == null) return;
+                var entity = _selectedEntity;
+                if (entity == null) return;
                 if (!_operaterOpen)
                 {
                     _operaterOpen = true;
                     _operateArea.SetActive(true);
                 }
-                // 镜头横移：把 _selectedEntity 横向对齐到 _operateArea 锚点，y 跟随实体世界位置
-                MoveCamera(_selectedEntity.EntityPosition + _deltaX * Vector2.right, 0.1f);
+                // 镜头横移：把 entity 横向对齐到 _operateArea 锚点，y 跟随实体世界位置
+                MoveCamera(entity.EntityPosition + _deltaX * Vector2.right, 0.1f);
 
                 // 撤退按钮：仅当该 entity 配置为可撤退时启用；点击 → 池回收 + 50% 退款
-                bool canCallBack = _selectedEntity.EntityData.CanCallBack;
+                bool canCallBack = entity.EntityData.CanCallBack;
                 _callBack.enabled = canCallBack;
                 _callBackClick.callback.RemoveAllListeners();
                 if (canCallBack)
@@ -1234,20 +1260,20 @@ namespace MyUI
                         // 先退款再回收：CurrentSetCost 在 Return() 后仍可读（SetActive(false) 不销毁组件），
                         // 但语义上"先退一半费用再还池"更符合玩家认知。
                         LevelRescurceManager.Manager.ChangeCost(
-                            (int)(_selectedEntity.GetComponent<InteractableStatic>().CurrentSetCost * 0.5f));
+                            (int)(entity.GetComponent<InteractableStatic>().CurrentSetCost * 0.5f));
                         // 关键：设 IsActive = false 是给 Slider 自清理的信号。
                         // 死亡路径里 EntityStats.BeginDie 会把 _participateIn 置 false（IsActive 走 false 分支 → slider ReturnSlider）；
                         // 撤退路径没有 BeginDie 这一步，Entity.Dormancy 也不动 _participateIn，slider 看不到任何"已离场"信号，
                         // 就会引用一个 SetActive(false) 的 Entity 永远卡着。这一行对齐死亡路径的信号。
-                        _selectedEntity.Stats.IsActive = false;
-                        _selectedEntity.thisEntityPool.Return(_selectedEntity);
+                        entity.Stats.IsActive = false;
+                        entity.thisEntityPool.Return(entity);
                         AudioManager.Manager.PlayAudio("escape", 1, false, false);
                         UIStates_SwitchTo_Normal();
                     });
                 }
 
                 // 技能按钮与技能范围预览（新 AbilitySystem 数据源：EntityAbilityRunner / AbilityRuntime / SPConfig）
-                var runner = _selectedEntity.SkillRunner;
+                var runner = entity.SkillRunner;
                 if (runner != null && runner.Skills != null && runner.Skills.Count > 0)
                 {
                     _selectAbilityRuntime = runner.Skills[0];
@@ -1400,26 +1426,13 @@ namespace MyUI
         // Dragger
         private void UIStates_ShowClose_Dragger(bool show)
         {
-            if (show)
+            ShowClosePanel(ref _draggerOpen, _target.gameObject, show, () =>
             {
-                if (!_draggerOpen)
-                {
-                    _draggerOpen = true;
-                    _target.gameObject.SetActive(true);
-                }
-            }
-            else
-            {
-                if (_draggerOpen)
-                {
-                    _draggerOpen = false;
-                    _target.gameObject.SetActive(false);
-                    _up.enabled = false;
-                    _right.enabled = false;
-                    _left.enabled = false;
-                    _down.enabled = false;
-                }
-            }
+                _up.enabled = false;
+                _right.enabled = false;
+                _left.enabled = false;
+                _down.enabled = false;
+            });
         }
         private void UIStates_Update_Dragger()
         {
@@ -1457,22 +1470,10 @@ namespace MyUI
         // Chooser
         private void UIStates_ShowClose_Chooser(bool show)
         {
-            if (show)
+            ShowClosePanel(ref _chooserOpen, _chooser.gameObject, show);
+            if (show && _chooserOpen)
             {
-                if (!_chooserOpen)
-                {
-                    _chooserOpen = true;
-                    _chooser.gameObject.SetActive(true);
-                }
                 _chooser.transform.position = _target.transform.position;
-            }
-            else
-            {
-                if (_chooserOpen)
-                {
-                    _chooserOpen = false;
-                    _chooser.gameObject.SetActive(false);
-                }
             }
         }
         private void UIStates_Update_Chooser()
@@ -1482,47 +1483,12 @@ namespace MyUI
             if (!_inChooser)
             {
                 Vector2 dp = p - _chooser.transform.position;
-                if (dp.y > dp.x)
+                int newOrient = ResolveChooserOrientation(dp);
+                if (newOrient != -1 && _orientation != newOrient)
                 {
-                    if (dp.y > -dp.x && _orientation != 0)
-                    {
-                        _orientation = 0;
-                        _up.enabled = true;
-                        _down.enabled = false;
-                        _left.enabled = false;
-                        _right.enabled = false;
-                        UIStates_ShowClose_Range(true);
-                    }
-                    else if (dp.y <= -dp.x && _orientation != 3)
-                    {
-                        _orientation = 3;
-                        _up.enabled = false;
-                        _down.enabled = false;
-                        _left.enabled = true;
-                        _right.enabled = false;
-                        UIStates_ShowClose_Range(true);
-                    }
-                }
-                else
-                {
-                    if (dp.y > -dp.x && _orientation != 1)
-                    {
-                        _orientation = 1;
-                        _up.enabled = false;
-                        _down.enabled = false;
-                        _left.enabled = false;
-                        _right.enabled = true;
-                        UIStates_ShowClose_Range(true);
-                    }
-                    else if (dp.y <= -dp.x && _orientation != 2)
-                    {
-                        _orientation = 2;
-                        _up.enabled = false;
-                        _down.enabled = true;
-                        _left.enabled = false;
-                        _right.enabled = false;
-                        UIStates_ShowClose_Range(true);
-                    }
+                    _orientation = newOrient;
+                    SetOrientationArrow(newOrient);
+                    UIStates_ShowClose_Range(true);
                 }
                 _chooser.color = new Color(0, 1, 0, 0.4f);
                 _target.color = Color.green;
@@ -1530,14 +1496,38 @@ namespace MyUI
             else
             {
                 _orientation = -1;
-                _up.enabled = false;
-                _down.enabled = false;
-                _left.enabled = false;
-                _right.enabled = false;
+                SetOrientationArrow(-1);
                 _chooser.color = new Color(1, 1, 0, 0.4f);
                 _target.color = Color.yellow;
                 UIStates_ShowClose_Range(false);
             }
+        }
+
+        // 选择器朝向判定:dp.y 主导上半 vs 下半;若 dp.y 主导则按 dp.y vs -dp.x 分 up/left,
+        // 否则按 dp.y vs -dp.x 分 right/down。原 dp.y > -dp.x 边界同时被 up/right 用,
+        // 这里用 > / <= 与原条件逐位一致。返回 -1 = 在两条分界线的盲区,保持原朝向不变。
+        private static int ResolveChooserOrientation(Vector2 dp)
+        {
+            if (dp.y > dp.x)
+            {
+                if (dp.y > -dp.x) return 0; // up
+                if (dp.y <= -dp.x) return 3; // left
+            }
+            else
+            {
+                if (dp.y > -dp.x) return 1; // right
+                if (dp.y <= -dp.x) return 2; // down
+            }
+            return -1;
+        }
+
+        // 朝向 → 四个方向箭头 enabled。-1 全关。indices 与 _orientation 对齐(0=up,1=right,2=down,3=left)。
+        private void SetOrientationArrow(int orient)
+        {
+            _up.enabled = orient == 0;
+            _right.enabled = orient == 1;
+            _down.enabled = orient == 2;
+            _left.enabled = orient == 3;
         }
         // Range — 普通攻击范围（保持原签名供 UIStates_ShowSomethingAndOtherClose 调用）。
         // 内部委托给 SetRangeMode，池子开/关/写图元统一走同一条路径。
@@ -1589,17 +1579,18 @@ namespace MyUI
                 case RangeDisplayMode.Skill:
                 {
                     if (_selectedEntity == null || _skillRangeComponentParams == null) return null;
-                    // 原始 range 是设计师写的"模板范围",需结合 _selectedEntity 的位置 / 朝向
+                    var entity = _selectedEntity;
+                    // 原始 range 是设计师写的"模板范围",需结合 entity 的位置 / 朝向
                     // 喂给 MapDataManager.RangeCaculator,语义与 SetStaticEntity 落盘时对齐。
                     // 与 AttackRangeOverride.OnTrigger 行为一致:ctx=SkillRunner.sharedBlackboard
                     // 让 fromBlackboard=true 的设计能读到运行时 BB。
                     Vector2Int[] range = _skillRangeComponentParams.GetVector2IntArrayLazy(
-                        "range", null, _selectedEntity.SkillRunner.sharedBlackboard)();
+                        "range", null, entity.SkillRunner.sharedBlackboard)();
                     if (range == null || range.Length == 0) return null;
-                    Vector2 origin = _selectedEntity.EntityPosition;
+                    Vector2 origin = entity.EntityPosition;
                     (int x, int y) tilePos = ((int)(origin.x + 0.5), (int)(origin.y + 0.5));
                     return MapDataManager.Manager.RangeCaculator(
-                        ToTupleRange(range), tilePos, _selectedEntity.Orientation);
+                        ToTupleRange(range), tilePos, entity.Orientation);
                 }
                 default:
                     return null;
@@ -1703,10 +1694,7 @@ namespace MyUI
                 if (_cansetOpen)
                 {
                     _cansetOpen = false;
-                    for (int i = 0; i < _canSetBlockList.Count; i++)
-                    {
-                        MapDataManager.Manager.BlockDataMatrix[_canSetBlockList[i].i, _canSetBlockList[i].j].Material.color = Color.white;
-                    }
+                    ResetCanSetBlockColors();
                 }
             }
         }
@@ -1717,54 +1705,54 @@ namespace MyUI
 
             Color lightGreen = new Color(0, 0.4f, 0);
             FetchMapEntityData();
-            for (int i = 0; i < _canSetBlockList.Count; i++)
-            {
-                MapDataManager.Manager.BlockDataMatrix[_canSetBlockList[i].i, _canSetBlockList[i].j].Material.color = Color.white;
-            }
+            ResetCanSetBlockColors();
             _canSetBlockList.Clear();
-            switch (_canSetType)
+            System.Func<int, int, bool> predicate = GetCanSetPredicate(_canSetType);
+            if (predicate != null)
             {
-                case 0:
-                    for (int i = 0; i < _iSize; i++)
+                for (int i = 0; i < _iSize; i++)
+                {
+                    for (int j = 0; j < _jSize; j++)
                     {
-                        for (int j = 0; j < _jSize; j++)
+                        if (predicate(i, j))
                         {
-                            if (_lowerCanSetBlock[i, j] && !_staticEntityExistBlock[i, j])
-                            {
-                                _canSetBlockList.Add((i, j));
-                            }
+                            _canSetBlockList.Add((i, j));
                         }
                     }
-                    break;
-                case 1:
-                    for (int i = 0; i < _iSize; i++)
-                    {
-                        for (int j = 0; j < _jSize; j++)
-                        {
-                            if (_higherCanSetBlock[i, j] && !_staticEntityExistBlock[i, j])
-                            {
-                                _canSetBlockList.Add((i, j));
-                            }
-                        }
-                    }
-                    break;
-                case 2:
-                    for (int i = 0; i < _iSize; i++)
-                    {
-                        for (int j = 0; j < _jSize; j++)
-                        {
-                            if ((_lowerCanSetBlock[i, j] || _higherCanSetBlock[i, j]) && !_staticEntityExistBlock[i, j])
-                            {
-                                _canSetBlockList.Add((i, j));
-                            }
-                        }
-                    }
-                    break;
-                default: break;
+                }
             }
+            ColorBlockList(lightGreen);
+        }
+
+        // 把上一帧高亮的格子全部还原为白色,避免状态切换后残留绿块。
+        private void ResetCanSetBlockColors()
+        {
+            var matrix = MapDataManager.Manager.BlockDataMatrix;
             for (int i = 0; i < _canSetBlockList.Count; i++)
             {
-                MapDataManager.Manager.BlockDataMatrix[_canSetBlockList[i].i, _canSetBlockList[i].j].Material.color = lightGreen;
+                matrix[_canSetBlockList[i].i, _canSetBlockList[i].j].Material.color = Color.white;
+            }
+        }
+
+        private void ColorBlockList(Color c)
+        {
+            var matrix = MapDataManager.Manager.BlockDataMatrix;
+            for (int i = 0; i < _canSetBlockList.Count; i++)
+            {
+                matrix[_canSetBlockList[i].i, _canSetBlockList[i].j].Material.color = c;
+            }
+        }
+
+        // 把原 switch 三臂的"格子可放置判定"抽成谓词,主循环只跑一份。
+        // 0=仅地面 / 1=仅高台 / 2=都可;FetchMapEntityData 已保证对应 bool[,] 已加载。
+        private System.Func<int, int, bool> GetCanSetPredicate(int canSetType)
+        {
+            switch (canSetType)
+            {
+                case 0: return (i, j) => _lowerCanSetBlock[i, j] && !_staticEntityExistBlock[i, j];
+                case 1: return (i, j) => _higherCanSetBlock[i, j] && !_staticEntityExistBlock[i, j];
+                case 2: return (i, j) => (_lowerCanSetBlock[i, j] || _higherCanSetBlock[i, j]) && !_staticEntityExistBlock[i, j];
+                default: return null;
             }
         }
 
@@ -1773,20 +1761,18 @@ namespace MyUI
         #region Helpers
         private void FetchMapEntityData()
         {
+            _staticEntityExistBlock = EntityManager.Manager.StaticEntityExistBlock;
             switch (_canSetType)
             {
                 case 0:
                     _lowerCanSetBlock = MapDataManager.Manager.LowerCanSetBlock;
-                    _staticEntityExistBlock = EntityManager.Manager.StaticEntityExistBlock;
                     break;
                 case 1:
                     _higherCanSetBlock = MapDataManager.Manager.HigherCanSetBlock;
-                    _staticEntityExistBlock = EntityManager.Manager.StaticEntityExistBlock;
                     break;
                 case 2:
                     _lowerCanSetBlock = MapDataManager.Manager.LowerCanSetBlock;
                     _higherCanSetBlock = MapDataManager.Manager.HigherCanSetBlock;
-                    _staticEntityExistBlock = EntityManager.Manager.StaticEntityExistBlock;
                     break;
                 default: break;
             }
@@ -1857,10 +1843,14 @@ namespace MyUI
                     // Skill: 优先用 live entity 的 AbilityRuntime（未来可显示 SP 实时状态），回退到模板
                     AbilitySystem.AbilityConfig abilityConfig = null;
                     AbilitySystem.AbilityRuntime abilityRuntime = null;
-                    if (entity != null && entity.SkillRunner != null && entity.SkillRunner.Skills != null && entity.SkillRunner.Skills.Count > 0)
+                    if (entity != null)
                     {
-                        abilityRuntime = entity.SkillRunner.Skills[0];
-                        abilityConfig = abilityRuntime.config;
+                        var skillRunner = entity.SkillRunner;
+                        if (skillRunner != null && skillRunner.Skills != null && skillRunner.Skills.Count > 0)
+                        {
+                            abilityRuntime = skillRunner.Skills[0];
+                            abilityConfig = abilityRuntime.config;
+                        }
                     }
                     else if (entityData.Skills != null && entityData.Skills.Count > 0)
                     {
@@ -1883,9 +1873,10 @@ namespace MyUI
                 case 2:
                     // Talent: live entity 优先（运行时实际挂载的 AbilityRuntime 缓存视图），回退到 entityData.Talents（数据层模板）
                     AbilitySystem.AbilityConfig[] ts;
-                    if (entity != null && entity.SkillRunner != null)
+                    var talentRunner = entity != null ? entity.SkillRunner : null;
+                    if (talentRunner != null)
                     {
-                        var runtimes = entity.SkillRunner.Talents;
+                        var runtimes = talentRunner.Talents;
                         ts = new AbilitySystem.AbilityConfig[runtimes.Count];
                         for (int i = 0; i < runtimes.Count; i++) ts[i] = runtimes[i].config;
                     }
@@ -1967,17 +1958,26 @@ namespace MyUI
                 _skillTalentRectParent.GetComponent<ScrollRect>().vertical = false;
             }
         }
-        private void ShowAttackRangeAttributes(List<Vector2Int> range0)
+        // 把 EntityData.VisionRange（基础范围，相对偏移，self=(0,0)）摆到 LeftMessage 的
+        // 小预览 UI 中：以 base range 包围盒中心为锚点居中（视觉上整张图在 _rangeArea 中
+        // 摆正），self 跟随 (0, 0) entry 的位置（(0-centerX, 0-centerY) * l，对称范围时与
+        // 包围盒中心重合,非对称范围时偏向一侧）。tile 边长 l 由 base range 的最大延伸算出,
+        // 保证整张图塞得进 _rangeArea。保留 (y,-x) 旋转约定（与原版一致）。
+        // base range 是模板,与 viewAfterSet/_orientation/RangeCaculator 无关,
+        // 任意状态下显示都一致。
+        private void ShowAttackRangeAttributes(List<Vector2Int> baseRange)
         {
+            if (baseRange == null || baseRange.Count == 0) return;
+
             int maxX, minX, maxY, minY;
             maxX = -1000;
             maxY = -1000;
             minX = 1000;
             minY = 1000;
-            (int x, int y)[] range = new (int x, int y)[range0.Count];
+            (int x, int y)[] range = new (int x, int y)[baseRange.Count];
             for (int i = 0; i < range.Length; i++)
             {
-                range[i] = (range0[i].y, -range0[i].x);
+                range[i] = (baseRange[i].y, -baseRange[i].x);
                 if (maxX < range[i].x)
                     maxX = range[i].x;
                 if (maxY < range[i].y)
@@ -2017,30 +2017,26 @@ namespace MyUI
             for (int i = 0; i < range.Length; i++)
             {
                 _rangeTiles[i].sizeDelta = new Vector2(l * (1 - gap), l * (1 - gap));
+                // 整图居中:所有 tile 减掉包围盒中心,(0,0) entry 偏移到 (-centerX,-centerY)*l。
                 _rangeTiles[i].anchoredPosition = new Vector2(l * (range[i].x - centerX), l * (range[i].y - centerY));
                 _rangeTiles[i].gameObject.SetActive(true);
             }
+            // self tile 落在 (0,0) entry 居中后的位置 — 对称范围 = 视觉中心;
+            // 非对称范围(如"向右一条线")=(0,0) entry 偏移后落在图的一侧。
             _rangeSelfTile.sizeDelta = new Vector2(l * (1 - gap), l * (1 - gap));
             _rangeSelfTile.anchoredPosition = new Vector2(-l * centerX, -l * centerY);
-
-
-
-
         }
         private async void CostSliderAndCanSetNumUpdate()
         {
             while (true)
             {
-                (int currentCost, int maxCost, float costTimer) cm = LevelRescurceManager.Manager.CostMessage;
+                var cm = LevelRescurceManager.Manager.CostMessage;
                 _isAffordableNum = LevelRescurceManager.Manager.CanSetNumLeft;
                 _currentCost = cm.currentCost;
                 _cost.text = _currentCost.ToString();
                 _costSlider.fillAmount = cm.costTimer;
                 _isAffordableNumText.text = _isAffordableNum.ToString();
-                for (int i = 0; i < _placeDataList.Count; i++)
-                {
-                    _placeDataList[i].CanSetStateUpDate();
-                }
+                RefreshAllPlaceDataAffordability();
                 await UniTask.WaitForFixedUpdate(LevelResourceSharing.LevelCtk);
             }
         }
