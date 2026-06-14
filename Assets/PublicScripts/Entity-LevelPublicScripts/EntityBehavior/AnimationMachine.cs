@@ -340,7 +340,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 SetSpineAnimation(Move, true, 1);
                 break;
             case EntityState.Attack:
-                OnAttackAnimationBegin?.Invoke();
                 Attack = (thisEntity.Movement.ResistList.Count == 0) ? Attack_Remote : Attack_Close;
                 int length = Attack.Length;
                 AnimationReferenceAsset attack = (_attackAnimationIndex < length)
@@ -361,6 +360,10 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                     SetSpineAnimation(Attack_Begin, false, scaleB > 1 ? scaleB : 1);
                     AddSpineAnimation(attack, false, scale, 0);
                 }
+                // Fired after the spine track is (re)assigned so subscribers can read a
+                // consistent track entry. CurrentState is still the previous value here —
+                // it is updated in HandleAnimationStateStart when Spine raises Start.
+                OnAttackAnimationBegin?.Invoke();
                 break;
             case EntityState.Start:
                 SetSpineAnimation(Start, false, 1);
@@ -419,7 +422,9 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 break;
             case AnimKind.DieAnim:
                 currentState = EntityState.Die;
-                SetColor(ColorEffect.FadeOut, Die.Animation.Duration);
+                // FadeOut is deferred to HandleAnimationStateComplete so the
+                // death animation plays at full opacity, then fades + returns
+                // to pool only after Spine signals the Die track has finished.
                 break;
         }
     }
@@ -473,6 +478,14 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
             {
                 _attackAnimationIndex = (_attackAnimationIndex + 1) % Attack.Length;
             }
+            return;
+        }
+        // Die animation finished → kick off the fade-out. The tween's OnComplete
+        // returns the entity to the pool. currentState guard keeps Dormancy-reset
+        // (which replaces the Die track with Default) from re-triggering fade-out.
+        if (Die != null && currentState == EntityState.Die && trackEntry.Animation == Die.Animation)
+        {
+            SetColor(ColorEffect.FadeOut, 0.2f);
             return;
         }
     }
@@ -549,6 +562,11 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     public void Dormancy()
     {
         OnAttackAnimationBegin = null;
+        // _attackAction may still be set if Dormancy fires between
+        // TrySetAttackState and the OnAttack Spine event (e.g. a death
+        // that pre-empts an in-flight attack). Null it so pool reuse
+        // doesn't re-fire a stale callback on the next deploy.
+        _attackAction = null;
         states_ban.Clear();
         ResetAnimation(AllSlots);
         SetState(EntityState.Default);
