@@ -225,8 +225,13 @@ public class LevelActionManager : IManagerStartEnd
         {
             AudioManager.Manager.PlayAudio(win ? "win" : "lose", 1, false, false);
             SettlementPanel.Panel.SetDatas($"{LevelResourceSharing.LD.LevelCode}  {LevelResourceSharing.LD.LevelName}", win, 0, LevelMessagePanel.Panel.DamageStatisticDatas);
-            PanelManager.Push(SettlementPanel.Panel);
+            // 必须先 LevelEnd 再 Push：ToEnd 会把 _turrets 里的静态干员还池，触发
+            // InteractableStatic.Dormancy → EntityBackToSelector 回填 _placeDataList。
+            // 若先 Push，OnPause 会先把列表清空，EntityBackToSelector 在空列表上调用
+            // AddStaticEntityPrefabToSelector 凭空塞一条记录，下一场 OnEnter 追加 placeData
+            // 时会复制一份，部署/撤退后 bench 上出现重复图标。
             LevelResourceSharing.LevelEnd();
+            PanelManager.Push(SettlementPanel.Panel);
         }
     }
     public void SetPathPrinter(Vector2 destination, int pathSerial, int sectionSerial, int pointSerial, int moveMethod)
