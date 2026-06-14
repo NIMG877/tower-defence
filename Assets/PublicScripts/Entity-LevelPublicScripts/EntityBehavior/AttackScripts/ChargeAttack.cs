@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Spine;
 using Spine.Unity;
 
@@ -8,7 +9,10 @@ public class ChargeAttack : AttackBase
 {
     public OperationsBeforeTakeDamage OnBeforeChargeTakeDamage;
     public OperationsAfterTakeDamage OnAfterChargeTakeDamage;
-    public AnimationReferenceAsset[] ChargeAnimation;
+    public AnimationReferenceAsset ChargeBegin;
+    [FormerlySerializedAs("ChargeAnimation")]
+    public AnimationReferenceAsset[] Charge;
+    public AnimationReferenceAsset ChargeEnd;
     private int _currentChargeNum;
     [SerializeField] private GameObject[] _chargeEffects;
     [SerializeField] private AttackEffectData _chargeEffectData;
@@ -39,8 +43,10 @@ public class ChargeAttack : AttackBase
         {
             var once = new AnimationOverride
             {
-                AttackRemote = ChargeAnimation,
-                AttackClose = ChargeAnimation,
+                AttackBegin = ChargeBegin,
+                AttackRemote = Charge,
+                AttackClose = Charge,
+                AttackEnd = ChargeEnd,
             };
             if (_thisEntity.entityAM.TrySetAttackState(forceChange, () => { SpawnChargeEffect(); }, once))
             {
