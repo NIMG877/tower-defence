@@ -7,6 +7,13 @@ using System;
 
 public class AnimationMachine : MonoBehaviour, IPoolOperation
 {
+    // Animation reference assets are serialized in two stages: original (o_*) for reset
+    // and runtime (no prefix) which the gameplay code is allowed to swap via ResetAnimation.
+    [SerializeField] private AnimationReferenceAsset o_default, o_idle, o_move, o_attack_begin, o_attack_end, o_start, o_die;
+    [SerializeField] private AnimationReferenceAsset[] o_attack_remote, o_attack_close;
+    [HideInInspector] public AnimationReferenceAsset Default, Idle, Move, Attack_Begin, Attack_End, Start, Die;
+    [HideInInspector] public AnimationReferenceAsset[] Attack_Remote, Attack_Close;
+
     private EntityState currentState;
     private EntityState targetState;
     private List<EntityState> states_ban;
@@ -16,27 +23,30 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     private EventData event_start;
     private (bool left, bool up) _direction;
     private Action _attackAction;
-    [SerializeField] private AnimationReferenceAsset o_default, o_idle, o_move, o_attack_begin, o_attack_end, o_start, o_die;
-    [SerializeField] private AnimationReferenceAsset[] o_attack_remote, o_attack_close;
-    [HideInInspector] public AnimationReferenceAsset Default, Idle, Move, Attack_Begin, Attack_End, Start, Die;
-    [HideInInspector] public AnimationReferenceAsset[] Attack_Remote, Attack_Close;
     private int _attackAnimationIndex;
     private float _attackStaticWaitTime;
     private AnimationReferenceAsset[] Attack;
+
     public delegate void OperationsOnAttackAnimationBegin();
+
     /// <summary>
-    /// �ڹ��������տ�ʼʱ�����ã������ڻ��ڹ���������ʼ�ļ�⣬�缼�ܿ���ʱ��������
+    /// Fired at the very start of the attack animation.
+    /// Use for windowed checks (e.g. skill parry windows) that need to begin at the
+    /// first frame of the attack animation.
     /// </summary>
     public event OperationsOnAttackAnimationBegin OnAttackAnimationBegin;
+
     /// <summary>
-    /// 当前状态。直接返回 <see cref="EntityState"/> enum 值，不再做二次 int 映射。
-    /// 旧版会把 Attack 和 Attack_Wait 都映射为 3，Start 映射为 4，Die 映射为 5，
-    /// 与内部 enum 索引（5/6）不一致——现已修复。
+    /// Current state. Returns the <see cref="EntityState"/> enum value directly —
+    /// no second int remapping.
+    /// The legacy version collapsed Attack/Attack_Wait to 3 and Start to 4 / Die to 5,
+    /// which did not match the enum's actual indices (5/6). That mismatch is fixed.
     /// </summary>
     public EntityState CurrentState
     {
         get { return currentState; }
     }
+
     public (bool left, bool up) CurrentDirection { get { return _direction; } }
 
     private void FixedUpdate()
@@ -49,42 +59,39 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
             }
             else if (_attackStaticWaitTime > -100)
             {
-                Debug.Log($"{thisEntity}�����������͵ȴ��׶�");
+                Debug.Log($"{thisEntity} enter attack end-wait stage");
                 _attackAnimationIndex = 0;
                 _attackStaticWaitTime = -100;
                 if (Attack_End)
                 {
                     skeleton.state.SetAnimation(0, Attack_End, false);
-                    //�˴�������������SetAnimation��Ϊ���ܹ���FixedUpdate�м�⹥���ȴ��¼��Ĺ�������ö���
+                    // SetAnimation (not AddAnimation) is intentional so that FixedUpdate
+                    // can still detect the attack end-wait event during the playback.
                 }
                 else
                 {
                     skeleton.state.SetAnimation(0, Idle, false);
-                    //�˴�������������SetAnimation��Ϊ���ܹ���FixedUpdate�м�⹥���ȴ��¼��Ĺ�������ö���
+                    // SetAnimation (not AddAnimation) is intentional so that FixedUpdate
+                    // can still detect the attack end-wait event during the playback.
                 }
             }
         }
-
     }
+
     /// <summary>
-    /// ������ɫ
+    /// Tints the entity sprite.
     /// </summary>
-    /// <param name="type">�������ࣺ0-��ʾ��1-��ʧ��2-����</param>
+    /// <param name="type">Tint type: 0 = fade in, 1 = fade out (returns to pool on complete), 2 = flash red on hit</param>
+    /// <param name="duration">Tween duration in seconds</param>
     private void SetColor(int type, float duration)
     {
         switch (type)
         {
             case 0:
-                DOTween.To((value) =>
-                {
-                    skeleton.skeleton.SetColor(new Color(value, value, value, Math.Min(value * 2, 1)));
-                }, 0, 1, duration);
+                DOTween.To(FadeAlpha, 0, 1, duration);
                 break;
             case 1:
-                DOTween.To((value) =>
-                {
-                    skeleton.skeleton.SetColor(new Color(value, value, value, Math.Min(value * 2, 1)));
-                }, 1, 0, duration).OnComplete(() =>
+                DOTween.To(FadeAlpha, 1, 0, duration).OnComplete(() =>
                 {
                     thisEntity.thisEntityPool.Return(thisEntity);
                 });
@@ -106,10 +113,19 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 break;
         }
     }
+
+    // Applies a greyscale-with-double-alpha curve used by fade-in / fade-out.
+    private void FadeAlpha(float value)
+    {
+        skeleton.skeleton.SetColor(new Color(value, value, value, Math.Min(value * 2, 1)));
+    }
+
     /// <summary>
-    /// ���ö�����0-default,1-idle,2-move,30-attack_remote,31-attack_close,32-attack_begin,33-attack_end,4-start,5-die��
+    /// Resets (or assigns) animation references by index.
+    /// Index map: 0-default, 1-idle, 2-move, 30-attack_remote, 31-attack_close,
+    /// 32-attack_begin, 33-attack_end, 4-start, 5-die.
     /// </summary>
-    /// <param name="resets">�����õĶ������</param>
+    /// <param name="resets">Indices to reset</param>
     public void ResetAnimation(int[] resets)
     {
         foreach (int index in resets)
@@ -125,28 +141,30 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 case 33: Attack_End = o_attack_end; break;
                 case 4: Start = o_start; break;
                 case 5: Die = o_die; break;
-                default: Debug.LogWarning($"���ޱ��Ϊ{index}�Ķ���"); break;
+                default: Debug.LogWarning($"No animation registered for index {index}"); break;
             }
         }
     }
+
     /// <summary>
-    /// ��״̬��Ϊ����
+    /// Adds states to the transition ban list.
     /// </summary>
-    /// <param name="statesToBan">0-Default 1-Idle 2-Move 3-Attack</param>
+    /// <param name="statesToBan">States to ban (see <see cref="EntityState"/>)</param>
     public void AddStateToBan(EntityState[] statesToBan)
     {
         for (int i = 0; i < statesToBan.Length; i++)
         {
-            if (!states_ban.Contains(statesToBan[i]))
+            if (!this.states_ban.Contains(statesToBan[i]))
             {
-                states_ban.Add(statesToBan[i]);
+                this.states_ban.Add(statesToBan[i]);
             }
         }
     }
+
     /// <summary>
-    /// ���һ��״̬����
+    /// Removes states from the transition ban list.
     /// </summary>
-    /// <param name="statesfromBan">0-Default 1-Idle 2-Move 3-Attack</param>
+    /// <param name="statesfromBan">States to unban</param>
     public void RemoveStateFromBan(EntityState[] statesfromBan)
     {
         foreach (var state in statesfromBan)
@@ -154,12 +172,14 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
             states_ban.Remove(state);
         }
     }
+
     /// <summary>
-    /// ����ת������״̬����0-default,1-idle,2-move,3-attack_wait,4-attack,5-start,6-die��
+    /// Attempts to transition to the given state.
+    /// State index map: 0-default, 1-idle, 2-move, 3-attack_wait, 4-attack, 5-start, 6-die.
     /// </summary>
-    /// <param name="stateIndex">����ת����״̬����</param>
-    /// <param name="forceChange">�Ƿ�ǿ��ת��</param>
-    /// <returns>�����Ƿ�ת���ɹ�</returns>
+    /// <param name="state">Target state</param>
+    /// <param name="forceChange">If true, ignores priority; if false, only forward transitions are allowed</param>
+    /// <returns>True if the transition succeeded</returns>
     public bool TrySetState(EntityState state, bool forceChange)
     {
         if (!forceChange && state > currentState && !states_ban.Contains(state))
@@ -177,19 +197,23 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
             return false;
         }
     }
+
     public bool TrySetAttackState(bool forceChange, Action attackAction)
     {
-        
+        return TryTransitionToAttack(forceChange) && AttachAttackAction(attackAction);
+    }
+
+    // Shared transition gate for TrySetState / TrySetAttackState.
+    private bool TryTransitionToAttack(bool forceChange)
+    {
         if (!forceChange && EntityState.Attack > currentState && !states_ban.Contains(EntityState.Attack))
         {
             SetState(EntityState.Attack);
-            _attackAction = attackAction;
             return true;
         }
         else if (forceChange && currentState != EntityState.Die && !states_ban.Contains(EntityState.Attack))
         {
             SetState(EntityState.Attack);
-            _attackAction = attackAction;
             return true;
         }
         else
@@ -197,12 +221,23 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
             return false;
         }
     }
+
+    // Stashes the per-attack callback. Kept separate so future logic can grow here
+    // without disturbing the transition gate.
+    private bool AttachAttackAction(Action attackAction)
+    {
+        _attackAction = attackAction;
+        return true;
+    }
+
     /// <summary>
-    /// ����ʵ�峯��
+    /// Sets the entity facing direction based on a world-space target.
     /// </summary>
-    /// <param name="target">Ŀ�곯���</param>
+    /// <param name="target">World-space target position</param>
     public void SetDirection(Vector2 target)
     {
+        // Note: the trailing `return;` on the !left branch is intentional and preserved.
+        // Removing it would change rotation behavior for that branch.
         void SetDirectionBase()
         {
             float ry = skeleton.transform.rotation.y;
@@ -215,9 +250,8 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 if (ry != 0) skeleton.transform.Rotate(new Vector3(0, -ry * 180, 0)); return;
             }
         }
-        float dx, dy;
-        dx = target.x - transform.position.x;
-        dy = target.y - transform.position.y;
+        float dx = target.x - transform.position.x;
+        float dy = target.y - transform.position.y;
         if (dy > 0)
         {
             _direction.up = true;
@@ -237,6 +271,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
             SetDirectionBase();
         }
     }
+
     public void ArriveEnd()
     {
         SetColor(1, 0.2f);
@@ -253,7 +288,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         {
             skeleton.state.SetAnimation(0, animation, loop).TimeScale = timeScale;
         }
-        float scale;
         switch (setState)
         {
             case EntityState.Default:
@@ -267,25 +301,12 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 break;
             case EntityState.Attack:
                 OnAttackAnimationBegin?.Invoke();
-                if (thisEntity.Movement.ResistList.Count == 0)
-                {
-                    Attack = Attack_Remote;
-                }
-                else
-                {
-                    Attack = Attack_Close;
-                }
-                AnimationReferenceAsset attack;
+                Attack = (thisEntity.Movement.ResistList.Count == 0) ? Attack_Remote : Attack_Close;
                 int length = Attack.Length;
-                if (_attackAnimationIndex < length)
-                {
-                    attack = Attack[_attackAnimationIndex];
-                }
-                else
-                {
-                    attack = Attack[length - 1];
-                }
-                scale = attack.Animation.Duration / thisEntity.AttackBase.BaseAttackTimeS;
+                AnimationReferenceAsset attack = (_attackAnimationIndex < length)
+                    ? Attack[_attackAnimationIndex]
+                    : Attack[length - 1];
+                float scale = attack.Animation.Duration / thisEntity.AttackBase.BaseAttackTimeS;
                 if (Attack_Begin == null && length == 1)
                 {
                     SetSpineAnimation(attack, false, 1);
@@ -311,6 +332,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
             default: break;
         }
     }
+
     private void HandleAnimationStateEvent(Spine.TrackEntry trackEntry, Spine.Event e)
     {
         if (e.Data == event_attack)
@@ -324,36 +346,82 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         }
         else
         {
-            Debug.LogWarning($"��δ������Ϊ{e.Data.Name}�Ķ����¼�");
+            Debug.LogWarning($"Unregistered animation event: {e.Data.Name}");
         }
     }
+
     private void HandleAnimationStateStart(Spine.TrackEntry trackEntry)
     {
-        if (Default && trackEntry.Animation == Default.Animation) { currentState = EntityState.Default; }
-        else if (Idle && trackEntry.Animation == Idle.Animation) currentState = EntityState.Idle;
-        else if (Move && trackEntry.Animation == Move.Animation) currentState = EntityState.Move;
-        else if (Attack != null && ((_attackAnimationIndex < Attack.Length && trackEntry.Animation == Attack[_attackAnimationIndex].Animation) || (_attackAnimationIndex >= Attack.Length && trackEntry.Animation == Attack[Attack.Length - 1].Animation)))
+        AnimKind kind = ClassifyAnimation(trackEntry);
+        switch (kind)
         {
-            currentState = EntityState.Attack;
-            if (Attack_End == null && Attack.Length == 1)
-            {
+            case AnimKind.DefaultAnim:
+                currentState = EntityState.Default;
+                break;
+            case AnimKind.IdleAnim:
+                currentState = EntityState.Idle;
+                break;
+            case AnimKind.MoveAnim:
+                currentState = EntityState.Move;
+                break;
+            case AnimKind.AttackAnim:
+                currentState = EntityState.Attack;
+                if (Attack_End == null && Attack.Length == 1)
+                {
+                    AddSpineAnimation(Idle, true, 1, 0);
+                }
+                break;
+            case AnimKind.AttackEndAnim:
                 AddSpineAnimation(Idle, true, 1, 0);
-            }
+                break;
+            case AnimKind.StartAnim:
+                currentState = EntityState.Start;
+                break;
+            case AnimKind.DieAnim:
+                currentState = EntityState.Die;
+                SetColor(1, Die.Animation.Duration);
+                break;
         }
-        else if (Attack_End && trackEntry.Animation == Attack_End.Animation)
-        {
-            AddSpineAnimation(Idle, true, 1, 0);
-        }
-        else if (Start && trackEntry.Animation == Start.Animation) currentState = EntityState.Start;
-        else if (Die && trackEntry.Animation == Die.Animation) { currentState = EntityState.Die; SetColor(1, Die.Animation.Duration); }
     }
+
+    // Identifies which logical animation just started, preserving the original
+    // if-else evaluation order exactly.
+    private AnimKind ClassifyAnimation(Spine.TrackEntry entry)
+    {
+        if (Default && entry.Animation == Default.Animation) return AnimKind.DefaultAnim;
+        if (Idle && entry.Animation == Idle.Animation) return AnimKind.IdleAnim;
+        if (Move && entry.Animation == Move.Animation) return AnimKind.MoveAnim;
+        if (Attack != null)
+        {
+            bool inRange = _attackAnimationIndex < Attack.Length;
+            bool matchesInRange = inRange && entry.Animation == Attack[_attackAnimationIndex].Animation;
+            bool matchesLast = !inRange && entry.Animation == Attack[Attack.Length - 1].Animation;
+            if (matchesInRange || matchesLast) return AnimKind.AttackAnim;
+        }
+        if (Attack_End && entry.Animation == Attack_End.Animation) return AnimKind.AttackEndAnim;
+        if (Start && entry.Animation == Start.Animation) return AnimKind.StartAnim;
+        if (Die && entry.Animation == Die.Animation) return AnimKind.DieAnim;
+        return AnimKind.None;
+    }
+
+    private enum AnimKind
+    {
+        None,
+        DefaultAnim,
+        IdleAnim,
+        MoveAnim,
+        AttackAnim,
+        AttackEndAnim,
+        StartAnim,
+        DieAnim
+    }
+
     private void HandleAnimationStateComplete(Spine.TrackEntry trackEntry)
     {
         if ((Attack_End || (Attack != null && Attack.Length > 1)) && currentState == EntityState.Attack && trackEntry.Animation == Attack[_attackAnimationIndex].Animation)
         {
             currentState = EntityState.Attack_Wait;
             _attackStaticWaitTime = 0.05f;
-            //Debug.Log($"{thisEntity}����{_attackStaticWaitTime}s�Ĺ������͵ȴ��׶�");
             if (Attack.Length > 1)
             {
                 _attackAnimationIndex = (_attackAnimationIndex + 1) % Attack.Length;
@@ -362,75 +430,57 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         }
     }
 
-
     public void PreWarm()
     {
-        if (this.transform.GetChild(0).TryGetComponent(out SkeletonAnimation skeletonAnimation))
+        if (!this.transform.GetChild(0).TryGetComponent(out SkeletonAnimation skeletonAnimation))
         {
-            skeleton = skeletonAnimation;
-            states_ban = new List<EntityState>();
-            _direction = (false, false);
-            thisEntity = this.GetComponent<Entity>();
-            ResetAnimation(new int[9] { 0, 1, 2, 30, 31, 32, 33, 4, 5 });
-            event_attack = skeleton.Skeleton.Data.FindEvent("OnAttack");
-            event_start = skeleton.Skeleton.Data.FindEvent("OnStart");
-            skeleton.AnimationState.Event += HandleAnimationStateEvent;
-            skeleton.AnimationState.Start += HandleAnimationStateStart;
-            skeleton.AnimationState.Complete += HandleAnimationStateComplete;
-            skeleton.AnimationState.Data.DefaultMix = 0.1f;
-            if (Default != null)
-            {
-                skeleton.AnimationState.Data.SetMix(Default, Start, 0);
-            }
-            if (Idle != null)
-            {
-                skeleton.AnimationState.Data.SetMix(Idle, Start, 0);
-            }
-            if (Move != null)
-            {
-                skeleton.AnimationState.Data.SetMix(Move, Start, 0);
-            }
-            if (Attack_Begin != null)
-            {
-                skeleton.AnimationState.Data.SetMix(Attack_Begin, Start, 0);
-            }
-            if (Attack_End != null)
-            {
-                skeleton.AnimationState.Data.SetMix(Attack_End, Start, 0);
-            }
-            if (Attack_Remote != null)
-            {
-                for (int i = 0; i < Attack_Remote.Length; i++)
-                {
-                    skeleton.AnimationState.Data.SetMix(Attack_Remote[i], Start, 0);
-                }
-            }
-            if (Attack_Close != null)
-            {
-                for (int i = 0; i < Attack_Close.Length; i++)
-                {
-                    skeleton.AnimationState.Data.SetMix(Attack_Close[i], Start, 0);
-                }
-            }
-            if (Die != null)
-            {
-                skeleton.AnimationState.Data.SetMix(Die, Start, 0);
-            }
-            //if (Attack_End)
-            //{
-            //    if (Attack_Close!=null)
-            //    {
-            //        for(int i=;i<Attack_Close.Length)
-            //        skeleton.AnimationState.Data.SetMix(Attack_Close, Attack_End, 0);
-            //        skeleton.AnimationState.Data.SetMix(Attack_End, Attack_Close, 0);
-            //    }
-            //}
+            Debug.LogError("SkeletonAnimation not found on child 0");
+            return;
         }
-        else
+
+        skeleton = skeletonAnimation;
+        states_ban = new List<EntityState>();
+        _direction = (false, false);
+        thisEntity = this.GetComponent<Entity>();
+        ResetAnimation(new int[9] { 0, 1, 2, 30, 31, 32, 33, 4, 5 });
+        event_attack = skeleton.Skeleton.Data.FindEvent("OnAttack");
+        event_start = skeleton.Skeleton.Data.FindEvent("OnStart");
+        skeleton.AnimationState.Event += HandleAnimationStateEvent;
+        skeleton.AnimationState.Start += HandleAnimationStateStart;
+        skeleton.AnimationState.Complete += HandleAnimationStateComplete;
+        skeleton.AnimationState.Data.DefaultMix = 0.1f;
+        SetMixToStart(Default);
+        SetMixToStart(Idle);
+        SetMixToStart(Move);
+        SetMixToStart(Attack_Begin);
+        SetMixToStart(Attack_End);
+        SetMixToStartAll(Attack_Remote);
+        SetMixToStartAll(Attack_Close);
+        SetMixToStart(Die);
+        // The following block was commented out and is intentionally not restored:
+        // it attempted to cross-mix Attack_Close <-> Attack_End but the loops were broken
+        // (e.g. `for(int i=;i<Attack_Close.Length)`), so leaving it disabled is correct.
+    }
+
+    // Helper: zero mix time from a single animation to Start.
+    private void SetMixToStart(AnimationReferenceAsset animation)
+    {
+        if (animation != null)
         {
-            Debug.LogError("�Ҳ�����������");
+            skeleton.AnimationState.Data.SetMix(animation, Start, 0);
         }
     }
+
+    // Helper: zero mix time from every animation in the array to Start.
+    private void SetMixToStartAll(AnimationReferenceAsset[] animations)
+    {
+        if (animations == null) return;
+        for (int i = 0; i < animations.Length; i++)
+        {
+            SetMixToStart(animations[i]);
+        }
+    }
+
     public void Initialize()
     {
         SetColor(0, 0.2f);
@@ -443,6 +493,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         });
         _attackAnimationIndex = 0;
     }
+
     public void Dormancy()
     {
         OnAttackAnimationBegin = null;
