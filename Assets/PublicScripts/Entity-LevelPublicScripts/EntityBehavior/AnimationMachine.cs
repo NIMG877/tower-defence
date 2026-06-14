@@ -34,8 +34,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     [HideInInspector] public AnimationReferenceAsset[] Attack_Remote, Attack_Close;
 
     private EntityState currentState;
-    private EntityState targetState;
-    private List<EntityState> states_ban;
+    private HashSet<EntityState> states_ban;
     private SkeletonAnimation skeleton;
     private Entity thisEntity;
     private EventData event_attack;
@@ -76,23 +75,9 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
             {
                 _attackStaticWaitTime -= Time.fixedDeltaTime;
             }
-            else if (_attackStaticWaitTime > -100)
+            else
             {
-                Debug.Log($"{thisEntity} enter attack end-wait stage");
-                _attackAnimationIndex = 0;
-                _attackStaticWaitTime = -100;
-                _attackPhase = AttackPhase.End;
-                if (Attack_End)
-                {
-                    skeleton.state.SetAnimation(0, Attack_End, false);
-                    // SetAnimation immediately leaves the combo window and starts the
-                    // attack ending phase.
-                }
-                else
-                {
-                    skeleton.state.SetAnimation(0, Idle, false);
-                    // SetAnimation immediately leaves the combo window and returns idle.
-                }
+                FinishComboWindow();
             }
         }
     }
@@ -191,12 +176,9 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     /// <param name="statesToBan">States to ban (see <see cref="EntityState"/>)</param>
     public void AddStateToBan(EntityState[] statesToBan)
     {
-        for (int i = 0; i < statesToBan.Length; i++)
+        foreach (EntityState state in statesToBan)
         {
-            if (!this.states_ban.Contains(statesToBan[i]))
-            {
-                this.states_ban.Add(statesToBan[i]);
-            }
+            states_ban.Add(state);
         }
     }
 
@@ -242,33 +224,10 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
     public bool TrySetAttackState(bool forceChange, Action attackAction)
     {
-        return TryTransitionToAttack(forceChange) && AttachAttackAction(attackAction);
-    }
-
-    // Shared transition gate for TrySetState / TrySetAttackState.
-    private bool TryTransitionToAttack(bool forceChange)
-    {
-        bool canContinueCombo = currentState == EntityState.Attack && _attackPhase == AttackPhase.ComboWindow;
-        if (!forceChange && (EntityState.Attack > currentState || canContinueCombo) && !states_ban.Contains(EntityState.Attack))
-        {
-            SetState(EntityState.Attack);
-            return true;
-        }
-        else if (forceChange && currentState != EntityState.Die && !states_ban.Contains(EntityState.Attack))
-        {
-            SetState(EntityState.Attack);
-            return true;
-        }
-        else
+        if (!TrySetState(EntityState.Attack, forceChange))
         {
             return false;
         }
-    }
-
-    // Stashes the per-attack callback. Kept separate so future logic can grow here
-    // without disturbing the transition gate.
-    private bool AttachAttackAction(Action attackAction)
-    {
         _attackAction = attackAction;
         return true;
     }
@@ -325,12 +284,56 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         skeleton.state.AddAnimation(0, animation, loop, delay).TimeScale = timeScale;
     }
 
+    private void SetSpineAnimation(AnimationReferenceAsset animation, bool loop, float timeScale)
+    {
+        skeleton.state.SetAnimation(0, animation, loop).TimeScale = timeScale;
+    }
+
+    private void FinishComboWindow()
+    {
+        Debug.Log($"{thisEntity} enter attack end-wait stage");
+        _attackAnimationIndex = 0;
+        _attackPhase = AttackPhase.End;
+        if (Attack_End)
+        {
+            skeleton.state.SetAnimation(0, Attack_End, false);
+        }
+        else
+        {
+            skeleton.state.SetAnimation(0, Idle, false);
+        }
+    }
+
+    private void PlayAttackAnimation(bool continueCombo)
+    {
+        Attack = (thisEntity.Movement.ResistList.Count == 0) ? Attack_Remote : Attack_Close;
+        int length = Attack.Length;
+        AnimationReferenceAsset attack = (_attackAnimationIndex < length)
+            ? Attack[_attackAnimationIndex]
+            : Attack[length - 1];
+        float scale = attack.Animation.Duration / thisEntity.AttackBase.BaseAttackTimeS;
+        if (Attack_Begin == null && length == 1)
+        {
+            SetSpineAnimation(attack, false, 1);
+        }
+        else if (continueCombo || Attack_Begin == null)
+        {
+            _attackPhase = AttackPhase.Active;
+            SetSpineAnimation(attack, false, scale);
+        }
+        else
+        {
+            _attackPhase = AttackPhase.Begin;
+            float scaleB = Attack_Begin.Animation.Duration / thisEntity.AttackBase.BaseAttackTimeS;
+            SetSpineAnimation(Attack_Begin, false, scaleB > 1 ? scaleB : 1);
+            AddSpineAnimation(attack, false, scale, 0);
+        }
+        // Keep this after assigning the Spine track; currentState updates on Spine Start.
+        OnAttackAnimationBegin?.Invoke();
+    }
+
     private void SetState(EntityState setState)
     {
-        void SetSpineAnimation(AnimationReferenceAsset animation, bool loop, float timeScale)
-        {
-            skeleton.state.SetAnimation(0, animation, loop).TimeScale = timeScale;
-        }
         bool continueCombo = setState == EntityState.Attack && _attackPhase == AttackPhase.ComboWindow;
         if (setState != EntityState.Attack)
         {
@@ -348,32 +351,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 SetSpineAnimation(Move, true, 1);
                 break;
             case EntityState.Attack:
-                Attack = (thisEntity.Movement.ResistList.Count == 0) ? Attack_Remote : Attack_Close;
-                int length = Attack.Length;
-                AnimationReferenceAsset attack = (_attackAnimationIndex < length)
-                    ? Attack[_attackAnimationIndex]
-                    : Attack[length - 1];
-                float scale = attack.Animation.Duration / thisEntity.AttackBase.BaseAttackTimeS;
-                if (Attack_Begin == null && length == 1)
-                {
-                    SetSpineAnimation(attack, false, 1);
-                }
-                else if (continueCombo || Attack_Begin == null)
-                {
-                    _attackPhase = AttackPhase.Active;
-                    SetSpineAnimation(attack, false, scale);
-                }
-                else
-                {
-                    _attackPhase = AttackPhase.Begin;
-                    float scaleB = Attack_Begin.Animation.Duration / thisEntity.AttackBase.BaseAttackTimeS;
-                    SetSpineAnimation(Attack_Begin, false, scaleB > 1 ? scaleB : 1);
-                    AddSpineAnimation(attack, false, scale, 0);
-                }
-                // Fired after the spine track is (re)assigned so subscribers can read a
-                // consistent track entry. CurrentState is still the previous value here —
-                // it is updated in HandleAnimationStateStart when Spine raises Start.
-                OnAttackAnimationBegin?.Invoke();
+                PlayAttackAnimation(continueCombo);
                 break;
             case EntityState.Start:
                 SetSpineAnimation(Start, false, 1);
@@ -521,7 +499,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         }
 
         skeleton = skeletonAnimation;
-        states_ban = new List<EntityState>();
+        states_ban = new HashSet<EntityState>();
         _direction = (false, false);
         thisEntity = this.GetComponent<Entity>();
         ResetAnimation(AllSlots);
