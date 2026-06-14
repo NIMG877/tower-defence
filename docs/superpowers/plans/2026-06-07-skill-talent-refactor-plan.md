@@ -2046,15 +2046,15 @@ namespace SkillSystem.Components
     [RegisterComponent("ResetAnimation")]
     public class ResetAnimationComponent : ISkillComponent
     {
-        private int[] _resets;
+        private AnimationSlot[] _resets;
 
         public void OnInit(SkillContext ctx, ParamList p)
         {
-            var csv = p.GetString("resetIndices", "");
-            if (string.IsNullOrEmpty(csv)) { _resets = System.Array.Empty<int>(); return; }
+            var csv = p.GetString("resetSlots", "");
+            if (string.IsNullOrEmpty(csv)) { _resets = System.Array.Empty<AnimationSlot>(); return; }
             var parts = csv.Split(',');
-            _resets = new int[parts.Length];
-            for (int i = 0; i < parts.Length; i++) _resets[i] = int.Parse(parts[i].Trim());
+            _resets = new AnimationSlot[parts.Length];
+            for (int i = 0; i < parts.Length; i++) _resets[i] = (AnimationSlot)int.Parse(parts[i].Trim());
         }
 
         public void OnTrigger(SkillContext ctx)

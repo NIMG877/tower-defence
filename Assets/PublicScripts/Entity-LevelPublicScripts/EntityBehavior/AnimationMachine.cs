@@ -5,6 +5,26 @@ using Spine;
 using DG.Tweening;
 using System;
 
+/// <summary>
+/// 动画资源槽位码。
+/// 替代 AnimationMachine 旧版 int[] 形参（0/1/2/30/31/32/33/4/5），
+/// 用于 <see cref="AnimationMachine.ResetAnimation"/> 标识需要重置的动画资源槽。
+/// 注：与 <see cref="EntityState"/> 的语义不重合——本枚举标识动画资源槽位，
+///     EntityState 标识逻辑动画状态。
+/// </summary>
+public enum AnimationSlot
+{
+    Default = 0,
+    Idle = 1,
+    Move = 2,
+    Start = 4,
+    Die = 5,
+    AttackRemote = 30,
+    AttackClose = 31,
+    AttackBegin = 32,
+    AttackEnd = 33,
+}
+
 public class AnimationMachine : MonoBehaviour, IPoolOperation
 {
     // Animation reference assets are serialized in two stages: original (o_*) for reset
@@ -81,37 +101,45 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     /// <summary>
     /// Tints the entity sprite.
     /// </summary>
-    /// <param name="type">Tint type: 0 = fade in, 1 = fade out (returns to pool on complete), 2 = flash red on hit</param>
+    /// <param name="effect">Which tint effect to play</param>
     /// <param name="duration">Tween duration in seconds</param>
-    private void SetColor(int type, float duration)
+    private void SetColor(ColorEffect effect, float duration)
     {
-        switch (type)
+        switch (effect)
         {
-            case 0:
+            case ColorEffect.FadeIn:
                 DOTween.To(FadeAlpha, 0, 1, duration);
                 break;
-            case 1:
+            case ColorEffect.FadeOut:
                 DOTween.To(FadeAlpha, 1, 0, duration).OnComplete(() =>
                 {
                     thisEntity.thisEntityPool.Return(thisEntity);
                 });
                 break;
-            case 2:
-                float currentColor_g = skeleton.skeleton.GetColor().g;
-                DOTween.To((value) =>
-                {
-                    if (value < 1)
-                    {
-                        value = Math.Max(-value + currentColor_g, 0);
-                    }
-                    else
-                    {
-                        value = value - 1;
-                    }
-                    skeleton.skeleton.SetColor(new Color(1, value, value));
-                }, 0, 2, duration);
+            case ColorEffect.FlashRed:
+                _flashRedBaselineG = skeleton.skeleton.GetColor().g;
+                DOTween.To(ApplyFlashRed, 0, 2, duration);
                 break;
         }
+    }
+
+    // Snapshotted g-channel at the moment FlashRed starts; the tween body
+    // reads this each frame instead of capturing a closure.
+    private float _flashRedBaselineG;
+
+    // FlashRed tween body: a 0→2 ramp mapped to a red→white→red pulse that
+    // returns to the baseline green channel captured at tween start.
+    private void ApplyFlashRed(float value)
+    {
+        if (value < 1)
+        {
+            value = Math.Max(-value + _flashRedBaselineG, 0);
+        }
+        else
+        {
+            value = value - 1;
+        }
+        skeleton.skeleton.SetColor(new Color(1, value, value));
     }
 
     // Applies a greyscale-with-double-alpha curve used by fade-in / fade-out.
@@ -120,28 +148,40 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         skeleton.skeleton.SetColor(new Color(value, value, value, Math.Min(value * 2, 1)));
     }
 
+    // Shared "reset all slots" array. Avoids re-allocating a 9-element array
+    // on every Dormancy (per pool return) and on every PreWarm.
+    private static readonly AnimationSlot[] AllSlots = {
+        AnimationSlot.Default,
+        AnimationSlot.Idle,
+        AnimationSlot.Move,
+        AnimationSlot.AttackRemote,
+        AnimationSlot.AttackClose,
+        AnimationSlot.AttackBegin,
+        AnimationSlot.AttackEnd,
+        AnimationSlot.Start,
+        AnimationSlot.Die,
+    };
+
     /// <summary>
-    /// Resets (or assigns) animation references by index.
-    /// Index map: 0-default, 1-idle, 2-move, 30-attack_remote, 31-attack_close,
-    /// 32-attack_begin, 33-attack_end, 4-start, 5-die.
+    /// Resets (or assigns) animation references for the given slots.
     /// </summary>
-    /// <param name="resets">Indices to reset</param>
-    public void ResetAnimation(int[] resets)
+    /// <param name="resets">Slots to reset to their original (o_*) references</param>
+    public void ResetAnimation(AnimationSlot[] resets)
     {
-        foreach (int index in resets)
+        foreach (AnimationSlot slot in resets)
         {
-            switch (index)
+            switch (slot)
             {
-                case 0: Default = o_default; break;
-                case 1: Idle = o_idle; break;
-                case 2: Move = o_move; break;
-                case 30: Attack_Remote = o_attack_remote; break;
-                case 31: Attack_Close = o_attack_close; break;
-                case 32: Attack_Begin = o_attack_begin; break;
-                case 33: Attack_End = o_attack_end; break;
-                case 4: Start = o_start; break;
-                case 5: Die = o_die; break;
-                default: Debug.LogWarning($"No animation registered for index {index}"); break;
+                case AnimationSlot.Default: Default = o_default; break;
+                case AnimationSlot.Idle: Idle = o_idle; break;
+                case AnimationSlot.Move: Move = o_move; break;
+                case AnimationSlot.AttackRemote: Attack_Remote = o_attack_remote; break;
+                case AnimationSlot.AttackClose: Attack_Close = o_attack_close; break;
+                case AnimationSlot.AttackBegin: Attack_Begin = o_attack_begin; break;
+                case AnimationSlot.AttackEnd: Attack_End = o_attack_end; break;
+                case AnimationSlot.Start: Start = o_start; break;
+                case AnimationSlot.Die: Die = o_die; break;
+                default: Debug.LogWarning($"No animation registered for slot {slot}"); break;
             }
         }
     }
@@ -274,7 +314,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
     public void ArriveEnd()
     {
-        SetColor(1, 0.2f);
+        SetColor(ColorEffect.FadeOut, 0.2f);
     }
 
     private void AddSpineAnimation(AnimationReferenceAsset animation, bool loop, float timeScale, float delay)
@@ -379,7 +419,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 break;
             case AnimKind.DieAnim:
                 currentState = EntityState.Die;
-                SetColor(1, Die.Animation.Duration);
+                SetColor(ColorEffect.FadeOut, Die.Animation.Duration);
                 break;
         }
     }
@@ -416,6 +456,13 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         DieAnim
     }
 
+    private enum ColorEffect
+    {
+        FadeIn,
+        FadeOut,
+        FlashRed,
+    }
+
     private void HandleAnimationStateComplete(Spine.TrackEntry trackEntry)
     {
         if ((Attack_End || (Attack != null && Attack.Length > 1)) && currentState == EntityState.Attack && trackEntry.Animation == Attack[_attackAnimationIndex].Animation)
@@ -442,7 +489,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         states_ban = new List<EntityState>();
         _direction = (false, false);
         thisEntity = this.GetComponent<Entity>();
-        ResetAnimation(new int[9] { 0, 1, 2, 30, 31, 32, 33, 4, 5 });
+        ResetAnimation(AllSlots);
         event_attack = skeleton.Skeleton.Data.FindEvent("OnAttack");
         event_start = skeleton.Skeleton.Data.FindEvent("OnStart");
         skeleton.AnimationState.Event += HandleAnimationStateEvent;
@@ -483,22 +530,27 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
     public void Initialize()
     {
-        SetColor(0, 0.2f);
-        thisEntity.OnAfterHurt += new Entity.OperationsAfterHurt((Entity origin, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType, bool isDeadly) =>
-        {
-            if (applyType != 2)
-            {
-                SetColor(2, 0.2f);
-            }
-        });
+        SetColor(ColorEffect.FadeIn, 0.2f);
+        thisEntity.OnAfterHurt += HandleAfterHurt;
         _attackAnimationIndex = 0;
+    }
+
+    // Method group (cached, no per-checkout closure) subscribed to OnAfterHurt
+    // in Initialize. Entity.Dormancy() nulls the event, so no -=/manual cleanup
+    // is required here.
+    private void HandleAfterHurt(Entity origin, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType, bool isDeadly)
+    {
+        if (applyType != 2)
+        {
+            SetColor(ColorEffect.FlashRed, 0.2f);
+        }
     }
 
     public void Dormancy()
     {
         OnAttackAnimationBegin = null;
         states_ban.Clear();
-        ResetAnimation(new int[9] { 0, 1, 2, 30, 31, 32, 33, 4, 5 });
+        ResetAnimation(AllSlots);
         SetState(EntityState.Default);
     }
 }

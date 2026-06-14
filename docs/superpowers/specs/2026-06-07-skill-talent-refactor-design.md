@@ -363,7 +363,7 @@ The 28+ existing scripts map to the following **~40 components**. Each component
 |---|---|---|---|
 | `SwapAnimationComponent` | `SwapAnimation` | Zombie, Creeper, Witch | Replaces AnimationReferenceAsset fields on self.animation machine |
 | `PlayAnimationComponent` | `PlayAnimation` | Creeper, HeadSeter | Triggers `entityAM.TrySetState(...)` with optional blocking |
-| `ResetAnimationComponent` | `ResetAnimation` | Creeper, Witch | Calls `entityAM.ResetAnimation(...)` with int array |
+| `ResetAnimationComponent` | `ResetAnimation` | Creeper, Witch | Calls `entityAM.ResetAnimation(...)` with `AnimationSlot[]` |
 
 #### 4.3.4 Movement / position
 
