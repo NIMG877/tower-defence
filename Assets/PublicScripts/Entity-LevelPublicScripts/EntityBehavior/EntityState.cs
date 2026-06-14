@@ -8,7 +8,6 @@ public enum EntityState
     Default,
     Idle,
     Move,
-    Attack_Wait,
     Attack,
     Start,
     Die,

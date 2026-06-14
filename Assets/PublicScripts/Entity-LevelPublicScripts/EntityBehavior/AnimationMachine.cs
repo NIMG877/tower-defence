@@ -7,22 +7,21 @@ using System;
 
 /// <summary>
 /// 动画资源槽位码。
-/// 替代 AnimationMachine 旧版 int[] 形参（0/1/2/30/31/32/33/4/5），
 /// 用于 <see cref="AnimationMachine.ResetAnimation"/> 标识需要重置的动画资源槽。
 /// 注：与 <see cref="EntityState"/> 的语义不重合——本枚举标识动画资源槽位，
 ///     EntityState 标识逻辑动画状态。
 /// </summary>
 public enum AnimationSlot
 {
-    Default = 0,
-    Idle = 1,
-    Move = 2,
-    Start = 4,
-    Die = 5,
-    AttackRemote = 30,
-    AttackClose = 31,
-    AttackBegin = 32,
-    AttackEnd = 33,
+    Default,
+    Idle,
+    Move,
+    Start,
+    Die,
+    AttackRemote,
+    AttackClose,
+    AttackBegin,
+    AttackEnd,
 }
 
 public class AnimationMachine : MonoBehaviour, IPoolOperation
@@ -46,6 +45,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     private int _attackAnimationIndex;
     private float _attackStaticWaitTime;
     private AnimationReferenceAsset[] Attack;
+    private AttackPhase _attackPhase;
 
     public delegate void OperationsOnAttackAnimationBegin();
 
@@ -59,8 +59,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     /// <summary>
     /// Current state. Returns the <see cref="EntityState"/> enum value directly —
     /// no second int remapping.
-    /// The legacy version collapsed Attack/Attack_Wait to 3 and Start to 4 / Die to 5,
-    /// which did not match the enum's actual indices (5/6). That mismatch is fixed.
+    /// Attack sub-phases are tracked privately and are not exposed as entity states.
     /// </summary>
     public EntityState CurrentState
     {
@@ -71,7 +70,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
     private void FixedUpdate()
     {
-        if (currentState == EntityState.Attack_Wait)
+        if (_attackPhase == AttackPhase.ComboWindow)
         {
             if (_attackStaticWaitTime > 0)
             {
@@ -82,17 +81,17 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 Debug.Log($"{thisEntity} enter attack end-wait stage");
                 _attackAnimationIndex = 0;
                 _attackStaticWaitTime = -100;
+                _attackPhase = AttackPhase.End;
                 if (Attack_End)
                 {
                     skeleton.state.SetAnimation(0, Attack_End, false);
-                    // SetAnimation (not AddAnimation) is intentional so that FixedUpdate
-                    // can still detect the attack end-wait event during the playback.
+                    // SetAnimation immediately leaves the combo window and starts the
+                    // attack ending phase.
                 }
                 else
                 {
                     skeleton.state.SetAnimation(0, Idle, false);
-                    // SetAnimation (not AddAnimation) is intentional so that FixedUpdate
-                    // can still detect the attack end-wait event during the playback.
+                    // SetAnimation immediately leaves the combo window and returns idle.
                 }
             }
         }
@@ -215,14 +214,17 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
     /// <summary>
     /// Attempts to transition to the given state.
-    /// State index map: 0-default, 1-idle, 2-move, 3-attack_wait, 4-attack, 5-start, 6-die.
+    /// State declaration order defines transition priority.
     /// </summary>
     /// <param name="state">Target state</param>
     /// <param name="forceChange">If true, ignores priority; if false, only forward transitions are allowed</param>
     /// <returns>True if the transition succeeded</returns>
     public bool TrySetState(EntityState state, bool forceChange)
     {
-        if (!forceChange && state > currentState && !states_ban.Contains(state))
+        bool canContinueCombo = state == EntityState.Attack &&
+            currentState == EntityState.Attack &&
+            _attackPhase == AttackPhase.ComboWindow;
+        if (!forceChange && (state > currentState || canContinueCombo) && !states_ban.Contains(state))
         {
             SetState(state);
             return true;
@@ -246,7 +248,8 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     // Shared transition gate for TrySetState / TrySetAttackState.
     private bool TryTransitionToAttack(bool forceChange)
     {
-        if (!forceChange && EntityState.Attack > currentState && !states_ban.Contains(EntityState.Attack))
+        bool canContinueCombo = currentState == EntityState.Attack && _attackPhase == AttackPhase.ComboWindow;
+        if (!forceChange && (EntityState.Attack > currentState || canContinueCombo) && !states_ban.Contains(EntityState.Attack))
         {
             SetState(EntityState.Attack);
             return true;
@@ -328,6 +331,11 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         {
             skeleton.state.SetAnimation(0, animation, loop).TimeScale = timeScale;
         }
+        bool continueCombo = setState == EntityState.Attack && _attackPhase == AttackPhase.ComboWindow;
+        if (setState != EntityState.Attack)
+        {
+            _attackPhase = AttackPhase.None;
+        }
         switch (setState)
         {
             case EntityState.Default:
@@ -350,12 +358,14 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 {
                     SetSpineAnimation(attack, false, 1);
                 }
-                else if (currentState == EntityState.Attack_Wait || Attack_Begin == null)
+                else if (continueCombo || Attack_Begin == null)
                 {
+                    _attackPhase = AttackPhase.Active;
                     SetSpineAnimation(attack, false, scale);
                 }
                 else
                 {
+                    _attackPhase = AttackPhase.Begin;
                     float scaleB = Attack_Begin.Animation.Duration / thisEntity.AttackBase.BaseAttackTimeS;
                     SetSpineAnimation(Attack_Begin, false, scaleB > 1 ? scaleB : 1);
                     AddSpineAnimation(attack, false, scale, 0);
@@ -403,18 +413,21 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 break;
             case AnimKind.IdleAnim:
                 currentState = EntityState.Idle;
+                _attackPhase = AttackPhase.None;
                 break;
             case AnimKind.MoveAnim:
                 currentState = EntityState.Move;
                 break;
             case AnimKind.AttackAnim:
                 currentState = EntityState.Attack;
+                _attackPhase = AttackPhase.Active;
                 if (Attack_End == null && Attack.Length == 1)
                 {
                     AddSpineAnimation(Idle, true, 1, 0);
                 }
                 break;
             case AnimKind.AttackEndAnim:
+                _attackPhase = AttackPhase.End;
                 AddSpineAnimation(Idle, true, 1, 0);
                 break;
             case AnimKind.StartAnim:
@@ -461,6 +474,15 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         DieAnim
     }
 
+    private enum AttackPhase
+    {
+        None,
+        Begin,
+        Active,
+        ComboWindow,
+        End,
+    }
+
     private enum ColorEffect
     {
         FadeIn,
@@ -470,9 +492,9 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
     private void HandleAnimationStateComplete(Spine.TrackEntry trackEntry)
     {
-        if ((Attack_End || (Attack != null && Attack.Length > 1)) && currentState == EntityState.Attack && trackEntry.Animation == Attack[_attackAnimationIndex].Animation)
+        if ((Attack_End || (Attack != null && Attack.Length > 1)) && currentState == EntityState.Attack && _attackPhase == AttackPhase.Active && trackEntry.Animation == Attack[_attackAnimationIndex].Animation)
         {
-            currentState = EntityState.Attack_Wait;
+            _attackPhase = AttackPhase.ComboWindow;
             _attackStaticWaitTime = 0.05f;
             if (Attack.Length > 1)
             {
@@ -546,6 +568,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         SetColor(ColorEffect.FadeIn, 0.2f);
         thisEntity.OnAfterHurt += HandleAfterHurt;
         _attackAnimationIndex = 0;
+        _attackPhase = AttackPhase.None;
     }
 
     // Method group (cached, no per-checkout closure) subscribed to OnAfterHurt
@@ -567,6 +590,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         // that pre-empts an in-flight attack). Null it so pool reuse
         // doesn't re-fire a stale callback on the next deploy.
         _attackAction = null;
+        _attackPhase = AttackPhase.None;
         states_ban.Clear();
         ResetAnimation(AllSlots);
         SetState(EntityState.Default);
