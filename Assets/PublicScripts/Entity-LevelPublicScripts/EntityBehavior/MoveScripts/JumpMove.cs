@@ -29,8 +29,7 @@ public class JumpMove : MoveBase
             }
             if (_thisAM.CurrentState != EntityState.Move && _thisEntity.Movement.ResistList.Count == 0)
             {
-                _thisAM.Move = _jumpBegin;
-                if (_thisAM.TrySetState(EntityState.Move, false))
+                if (_thisAM.TrySetState(EntityState.Move, false, new AnimationOverride { Move = _jumpBegin }))
                 {
                     Jump(this.transform.position, _currentSection[_currentPointSerial].targetPosition);
                 }
@@ -53,8 +52,7 @@ public class JumpMove : MoveBase
         jumpT = _jump.Animation.Duration * k;
         Vector2 dir = to - from;
         await UniTask.WaitForSeconds(jumpBeginT);
-        _thisAM.Move = _jump;
-        _thisAM.TrySetState(EntityState.Move, true);
+        _thisAM.TrySetState(EntityState.Move, true, new AnimationOverride { Move = _jump });
         float dt = 0;
         while (dt < jumpT)
         {
@@ -64,8 +62,7 @@ public class JumpMove : MoveBase
             dt += Time.fixedDeltaTime;
         }
         this.transform.position = to;
-        _thisAM.Move = _jumpEnd;
-        _thisAM.TrySetState(EntityState.Move, true);
+        _thisAM.TrySetState(EntityState.Move, true, new AnimationOverride { Move = _jumpEnd });
         await UniTask.WaitForSeconds(jumpEndT);
         if (_currentSection[_currentPointSerial].whetherToEnterPortal)
         {

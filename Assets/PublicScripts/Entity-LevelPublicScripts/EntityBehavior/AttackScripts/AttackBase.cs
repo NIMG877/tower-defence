@@ -113,6 +113,7 @@ public class AttackBase : MonoBehaviour, IPoolOperation
 
     protected Entity _thisEntity;
     protected float _attackTimer;
+    protected AnimationOverride PendingAnimationOverride { get; private set; }
 
     private (int x, int y)[] _attackRangeF;
     private float _attackRadiusF;
@@ -191,6 +192,18 @@ public class AttackBase : MonoBehaviour, IPoolOperation
             _thisEntity.entityAM.SetDirection(centerPos);
         }
         return false;
+    }
+    public bool TryToAttackWithAnimation(Entity[] attackTargets, bool forceChange, bool canBeInterrupt, AnimationOverride once)
+    {
+        PendingAnimationOverride = once;
+        try
+        {
+            return TryToAttack(attackTargets, forceChange, canBeInterrupt);
+        }
+        finally
+        {
+            PendingAnimationOverride = null;
+        }
     }
     protected async void AttackByAnimation(Entity[] attackTargets, bool canInterrupt)
     {

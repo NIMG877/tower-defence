@@ -9,7 +9,6 @@ public class ChargeAttack : AttackBase
     public OperationsBeforeTakeDamage OnBeforeChargeTakeDamage;
     public OperationsAfterTakeDamage OnAfterChargeTakeDamage;
     public AnimationReferenceAsset[] ChargeAnimation;
-    private AnimationReferenceAsset[] _attackRemoteP, _attackCloseP;
     private int _currentChargeNum;
     [SerializeField] private GameObject[] _chargeEffects;
     [SerializeField] private AttackEffectData _chargeEffectData;
@@ -30,7 +29,7 @@ public class ChargeAttack : AttackBase
     {
         if (attackTargets.Length > 0)
         {
-            if (_thisEntity.entityAM.TrySetAttackState(forceChange, () => { AttackByAnimation(attackTargets, canBeInterrupt); }))
+            if (_thisEntity.entityAM.TrySetAttackState(forceChange, () => { AttackByAnimation(attackTargets, canBeInterrupt); }, PendingAnimationOverride))
             {
                 base.TryToAttack(attackTargets, forceChange, canBeInterrupt);
                 return true;
@@ -38,18 +37,15 @@ public class ChargeAttack : AttackBase
         }
         else if (_currentChargeNum < _chargeEffects.Length)
         {
-            _attackRemoteP = _thisEntity.entityAM.Attack_Remote;
-            _attackCloseP = _thisEntity.entityAM.Attack_Close;
-            _thisEntity.entityAM.Attack_Remote = ChargeAnimation;
-            _thisEntity.entityAM.Attack_Close = ChargeAnimation;
-            if (_thisEntity.entityAM.TrySetAttackState(forceChange, () => { SpawnChargeEffect(); }))
+            var once = new AnimationOverride
             {
-                _thisEntity.entityAM.Attack_Remote = _attackRemoteP;
-                _thisEntity.entityAM.Attack_Close = _attackCloseP;
+                AttackRemote = ChargeAnimation,
+                AttackClose = ChargeAnimation,
+            };
+            if (_thisEntity.entityAM.TrySetAttackState(forceChange, () => { SpawnChargeEffect(); }, once))
+            {
                 return true;
             }
-            _thisEntity.entityAM.Attack_Remote = _attackRemoteP;
-            _thisEntity.entityAM.Attack_Close = _attackCloseP;
         }
         return false;
     }

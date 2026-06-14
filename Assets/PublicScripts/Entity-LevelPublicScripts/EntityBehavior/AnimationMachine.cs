@@ -6,8 +6,8 @@ using DG.Tweening;
 using System;
 
 /// <summary>
-/// 动画资源槽位码。
-/// 用于 <see cref="AnimationMachine.ResetAnimation"/> 标识需要重置的动画资源槽。
+/// 动画资源槽位。
+/// 用于解析动画资源，以及在 <see cref="AnimationOverride"/> 中显式清空某个覆盖槽。
 /// 注：与 <see cref="EntityState"/> 的语义不重合——本枚举标识动画资源槽位，
 ///     EntityState 标识逻辑动画状态。
 /// </summary>
@@ -24,14 +24,39 @@ public enum AnimationSlot
     AttackEnd,
 }
 
+public sealed class AnimationOverride
+{
+    public AnimationReferenceAsset Default;
+    public AnimationReferenceAsset Idle;
+    public AnimationReferenceAsset Move;
+    public AnimationReferenceAsset Start;
+    public AnimationReferenceAsset Die;
+    public AnimationReferenceAsset AttackBegin;
+    public AnimationReferenceAsset AttackEnd;
+    public AnimationReferenceAsset[] AttackRemote;
+    public AnimationReferenceAsset[] AttackClose;
+    internal readonly HashSet<AnimationSlot> ClearedSlots = new HashSet<AnimationSlot>();
+
+    public AnimationOverride Clear(params AnimationSlot[] slots)
+    {
+        foreach (AnimationSlot slot in slots)
+        {
+            ClearedSlots.Add(slot);
+        }
+        return this;
+    }
+}
+
+public sealed class AnimationOverrideHandle
+{
+    internal int Id;
+    internal AnimationMachine Machine;
+}
+
 public class AnimationMachine : MonoBehaviour, IPoolOperation
 {
-    // Animation reference assets are serialized in two stages: original (o_*) for reset
-    // and runtime (no prefix) which the gameplay code is allowed to swap via ResetAnimation.
     [SerializeField] private AnimationReferenceAsset o_default, o_idle, o_move, o_attack_begin, o_attack_end, o_start, o_die;
     [SerializeField] private AnimationReferenceAsset[] o_attack_remote, o_attack_close;
-    [HideInInspector] public AnimationReferenceAsset Default, Idle, Move, Attack_Begin, Attack_End, Start, Die;
-    [HideInInspector] public AnimationReferenceAsset[] Attack_Remote, Attack_Close;
 
     private EntityState currentState;
     private HashSet<EntityState> states_ban;
@@ -45,6 +70,9 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     private float _attackStaticWaitTime;
     private AnimationReferenceAsset[] Attack;
     private AttackPhase _attackPhase;
+    private AnimationSet _activeAnimations;
+    private readonly List<OverrideEntry> _overrides = new List<OverrideEntry>();
+    private int _nextOverrideId;
 
     public delegate void OperationsOnAttackAnimationBegin();
 
@@ -132,42 +160,34 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         skeleton.skeleton.SetColor(new Color(value, value, value, Math.Min(value * 2, 1)));
     }
 
-    // Shared "reset all slots" array. Avoids re-allocating a 9-element array
-    // on every Dormancy (per pool return) and on every PreWarm.
-    private static readonly AnimationSlot[] AllSlots = {
-        AnimationSlot.Default,
-        AnimationSlot.Idle,
-        AnimationSlot.Move,
-        AnimationSlot.AttackRemote,
-        AnimationSlot.AttackClose,
-        AnimationSlot.AttackBegin,
-        AnimationSlot.AttackEnd,
-        AnimationSlot.Start,
-        AnimationSlot.Die,
-    };
-
-    /// <summary>
-    /// Resets (or assigns) animation references for the given slots.
-    /// </summary>
-    /// <param name="resets">Slots to reset to their original (o_*) references</param>
-    public void ResetAnimation(AnimationSlot[] resets)
+    public AnimationReferenceAsset ResolveAnimation(AnimationSlot slot)
     {
-        foreach (AnimationSlot slot in resets)
-        {
-            switch (slot)
-            {
-                case AnimationSlot.Default: Default = o_default; break;
-                case AnimationSlot.Idle: Idle = o_idle; break;
-                case AnimationSlot.Move: Move = o_move; break;
-                case AnimationSlot.AttackRemote: Attack_Remote = o_attack_remote; break;
-                case AnimationSlot.AttackClose: Attack_Close = o_attack_close; break;
-                case AnimationSlot.AttackBegin: Attack_Begin = o_attack_begin; break;
-                case AnimationSlot.AttackEnd: Attack_End = o_attack_end; break;
-                case AnimationSlot.Start: Start = o_start; break;
-                case AnimationSlot.Die: Die = o_die; break;
-                default: Debug.LogWarning($"No animation registered for slot {slot}"); break;
-            }
-        }
+        return ResolveAnimations(null).GetSingle(slot);
+    }
+
+    public AnimationReferenceAsset[] ResolveAttackAnimations(bool close)
+    {
+        AnimationSet animations = ResolveAnimations(null);
+        return close ? animations.AttackClose : animations.AttackRemote;
+    }
+
+    public AnimationOverrideHandle AddOverride(object owner, AnimationOverride animations, int priority = 0)
+    {
+        var handle = new AnimationOverrideHandle { Id = ++_nextOverrideId, Machine = this };
+        _overrides.Add(new OverrideEntry(handle.Id, owner, animations, priority));
+        RegisterMixes(animations);
+        return handle;
+    }
+
+    public void RemoveOverride(AnimationOverrideHandle handle)
+    {
+        if (handle == null || handle.Machine != this) return;
+        _overrides.RemoveAll(entry => entry.Id == handle.Id);
+    }
+
+    public void RemoveOverrides(object owner)
+    {
+        _overrides.RemoveAll(entry => ReferenceEquals(entry.Owner, owner));
     }
 
     /// <summary>
@@ -201,19 +221,19 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     /// <param name="state">Target state</param>
     /// <param name="forceChange">If true, ignores priority; if false, only forward transitions are allowed</param>
     /// <returns>True if the transition succeeded</returns>
-    public bool TrySetState(EntityState state, bool forceChange)
+    public bool TrySetState(EntityState state, bool forceChange, AnimationOverride once = null)
     {
         bool canContinueCombo = state == EntityState.Attack &&
             currentState == EntityState.Attack &&
             _attackPhase == AttackPhase.ComboWindow;
         if (!forceChange && (state > currentState || canContinueCombo) && !states_ban.Contains(state))
         {
-            SetState(state);
+            SetState(state, once);
             return true;
         }
         else if (forceChange && currentState != EntityState.Die && !states_ban.Contains(state))
         {
-            SetState(state);
+            SetState(state, once);
             return true;
         }
         else
@@ -222,9 +242,9 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         }
     }
 
-    public bool TrySetAttackState(bool forceChange, Action attackAction)
+    public bool TrySetAttackState(bool forceChange, Action attackAction, AnimationOverride once = null)
     {
-        if (!TrySetState(EntityState.Attack, forceChange))
+        if (!TrySetState(EntityState.Attack, forceChange, once))
         {
             return false;
         }
@@ -294,29 +314,29 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         Debug.Log($"{thisEntity} enter attack end-wait stage");
         _attackAnimationIndex = 0;
         _attackPhase = AttackPhase.End;
-        if (Attack_End)
+        if (_activeAnimations.AttackEnd)
         {
-            skeleton.state.SetAnimation(0, Attack_End, false);
+            skeleton.state.SetAnimation(0, _activeAnimations.AttackEnd, false);
         }
         else
         {
-            skeleton.state.SetAnimation(0, Idle, false);
+            skeleton.state.SetAnimation(0, _activeAnimations.Idle, false);
         }
     }
 
     private void PlayAttackAnimation(bool continueCombo)
     {
-        Attack = (thisEntity.Movement.ResistList.Count == 0) ? Attack_Remote : Attack_Close;
+        Attack = (thisEntity.Movement.ResistList.Count == 0) ? _activeAnimations.AttackRemote : _activeAnimations.AttackClose;
         int length = Attack.Length;
         AnimationReferenceAsset attack = (_attackAnimationIndex < length)
             ? Attack[_attackAnimationIndex]
             : Attack[length - 1];
         float scale = attack.Animation.Duration / thisEntity.AttackBase.BaseAttackTimeS;
-        if (Attack_Begin == null && length == 1)
+        if (_activeAnimations.AttackBegin == null && length == 1)
         {
             SetSpineAnimation(attack, false, 1);
         }
-        else if (continueCombo || Attack_Begin == null)
+        else if (continueCombo || _activeAnimations.AttackBegin == null)
         {
             _attackPhase = AttackPhase.Active;
             SetSpineAnimation(attack, false, scale);
@@ -324,17 +344,19 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         else
         {
             _attackPhase = AttackPhase.Begin;
-            float scaleB = Attack_Begin.Animation.Duration / thisEntity.AttackBase.BaseAttackTimeS;
-            SetSpineAnimation(Attack_Begin, false, scaleB > 1 ? scaleB : 1);
+            float scaleB = _activeAnimations.AttackBegin.Animation.Duration / thisEntity.AttackBase.BaseAttackTimeS;
+            SetSpineAnimation(_activeAnimations.AttackBegin, false, scaleB > 1 ? scaleB : 1);
             AddSpineAnimation(attack, false, scale, 0);
         }
         // Keep this after assigning the Spine track; currentState updates on Spine Start.
         OnAttackAnimationBegin?.Invoke();
     }
 
-    private void SetState(EntityState setState)
+    private void SetState(EntityState setState, AnimationOverride once = null)
     {
         bool continueCombo = setState == EntityState.Attack && _attackPhase == AttackPhase.ComboWindow;
+        RegisterMixes(once);
+        _activeAnimations = ResolveAnimations(once);
         if (setState != EntityState.Attack)
         {
             _attackPhase = AttackPhase.None;
@@ -342,23 +364,23 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         switch (setState)
         {
             case EntityState.Default:
-                SetSpineAnimation(Default, false, 1);
+                SetSpineAnimation(_activeAnimations.Default, false, 1);
                 break;
             case EntityState.Idle:
-                SetSpineAnimation(Idle, true, 1);
+                SetSpineAnimation(_activeAnimations.Idle, true, 1);
                 break;
             case EntityState.Move:
-                SetSpineAnimation(Move, true, 1);
+                SetSpineAnimation(_activeAnimations.Move, true, 1);
                 break;
             case EntityState.Attack:
                 PlayAttackAnimation(continueCombo);
                 break;
             case EntityState.Start:
-                SetSpineAnimation(Start, false, 1);
-                AddSpineAnimation(Idle, true, 1, 0);
+                SetSpineAnimation(_activeAnimations.Start, false, 1);
+                AddSpineAnimation(_activeAnimations.Idle, true, 1, 0);
                 break;
             case EntityState.Die:
-                SetSpineAnimation(Die, false, 1);
+                SetSpineAnimation(_activeAnimations.Die, false, 1);
                 break;
             default: break;
         }
@@ -399,14 +421,14 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
             case AnimKind.AttackAnim:
                 currentState = EntityState.Attack;
                 _attackPhase = AttackPhase.Active;
-                if (Attack_End == null && Attack.Length == 1)
+                if (_activeAnimations.AttackEnd == null && Attack.Length == 1)
                 {
-                    AddSpineAnimation(Idle, true, 1, 0);
+                    AddSpineAnimation(_activeAnimations.Idle, true, 1, 0);
                 }
                 break;
             case AnimKind.AttackEndAnim:
                 _attackPhase = AttackPhase.End;
-                AddSpineAnimation(Idle, true, 1, 0);
+                AddSpineAnimation(_activeAnimations.Idle, true, 1, 0);
                 break;
             case AnimKind.StartAnim:
                 currentState = EntityState.Start;
@@ -424,9 +446,9 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     // if-else evaluation order exactly.
     private AnimKind ClassifyAnimation(Spine.TrackEntry entry)
     {
-        if (Default && entry.Animation == Default.Animation) return AnimKind.DefaultAnim;
-        if (Idle && entry.Animation == Idle.Animation) return AnimKind.IdleAnim;
-        if (Move && entry.Animation == Move.Animation) return AnimKind.MoveAnim;
+        if (_activeAnimations.Default && entry.Animation == _activeAnimations.Default.Animation) return AnimKind.DefaultAnim;
+        if (_activeAnimations.Idle && entry.Animation == _activeAnimations.Idle.Animation) return AnimKind.IdleAnim;
+        if (_activeAnimations.Move && entry.Animation == _activeAnimations.Move.Animation) return AnimKind.MoveAnim;
         if (Attack != null)
         {
             bool inRange = _attackAnimationIndex < Attack.Length;
@@ -434,9 +456,9 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
             bool matchesLast = !inRange && entry.Animation == Attack[Attack.Length - 1].Animation;
             if (matchesInRange || matchesLast) return AnimKind.AttackAnim;
         }
-        if (Attack_End && entry.Animation == Attack_End.Animation) return AnimKind.AttackEndAnim;
-        if (Start && entry.Animation == Start.Animation) return AnimKind.StartAnim;
-        if (Die && entry.Animation == Die.Animation) return AnimKind.DieAnim;
+        if (_activeAnimations.AttackEnd && entry.Animation == _activeAnimations.AttackEnd.Animation) return AnimKind.AttackEndAnim;
+        if (_activeAnimations.Start && entry.Animation == _activeAnimations.Start.Animation) return AnimKind.StartAnim;
+        if (_activeAnimations.Die && entry.Animation == _activeAnimations.Die.Animation) return AnimKind.DieAnim;
         return AnimKind.None;
     }
 
@@ -461,6 +483,111 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         End,
     }
 
+    private sealed class OverrideEntry
+    {
+        public readonly int Id;
+        public readonly object Owner;
+        public readonly AnimationOverride Animations;
+        public readonly int Priority;
+
+        public OverrideEntry(int id, object owner, AnimationOverride animations, int priority)
+        {
+            Id = id;
+            Owner = owner;
+            Animations = animations;
+            Priority = priority;
+        }
+    }
+
+    private sealed class AnimationSet
+    {
+        public AnimationReferenceAsset Default;
+        public AnimationReferenceAsset Idle;
+        public AnimationReferenceAsset Move;
+        public AnimationReferenceAsset Start;
+        public AnimationReferenceAsset Die;
+        public AnimationReferenceAsset AttackBegin;
+        public AnimationReferenceAsset AttackEnd;
+        public AnimationReferenceAsset[] AttackRemote;
+        public AnimationReferenceAsset[] AttackClose;
+
+        public AnimationReferenceAsset GetSingle(AnimationSlot slot)
+        {
+            switch (slot)
+            {
+                case AnimationSlot.Default: return Default;
+                case AnimationSlot.Idle: return Idle;
+                case AnimationSlot.Move: return Move;
+                case AnimationSlot.Start: return Start;
+                case AnimationSlot.Die: return Die;
+                case AnimationSlot.AttackBegin: return AttackBegin;
+                case AnimationSlot.AttackEnd: return AttackEnd;
+                default: return null;
+            }
+        }
+
+        public void Apply(AnimationOverride animations)
+        {
+            if (animations == null) return;
+            foreach (AnimationSlot slot in animations.ClearedSlots)
+            {
+                Clear(slot);
+            }
+            if (animations.Default != null) Default = animations.Default;
+            if (animations.Idle != null) Idle = animations.Idle;
+            if (animations.Move != null) Move = animations.Move;
+            if (animations.Start != null) Start = animations.Start;
+            if (animations.Die != null) Die = animations.Die;
+            if (animations.AttackBegin != null) AttackBegin = animations.AttackBegin;
+            if (animations.AttackEnd != null) AttackEnd = animations.AttackEnd;
+            if (animations.AttackRemote != null) AttackRemote = animations.AttackRemote;
+            if (animations.AttackClose != null) AttackClose = animations.AttackClose;
+        }
+
+        private void Clear(AnimationSlot slot)
+        {
+            switch (slot)
+            {
+                case AnimationSlot.Default: Default = null; break;
+                case AnimationSlot.Idle: Idle = null; break;
+                case AnimationSlot.Move: Move = null; break;
+                case AnimationSlot.Start: Start = null; break;
+                case AnimationSlot.Die: Die = null; break;
+                case AnimationSlot.AttackBegin: AttackBegin = null; break;
+                case AnimationSlot.AttackEnd: AttackEnd = null; break;
+                case AnimationSlot.AttackRemote: AttackRemote = null; break;
+                case AnimationSlot.AttackClose: AttackClose = null; break;
+            }
+        }
+    }
+
+    private AnimationSet ResolveAnimations(AnimationOverride once)
+    {
+        var resolved = new AnimationSet
+        {
+            Default = o_default,
+            Idle = o_idle,
+            Move = o_move,
+            Start = o_start,
+            Die = o_die,
+            AttackBegin = o_attack_begin,
+            AttackEnd = o_attack_end,
+            AttackRemote = o_attack_remote,
+            AttackClose = o_attack_close,
+        };
+        _overrides.Sort((left, right) =>
+        {
+            int priority = left.Priority.CompareTo(right.Priority);
+            return priority != 0 ? priority : left.Id.CompareTo(right.Id);
+        });
+        foreach (OverrideEntry entry in _overrides)
+        {
+            resolved.Apply(entry.Animations);
+        }
+        resolved.Apply(once);
+        return resolved;
+    }
+
     private enum ColorEffect
     {
         FadeIn,
@@ -470,7 +597,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
     private void HandleAnimationStateComplete(Spine.TrackEntry trackEntry)
     {
-        if ((Attack_End || (Attack != null && Attack.Length > 1)) && currentState == EntityState.Attack && _attackPhase == AttackPhase.Active && trackEntry.Animation == Attack[_attackAnimationIndex].Animation)
+        if ((_activeAnimations.AttackEnd || (Attack != null && Attack.Length > 1)) && currentState == EntityState.Attack && _attackPhase == AttackPhase.Active && trackEntry.Animation == Attack[_attackAnimationIndex].Animation)
         {
             _attackPhase = AttackPhase.ComboWindow;
             _attackStaticWaitTime = 0.05f;
@@ -483,7 +610,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         // Die animation finished → kick off the fade-out. The tween's OnComplete
         // returns the entity to the pool. currentState guard keeps Dormancy-reset
         // (which replaces the Die track with Default) from re-triggering fade-out.
-        if (Die != null && currentState == EntityState.Die && trackEntry.Animation == Die.Animation)
+        if (_activeAnimations.Die != null && currentState == EntityState.Die && trackEntry.Animation == _activeAnimations.Die.Animation)
         {
             SetColor(ColorEffect.FadeOut, 0.2f);
             return;
@@ -502,21 +629,21 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         states_ban = new HashSet<EntityState>();
         _direction = (false, false);
         thisEntity = this.GetComponent<Entity>();
-        ResetAnimation(AllSlots);
+        _activeAnimations = ResolveAnimations(null);
         event_attack = skeleton.Skeleton.Data.FindEvent("OnAttack");
         event_start = skeleton.Skeleton.Data.FindEvent("OnStart");
         skeleton.AnimationState.Event += HandleAnimationStateEvent;
         skeleton.AnimationState.Start += HandleAnimationStateStart;
         skeleton.AnimationState.Complete += HandleAnimationStateComplete;
         skeleton.AnimationState.Data.DefaultMix = 0.1f;
-        SetMixToStart(Default);
-        SetMixToStart(Idle);
-        SetMixToStart(Move);
-        SetMixToStart(Attack_Begin);
-        SetMixToStart(Attack_End);
-        SetMixToStartAll(Attack_Remote);
-        SetMixToStartAll(Attack_Close);
-        SetMixToStart(Die);
+        SetMixToStart(o_default);
+        SetMixToStart(o_idle);
+        SetMixToStart(o_move);
+        SetMixToStart(o_attack_begin);
+        SetMixToStart(o_attack_end);
+        SetMixToStartAll(o_attack_remote);
+        SetMixToStartAll(o_attack_close);
+        SetMixToStart(o_die);
         // The following block was commented out and is intentionally not restored:
         // it attempted to cross-mix Attack_Close <-> Attack_End but the loops were broken
         // (e.g. `for(int i=;i<Attack_Close.Length)`), so leaving it disabled is correct.
@@ -527,7 +654,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     {
         if (animation != null)
         {
-            skeleton.AnimationState.Data.SetMix(animation, Start, 0);
+            skeleton.AnimationState.Data.SetMix(animation, o_start, 0);
         }
     }
 
@@ -539,6 +666,19 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         {
             SetMixToStart(animations[i]);
         }
+    }
+
+    private void RegisterMixes(AnimationOverride animations)
+    {
+        if (animations == null || skeleton == null) return;
+        SetMixToStart(animations.Default);
+        SetMixToStart(animations.Idle);
+        SetMixToStart(animations.Move);
+        SetMixToStart(animations.AttackBegin);
+        SetMixToStart(animations.AttackEnd);
+        SetMixToStartAll(animations.AttackRemote);
+        SetMixToStartAll(animations.AttackClose);
+        SetMixToStart(animations.Die);
     }
 
     public void Initialize()
@@ -570,7 +710,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         _attackAction = null;
         _attackPhase = AttackPhase.None;
         states_ban.Clear();
-        ResetAnimation(AllSlots);
+        _overrides.Clear();
         SetState(EntityState.Default);
     }
 }
