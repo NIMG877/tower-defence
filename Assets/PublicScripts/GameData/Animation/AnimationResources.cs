@@ -13,22 +13,15 @@ public sealed class AnimationResources : ScriptableObject
     {
         public AnimationReferenceAsset Default;
         public AnimationReferenceAsset Idle;
-        public AnimationReferenceAsset Move;
         public AnimationReferenceAsset Start;
         public AnimationReferenceAsset Die;
-        public AnimationReferenceAsset AttackBegin;
-        public AnimationReferenceAsset[] AttackRemote = Array.Empty<AnimationReferenceAsset>();
-        public AnimationReferenceAsset[] AttackClose = Array.Empty<AnimationReferenceAsset>();
-        public AnimationReferenceAsset AttackEnd;
-        
     }
 
     [Serializable]
-    public sealed class ChargeAttackAnimationTemplate
+    public sealed class MovementAnimationGroup
     {
-        public AnimationReferenceAsset ChargeBegin;
-        public AnimationReferenceAsset[] Charge = Array.Empty<AnimationReferenceAsset>();
-        public AnimationReferenceAsset ChargeEnd;
+        public AnimationReferenceAsset Move;
+        public JumpAnimationTemplate Jump = new JumpAnimationTemplate();
     }
 
     [Serializable]
@@ -37,6 +30,24 @@ public sealed class AnimationResources : ScriptableObject
         public AnimationReferenceAsset Begin;
         public AnimationReferenceAsset Loop;
         public AnimationReferenceAsset End;
+    }
+
+    [Serializable]
+    public sealed class AttackAnimationGroup
+    {
+        public AnimationReferenceAsset AttackBegin;
+        public AnimationReferenceAsset[] AttackRemote = Array.Empty<AnimationReferenceAsset>();
+        public AnimationReferenceAsset[] AttackClose = Array.Empty<AnimationReferenceAsset>();
+        public AnimationReferenceAsset AttackEnd;
+        public ChargeAttackAnimationTemplate Charge = new ChargeAttackAnimationTemplate();
+    }
+
+    [Serializable]
+    public sealed class ChargeAttackAnimationTemplate
+    {
+        public AnimationReferenceAsset ChargeBegin;
+        public AnimationReferenceAsset[] Charge = Array.Empty<AnimationReferenceAsset>();
+        public AnimationReferenceAsset ChargeEnd;
     }
 
     [Serializable]
@@ -55,8 +66,8 @@ public sealed class AnimationResources : ScriptableObject
 
     [Header("Fixed Templates")]
     [SerializeField] private DefaultAnimationTemplate _defaults = new DefaultAnimationTemplate();
-    [SerializeField] private ChargeAttackAnimationTemplate _chargeAttack = new ChargeAttackAnimationTemplate();
-    [SerializeField] private JumpAnimationTemplate _jump = new JumpAnimationTemplate();
+    [SerializeField] private MovementAnimationGroup _movement = new MovementAnimationGroup();
+    [SerializeField] private AttackAnimationGroup _attack = new AttackAnimationGroup();
 
     [Header("Named Resources")]
     [SerializeField] private List<NamedAnimation> _animations = new List<NamedAnimation>();
@@ -66,8 +77,8 @@ public sealed class AnimationResources : ScriptableObject
     private Dictionary<string, AnimationReferenceAsset[]> _animationGroupLookup;
 
     public DefaultAnimationTemplate Defaults => _defaults;
-    public ChargeAttackAnimationTemplate ChargeAttack => _chargeAttack;
-    public JumpAnimationTemplate Jump => _jump;
+    public MovementAnimationGroup Movement => _movement;
+    public AttackAnimationGroup Attack => _attack;
 
     public bool TryGetAnimation(string name, out AnimationReferenceAsset animation)
     {
@@ -200,19 +211,20 @@ public sealed class AnimationResources : ScriptableObject
     {
         ValidateRequiredAnimation(_defaults.Default, "default animation");
         ValidateRequiredAnimation(_defaults.Idle, "idle animation");
-        ValidateRequiredAnimation(_defaults.Move, "move animation");
-        ValidateGroup(_defaults.AttackRemote, "default remote attack group", true);
-        ValidateGroup(_defaults.AttackClose, "default close attack group", true);
+        ValidateRequiredAnimation(_movement.Move, "move animation");
+        ValidateGroup(_attack.AttackRemote, "default remote attack group", true);
+        ValidateGroup(_attack.AttackClose, "default close attack group", true);
 
-        ValidateGroup(_chargeAttack.Charge, "charge animation group", false);
+        ChargeAttackAnimationTemplate charge = _attack.Charge;
+        ValidateGroup(charge.Charge, "charge animation group", false);
         bool hasAnyChargeAttack =
-            _chargeAttack.ChargeBegin != null ||
-            HasAnimations(_chargeAttack.Charge) ||
-            _chargeAttack.ChargeEnd != null;
+            charge.ChargeBegin != null ||
+            HasAnimations(charge.Charge) ||
+            charge.ChargeEnd != null;
         bool hasAllChargeAttack =
-            _chargeAttack.ChargeBegin != null &&
-            HasAnimations(_chargeAttack.Charge) &&
-            _chargeAttack.ChargeEnd != null;
+            charge.ChargeBegin != null &&
+            HasAnimations(charge.Charge) &&
+            charge.ChargeEnd != null;
         if (hasAnyChargeAttack && !hasAllChargeAttack)
         {
             Debug.LogWarning(
@@ -220,8 +232,9 @@ public sealed class AnimationResources : ScriptableObject
                 this);
         }
 
-        bool hasAnyJump = _jump.Begin != null || _jump.Loop != null || _jump.End != null;
-        bool hasAllJump = _jump.Begin != null && _jump.Loop != null && _jump.End != null;
+        JumpAnimationTemplate jump = _movement.Jump;
+        bool hasAnyJump = jump.Begin != null || jump.Loop != null || jump.End != null;
+        bool hasAllJump = jump.Begin != null && jump.Loop != null && jump.End != null;
         if (hasAnyJump && !hasAllJump)
         {
             Debug.LogWarning($"[{name}] Jump template must configure Begin, Loop, and End together.", this);
@@ -265,8 +278,10 @@ public sealed class AnimationResources : ScriptableObject
     private void EnsureSerializedFields()
     {
         if (_defaults == null) _defaults = new DefaultAnimationTemplate();
-        if (_chargeAttack == null) _chargeAttack = new ChargeAttackAnimationTemplate();
-        if (_jump == null) _jump = new JumpAnimationTemplate();
+        if (_movement == null) _movement = new MovementAnimationGroup();
+        if (_movement.Jump == null) _movement.Jump = new JumpAnimationTemplate();
+        if (_attack == null) _attack = new AttackAnimationGroup();
+        if (_attack.Charge == null) _attack.Charge = new ChargeAttackAnimationTemplate();
         if (_animations == null) _animations = new List<NamedAnimation>();
         if (_animationGroups == null) _animationGroups = new List<NamedAnimationGroup>();
     }

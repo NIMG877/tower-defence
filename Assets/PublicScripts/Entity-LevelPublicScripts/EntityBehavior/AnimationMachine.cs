@@ -55,6 +55,7 @@ public sealed class AnimationOverrideHandle
 
 public class AnimationMachine : MonoBehaviour, IPoolOperation
 {
+    [Header("Legacy Animation Resources (Unused)")]
     [SerializeField] private AnimationReferenceAsset o_default, o_idle, o_move, o_attack_begin, o_attack_end, o_start, o_die;
     [SerializeField] private AnimationReferenceAsset[] o_attack_remote, o_attack_close;
 
@@ -70,6 +71,8 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     private float _attackStaticWaitTime;
     private AnimationReferenceAsset[] Attack;
     private AttackPhase _attackPhase;
+    private AnimationResources _animationResources;
+    private AnimationSet _baseAnimations;
     private AnimationSet _activeAnimations;
     private readonly List<OverrideEntry> _overrides = new List<OverrideEntry>();
     private int _nextOverrideId;
@@ -511,6 +514,41 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         public AnimationReferenceAsset[] AttackRemote;
         public AnimationReferenceAsset[] AttackClose;
 
+        public static AnimationSet From(AnimationResources resources)
+        {
+            AnimationResources.DefaultAnimationTemplate defaults = resources.Defaults;
+            AnimationResources.MovementAnimationGroup movement = resources.Movement;
+            AnimationResources.AttackAnimationGroup attack = resources.Attack;
+            return new AnimationSet
+            {
+                Default = defaults.Default,
+                Idle = defaults.Idle,
+                Move = movement.Move,
+                Start = defaults.Start,
+                Die = defaults.Die,
+                AttackBegin = attack.AttackBegin,
+                AttackEnd = attack.AttackEnd,
+                AttackRemote = attack.AttackRemote,
+                AttackClose = attack.AttackClose,
+            };
+        }
+
+        public AnimationSet Copy()
+        {
+            return new AnimationSet
+            {
+                Default = Default,
+                Idle = Idle,
+                Move = Move,
+                Start = Start,
+                Die = Die,
+                AttackBegin = AttackBegin,
+                AttackEnd = AttackEnd,
+                AttackRemote = AttackRemote,
+                AttackClose = AttackClose,
+            };
+        }
+
         public AnimationReferenceAsset GetSingle(AnimationSlot slot)
         {
             switch (slot)
@@ -563,18 +601,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
     private AnimationSet ResolveAnimations(AnimationOverride once)
     {
-        var resolved = new AnimationSet
-        {
-            Default = o_default,
-            Idle = o_idle,
-            Move = o_move,
-            Start = o_start,
-            Die = o_die,
-            AttackBegin = o_attack_begin,
-            AttackEnd = o_attack_end,
-            AttackRemote = o_attack_remote,
-            AttackClose = o_attack_close,
-        };
+        AnimationSet resolved = _baseAnimations.Copy();
         _overrides.Sort((left, right) =>
         {
             int priority = left.Priority.CompareTo(right.Priority);
@@ -629,6 +656,14 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         states_ban = new HashSet<EntityState>();
         _direction = (false, false);
         thisEntity = this.GetComponent<Entity>();
+        _animationResources = thisEntity.EntityData.AnimationResources;
+        if (_animationResources == null)
+        {
+            Debug.LogError($"AnimationResources is not configured for entity '{thisEntity.EntityData.ID}'.", this);
+            return;
+        }
+
+        _baseAnimations = AnimationSet.From(_animationResources);
         _activeAnimations = ResolveAnimations(null);
         event_attack = skeleton.Skeleton.Data.FindEvent("OnAttack");
         event_start = skeleton.Skeleton.Data.FindEvent("OnStart");
@@ -636,14 +671,14 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         skeleton.AnimationState.Start += HandleAnimationStateStart;
         skeleton.AnimationState.Complete += HandleAnimationStateComplete;
         skeleton.AnimationState.Data.DefaultMix = 0.1f;
-        SetMixToStart(o_default);
-        SetMixToStart(o_idle);
-        SetMixToStart(o_move);
-        SetMixToStart(o_attack_begin);
-        SetMixToStart(o_attack_end);
-        SetMixToStartAll(o_attack_remote);
-        SetMixToStartAll(o_attack_close);
-        SetMixToStart(o_die);
+        SetMixToStart(_baseAnimations.Default);
+        SetMixToStart(_baseAnimations.Idle);
+        SetMixToStart(_baseAnimations.Move);
+        SetMixToStart(_baseAnimations.AttackBegin);
+        SetMixToStart(_baseAnimations.AttackEnd);
+        SetMixToStartAll(_baseAnimations.AttackRemote);
+        SetMixToStartAll(_baseAnimations.AttackClose);
+        SetMixToStart(_baseAnimations.Die);
         // The following block was commented out and is intentionally not restored:
         // it attempted to cross-mix Attack_Close <-> Attack_End but the loops were broken
         // (e.g. `for(int i=;i<Attack_Close.Length)`), so leaving it disabled is correct.
@@ -652,9 +687,9 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     // Helper: zero mix time from a single animation to Start.
     private void SetMixToStart(AnimationReferenceAsset animation)
     {
-        if (animation != null)
+        if (animation != null && _baseAnimations.Start != null)
         {
-            skeleton.AnimationState.Data.SetMix(animation, o_start, 0);
+            skeleton.AnimationState.Data.SetMix(animation, _baseAnimations.Start, 0);
         }
     }
 

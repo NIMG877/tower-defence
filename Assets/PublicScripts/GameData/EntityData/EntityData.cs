@@ -96,4 +96,7 @@ public class EntityData
     // ExtraAbility 继续走运行时 AddExtraAbility 路径,不在这里
     public List<AbilityConfig> Skills = new List<AbilityConfig>();
     public List<AbilityConfig> Talents = new List<AbilityConfig>();
+
+    // 动画资源
+    public AnimationResources AnimationResources;
 }
