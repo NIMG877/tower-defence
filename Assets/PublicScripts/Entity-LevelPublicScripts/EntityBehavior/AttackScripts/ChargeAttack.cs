@@ -1,18 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Spine;
-using Spine.Unity;
 
 public class ChargeAttack : AttackBase
 {
     public OperationsBeforeTakeDamage OnBeforeChargeTakeDamage;
     public OperationsAfterTakeDamage OnAfterChargeTakeDamage;
-    public AnimationReferenceAsset ChargeBegin;
-    [FormerlySerializedAs("ChargeAnimation")]
-    public AnimationReferenceAsset[] Charge;
-    public AnimationReferenceAsset ChargeEnd;
     private int _currentChargeNum;
     [SerializeField] private GameObject[] _chargeEffects;
     [SerializeField] private AttackEffectData _chargeEffectData;
@@ -33,7 +27,11 @@ public class ChargeAttack : AttackBase
     {
         if (attackTargets.Length > 0)
         {
-            if (_thisEntity.entityAM.TrySetAttackState(forceChange, () => { AttackByAnimation(attackTargets, canBeInterrupt); }, PendingAnimationOverride))
+            if (_thisEntity.entityAM.TrySetAttackState(
+                forceChange,
+                () => { AttackByAnimation(attackTargets, canBeInterrupt); },
+                AttackAnimationBranch.Normal,
+                PendingAnimationOverride))
             {
                 base.TryToAttack(attackTargets, forceChange, canBeInterrupt);
                 return true;
@@ -41,14 +39,10 @@ public class ChargeAttack : AttackBase
         }
         else if (_currentChargeNum < _chargeEffects.Length)
         {
-            var once = new AnimationOverride
-            {
-                AttackBegin = ChargeBegin,
-                AttackRemote = Charge,
-                AttackClose = Charge,
-                AttackEnd = ChargeEnd,
-            };
-            if (_thisEntity.entityAM.TrySetAttackState(forceChange, () => { SpawnChargeEffect(); }, once))
+            if (_thisEntity.entityAM.TrySetAttackState(
+                forceChange,
+                () => { SpawnChargeEffect(); },
+                AttackAnimationBranch.Charge))
             {
                 return true;
             }

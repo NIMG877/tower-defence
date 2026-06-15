@@ -1,15 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Spine;
-using Spine.Unity;
 using Cysharp.Threading.Tasks;
 
 public class JumpMove : MoveBase
 {
     [SerializeField] private Vector2Int[] _jumpRange;
     [SerializeField] private float _jumpGap;
-    [SerializeField] private AnimationReferenceAsset _jumpBegin, _jumpEnd, _jump;
     private float _jumpGapTimer;
     bool _initialFind;
     protected override void MovePosition()
@@ -29,7 +26,7 @@ public class JumpMove : MoveBase
             }
             if (_thisAM.CurrentState != EntityState.Move && _thisEntity.Movement.ResistList.Count == 0)
             {
-                if (_thisAM.TrySetState(EntityState.Move, false, new AnimationOverride { Move = _jumpBegin }))
+                if (_thisAM.TrySetMoveState(false, MoveAnimationBranch.JumpBegin))
                 {
                     Jump(this.transform.position, _currentSection[_currentPointSerial].targetPosition);
                 }
@@ -47,12 +44,12 @@ public class JumpMove : MoveBase
     {
         float jumpBeginT, jumpEndT, jumpT;
         float k = 0.9f;
-        jumpBeginT = _jumpBegin.Animation.Duration * k;
-        jumpEndT = _jumpEnd.Animation.Duration * k;
-        jumpT = _jump.Animation.Duration * k;
+        jumpBeginT = _thisAM.ResolveAnimationDuration(AnimationSlot.JumpBegin) * k;
+        jumpEndT = _thisAM.ResolveAnimationDuration(AnimationSlot.JumpEnd) * k;
+        jumpT = _thisAM.ResolveAnimationDuration(AnimationSlot.JumpLoop) * k;
         Vector2 dir = to - from;
         await UniTask.WaitForSeconds(jumpBeginT);
-        _thisAM.TrySetState(EntityState.Move, true, new AnimationOverride { Move = _jump });
+        _thisAM.TrySetMoveState(true, MoveAnimationBranch.JumpLoop);
         float dt = 0;
         while (dt < jumpT)
         {
@@ -62,7 +59,7 @@ public class JumpMove : MoveBase
             dt += Time.fixedDeltaTime;
         }
         this.transform.position = to;
-        _thisAM.TrySetState(EntityState.Move, true, new AnimationOverride { Move = _jumpEnd });
+        _thisAM.TrySetMoveState(true, MoveAnimationBranch.JumpEnd);
         await UniTask.WaitForSeconds(jumpEndT);
         if (_currentSection[_currentPointSerial].whetherToEnterPortal)
         {
