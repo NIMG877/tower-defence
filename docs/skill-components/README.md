@@ -87,6 +87,13 @@ callers.
   (`multiplyer`, `damageType`, `cumbo`, etc.). Supersedes the
   removed `AttackMultiplierBoost` and `SetAttackCombo`.
 
+### Charge attacks
+
+- [ChargeAttackDamageModifier](ChargeAttackDamageModifier.md) - multiplies
+  damage dealt by each stored ChargeAttack energy projectile.
+- [ChargeAttackReservePool](ChargeAttackReservePool.md) - adds an extra
+  conditionally consumable ChargeAttack energy pool.
+
 ### Attack behavior
 
 - [AttackBehaviorOverride](AttackBehaviorOverride.md) - overrides attack
