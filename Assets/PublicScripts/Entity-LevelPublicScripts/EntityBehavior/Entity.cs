@@ -6,6 +6,7 @@ public enum OrderLogic
     Priority_Des,
     Hprate_NoFull_Asc,
     ResistFirst_OtherCampFirst_Priority_Des,
+    Defense_Des,
 }
 
 

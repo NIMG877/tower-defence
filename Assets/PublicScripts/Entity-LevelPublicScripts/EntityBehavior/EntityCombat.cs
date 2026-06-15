@@ -81,6 +81,9 @@ public class EntityCombat
                 }
                 entitiesList.Sort((x, y) => x.Stats.CurrentHpRate.CompareTo(y.Stats.CurrentHpRate));
                 break;
+            case OrderLogic.Defense_Des:
+                entitiesList.Sort((x, y) => y.Stats.DefS.CompareTo(x.Stats.DefS));
+                break;
             case OrderLogic.ResistFirst_OtherCampFirst_Priority_Des:
                 for (int i = 0; i < entitiesList.Count - 1; i++)
                 {

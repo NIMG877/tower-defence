@@ -20,6 +20,8 @@ Common values:
 - `damageType=3`: healing; attack target selection switches to same-camp entities.
 - `orderLogic=Hprate_NoFull_Asc`: exclude full-health targets and prioritize
   the lowest current HP ratio.
+- `orderLogic=Defense_Des`: prioritize targets by current `Stats.DefS` from
+  highest to lowest.
 
 Changing attack behavior does not automatically restart an in-flight attack.
 Pair with `ForceResetAttack` when the new mode must take effect immediately.
