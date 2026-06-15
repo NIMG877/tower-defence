@@ -1,7 +1,7 @@
 # Skill Components
 
-Parameter reference for the four `AbilityComponentBase` implementations in
-the project. One file per component; this README is the index.
+Parameter reference for all concrete `AbilityComponentBase` implementations
+in the project. One file per component; this README is the index.
 
 When you need to look up what a `key:` row in a `ComponentConfig.parameters`
 asset means, click the component name in the list below.
@@ -64,7 +64,7 @@ range 0–3:
 | `0` | Physical |
 | `1` | Magical |
 | `2` | Siege |
-| `3` | TrueDamage (bypasses defence/resistance) |
+| `3` | Healing; attack target selection switches to same-camp entities |
 
 The literal `3` appears in some legacy code; the meaning is project-
 wide, not per-component. Search the codebase for `damageType` for
@@ -86,6 +86,26 @@ callers.
   CSV-driven rewriter for `DamageEventBase` event fields
   (`multiplyer`, `damageType`, `cumbo`, etc.). Supersedes the
   removed `AttackMultiplierBoost` and `SetAttackCombo`.
+
+### Attack behavior
+
+- [AttackBehaviorOverride](AttackBehaviorOverride.md) - overrides attack
+  damage type and target ordering, optionally saving the original values.
+- [AttackBehaviorRestore](AttackBehaviorRestore.md) - restores snapshots
+  written by `AttackBehaviorOverride`.
+- [ForceResetAttack](ForceResetAttack.md) - immediately reselects targets and
+  attempts a forced attack using the current behavior.
+- [AttackRangeOverride](AttackRangeOverride.md) - temporarily replaces an
+  entity's attack range.
+- [AttackRangeRestore](AttackRangeRestore.md) - restores the entity's base
+  attack range.
+
+### Animation
+
+- [ApplyAnimationOverride](ApplyAnimationOverride.md) - performs a one-time
+  animation replacement or adds a persistent Named Resource override.
+- [RemoveAnimationOverride](RemoveAnimationOverride.md) - removes persistent
+  animation overrides using records stored in the Blackboard.
 
 ### Random
 

@@ -1,0 +1,20 @@
+# AttackBehaviorRestore
+
+Restores attack `DamageType` and `OrderLogic` from snapshots written by
+`AttackBehaviorOverride`.
+
+**Registered as:** `AttackBehaviorRestore`
+
+## Parameters
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `toSelf` | Bool | `True` | Restore records belonging to `ctx.entity`. If false, filter by entities from `blackboardKey`. |
+| `blackboardKey` | String | `""` | Blackboard key containing `List<Entity>` when `toSelf=false`. |
+| `inputKey` | String | `""` | Blackboard key containing `List<AttackBehaviorSnapshot>`. |
+
+Matching snapshots are restored and consumed. The Blackboard key is deleted
+when no snapshots remain.
+
+Normally trigger this on `OnAbilityEnd`, then trigger `ForceResetAttack` so the
+restored targeting behavior takes effect immediately.
