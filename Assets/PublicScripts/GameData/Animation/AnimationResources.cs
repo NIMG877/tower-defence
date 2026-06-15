@@ -66,8 +66,8 @@ public sealed class AnimationResources : ScriptableObject
 
     [Header("Fixed Templates")]
     [SerializeField] private DefaultAnimationTemplate _defaults = new DefaultAnimationTemplate();
-    [SerializeField] private MovementAnimationGroup _movement = new MovementAnimationGroup();
     [SerializeField] private AttackAnimationGroup _attack = new AttackAnimationGroup();
+    [SerializeField] private MovementAnimationGroup _movement = new MovementAnimationGroup();
 
     [Header("Named Resources")]
     [SerializeField] private List<NamedAnimation> _animations = new List<NamedAnimation>();
