@@ -1,6 +1,6 @@
 ---
 name: td-create-ability-component
-description: Create new reusable AbilitySystem component classes in this TD Unity project from a component contract describing requirements, parameters, and expected effects. Use only when a new component is needed. Analyze the owning subsystem, choose useful but restrained generality, create only new component source/meta files, add its docs/skill-components documentation, and update docs/skill-components/README.md. Never modify existing runtime components or other project code; exit and ask the user when new files alone cannot implement the behavior.
+description: Create new reusable AbilitySystem component classes in this TD Unity project from a component contract describing requirements, parameters, and expected effects. Use only when existing components cannot compose the behavior and no reasonable extension of an existing component preserves its responsibility. Analyze the owning subsystem, choose useful but restrained generality, create only new component source/meta files, add its docs/skill-components documentation, and update docs/skill-components/README.md. Never modify existing runtime components or other project code; exit and ask the user when new files alone cannot implement the behavior.
 ---
 
 # Create TD Ability Component

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 
 namespace AbilitySystem.Components
@@ -22,6 +24,9 @@ namespace AbilitySystem.Components
         private Func<string>  _key;
         private Func<object> _value;
         private Func<string>  _method;
+        private Func<string> _source;
+        private Func<string> _path;
+        private Func<bool> _asString;
 
         public override void OnInit(AbilityContext ctx, ParamList p)
         {
@@ -29,6 +34,9 @@ namespace AbilitySystem.Components
             _key    = p.GetStringLazy("key",    "",    bb);
             _value  = p.GetValueLazy ("value",  null,  bb);
             _method = p.GetStringLazy("method", "set", bb);
+            _source = p.GetStringLazy("source", "value", bb);
+            _path = p.GetStringLazy("path", "", bb);
+            _asString = p.GetBoolLazy("asString", false, bb);
         }
 
         public override void OnTrigger(AbilityContext ctx)
@@ -37,7 +45,7 @@ namespace AbilitySystem.Components
             string key = _key();
             if (string.IsNullOrEmpty(key)) return;
 
-            object value = _value();
+            object value = ResolveValue(ctx);
             string method = _method();
 
             switch (method)
@@ -54,6 +62,114 @@ namespace AbilitySystem.Components
                     Debug.LogWarning($"WriteBlackboard: unknown method '{method}'; skipping");
                     return;
             }
+        }
+
+        private object ResolveValue(AbilityContext ctx)
+        {
+            object value;
+            switch (Normalize(_source()))
+            {
+                case "event":
+                    value = ResolveEventValue(ctx.currentEvent, Normalize(_path()));
+                    break;
+                case "entity":
+                    value = ResolveEntityValue(ctx.entity, Normalize(_path()));
+                    break;
+                default:
+                    value = _value();
+                    break;
+            }
+
+            if (!_asString() || value == null || value is List<Entity>) return value;
+            return value is IFormattable formattable
+                ? formattable.ToString(null, CultureInfo.InvariantCulture)
+                : value.ToString();
+        }
+
+        private static object ResolveEventValue(AbilityEvent evt, string path)
+        {
+            if (evt == null) return null;
+
+            if (evt is DamageEventBase damageEvent)
+            {
+                switch (path)
+                {
+                    case "target": return ToEntityList(damageEvent.target);
+                    case "multiplier":
+                    case "multiplyer": return damageEvent.multiplyer;
+                    case "defpenetrate": return damageEvent.defPenetrate;
+                    case "mgrpenetrate": return damageEvent.mgrPenetrate;
+                    case "defpenetrate_value": return damageEvent.defPenetrate_value;
+                    case "mgrpenetrate_value": return damageEvent.mgrPenetrate_value;
+                    case "damagetype": return damageEvent.damageType;
+                    case "applytype": return damageEvent.applyType;
+                }
+            }
+
+            if (evt is HurtEventBase hurtEvent)
+            {
+                switch (path)
+                {
+                    case "origin": return ToEntityList(hurtEvent.origin);
+                    case "damage": return hurtEvent.damage;
+                    case "multiplier":
+                    case "multiplyer": return hurtEvent.multiplyer;
+                    case "defpenetrate": return hurtEvent.defPenetrate;
+                    case "mgrpenetrate": return hurtEvent.mgrPenetrate;
+                    case "defpenetrate_value": return hurtEvent.defPenetrate_value;
+                    case "mgrpenetrate_value": return hurtEvent.mgrPenetrate_value;
+                    case "damagetype": return hurtEvent.damageType;
+                    case "applytype": return hurtEvent.applyType;
+                    case "isdeadly": return hurtEvent.isDeadly;
+                }
+            }
+
+            if (path == "isdeadly")
+            {
+                if (evt is AfterAttackEvent afterAttack) return afterAttack.isDeadly;
+                if (evt is AfterTakeDamageEvent afterDamage) return afterDamage.isDeadly;
+            }
+            if (path == "cumbo" && evt is BeforeAttackEvent beforeAttack) return beforeAttack.cumbo;
+
+            WarnUnknownContextPath("event", path);
+            return null;
+        }
+
+        private static object ResolveEntityValue(Entity entity, string path)
+        {
+            if (entity == null) return null;
+
+            switch (path)
+            {
+                case "":
+                case "self": return ToEntityList(entity);
+                case "camp": return entity.Camp;
+                case "currenthp": return entity.Stats.CurrentHp;
+                case "currenthprate": return entity.Stats.CurrentHpRate;
+                case "maxhp": return entity.Stats.MaxHpS;
+                case "attack": return entity.Stats.AttackS;
+                case "monsterstatus": return entity.EntityData != null ? entity.EntityData.MonsterStatus : 0;
+                default:
+                    WarnUnknownContextPath("entity", path);
+                    return null;
+            }
+        }
+
+        private static List<Entity> ToEntityList(Entity entity)
+        {
+            return entity == null ? new List<Entity>() : new List<Entity> { entity };
+        }
+
+        private static void WarnUnknownContextPath(string source, string path)
+        {
+            OneShotWarn.WarnOnce(
+                $"write-bb-context:{source}:{path}",
+                $"WriteBlackboard: unsupported context path '{source}.{path}'; skipping.");
+        }
+
+        private static string Normalize(string value)
+        {
+            return string.IsNullOrEmpty(value) ? "" : value.Trim().ToLowerInvariant();
         }
 
         // "add" / "mult" / "div" path. Reads existing at key, parses value to existing's type,

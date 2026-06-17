@@ -73,13 +73,33 @@ Every atomic behavior must map to:
 
 - SPConfig behavior;
 - one or more existing components; or
+- an explicitly approved, reasonable extension of an existing component; or
 - an explicitly approved new component.
 
-For a component gap, produce this handoff:
+When composition cannot satisfy an atomic behavior, stop before editing
+runtime code and invoke `$td-extend-ability-component` with this gap handoff:
 
 ```text
 Atomic requirement:
-Why existing components cannot satisfy it:
+Why current composition cannot satisfy it:
+Relevant existing components/candidates:
+Required targets:
+Required trigger/lifecycle behavior:
+Required Blackboard inputs/outputs:
+Expected effect:
+```
+
+Do not assess whether an extension is reasonable, design its API, or ask the
+user to approve an extension in this workflow. Those responsibilities belong
+to `$td-extend-ability-component`.
+
+Resume ability composition when the extension skill implements and verifies an
+approved extension. If it reports that no reasonable extension exists, use
+its findings to produce a new-component handoff:
+
+```text
+Atomic requirement:
+Why existing composition and reasonable extensions cannot satisfy it:
 Proposed component name:
 General responsibility:
 Parameters:

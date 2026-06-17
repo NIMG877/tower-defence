@@ -86,6 +86,15 @@ callers.
   CSV-driven rewriter for `DamageEventBase` event fields
   (`multiplyer`, `damageType`, `cumbo`, etc.). Supersedes the
   removed `AttackMultiplierBoost` and `SetAttackCombo`.
+- [ApplyDamage](ApplyDamage.md) - applies direct attack-based or fixed-value
+  damage to the event target, self, or a Blackboard entity list.
+
+### Entity selection
+
+- [EntitySelector](EntitySelector.md) - selects entities by subject, event
+  target, vision, radius, or range and writes the result/count to Blackboard.
+- [EntityFilter](EntityFilter.md) - filters attack target candidates with
+  configurable OR groups of AND conditions.
 
 ### Charge attacks
 

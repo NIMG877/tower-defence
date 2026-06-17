@@ -27,6 +27,36 @@ re-evaluates the source on every call.
 | `value` | typed (per `ParamEntry.type`) | `null` | The value to write (`set`) or the operand to apply (`add`/`mult`/`div`). |
 | `method` | String | `set` | One of `set` / `add` / `mult` / `div`. Unknown method → `LogWarning` + skip. |
 
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `source` | String | `value` | Value source: `value`, `event`, or `entity`. |
+| `path` | String | `""` | Context field used by `source=event` or `source=entity`. |
+| `asString` | Bool | `False` | Convert non-entity-list context values to invariant strings before writing. Useful for `ConditionEvaluator`. |
+
+## Context sources
+
+`source=value` preserves the original behavior. `source=event` and
+`source=entity` read the current trigger context instead of `value`.
+
+Supported event paths:
+
+- Damage events: `target`, `multiplyer`/`multiplier`, `defPenetrate`,
+  `mgrPenetrate`, `defPenetrate_value`, `mgrPenetrate_value`, `damageType`,
+  `applyType`
+- Hurt events: `origin`, `damage`, the same multiplier/penetration/type
+  fields, and `isDeadly`
+- Specific events: `isDeadly` on after-attack/after-damage events and `cumbo`
+  on before-attack events
+
+Supported entity paths:
+
+- empty path or `self`
+- `camp`, `currentHp`, `currentHpRate`, `maxHp`, `attack`, `monsterStatus`
+
+Entity-valued paths (`event.target`, `event.origin`, and `entity.self`) write
+`List<Entity>` so they can feed components such as `ApplyBuff`. Unsupported
+paths emit a one-shot warning and skip the write.
+
 ### Value type
 
 `value` is the only param whose runtime type is determined by the
@@ -64,6 +94,8 @@ Non-numeric existing types log a warning and skip. `div` by zero is
 
 ## Changelog
 
+- 2026-06-15: added `event` and `entity` context sources plus optional string
+  conversion for conditional-trigger handoffs.
 - 2026-06-12: initial implementation. `GetValueLazy` (returns
   `Func<object>`) was added to `ParamList` to support type-dispatched
   reads driven by `ParamEntry.type`.

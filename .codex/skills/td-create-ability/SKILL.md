@@ -1,13 +1,13 @@
 ---
 name: td-create-ability
-description: Create or complete AbilityConfig .asset files in this TD Unity project from natural-language ability requirements. Use when the user names an ability asset and describes SP rules, effects, targeting, animation overrides, ranges, timing, or lifecycle behavior. Decompose the ability into atomic behaviors, select documented ability components, compose triggers and Blackboard handoffs, fill the asset, and verify it. If existing components cannot satisfy an atomic behavior, obtain user approval before handing a component specification to $td-create-ability-component.
+description: Create or complete AbilityConfig .asset files in this TD Unity project from natural-language ability requirements. Use when the user names an ability asset and describes SP rules, effects, targeting, animation overrides, ranges, timing, or lifecycle behavior. Decompose the ability into atomic behaviors, select documented ability components, compose triggers and Blackboard handoffs, fill the asset, and verify it. When current components cannot compose an atomic behavior, hand the gap to $td-extend-ability-component for extension assessment before proposing a new component.
 ---
 
 # Create TD Ability
 
-Create an ability by composing existing components. Treat the asset as data;
-do not add or modify runtime code unless the user explicitly approves the
-component-creation handoff.
+Create an ability by composing existing components. Treat the asset as data.
+Do not add or modify runtime code unless the user explicitly approves either
+an existing-component extension or a new-component handoff.
 
 Read [references/ability-workflow.md](references/ability-workflow.md) before
 starting.
@@ -41,12 +41,18 @@ When no existing component can implement an atomic behavior:
 
 1. Stop before editing runtime code.
 2. Explain the missing atomic behavior and why existing components fail.
-3. Propose a component contract: responsibility, parameters, targets,
-   trigger/lifecycle behavior, Blackboard inputs/outputs, and expected effect.
-4. Ask the user for approval to create it.
-5. Only after approval, invoke `$td-create-ability-component` with that
-   contract.
-6. Resume this workflow after the new component is complete.
+3. Invoke `$td-extend-ability-component` with the atomic requirement, why
+   current composition fails, relevant component candidates, required
+   behavior, targets, triggers/lifecycle, and Blackboard handoffs.
+4. Let that skill assess whether a reasonable extension exists, report the
+   extension plan, obtain user approval, and implement an approved extension.
+5. Resume ability composition after a successful extension handoff.
+6. If the extension skill reports that no reasonable extension exists,
+   propose a new component contract:
+   responsibility, parameters, targets, trigger/lifecycle behavior,
+   Blackboard inputs/outputs, and expected effect.
+7. Ask the user for approval to create it. Only after approval, invoke
+   `$td-create-ability-component`, then resume this workflow.
 
 Do not silently weaken or omit an effect to avoid the handoff.
 
@@ -61,5 +67,6 @@ Summarize:
 - atomic behavior decomposition;
 - selected components and trigger timing;
 - Blackboard handoffs;
+- any existing component extended;
 - any new component created;
 - verification performed and remaining manual checks.

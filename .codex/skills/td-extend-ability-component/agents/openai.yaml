@@ -1,0 +1,4 @@
+interface:
+  display_name: "TD Extend Ability Component"
+  short_description: "Assess and extend existing ability components"
+  default_prompt: "Use $td-extend-ability-component to assess this ability-component gap and implement a reasonable extension after approval."
