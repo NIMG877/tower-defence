@@ -21,6 +21,10 @@ public static class WaveTimelineSection
     {
         var section = new VisualElement();
         section.AddToClassList("level-editor-section");
+        // 关键: 强制 section 宽度 = 父级 (body.content) 宽度,
+        // 防止内部 cardsContainer (minWidth = maxTime*pxPerSec) 通过 ScrollView 把 section 撑大,
+        // 进而让 zoom bar 的 slider 也跟着溢出。
+        section.style.width = Length.Percent(100);
 
         var title = new Label("▸ 波次时间线");
         title.AddToClassList("level-editor-section-title");
