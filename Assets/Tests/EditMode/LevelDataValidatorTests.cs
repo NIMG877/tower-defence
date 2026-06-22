@@ -44,5 +44,38 @@ namespace Tests.EditMode
             Assert.IsTrue(issues.Any(i => i.Severity == ValidationSeverity.Error && i.Path.Contains("Waves")),
                 $"Expected error mentioning Waves, got: {string.Join("; ", issues.Select(i => i.Message))}");
         }
+
+        [Test]
+        public void Validate_WaveWithEmptyActions_ReturnsWarning()
+        {
+            _data.Waves = new LevelActions.Wave[] {
+                new LevelActions.Wave { Actions = new LevelActions.Action[0] }
+            };
+            var issues = LevelDataValidator.Validate(_data);
+            Assert.IsTrue(issues.Any(i => i.Severity == ValidationSeverity.Warning && i.Message.Contains("空")),
+                $"Expected warning about empty Wave actions, got: {string.Join("; ", issues.Select(i => i.Message))}");
+        }
+
+        [Test]
+        public void Validate_EmptyWaveEntityPrefabIDs_ReturnsError()
+        {
+            _data.WaveEntityPrefabIDs = new EntityID[0];
+            var issues = LevelDataValidator.Validate(_data);
+            Assert.IsTrue(issues.Any(i => i.Severity == ValidationSeverity.Error && i.Path.Contains("WaveEntityPrefabIDs")),
+                $"Expected error about WaveEntityPrefabIDs, got: {string.Join("; ", issues.Select(i => i.Message))}");
+        }
+
+        [Test]
+        public void Validate_EntityPrefabSerialOutOfRange_ReturnsError()
+        {
+            _data.Waves = new LevelActions.Wave[] {
+                new LevelActions.Wave { Actions = new LevelActions.Action[] {
+                    new LevelActions.Action { CommandType = 0, EntityPrefabSerial = 99 }
+                } }
+            };
+            var issues = LevelDataValidator.Validate(_data);
+            Assert.IsTrue(issues.Any(i => i.Severity == ValidationSeverity.Error && i.Message.Contains("EntityPrefabSerial")),
+                $"Expected error about EntityPrefabSerial range, got: {string.Join("; ", issues.Select(i => i.Message))}");
+        }
     }
 }
