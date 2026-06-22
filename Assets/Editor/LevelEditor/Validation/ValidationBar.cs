@@ -15,18 +15,19 @@ public static class ValidationBar
         bar.style.flexDirection = FlexDirection.Row;
         bar.style.alignItems = Align.Center;
 
-        statusLabel = new Label("...");
-        statusLabel.style.fontSize = 11;
-        bar.Add(statusLabel);
+        var label = new Label("...");
+        label.style.fontSize = 11;
+        bar.Add(label);
+        statusLabel = label;
 
-        Refresh(so, statusLabel);
+        Refresh(so, label);
 
         // 监听: 任何字段改动后延迟一帧刷新
         so.Update();
         bar.TrackSerializedObjectValue(so, _ =>
         {
             // 延迟 1 帧
-            bar.schedule.Execute(() => Refresh(so, statusLabel)).StartingIn(50);
+            bar.schedule.Execute(() => Refresh(so, label)).StartingIn(50);
         });
 
         return bar;
