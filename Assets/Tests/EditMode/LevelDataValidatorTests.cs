@@ -1,6 +1,7 @@
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
+using Validation;
 
 namespace Tests.EditMode
 {
