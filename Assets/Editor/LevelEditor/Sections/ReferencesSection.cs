@@ -16,52 +16,32 @@ public static class ReferencesSection
         title.AddToClassList("level-editor-section-title");
         section.Add(title);
 
-        section.Add(MakeSingleRow("MapPrefab",                 so.FindProperty("MapPrefab")));
-        section.Add(MakeSingleRow("EnvironmentalControlDevice", so.FindProperty("EnvironmentalControlDevice")));
+        section.Add(MakeSingleRow(so.FindProperty("MapPrefab")));
+        section.Add(MakeSingleRow(so.FindProperty("EnvironmentalControlDevice")));
 
         // 数组
         var checkpointsProp = so.FindProperty("CheckPoints");
         var idsProp = so.FindProperty("WaveEntityPrefabIDs");
-        section.Add(MakeArrayRow("CheckPoints (拖拽 GameObject)",        checkpointsProp));
-        section.Add(MakeArrayRow("WaveEntityPrefabIDs (拖拽 EntityData)", idsProp));
+        section.Add(MakeArrayRow(checkpointsProp));
+        section.Add(MakeArrayRow(idsProp));
 
         return section;
     }
 
-    static VisualElement MakeSingleRow(string label, SerializedProperty prop)
+    static VisualElement MakeSingleRow(SerializedProperty prop)
     {
-        var row = new VisualElement();
-        row.style.flexDirection = FlexDirection.Row;
-        row.style.marginBottom = 4;
-
-        var lab = new Label(label);
-        lab.style.width = 200;
-        lab.style.color = new UnityEngine.Color(0.5f, 0.5f, 0.5f);
-        row.Add(lab);
-
         var field = new PropertyField(prop);
-        field.style.flexGrow = 1;
         field.BindProperty(prop);
-        row.Add(field);
-
-        return row;
+        field.style.marginBottom = 4;
+        return field;
     }
 
-    static VisualElement MakeArrayRow(string label, SerializedProperty arrayProp)
+    static VisualElement MakeArrayRow(SerializedProperty arrayProp)
     {
-        var row = new VisualElement();
-        row.style.marginBottom = 8;
-
-        var lab = new Label(label);
-        lab.style.color = new UnityEngine.Color(0.5f, 0.5f, 0.5f);
-        lab.style.marginBottom = 2;
-        row.Add(lab);
-
         // 直接 PropertyField 让 Unity 自己渲染 ListView (Unity 2022 ListView binding)
         var field = new PropertyField(arrayProp);
         field.BindProperty(arrayProp);
-        row.Add(field);
-
-        return row;
+        field.style.marginBottom = 8;
+        return field;
     }
 }
