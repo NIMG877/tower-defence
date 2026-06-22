@@ -5,11 +5,15 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// 横向波次时间线: 列出 Waves, 每条 Wave 一行; 每条 Action 渲染为卡片 (Task 12 加入)。
+/// 横向波次时间线: 列出 Waves, 每条 Wave 一行; 每条 Action 按"绝对时间"渲染为卡片,
+/// 无 gap 占位标记, 顶部有刻度 + 时间标签, 顶部有缩放滑块 (整体共享)。
 /// 通过事件 ActionSelected 派发"用户选中"信号给 ActionDetailSection。
 /// </summary>
 public static class WaveTimelineSection
 {
+    // 整体缩放 (所有 Wave 共享, static)
+    static float _zoom = 1f;
+
     public static VisualElement Build(SerializedObject so, Action<int, int> onActionSelected)
     {
         var section = new VisualElement();
@@ -23,12 +27,15 @@ public static class WaveTimelineSection
         var wavesListContainer = new VisualElement();
         section.Add(wavesListContainer);
 
-        // 重建: 在 onCreate / wave 数组变化时调用
+        // 重建: 在 zoom 变化 / wave 数组变化时调用
         Action rebuild = () => RebuildWaves(wavesListContainer, wavesProp, so, onActionSelected);
         rebuild();
 
+        // 缩放控件 (位于标题下、Wave 列表之上)
+        section.Add(BuildZoomControls(rebuild));
+
         // 监听 Waves 数组变化 (Undo/Redo, 外部 mutation)
-        section.TrackPropertyValue(wavesProp, _ => rebuild());
+        wavesProp.TrackPropertyValue(wavesProp, _ => rebuild());
 
         // + 新增 Wave 按钮
         var addWaveBtn = new Button(() =>
@@ -59,78 +66,137 @@ public static class WaveTimelineSection
         container.Clear();
         if (actionsProp.arraySize == 0)
         {
-            var empty = new Label("(空)");
+            var empty = new Label("(空 · 0s)");
             empty.style.color = new Color(0.4f, 0.4f, 0.4f);
             empty.style.unityTextAlign = TextAnchor.MiddleCenter;
-            empty.style.flexGrow = 1;
+            empty.style.position = Position.Absolute;
+            empty.style.left = 0;
+            empty.style.right = 0;
+            empty.style.top = 0;
+            empty.style.bottom = 0;
             container.Add(empty);
             return;
         }
 
-        // 允许卡片在容器中溢出 (用最小宽度时需要)
-        container.style.overflow = Overflow.Visible;
+        float maxTime = ComputeMaxTime(actionsProp);
+        float tickInterval = ChooseTickInterval(maxTime);
+        float pxPerSec = PixelsPerSecond();
+        float containerWidth = Mathf.Max(200f, maxTime * pxPerSec);
+        container.style.minWidth = containerWidth;
 
-        // 计算总时长 (累加所有 Gap + 每条 Action 占 1s 占位宽度)
-        float totalUnits = 0f;
-        for (int i = 0; i < actionsProp.arraySize; i++)
+        // 渲染刻度 (tick + label)
+        for (float t = 0f; t <= maxTime + 0.001f; t += tickInterval)
         {
-            var a = actionsProp.GetArrayElementAtIndex(i);
-            totalUnits += 1f; // Action 自身占 1 单位
-            totalUnits += Mathf.Max(0f, a.FindPropertyRelative("GapFromLastAction").floatValue);
+            float x = t * pxPerSec;
+            var tick = new VisualElement();
+            tick.style.position = Position.Absolute;
+            tick.style.left = x;
+            tick.style.top = 18;
+            tick.style.bottom = 0;
+            tick.style.width = 1;
+            tick.style.backgroundColor = new Color(0.25f, 0.25f, 0.3f);
+            container.Add(tick);
+
+            var label = new Label($"{t:0.#}s");
+            label.style.position = Position.Absolute;
+            label.style.left = x + 2;
+            label.style.top = 0;
+            label.style.fontSize = 9;
+            label.style.color = new Color(0.55f, 0.55f, 0.55f);
+            container.Add(label);
         }
-        if (totalUnits <= 0f) totalUnits = 1f;
 
-        // 卡片最小宽度 (避免多 Action 时卡片过窄不可点)
-        float cardPct = 1f / totalUnits * 100f;
-        float minCardPct = 5f;
-        float actualCardPct = Mathf.Max(cardPct, minCardPct);
-
-        // 渲染
-        float cursorUnits = 0f;
+        // 渲染 action 卡片 (按绝对时间定位, 无 gap 标记)
+        float cumulativeTime = 0f;
         for (int i = 0; i < actionsProp.arraySize; i++)
         {
-            int actionIndex = i; // 闭包按值捕获, 避免循环结束后 i 越界
             var a = actionsProp.GetArrayElementAtIndex(i);
-            float gap = Mathf.Max(0f, a.FindPropertyRelative("GapFromLastAction").floatValue);
             int cmd = a.FindPropertyRelative("CommandType").intValue;
+            float gap = Mathf.Max(0f, a.FindPropertyRelative("GapFromLastAction").floatValue);
 
-            // 间隔标记
-            if (gap > 0f)
-            {
-                var gapEl = new VisualElement();
-                gapEl.style.position = Position.Absolute;
-                gapEl.style.left = Length.Percent(cursorUnits / totalUnits * 100f);
-                gapEl.style.width = Length.Percent(gap / totalUnits * 100f);
-                gapEl.style.height = Length.Percent(100f);
-                gapEl.style.backgroundColor = new Color(0.23f, 0.23f, 0.27f);
-                gapEl.style.flexDirection = FlexDirection.Row;
-                gapEl.style.alignItems = Align.Center;
-                gapEl.style.justifyContent = Justify.Center;
-                var gapLabel = new Label($"gap {gap:0.0}s");
-                gapLabel.style.color = new Color(0.5f, 0.5f, 0.5f);
-                gapLabel.style.fontSize = 9;
-                gapEl.Add(gapLabel);
-                container.Add(gapEl);
-                cursorUnits += gap;
-            }
-
-            // 卡片
+            float x = cumulativeTime * pxPerSec;
+            int actionIndex = i; // 闭包按值捕获, 避免循环结束后 i 越界
             var card = new Button(() => onActionSelected?.Invoke(waveIdx, actionIndex))
             {
                 text = $"A{i} {CommandTypeShort(cmd)}"
             };
             card.style.position = Position.Absolute;
-            card.style.left = Length.Percent(cursorUnits / totalUnits * 100f);
-            card.style.width = Length.Percent(actualCardPct);
-            card.style.height = Length.Percent(100f);
+            card.style.left = x;
+            card.style.top = 22;  // 位于刻度标签之下
+            card.style.height = 28;
+            card.style.width = 36;  // 固定宽度
             card.style.backgroundColor = CommandTypeColor(cmd);
             card.style.color = new Color(0, 0, 0);
             card.style.fontSize = 9;
             card.style.paddingLeft = 2;
             card.style.paddingRight = 2;
             container.Add(card);
-            cursorUnits += 1f;
+
+            cumulativeTime += gap;
         }
+    }
+
+    static float ComputeMaxTime(SerializedProperty actionsProp)
+    {
+        float total = 0f;
+        for (int i = 0; i < actionsProp.arraySize; i++)
+        {
+            var a = actionsProp.GetArrayElementAtIndex(i);
+            total += Mathf.Max(0f, a.FindPropertyRelative("GapFromLastAction").floatValue);
+        }
+        return Mathf.Max(1f, total);
+    }
+
+    static float ChooseTickInterval(float maxTime)
+    {
+        // 目标: 5-10 个刻度
+        float[] candidates = { 1f, 2f, 5f, 10f, 15f, 30f, 60f, 120f, 300f };
+        foreach (var c in candidates)
+        {
+            if (maxTime / c <= 10f) return c;
+        }
+        return 600f;
+    }
+
+    static float PixelsPerSecond() => 24f * _zoom;  // 基础刻度 × zoom
+
+    static VisualElement BuildZoomControls(Action onZoomChanged)
+    {
+        var bar = new VisualElement();
+        bar.style.flexDirection = FlexDirection.Row;
+        bar.style.alignItems = Align.Center;
+        bar.style.marginBottom = 8;
+        bar.style.paddingLeft = 6;
+        bar.style.paddingRight = 6;
+
+        var zoomLabel = new Label($"缩放 {_zoom:0.0}x");
+        zoomLabel.style.fontSize = 11;
+        zoomLabel.style.color = new Color(0.8f, 0.8f, 0.8f);
+        zoomLabel.style.width = 70;
+        bar.Add(zoomLabel);
+
+        var slider = new Slider(0.5f, 5f) { value = _zoom };
+        slider.style.flexGrow = 1;
+        slider.showInputField = false;
+        slider.RegisterValueChangedCallback(evt =>
+        {
+            _zoom = evt.newValue;
+            zoomLabel.text = $"缩放 {_zoom:0.0}x";
+            onZoomChanged?.Invoke();
+        });
+        bar.Add(slider);
+
+        var resetBtn = new Button(() =>
+        {
+            _zoom = 1f;
+            slider.SetValueWithoutNotify(1f);
+            zoomLabel.text = "缩放 1.0x";
+            onZoomChanged?.Invoke();
+        }) { text = "重置" };
+        resetBtn.style.marginLeft = 6;
+        bar.Add(resetBtn);
+
+        return bar;
     }
 
     static string CommandTypeShort(int cmd)
@@ -185,14 +251,16 @@ public static class WaveTimelineSection
         label.style.marginBottom = 4;
         row.Add(label);
 
-        // Action 卡片容器 (Task 12 填充)
+        // Action 卡片容器 (顶部刻度标签 + 下方卡片, 高 60, 允许横向溢出)
         var cardsContainer = new VisualElement();
-        cardsContainer.style.height = 32;
+        cardsContainer.style.height = 60;
         cardsContainer.style.backgroundColor = new Color(0.1f, 0.1f, 0.12f);
         cardsContainer.style.borderTopLeftRadius = 3;
         cardsContainer.style.borderTopRightRadius = 3;
         cardsContainer.style.borderBottomLeftRadius = 3;
         cardsContainer.style.borderBottomRightRadius = 3;
+        cardsContainer.style.position = Position.Relative;
+        cardsContainer.style.overflow = Overflow.Visible;
         row.Add(cardsContainer);
 
         RenderActionCards(cardsContainer, actionsProp, waveIdx, onActionSelected);
