@@ -2,6 +2,7 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Validation;
 
 /// <summary>
 /// 校验状态条: 显示当前 LevelData 的 issue 数量, 颜色按 Error/Warning/OK 区分。
