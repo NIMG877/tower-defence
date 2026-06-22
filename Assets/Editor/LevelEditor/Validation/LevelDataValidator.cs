@@ -115,6 +115,57 @@ namespace Validation
                     $"CameraSize 必须 > 0, 当前 {data.CameraSize}"));
             }
 
+            // === Paths 校验 ===
+            if (data.Paths == null || data.Paths.Length == 0)
+            {
+                issues.Add(new ValidationIssue
+                {
+                    Severity = ValidationSeverity.Warning,
+                    Path = "Paths",
+                    Message = "没有任何路径数据"
+                });
+            }
+            else
+            {
+                for (int p = 0; p < data.Paths.Length; p++)
+                {
+                    var path = data.Paths[p];
+                    if (path.CheckPoints == null || path.CheckPoints.Length < 2)
+                    {
+                        issues.Add(new ValidationIssue
+                        {
+                            Severity = ValidationSeverity.Error,
+                            Path = $"Paths[{p}]",
+                            Message = $"Path {p} 至少需要 2 个 checkpoint,当前 {path.CheckPoints?.Length ?? 0} 个"
+                        });
+                        continue;
+                    }
+
+                    if (path.WaitTimes == null || path.CheckPoints.Length != path.WaitTimes.Length)
+                    {
+                        issues.Add(new ValidationIssue
+                        {
+                            Severity = ValidationSeverity.Error,
+                            Path = $"Paths[{p}].WaitTimes",
+                            Message = $"Path {p} WaitTimes 长度必须等于 CheckPoints 长度"
+                        });
+                    }
+
+                    for (int k = 0; k < path.WaitTimes.Length; k++)
+                    {
+                        if (path.WaitTimes[k] < 0)
+                        {
+                            issues.Add(new ValidationIssue
+                            {
+                                Severity = ValidationSeverity.Warning,
+                                Path = $"Paths[{p}].WaitTimes[{k}]",
+                                Message = $"Path {p} WaitTime[{k}] = {path.WaitTimes[k]} 为负"
+                            });
+                        }
+                    }
+                }
+            }
+
             return issues;
         }
     }

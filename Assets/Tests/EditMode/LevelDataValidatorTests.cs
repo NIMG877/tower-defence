@@ -21,7 +21,9 @@ namespace Tests.EditMode
             _data.MapPrefab = new GameObject("dummy_map");
             _data.EnvironmentalControlDevice = null;
             _data.Waves = new LevelActions.Wave[] { new LevelActions.Wave { Actions = new LevelActions.Action[0] } };
+#pragma warning disable CS0618
             _data.CheckPoints = new GameObject[0];
+#pragma warning restore CS0618
             _data.WaveEntityPrefabIDs = new EntityID[] { new EntityID("c", 1) };
             _data.LevelHp = 10;
             _data.Cost0 = 100;
@@ -118,6 +120,57 @@ namespace Tests.EditMode
             _data.CameraSize = 0f;
             var issues = LevelDataValidator.Validate(_data);
             Assert.IsTrue(issues.Any(i => i.Severity == ValidationSeverity.Error && i.Path.Contains("CameraSize")));
+        }
+
+        [Test]
+        public void Validate_EmptyPaths_ReturnsWarning()
+        {
+            _data.Paths = new LevelData.PathData[0];
+            var issues = LevelDataValidator.Validate(_data);
+            Assert.IsTrue(issues.Any(i => i.Severity == ValidationSeverity.Warning && i.Path.Contains("Paths")),
+                $"Expected warning about empty Paths, got: {string.Join("; ", issues.Select(i => i.Message))}");
+        }
+
+        [Test]
+        public void Validate_PathWithLessThanTwoCheckpoints_ReturnsError()
+        {
+            _data.Paths = new LevelData.PathData[] {
+                new LevelData.PathData {
+                    CheckPoints = new Vector2[] { new Vector2(1f, 1f) },
+                    WaitTimes = new float[] { 0f }
+                }
+            };
+            var issues = LevelDataValidator.Validate(_data);
+            Assert.IsTrue(issues.Any(i => i.Severity == ValidationSeverity.Error && i.Path.Contains("Paths") && i.Message.Contains("2")),
+                $"Expected error about <2 checkpoints, got: {string.Join("; ", issues.Select(i => i.Message))}");
+        }
+
+        [Test]
+        public void Validate_PathCheckPointLengthMismatchWaitTimesLength_ReturnsError()
+        {
+            _data.Paths = new LevelData.PathData[] {
+                new LevelData.PathData {
+                    CheckPoints = new Vector2[] { new Vector2(1f, 1f), new Vector2(2f, 2f) },
+                    WaitTimes = new float[] { 0f } // length mismatch
+                }
+            };
+            var issues = LevelDataValidator.Validate(_data);
+            Assert.IsTrue(issues.Any(i => i.Severity == ValidationSeverity.Error && i.Message.Contains("WaitTimes")),
+                $"Expected error about CheckPoints/WaitTimes length mismatch, got: {string.Join("; ", issues.Select(i => i.Message))}");
+        }
+
+        [Test]
+        public void Validate_PathCheckPointNegativeWaitTime_ReturnsWarning()
+        {
+            _data.Paths = new LevelData.PathData[] {
+                new LevelData.PathData {
+                    CheckPoints = new Vector2[] { new Vector2(1f, 1f), new Vector2(2f, 2f) },
+                    WaitTimes = new float[] { 0f, -1f }
+                }
+            };
+            var issues = LevelDataValidator.Validate(_data);
+            Assert.IsTrue(issues.Any(i => i.Severity == ValidationSeverity.Warning && i.Message.Contains("WaitTime")),
+                $"Expected warning about negative WaitTime, got: {string.Join("; ", issues.Select(i => i.Message))}");
         }
     }
 }
