@@ -28,7 +28,7 @@ public static class WaveTimelineSection
         rebuild();
 
         // 监听 Waves 数组变化 (Undo/Redo, 外部 mutation)
-        wavesProp.TrackPropertyValue(wavesProp, _ => rebuild());
+        section.TrackPropertyValue(wavesProp, _ => rebuild());
 
         // + 新增 Wave 按钮
         var addWaveBtn = new Button(() =>
@@ -187,7 +187,7 @@ public static class WaveTimelineSection
         row.Add(cardsContainer);
 
         RenderActionCards(cardsContainer, actionsProp, waveIdx, onActionSelected);
-        actionsProp.TrackPropertyValue(actionsProp, _ => RenderActionCards(cardsContainer, actionsProp, waveIdx, onActionSelected));
+        cardsContainer.TrackPropertyValue(actionsProp, _ => RenderActionCards(cardsContainer, actionsProp, waveIdx, onActionSelected));
 
         // + 新增 Action 按钮
         var addActionBtn = new Button(() =>

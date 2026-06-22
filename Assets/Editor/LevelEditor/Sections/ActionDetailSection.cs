@@ -62,11 +62,8 @@ public static class ActionDetailSection
 
         // CommandType 变化时重建条件容器
         var commandTypeProp = actionProp.FindPropertyRelative("CommandType");
-        RebuildConditional(conditionalContainer, actionProp, commandTypeProp.intValue);
-        commandTypeProp.RegisterValueChangeCallback(evt =>
-        {
-            RebuildConditional(conditionalContainer, actionProp, evt.changedProperty.intValue);
-        });
+        RebuildConditional(conditionalContainer, actionProp, commandTypeProp.intValue, section);
+        section.TrackPropertyValue(commandTypeProp, _ => RebuildConditional(conditionalContainer, actionProp, commandTypeProp.intValue, section));
 
         return section;
     }
@@ -114,7 +111,7 @@ public static class ActionDetailSection
         return row;
     }
 
-    static void RebuildConditional(VisualElement container, SerializedProperty actionProp, int commandType)
+    static void RebuildConditional(VisualElement container, SerializedProperty actionProp, int commandType, VisualElement section)
     {
         container.Clear();
 
@@ -162,10 +159,10 @@ public static class ActionDetailSection
                 container.Add(MakeRow("ModifyPrimary",        actionProp.FindPropertyRelative("ModifyPrimary")));
                 container.Add(MakeRow("ModifyCountOperate",   actionProp.FindPropertyRelative("ModifyCountOperate")));
             }
-            modifyProp.RegisterValueChangeCallback(_ =>
+            section.TrackPropertyValue(modifyProp, _ =>
             {
                 // ModifyAttributes 切换时重建 (展开/收起 ModifyLevelHpConsume 等)
-                RebuildConditional(container, actionProp, commandType);
+                RebuildConditional(container, actionProp, commandType, section);
             });
         }
 
