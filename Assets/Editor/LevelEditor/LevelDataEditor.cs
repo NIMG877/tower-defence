@@ -53,8 +53,6 @@ public class LevelDataEditor : Editor
         footer.style.paddingRight = 12;
         footer.style.flexDirection = FlexDirection.Row;
         footer.style.alignItems = Align.Center;
-        footer.style.position = Position.Sticky;
-        footer.style.bottom = 0;
         root.Add(footer);
 
         Label statusLabel;
