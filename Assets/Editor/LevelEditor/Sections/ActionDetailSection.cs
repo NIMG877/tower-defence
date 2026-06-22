@@ -52,9 +52,9 @@ public static class ActionDetailSection
         section.Add(header);
 
         // 基础字段 (始终显示)
-        section.Add(MakeRow("CommandType",        actionProp.FindPropertyRelative("CommandType")));
-        section.Add(MakeRow("GapFromLastAction",  actionProp.FindPropertyRelative("GapFromLastAction")));
-        section.Add(MakeUnityEventRow("OnBeforeAction", actionProp.FindPropertyRelative("OnBeforeAction")));
+        section.Add(MakeRow(actionProp.FindPropertyRelative("CommandType")));
+        section.Add(MakeRow(actionProp.FindPropertyRelative("GapFromLastAction")));
+        section.Add(MakeUnityEventRow(actionProp.FindPropertyRelative("OnBeforeAction")));
 
         // 条件字段容器 (按 CommandType 显隐)
         var conditionalContainer = new VisualElement();
@@ -68,47 +68,25 @@ public static class ActionDetailSection
         return section;
     }
 
-    static VisualElement MakeRow(string label, SerializedProperty prop)
+    static VisualElement MakeRow(SerializedProperty prop)
     {
-        var row = new VisualElement();
-        row.style.flexDirection = FlexDirection.Row;
-        row.style.marginBottom = 2;
-
-        var lab = new Label(label);
-        lab.style.width = 160;
-        lab.style.color = new Color(0.5f, 0.5f, 0.5f);
-        row.Add(lab);
-
         var field = new PropertyField(prop);
-        field.style.flexGrow = 1;
         field.BindProperty(prop);
-        row.Add(field);
-
-        return row;
+        field.style.marginBottom = 2;
+        return field;
     }
 
     /// <summary>
     /// UnityEvent 字段: UI Toolkit 的 PropertyField 对 UnityEvent 渲染有限, 这里用 IMGUIContainer 包一层 IMGUI。
     /// </summary>
-    static VisualElement MakeUnityEventRow(string label, SerializedProperty prop)
+    static VisualElement MakeUnityEventRow(SerializedProperty prop)
     {
-        var row = new VisualElement();
-        row.style.flexDirection = FlexDirection.Row;
-        row.style.marginBottom = 2;
-
-        var lab = new Label(label);
-        lab.style.width = 160;
-        lab.style.color = new Color(0.5f, 0.5f, 0.5f);
-        row.Add(lab);
-
         var imgui = new IMGUIContainer(() =>
         {
             if (prop != null) EditorGUILayout.PropertyField(prop);
         });
-        imgui.style.flexGrow = 1;
-        row.Add(imgui);
-
-        return row;
+        imgui.style.marginBottom = 2;
+        return imgui;
     }
 
     static void RebuildConditional(VisualElement container, SerializedProperty actionProp, int commandType, VisualElement section)
@@ -125,18 +103,18 @@ public static class ActionDetailSection
             title.style.marginBottom = 4;
             container.Add(title);
 
-            container.Add(MakeRow("EntityPrefabSerial", actionProp.FindPropertyRelative("EntityPrefabSerial")));
-            container.Add(MakeRow("Camp",               actionProp.FindPropertyRelative("Camp")));
+            container.Add(MakeRow(actionProp.FindPropertyRelative("EntityPrefabSerial")));
+            container.Add(MakeRow(actionProp.FindPropertyRelative("Camp")));
             if (commandType == 0)
             {
-                container.Add(MakeUnityEventRow("OnActionRepeat", actionProp.FindPropertyRelative("OnActionRepeat")));
+                container.Add(MakeUnityEventRow(actionProp.FindPropertyRelative("OnActionRepeat")));
             }
         }
 
         // CommandType 0/2/3/4: 路径
         if (commandType == 0 || commandType == 2 || commandType == 3 || commandType == 4)
         {
-            container.Add(MakeRow("PathSerial", actionProp.FindPropertyRelative("PathSerial")));
+            container.Add(MakeRow(actionProp.FindPropertyRelative("PathSerial")));
         }
 
         // CommandType 0: 重复召唤
@@ -149,15 +127,15 @@ public static class ActionDetailSection
             t.style.marginBottom = 4;
             container.Add(t);
 
-            container.Add(MakeRow("GapsFromLastRepeat", actionProp.FindPropertyRelative("GapsFromLastRepeat")));
-            container.Add(MakeRow("ModifyAttributes",   actionProp.FindPropertyRelative("ModifyAttributes")));
+            container.Add(MakeRow(actionProp.FindPropertyRelative("GapsFromLastRepeat")));
+            container.Add(MakeRow(actionProp.FindPropertyRelative("ModifyAttributes")));
 
             var modifyProp = actionProp.FindPropertyRelative("ModifyAttributes");
             if (modifyProp.boolValue)
             {
-                container.Add(MakeRow("ModifyLevelHpConsume", actionProp.FindPropertyRelative("ModifyLevelHpConsume")));
-                container.Add(MakeRow("ModifyPrimary",        actionProp.FindPropertyRelative("ModifyPrimary")));
-                container.Add(MakeRow("ModifyCountOperate",   actionProp.FindPropertyRelative("ModifyCountOperate")));
+                container.Add(MakeRow(actionProp.FindPropertyRelative("ModifyLevelHpConsume")));
+                container.Add(MakeRow(actionProp.FindPropertyRelative("ModifyPrimary")));
+                container.Add(MakeRow(actionProp.FindPropertyRelative("ModifyCountOperate")));
             }
             section.TrackPropertyValue(modifyProp, _ =>
             {
@@ -169,8 +147,8 @@ public static class ActionDetailSection
         // CommandType 1: 静止目标位置
         if (commandType == 1)
         {
-            container.Add(MakeRow("Destination", actionProp.FindPropertyRelative("Destination")));
-            container.Add(MakeRow("Orientation", actionProp.FindPropertyRelative("Orientation")));
+            container.Add(MakeRow(actionProp.FindPropertyRelative("Destination")));
+            container.Add(MakeRow(actionProp.FindPropertyRelative("Orientation")));
         }
 
         // CommandType 5: 对话框
@@ -183,9 +161,9 @@ public static class ActionDetailSection
             t.style.marginBottom = 4;
             container.Add(t);
 
-            container.Add(MakeRow("HeadImage",    actionProp.FindPropertyRelative("HeadImage")));
-            container.Add(MakeRow("Content",      actionProp.FindPropertyRelative("Content")));
-            container.Add(MakeRow("DurationTime", actionProp.FindPropertyRelative("DurationTime")));
+            container.Add(MakeRow(actionProp.FindPropertyRelative("HeadImage")));
+            container.Add(MakeRow(actionProp.FindPropertyRelative("Content")));
+            container.Add(MakeRow(actionProp.FindPropertyRelative("DurationTime")));
         }
 
         // CommandType 6: 面板
@@ -198,7 +176,7 @@ public static class ActionDetailSection
             t.style.marginBottom = 4;
             container.Add(t);
 
-            container.Add(MakeRow("Contents", actionProp.FindPropertyRelative("Contents")));
+            container.Add(MakeRow(actionProp.FindPropertyRelative("Contents")));
         }
     }
 }
