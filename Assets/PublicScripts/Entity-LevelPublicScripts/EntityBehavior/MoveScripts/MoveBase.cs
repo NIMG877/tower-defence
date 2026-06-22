@@ -46,22 +46,22 @@ public class MoveBase : MonoBehaviour, IPoolOperation
         Move();
         UnBalancedMove();
     }
-    //private void OnDrawGizmosSelected()
-    //{
-    //    Gizmos.color = Color.red;
-    //    Gizmos.DrawLine(this.transform.position, _currentSection[_currentPointSerial].targetPosition);
-    //    for (int i = _currentPointSerial; i < _currentSection.Length - 1; i++)
-    //    {
-    //        Gizmos.DrawLine(_currentSection[i].targetPosition, _currentSection[i + 1].targetPosition);
-    //    }
-    //    for (int i = 0; i < 4; i++)
-    //    {
-    //        if (inBlocks[i].j != -1)
-    //        {
-    //            Gizmos.DrawWireCube(new Vector3(inBlocks[i].j, inBlocks[i].i, 0), new Vector3(1, 1, 1));
-    //        }
-    //    }
-    //}
+    private void OnDrawGizmosSelected()
+    {
+       Gizmos.color = Color.red;
+       Gizmos.DrawLine(this.transform.position, _currentSection[_currentPointSerial].targetPosition);
+       for (int i = _currentPointSerial; i < _currentSection.Length - 1; i++)
+       {
+           Gizmos.DrawLine(_currentSection[i].targetPosition, _currentSection[i + 1].targetPosition);
+       }
+       for (int i = 0; i < 4; i++)
+       {
+           if (_thisEntity.Movement.InBlocks[i].j != -1)
+           {
+               Gizmos.DrawWireCube(new Vector3(_thisEntity.Movement.InBlocks[i].j, _thisEntity.Movement.InBlocks[i].i, 0), new Vector3(1, 1, 1));
+           }
+       }
+    }
     public void CountPriority()
     {
         float length = Vector2.Distance(this.transform.position, _currentSection[_currentPointSerial].targetPosition);

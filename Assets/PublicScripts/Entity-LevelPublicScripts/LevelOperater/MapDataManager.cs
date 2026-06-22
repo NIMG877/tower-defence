@@ -81,7 +81,14 @@ public class MapDataManager : IManagerStartEnd
             return low;
         }
     }
-    private List<AStarProperty> frontier = new List<AStarProperty>();
+    private struct HeapEntry
+    {
+        public int i;
+        public int j;
+        public float priority;
+    }
+    private HeapEntry[] heap;
+    private int heapCount;
     private AStarProperty[,] graph;
     private List<MoveParameters> path = new List<MoveParameters>();
     private int iSize;
@@ -167,6 +174,7 @@ public class MapDataManager : IManagerStartEnd
         }
 
         graph = new AStarProperty[iSize, jSize];
+        heap = new HeapEntry[iSize * jSize + 16];
         for (int i = 0; i < iSize; i++)
         {
             for (int j = 0; j < jSize; j++)
@@ -283,7 +291,7 @@ public class MapDataManager : IManagerStartEnd
             return new MoveParameters[2] { new MoveParameters(startPoint, false), new MoveParameters(endPoint, false) };
         }
         path.Clear();
-        frontier.Clear();
+        HeapClear();
         foreach ((int i, int j) ij in JudgePointInUnWalkableBlock(startPoint, entityR))
         {
             graph[ij.i, ij.j].Passable = true;
@@ -292,14 +300,18 @@ public class MapDataManager : IManagerStartEnd
         {
             graph[ij.i, ij.j].Passable = true;
         }
-        graph[(int)(startPoint.y + 0.5f), (int)(startPoint.x + 0.5f)] = Change(graph[(int)(startPoint.y + 0.5f), (int)(startPoint.x + 0.5f)], true, true, 0, Distance(startPoint, endPoint));
-        graph[(int)(endPoint.y + 0.5f), (int)(endPoint.x + 0.5f)] = Change(graph[(int)(endPoint.y + 0.5f), (int)(endPoint.x + 0.5f)], true, false, 0, 0);
-        frontier.Add(graph[(int)(startPoint.y + 0.5f), (int)(startPoint.x + 0.5f)]);
+        int startI = (int)(startPoint.y + 0.5f);
+        int startJ = (int)(startPoint.x + 0.5f);
+        int endI = (int)(endPoint.y + 0.5f);
+        int endJ = (int)(endPoint.x + 0.5f);
+        graph[startI, startJ] = Change(graph[startI, startJ], true, true, 0, Distance(startPoint, endPoint));
+        graph[endI, endJ] = Change(graph[endI, endJ], true, false, 0, 0);
+        HeapPush(startI, startJ, graph[startI, startJ].priority);
         AStarProperty current = default;
-        while (frontier.Count > 0)
+        while (heapCount > 0)
         {
-            current = MinPriorityFrontier();
-            if (current.plotPos.x == (int)(endPoint.x + 0.5f) && current.plotPos.y == (int)(endPoint.y + 0.5f))
+            current = graph[heap[0].i, heap[0].j];
+            if (current.plotPos.x == endJ && current.plotPos.y == endI)
             {
                 isReach = true;
                 break;
@@ -307,12 +319,12 @@ public class MapDataManager : IManagerStartEnd
             else
             {
                 FindNewFrontier(current, endPoint);
-                frontier.Remove(current);
+                HeapPop();
             }
         }
         if (!isReach)
         {
-            frontier.Clear();
+            HeapClear();
             for (int i = 0; i < iSize; i++)
             {
                 for (int j = 0; j < jSize; j++)
@@ -328,14 +340,14 @@ public class MapDataManager : IManagerStartEnd
             {
                 graph[ij.i, ij.j].Passable = true;
             }
-            graph[(int)(startPoint.y + 0.5f), (int)(startPoint.x + 0.5f)] = Change(graph[(int)(startPoint.y + 0.5), (int)(startPoint.x + 0.5)], true, true, 0, Distance(startPoint, endPoint));
-            graph[(int)(endPoint.y + 0.5f), (int)(endPoint.x + 0.5f)] = Change(graph[(int)(endPoint.y + 0.5), (int)(endPoint.x + 0.5)], true, false, 0, 0);
-            frontier.Add(graph[(int)(startPoint.y + 0.5f), (int)(startPoint.x + 0.5f)]);
-            current = MinPriorityFrontier();
-            while (frontier.Count > 0)
+            graph[startI, startJ] = Change(graph[startI, startJ], true, true, 0, Distance(startPoint, endPoint));
+            graph[endI, endJ] = Change(graph[endI, endJ], true, false, 0, 0);
+            HeapPush(startI, startJ, graph[startI, startJ].priority);
+            current = graph[heap[0].i, heap[0].j];
+            while (heapCount > 0)
             {
-                current = MinPriorityFrontier();
-                if (current.plotPos.x == (int)(endPoint.x + 0.5f) && current.plotPos.y == (int)(endPoint.y + 0.5f))
+                current = graph[heap[0].i, heap[0].j];
+                if (current.plotPos.x == endJ && current.plotPos.y == endI)
                 {
                     isReach = true;
                     break;
@@ -343,7 +355,7 @@ public class MapDataManager : IManagerStartEnd
                 else
                 {
                     FindNewFrontier(current, endPoint);
-                    frontier.Remove(current);
+                    HeapPop();
                 }
             }
         }
@@ -430,7 +442,7 @@ public class MapDataManager : IManagerStartEnd
             }
         }
         path.Clear();
-        frontier.Clear();
+        HeapClear();
         foreach ((int i, int j) ij in JudgePointInUnWalkableBlock(startPoint, entityR))
         {
             graph[ij.i, ij.j].Passable = true;
@@ -439,14 +451,18 @@ public class MapDataManager : IManagerStartEnd
         {
             graph[ij.i, ij.j].Passable = true;
         }
-        graph[(int)(startPoint.y + 0.5f), (int)(startPoint.x + 0.5f)] = Change(graph[(int)(startPoint.y + 0.5f), (int)(startPoint.x + 0.5f)], true, true, 0, Distance(startPoint, endPoint));
-        graph[(int)(endPoint.y + 0.5f), (int)(endPoint.x + 0.5f)] = Change(graph[(int)(endPoint.y + 0.5f), (int)(endPoint.x + 0.5f)], true, false, 0, 0);
-        frontier.Add(graph[(int)(startPoint.y + 0.5f), (int)(startPoint.x + 0.5f)]);
+        int startI = (int)(startPoint.y + 0.5f);
+        int startJ = (int)(startPoint.x + 0.5f);
+        int endI = (int)(endPoint.y + 0.5f);
+        int endJ = (int)(endPoint.x + 0.5f);
+        graph[startI, startJ] = Change(graph[startI, startJ], true, true, 0, Distance(startPoint, endPoint));
+        graph[endI, endJ] = Change(graph[endI, endJ], true, false, 0, 0);
+        HeapPush(startI, startJ, graph[startI, startJ].priority);
         AStarProperty current = default;
-        while (frontier.Count > 0)
+        while (heapCount > 0)
         {
-            current = MinPriorityFrontier();
-            if (current.plotPos.x == (int)(endPoint.x + 0.5f) && current.plotPos.y == (int)(endPoint.y + 0.5f))
+            current = graph[heap[0].i, heap[0].j];
+            if (current.plotPos.x == endJ && current.plotPos.y == endI)
             {
                 isReach = true;
                 break;
@@ -454,12 +470,12 @@ public class MapDataManager : IManagerStartEnd
             else
             {
                 FindNewFrontier_Jump(current, endPoint, jumpRange);
-                frontier.Remove(current);
+                HeapPop();
             }
         }
         if (!isReach)
         {
-            frontier.Clear();
+            HeapClear();
             for (int i = 0; i < iSize; i++)
             {
                 for (int j = 0; j < jSize; j++)
@@ -475,14 +491,14 @@ public class MapDataManager : IManagerStartEnd
             {
                 graph[ij.i, ij.j].Passable = true;
             }
-            graph[(int)(startPoint.y + 0.5f), (int)(startPoint.x + 0.5f)] = Change(graph[(int)(startPoint.y + 0.5), (int)(startPoint.x + 0.5)], true, true, 0, Distance(startPoint, endPoint));
-            graph[(int)(endPoint.y + 0.5f), (int)(endPoint.x + 0.5f)] = Change(graph[(int)(endPoint.y + 0.5), (int)(endPoint.x + 0.5)], true, false, 0, 0);
-            frontier.Add(graph[(int)(startPoint.y + 0.5f), (int)(startPoint.x + 0.5f)]);
-            current = MinPriorityFrontier();
-            while (frontier.Count > 0)
+            graph[startI, startJ] = Change(graph[startI, startJ], true, true, 0, Distance(startPoint, endPoint));
+            graph[endI, endJ] = Change(graph[endI, endJ], true, false, 0, 0);
+            HeapPush(startI, startJ, graph[startI, startJ].priority);
+            current = graph[heap[0].i, heap[0].j];
+            while (heapCount > 0)
             {
-                current = MinPriorityFrontier();
-                if (current.plotPos.x == (int)(endPoint.x + 0.5f) && current.plotPos.y == (int)(endPoint.y + 0.5f))
+                current = graph[heap[0].i, heap[0].j];
+                if (current.plotPos.x == endJ && current.plotPos.y == endI)
                 {
                     isReach = true;
                     break;
@@ -490,7 +506,7 @@ public class MapDataManager : IManagerStartEnd
                 else
                 {
                     FindNewFrontier_Jump(current, endPoint, jumpRange);
-                    frontier.Remove(current);
+                    HeapPop();
                 }
             }
         }
@@ -543,17 +559,44 @@ public class MapDataManager : IManagerStartEnd
     {
         return Math.Abs(pos1.x - pos2.x) + Math.Abs(pos1.y - pos2.y);
     }
-    private AStarProperty MinPriorityFrontier()
+    private void HeapClear()
     {
-        int minIndex = 0;
-        for (int i = minIndex; i < frontier.Count; i++)
+        heapCount = 0;
+    }
+    private void HeapPush(int i, int j, float priority)
+    {
+        heap[heapCount].i = i;
+        heap[heapCount].j = j;
+        heap[heapCount].priority = priority;
+        int pos = heapCount;
+        while (pos > 0)
         {
-            if (frontier[minIndex].priority > frontier[i].priority)
+            int parent = (pos - 1) >> 1;
+            if (heap[parent].priority <= heap[pos].priority) break;
+            (heap[parent], heap[pos]) = (heap[pos], heap[parent]);
+            pos = parent;
+        }
+        heapCount++;
+    }
+    private void HeapPop()
+    {
+        heapCount--;
+        if (heapCount > 0)
+        {
+            heap[0] = heap[heapCount];
+            int pos = 0;
+            while (true)
             {
-                minIndex = i;
+                int left = (pos << 1) + 1;
+                int right = left + 1;
+                int smallest = pos;
+                if (left < heapCount && heap[left].priority < heap[smallest].priority) smallest = left;
+                if (right < heapCount && heap[right].priority < heap[smallest].priority) smallest = right;
+                if (smallest == pos) break;
+                (heap[smallest], heap[pos]) = (heap[pos], heap[smallest]);
+                pos = smallest;
             }
         }
-        return frontier[minIndex];
     }
     private void FindNewFrontier(AStarProperty aStarProperty, Vector2 endPoint)
     {
@@ -570,7 +613,7 @@ public class MapDataManager : IManagerStartEnd
                 graph[ti, tj].plotPosCameFrom = (j, i);
                 graph[ti, tj].cost = aStarProperty.cost;
                 graph[ti, tj].priority = graph[ti, tj].cost + Distance(graph[ti, tj].plotPos, endPoint);
-                frontier.Add(graph[ti, tj]);
+                HeapPush(ti, tj, graph[ti, tj].priority);
             }
         }
         if (i < iSize - 1 && graph[i + 1, j].Passable && !graph[i + 1, j].marked)
@@ -579,7 +622,7 @@ public class MapDataManager : IManagerStartEnd
             graph[i + 1, j].plotPosCameFrom = (j, i);
             graph[i + 1, j].cost = aStarProperty.cost + 1;
             graph[i + 1, j].priority = graph[i + 1, j].cost + Distance(graph[i + 1, j].plotPos, endPoint);
-            frontier.Add(graph[i + 1, j]);
+            HeapPush(i + 1, j, graph[i + 1, j].priority);
         }
         if (i > 0 && graph[i - 1, j].Passable && !graph[i - 1, j].marked)
         {
@@ -587,7 +630,7 @@ public class MapDataManager : IManagerStartEnd
             graph[i - 1, j].plotPosCameFrom = (j, i);
             graph[i - 1, j].cost = aStarProperty.cost + 1;
             graph[i - 1, j].priority = graph[i - 1, j].cost + Distance(graph[i - 1, j].plotPos, endPoint);
-            frontier.Add(graph[i - 1, j]);
+            HeapPush(i - 1, j, graph[i - 1, j].priority);
         }
         if (j < jSize - 1 && graph[i, j + 1].Passable && !graph[i, j + 1].marked)
         {
@@ -595,7 +638,7 @@ public class MapDataManager : IManagerStartEnd
             graph[i, j + 1].plotPosCameFrom = (j, i);
             graph[i, j + 1].cost = aStarProperty.cost + 1;
             graph[i, j + 1].priority = graph[i, j + 1].cost + Distance(graph[i, j + 1].plotPos, endPoint);
-            frontier.Add(graph[i, j + 1]);
+            HeapPush(i, j + 1, graph[i, j + 1].priority);
         }
         if (j > 0 && graph[i, j - 1].Passable && !graph[i, j - 1].marked)
         {
@@ -603,7 +646,7 @@ public class MapDataManager : IManagerStartEnd
             graph[i, j - 1].plotPosCameFrom = (j, i);
             graph[i, j - 1].cost = aStarProperty.cost + 1;
             graph[i, j - 1].priority = graph[i, j - 1].cost + Distance(graph[i, j - 1].plotPos, endPoint);
-            frontier.Add(graph[i, j - 1]);
+            HeapPush(i, j - 1, graph[i, j - 1].priority);
         }
     }
     private void FindNewFrontier_Jump(AStarProperty aStarProperty, Vector2 endPoint, Vector2Int[] jumpRange)
@@ -621,7 +664,7 @@ public class MapDataManager : IManagerStartEnd
                 graph[ti, tj].plotPosCameFrom = (j, i);
                 graph[ti, tj].cost = aStarProperty.cost;
                 graph[ti, tj].priority = graph[ti, tj].cost + Distance(graph[ti, tj].plotPos, endPoint);
-                frontier.Add(graph[ti, tj]);
+                HeapPush(ti, tj, graph[ti, tj].priority);
             }
         }
         for (int index = 0; index < jumpRange.Length; index++)
@@ -634,7 +677,7 @@ public class MapDataManager : IManagerStartEnd
                 graph[ii, jj].plotPosCameFrom = (j, i);
                 graph[ii, jj].cost = aStarProperty.cost + 1;
                 graph[ii, jj].priority = graph[ii, jj].cost + Distance(graph[ii, jj].plotPos, endPoint);
-                frontier.Add(graph[ii, jj]);
+                HeapPush(ii, jj, graph[ii, jj].priority);
             }
         }
     }
