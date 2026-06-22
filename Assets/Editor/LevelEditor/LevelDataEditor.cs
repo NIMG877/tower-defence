@@ -29,6 +29,7 @@ public class LevelDataEditor : Editor
         body.style.paddingTop = 12;
         body.style.paddingBottom = 12;
         body.Add(MetadataSection.Build(serializedObject));
+        body.Add(ReferencesSection.Build(serializedObject));
         body.Add(EconomySection.Build(serializedObject));
         root.Add(body);
 
