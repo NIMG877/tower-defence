@@ -1,0 +1,34 @@
+
+wither.png
+size: 1024,256
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+body
+  rotate: true
+  xy: 0, 9
+  size: 205, 271
+  orig: 205, 271
+  offset: 0, 0
+  index: -1
+lefthead
+  rotate: true
+  xy: 432, 70
+  size: 144, 109
+  orig: 144, 109
+  offset: 0, 0
+  index: -1
+righthead
+  rotate: true
+  xy: 432, 70
+  size: 144, 109
+  orig: 144, 109
+  offset: 0, 0
+  index: -1
+mainhead
+  rotate: true
+  xy: 273, 0
+  size: 214, 157
+  orig: 214, 157
+  offset: 0, 0
+  index: -1

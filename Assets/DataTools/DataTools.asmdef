@@ -1,0 +1,19 @@
+{
+    "name": "DataTools",
+    "rootNamespace": "",
+    "references": [
+        "GUID:ba7f49d14bec8c140aed213539316a65",
+        "GUID:49b05dfb3ba40974886753aa2993aaff"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

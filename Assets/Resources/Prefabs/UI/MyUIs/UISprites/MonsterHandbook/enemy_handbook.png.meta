@@ -1,0 +1,1605 @@
+fileFormatVersion: 2
+guid: db6dce7833f5c98488e49ede9ec4a1ed
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1179337629276312213
+    second: enemy_handbook_0
+  - first:
+      213: -1044082945111311066
+    second: enemy_handbook_1
+  - first:
+      213: 537658263353844565
+    second: enemy_handbook_2
+  - first:
+      213: -3361612950240352826
+    second: enemy_handbook_3
+  - first:
+      213: 636234682575474539
+    second: enemy_handbook_4
+  - first:
+      213: 1124976293390829756
+    second: enemy_handbook_5
+  - first:
+      213: 4963481413866400554
+    second: enemy_handbook_6
+  - first:
+      213: 1565751819946697694
+    second: enemy_handbook_7
+  - first:
+      213: -5725664963401230343
+    second: enemy_handbook_8
+  - first:
+      213: -6358637186104993198
+    second: enemy_handbook_9
+  - first:
+      213: 4727171079772126228
+    second: enemy_handbook_10
+  - first:
+      213: 4333955571140001093
+    second: enemy_handbook_11
+  - first:
+      213: 6933205352381075642
+    second: enemy_handbook_12
+  - first:
+      213: -4041173463030100208
+    second: enemy_handbook_13
+  - first:
+      213: -6411596825490801541
+    second: enemy_handbook_14
+  - first:
+      213: -1828602656806660840
+    second: enemy_handbook_15
+  - first:
+      213: -5348622012723484698
+    second: enemy_handbook_16
+  - first:
+      213: 8839195121733929075
+    second: enemy_handbook_17
+  - first:
+      213: 8429990731985920481
+    second: enemy_handbook_18
+  - first:
+      213: -3293081031989447063
+    second: enemy_handbook_19
+  - first:
+      213: -1213484302318895252
+    second: enemy_handbook_20
+  - first:
+      213: -6449042421208359664
+    second: enemy_handbook_21
+  - first:
+      213: 6839392423868743593
+    second: enemy_handbook_22
+  - first:
+      213: -1703260295383417820
+    second: enemy_handbook_23
+  - first:
+      213: -2611647652602844870
+    second: enemy_handbook_24
+  - first:
+      213: -291346151540928353
+    second: enemy_handbook_25
+  - first:
+      213: 3622629477549314545
+    second: enemy_handbook_26
+  - first:
+      213: -589567977458080366
+    second: enemy_handbook_27
+  - first:
+      213: 6276550204167025079
+    second: enemy_handbook_28
+  - first:
+      213: 7695423734976064981
+    second: enemy_handbook_29
+  - first:
+      213: 6654655444432033941
+    second: enemy_handbook_30
+  - first:
+      213: -8650981329976116604
+    second: enemy_handbook_31
+  - first:
+      213: 2419167288252959770
+    second: enemy_handbook_32
+  - first:
+      213: 4582958537436061219
+    second: enemy_handbook_33
+  - first:
+      213: -583420250678024242
+    second: enemy_handbook_34
+  - first:
+      213: -1158577147265526482
+    second: enemy_handbook_35
+  - first:
+      213: 6352377437458687800
+    second: enemy_handbook_36
+  - first:
+      213: 2133349144397018569
+    second: enemy_handbook_37
+  - first:
+      213: -7741769344692481283
+    second: enemy_handbook_38
+  - first:
+      213: 8979916282383425212
+    second: enemy_handbook_39
+  - first:
+      213: -1071958129451938574
+    second: enemy_handbook_40
+  - first:
+      213: -8224109888404485355
+    second: enemy_handbook_41
+  - first:
+      213: 7229208017196113596
+    second: enemy_handbook_42
+  - first:
+      213: 775459442255151578
+    second: enemy_handbook_43
+  - first:
+      213: 7810513541111956378
+    second: enemy_handbook_44
+  - first:
+      213: -1529878702658688233
+    second: enemy_handbook_45
+  - first:
+      213: 2540318240100701263
+    second: enemy_handbook_46
+  - first:
+      213: 362853924696247993
+    second: enemy_handbook_47
+  - first:
+      213: -8946956826258111789
+    second: enemy_handbook_48
+  - first:
+      213: -3721444424556889194
+    second: enemy_handbook_49
+  - first:
+      213: -5669085587974592806
+    second: enemy_handbook_50
+  - first:
+      213: -1450454695930717982
+    second: enemy_handbook_51
+  - first:
+      213: -8968470828425139336
+    second: enemy_handbook_52
+  - first:
+      213: 7622357125126972234
+    second: enemy_handbook_53
+  - first:
+      213: -605306961529593719
+    second: enemy_handbook_54
+  - first:
+      213: -3478993746170384595
+    second: enemy_handbook_55
+  - first:
+      213: 1480767075264355387
+    second: enemy_handbook_56
+  - first:
+      213: 4804731369537791154
+    second: enemy_handbook_57
+  - first:
+      213: 3283471138443666987
+    second: enemy_handbook_58
+  - first:
+      213: 2268873876577149443
+    second: enemy_handbook_59
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: enemy_handbook_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 696
+        width: 176
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 592144f4359dd5010800000000000000
+      internalID: 1179337629276312213
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_1
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 743
+        width: 51
+        height: 26
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 62db89cd71ca281f0800000000000000
+      internalID: -1044082945111311066
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_2
+      rect:
+        serializedVersion: 2
+        x: 516
+        y: 766
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 55362c58755267700800000000000000
+      internalID: 537658263353844565
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_3
+      rect:
+        serializedVersion: 2
+        x: 655
+        y: 753
+        width: 11
+        height: 22
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6c5229415d62951d0800000000000000
+      internalID: -3361612950240352826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_4
+      rect:
+        serializedVersion: 2
+        x: 711
+        y: 745
+        width: 14
+        height: 27
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b6fc1b8a21c54d800800000000000000
+      internalID: 636234682575474539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_5
+      rect:
+        serializedVersion: 2
+        x: 726
+        y: 768
+        width: 7
+        height: 4
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cb8cb4c7af7bc9f00800000000000000
+      internalID: 1124976293390829756
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_6
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 736
+        width: 49
+        height: 27
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a2ba2ca5c04d1e440800000000000000
+      internalID: 4963481413866400554
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_7
+      rect:
+        serializedVersion: 2
+        x: 516
+        y: 685
+        width: 137
+        height: 79
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ed3285a0cfaaab510800000000000000
+      internalID: 1565751819946697694
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_8
+      rect:
+        serializedVersion: 2
+        x: 726
+        y: 762
+        width: 9
+        height: 5
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9f7d1993d0a5a80b0800000000000000
+      internalID: -5725664963401230343
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_9
+      rect:
+        serializedVersion: 2
+        x: 726
+        y: 756
+        width: 11
+        height: 5
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 25a5f923b2591c7a0800000000000000
+      internalID: -6358637186104993198
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_10
+      rect:
+        serializedVersion: 2
+        x: 726
+        y: 751
+        width: 13
+        height: 4
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 41c315a2d094a9140800000000000000
+      internalID: 4727171079772126228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_11
+      rect:
+        serializedVersion: 2
+        x: 726
+        y: 745
+        width: 15
+        height: 5
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 54dff1231ad452c30800000000000000
+      internalID: 4333955571140001093
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_12
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 685
+        width: 98
+        height: 49
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ab0d287c881b73060800000000000000
+      internalID: 6933205352381075642
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_13
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 707
+        width: 140
+        height: 34
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 01f0b5c752edae7c0800000000000000
+      internalID: -4041173463030100208
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_14
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 724
+        width: 22
+        height: 21
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b7c399548ae6507a0800000000000000
+      internalID: -6411596825490801541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_15
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 717
+        width: 15
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 81514bd629f7f96e0800000000000000
+      internalID: -1828602656806660840
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_16
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 612
+        width: 193
+        height: 82
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6e728cd1e90e5c5b0800000000000000
+      internalID: -5348622012723484698
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_17
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 632
+        width: 180
+        height: 73
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 378015391212baa70800000000000000
+      internalID: 8839195121733929075
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_18
+      rect:
+        serializedVersion: 2
+        x: 664
+        y: 691
+        width: 15
+        height: 19
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1e12bdf18e75df470800000000000000
+      internalID: 8429990731985920481
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_19
+      rect:
+        serializedVersion: 2
+        x: 718
+        y: 686
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 96631b7bf30ac42d0800000000000000
+      internalID: -3293081031989447063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_20
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 612
+        width: 93
+        height: 71
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c6ff4c3d476d82fe0800000000000000
+      internalID: -1213484302318895252
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_21
+      rect:
+        serializedVersion: 2
+        x: 516
+        y: 643
+        width: 193
+        height: 40
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 01d537e16166086a0800000000000000
+      internalID: -6449042421208359664
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_22
+      rect:
+        serializedVersion: 2
+        x: 718
+        y: 651
+        width: 19
+        height: 15
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9afb1304c276aee50800000000000000
+      internalID: 6839392423868743593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_23
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 544
+        width: 213
+        height: 66
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 42cf4ad19cdcc58e0800000000000000
+      internalID: -1703260295383417820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_24
+      rect:
+        serializedVersion: 2
+        x: 301
+        y: 563
+        width: 212
+        height: 66
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a39ef1c0c4091cbd0800000000000000
+      internalID: -2611647652602844870
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_25
+      rect:
+        serializedVersion: 2
+        x: 516
+        y: 562
+        width: 176
+        height: 78
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f90d9b2083ee4fbf0800000000000000
+      internalID: -291346151540928353
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_26
+      rect:
+        serializedVersion: 2
+        x: 700
+        y: 603
+        width: 19
+        height: 17
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1f19f2af05a264230800000000000000
+      internalID: 3622629477549314545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_27
+      rect:
+        serializedVersion: 2
+        x: 223
+        y: 584
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2956aa45c0f61d7f0800000000000000
+      internalID: -589567977458080366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_28
+      rect:
+        serializedVersion: 2
+        x: 700
+        y: 568
+        width: 19
+        height: 19
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7b1f746f729ca1750800000000000000
+      internalID: 6276550204167025079
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_29
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 550
+        width: 15
+        height: 19
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5ddab576d13abca60800000000000000
+      internalID: 7695423734976064981
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_30
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 402
+        width: 158
+        height: 158
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5989dfb6ed51a5c50800000000000000
+      internalID: 6654655444432033941
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_31
+      rect:
+        serializedVersion: 2
+        x: 462
+        y: 540
+        width: 21
+        height: 21
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 48abc34b05a81f780800000000000000
+      internalID: -8650981329976116604
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_32
+      rect:
+        serializedVersion: 2
+        x: 657
+        y: 528
+        width: 34
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a1c0094d4db929120800000000000000
+      internalID: 2419167288252959770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_33
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 242
+        width: 300
+        height: 300
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 32e583c1280f99f30800000000000000
+      internalID: 4582958537436061219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_34
+      rect:
+        serializedVersion: 2
+        x: 462
+        y: 468
+        width: 183
+        height: 70
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec721938f5647e7f0800000000000000
+      internalID: -583420250678024242
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_35
+      rect:
+        serializedVersion: 2
+        x: 657
+        y: 491
+        width: 38
+        height: 35
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e255a541938ebefe0800000000000000
+      internalID: -1158577147265526482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_36
+      rect:
+        serializedVersion: 2
+        x: 462
+        y: 383
+        width: 193
+        height: 82
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8376eee7f9d282850800000000000000
+      internalID: 6352377437458687800
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_37
+      rect:
+        serializedVersion: 2
+        x: 657
+        y: 454
+        width: 38
+        height: 35
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9c5faad6ebd2b9d10800000000000000
+      internalID: 2133349144397018569
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_38
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 242
+        width: 158
+        height: 158
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: df298947cc5bf8490800000000000000
+      internalID: -7741769344692481283
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_39
+      rect:
+        serializedVersion: 2
+        x: 657
+        y: 383
+        width: 71
+        height: 69
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cbed53cf7421f9c70800000000000000
+      internalID: 8979916282383425212
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_40
+      rect:
+        serializedVersion: 2
+        x: 462
+        y: 242
+        width: 139
+        height: 139
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2fcccefb2c3af11f0800000000000000
+      internalID: -1071958129451938574
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_41
+      rect:
+        serializedVersion: 2
+        x: 603
+        y: 340
+        width: 99
+        height: 41
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 51b8fd331a71edd80800000000000000
+      internalID: -8224109888404485355
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_42
+      rect:
+        serializedVersion: 2
+        x: 724
+        y: 315
+        width: 5
+        height: 38
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cbe5160c36e435460800000000000000
+      internalID: 7229208017196113596
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_43
+      rect:
+        serializedVersion: 2
+        x: 606
+        y: 242
+        width: 96
+        height: 96
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ad14751114cf2ca00800000000000000
+      internalID: 775459442255151578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_44
+      rect:
+        serializedVersion: 2
+        x: 724
+        y: 290
+        width: 23
+        height: 23
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a934b5b0fa4846c60800000000000000
+      internalID: 7810513541111956378
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_45
+      rect:
+        serializedVersion: 2
+        x: 724
+        y: 265
+        width: 23
+        height: 23
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 71be792fc67c4cae0800000000000000
+      internalID: -1529878702658688233
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_46
+      rect:
+        serializedVersion: 2
+        x: 724
+        y: 240
+        width: 23
+        height: 23
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f44d5adeaf5014320800000000000000
+      internalID: 2540318240100701263
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_47
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 161
+        width: 556
+        height: 79
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9be40e6d8bd190500800000000000000
+      internalID: 362853924696247993
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_48
+      rect:
+        serializedVersion: 2
+        x: 586
+        y: 152
+        width: 136
+        height: 77
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3d201266b2606d380800000000000000
+      internalID: -8946956826258111789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_49
+      rect:
+        serializedVersion: 2
+        x: 724
+        y: 215
+        width: 23
+        height: 23
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 69bbdee4306ca5cc0800000000000000
+      internalID: -3721444424556889194
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_50
+      rect:
+        serializedVersion: 2
+        x: 724
+        y: 186
+        width: 30
+        height: 27
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ad6ec7f91bc5351b0800000000000000
+      internalID: -5669085587974592806
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_52
+      rect:
+        serializedVersion: 2
+        x: 731
+        y: 159
+        width: 19
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 87b244d6c47998380800000000000000
+      internalID: -8968470828425139336
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_53
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 53
+        width: 584
+        height: 106
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a436c5a9b6d08c960800000000000000
+      internalID: 7622357125126972234
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_54
+      rect:
+        serializedVersion: 2
+        x: 586
+        y: 52
+        width: 124
+        height: 98
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 98025f986848997f0800000000000000
+      internalID: -605306961529593719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_55
+      rect:
+        serializedVersion: 2
+        x: 712
+        y: 120
+        width: 33
+        height: 31
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d2f65bfce9128bfc0800000000000000
+      internalID: -3478993746170384595
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_56
+      rect:
+        serializedVersion: 2
+        x: 719
+        y: 92
+        width: 19
+        height: 19
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b3cd93c3fcdbc8410800000000000000
+      internalID: 1480767075264355387
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_57
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 59
+        width: 16
+        height: 17
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2b4e97a59b5dda240800000000000000
+      internalID: 4804731369537791154
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_58
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 654
+        height: 50
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b26ae259a9b319d20800000000000000
+      internalID: 3283471138443666987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy_handbook_59
+      rect:
+        serializedVersion: 2
+        x: 663
+        y: 7
+        width: 18
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3026b8d05c8ac7f10800000000000000
+      internalID: 2268873876577149443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: cb9e57e4f3223134ab6a2d7f8bb21adc
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    nameFileIdTable:
+      enemy_handbook_0: 1179337629276312213
+      enemy_handbook_1: -1044082945111311066
+      enemy_handbook_10: 4727171079772126228
+      enemy_handbook_11: 4333955571140001093
+      enemy_handbook_12: 6933205352381075642
+      enemy_handbook_13: -4041173463030100208
+      enemy_handbook_14: -6411596825490801541
+      enemy_handbook_15: -1828602656806660840
+      enemy_handbook_16: -5348622012723484698
+      enemy_handbook_17: 8839195121733929075
+      enemy_handbook_18: 8429990731985920481
+      enemy_handbook_19: -3293081031989447063
+      enemy_handbook_2: 537658263353844565
+      enemy_handbook_20: -1213484302318895252
+      enemy_handbook_21: -6449042421208359664
+      enemy_handbook_22: 6839392423868743593
+      enemy_handbook_23: -1703260295383417820
+      enemy_handbook_24: -2611647652602844870
+      enemy_handbook_25: -291346151540928353
+      enemy_handbook_26: 3622629477549314545
+      enemy_handbook_27: -589567977458080366
+      enemy_handbook_28: 6276550204167025079
+      enemy_handbook_29: 7695423734976064981
+      enemy_handbook_3: -3361612950240352826
+      enemy_handbook_30: 6654655444432033941
+      enemy_handbook_31: -8650981329976116604
+      enemy_handbook_32: 2419167288252959770
+      enemy_handbook_33: 4582958537436061219
+      enemy_handbook_34: -583420250678024242
+      enemy_handbook_35: -1158577147265526482
+      enemy_handbook_36: 6352377437458687800
+      enemy_handbook_37: 2133349144397018569
+      enemy_handbook_38: -7741769344692481283
+      enemy_handbook_39: 8979916282383425212
+      enemy_handbook_4: 636234682575474539
+      enemy_handbook_40: -1071958129451938574
+      enemy_handbook_41: -8224109888404485355
+      enemy_handbook_42: 7229208017196113596
+      enemy_handbook_43: 775459442255151578
+      enemy_handbook_44: 7810513541111956378
+      enemy_handbook_45: -1529878702658688233
+      enemy_handbook_46: 2540318240100701263
+      enemy_handbook_47: 362853924696247993
+      enemy_handbook_48: -8946956826258111789
+      enemy_handbook_49: -3721444424556889194
+      enemy_handbook_5: 1124976293390829756
+      enemy_handbook_50: -5669085587974592806
+      enemy_handbook_52: -8968470828425139336
+      enemy_handbook_53: 7622357125126972234
+      enemy_handbook_54: -605306961529593719
+      enemy_handbook_55: -3478993746170384595
+      enemy_handbook_56: 1480767075264355387
+      enemy_handbook_57: 4804731369537791154
+      enemy_handbook_58: 3283471138443666987
+      enemy_handbook_59: 2268873876577149443
+      enemy_handbook_6: 4963481413866400554
+      enemy_handbook_7: 1565751819946697694
+      enemy_handbook_8: -5725664963401230343
+      enemy_handbook_9: -6358637186104993198
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

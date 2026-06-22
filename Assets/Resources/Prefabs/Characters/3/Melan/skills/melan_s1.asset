@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
+  m_Name: melan_s1
+  m_EditorClassIdentifier: 
+  abilityId: melan_s1
+  abilityName: "\u653B\u51FB\u529B\u5F3A\u5316\xB7\u03B1\u578B"
+  description: "\u653B\u51FB\u529B+50%"
+  icon: {fileID: 21300000, guid: f0adbfbddcecd1f46ad5fa013b4b8e8e, type: 3}
+  Kind: 0
+  sp:
+    totalSp: 40
+    initialSp: 0
+    chargeNum: 1
+    abilityAmount: 20
+    recoverMode: 0
+    consumeMode: 0
+    openMode: 3
+    recoverForbidDuringAbility: 1
+    canManualClose: 0
+  components:
+  - componentType: ApplyBuff
+    parameters:
+      entries:
+      - key: buffTypes
+        value: atk_delta_percent
+        fromBlackboard: 0
+        type: 3
+      - key: buffValues
+        value: 0.5
+        fromBlackboard: 0
+        type: 3
+      - key: buffId
+        value: melan_s1
+        fromBlackboard: 0
+        type: 3
+      - key: outputBuff
+        value: melan_s1_outputBuff
+        fromBlackboard: 0
+        type: 3
+      - key: outputTarget
+        value: melan_s1_outputTarget
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 2
+      groups: []
+  - componentType: DestroyBuff
+    parameters:
+      entries:
+      - key: inputTarget
+        value: melan_s1_outputTarget
+        fromBlackboard: 0
+        type: 3
+      - key: inputBuff
+        value: melan_s1_outputBuff
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 3
+      groups: []

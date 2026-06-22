@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9caadfbafeeff1541807bbb2cbedeed1, type: 3}
+  m_Name: melan
+  m_EditorClassIdentifier: 
+  _defaults:
+    Default: {fileID: 11400000, guid: 85f26f9a6869a2249948e50c08a989fe, type: 2}
+    Idle: {fileID: 11400000, guid: bfdd1f3a26b9b4b4aabdff25294792c9, type: 2}
+    Start: {fileID: 11400000, guid: 47aa33744d730d24d95b3897bf59d60d, type: 2}
+    Die: {fileID: 11400000, guid: e0eb99c14a138114193311b970a85524, type: 2}
+  _attack:
+    AttackBegin: {fileID: 11400000, guid: dce6c00ddcaf8ae40a171705c5afc4ce, type: 2}
+    AttackRemote:
+    - {fileID: 11400000, guid: 3712ae56789e42c4297f45e31f72bc2c, type: 2}
+    - {fileID: 11400000, guid: ac5f9bcb7c62c4744bb779dbcc3d09f7, type: 2}
+    - {fileID: 11400000, guid: 436aa708ce22dde4fae38d6185b8ca7b, type: 2}
+    AttackClose:
+    - {fileID: 11400000, guid: 3712ae56789e42c4297f45e31f72bc2c, type: 2}
+    - {fileID: 11400000, guid: ac5f9bcb7c62c4744bb779dbcc3d09f7, type: 2}
+    - {fileID: 11400000, guid: 436aa708ce22dde4fae38d6185b8ca7b, type: 2}
+    AttackEnd: {fileID: 11400000, guid: ddde1b511b0e2604e84c870aca6c5ed7, type: 2}
+    Charge:
+      ChargeBegin: {fileID: 0}
+      Charge: []
+      ChargeEnd: {fileID: 0}
+  _movement:
+    Move: {fileID: 0}
+    Jump:
+      Begin: {fileID: 0}
+      Loop: {fileID: 0}
+      End: {fileID: 0}
+  _animations: []
+  _animationGroups: []

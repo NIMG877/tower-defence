@@ -1,0 +1,174 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
+  m_Name: ebnhlz_s3
+  m_EditorClassIdentifier: 
+  abilityId: ebnhlz_s3
+  abilityName: "\u5BC2\u9759\u4E4B\u58F0"
+  description: "\u653B\u51FB\u901F\u5EA6+80\uFF0C\u653B\u51FB\u529B+65%\uFF0C\u53EA\u4EE5\u7CBE\u82F1\u6216\u9886\u8896\u654C\u4EBA\u4E3A\u653B\u51FB\u76EE\u6807\uFF0C\u7B2C\u4E00\u5929\u8D4B\u7684\u4F24\u5BB3\u52A0\u6210\u63D0\u5347\u81F3\u539F\u672C\u7684140%"
+  icon: {fileID: 21300000, guid: 4635b170785529c44a88013a54a3c807, type: 3}
+  Kind: 0
+  sp:
+    totalSp: 20
+    initialSp: 10
+    chargeNum: 1
+    abilityAmount: 30
+    recoverMode: 0
+    consumeMode: 0
+    openMode: 3
+    recoverForbidDuringAbility: 1
+    canManualClose: 1
+  components:
+  - componentType: ApplyBuff
+    parameters:
+      entries:
+      - key: buffTypes
+        value: atkspd_delta_value,atk_delta_percent
+        fromBlackboard: 0
+        type: 3
+      - key: buffValues
+        value: 80,0.65
+        fromBlackboard: 0
+        type: 3
+      - key: buffId
+        value: ebnhlz_s3
+        fromBlackboard: 0
+        type: 3
+      - key: outputTarget
+        value: ebnhlz_s3_buff_targets
+        fromBlackboard: 0
+        type: 3
+      - key: outputBuff
+        value: ebnhlz_s3_buffs
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 2
+      groups: []
+  - componentType: ApplyAnimationOverride
+    parameters:
+      entries:
+      - key: mode
+        value: override
+        fromBlackboard: 0
+        type: 3
+      - key: slots
+        value: Charge,AttackRemote,AttackClose
+        fromBlackboard: 0
+        type: 3
+      - key: resources
+        value: Skill_3_Charge,Skill_3_Attack,Skill_3_Attack
+        fromBlackboard: 0
+        type: 3
+      - key: outputKey
+        value: ebnhlz_s3_animation_overrides
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 2
+      groups: []
+  - componentType: WriteBlackboard
+    parameters:
+      entries:
+      - key: key
+        value: ebnhlz_t1_charge_damage_multiplier
+        fromBlackboard: 0
+        type: 3
+      - key: value
+        value: 1.4
+        fromBlackboard: 0
+        type: 1
+      - key: method
+        value: mult
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 2
+      groups: []
+  - componentType: EntityFilter
+    parameters:
+      entries:
+      - key: fields
+        value: MonsterStatus,MonsterStatus
+        fromBlackboard: 0
+        type: 3
+      - key: ops
+        value: GreaterOrEqual,LessOrEqual
+        fromBlackboard: 0
+        type: 3
+      - key: values
+        value: 1,2
+        fromBlackboard: 0
+        type: 3
+      - key: groups
+        value: 0,0
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 2
+      groups: []
+    - triggerEvent: 3
+      groups: []
+  - componentType: ForceResetAttack
+    parameters:
+      entries: []
+    triggers:
+    - triggerEvent: 2
+      groups: []
+  - componentType: DestroyBuff
+    parameters:
+      entries:
+      - key: inputTarget
+        value: ebnhlz_s3_buff_targets
+        fromBlackboard: 0
+        type: 3
+      - key: inputBuff
+        value: ebnhlz_s3_buffs
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 3
+      groups: []
+  - componentType: RemoveAnimationOverride
+    parameters:
+      entries:
+      - key: inputKey
+        value: ebnhlz_s3_animation_overrides
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 3
+      groups: []
+  - componentType: WriteBlackboard
+    parameters:
+      entries:
+      - key: key
+        value: ebnhlz_t1_charge_damage_multiplier
+        fromBlackboard: 0
+        type: 3
+      - key: value
+        value: 1.4
+        fromBlackboard: 0
+        type: 1
+      - key: method
+        value: div
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 3
+      groups: []
+  - componentType: ForceResetAttack
+    parameters:
+      entries: []
+    triggers:
+    - triggerEvent: 3
+      groups: []

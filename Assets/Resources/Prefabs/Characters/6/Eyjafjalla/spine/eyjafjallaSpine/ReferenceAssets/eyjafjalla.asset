@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9caadfbafeeff1541807bbb2cbedeed1, type: 3}
+  m_Name: eyjafjalla
+  m_EditorClassIdentifier: 
+  _defaults:
+    Default: {fileID: 11400000, guid: 1726eaea1dca7e84e901aa2c008e165c, type: 2}
+    Idle: {fileID: 11400000, guid: 8d27196d7f54c7e45b5c91f4f14d7a4c, type: 2}
+    Start: {fileID: 11400000, guid: c7fbbeeff890b22479379f45a751075a, type: 2}
+    Die: {fileID: 11400000, guid: 2d5c55980c816b3408e036a43067f01e, type: 2}
+  _attack:
+    AttackBegin: {fileID: 0}
+    AttackRemote:
+    - {fileID: 11400000, guid: d1816a03dee300043b210a7c2399c291, type: 2}
+    AttackClose:
+    - {fileID: 11400000, guid: d1816a03dee300043b210a7c2399c291, type: 2}
+    AttackEnd: {fileID: 0}
+    Charge:
+      ChargeBegin: {fileID: 0}
+      Charge: []
+      ChargeEnd: {fileID: 0}
+  _movement:
+    Move: {fileID: 0}
+    Jump:
+      Begin: {fileID: 0}
+      Loop: {fileID: 0}
+      End: {fileID: 0}
+  _animations:
+  - Name: Skill3_Start
+    Animation: {fileID: 11400000, guid: 82750611b74085842ba68a6fe4d5f77f, type: 2}
+  - Name: Skill3_Idle
+    Animation: {fileID: 11400000, guid: 98512aa8c481d5f43b1a1fdff5573eb9, type: 2}
+  - Name: Skill3_End
+    Animation: {fileID: 11400000, guid: 39d744c77e5db6c47b6d35b91a3bab17, type: 2}
+  - Name: Talent_Begin
+    Animation: {fileID: 11400000, guid: 85fe9428b4f979d42b6c8973891f7aef, type: 2}
+  - Name: Talent_End
+    Animation: {fileID: 11400000, guid: d13b4959f66095340947354ad803d5cf, type: 2}
+  _animationGroups:
+  - Name: Skill2
+    Animations:
+    - {fileID: 11400000, guid: b3afebf46149d1c4aabcae6baa7f86d6, type: 2}
+  - Name: Talent_Attack
+    Animations:
+    - {fileID: 11400000, guid: 32d5d36ac643a2e47a21c42df25814f0, type: 2}

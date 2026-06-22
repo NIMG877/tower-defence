@@ -1,0 +1,256 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb7f1744c96d9834491e7169ccef37cc, type: 3}
+  m_Name: MC-1
+  m_EditorClassIdentifier: 
+  LevelName: "\u8BEF\u5165\u5947\u5883"
+  LevelCode: MC-1
+  LevelDescription: "\u5F53\u4F60\u4E0D\u5C0F\u5FC3\u8FDB\u5165\u4E86\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\uFF0C\u63A5\u4E0B\u6765\u4F1A\u53D1\u751F\u4EC0\u4E48\u6837\u7CBE\u5F69\u7684\u6545\u4E8B\u5462\uFF1F"
+  CameraSize: 4.5
+  CameraPos: {x: 5, y: 3.5}
+  CutToLevelTexture: {fileID: 2800000, guid: f44a6d0f153c7f8478b214480fd37139, type: 3}
+  MapPrefab: {fileID: 3960715908125169980, guid: 5c283094145edc14cbf7473e87353017, type: 3}
+  EnvironmentalControlDevice: {fileID: 6308497817176099097, guid: ba0fe5a46e68e4b469b07be44468fc35, type: 3}
+  Waves:
+  - Actions:
+    - CommandType: 2
+      GapFromLastAction: 0
+      OnBeforeAction:
+        m_PersistentCalls:
+          m_Calls: []
+      EntityPrefabSerial: 0
+      Camp: 2
+      OnActionRepeat:
+        m_PersistentCalls:
+          m_Calls: []
+      PathSerial: 0
+      GapsFromLastRepeat:
+      - 0
+      - 0.8
+      ModifyAttributes: 0
+      ModifyLevelHpConsume: 0
+      ModifyPrimary: 0
+      ModifyCountOperate: 0
+      Destination: {x: 0, y: 0}
+      Orientation: 0
+      HeadImage: {fileID: 0}
+      Content: 
+      DurationTime: 0
+      Contents: []
+    - CommandType: 0
+      GapFromLastAction: 3
+      OnBeforeAction:
+        m_PersistentCalls:
+          m_Calls: []
+      EntityPrefabSerial: 0
+      Camp: 2
+      OnActionRepeat:
+        m_PersistentCalls:
+          m_Calls: []
+      PathSerial: 0
+      GapsFromLastRepeat:
+      - 0
+      - 32
+      - 32
+      - 16
+      ModifyAttributes: 0
+      ModifyLevelHpConsume: 0
+      ModifyPrimary: 0
+      ModifyCountOperate: 0
+      Destination: {x: 0, y: 0}
+      Orientation: 0
+      HeadImage: {fileID: 0}
+      Content: 
+      DurationTime: 0
+      Contents: []
+    - CommandType: 2
+      GapFromLastAction: 10
+      OnBeforeAction:
+        m_PersistentCalls:
+          m_Calls: []
+      EntityPrefabSerial: 0
+      Camp: 2
+      OnActionRepeat:
+        m_PersistentCalls:
+          m_Calls: []
+      PathSerial: 3
+      GapsFromLastRepeat:
+      - 0
+      - 0.8
+      ModifyAttributes: 0
+      ModifyLevelHpConsume: 0
+      ModifyPrimary: 0
+      ModifyCountOperate: 0
+      Destination: {x: 0, y: 0}
+      Orientation: 0
+      HeadImage: {fileID: 0}
+      Content: 
+      DurationTime: 0
+      Contents: []
+    - CommandType: 0
+      GapFromLastAction: 3
+      OnBeforeAction:
+        m_PersistentCalls:
+          m_Calls: []
+      EntityPrefabSerial: 1
+      Camp: 2
+      OnActionRepeat:
+        m_PersistentCalls:
+          m_Calls: []
+      PathSerial: 3
+      GapsFromLastRepeat:
+      - 0
+      ModifyAttributes: 0
+      ModifyLevelHpConsume: 0
+      ModifyPrimary: 0
+      ModifyCountOperate: 0
+      Destination: {x: 0, y: 0}
+      Orientation: 0
+      HeadImage: {fileID: 0}
+      Content: 
+      DurationTime: 0
+      Contents: []
+    - CommandType: 2
+      GapFromLastAction: 32
+      OnBeforeAction:
+        m_PersistentCalls:
+          m_Calls: []
+      EntityPrefabSerial: 1
+      Camp: 2
+      OnActionRepeat:
+        m_PersistentCalls:
+          m_Calls: []
+      PathSerial: 1
+      GapsFromLastRepeat:
+      - 0
+      - 0.8
+      ModifyAttributes: 0
+      ModifyLevelHpConsume: 0
+      ModifyPrimary: 0
+      ModifyCountOperate: 0
+      Destination: {x: 0, y: 0}
+      Orientation: 0
+      HeadImage: {fileID: 0}
+      Content: 
+      DurationTime: 0
+      Contents: []
+    - CommandType: 0
+      GapFromLastAction: 3
+      OnBeforeAction:
+        m_PersistentCalls:
+          m_Calls: []
+      EntityPrefabSerial: 0
+      Camp: 2
+      OnActionRepeat:
+        m_PersistentCalls:
+          m_Calls: []
+      PathSerial: 1
+      GapsFromLastRepeat:
+      - 0
+      - 24
+      - 16
+      ModifyAttributes: 0
+      ModifyLevelHpConsume: 0
+      ModifyPrimary: 0
+      ModifyCountOperate: 0
+      Destination: {x: 0, y: 0}
+      Orientation: 0
+      HeadImage: {fileID: 0}
+      Content: 
+      DurationTime: 0
+      Contents: []
+    - CommandType: 0
+      GapFromLastAction: 29
+      OnBeforeAction:
+        m_PersistentCalls:
+          m_Calls: []
+      EntityPrefabSerial: 1
+      Camp: 2
+      OnActionRepeat:
+        m_PersistentCalls:
+          m_Calls: []
+      PathSerial: 4
+      GapsFromLastRepeat:
+      - 0
+      ModifyAttributes: 0
+      ModifyLevelHpConsume: 0
+      ModifyPrimary: 0
+      ModifyCountOperate: 0
+      Destination: {x: 0, y: 0}
+      Orientation: 0
+      HeadImage: {fileID: 0}
+      Content: 
+      DurationTime: 0
+      Contents: []
+    - CommandType: 2
+      GapFromLastAction: 17
+      OnBeforeAction:
+        m_PersistentCalls:
+          m_Calls: []
+      EntityPrefabSerial: 0
+      Camp: 2
+      OnActionRepeat:
+        m_PersistentCalls:
+          m_Calls: []
+      PathSerial: 2
+      GapsFromLastRepeat:
+      - 0
+      - 0.8
+      ModifyAttributes: 0
+      ModifyLevelHpConsume: 0
+      ModifyPrimary: 0
+      ModifyCountOperate: 0
+      Destination: {x: 0, y: 0}
+      Orientation: 0
+      HeadImage: {fileID: 0}
+      Content: 
+      DurationTime: 0
+      Contents: []
+    - CommandType: 0
+      GapFromLastAction: 3
+      OnBeforeAction:
+        m_PersistentCalls:
+          m_Calls: []
+      EntityPrefabSerial: 0
+      Camp: 2
+      OnActionRepeat:
+        m_PersistentCalls:
+          m_Calls: []
+      PathSerial: 2
+      GapsFromLastRepeat:
+      - 0
+      ModifyAttributes: 0
+      ModifyLevelHpConsume: 0
+      ModifyPrimary: 0
+      ModifyCountOperate: 0
+      Destination: {x: 0, y: 0}
+      Orientation: 0
+      HeadImage: {fileID: 0}
+      Content: 
+      DurationTime: 0
+      Contents: []
+  CheckPoints:
+  - {fileID: 3962162900902801439, guid: b02ca6b735b50cd40ad9a4288909ccd1, type: 3}
+  - {fileID: 4662438118174203867, guid: c69e7eeb822473d4d97207abae38c0dd, type: 3}
+  - {fileID: 7054889419872924767, guid: 6d3c3339cd96b6141861fc214fcf667e, type: 3}
+  - {fileID: 2255276518616405981, guid: 44b0187e85db7a046ae8831531677c25, type: 3}
+  - {fileID: 2255276518616405981, guid: ac6bc99adf97b4744ac7d12489119dfb, type: 3}
+  WaveEntityPrefabIDs:
+  - ID_C: m
+    ID_N: 1
+  - ID_C: m
+    ID_N: 2
+  LevelHp: 3
+  Cost0: 10
+  MaxCost: 99
+  CanSetNum: 8
+  CostRecoverSpeed: 1

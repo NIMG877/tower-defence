@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9caadfbafeeff1541807bbb2cbedeed1, type: 3}
+  m_Name: lavaBubble
+  m_EditorClassIdentifier: 
+  _defaults:
+    Default: {fileID: 11400000, guid: de8d23b6fe6950e4f869c9530aa5e5e8, type: 2}
+    Idle: {fileID: 11400000, guid: 40b1930cb0c000942b5832dd4af9d29b, type: 2}
+    Start: {fileID: 11400000, guid: 65b53f33d5dad564bbecce06aaf146c1, type: 2}
+    Die: {fileID: 11400000, guid: 5a3764b2cd666cd46ab889f8ea83f70d, type: 2}
+  _attack:
+    AttackBegin: {fileID: 0}
+    AttackRemote: []
+    AttackClose: []
+    AttackEnd: {fileID: 0}
+    Charge:
+      ChargeBegin: {fileID: 0}
+      Charge: []
+      ChargeEnd: {fileID: 0}
+  _movement:
+    Move: {fileID: 0}
+    Jump:
+      Begin: {fileID: 0}
+      Loop: {fileID: 0}
+      End: {fileID: 0}
+  _animations: []
+  _animationGroups: []

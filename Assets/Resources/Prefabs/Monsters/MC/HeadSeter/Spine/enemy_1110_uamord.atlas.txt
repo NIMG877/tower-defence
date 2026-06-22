@@ -1,0 +1,181 @@
+
+enemy_1110_uamord.png
+size: 1024,256
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+C_Cloak_01
+  rotate: true
+  xy: 190, 1
+  size: 108, 56
+  orig: 108, 56
+  offset: 0, 0
+  index: -1
+C_Cloak_02
+  rotate: false
+  xy: 699, 3
+  size: 54, 48
+  orig: 54, 48
+  offset: 0, 0
+  index: -1
+C_Cloak_03
+  rotate: false
+  xy: 699, 53
+  size: 78, 88
+  orig: 78, 88
+  offset: 0, 0
+  index: -1
+C_Cloak_04
+  rotate: false
+  xy: 850, 177
+  size: 46, 78
+  orig: 46, 78
+  offset: 0, 0
+  index: -1
+C_Skirt_01
+  rotate: false
+  xy: 694, 143
+  size: 80, 112
+  orig: 80, 112
+  offset: 0, 0
+  index: -1
+C_Skirt_02
+  rotate: true
+  xy: 58, 2
+  size: 64, 56
+  orig: 64, 56
+  offset: 0, 0
+  index: -1
+C_Skirt_03
+  rotate: false
+  xy: 629, 17
+  size: 68, 116
+  orig: 68, 116
+  offset: 0, 0
+  index: -1
+C_Strap_01
+  rotate: false
+  xy: 174, 2
+  size: 14, 64
+  orig: 14, 64
+  offset: 0, 0
+  index: -1
+Collar
+  rotate: true
+  xy: 567, 1
+  size: 122, 60
+  orig: 122, 60
+  offset: 0, 0
+  index: -1
+Head
+  rotate: true
+  xy: 578, 135
+  size: 120, 114
+  orig: 128, 126
+  offset: 4, 6
+  index: -1
+Hood
+  rotate: true
+  xy: 0, 68
+  size: 187, 178
+  orig: 198, 206
+  offset: 11, 11
+  index: -1
+Hood_A
+  rotate: false
+  xy: 489, 1
+  size: 76, 122
+  orig: 76, 122
+  offset: 0, 0
+  index: -1
+L_Arm
+  rotate: false
+  xy: 779, 87
+  size: 44, 82
+  orig: 44, 82
+  offset: 0, 0
+  index: -1
+L_Foot
+  rotate: true
+  xy: 0, 0
+  size: 66, 56
+  orig: 66, 56
+  offset: 0, 0
+  index: -1
+L_Hand
+  rotate: true
+  xy: 841, 25
+  size: 62, 55
+  orig: 72, 56
+  offset: 6, 1
+  index: -1
+L_Leg
+  rotate: false
+  xy: 377, 125
+  size: 115, 130
+  orig: 118, 130
+  offset: 0, 0
+  index: -1
+L_Skirt
+  rotate: true
+  xy: 248, 16
+  size: 93, 117
+  orig: 100, 122
+  offset: 3, 3
+  index: -1
+R_Arm
+  rotate: true
+  xy: 755, 5
+  size: 46, 84
+  orig: 46, 84
+  offset: 0, 0
+  index: -1
+R_Foot
+  rotate: true
+  xy: 116, 2
+  size: 64, 56
+  orig: 64, 56
+  offset: 0, 0
+  index: -1
+R_Hand
+  rotate: true
+  xy: 825, 89
+  size: 80, 60
+  orig: 80, 64
+  offset: 0, 2
+  index: -1
+R_Leg
+  rotate: false
+  xy: 291, 111
+  size: 84, 144
+  orig: 84, 144
+  offset: 0, 0
+  index: -1
+R_Skirt
+  rotate: true
+  xy: 367, 21
+  size: 88, 120
+  orig: 88, 120
+  offset: 0, 0
+  index: -1
+Skirt
+  rotate: false
+  xy: 494, 125
+  size: 82, 130
+  orig: 82, 130
+  offset: 0, 0
+  index: -1
+Waist
+  rotate: true
+  xy: 776, 171
+  size: 84, 72
+  orig: 84, 72
+  offset: 0, 0
+  index: -1
+lefthead
+  rotate: true
+  xy: 180, 111
+  size: 144, 109
+  orig: 144, 109
+  offset: 0, 0
+  index: -1

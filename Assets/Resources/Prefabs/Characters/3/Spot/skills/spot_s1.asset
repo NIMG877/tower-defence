@@ -1,0 +1,158 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
+  m_Name: spot_s1
+  m_EditorClassIdentifier: 
+  abilityId: spot_s1
+  abilityName: "\u6B21\u7EA7\u6CBB\u7597\u6A21\u5F0F"
+  description: "\u653B\u51FB\u529B+45%\uFF0C\u653B\u51FB\u95F4\u9694+1.3\uFF0C\u5BF9\u5468\u56F4\u7684\u53CB\u65B9\u89D2\u8272\u8FDB\u884C\u6CBB\u7597"
+  icon: {fileID: 0}
+  Kind: 0
+  sp:
+    totalSp: 40
+    initialSp: 25
+    chargeNum: 1
+    abilityAmount: 25
+    recoverMode: 0
+    consumeMode: 0
+    openMode: 3
+    recoverForbidDuringAbility: 1
+    canManualClose: 0
+  components:
+  - componentType: ApplyBuff
+    parameters:
+      entries:
+      - key: buffTypes
+        value: atk_delta_percent,batkt_delta_value
+        fromBlackboard: 0
+        type: 3
+      - key: buffValues
+        value: 0.45,1.3
+        fromBlackboard: 0
+        type: 3
+      - key: buffId
+        value: spot_s1
+        fromBlackboard: 0
+        type: 3
+      - key: outputTarget
+        value: spot_s1_buff_targets
+        fromBlackboard: 0
+        type: 3
+      - key: outputBuff
+        value: spot_s1_buffs
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 2
+      groups: []
+  - componentType: AttackRangeOverride
+    parameters:
+      entries:
+      - key: range
+        value: '[[0,0],[0,1],[0,-1],[1,0],[1,1],[1,-1],[-1,0],[-1,1],[-1,-1]]'
+        fromBlackboard: 0
+        type: 4
+    triggers:
+    - triggerEvent: 2
+      groups: []
+  - componentType: ApplyAnimationOverride
+    parameters:
+      entries:
+      - key: mode
+        value: override
+        fromBlackboard: 0
+        type: 3
+      - key: slots
+        value: AttackRemote,AttackClose
+        fromBlackboard: 0
+        type: 3
+      - key: resources
+        value: Skill,Skill
+        fromBlackboard: 0
+        type: 3
+      - key: outputKey
+        value: spot_s1_animation_overrides
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 2
+      groups: []
+  - componentType: AttackBehaviorOverride
+    parameters:
+      entries:
+      - key: damageType
+        value: 3
+        fromBlackboard: 0
+        type: 0
+      - key: orderLogic
+        value: Hprate_NoFull_Asc
+        fromBlackboard: 0
+        type: 3
+      - key: outputKey
+        value: spot_s1_attack_behavior
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 2
+      groups: []
+  - componentType: ForceResetAttack
+    parameters:
+      entries: []
+    triggers:
+    - triggerEvent: 2
+      groups: []
+  - componentType: DestroyBuff
+    parameters:
+      entries:
+      - key: inputTarget
+        value: spot_s1_buff_targets
+        fromBlackboard: 0
+        type: 3
+      - key: inputBuff
+        value: spot_s1_buffs
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 3
+      groups: []
+  - componentType: AttackRangeRestore
+    parameters:
+      entries: []
+    triggers:
+    - triggerEvent: 3
+      groups: []
+  - componentType: RemoveAnimationOverride
+    parameters:
+      entries:
+      - key: inputKey
+        value: spot_s1_animation_overrides
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 3
+      groups: []
+  - componentType: AttackBehaviorRestore
+    parameters:
+      entries:
+      - key: inputKey
+        value: spot_s1_attack_behavior
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 3
+      groups: []
+  - componentType: ForceResetAttack
+    parameters:
+      entries: []
+    triggers:
+    - triggerEvent: 3
+      groups: []

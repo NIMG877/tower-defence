@@ -1,0 +1,233 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4113559412623234849
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8986177455173299421}
+  - component: {fileID: -1321257011317040044}
+  - component: {fileID: -6362633736774080786}
+  m_Layer: 0
+  m_Name: LavaBubble
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8986177455173299421
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4113559412623234849}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4727859330019957540}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-1321257011317040044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4113559412623234849}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 464e5370c78639e4db5946b6303ec0b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entity_name: "\u7194\u5CA9\u6CE1\u6CE1"
+  description: "\u7194\u5CA9\uFF1F\u6CE1\u6CE1\uFF01"
+  entity_head_img: {fileID: 0}
+  entity_halfBody_img: {fileID: 0}
+  entity_hole_img: {fileID: 0}
+  atk_range: []
+  atk_radius: 1.5
+  max_hp: 100
+  atk: 0
+  base_attack_time: -1
+  def: 0
+  magic_resistance: 0
+  phDoge: 0
+  mgDoge: 0
+  block_occupation: 0
+  attack_num: 0
+  taunt_level: -1
+  damageType: 1
+  SkillSelect: 0
+  skills: []
+  talents: []
+  can_spawn_entity_datas: []
+  characterRarity: 0
+  characterInfluence: 
+  characterClass: 0
+  monsterId: 0
+  monsterStatus: 0
+  monsterLabel: 0
+  isPrimary: 0
+  countOperated: 0
+  _levelHpComsume: 0
+  _moveSpeed: 1
+  _massLevel: 1
+  _moveMethod: 0
+--- !u!114 &-6362633736774080786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4113559412623234849}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98c15169cca6fd54088c6e3b3c07ff80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  o_default: {fileID: 11400000, guid: de8d23b6fe6950e4f869c9530aa5e5e8, type: 2}
+  o_idle: {fileID: 11400000, guid: 40b1930cb0c000942b5832dd4af9d29b, type: 2}
+  o_move: {fileID: 11400000, guid: 40b1930cb0c000942b5832dd4af9d29b, type: 2}
+  o_attack_begin: {fileID: 0}
+  o_attack_end: {fileID: 0}
+  o_start: {fileID: 11400000, guid: 65b53f33d5dad564bbecce06aaf146c1, type: 2}
+  o_die: {fileID: 11400000, guid: 5a3764b2cd666cd46ab889f8ea83f70d, type: 2}
+  o_attack_remote: []
+  o_attack_close: []
+  Default: {fileID: 0}
+  Idle: {fileID: 0}
+  Move: {fileID: 0}
+  Attack_Begin: {fileID: 0}
+  Attack_End: {fileID: 0}
+  Start: {fileID: 0}
+  Die: {fileID: 0}
+  Attack_Remote: []
+  Attack_Close: []
+--- !u!1 &7496238143874463761
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4727859330019957540}
+  - component: {fileID: 4497998729298633647}
+  - component: {fileID: 7557046251465941381}
+  - component: {fileID: 554370182012142204}
+  m_Layer: 0
+  m_Name: Spine GameObject (skeleton)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4727859330019957540
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7496238143874463761}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.15, z: 0}
+  m_LocalScale: {x: 0.15, y: 0.15, z: 0.15}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 8986177455173299421}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &4497998729298633647
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7496238143874463761}
+  m_Mesh: {fileID: 0}
+--- !u!23 &7557046251465941381
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7496238143874463761}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 432e360a5b3afa14f9caeb8b48c2c849, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: -14351693
+  m_SortingLayer: 3
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &554370182012142204
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7496238143874463761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d247ba06193faa74d9335f5481b2b56c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  skeletonDataAsset: {fileID: 11400000, guid: b381d229027b90e4abbc3bb4193c5af8, type: 2}
+  initialSkinName: 
+  initialFlipX: 0
+  initialFlipY: 0
+  updateWhenInvisible: 3
+  separatorSlotNames: []
+  zSpacing: 0
+  useClipping: 1
+  immutableTriangles: 0
+  pmaVertexColors: 1
+  clearStateOnDisable: 0
+  tintBlack: 0
+  singleSubmesh: 0
+  fixDrawOrder: 0
+  addNormals: 0
+  calculateTangents: 0
+  maskInteraction: 0
+  maskMaterials:
+    materialsMaskDisabled: []
+    materialsInsideMask: []
+    materialsOutsideMask: []
+  disableRenderingOnOverride: 1
+  _animationName: default
+  loop: 1
+  timeScale: 1

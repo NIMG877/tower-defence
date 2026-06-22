@@ -1,0 +1,1066 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3028019c61d64bf47bcd3ef7c506fa36, type: 3}
+  m_Name: EntityDataCollection
+  m_EditorClassIdentifier: 
+  _entityBasicDatas:
+  - ID:
+      ID_C: c
+      ID_N: 1
+    ChineseName: "\u827E\u96C5\u6CD5\u62C9"
+    EnglishName: Eyjafjalla
+    Description: "\u827E\u96C5\u6CD5\u62C9\uFF0C\u706B\u5C71\u5B66\u5BB6\uFF0C\u5929\u707E\u4FE1\u4F7F\u3002\u4E8E\u9AD8\u7B49\u6E90\u77F3\u6280\u827A\u3001\u9AD8\u80FD\u91CF\u6CD5\u672F\u91CA\u653E\u7B49\u9886\u57DF\u5C55\u73B0\u51FA\u4E86\u5353\u8D8A\u7684\u5929\u8D4B\u3002\n\u73B0\u4E8E\u7F57\u5FB7\u5C9B\u63A5\u53D7\u6CBB\u7597\uFF0C\u540C\u65F6\u4E3A\u7F57\u5FB7\u5C9B\u63D0\u4F9B\u5929\u707E\u7814\u7A76\u3001\u73AF\u5883\u89C2\u5BDF\u4E0E\u8BC4\u4F30\u3001\u5371\u9669\u5730\u5F62\u822A\u884C\u4FDD\u969C\u7B49\u76F8\u5173\u670D\u52A1\u3002"
+    Prefab: {fileID: 4310881110139641480, guid: 40eda0efeef76274a9f0cb5b87533f8e, type: 3}
+    HeadImage: {fileID: 21300000, guid: aa7c3db0c820c39439a352142be9ea79, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: dbaf3acc1d340984f91e8d68d43a7b71, type: 3}
+    WholeImage: {fileID: 21300000, guid: f7a72dbb186dd914ea71c0bb3d6810ae, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 6
+    CharacterInfluence: "\u83B1\u5854\u5C3C\u4E9A"
+    CharacterJob: 4
+    CharacterSubJob: "\u4E2D\u575A\u672F\u5E08"
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    - {x: 0, y: 2}
+    - {x: 0, y: 3}
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    - {x: 1, y: 2}
+    - {x: -1, y: 0}
+    - {x: -1, y: 1}
+    - {x: -1, y: 2}
+    VisionRadius: 0
+    Attack: 762
+    BaseAttackTime: 1.6
+    AttackNum: 1
+    DamageType: 1
+    MaxHp: 1743
+    Defense: 122
+    MagicResistance: 20
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    StunImmune: 0
+    SilenceImmune: 0
+    SleepImmune: 0
+    FrozenImmune: 0
+    LevitateImmune: 0
+    DisarmedCombatImmune: 0
+    FearedImmune: 0
+    CanSpawnEntityIds:
+    - ID_C: t
+      ID_N: 1
+    CanSpawnEntityCounts: 01000000
+    IsStatic: 1
+    Cost: 19
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 1
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills: []
+    Talents: []
+    AnimationResources: {fileID: 11400000, guid: b7639e8dd39688e47a11dea72ef2238e, type: 2}
+  - ID:
+      ID_C: c
+      ID_N: 2
+    ChineseName: "\u9ED1\u952E"
+    EnglishName: Ebenholz
+    Description: "\u9ED1\u952E\uFF0C\u83B1\u5854\u5C3C\u4E9A\u5E73\u6C11\uFF0C\u4E8E\u7EF4\u8C22\u6D77\u59C6\u4E8B\u4EF6\u4E2D\u611F\u67D3\u77FF\u77F3\u75C5\uFF0C\u7ECF\u5E72\u5458\u8299\u84C9\u4ECB\u7ECD\u6765\u7F57\u5FB7\u5C9B\u6CBB\u7597\uFF0C\u5728\u6E90\u77F3\u6280\u827A\u65B9\u9762\u5C55\u73B0\u51FA\u4E0D\u51E1\u5929\u8D4B\u3002\u7ECF\u8003\u6838\u540E\uFF0C\u4F5C\u4E3A\u5916\u52E4\u5E72\u5458\u52A0\u5165\u7F57\u5FB7\u5C9B\u3002"
+    Prefab: {fileID: 4310881110139641480, guid: 35005acce465d0c4aa742b208804d533, type: 3}
+    HeadImage: {fileID: 21300000, guid: 22ffac8006727c74590eb373b13967b9, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: 6f2df04ed6350ad40959afb7b9a0c3d6, type: 3}
+    WholeImage: {fileID: 21300000, guid: 4e299dd21cbf6f745aaa074ef3cf4acc, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 6
+    CharacterInfluence: "\u83B1\u5854\u5C3C\u4E9A"
+    CharacterJob: 4
+    CharacterSubJob: "\u79D8\u672F\u5E08"
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    - {x: 0, y: 2}
+    - {x: 0, y: 3}
+    - {x: 1, y: 1}
+    - {x: 1, y: 2}
+    - {x: 1, y: 3}
+    - {x: -1, y: 1}
+    - {x: -1, y: 2}
+    - {x: -1, y: 3}
+    VisionRadius: 0
+    Attack: 1692
+    BaseAttackTime: 3
+    AttackNum: 1
+    DamageType: 1
+    MaxHp: 1678
+    Defense: 135
+    MagicResistance: 20
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    StunImmune: 0
+    SilenceImmune: 0
+    SleepImmune: 0
+    FrozenImmune: 0
+    LevitateImmune: 0
+    DisarmedCombatImmune: 0
+    FearedImmune: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 25
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 1
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: 9929ebb00dea8844ca7a7e9b63aff3a9, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: 6676cdd6d28d4724eb351d16c36028a5, type: 2}
+    - {fileID: 11400000, guid: 2e0973b3bd943054db55d52dbefbaa60, type: 2}
+    AnimationResources: {fileID: 11400000, guid: e4017be5cb5e0f4449e1384dfd30b172, type: 2}
+  - ID:
+      ID_C: c
+      ID_N: 3
+    ChineseName: "\u514B\u6D1B\u4E1D"
+    EnglishName: Kroos
+    Description: "\u6765\u81EA\u96F7\u59C6\u5FC5\u62D3\u7684\u514B\u6D1B\u4E1D\u8DDF\u82AC\u548C\u7C73\u683C\u9C81\u4E00\u6837\uFF0C\u4E4B\u524D\u53D7\u8BAD\u4E8E\u54E5\u4F26\u6BD4\u4E9A\u970D\u5C14\u59C6\u52A0\u5FB7\u8B66\u5907\u961F\u3002\u6027\u683C\u51B7\u9759\u5BA2\u89C2\uFF0C\u8138\u4E0A\u6C38\u8FDC\u6302\u7740\u7B11\u5BB9\uFF0C\u6027\u5B50\u6162\uFF0C\u5706\u6ED1\u800C\u6E29\u548C\uFF0C\u4F46\u662F\u5076\u5C14\u4E5F\u4F1A\u9732\u51FA\u6BD2\u820C\u8179\u9ED1\u7684\u4E00\u9762\u3002"
+    Prefab: {fileID: 4310881110139641480, guid: 2841f06a1b6be664281a6c7af46fd073, type: 3}
+    HeadImage: {fileID: 21300000, guid: 29d43ceaddd03d040ba0fa2a77a8d05b, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: 1cb3d7a80caad6e4eaf9aa91776de9cb, type: 3}
+    WholeImage: {fileID: 21300000, guid: c05242870001c9c43b382fb1549465b1, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 3
+    CharacterInfluence: "\u884C\u52A8\u9884\u5907\u7EC4A1"
+    CharacterJob: 3
+    CharacterSubJob: "\u901F\u5C04\u624B"
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    - {x: 0, y: 2}
+    - {x: 0, y: 3}
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    - {x: 1, y: 2}
+    - {x: 1, y: 3}
+    - {x: -1, y: 0}
+    - {x: -1, y: 1}
+    - {x: -1, y: 2}
+    - {x: -1, y: 3}
+    VisionRadius: 0
+    Attack: 446
+    BaseAttackTime: 1
+    AttackNum: 1
+    DamageType: 0
+    MaxHp: 1060
+    Defense: 126
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    StunImmune: 0
+    SilenceImmune: 0
+    SleepImmune: 0
+    FrozenImmune: 0
+    LevitateImmune: 0
+    DisarmedCombatImmune: 0
+    FearedImmune: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 11
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 1
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: 9a33ac06692c8a44b8df73dc20dcf0be, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: 30336de6325142b458941f1e612088c2, type: 2}
+    - {fileID: 11400000, guid: 47b0e6b2e1342f84491dbbc675c7d51f, type: 2}
+    AnimationResources: {fileID: 11400000, guid: 2eb42c200c1aab54496fec70451c4fa9, type: 2}
+  - ID:
+      ID_C: c
+      ID_N: 4
+    ChineseName: "\u53F2\u90FD\u534E\u5FB7"
+    EnglishName: Steward
+    Description: "\u53F2\u90FD\u534E\u5FB7\uFF0C\u884C\u52A8\u9884\u5907\u7EC4A4\u7EC4\u5458\uFF0C\u8C22\u62C9\u683C\u516C\u6C11\uFF0C\u6B63\u5F0F\u4EFB\u804C\u524D\u4E3A\u81EA\u7531\u804C\u4E1A\u8005\u3002\u4E8E\u591A\u9879\u6D4B\u8BD5\u4E2D\u83B7\u5F97\u4F18\u5F02\u6210\u7EE9\uFF0C\u9042\u83B7\u51C6\u52A0\u5165\u7F57\u5FB7\u5C9B\uFF0C\u73B0\u4E8E\u7F57\u5FB7\u5C9B\u884C\u52A8\u9884\u5907\u7EC4A4\u5C0F\u7EC4\u4EFB\u804C\u3002\n\u5728\u6CD5\u672F\u652F\u63F4\u3001\u786E\u8BA4\u8DEF\u5F84\u3001\u652F\u63F4\u4F5C\u6218\u7B49\u9879\u76EE\u4E2D\u5C55\u73B0\u51FA\u503C\u5F97\u671F\u5F85\u7684\u6F5C\u529B\u3002"
+    Prefab: {fileID: 4310881110139641480, guid: 6f05fa325c4c4f54b8a9b3e8e28c0972, type: 3}
+    HeadImage: {fileID: 21300000, guid: 2ae7f7300240e9b4c987dcc5bb5754e1, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: 5d4d8d011dca47f49a95aaace6ec6172, type: 3}
+    WholeImage: {fileID: 21300000, guid: 9ccc9ea8f5f14474590df597900fcd5c, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 3
+    CharacterInfluence: "\u884C\u52A8\u9884\u5907\u7EC4A4"
+    CharacterJob: 4
+    CharacterSubJob: "\u4E2D\u575A\u672F\u58EB"
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    - {x: 0, y: 2}
+    - {x: 0, y: 3}
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    - {x: 1, y: 2}
+    - {x: -1, y: 0}
+    - {x: -1, y: 1}
+    - {x: -1, y: 2}
+    VisionRadius: 0
+    Attack: 520
+    BaseAttackTime: 1.6
+    AttackNum: 1
+    DamageType: 1
+    MaxHp: 1100
+    Defense: 90
+    MagicResistance: 15
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    StunImmune: 0
+    SilenceImmune: 0
+    SleepImmune: 0
+    FrozenImmune: 0
+    LevitateImmune: 0
+    DisarmedCombatImmune: 0
+    FearedImmune: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 16
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 1
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: 28d6c3a075490e84e9e8c27243786cf3, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: 5e095252e619e0b4eaa17558e65bbb07, type: 2}
+    AnimationResources: {fileID: 11400000, guid: 4ad63c1c0debbf245b440f91c4f8157c, type: 2}
+  - ID:
+      ID_C: c
+      ID_N: 5
+    ChineseName: "\u6591\u70B9"
+    EnglishName: Spot
+    Description: "\u539F\u8428\u5C14\u8D21\u58EB\u5175\uFF0C\u4E3B\u52A8\u6765\u5230\u7F57\u5FB7\u5C9B\u6C42\u804C\u3002\u5728\u901A\u8FC7\u5E72\u5458\u6D4B\u8BD5\u540E\uFF0C\u6210\u4E3A\u7F57\u5FB7\u5C9B\u7684\u4E00\u5458\uFF0C\u88AB\u5206\u914D\u5230\u9884\u5907\u884C\u52A8\u7EC4A6\u3002\n\u4E8E\u5B88\u62A4\u65B9\u9762\u9887\u6709\u5FC3\u5F97\uFF0C\u662F\u5C0F\u961F\u7684\u9632\u5FA1\u624B\u3002"
+    Prefab: {fileID: 4310881110139641480, guid: 2887fb675e46b79449b990ed022b9341, type: 3}
+    HeadImage: {fileID: 21300000, guid: 5354695c36201ee4ab7c883f26cb4f6a, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: 9f288aead9c07064c80b20b4e14d0634, type: 3}
+    WholeImage: {fileID: 21300000, guid: e16cc4dd6f27a7e4f971d941c87dca44, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 3
+    CharacterInfluence: "\u884C\u52A8\u9884\u5907\u7EC4A6"
+    CharacterJob: 2
+    CharacterSubJob: "\u5B88\u62A4\u8005"
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    VisionRadius: 0
+    Attack: 350
+    BaseAttackTime: 1.2
+    AttackNum: 1
+    DamageType: 0
+    MaxHp: 1833
+    Defense: 496
+    MagicResistance: 10
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 3
+    TauntLevel: 0
+    StunImmune: 0
+    SilenceImmune: 0
+    SleepImmune: 0
+    FrozenImmune: 0
+    LevitateImmune: 0
+    DisarmedCombatImmune: 0
+    FearedImmune: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 15
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 0
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: 0940832e465d7b148bf445f12ce61a24, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: 62fdda0674b0245499caf1f700a08fad, type: 2}
+    AnimationResources: {fileID: 11400000, guid: a009ade165267c246a1ad64b5d4d0d38, type: 2}
+  - ID:
+      ID_C: c
+      ID_N: 6
+    ChineseName: "\u73AB\u5170\u838E"
+    EnglishName: Melantha
+    Description: "\u73AB\u5170\u838E\uFF0C\u884C\u52A8\u9884\u5907\u7EC4A4\u7EC4\u957F\uFF0C\u7EF4\u591A\u5229\u4E9A\u516C\u6C11\uFF0C\u6B63\u5F0F\u4EFB\u804C\u524D\u4E3A\u666E\u901A\u611F\u67D3\u8005\uFF0C\u65E0\u804C\u4E1A\u3002\u4E8E\u591A\u9879\u6D4B\u8BD5\u4E2D\u83B7\u5F97\u4F18\u5F02\u6210\u7EE9\uFF0C\u9042\u83B7\u51C6\u52A0\u5165\u7F57\u5FB7\u5C9B\u3002"
+    Prefab: {fileID: 4310881110139641480, guid: d46768ff51303e74a9b685b4f1e99c4f, type: 3}
+    HeadImage: {fileID: 21300000, guid: 037f9fb398b785143b14c92795393990, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: 6bdb0289eb41f164a99812a922394f12, type: 3}
+    WholeImage: {fileID: 21300000, guid: 60c735c3f749e5d47a3f8cb6bca5207d, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 3
+    CharacterInfluence: "\u884C\u52A8\u9884\u5907\u7EC4A4"
+    CharacterJob: 1
+    CharacterSubJob: "\u65E0\u754F\u8005"
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    VisionRadius: 0
+    Attack: 828
+    BaseAttackTime: 1.5
+    AttackNum: 1
+    DamageType: 0
+    MaxHp: 2745
+    Defense: 155
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    StunImmune: 0
+    SilenceImmune: 0
+    SleepImmune: 0
+    FrozenImmune: 0
+    LevitateImmune: 0
+    DisarmedCombatImmune: 0
+    FearedImmune: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 13
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 0
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: 99db95c505cb4d341b4065b66f8ff78d, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: 7d6b84033e6602140b4829f8674e4306, type: 2}
+    AnimationResources: {fileID: 11400000, guid: 70eb60c57ea57be4d8adbabb43102e8b, type: 2}
+  - ID:
+      ID_C: m
+      ID_N: 1
+    ChineseName: "\u50F5\u5C38"
+    EnglishName: Zombie
+    Description: "\u50F5\u5C38\u662F\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u64C5\u957F\u8FD1\u8EAB\u640F\u6597\u7684\u602A\u7269\u3002\u4F5C\u4E3A\u4EA1\u7075\u751F\u7269\uFF0C\u5B83\u60E7\u6015\u9633\u5149\uFF0C\u4F46\u5B83\u5934\u9876\u7684\u5E3D\u5B50\u4F3C\u4E4E\u53EF\u4EE5\u5E2E\u4ED6\u89E3\u51B3\u8FD9\u4E2A\u95EE\u9898\u3002\u50F5\u5C38\u5F88\u5BB9\u6613\u88AB\u8BEF\u8BA4\u4E3A\u662F\u4E00\u79CD\u7B28\u62D9\u800C\u8E52\u8DDA\u7684\u751F\u7269\uFF0C\u4F46\u5982\u679C\u5B83\u4EEC\u6210\u7FA4\u7ED3\u961F\uFF0C\u751A\u81F3\u80FD\u591F\u8BA9\u6700\u52C7\u6562\u7684\u5192\u9669\u8005\u683D\u5728\u5B83\u4EEC\u624B\u91CC\u3002"
+    Prefab: {fileID: 5752354500556713093, guid: 461c764bb2af5664c80f113967cdd7fe, type: 3}
+    HeadImage: {fileID: 21300000, guid: af77f5abba4b55147a0e0f34fe1057a7, type: 3}
+    HalfBodyImage: {fileID: 0}
+    WholeImage: {fileID: 0}
+    DefaultCamp: 2
+    CharacterRarity: 0
+    CharacterInfluence: 
+    CharacterJob: 9
+    CharacterSubJob: 
+    MonsterStatus: 0
+    MonsterLabel: "\u4EA1\u7075\u751F\u7269"
+    MonsterIsPrimary: 1
+    MonsterCountOperated: 1
+    MonsterLevelHpConsume: 1
+    VisionRange: []
+    VisionRadius: 0
+    Attack: 400
+    BaseAttackTime: 2
+    AttackNum: 1
+    DamageType: 0
+    MaxHp: 5500
+    Defense: 265
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    StunImmune: 0
+    SilenceImmune: 0
+    SleepImmune: 0
+    FrozenImmune: 0
+    LevitateImmune: 0
+    DisarmedCombatImmune: 0
+    FearedImmune: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 0
+    Cost: 0
+    CanCallBack: 0
+    NeedsDirectionSelection: 0
+    CanSetType: 0
+    RespawnTime: 0
+    RespawnStrategy: 3
+    CanRespawn: 0
+    RespawnCostUp: 0
+    MaxOccupyCount: 0
+    MoveSpeed: 0.5
+    MassLevel: 1
+    MoveMethod: 0
+    Skills: []
+    Talents: []
+    AnimationResources: {fileID: 11400000, guid: 5c5f405e5ac452d43a6e420f1522f197, type: 2}
+  - ID:
+      ID_C: m
+      ID_N: 2
+    ChineseName: "\u9AB7\u9AC5"
+    EnglishName: Skeleton
+    Description: "\u9AB7\u9AC5\u662F\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u64C5\u957F\u4F7F\u7528\u5F13\u7BAD\u8FDC\u7A0B\u653B\u51FB\u7684\u602A\u7269\u3002\u4F5C\u4E3A\u4EA1\u7075\u751F\u7269\uFF0C\u5B83\u60E7\u6015\u9633\u5149\uFF0C\u4F46\u5B83\u5934\u9876\u7684\u5E3D\u5B50\u4F3C\u4E4E\u53EF\u4EE5\u5E2E\u4ED6\u89E3\u51B3\u8FD9\u4E2A\u95EE\u9898\u3002\u9AB7\u9AC5\u770B\u4F3C\u4E00\u5177\u5080\u5121\uFF0C\u4F46\u5B83\u4EEC\u4F3C\u4E4E\u62E5\u6709\u4EA4\u6D41\u80FD\u529B\uFF0C\u53EF\u4EE5\u5C06\u5BF9\u624B\u7684\u4FE1\u606F\u544A\u8BC9\u961F\u53CB\u3002"
+    Prefab: {fileID: 5752354500556713093, guid: 73542255c8c9d20478283f1106ab97ba, type: 3}
+    HeadImage: {fileID: 21300000, guid: bd74f9d899ec05b4f9fd65a9dcf201c0, type: 3}
+    HalfBodyImage: {fileID: 0}
+    WholeImage: {fileID: 0}
+    DefaultCamp: 2
+    CharacterRarity: 0
+    CharacterInfluence: 
+    CharacterJob: 9
+    CharacterSubJob: 
+    MonsterStatus: 0
+    MonsterLabel: "\u4EA1\u7075\u751F\u7269"
+    MonsterIsPrimary: 1
+    MonsterCountOperated: 1
+    MonsterLevelHpConsume: 1
+    VisionRange: []
+    VisionRadius: 3
+    Attack: 395
+    BaseAttackTime: 5
+    AttackNum: 1
+    DamageType: 0
+    MaxHp: 4590
+    Defense: 185
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    StunImmune: 0
+    SilenceImmune: 0
+    SleepImmune: 0
+    FrozenImmune: 0
+    LevitateImmune: 0
+    DisarmedCombatImmune: 0
+    FearedImmune: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 0
+    Cost: 0
+    CanCallBack: 0
+    NeedsDirectionSelection: 0
+    CanSetType: 0
+    RespawnTime: 0
+    RespawnStrategy: 3
+    CanRespawn: 0
+    RespawnCostUp: 0
+    MaxOccupyCount: 0
+    MoveSpeed: 0.45
+    MassLevel: 1
+    MoveMethod: 0
+    Skills: []
+    Talents: []
+    AnimationResources: {fileID: 11400000, guid: 7a626b4b74dec5e4b89d0bc4bef34643, type: 2}
+  - ID:
+      ID_C: m
+      ID_N: 3
+    ChineseName: "\u82E6\u529B\u6015"
+    EnglishName: Creeper
+    Description: "\u201CSISISISI~BOOM\uFF01\uFF01\uFF01\u201D......\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u6781\u5177\u653B\u51FB\u529B\u548C\u7834\u574F\u6027\u7684\u602A\u7269\uFF0C\u5B83\u957F\u76F8\u5947\u7279\uFF0C\u5F80\u5F80\u4F1A\u6084\u65E0\u58F0\u606F\u5730\u63A5\u8FD1\u4F60\uFF0C\u7136\u540E\u5F15\u7206\u81EA\u8EAB\u5BF9\u4F60\u548C\u5468\u56F4\u7684\u6240\u6709\u751F\u7269\u9020\u6210\u7834\u574F\u3002"
+    Prefab: {fileID: 5752354500556713093, guid: d6ce07bac3ee74548a909bcb9705f070, type: 3}
+    HeadImage: {fileID: 21300000, guid: de3f5dcbec975f5408de0270e1d45305, type: 3}
+    HalfBodyImage: {fileID: 0}
+    WholeImage: {fileID: 0}
+    DefaultCamp: 2
+    CharacterRarity: 0
+    CharacterInfluence: 
+    CharacterJob: 9
+    CharacterSubJob: 
+    MonsterStatus: 1
+    MonsterLabel: 
+    MonsterIsPrimary: 1
+    MonsterCountOperated: 1
+    MonsterLevelHpConsume: 1
+    VisionRange: []
+    VisionRadius: 1.414
+    Attack: 1050
+    BaseAttackTime: 3
+    AttackNum: 1
+    DamageType: 0
+    MaxHp: 12000
+    Defense: 325
+    MagicResistance: 10
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    StunImmune: 0
+    SilenceImmune: 0
+    SleepImmune: 0
+    FrozenImmune: 0
+    LevitateImmune: 0
+    DisarmedCombatImmune: 0
+    FearedImmune: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 0
+    Cost: 0
+    CanCallBack: 0
+    NeedsDirectionSelection: 0
+    CanSetType: 0
+    RespawnTime: 0
+    RespawnStrategy: 3
+    CanRespawn: 0
+    RespawnCostUp: 0
+    MaxOccupyCount: 0
+    MoveSpeed: 0.4
+    MassLevel: 1
+    MoveMethod: 0
+    Skills: []
+    Talents: []
+    AnimationResources: {fileID: 0}
+  - ID:
+      ID_C: m
+      ID_N: 4
+    ChineseName: "\u5973\u5DEB"
+    EnglishName: Witch
+    Description: "\u5973\u5DEB\u662F\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u4F1A\u4F7F\u7528\u836F\u6C34\u7684\u602A\u7269\u3002\u5B83\u539F\u672C\u53EA\u662F\u5728\u6751\u5E84\u4E2D\u5B89\u5C45\u4E50\u4E1A\u7684\u6751\u6C11\uFF0C\u4F46\u4E00\u9053\u96F7\u51FB\u4E2D\u4E86\u5B83\uFF0C\u4E8E\u662F\u5B83\u5C31\u5F02\u53D8\u6210\u4E86\u5973\u5DEB\u3002\u7531\u4E8E\u5B83\u5177\u6709\u4EBA\u7C7B\u7684\u667A\u6167\uFF0C\u6240\u4EE5\u4ED6\u638C\u63E1\u4E86\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u53E4\u8001\u800C\u53C8\u590D\u6742\u7684\u836F\u6C34\u917F\u9020\u6280\u672F"
+    Prefab: {fileID: 5752354500556713093, guid: 81f85669bcd1ae94e8166c0cce9fe582, type: 3}
+    HeadImage: {fileID: 21300000, guid: a80c6599d7282eb469df468504119c56, type: 3}
+    HalfBodyImage: {fileID: 0}
+    WholeImage: {fileID: 0}
+    DefaultCamp: 2
+    CharacterRarity: 0
+    CharacterInfluence: 
+    CharacterJob: 9
+    CharacterSubJob: 
+    MonsterStatus: 1
+    MonsterLabel: "\u96F7\u51FB\u5F02\u53D8\u4F53"
+    MonsterIsPrimary: 1
+    MonsterCountOperated: 1
+    MonsterLevelHpConsume: 1
+    VisionRange: []
+    VisionRadius: 3
+    Attack: 200
+    BaseAttackTime: 5
+    AttackNum: 1
+    DamageType: 1
+    MaxHp: 12500
+    Defense: 375
+    MagicResistance: 50
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    StunImmune: 0
+    SilenceImmune: 0
+    SleepImmune: 0
+    FrozenImmune: 0
+    LevitateImmune: 0
+    DisarmedCombatImmune: 0
+    FearedImmune: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 0
+    Cost: 0
+    CanCallBack: 0
+    NeedsDirectionSelection: 0
+    CanSetType: 0
+    RespawnTime: 0
+    RespawnStrategy: 3
+    CanRespawn: 0
+    RespawnCostUp: 0
+    MaxOccupyCount: 0
+    MoveSpeed: 0.25
+    MassLevel: 1
+    MoveMethod: 0
+    Skills: []
+    Talents: []
+    AnimationResources: {fileID: 0}
+  - ID:
+      ID_C: m
+      ID_N: 6
+    ChineseName: "\u53F2\u83B1\u59C6S"
+    EnglishName: SlimeSmall
+    Description: "\u53F2\u83B1\u59C6S\u662F\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u8E66\u8E66\u8DF3\u8DF3\u7684\u751F\u7269\uFF0C\u5B83\u770B\u8D77\u6765\u5982\u679C\u51BB\u4E00\u822C\uFF0C\u4F46\u5176\u653B\u51FB\u6027\u53EF...\u786E\u5B9E\u6CA1\u6709\u4EC0\u4E48\u653B\u51FB\u6027\u3002\u5B83\u901A\u8FC7\u8DF3\u8DC3\u6765\u79FB\u52A8\uFF0C\u751A\u81F3\u53EF\u4EE5\u8D8A\u8FC7\u969C\u788D\u7269\u3002\u53F2\u83B1\u59C6S\u7684\u8DF3\u8DC3\u8303\u56F4\u6BD4\u8F83\u5C0F\uFF0C\u4F46\u662F\u8DF3\u8DC3\u95F4\u9694\u4E5F\u5F88\u77ED\u3002"
+    Prefab: {fileID: 5752354500556713093, guid: c997f8a5bea0a2d40a0164d3e867e90f, type: 3}
+    HeadImage: {fileID: 21300000, guid: 0bccdffd6dea4d84587004e524f1bbf0, type: 3}
+    HalfBodyImage: {fileID: 0}
+    WholeImage: {fileID: 0}
+    DefaultCamp: 2
+    CharacterRarity: 0
+    CharacterInfluence: 
+    CharacterJob: 9
+    CharacterSubJob: 
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 1
+    MonsterCountOperated: 1
+    MonsterLevelHpConsume: 1
+    VisionRange: []
+    VisionRadius: 0
+    Attack: 290
+    BaseAttackTime: 2
+    AttackNum: 1
+    DamageType: 0
+    MaxHp: 1235
+    Defense: 65
+    MagicResistance: 5
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    StunImmune: 0
+    SilenceImmune: 0
+    SleepImmune: 0
+    FrozenImmune: 0
+    LevitateImmune: 0
+    DisarmedCombatImmune: 0
+    FearedImmune: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 0
+    Cost: 0
+    CanCallBack: 0
+    NeedsDirectionSelection: 0
+    CanSetType: 0
+    RespawnTime: 0
+    RespawnStrategy: 3
+    CanRespawn: 0
+    RespawnCostUp: 0
+    MaxOccupyCount: 0
+    MoveSpeed: 0
+    MassLevel: 1
+    MoveMethod: 0
+    Skills: []
+    Talents: []
+    AnimationResources: {fileID: 0}
+  - ID:
+      ID_C: m
+      ID_N: 7
+    ChineseName: "\u53F2\u83B1\u59C6M"
+    EnglishName: SlimeMiddle
+    Description: "\u53F2\u83B1\u59C6M\u662F\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u8E66\u8E66\u8DF3\u8DF3\u7684\u751F\u7269\uFF0C\u5B83\u770B\u8D77\u6765\u5982\u679C\u51BB\u4E00\u822C\uFF0C\u4F46\u5176\u653B\u51FB\u6027\u53EF\u4E0D\u5C0F\uFF0C\u88AB\u51FB\u5012\u540E\u8FD8\u4F1A\u5206\u88C2\u4E3A4\u4E2A\u53F2\u83B1\u59C6S\u3002\u5B83\u901A\u8FC7\u8DF3\u8DC3\u6765\u79FB\u52A8\uFF0C\u751A\u81F3\u53EF\u4EE5\u8D8A\u8FC7\u969C\u788D\u7269\u3002\u53F2\u83B1\u59C6M\u7684\u8DF3\u8DC3\u8303\u56F4\u6BD4\u8F83\u5927\u3002"
+    Prefab: {fileID: 5752354500556713093, guid: 84fe417dc55b02b4db5a8ee2f21afa91, type: 3}
+    HeadImage: {fileID: 21300000, guid: ba4b19649e26ece4b98ce466159b7c78, type: 3}
+    HalfBodyImage: {fileID: 0}
+    WholeImage: {fileID: 0}
+    DefaultCamp: 2
+    CharacterRarity: 0
+    CharacterInfluence: 
+    CharacterJob: 9
+    CharacterSubJob: 
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 1
+    MonsterCountOperated: 1
+    MonsterLevelHpConsume: 1
+    VisionRange: []
+    VisionRadius: 0
+    Attack: 430
+    BaseAttackTime: 4
+    AttackNum: 1
+    DamageType: 0
+    MaxHp: 3600
+    Defense: 150
+    MagicResistance: 5
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    StunImmune: 0
+    SilenceImmune: 0
+    SleepImmune: 0
+    FrozenImmune: 0
+    LevitateImmune: 0
+    DisarmedCombatImmune: 0
+    FearedImmune: 0
+    CanSpawnEntityIds:
+    - ID_C: m
+      ID_N: 6
+    CanSpawnEntityCounts: 04000000
+    IsStatic: 0
+    Cost: 0
+    CanCallBack: 0
+    NeedsDirectionSelection: 0
+    CanSetType: 0
+    RespawnTime: 0
+    RespawnStrategy: 3
+    CanRespawn: 0
+    RespawnCostUp: 0
+    MaxOccupyCount: 0
+    MoveSpeed: 0
+    MassLevel: 1
+    MoveMethod: 0
+    Skills: []
+    Talents: []
+    AnimationResources: {fileID: 0}
+  - ID:
+      ID_C: m
+      ID_N: 8
+    ChineseName: "\u53F2\u83B1\u59C6L"
+    EnglishName: SlimeLarge
+    Description: "\u53F2\u83B1\u59C6L\u662F\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u8E66\u8E66\u8DF3\u8DF3\u7684\u751F\u7269\uFF0C\u5B83\u770B\u8D77\u6765\u5982\u679C\u51BB\u4E00\u822C\uFF0C\u4F46\u5176\u653B\u51FB\u6027\u53EF\u4E0D\u5C0F\uFF0C\u88AB\u51FB\u5012\u540E\u8FD8\u4F1A\u5206\u88C2\u4E3A4\u4E2A\u53F2\u83B1\u59C6M\u3002\u5B83\u901A\u8FC7\u8DF3\u8DC3\u6765\u79FB\u52A8\uFF0C\u751A\u81F3\u53EF\u4EE5\u8D8A\u8FC7\u969C\u788D\u7269\u3002\u53F2\u83B1\u59C6L\u7684\u8DF3\u8DC3\u8303\u56F4\u5F88\u5927\u3002"
+    Prefab: {fileID: 5752354500556713093, guid: 731864e8f41924a4c834cfdb89c0712c, type: 3}
+    HeadImage: {fileID: 21300000, guid: db96a19ec93a1584f9252cd3c5444c7b, type: 3}
+    HalfBodyImage: {fileID: 0}
+    WholeImage: {fileID: 0}
+    DefaultCamp: 2
+    CharacterRarity: 0
+    CharacterInfluence: 
+    CharacterJob: 9
+    CharacterSubJob: 
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 1
+    MonsterCountOperated: 1
+    MonsterLevelHpConsume: 1
+    VisionRange: []
+    VisionRadius: 0
+    Attack: 670
+    BaseAttackTime: 5
+    AttackNum: 1
+    DamageType: 0
+    MaxHp: 6900
+    Defense: 235
+    MagicResistance: 5
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    StunImmune: 0
+    SilenceImmune: 0
+    SleepImmune: 0
+    FrozenImmune: 0
+    LevitateImmune: 0
+    DisarmedCombatImmune: 0
+    FearedImmune: 0
+    CanSpawnEntityIds:
+    - ID_C: m
+      ID_N: 7
+    CanSpawnEntityCounts: 04000000
+    IsStatic: 0
+    Cost: 0
+    CanCallBack: 0
+    NeedsDirectionSelection: 0
+    CanSetType: 0
+    RespawnTime: 0
+    RespawnStrategy: 3
+    CanRespawn: 0
+    RespawnCostUp: 0
+    MaxOccupyCount: 0
+    MoveSpeed: 0
+    MassLevel: 1
+    MoveMethod: 0
+    Skills: []
+    Talents: []
+    AnimationResources: {fileID: 0}
+  - ID:
+      ID_C: m
+      ID_N: 9
+    ChineseName: "\u201C\u51CB\u96F6\u201D\u4FE1\u5F92"
+    EnglishName: WitherBeliever
+    Description: "\u600E\u80FD\u60F3\u8C61\uFF0C\u201C\u51CB\u96F6\u201D\u7684\u540D\u58F0\u65E9\u5DF2\u8FDC\u626C\uFF0C\u5728\u201C\u6211\u7684\u4E16\u754C\u201D\u4E4B\u5916\u7ADF\u5B58\u5728\u5982\u6B64\u75AF\u72C2\u7684\u4FE1\u5F92\u3002\u4ED6\u4EEC\u4E00\u5FC3\u7684\u60F3\u6CD5\u5C31\u53EA\u6709\u8BA9\u201C\u51CB\u96F6\u201D\u91CD\u65B0\u51FA\u73B0\u5728\u8FD9\u4E2A\u4E16\u754C\u4E0A\uFF0C\u4E0D\u53EF\u963B\u6321\u3002"
+    Prefab: {fileID: 5752354500556713093, guid: e46a9ab09aba9134d813f105c1ed7a8e, type: 3}
+    HeadImage: {fileID: 0}
+    HalfBodyImage: {fileID: 0}
+    WholeImage: {fileID: 0}
+    DefaultCamp: 2
+    CharacterRarity: 0
+    CharacterInfluence: 
+    CharacterJob: 9
+    CharacterSubJob: 
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange: []
+    VisionRadius: 2.2
+    Attack: 500
+    BaseAttackTime: 3
+    AttackNum: 1
+    DamageType: 1
+    MaxHp: 5000
+    Defense: 500
+    MagicResistance: 50
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    StunImmune: 0
+    SilenceImmune: 0
+    SleepImmune: 0
+    FrozenImmune: 0
+    LevitateImmune: 0
+    DisarmedCombatImmune: 0
+    FearedImmune: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 0
+    Cost: 0
+    CanCallBack: 0
+    NeedsDirectionSelection: 0
+    CanSetType: 0
+    RespawnTime: 0
+    RespawnStrategy: 3
+    CanRespawn: 0
+    RespawnCostUp: 0
+    MaxOccupyCount: 0
+    MoveSpeed: 0.45
+    MassLevel: 2
+    MoveMethod: 0
+    Skills: []
+    Talents: []
+    AnimationResources: {fileID: 0}
+  - ID:
+      ID_C: m
+      ID_N: 10
+    ChineseName: "\u201C\u51CB\u96F6\u201D\u738B\u5EA7"
+    EnglishName: WitherSeat
+    Description: "\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u7528\u4E8E\u53EC\u5524\u201C\u51CB\u96F6\u201D\u7684\u57FA\u5EA7\uFF0C\u7531\u56DB\u4E2A\u7075\u9B42\u6C99\u5448\u201CT\u201D\u5B57\u5F62\u6446\u653E\u3002\u5728\u57FA\u5EA7\u4E0A\u6446\u653E\u4E09\u4E2A\u201C\u51CB\u96F6\u201D\u5934\u9885\uFF0C\u5373\u53EF\u53EC\u5524\u201C\u51CB\u96F6\u201D\u3002"
+    Prefab: {fileID: 5752354500556713093, guid: e2f0c2132e54fe2478ff70faf809315a, type: 3}
+    HeadImage: {fileID: 0}
+    HalfBodyImage: {fileID: 0}
+    WholeImage: {fileID: 0}
+    DefaultCamp: 2
+    CharacterRarity: 0
+    CharacterInfluence: 
+    CharacterJob: 9
+    CharacterSubJob: 
+    MonsterStatus: 0
+    MonsterLabel: "\u6CD5\u672F\u9020\u7269"
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange: []
+    VisionRadius: 0
+    Attack: 100
+    BaseAttackTime: 2
+    AttackNum: 0
+    DamageType: 0
+    MaxHp: 100
+    Defense: 0
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 0
+    TauntLevel: 0
+    StunImmune: 0
+    SilenceImmune: 0
+    SleepImmune: 0
+    FrozenImmune: 0
+    LevitateImmune: 0
+    DisarmedCombatImmune: 0
+    FearedImmune: 0
+    CanSpawnEntityIds:
+    - ID_C: m
+      ID_N: 11
+    CanSpawnEntityCounts: 01000000
+    IsStatic: 1
+    Cost: 0
+    CanCallBack: 0
+    NeedsDirectionSelection: 0
+    CanSetType: 0
+    RespawnTime: 0
+    RespawnStrategy: 0
+    CanRespawn: 0
+    RespawnCostUp: 0
+    MaxOccupyCount: 0
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills: []
+    Talents: []
+    AnimationResources: {fileID: 0}
+  - ID:
+      ID_C: m
+      ID_N: 11
+    ChineseName: "\u201C\u51CB\u96F6\u201D"
+    EnglishName: Wither
+    Description: "\u201C\u51CB\u96F6\u201D\u662F\"\u6211\u7684\u4E16\u754C\"\u4E2D\u6781\u5177\u653B\u51FB\u80FD\u529B\u548C\u6BC1\u706D\u529B\u91CF\u7684BOSS\u7EA7\u751F\u7269\uFF0C\u5B9B\u5982\u4E00\u9053\u9ED1\u6697\u7684\u5669\u68A6\u3002\u8FD9\u5E9E\u5927\u7684\u4E09\u5934\u602A\u517D\u7531\u51CB\u96F6\u9AB7\u9AC5\u5934\u548C\u7075\u9B42\u6C99\u6DF7\u5408\u800C\u6210\uFF08\u201C\u51CB\u96F6\u796D\u575B\u201D\uFF09\uFF0C\u6CE8\u5B9A\u5E26\u6765\u65E0\u5C3D\u7684\u6050\u6016\u4E0E\u7834\u574F\u3002\u4E00\u65E6\u201C\u51CB\u96F6\u201D\u73B0\u8EAB\uFF0C\u5176\u5F3A\u608D\u7684\u653B\u51FB\u80FD\u529B\u5373\u523B\u5C55\u9732\u65E0\u9057\u3002\u5B83\u51F6\u731B\u5730\u53D1\u5C04\u51CB\u96F6\u5934\u9885\uFF0C\u9020\u6210\u9A87\u4EBA\u7684\u7834\u574F\u3002\u8FD9\u4E9B\u5934\u9885\u5F15\u53D1\u7206\u70B8\uFF0C\u77AC\u95F4\u6467\u6BC1\u5468\u56F4\u7684\u65B9\u5757\uFF0C\u5C06\u5EFA\u7B51\u7269\u548C\u73AF\u5883\u5316\u4E3A\u4E4C\u6709\u3002\u51CB\u96F6\u7684\u5A01\u529B\u4E4B\u5927\uFF0C\u4F7F\u5F97\u5B83\u6210\u4E3A\u6BC1\u706D\u4E0E\u6DF7\u4E71\u7684\u8C61\u5F81\u3002"
+    Prefab: {fileID: 5752354500556713093, guid: 5f05e4f441fc99b47b607c71a9b492b7, type: 3}
+    HeadImage: {fileID: 21300000, guid: dbd711650c4b9804f9e669b5668bd4b5, type: 3}
+    HalfBodyImage: {fileID: 0}
+    WholeImage: {fileID: 0}
+    DefaultCamp: 2
+    CharacterRarity: 0
+    CharacterInfluence: 
+    CharacterJob: 9
+    CharacterSubJob: 
+    MonsterStatus: 2
+    MonsterLabel: "\u4EA1\u7075\u751F\u7269"
+    MonsterIsPrimary: 1
+    MonsterCountOperated: 1
+    MonsterLevelHpConsume: 2
+    VisionRange: []
+    VisionRadius: 3
+    Attack: 650
+    BaseAttackTime: 5
+    AttackNum: 3
+    DamageType: 1
+    MaxHp: 32500
+    Defense: 700
+    MagicResistance: 50
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    StunImmune: 1
+    SilenceImmune: 1
+    SleepImmune: 1
+    FrozenImmune: 1
+    LevitateImmune: 1
+    DisarmedCombatImmune: 1
+    FearedImmune: 1
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 0
+    Cost: 0
+    CanCallBack: 0
+    NeedsDirectionSelection: 0
+    CanSetType: 0
+    RespawnTime: 0
+    RespawnStrategy: 3
+    CanRespawn: 0
+    RespawnCostUp: 0
+    MaxOccupyCount: 0
+    MoveSpeed: 0.3
+    MassLevel: 7
+    MoveMethod: 0
+    Skills: []
+    Talents: []
+    AnimationResources: {fileID: 0}
+  - ID:
+      ID_C: t
+      ID_N: 1
+    ChineseName: "\u7194\u5CA9\u6CE1\u6CE1"
+    EnglishName: LavaBubble
+    Description: "\u4E0D\u7A33\u5B9A\u7684\u7194\u5CA9\u6CE1\u6CE1\uFF0C\u968F\u65F6\u6709\u53EF\u80FD\u4F1A\u53D1\u751F\u7206\u70B8\uFF01"
+    Prefab: {fileID: 4113559412623234849, guid: f068f5218d7f67244a9b2215e88178dd, type: 3}
+    HeadImage: {fileID: 0}
+    HalfBodyImage: {fileID: 0}
+    WholeImage: {fileID: 0}
+    DefaultCamp: 2
+    CharacterRarity: 0
+    CharacterInfluence: 
+    CharacterJob: 9
+    CharacterSubJob: 
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange: []
+    VisionRadius: 1.5
+    Attack: 0
+    BaseAttackTime: -1
+    AttackNum: 0
+    DamageType: 1
+    MaxHp: 100
+    Defense: 0
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 0
+    TauntLevel: 0
+    StunImmune: 0
+    SilenceImmune: 0
+    SleepImmune: 0
+    FrozenImmune: 0
+    LevitateImmune: 0
+    DisarmedCombatImmune: 0
+    FearedImmune: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 0
+    Cost: 0
+    CanCallBack: 0
+    NeedsDirectionSelection: 0
+    CanSetType: 0
+    RespawnTime: 0
+    RespawnStrategy: 3
+    CanRespawn: 0
+    RespawnCostUp: 0
+    MaxOccupyCount: 0
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills: []
+    Talents: []
+    AnimationResources: {fileID: 11400000, guid: 6de2e3c964f4f114c898e83234721ced, type: 2}

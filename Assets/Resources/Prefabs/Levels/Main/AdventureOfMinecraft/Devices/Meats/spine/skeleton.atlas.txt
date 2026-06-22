@@ -1,0 +1,13 @@
+
+skeleton.png
+size: 128,128
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+cooked_beef
+  rotate: false
+  xy: 0, 0
+  size: 82, 76
+  orig: 82, 76
+  offset: 0, 0
+  index: -1

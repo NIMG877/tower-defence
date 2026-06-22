@@ -1,0 +1,298 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2958742729651267382
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1270441738360261863}
+  - component: {fileID: 9157982193933067019}
+  - component: {fileID: 6136022169307121104}
+  - component: {fileID: 7326904176642371778}
+  m_Layer: 0
+  m_Name: Spine GameObject (enemy_1110_uamord)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1270441738360261863
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2958742729651267382}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.1702, z: 0}
+  m_LocalScale: {x: 0.33485538, y: 0.33485538, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7346695484381571506}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &9157982193933067019
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2958742729651267382}
+  m_Mesh: {fileID: 0}
+--- !u!23 &6136022169307121104
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2958742729651267382}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: bb0ef839df8ce4949928d694fd4aab6e, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: -14351693
+  m_SortingLayer: 3
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &7326904176642371778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2958742729651267382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d247ba06193faa74d9335f5481b2b56c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  skeletonDataAsset: {fileID: 11400000, guid: 518b89446dd4d6849a1eacf9df5a4089, type: 2}
+  initialSkinName: 
+  initialFlipX: 0
+  initialFlipY: 0
+  updateWhenInvisible: 3
+  separatorSlotNames: []
+  zSpacing: 0
+  useClipping: 1
+  immutableTriangles: 0
+  pmaVertexColors: 1
+  clearStateOnDisable: 0
+  tintBlack: 0
+  singleSubmesh: 0
+  fixDrawOrder: 0
+  addNormals: 0
+  calculateTangents: 0
+  maskInteraction: 0
+  maskMaterials:
+    materialsMaskDisabled: []
+    materialsInsideMask: []
+    materialsOutsideMask: []
+  disableRenderingOnOverride: 1
+  _animationName: Default
+  loop: 1
+  timeScale: 1
+--- !u!1 &5752354500556713093
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7346695484381571506}
+  - component: {fileID: 6918839178590651092}
+  - component: {fileID: 7915518268081645992}
+  - component: {fileID: -4401687450290542570}
+  - component: {fileID: -8206011941779139267}
+  - component: {fileID: -7110970958213019192}
+  m_Layer: 0
+  m_Name: HeadSeter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7346695484381571506
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5752354500556713093}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1270441738360261863}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6918839178590651092
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5752354500556713093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98c15169cca6fd54088c6e3b3c07ff80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  o_default: {fileID: 11400000, guid: 18c59d05847bddd4e9355cb5ddfd411f, type: 2}
+  o_idle: {fileID: 11400000, guid: c7a133df3d781a94c8a99e9816c848e6, type: 2}
+  o_move: {fileID: 11400000, guid: b6e46bfdd3bc9e44ebd51d08dfe55ab5, type: 2}
+  o_attack_begin: {fileID: 0}
+  o_attack_end: {fileID: 0}
+  o_start: {fileID: 11400000, guid: 18c59d05847bddd4e9355cb5ddfd411f, type: 2}
+  o_die: {fileID: 11400000, guid: b2f0b461e41160646be682731052c033, type: 2}
+  o_attack_remote:
+  - {fileID: 11400000, guid: 8b5d2b3aa041d0a4a8696dafd675a669, type: 2}
+  o_attack_close:
+  - {fileID: 11400000, guid: 8b5d2b3aa041d0a4a8696dafd675a669, type: 2}
+  Default: {fileID: 0}
+  Idle: {fileID: 0}
+  Move: {fileID: 0}
+  Attack_Begin: {fileID: 0}
+  Attack_End: {fileID: 0}
+  Start: {fileID: 0}
+  Die: {fileID: 0}
+  Attack_Remote: []
+  Attack_Close: []
+--- !u!114 &7915518268081645992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5752354500556713093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62a03b516ab1ae5498c989285df1e562, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  EntityOrderLogic: 0
+  DamageType: 0
+  _attackEffectData:
+    BulletData:
+      BulletPrefab: {fileID: 0}
+      BulletTrailPrefab: {fileID: 0}
+      BulletSpawnEffect: {fileID: 0}
+      BulletDestroyEffect: {fileID: 0}
+      BulletSpeed: 0
+      BulletType: 0
+      AllowNoTarget: 0
+      DevitationXRate: 0
+      DevitationYValue: 0
+    BulletSpawnTransform: {fileID: 0}
+    AttackEffect: {fileID: 0}
+  _attackEffectData0:
+    BulletData:
+      BulletPrefab: {fileID: 0}
+      BulletTrailPrefab: {fileID: 0}
+      BulletSpawnEffect: {fileID: 0}
+      BulletDestroyEffect: {fileID: 0}
+      BulletSpeed: 0
+      BulletType: 0
+      AllowNoTarget: 0
+      DevitationXRate: 0
+      DevitationYValue: 0
+    BulletSpawnTransform: {fileID: 0}
+    AttackEffect: {fileID: 0}
+--- !u!114 &-4401687450290542570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5752354500556713093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b8f5bd5b58612f44b7e392028029c95, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-8206011941779139267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5752354500556713093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 178b5bf7c1a64fd4db3c0aabdbb706a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _talentName: "\u8654\u8BDA\u7684\u4FE1\u5F92"
+  _talentDescription: "\u201C\u51CB\u96F6\u201D\u4FE1\u5F92\u521D\u59CB\u6301\u6709\u201C\u51CB\u96F6\u201D\u5934\u9885\uFF0C\u5728\u63A5\u8FD1\u201C\u51CB\u96F6\u201D\u57FA\u5EA7\u65F6\u4F1A\u5C06\u5934\u9885\u6446\u653E\u81F3\u57FA\u5EA7\u4E0A\uFF0C\u81EA\u8EAB\u5931\u53BB\u5934\u9885\u3002\u6301\u6709\u5934\u9885\u65F6\uFF0C\u53D7\u5230\u81F4\u547D\u4F24\u5BB3\u540E\u56DE\u590D1\u70B9\u751F\u547D\u503C\uFF0C\u83B7\u5F97\u6301\u7EED\u65F6\u95F4\u65E0\u9650\u7684\u65E0\u654C\uFF0C\u79FB\u52A8\u901F\u5EA6\u964D\u4F4E35%\uFF0C\u5931\u53BB\u5934\u9885\u540E\u7ACB\u5373\u5012\u4E0B\u3002"
+  _default_1: {fileID: 11400000, guid: 88303354d49d2e842b20f86370b07082, type: 2}
+  _move_1: {fileID: 11400000, guid: b3d8bbbc6b8a27f479f9ea9a79a347f5, type: 2}
+  _idle_1: {fileID: 11400000, guid: 65cba6a6dce95674f87965fd2eabe113, type: 2}
+  _default_d: {fileID: 11400000, guid: 4a282db330d99eb4598cab526dc7e179, type: 2}
+  _move_d: {fileID: 11400000, guid: 02e758c42378bc64f9bc0c7464d46676, type: 2}
+  _idle_d: {fileID: 11400000, guid: ff11b909533e0c34e929e1f4c1ff1a71, type: 2}
+  _die_d: {fileID: 11400000, guid: fd83e3c307e151943be7ebe69bf3d683, type: 2}
+  _set_d: {fileID: 11400000, guid: 2038e8fe17e75854c9f8128a4a0a35f1, type: 2}
+  _attack: {fileID: 11400000, guid: a37b75f6144ca944caa6152b74d081ea, type: 2}
+--- !u!114 &-7110970958213019192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5752354500556713093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 184993c683cbbef4e90f96a8d11f44dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _skillName: "\u610F\u5FF5\u7684\u6298\u8DC3"
+  _skillImg: {fileID: 0}
+  _skillDescription: "\u201C\u51CB\u96F6\u201D\u4FE1\u5F92\u5728\u6301\u6709\u5934\u9885\u4E14\u88AB\u963B\u6321\u65F6\uFF0C\u4F1A\u8FDB\u884C\u6301\u7EED1\u79D2\u7684\u51A5\u60F3\uFF0C\u671F\u95F4\u83B7\u5F97\u7B49\u957F\u7684\u65E0\u654C\u548C\u675F\u7F1A\uFF0C\u968F\u540E\u6298\u8DC3\u5230\u963B\u6321\u5355\u4F4D\u8EAB\u540E\u3002\u6298\u8DC3\u8DDD\u79BB\u4E3A1.51\u3002"
+  _spRecoverMode: 0
+  _spConsumeMode: 0
+  _skillOpenMode: 0
+  _chargeNum: 1
+  _totalSp: 2
+  _initialSp: 0
+  _skillAmount: 1.05
+  _recoverForbidDuringSkill: 1
+  _canCloseSkill: 0
+  _skillAttackRange: []
+  _moveDis: 1.51
+  _begin: {fileID: 11400000, guid: 7fbe6ece4fa87cb4e8ea9b7ea8c79d66, type: 2}
+  _begin_d: {fileID: 11400000, guid: eaf02fe67b1f94d4a913c84a6a864465, type: 2}
+  _end: {fileID: 11400000, guid: 29e269245293f5c46b72537c386a227c, type: 2}
+  _end_d: {fileID: 11400000, guid: 363eef30abb5c7f4895433423ee4a742, type: 2}
+  IsDie: 0

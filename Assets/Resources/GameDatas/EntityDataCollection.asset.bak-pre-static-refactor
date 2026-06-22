@@ -1,0 +1,948 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3028019c61d64bf47bcd3ef7c506fa36, type: 3}
+  m_Name: EntityDataCollection
+  m_EditorClassIdentifier: 
+  _entityBasicDatas:
+  - ID_C: c
+    ID_N: 1
+    ChineseName: "\u827E\u96C5\u6CD5\u62C9"
+    EnglishName: Eyjafjalla
+    description: "\u827E\u96C5\u6CD5\u62C9\uFF0C\u706B\u5C71\u5B66\u5BB6\uFF0C\u5929\u707E\u4FE1\u4F7F\u3002\u4E8E\u9AD8\u7B49\u6E90\u77F3\u6280\u827A\u3001\u9AD8\u80FD\u91CF\u6CD5\u672F\u91CA\u653E\u7B49\u9886\u57DF\u5C55\u73B0\u51FA\u4E86\u5353\u8D8A\u7684\u5929\u8D4B\u3002\n\u73B0\u4E8E\u7F57\u5FB7\u5C9B\u63A5\u53D7\u6CBB\u7597\uFF0C\u540C\u65F6\u4E3A\u7F57\u5FB7\u5C9B\u63D0\u4F9B\u5929\u707E\u7814\u7A76\u3001\u73AF\u5883\u89C2\u5BDF\u4E0E\u8BC4\u4F30\u3001\u5371\u9669\u5730\u5F62\u822A\u884C\u4FDD\u969C\u7B49\u76F8\u5173\u670D\u52A1\u3002"
+    prefab: {fileID: 4310881110139641480, guid: 40eda0efeef76274a9f0cb5b87533f8e, type: 3}
+    headImg: {fileID: 21300000, guid: aa7c3db0c820c39439a352142be9ea79, type: 3}
+    halfbodyImg: {fileID: 21300000, guid: dbaf3acc1d340984f91e8d68d43a7b71, type: 3}
+    wholeImg: {fileID: 21300000, guid: f7a72dbb186dd914ea71c0bb3d6810ae, type: 3}
+    character_rarity: 6
+    character_influence: "\u83B1\u5854\u5C3C\u4E9A"
+    character_job: "\u672F\u5E08"
+    character_subjob: "\u4E2D\u575A\u672F\u5E08"
+    monster_status: 0
+    monster_label: 
+    monster_isPrimary: 0
+    monster_countOperated: 0
+    monster_levelHPConsume: 0
+    visionRange_L:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    - {x: 0, y: 2}
+    - {x: 0, y: 3}
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    - {x: 1, y: 2}
+    - {x: 2, y: 0}
+    - {x: 2, y: 1}
+    - {x: 2, y: 2}
+    visionRadius: 0
+    attack: 762
+    baseAttackTime: 1.6
+    attackNum: 1
+    damageType: 1
+    maxHP: 1743
+    defence: 122
+    magicResistance: 20
+    physicalDoge: 0
+    magicDoge: 0
+    blockOccupation: 1
+    tauntLevel: 0
+    defaultCamp: 1
+    stunImmune: 0
+    silenceImmune: 0
+    sleepImmune: 0
+    frozenImmune: 0
+    levitateImmune: 0
+    disarmedCombatImmune: 0
+    fearedImmune: 0
+    canSpawnEntityID_L:
+    - t-1
+    canSpawnEntityNum_L: 01000000
+    cost: 19
+    canCallBack: 1
+    needSelectDirection: 1
+    canSetType: 1
+    respawnTime: 70
+    canRespawn: 1
+    respawnCostUp: 50
+    canSetNumOccupy: 1
+    moveSpeed: 0
+    massLevel: 0
+    moveMethod: 0
+  - ID_C: c
+    ID_N: 2
+    ChineseName: "\u9ED1\u952E"
+    EnglishName: Ebenholz
+    description: "\u9ED1\u952E\uFF0C\u83B1\u5854\u5C3C\u4E9A\u5E73\u6C11\uFF0C\u4E8E\u7EF4\u8C22\u6D77\u59C6\u4E8B\u4EF6\u4E2D\u611F\u67D3\u77FF\u77F3\u75C5\uFF0C\u7ECF\u5E72\u5458\u8299\u84C9\u4ECB\u7ECD\u6765\u7F57\u5FB7\u5C9B\u6CBB\u7597\uFF0C\u5728\u6E90\u77F3\u6280\u827A\u65B9\u9762\u5C55\u73B0\u51FA\u4E0D\u51E1\u5929\u8D4B\u3002\u7ECF\u8003\u6838\u540E\uFF0C\u4F5C\u4E3A\u5916\u52E4\u5E72\u5458\u52A0\u5165\u7F57\u5FB7\u5C9B\u3002"
+    prefab: {fileID: 4310881110139641480, guid: 35005acce465d0c4aa742b208804d533, type: 3}
+    headImg: {fileID: 21300000, guid: 22ffac8006727c74590eb373b13967b9, type: 3}
+    halfbodyImg: {fileID: 21300000, guid: 6f2df04ed6350ad40959afb7b9a0c3d6, type: 3}
+    wholeImg: {fileID: 21300000, guid: 4e299dd21cbf6f745aaa074ef3cf4acc, type: 3}
+    character_rarity: 6
+    character_influence: "\u83B1\u5854\u5C3C\u4E9A"
+    character_job: "\u672F\u5E08"
+    character_subjob: "\u79D8\u672F\u5E08"
+    monster_status: 0
+    monster_label: 
+    monster_isPrimary: 0
+    monster_countOperated: 0
+    monster_levelHPConsume: 0
+    visionRange_L:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    - {x: 0, y: 2}
+    - {x: 0, y: 3}
+    - {x: 1, y: 1}
+    - {x: 1, y: 2}
+    - {x: 1, y: 3}
+    - {x: -1, y: 1}
+    - {x: -1, y: 2}
+    - {x: -1, y: 3}
+    visionRadius: 0
+    attack: 1692
+    baseAttackTime: 3
+    attackNum: 1
+    damageType: 1
+    maxHP: 1678
+    defence: 135
+    magicResistance: 20
+    physicalDoge: 0
+    magicDoge: 0
+    blockOccupation: 1
+    tauntLevel: 0
+    defaultCamp: 1
+    stunImmune: 0
+    silenceImmune: 0
+    sleepImmune: 0
+    frozenImmune: 0
+    levitateImmune: 0
+    disarmedCombatImmune: 0
+    fearedImmune: 0
+    canSpawnEntityID_L: []
+    canSpawnEntityNum_L: 
+    cost: 25
+    canCallBack: 1
+    needSelectDirection: 1
+    canSetType: 1
+    respawnTime: 70
+    canRespawn: 1
+    respawnCostUp: 50
+    canSetNumOccupy: 1
+    moveSpeed: 0
+    massLevel: 0
+    moveMethod: 0
+  - ID_C: c
+    ID_N: 3
+    ChineseName: "\u514B\u6D1B\u4E1D"
+    EnglishName: Kroos
+    description: "\u6765\u81EA\u96F7\u59C6\u5FC5\u62D3\u7684\u514B\u6D1B\u4E1D\u8DDF\u82AC\u548C\u7C73\u683C\u9C81\u4E00\u6837\uFF0C\u4E4B\u524D\u53D7\u8BAD\u4E8E\u54E5\u4F26\u6BD4\u4E9A\u970D\u5C14\u59C6\u52A0\u5FB7\u8B66\u5907\u961F\u3002\u6027\u683C\u51B7\u9759\u5BA2\u89C2\uFF0C\u8138\u4E0A\u6C38\u8FDC\u6302\u7740\u7B11\u5BB9\uFF0C\u6027\u5B50\u6162\uFF0C\u5706\u6ED1\u800C\u6E29\u548C\uFF0C\u4F46\u662F\u5076\u5C14\u4E5F\u4F1A\u9732\u51FA\u6BD2\u820C\u8179\u9ED1\u7684\u4E00\u9762\u3002"
+    prefab: {fileID: 4310881110139641480, guid: 2841f06a1b6be664281a6c7af46fd073, type: 3}
+    headImg: {fileID: 21300000, guid: 29d43ceaddd03d040ba0fa2a77a8d05b, type: 3}
+    halfbodyImg: {fileID: 21300000, guid: 1cb3d7a80caad6e4eaf9aa91776de9cb, type: 3}
+    wholeImg: {fileID: 21300000, guid: c05242870001c9c43b382fb1549465b1, type: 3}
+    character_rarity: 3
+    character_influence: "\u884C\u52A8\u9884\u5907\u7EC4A1"
+    character_job: "\u72D9\u51FB"
+    character_subjob: "\u901F\u5C04\u624B"
+    monster_status: 0
+    monster_label: 
+    monster_isPrimary: 0
+    monster_countOperated: 0
+    monster_levelHPConsume: 0
+    visionRange_L:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    - {x: 0, y: 2}
+    - {x: 0, y: 3}
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    - {x: 1, y: 2}
+    - {x: 1, y: 3}
+    - {x: -1, y: 0}
+    - {x: -1, y: 1}
+    - {x: -1, y: 2}
+    - {x: -1, y: 3}
+    visionRadius: 0
+    attack: 446
+    baseAttackTime: 1
+    attackNum: 1
+    damageType: 0
+    maxHP: 1060
+    defence: 126
+    magicResistance: 0
+    physicalDoge: 0
+    magicDoge: 0
+    blockOccupation: 1
+    tauntLevel: 0
+    defaultCamp: 1
+    stunImmune: 0
+    silenceImmune: 0
+    sleepImmune: 0
+    frozenImmune: 0
+    levitateImmune: 0
+    disarmedCombatImmune: 0
+    fearedImmune: 0
+    canSpawnEntityID_L: []
+    canSpawnEntityNum_L: 
+    cost: 11
+    canCallBack: 1
+    needSelectDirection: 1
+    canSetType: 1
+    respawnTime: 70
+    canRespawn: 1
+    respawnCostUp: 50
+    canSetNumOccupy: 1
+    moveSpeed: 0
+    massLevel: 0
+    moveMethod: 0
+  - ID_C: c
+    ID_N: 4
+    ChineseName: "\u53F2\u90FD\u534E\u5FB7"
+    EnglishName: Steward
+    description: "\u53F2\u90FD\u534E\u5FB7\uFF0C\u884C\u52A8\u9884\u5907\u7EC4A4\u7EC4\u5458\uFF0C\u8C22\u62C9\u683C\u516C\u6C11\uFF0C\u6B63\u5F0F\u4EFB\u804C\u524D\u4E3A\u81EA\u7531\u804C\u4E1A\u8005\u3002\u4E8E\u591A\u9879\u6D4B\u8BD5\u4E2D\u83B7\u5F97\u4F18\u5F02\u6210\u7EE9\uFF0C\u9042\u83B7\u51C6\u52A0\u5165\u7F57\u5FB7\u5C9B\uFF0C\u73B0\u4E8E\u7F57\u5FB7\u5C9B\u884C\u52A8\u9884\u5907\u7EC4A4\u5C0F\u7EC4\u4EFB\u804C\u3002\n\u5728\u6CD5\u672F\u652F\u63F4\u3001\u786E\u8BA4\u8DEF\u5F84\u3001\u652F\u63F4\u4F5C\u6218\u7B49\u9879\u76EE\u4E2D\u5C55\u73B0\u51FA\u503C\u5F97\u671F\u5F85\u7684\u6F5C\u529B\u3002"
+    prefab: {fileID: 4310881110139641480, guid: 6f05fa325c4c4f54b8a9b3e8e28c0972, type: 3}
+    headImg: {fileID: 21300000, guid: 2ae7f7300240e9b4c987dcc5bb5754e1, type: 3}
+    halfbodyImg: {fileID: 21300000, guid: 5d4d8d011dca47f49a95aaace6ec6172, type: 3}
+    wholeImg: {fileID: 21300000, guid: 9ccc9ea8f5f14474590df597900fcd5c, type: 3}
+    character_rarity: 3
+    character_influence: "\u884C\u52A8\u9884\u5907\u7EC4A4"
+    character_job: "\u672F\u5E08"
+    character_subjob: "\u4E2D\u575A\u672F\u58EB"
+    monster_status: 0
+    monster_label: 
+    monster_isPrimary: 0
+    monster_countOperated: 0
+    monster_levelHPConsume: 0
+    visionRange_L:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    - {x: 0, y: 2}
+    - {x: 0, y: 3}
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    - {x: 1, y: 2}
+    - {x: 2, y: 0}
+    - {x: 2, y: 1}
+    - {x: 2, y: 2}
+    visionRadius: 0
+    attack: 520
+    baseAttackTime: 1.6
+    attackNum: 1
+    damageType: 1
+    maxHP: 1100
+    defence: 90
+    magicResistance: 15
+    physicalDoge: 0
+    magicDoge: 0
+    blockOccupation: 1
+    tauntLevel: 0
+    defaultCamp: 1
+    stunImmune: 0
+    silenceImmune: 0
+    sleepImmune: 0
+    frozenImmune: 0
+    levitateImmune: 0
+    disarmedCombatImmune: 0
+    fearedImmune: 0
+    canSpawnEntityID_L: []
+    canSpawnEntityNum_L: 
+    cost: 16
+    canCallBack: 1
+    needSelectDirection: 1
+    canSetType: 1
+    respawnTime: 70
+    canRespawn: 1
+    respawnCostUp: 50
+    canSetNumOccupy: 1
+    moveSpeed: 0
+    massLevel: 0
+    moveMethod: 0
+  - ID_C: c
+    ID_N: 5
+    ChineseName: "\u6591\u70B9"
+    EnglishName: Spot
+    description: "\u539F\u8428\u5C14\u8D21\u58EB\u5175\uFF0C\u4E3B\u52A8\u6765\u5230\u7F57\u5FB7\u5C9B\u6C42\u804C\u3002\u5728\u901A\u8FC7\u5E72\u5458\u6D4B\u8BD5\u540E\uFF0C\u6210\u4E3A\u7F57\u5FB7\u5C9B\u7684\u4E00\u5458\uFF0C\u88AB\u5206\u914D\u5230\u9884\u5907\u884C\u52A8\u7EC4A6\u3002\n\u4E8E\u5B88\u62A4\u65B9\u9762\u9887\u6709\u5FC3\u5F97\uFF0C\u662F\u5C0F\u961F\u7684\u9632\u5FA1\u624B\u3002"
+    prefab: {fileID: 4310881110139641480, guid: 2887fb675e46b79449b990ed022b9341, type: 3}
+    headImg: {fileID: 21300000, guid: 5354695c36201ee4ab7c883f26cb4f6a, type: 3}
+    halfbodyImg: {fileID: 21300000, guid: 9f288aead9c07064c80b20b4e14d0634, type: 3}
+    wholeImg: {fileID: 21300000, guid: e16cc4dd6f27a7e4f971d941c87dca44, type: 3}
+    character_rarity: 3
+    character_influence: "\u884C\u52A8\u9884\u5907\u7EC4A6"
+    character_job: "\u91CD\u88C5"
+    character_subjob: "\u5B88\u62A4\u8005"
+    monster_status: 0
+    monster_label: 
+    monster_isPrimary: 0
+    monster_countOperated: 0
+    monster_levelHPConsume: 0
+    visionRange_L:
+    - {x: 0, y: 0}
+    visionRadius: 0
+    attack: 350
+    baseAttackTime: 1.2
+    attackNum: 1
+    damageType: 0
+    maxHP: 1833
+    defence: 496
+    magicResistance: 10
+    physicalDoge: 0
+    magicDoge: 0
+    blockOccupation: 3
+    tauntLevel: 0
+    defaultCamp: 1
+    stunImmune: 0
+    silenceImmune: 0
+    sleepImmune: 0
+    frozenImmune: 0
+    levitateImmune: 0
+    disarmedCombatImmune: 0
+    fearedImmune: 0
+    canSpawnEntityID_L: []
+    canSpawnEntityNum_L: 
+    cost: 15
+    canCallBack: 1
+    needSelectDirection: 1
+    canSetType: 1
+    respawnTime: 70
+    canRespawn: 1
+    respawnCostUp: 50
+    canSetNumOccupy: 1
+    moveSpeed: 0
+    massLevel: 0
+    moveMethod: 0
+  - ID_C: c
+    ID_N: 6
+    ChineseName: "\u73AB\u5170\u838E"
+    EnglishName: Melantha
+    description: "\u73AB\u5170\u838E\uFF0C\u884C\u52A8\u9884\u5907\u7EC4A4\u7EC4\u957F\uFF0C\u7EF4\u591A\u5229\u4E9A\u516C\u6C11\uFF0C\u6B63\u5F0F\u4EFB\u804C\u524D\u4E3A\u666E\u901A\u611F\u67D3\u8005\uFF0C\u65E0\u804C\u4E1A\u3002\u4E8E\u591A\u9879\u6D4B\u8BD5\u4E2D\u83B7\u5F97\u4F18\u5F02\u6210\u7EE9\uFF0C\u9042\u83B7\u51C6\u52A0\u5165\u7F57\u5FB7\u5C9B\u3002"
+    prefab: {fileID: 4310881110139641480, guid: d46768ff51303e74a9b685b4f1e99c4f, type: 3}
+    headImg: {fileID: 21300000, guid: 037f9fb398b785143b14c92795393990, type: 3}
+    halfbodyImg: {fileID: 21300000, guid: 6bdb0289eb41f164a99812a922394f12, type: 3}
+    wholeImg: {fileID: 21300000, guid: 60c735c3f749e5d47a3f8cb6bca5207d, type: 3}
+    character_rarity: 3
+    character_influence: "\u884C\u52A8\u9884\u5907\u7EC4A4"
+    character_job: "\u8FD1\u536B"
+    character_subjob: "\u65E0\u754F\u8005"
+    monster_status: 0
+    monster_label: 
+    monster_isPrimary: 0
+    monster_countOperated: 0
+    monster_levelHPConsume: 0
+    visionRange_L:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    visionRadius: 0
+    attack: 828
+    baseAttackTime: 1.5
+    attackNum: 1
+    damageType: 0
+    maxHP: 2745
+    defence: 155
+    magicResistance: 0
+    physicalDoge: 0
+    magicDoge: 0
+    blockOccupation: 1
+    tauntLevel: 0
+    defaultCamp: 1
+    stunImmune: 0
+    silenceImmune: 0
+    sleepImmune: 0
+    frozenImmune: 0
+    levitateImmune: 0
+    disarmedCombatImmune: 0
+    fearedImmune: 0
+    canSpawnEntityID_L: []
+    canSpawnEntityNum_L: 
+    cost: 13
+    canCallBack: 1
+    needSelectDirection: 1
+    canSetType: 1
+    respawnTime: 70
+    canRespawn: 1
+    respawnCostUp: 50
+    canSetNumOccupy: 1
+    moveSpeed: 0
+    massLevel: 0
+    moveMethod: 0
+  - ID_C: m
+    ID_N: 1
+    ChineseName: "\u50F5\u5C38"
+    EnglishName: Zombie
+    description: "\u50F5\u5C38\u662F\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u64C5\u957F\u8FD1\u8EAB\u640F\u6597\u7684\u602A\u7269\u3002\u4F5C\u4E3A\u4EA1\u7075\u751F\u7269\uFF0C\u5B83\u60E7\u6015\u9633\u5149\uFF0C\u4F46\u5B83\u5934\u9876\u7684\u5E3D\u5B50\u4F3C\u4E4E\u53EF\u4EE5\u5E2E\u4ED6\u89E3\u51B3\u8FD9\u4E2A\u95EE\u9898\u3002\u50F5\u5C38\u5F88\u5BB9\u6613\u88AB\u8BEF\u8BA4\u4E3A\u662F\u4E00\u79CD\u7B28\u62D9\u800C\u8E52\u8DDA\u7684\u751F\u7269\uFF0C\u4F46\u5982\u679C\u5B83\u4EEC\u6210\u7FA4\u7ED3\u961F\uFF0C\u751A\u81F3\u80FD\u591F\u8BA9\u6700\u52C7\u6562\u7684\u5192\u9669\u8005\u683D\u5728\u5B83\u4EEC\u624B\u91CC\u3002"
+    prefab: {fileID: 5752354500556713093, guid: 461c764bb2af5664c80f113967cdd7fe, type: 3}
+    headImg: {fileID: 21300000, guid: af77f5abba4b55147a0e0f34fe1057a7, type: 3}
+    halfbodyImg: {fileID: 0}
+    wholeImg: {fileID: 0}
+    character_rarity: 0
+    character_influence: 
+    character_job: 
+    character_subjob: 
+    monster_status: 0
+    monster_label: "\u4EA1\u7075\u751F\u7269"
+    monster_isPrimary: 1
+    monster_countOperated: 1
+    monster_levelHPConsume: 1
+    visionRange_L: []
+    visionRadius: 0
+    attack: 400
+    baseAttackTime: 2
+    attackNum: 1
+    damageType: 0
+    maxHP: 5500
+    defence: 265
+    magicResistance: 0
+    physicalDoge: 0
+    magicDoge: 0
+    blockOccupation: 1
+    tauntLevel: 0
+    defaultCamp: 2
+    stunImmune: 0
+    silenceImmune: 0
+    sleepImmune: 0
+    frozenImmune: 0
+    levitateImmune: 0
+    disarmedCombatImmune: 0
+    fearedImmune: 0
+    canSpawnEntityID_L: []
+    canSpawnEntityNum_L: 
+    cost: 0
+    canCallBack: 0
+    needSelectDirection: 0
+    canSetType: 0
+    respawnTime: 0
+    canRespawn: 0
+    respawnCostUp: 0
+    canSetNumOccupy: 0
+    moveSpeed: 0.5
+    massLevel: 1
+    moveMethod: 0
+  - ID_C: m
+    ID_N: 2
+    ChineseName: "\u9AB7\u9AC5"
+    EnglishName: Skeleton
+    description: "\u9AB7\u9AC5\u662F\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u64C5\u957F\u4F7F\u7528\u5F13\u7BAD\u8FDC\u7A0B\u653B\u51FB\u7684\u602A\u7269\u3002\u4F5C\u4E3A\u4EA1\u7075\u751F\u7269\uFF0C\u5B83\u60E7\u6015\u9633\u5149\uFF0C\u4F46\u5B83\u5934\u9876\u7684\u5E3D\u5B50\u4F3C\u4E4E\u53EF\u4EE5\u5E2E\u4ED6\u89E3\u51B3\u8FD9\u4E2A\u95EE\u9898\u3002\u9AB7\u9AC5\u770B\u4F3C\u4E00\u5177\u5080\u5121\uFF0C\u4F46\u5B83\u4EEC\u4F3C\u4E4E\u62E5\u6709\u4EA4\u6D41\u80FD\u529B\uFF0C\u53EF\u4EE5\u5C06\u5BF9\u624B\u7684\u4FE1\u606F\u544A\u8BC9\u961F\u53CB\u3002"
+    prefab: {fileID: 5752354500556713093, guid: 73542255c8c9d20478283f1106ab97ba, type: 3}
+    headImg: {fileID: 21300000, guid: bd74f9d899ec05b4f9fd65a9dcf201c0, type: 3}
+    halfbodyImg: {fileID: 0}
+    wholeImg: {fileID: 0}
+    character_rarity: 0
+    character_influence: 
+    character_job: 
+    character_subjob: 
+    monster_status: 0
+    monster_label: "\u4EA1\u7075\u751F\u7269"
+    monster_isPrimary: 1
+    monster_countOperated: 1
+    monster_levelHPConsume: 1
+    visionRange_L: []
+    visionRadius: 3
+    attack: 395
+    baseAttackTime: 5
+    attackNum: 1
+    damageType: 0
+    maxHP: 4590
+    defence: 185
+    magicResistance: 0
+    physicalDoge: 0
+    magicDoge: 0
+    blockOccupation: 1
+    tauntLevel: 0
+    defaultCamp: 2
+    stunImmune: 0
+    silenceImmune: 0
+    sleepImmune: 0
+    frozenImmune: 0
+    levitateImmune: 0
+    disarmedCombatImmune: 0
+    fearedImmune: 0
+    canSpawnEntityID_L: []
+    canSpawnEntityNum_L: 
+    cost: 0
+    canCallBack: 0
+    needSelectDirection: 0
+    canSetType: 0
+    respawnTime: 0
+    canRespawn: 0
+    respawnCostUp: 0
+    canSetNumOccupy: 0
+    moveSpeed: 0.45
+    massLevel: 1
+    moveMethod: 0
+  - ID_C: m
+    ID_N: 3
+    ChineseName: "\u82E6\u529B\u6015"
+    EnglishName: Creeper
+    description: "\u201CSISISISI~BOOM\uFF01\uFF01\uFF01\u201D......\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u6781\u5177\u653B\u51FB\u529B\u548C\u7834\u574F\u6027\u7684\u602A\u7269\uFF0C\u5B83\u957F\u76F8\u5947\u7279\uFF0C\u5F80\u5F80\u4F1A\u6084\u65E0\u58F0\u606F\u5730\u63A5\u8FD1\u4F60\uFF0C\u7136\u540E\u5F15\u7206\u81EA\u8EAB\u5BF9\u4F60\u548C\u5468\u56F4\u7684\u6240\u6709\u751F\u7269\u9020\u6210\u7834\u574F\u3002"
+    prefab: {fileID: 5752354500556713093, guid: d6ce07bac3ee74548a909bcb9705f070, type: 3}
+    headImg: {fileID: 21300000, guid: de3f5dcbec975f5408de0270e1d45305, type: 3}
+    halfbodyImg: {fileID: 0}
+    wholeImg: {fileID: 0}
+    character_rarity: 0
+    character_influence: 
+    character_job: 
+    character_subjob: 
+    monster_status: 1
+    monster_label: 
+    monster_isPrimary: 1
+    monster_countOperated: 1
+    monster_levelHPConsume: 1
+    visionRange_L: []
+    visionRadius: 1.414
+    attack: 1050
+    baseAttackTime: 3
+    attackNum: 1
+    damageType: 0
+    maxHP: 12000
+    defence: 325
+    magicResistance: 10
+    physicalDoge: 0
+    magicDoge: 0
+    blockOccupation: 1
+    tauntLevel: 0
+    defaultCamp: 2
+    stunImmune: 0
+    silenceImmune: 0
+    sleepImmune: 0
+    frozenImmune: 0
+    levitateImmune: 0
+    disarmedCombatImmune: 0
+    fearedImmune: 0
+    canSpawnEntityID_L: []
+    canSpawnEntityNum_L: 
+    cost: 0
+    canCallBack: 0
+    needSelectDirection: 0
+    canSetType: 0
+    respawnTime: 0
+    canRespawn: 0
+    respawnCostUp: 0
+    canSetNumOccupy: 0
+    moveSpeed: 0.4
+    massLevel: 1
+    moveMethod: 0
+  - ID_C: m
+    ID_N: 4
+    ChineseName: "\u5973\u5DEB"
+    EnglishName: Witch
+    description: "\u5973\u5DEB\u662F\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u4F1A\u4F7F\u7528\u836F\u6C34\u7684\u602A\u7269\u3002\u5B83\u539F\u672C\u53EA\u662F\u5728\u6751\u5E84\u4E2D\u5B89\u5C45\u4E50\u4E1A\u7684\u6751\u6C11\uFF0C\u4F46\u4E00\u9053\u96F7\u51FB\u4E2D\u4E86\u5B83\uFF0C\u4E8E\u662F\u5B83\u5C31\u5F02\u53D8\u6210\u4E86\u5973\u5DEB\u3002\u7531\u4E8E\u5B83\u5177\u6709\u4EBA\u7C7B\u7684\u667A\u6167\uFF0C\u6240\u4EE5\u4ED6\u638C\u63E1\u4E86\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u53E4\u8001\u800C\u53C8\u590D\u6742\u7684\u836F\u6C34\u917F\u9020\u6280\u672F"
+    prefab: {fileID: 5752354500556713093, guid: 81f85669bcd1ae94e8166c0cce9fe582, type: 3}
+    headImg: {fileID: 21300000, guid: a80c6599d7282eb469df468504119c56, type: 3}
+    halfbodyImg: {fileID: 0}
+    wholeImg: {fileID: 0}
+    character_rarity: 0
+    character_influence: 
+    character_job: 
+    character_subjob: 
+    monster_status: 1
+    monster_label: "\u96F7\u51FB\u5F02\u53D8\u4F53"
+    monster_isPrimary: 1
+    monster_countOperated: 1
+    monster_levelHPConsume: 1
+    visionRange_L: []
+    visionRadius: 3
+    attack: 200
+    baseAttackTime: 5
+    attackNum: 1
+    damageType: 1
+    maxHP: 12500
+    defence: 375
+    magicResistance: 50
+    physicalDoge: 0
+    magicDoge: 0
+    blockOccupation: 1
+    tauntLevel: 0
+    defaultCamp: 2
+    stunImmune: 0
+    silenceImmune: 0
+    sleepImmune: 0
+    frozenImmune: 0
+    levitateImmune: 0
+    disarmedCombatImmune: 0
+    fearedImmune: 0
+    canSpawnEntityID_L: []
+    canSpawnEntityNum_L: 
+    cost: 0
+    canCallBack: 0
+    needSelectDirection: 0
+    canSetType: 0
+    respawnTime: 0
+    canRespawn: 0
+    respawnCostUp: 0
+    canSetNumOccupy: 0
+    moveSpeed: 0.25
+    massLevel: 1
+    moveMethod: 0
+  - ID_C: m
+    ID_N: 6
+    ChineseName: "\u53F2\u83B1\u59C6S"
+    EnglishName: SlimeSmall
+    description: "\u53F2\u83B1\u59C6S\u662F\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u8E66\u8E66\u8DF3\u8DF3\u7684\u751F\u7269\uFF0C\u5B83\u770B\u8D77\u6765\u5982\u679C\u51BB\u4E00\u822C\uFF0C\u4F46\u5176\u653B\u51FB\u6027\u53EF...\u786E\u5B9E\u6CA1\u6709\u4EC0\u4E48\u653B\u51FB\u6027\u3002\u5B83\u901A\u8FC7\u8DF3\u8DC3\u6765\u79FB\u52A8\uFF0C\u751A\u81F3\u53EF\u4EE5\u8D8A\u8FC7\u969C\u788D\u7269\u3002\u53F2\u83B1\u59C6S\u7684\u8DF3\u8DC3\u8303\u56F4\u6BD4\u8F83\u5C0F\uFF0C\u4F46\u662F\u8DF3\u8DC3\u95F4\u9694\u4E5F\u5F88\u77ED\u3002"
+    prefab: {fileID: 5752354500556713093, guid: c997f8a5bea0a2d40a0164d3e867e90f, type: 3}
+    headImg: {fileID: 21300000, guid: 0bccdffd6dea4d84587004e524f1bbf0, type: 3}
+    halfbodyImg: {fileID: 0}
+    wholeImg: {fileID: 0}
+    character_rarity: 0
+    character_influence: 
+    character_job: 
+    character_subjob: 
+    monster_status: 0
+    monster_label: 
+    monster_isPrimary: 1
+    monster_countOperated: 1
+    monster_levelHPConsume: 1
+    visionRange_L: []
+    visionRadius: 0
+    attack: 290
+    baseAttackTime: 2
+    attackNum: 1
+    damageType: 0
+    maxHP: 1235
+    defence: 65
+    magicResistance: 5
+    physicalDoge: 0
+    magicDoge: 0
+    blockOccupation: 1
+    tauntLevel: 0
+    defaultCamp: 2
+    stunImmune: 0
+    silenceImmune: 0
+    sleepImmune: 0
+    frozenImmune: 0
+    levitateImmune: 0
+    disarmedCombatImmune: 0
+    fearedImmune: 0
+    canSpawnEntityID_L: []
+    canSpawnEntityNum_L: 
+    cost: 0
+    canCallBack: 0
+    needSelectDirection: 0
+    canSetType: 0
+    respawnTime: 0
+    canRespawn: 0
+    respawnCostUp: 0
+    canSetNumOccupy: 0
+    moveSpeed: 0
+    massLevel: 1
+    moveMethod: 0
+  - ID_C: m
+    ID_N: 7
+    ChineseName: "\u53F2\u83B1\u59C6M"
+    EnglishName: SlimeMiddle
+    description: "\u53F2\u83B1\u59C6M\u662F\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u8E66\u8E66\u8DF3\u8DF3\u7684\u751F\u7269\uFF0C\u5B83\u770B\u8D77\u6765\u5982\u679C\u51BB\u4E00\u822C\uFF0C\u4F46\u5176\u653B\u51FB\u6027\u53EF\u4E0D\u5C0F\uFF0C\u88AB\u51FB\u5012\u540E\u8FD8\u4F1A\u5206\u88C2\u4E3A4\u4E2A\u53F2\u83B1\u59C6S\u3002\u5B83\u901A\u8FC7\u8DF3\u8DC3\u6765\u79FB\u52A8\uFF0C\u751A\u81F3\u53EF\u4EE5\u8D8A\u8FC7\u969C\u788D\u7269\u3002\u53F2\u83B1\u59C6M\u7684\u8DF3\u8DC3\u8303\u56F4\u6BD4\u8F83\u5927\u3002"
+    prefab: {fileID: 5752354500556713093, guid: 84fe417dc55b02b4db5a8ee2f21afa91, type: 3}
+    headImg: {fileID: 21300000, guid: ba4b19649e26ece4b98ce466159b7c78, type: 3}
+    halfbodyImg: {fileID: 0}
+    wholeImg: {fileID: 0}
+    character_rarity: 0
+    character_influence: 
+    character_job: 
+    character_subjob: 
+    monster_status: 0
+    monster_label: 
+    monster_isPrimary: 1
+    monster_countOperated: 1
+    monster_levelHPConsume: 1
+    visionRange_L: []
+    visionRadius: 0
+    attack: 430
+    baseAttackTime: 4
+    attackNum: 1
+    damageType: 0
+    maxHP: 3600
+    defence: 150
+    magicResistance: 5
+    physicalDoge: 0
+    magicDoge: 0
+    blockOccupation: 1
+    tauntLevel: 0
+    defaultCamp: 2
+    stunImmune: 0
+    silenceImmune: 0
+    sleepImmune: 0
+    frozenImmune: 0
+    levitateImmune: 0
+    disarmedCombatImmune: 0
+    fearedImmune: 0
+    canSpawnEntityID_L:
+    - m-6
+    canSpawnEntityNum_L: 04000000
+    cost: 0
+    canCallBack: 0
+    needSelectDirection: 0
+    canSetType: 0
+    respawnTime: 0
+    canRespawn: 0
+    respawnCostUp: 0
+    canSetNumOccupy: 0
+    moveSpeed: 0
+    massLevel: 1
+    moveMethod: 0
+  - ID_C: m
+    ID_N: 8
+    ChineseName: "\u53F2\u83B1\u59C6L"
+    EnglishName: SlimeLarge
+    description: "\u53F2\u83B1\u59C6L\u662F\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u8E66\u8E66\u8DF3\u8DF3\u7684\u751F\u7269\uFF0C\u5B83\u770B\u8D77\u6765\u5982\u679C\u51BB\u4E00\u822C\uFF0C\u4F46\u5176\u653B\u51FB\u6027\u53EF\u4E0D\u5C0F\uFF0C\u88AB\u51FB\u5012\u540E\u8FD8\u4F1A\u5206\u88C2\u4E3A4\u4E2A\u53F2\u83B1\u59C6M\u3002\u5B83\u901A\u8FC7\u8DF3\u8DC3\u6765\u79FB\u52A8\uFF0C\u751A\u81F3\u53EF\u4EE5\u8D8A\u8FC7\u969C\u788D\u7269\u3002\u53F2\u83B1\u59C6L\u7684\u8DF3\u8DC3\u8303\u56F4\u5F88\u5927\u3002"
+    prefab: {fileID: 5752354500556713093, guid: 731864e8f41924a4c834cfdb89c0712c, type: 3}
+    headImg: {fileID: 21300000, guid: db96a19ec93a1584f9252cd3c5444c7b, type: 3}
+    halfbodyImg: {fileID: 0}
+    wholeImg: {fileID: 0}
+    character_rarity: 0
+    character_influence: 
+    character_job: 
+    character_subjob: 
+    monster_status: 0
+    monster_label: 
+    monster_isPrimary: 1
+    monster_countOperated: 1
+    monster_levelHPConsume: 1
+    visionRange_L: []
+    visionRadius: 0
+    attack: 670
+    baseAttackTime: 5
+    attackNum: 1
+    damageType: 0
+    maxHP: 6900
+    defence: 235
+    magicResistance: 5
+    physicalDoge: 0
+    magicDoge: 0
+    blockOccupation: 1
+    tauntLevel: 0
+    defaultCamp: 2
+    stunImmune: 0
+    silenceImmune: 0
+    sleepImmune: 0
+    frozenImmune: 0
+    levitateImmune: 0
+    disarmedCombatImmune: 0
+    fearedImmune: 0
+    canSpawnEntityID_L:
+    - m-7
+    canSpawnEntityNum_L: 04000000
+    cost: 0
+    canCallBack: 0
+    needSelectDirection: 0
+    canSetType: 0
+    respawnTime: 0
+    canRespawn: 0
+    respawnCostUp: 0
+    canSetNumOccupy: 0
+    moveSpeed: 0
+    massLevel: 1
+    moveMethod: 0
+  - ID_C: m
+    ID_N: 9
+    ChineseName: "\u201C\u51CB\u96F6\u201D\u4FE1\u5F92"
+    EnglishName: WitherBeliever
+    description: "\u600E\u80FD\u60F3\u8C61\uFF0C\u201C\u51CB\u96F6\u201D\u7684\u540D\u58F0\u65E9\u5DF2\u8FDC\u626C\uFF0C\u5728\u201C\u6211\u7684\u4E16\u754C\u201D\u4E4B\u5916\u7ADF\u5B58\u5728\u5982\u6B64\u75AF\u72C2\u7684\u4FE1\u5F92\u3002\u4ED6\u4EEC\u4E00\u5FC3\u7684\u60F3\u6CD5\u5C31\u53EA\u6709\u8BA9\u201C\u51CB\u96F6\u201D\u91CD\u65B0\u51FA\u73B0\u5728\u8FD9\u4E2A\u4E16\u754C\u4E0A\uFF0C\u4E0D\u53EF\u963B\u6321\u3002"
+    prefab: {fileID: 5752354500556713093, guid: e46a9ab09aba9134d813f105c1ed7a8e, type: 3}
+    headImg: {fileID: 0}
+    halfbodyImg: {fileID: 0}
+    wholeImg: {fileID: 0}
+    character_rarity: 0
+    character_influence: 
+    character_job: 
+    character_subjob: 
+    monster_status: 0
+    monster_label: 
+    monster_isPrimary: 0
+    monster_countOperated: 0
+    monster_levelHPConsume: 0
+    visionRange_L: []
+    visionRadius: 2.2
+    attack: 500
+    baseAttackTime: 3
+    attackNum: 1
+    damageType: 1
+    maxHP: 5000
+    defence: 500
+    magicResistance: 50
+    physicalDoge: 0
+    magicDoge: 0
+    blockOccupation: 1
+    tauntLevel: 0
+    defaultCamp: 2
+    stunImmune: 0
+    silenceImmune: 0
+    sleepImmune: 0
+    frozenImmune: 0
+    levitateImmune: 0
+    disarmedCombatImmune: 0
+    fearedImmune: 0
+    canSpawnEntityID_L: []
+    canSpawnEntityNum_L: 
+    cost: 0
+    canCallBack: 0
+    needSelectDirection: 0
+    canSetType: 0
+    respawnTime: 0
+    canRespawn: 0
+    respawnCostUp: 0
+    canSetNumOccupy: 0
+    moveSpeed: 0.45
+    massLevel: 2
+    moveMethod: 0
+  - ID_C: m
+    ID_N: 10
+    ChineseName: "\u201C\u51CB\u96F6\u201D\u738B\u5EA7"
+    EnglishName: WitherSeat
+    description: "\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u7528\u4E8E\u53EC\u5524\u201C\u51CB\u96F6\u201D\u7684\u57FA\u5EA7\uFF0C\u7531\u56DB\u4E2A\u7075\u9B42\u6C99\u5448\u201CT\u201D\u5B57\u5F62\u6446\u653E\u3002\u5728\u57FA\u5EA7\u4E0A\u6446\u653E\u4E09\u4E2A\u201C\u51CB\u96F6\u201D\u5934\u9885\uFF0C\u5373\u53EF\u53EC\u5524\u201C\u51CB\u96F6\u201D\u3002"
+    prefab: {fileID: 5752354500556713093, guid: e2f0c2132e54fe2478ff70faf809315a, type: 3}
+    headImg: {fileID: 0}
+    halfbodyImg: {fileID: 0}
+    wholeImg: {fileID: 0}
+    character_rarity: 0
+    character_influence: 
+    character_job: 
+    character_subjob: 
+    monster_status: 0
+    monster_label: "\u6CD5\u672F\u9020\u7269"
+    monster_isPrimary: 0
+    monster_countOperated: 0
+    monster_levelHPConsume: 0
+    visionRange_L: []
+    visionRadius: 0
+    attack: 100
+    baseAttackTime: 2
+    attackNum: 0
+    damageType: 0
+    maxHP: 100
+    defence: 0
+    magicResistance: 0
+    physicalDoge: 0
+    magicDoge: 0
+    blockOccupation: 0
+    tauntLevel: 0
+    defaultCamp: 2
+    stunImmune: 0
+    silenceImmune: 0
+    sleepImmune: 0
+    frozenImmune: 0
+    levitateImmune: 0
+    disarmedCombatImmune: 0
+    fearedImmune: 0
+    canSpawnEntityID_L:
+    - m-11
+    canSpawnEntityNum_L: 01000000
+    cost: 0
+    canCallBack: 0
+    needSelectDirection: 0
+    canSetType: 0
+    respawnTime: 0
+    canRespawn: 0
+    respawnCostUp: 0
+    canSetNumOccupy: 0
+    moveSpeed: 0
+    massLevel: 0
+    moveMethod: 0
+  - ID_C: m
+    ID_N: 11
+    ChineseName: "\u201C\u51CB\u96F6\u201D"
+    EnglishName: Wither
+    description: "\u201C\u51CB\u96F6\u201D\u662F\"\u6211\u7684\u4E16\u754C\"\u4E2D\u6781\u5177\u653B\u51FB\u80FD\u529B\u548C\u6BC1\u706D\u529B\u91CF\u7684BOSS\u7EA7\u751F\u7269\uFF0C\u5B9B\u5982\u4E00\u9053\u9ED1\u6697\u7684\u5669\u68A6\u3002\u8FD9\u5E9E\u5927\u7684\u4E09\u5934\u602A\u517D\u7531\u51CB\u96F6\u9AB7\u9AC5\u5934\u548C\u7075\u9B42\u6C99\u6DF7\u5408\u800C\u6210\uFF08\u201C\u51CB\u96F6\u796D\u575B\u201D\uFF09\uFF0C\u6CE8\u5B9A\u5E26\u6765\u65E0\u5C3D\u7684\u6050\u6016\u4E0E\u7834\u574F\u3002\u4E00\u65E6\u201C\u51CB\u96F6\u201D\u73B0\u8EAB\uFF0C\u5176\u5F3A\u608D\u7684\u653B\u51FB\u80FD\u529B\u5373\u523B\u5C55\u9732\u65E0\u9057\u3002\u5B83\u51F6\u731B\u5730\u53D1\u5C04\u51CB\u96F6\u5934\u9885\uFF0C\u9020\u6210\u9A87\u4EBA\u7684\u7834\u574F\u3002\u8FD9\u4E9B\u5934\u9885\u5F15\u53D1\u7206\u70B8\uFF0C\u77AC\u95F4\u6467\u6BC1\u5468\u56F4\u7684\u65B9\u5757\uFF0C\u5C06\u5EFA\u7B51\u7269\u548C\u73AF\u5883\u5316\u4E3A\u4E4C\u6709\u3002\u51CB\u96F6\u7684\u5A01\u529B\u4E4B\u5927\uFF0C\u4F7F\u5F97\u5B83\u6210\u4E3A\u6BC1\u706D\u4E0E\u6DF7\u4E71\u7684\u8C61\u5F81\u3002"
+    prefab: {fileID: 5752354500556713093, guid: 5f05e4f441fc99b47b607c71a9b492b7, type: 3}
+    headImg: {fileID: 21300000, guid: dbd711650c4b9804f9e669b5668bd4b5, type: 3}
+    halfbodyImg: {fileID: 0}
+    wholeImg: {fileID: 0}
+    character_rarity: 0
+    character_influence: 
+    character_job: 
+    character_subjob: 
+    monster_status: 2
+    monster_label: "\u4EA1\u7075\u751F\u7269"
+    monster_isPrimary: 1
+    monster_countOperated: 1
+    monster_levelHPConsume: 2
+    visionRange_L: []
+    visionRadius: 3
+    attack: 650
+    baseAttackTime: 5
+    attackNum: 3
+    damageType: 1
+    maxHP: 32500
+    defence: 700
+    magicResistance: 50
+    physicalDoge: 0
+    magicDoge: 0
+    blockOccupation: 1
+    tauntLevel: 0
+    defaultCamp: 2
+    stunImmune: 1
+    silenceImmune: 1
+    sleepImmune: 1
+    frozenImmune: 1
+    levitateImmune: 1
+    disarmedCombatImmune: 1
+    fearedImmune: 1
+    canSpawnEntityID_L: []
+    canSpawnEntityNum_L: 
+    cost: 0
+    canCallBack: 0
+    needSelectDirection: 0
+    canSetType: 0
+    respawnTime: 0
+    canRespawn: 0
+    respawnCostUp: 0
+    canSetNumOccupy: 0
+    moveSpeed: 0.3
+    massLevel: 7
+    moveMethod: 0
+  - ID_C: t
+    ID_N: 1
+    ChineseName: "\u7194\u5CA9\u6CE1\u6CE1"
+    EnglishName: LavaBubble
+    description: "\u4E0D\u7A33\u5B9A\u7684\u7194\u5CA9\u6CE1\u6CE1\uFF0C\u968F\u65F6\u6709\u53EF\u80FD\u4F1A\u53D1\u751F\u7206\u70B8\uFF01"
+    prefab: {fileID: 4113559412623234849, guid: f068f5218d7f67244a9b2215e88178dd, type: 3}
+    headImg: {fileID: 0}
+    halfbodyImg: {fileID: 0}
+    wholeImg: {fileID: 0}
+    character_rarity: 0
+    character_influence: 
+    character_job: 
+    character_subjob: 
+    monster_status: 0
+    monster_label: 
+    monster_isPrimary: 0
+    monster_countOperated: 0
+    monster_levelHPConsume: 0
+    visionRange_L: []
+    visionRadius: 1.5
+    attack: 0
+    baseAttackTime: -1
+    attackNum: 0
+    damageType: 1
+    maxHP: 100
+    defence: 0
+    magicResistance: 0
+    physicalDoge: 0
+    magicDoge: 0
+    blockOccupation: 0
+    tauntLevel: 0
+    defaultCamp: 2
+    stunImmune: 0
+    silenceImmune: 0
+    sleepImmune: 0
+    frozenImmune: 0
+    levitateImmune: 0
+    disarmedCombatImmune: 0
+    fearedImmune: 0
+    canSpawnEntityID_L: []
+    canSpawnEntityNum_L: 
+    cost: 0
+    canCallBack: 0
+    needSelectDirection: 0
+    canSetType: 0
+    respawnTime: 0
+    canRespawn: 0
+    respawnCostUp: 0
+    canSetNumOccupy: 0
+    moveSpeed: 0
+    massLevel: 0
+    moveMethod: 0

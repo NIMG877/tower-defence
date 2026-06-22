@@ -1,0 +1,76 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
+  m_Name: ebnhlz_t1
+  m_EditorClassIdentifier: 
+  abilityId: ebnhlz_t1
+  abilityName: "\u5F3A\u5F31\u6CD5"
+  description: "\u50A8\u5B58\u7684\u653B\u51FB\u80FD\u91CF\u9020\u6210\u7684\u4F24\u5BB3\u63D0\u5347\u81F3143%\uFF0C\u53EF\u989D\u5916\u50A8\u5B581\u4EFD\u53EA\u7528\u4E8E\u653B\u51FB\u7CBE\u82F1\u6216\u9886\u8896\u654C\u4EBA\u7684\u653B\u51FB\u80FD\u91CF"
+  icon: {fileID: 0}
+  Kind: 0
+  sp:
+    totalSp: 0
+    initialSp: 0
+    chargeNum: 1
+    abilityAmount: 0
+    recoverMode: 0
+    consumeMode: 5
+    openMode: 0
+    recoverForbidDuringAbility: 0
+    canManualClose: 0
+  components:
+  - componentType: WriteBlackboard
+    parameters:
+      entries:
+      - key: key
+        value: ebnhlz_t1_charge_damage_multiplier
+        fromBlackboard: 0
+        type: 3
+      - key: value
+        value: 1.43
+        fromBlackboard: 0
+        type: 1
+      - key: method
+        value: set
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 2
+      groups: []
+  - componentType: ChargeAttackDamageModifier
+    parameters:
+      entries:
+      - key: multiplier
+        value: ebnhlz_t1_charge_damage_multiplier
+        fromBlackboard: 1
+        type: 1
+    triggers:
+    - triggerEvent: 2
+      groups: []
+  - componentType: ChargeAttackReservePool
+    parameters:
+      entries:
+      - key: capacity
+        value: 1
+        fromBlackboard: 0
+        type: 0
+      - key: minMonsterStatus
+        value: 1
+        fromBlackboard: 0
+        type: 0
+      - key: maxMonsterStatus
+        value: 2
+        fromBlackboard: 0
+        type: 0
+    triggers:
+    - triggerEvent: 2
+      groups: []

@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9caadfbafeeff1541807bbb2cbedeed1, type: 3}
+  m_Name: creeper
+  m_EditorClassIdentifier: 
+  _defaults:
+    Default: {fileID: 11400000, guid: 3dbbb0bb4c50fd34b894bec64ddf44d9, type: 2}
+    Idle: {fileID: 11400000, guid: e6d156b4bbd570d45bf9b826ed99b81e, type: 2}
+    Start: {fileID: 0}
+    Die: {fileID: 11400000, guid: 91e16d0f8c0308f4da0ce82df94daccd, type: 2}
+  _attack:
+    AttackBegin: {fileID: 0}
+    AttackRemote:
+    - {fileID: 11400000, guid: 973945fbd09c2e144b88eafd91d3b8cb, type: 2}
+    AttackClose:
+    - {fileID: 11400000, guid: 973945fbd09c2e144b88eafd91d3b8cb, type: 2}
+    AttackEnd: {fileID: 0}
+    Charge:
+      ChargeBegin: {fileID: 0}
+      Charge: []
+      ChargeEnd: {fileID: 0}
+  _movement:
+    Move: {fileID: 11400000, guid: ee31e422c57b16545b7ebba954c551b4, type: 2}
+    Jump:
+      Begin: {fileID: 0}
+      Loop: {fileID: 0}
+      End: {fileID: 0}
+  _animations:
+  - Name: ChargeLoop
+    Animation: {fileID: 11400000, guid: 1cd09ba1d909e3448adb862a1fe0e66e, type: 2}
+  - Name: BackOut
+    Animation: {fileID: 11400000, guid: 4f733e8903a971149af273c8abca3e26, type: 2}
+  - Name: Die2
+    Animation: {fileID: 11400000, guid: 4d3113a5619f2aa418734702381a2b32, type: 2}
+  _animationGroups: []

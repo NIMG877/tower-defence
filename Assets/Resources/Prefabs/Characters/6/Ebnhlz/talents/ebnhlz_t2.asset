@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
+  m_Name: ebnhlz_t2
+  m_EditorClassIdentifier: 
+  abilityId: ebnhlz_t2
+  abilityName: "\u501A\u97F3"
+  description: "\u82E5\u653B\u51FB\u76EE\u6807\u5468\u56F4\u6CA1\u6709\u5176\u4ED6\u654C\u4EBA\uFF0C\u653B\u51FB\u5BF9\u5176\u989D\u5916\u9020\u6210\u76F8\u5F53\u4E8E\u653B\u51FB\u529B15%\u7684\u6CD5\u672F\u4F24\u5BB3"
+  icon: {fileID: 0}
+  Kind: 1
+  sp:
+    totalSp: 0
+    initialSp: 0
+    chargeNum: 1
+    abilityAmount: 0
+    recoverMode: 0
+    consumeMode: 5
+    openMode: 0
+    recoverForbidDuringAbility: 0
+    canManualClose: 0
+  components:
+  - componentType: EntitySelector
+    parameters:
+      entries:
+      - key: subjectMode
+        value: eventTarget
+        fromBlackboard: 0
+        type: 3
+      - key: selectionMode
+        value: radius
+        fromBlackboard: 0
+        type: 3
+      - key: campRelation
+        value: same
+        fromBlackboard: 0
+        type: 3
+      - key: radius
+        value: 1.1
+        fromBlackboard: 0
+        type: 1
+      - key: force
+        value: True
+        fromBlackboard: 0
+        type: 2
+      - key: excludeSubjects
+        value: True
+        fromBlackboard: 0
+        type: 2
+      - key: outputEntitiesKey
+        value: ebnhlz_t2_nearby_enemies
+        fromBlackboard: 0
+        type: 3
+      - key: outputCountKey
+        value: ebnhlz_t2_nearby_enemy_count
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 9
+      groups: []
+  - componentType: ApplyDamage
+    parameters:
+      entries:
+      - key: targetMode
+        value: eventTarget
+        fromBlackboard: 0
+        type: 3
+      - key: baseValueMode
+        value: attack
+        fromBlackboard: 0
+        type: 3
+      - key: multiplier
+        value: 0.15
+        fromBlackboard: 0
+        type: 1
+      - key: damageType
+        value: 1
+        fromBlackboard: 0
+        type: 0
+      - key: applyType
+        value: 2
+        fromBlackboard: 0
+        type: 0
+    triggers:
+    - triggerEvent: 9
+      groups:
+      - units:
+        - op: 6
+          leftKey: ebnhlz_t2_nearby_enemy_count
+          rightValue: 0

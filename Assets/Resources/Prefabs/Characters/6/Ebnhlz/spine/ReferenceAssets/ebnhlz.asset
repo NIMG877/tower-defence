@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9caadfbafeeff1541807bbb2cbedeed1, type: 3}
+  m_Name: ebnhlz
+  m_EditorClassIdentifier: 
+  _defaults:
+    Default: {fileID: 11400000, guid: 7829eb8a61380ac45b03781f5163da7a, type: 2}
+    Idle: {fileID: 11400000, guid: b2f4df8423ebd244aa35a6bbc3f9aa56, type: 2}
+    Start: {fileID: 11400000, guid: e4051101f04d6284c9025165d53fe5c0, type: 2}
+    Die: {fileID: 11400000, guid: d82008706b7cf1d47bd8d0fc93a9592c, type: 2}
+  _attack:
+    AttackBegin: {fileID: 0}
+    AttackRemote:
+    - {fileID: 11400000, guid: 7a73a7ddb4985594793159024fbebed1, type: 2}
+    AttackClose:
+    - {fileID: 11400000, guid: 7a73a7ddb4985594793159024fbebed1, type: 2}
+    AttackEnd: {fileID: 0}
+    Charge:
+      ChargeBegin: {fileID: 0}
+      Charge:
+      - {fileID: 11400000, guid: 83b7733facb43f043b21f9137d2c85df, type: 2}
+      ChargeEnd: {fileID: 0}
+  _movement:
+    Move: {fileID: 0}
+    Jump:
+      Begin: {fileID: 0}
+      Loop: {fileID: 0}
+      End: {fileID: 0}
+  _animations:
+  - Name: Skill_1_Begin
+    Animation: {fileID: 11400000, guid: 849d422e85563fc4fa88b65c83f2c48a, type: 2}
+  - Name: Skill_1_End
+    Animation: {fileID: 11400000, guid: 25a030e282820ac41b89be16c18d6d7a, type: 2}
+  - Name: Skill_1_Idle
+    Animation: {fileID: 11400000, guid: 011ce7ef1ca0b104bb85dc7780b8eb2d, type: 2}
+  - Name: Skill_1_Idle
+    Animation: {fileID: 11400000, guid: 011ce7ef1ca0b104bb85dc7780b8eb2d, type: 2}
+  _animationGroups:
+  - Name: Skill_1_Charge
+    Animations:
+    - {fileID: 11400000, guid: dc5ba17f9b6793d4b90f4304392f67f6, type: 2}
+  - Name: Skill_1_Attack
+    Animations:
+    - {fileID: 11400000, guid: c7ec3b82673753348a6aaf8c21453966, type: 2}
+  - Name: Skill_2_Attack
+    Animations:
+    - {fileID: 11400000, guid: 63096e1c49be49344803eb45ef082969, type: 2}
+  - Name: Skill_3_Charge
+    Animations:
+    - {fileID: 11400000, guid: 9144e245a21123f469ce41085e7ce773, type: 2}
+  - Name: Skill_3_Attack
+    Animations:
+    - {fileID: 11400000, guid: 4370ea648e1a2d14d925e8fc83fed081, type: 2}
+    - {fileID: 11400000, guid: 633ed2f7f249d6349a06395641f7a71a, type: 2}
+    - {fileID: 11400000, guid: 7ce2ddb22ba1af54292457e018f01f30, type: 2}

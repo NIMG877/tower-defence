@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9caadfbafeeff1541807bbb2cbedeed1, type: 3}
+  m_Name: skeleton
+  m_EditorClassIdentifier: 
+  _defaults:
+    Default: {fileID: 11400000, guid: e240b36ab00b7d24193b818db5dab5d2, type: 2}
+    Idle: {fileID: 11400000, guid: 32096c44820b16442bd7f8936c8950e9, type: 2}
+    Start: {fileID: 11400000, guid: e240b36ab00b7d24193b818db5dab5d2, type: 2}
+    Die: {fileID: 11400000, guid: 489c016c06ae9b646ac9b9253d5ea682, type: 2}
+  _attack:
+    AttackBegin: {fileID: 0}
+    AttackRemote:
+    - {fileID: 11400000, guid: 7bb5625fa381cdc4bbde52bf675a02b7, type: 2}
+    AttackClose:
+    - {fileID: 11400000, guid: 7bb5625fa381cdc4bbde52bf675a02b7, type: 2}
+    AttackEnd: {fileID: 0}
+    Charge:
+      ChargeBegin: {fileID: 0}
+      Charge: []
+      ChargeEnd: {fileID: 0}
+  _movement:
+    Move: {fileID: 11400000, guid: f9ac4a9f41609164d891d2be18249667, type: 2}
+    Jump:
+      Begin: {fileID: 0}
+      Loop: {fileID: 0}
+      End: {fileID: 0}
+  _animations:
+  - Name: ExtraAttackBegin
+    Animation: {fileID: 11400000, guid: 5a98e5ba9a83db04a880a68fdca3e120, type: 2}
+  - Name: ExtraAttackEnd
+    Animation: {fileID: 11400000, guid: 473ef51c81debcb40b64a9242b83c8a8, type: 2}
+  _animationGroups:
+  - Name: ExtraAttack
+    Animations:
+    - {fileID: 11400000, guid: e0c34618bf7e87f4ea7a5a5c1926ea54, type: 2}

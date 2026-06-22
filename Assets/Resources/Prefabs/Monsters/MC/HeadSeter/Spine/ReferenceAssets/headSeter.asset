@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9caadfbafeeff1541807bbb2cbedeed1, type: 3}
+  m_Name: headSeter
+  m_EditorClassIdentifier: 
+  _defaults:
+    Default: {fileID: 11400000, guid: 18c59d05847bddd4e9355cb5ddfd411f, type: 2}
+    Idle: {fileID: 11400000, guid: c7a133df3d781a94c8a99e9816c848e6, type: 2}
+    Start: {fileID: 11400000, guid: 18c59d05847bddd4e9355cb5ddfd411f, type: 2}
+    Die: {fileID: 11400000, guid: b2f0b461e41160646be682731052c033, type: 2}
+  _attack:
+    AttackBegin: {fileID: 0}
+    AttackRemote:
+    - {fileID: 11400000, guid: a37b75f6144ca944caa6152b74d081ea, type: 2}
+    AttackClose:
+    - {fileID: 11400000, guid: a37b75f6144ca944caa6152b74d081ea, type: 2}
+    AttackEnd: {fileID: 0}
+    Charge:
+      ChargeBegin: {fileID: 0}
+      Charge: []
+      ChargeEnd: {fileID: 0}
+  _movement:
+    Move: {fileID: 11400000, guid: b6e46bfdd3bc9e44ebd51d08dfe55ab5, type: 2}
+    Jump:
+      Begin: {fileID: 0}
+      Loop: {fileID: 0}
+      End: {fileID: 0}
+  _animations:
+  - Name: Default_d
+    Animation: {fileID: 11400000, guid: 4a282db330d99eb4598cab526dc7e179, type: 2}
+  - Name: Default_1
+    Animation: {fileID: 11400000, guid: 88303354d49d2e842b20f86370b07082, type: 2}
+  - Name: Die_d
+    Animation: {fileID: 11400000, guid: fd83e3c307e151943be7ebe69bf3d683, type: 2}
+  - Name: Idle_1
+    Animation: {fileID: 11400000, guid: 65cba6a6dce95674f87965fd2eabe113, type: 2}
+  - Name: Idle_d
+    Animation: {fileID: 11400000, guid: ff11b909533e0c34e929e1f4c1ff1a71, type: 2}
+  - Name: Move_1
+    Animation: {fileID: 11400000, guid: b3d8bbbc6b8a27f479f9ea9a79a347f5, type: 2}
+  - Name: Move_d
+    Animation: {fileID: 11400000, guid: 02e758c42378bc64f9bc0c7464d46676, type: 2}
+  - Name: Set_d
+    Animation: {fileID: 11400000, guid: 2038e8fe17e75854c9f8128a4a0a35f1, type: 2}
+  - Name: Set
+    Animation: {fileID: 11400000, guid: 8b5d2b3aa041d0a4a8696dafd675a669, type: 2}
+  - Name: Skill_Begin
+    Animation: {fileID: 11400000, guid: 7fbe6ece4fa87cb4e8ea9b7ea8c79d66, type: 2}
+  - Name: Skill_Begin_d
+    Animation: {fileID: 11400000, guid: eaf02fe67b1f94d4a913c84a6a864465, type: 2}
+  - Name: Skill_End
+    Animation: {fileID: 11400000, guid: 29e269245293f5c46b72537c386a227c, type: 2}
+  - Name: Skill_End_d
+    Animation: {fileID: 11400000, guid: 363eef30abb5c7f4895433423ee4a742, type: 2}
+  - Name: Skill_Loop
+    Animation: {fileID: 11400000, guid: bd3a636c96304504ca49f7ac9335f02d, type: 2}
+  _animationGroups: []

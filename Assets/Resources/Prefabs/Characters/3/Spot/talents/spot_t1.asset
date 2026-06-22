@@ -1,0 +1,100 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
+  m_Name: spot_t1
+  m_EditorClassIdentifier: 
+  abilityId: spot_t1
+  abilityName: "\u70DF\u96FE\u52A0\u88C5"
+  description: "\u6CBB\u7597\u540E\u4E3A\u5176\u63D0\u4F9B\u6301\u7EED3\u79D2\u768425%\u7269\u7406\u95EA\u907F"
+  icon: {fileID: 0}
+  Kind: 0
+  sp:
+    totalSp: 0
+    initialSp: 0
+    chargeNum: 1
+    abilityAmount: 0
+    recoverMode: 0
+    consumeMode: 5
+    openMode: 0
+    recoverForbidDuringAbility: 0
+    canManualClose: 0
+  components:
+  - componentType: WriteBlackboard
+    parameters:
+      entries:
+      - key: key
+        value: spot_t1_damage_type
+        fromBlackboard: 0
+        type: 3
+      - key: source
+        value: event
+        fromBlackboard: 0
+        type: 3
+      - key: path
+        value: damageType
+        fromBlackboard: 0
+        type: 3
+      - key: asString
+        value: True
+        fromBlackboard: 0
+        type: 2
+    triggers:
+    - triggerEvent: 9
+      groups: []
+  - componentType: WriteBlackboard
+    parameters:
+      entries:
+      - key: key
+        value: spot_t1_targets
+        fromBlackboard: 0
+        type: 3
+      - key: source
+        value: event
+        fromBlackboard: 0
+        type: 3
+      - key: path
+        value: target
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 9
+      groups: []
+  - componentType: ApplyBuff
+    parameters:
+      entries:
+      - key: buffTypes
+        value: phdoge_delta_rate
+        fromBlackboard: 0
+        type: 3
+      - key: buffValues
+        value: 0.25
+        fromBlackboard: 0
+        type: 3
+      - key: buffId
+        value: spot_t1_smoke
+        fromBlackboard: 0
+        type: 3
+      - key: buffTime
+        value: 3
+        fromBlackboard: 0
+        type: 1
+      - key: blackboardKey
+        value: spot_t1_targets
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 9
+      groups:
+      - units:
+        - op: 1
+          leftKey: spot_t1_damage_type
+          rightValue: 3

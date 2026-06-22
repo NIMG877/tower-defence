@@ -1,0 +1,69 @@
+
+skeleton.png
+size: 512,128
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+arrow
+  rotate: false
+  xy: 255, 34
+  size: 72, 12
+  orig: 72, 12
+  offset: 0, 0
+  index: -1
+body
+  rotate: true
+  xy: 0, 30
+  size: 95, 137
+  orig: 95, 138
+  offset: 0, 0
+  index: -1
+bow
+  rotate: true
+  xy: 255, 66
+  size: 59, 167
+  orig: 59, 167
+  offset: 0, 0
+  index: -1
+head
+  rotate: false
+  xy: 139, 35
+  size: 114, 90
+  orig: 115, 90
+  offset: 1, 0
+  index: -1
+helmet
+  rotate: true
+  xy: 448, 2
+  size: 123, 57
+  orig: 123, 57
+  offset: 0, 0
+  index: -1
+l-arm
+  rotate: false
+  xy: 255, 48
+  size: 112, 16
+  orig: 112, 16
+  offset: 0, 0
+  index: -1
+r-arm
+  rotate: false
+  xy: 255, 48
+  size: 112, 16
+  orig: 112, 16
+  offset: 0, 0
+  index: -1
+l-leg
+  rotate: false
+  xy: 424, 0
+  size: 22, 125
+  orig: 22, 134
+  offset: 0, 9
+  index: -1
+r-leg
+  rotate: false
+  xy: 424, 0
+  size: 22, 125
+  orig: 22, 134
+  offset: 0, 9
+  index: -1
