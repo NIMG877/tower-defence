@@ -35,7 +35,7 @@ public static class WaveTimelineSection
         section.Add(BuildZoomControls(rebuild));
 
         // 监听 Waves 数组变化 (Undo/Redo, 外部 mutation)
-        wavesProp.TrackPropertyValue(wavesProp, _ => rebuild());
+        section.TrackPropertyValue(wavesProp, _ => rebuild());
 
         // + 新增 Wave 按钮
         var addWaveBtn = new Button(() =>
