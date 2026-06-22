@@ -70,6 +70,51 @@ namespace Validation
                 }
             }
 
+            // 规则 6: LevelHp <= 0 -> Error
+            if (data.LevelHp <= 0)
+            {
+                issues.Add(new ValidationIssue(
+                    ValidationSeverity.Error,
+                    "LevelHp",
+                    $"LevelHp 必须 > 0, 当前 {data.LevelHp}"));
+            }
+
+            // 规则 7: MaxCost < Cost0 -> Error
+            if (data.MaxCost < data.Cost0)
+            {
+                issues.Add(new ValidationIssue(
+                    ValidationSeverity.Error,
+                    "MaxCost",
+                    $"MaxCost ({data.MaxCost}) 不能小于 Cost0 ({data.Cost0})"));
+            }
+
+            // 规则 8: MapPrefab == null -> Error
+            if (data.MapPrefab == null)
+            {
+                issues.Add(new ValidationIssue(
+                    ValidationSeverity.Error,
+                    "MapPrefab",
+                    "MapPrefab 不能为空"));
+            }
+
+            // 规则 9: CutToLevelTexture == null -> Warning
+            if (data.CutToLevelTexture == null)
+            {
+                issues.Add(new ValidationIssue(
+                    ValidationSeverity.Warning,
+                    "CutToLevelTexture",
+                    "CutToLevelTexture 未指定 (可选)"));
+            }
+
+            // 规则 10: CameraSize <= 0 -> Error
+            if (data.CameraSize <= 0f)
+            {
+                issues.Add(new ValidationIssue(
+                    ValidationSeverity.Error,
+                    "CameraSize",
+                    $"CameraSize 必须 > 0, 当前 {data.CameraSize}"));
+            }
+
             return issues;
         }
     }

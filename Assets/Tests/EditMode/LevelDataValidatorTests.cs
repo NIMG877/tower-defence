@@ -77,5 +77,46 @@ namespace Tests.EditMode
             Assert.IsTrue(issues.Any(i => i.Severity == ValidationSeverity.Error && i.Message.Contains("EntityPrefabSerial")),
                 $"Expected error about EntityPrefabSerial range, got: {string.Join("; ", issues.Select(i => i.Message))}");
         }
+
+        [Test]
+        public void Validate_LevelHpZeroOrNegative_ReturnsError()
+        {
+            _data.LevelHp = 0;
+            var issues = LevelDataValidator.Validate(_data);
+            Assert.IsTrue(issues.Any(i => i.Severity == ValidationSeverity.Error && i.Path.Contains("LevelHp")));
+        }
+
+        [Test]
+        public void Validate_MaxCostLessThanCost0_ReturnsError()
+        {
+            _data.Cost0 = 200;
+            _data.MaxCost = 100;
+            var issues = LevelDataValidator.Validate(_data);
+            Assert.IsTrue(issues.Any(i => i.Severity == ValidationSeverity.Error && i.Path.Contains("MaxCost")));
+        }
+
+        [Test]
+        public void Validate_NullMapPrefab_ReturnsError()
+        {
+            _data.MapPrefab = null;
+            var issues = LevelDataValidator.Validate(_data);
+            Assert.IsTrue(issues.Any(i => i.Severity == ValidationSeverity.Error && i.Path.Contains("MapPrefab")));
+        }
+
+        [Test]
+        public void Validate_NullCutToLevelTexture_ReturnsWarning()
+        {
+            _data.CutToLevelTexture = null;
+            var issues = LevelDataValidator.Validate(_data);
+            Assert.IsTrue(issues.Any(i => i.Severity == ValidationSeverity.Warning && i.Path.Contains("CutToLevelTexture")));
+        }
+
+        [Test]
+        public void Validate_ZeroCameraSize_ReturnsError()
+        {
+            _data.CameraSize = 0f;
+            var issues = LevelDataValidator.Validate(_data);
+            Assert.IsTrue(issues.Any(i => i.Severity == ValidationSeverity.Error && i.Path.Contains("CameraSize")));
+        }
     }
 }
