@@ -30,6 +30,7 @@ public class LevelDataEditor : Editor
         body.style.paddingBottom = 12;
         body.Add(MetadataSection.Build(serializedObject));
         body.Add(ReferencesSection.Build(serializedObject));
+        body.Add(WaveTimelineSection.Build(serializedObject, (w, a) => { /* wired in Task 13 */ }));
         body.Add(EconomySection.Build(serializedObject));
         root.Add(body);
 
