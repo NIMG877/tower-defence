@@ -1,0 +1,97 @@
+.level-editor-header {
+    background-color: rgb(42, 42, 53);
+    padding: 8px 12px;
+    flex-direction: row;
+    align-items: center;
+}
+
+.level-editor-title {
+    font-size: 16px;
+    color: rgb(255, 255, 255);
+    -unity-font-style: bold;
+}
+
+.level-editor-subtitle {
+    color: rgb(136, 136, 136);
+    font-size: 11px;
+    margin-left: 12px;
+}
+
+.level-editor-badge {
+    margin-left: auto;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    -unity-font-style: bold;
+}
+
+.level-editor-badge-ok {
+    background-color: rgb(46, 125, 50);
+    color: rgb(255, 255, 255);
+}
+
+.level-editor-badge-warn {
+    background-color: rgb(200, 150, 30);
+    color: rgb(0, 0, 0);
+}
+
+.level-editor-badge-error {
+    background-color: rgb(198, 40, 40);
+    color: rgb(255, 255, 255);
+}
+
+.level-editor-tabbar {
+    flex-direction: row;
+    background-color: rgb(37, 37, 48);
+}
+
+.level-editor-tab {
+    padding: 6px 14px;
+    font-size: 11px;
+    color: rgb(136, 136, 136);
+    border-bottom-width: 2px;
+    border-bottom-color: rgba(0, 0, 0, 0);
+}
+
+.level-editor-tab-active {
+    color: rgb(78, 201, 160);
+    border-bottom-color: rgb(78, 201, 160);
+}
+
+.level-editor-section {
+    background-color: rgb(30, 30, 34);
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+}
+
+.level-editor-section-title {
+    color: rgb(156, 220, 254);
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+}
+
+.level-editor-statusbar {
+    background-color: rgb(42, 42, 53);
+    padding: 10px 12px;
+    flex-direction: row;
+    align-items: center;
+    border-top-width: 1px;
+    border-top-color: rgb(68, 68, 68);
+}
+
+.level-editor-statusbar-text {
+    color: rgb(78, 201, 160);
+    font-size: 11px;
+}
+
+.level-editor-playtest-btn {
+    margin-left: auto;
+    background-color: rgb(220, 220, 170);
+    color: rgb(0, 0, 0);
+    -unity-font-style: bold;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 3px;
+}
