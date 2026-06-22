@@ -67,6 +67,9 @@ public static class WaveTimelineSection
             return;
         }
 
+        // 允许卡片在容器中溢出 (用最小宽度时需要)
+        container.style.overflow = Overflow.Visible;
+
         // 计算总时长 (累加所有 Gap + 每条 Action 占 1s 占位宽度)
         float totalUnits = 0f;
         for (int i = 0; i < actionsProp.arraySize; i++)
@@ -77,10 +80,16 @@ public static class WaveTimelineSection
         }
         if (totalUnits <= 0f) totalUnits = 1f;
 
+        // 卡片最小宽度 (避免多 Action 时卡片过窄不可点)
+        float cardPct = 1f / totalUnits * 100f;
+        float minCardPct = 5f;
+        float actualCardPct = Mathf.Max(cardPct, minCardPct);
+
         // 渲染
         float cursorUnits = 0f;
         for (int i = 0; i < actionsProp.arraySize; i++)
         {
+            int actionIndex = i; // 闭包按值捕获, 避免循环结束后 i 越界
             var a = actionsProp.GetArrayElementAtIndex(i);
             float gap = Mathf.Max(0f, a.FindPropertyRelative("GapFromLastAction").floatValue);
             int cmd = a.FindPropertyRelative("CommandType").intValue;
@@ -106,13 +115,13 @@ public static class WaveTimelineSection
             }
 
             // 卡片
-            var card = new Button(() => onActionSelected?.Invoke(waveIdx, i))
+            var card = new Button(() => onActionSelected?.Invoke(waveIdx, actionIndex))
             {
                 text = $"A{i} {CommandTypeShort(cmd)}"
             };
             card.style.position = Position.Absolute;
             card.style.left = Length.Percent(cursorUnits / totalUnits * 100f);
-            card.style.width = Length.Percent(1f / totalUnits * 100f);
+            card.style.width = Length.Percent(actualCardPct);
             card.style.height = Length.Percent(100f);
             card.style.backgroundColor = CommandTypeColor(cmd);
             card.style.color = new Color(0, 0, 0);
