@@ -287,6 +287,11 @@ public static class WaveTimelineSection
         RenderActionCards(cardsContainer, actionsProp, waveIdx, onActionSelected);
         cardsContainer.TrackPropertyValue(actionsProp, _ => RenderActionCards(cardsContainer, actionsProp, waveIdx, onActionSelected));
 
+        // 按钮行 (新增 Action / 删除 Action / 删除 Wave 横向排列)
+        var buttonRow = new VisualElement();
+        buttonRow.style.flexDirection = FlexDirection.Row;
+        buttonRow.style.marginTop = 4;
+
         // + 新增 Action 按钮
         var addActionBtn = new Button(() =>
         {
@@ -296,10 +301,26 @@ public static class WaveTimelineSection
             so.ApplyModifiedProperties();
         })
         { text = "+ 新增 Action" };
-        addActionBtn.style.marginTop = 4;
-        row.Add(addActionBtn);
+        addActionBtn.style.flexGrow = 1;
+        addActionBtn.style.marginRight = 4;
+        buttonRow.Add(addActionBtn);
 
-        // 删除 Wave 按钮
+        // × 删除 Action 按钮 (删除最后一个 action)
+        var delActionBtn = new Button(() =>
+        {
+            if (actionsProp.arraySize == 0) return;
+            if (EditorUtility.DisplayDialog("删除 Action", $"确认删除最后一个 Action? (当前 {actionsProp.arraySize} 个)", "删除", "取消"))
+            {
+                Undo.RecordObject(so.targetObject, "Delete Action");
+                actionsProp.DeleteArrayElementAtIndex(actionsProp.arraySize - 1);
+                so.ApplyModifiedProperties();
+            }
+        })
+        { text = "× 删除 Action" };
+        delActionBtn.style.marginRight = 4;
+        buttonRow.Add(delActionBtn);
+
+        // × 删除 Wave 按钮
         var delBtn = new Button(() =>
         {
             if (EditorUtility.DisplayDialog("删除 Wave", $"确认删除 Wave {waveIdx}?", "删除", "取消"))
@@ -310,8 +331,9 @@ public static class WaveTimelineSection
             }
         })
         { text = "× 删除 Wave" };
-        delBtn.style.marginTop = 4;
-        row.Add(delBtn);
+        buttonRow.Add(delBtn);
+
+        row.Add(buttonRow);
 
         return row;
     }
