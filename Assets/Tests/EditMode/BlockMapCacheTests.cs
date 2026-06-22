@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using UnityEditor;
 using UnityEngine;
 
 namespace Tests.EditMode
@@ -36,7 +35,7 @@ namespace Tests.EditMode
             Assert.IsNotNull(cache.Blocks[0, 0]);
             Assert.IsNotNull(cache.Blocks[1, 1]);
             // EntityR cached from EntityManager.EntityR (default 0.25)
-            Assert.AreEqual(0.25f, cache.EntityR, 0.001f);
+            Assert.AreEqual(EntityManager.EntityR, cache.EntityR, 0.001f);
             cache.Dispose();
         }
     }

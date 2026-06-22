@@ -2,6 +2,10 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
+/// <summary>
+/// 加载后的 BlockData 缓存。<see cref="Dispose"/> 仅释放 BlockData 引用,prefab contents
+/// 的生命周期由 <see cref="Load"/> 内部管理(在 Load 的 finally 中已 unload)。
+/// </summary>
 public sealed class BlockMapCache : IDisposable
 {
     public BlockData[,] Blocks;
