@@ -1462,7 +1462,7 @@ git commit -m "feat(level-editor): WaveTimelineSection 骨架 (Wave/Action 增�
             // 卡片
             var card = new Button(() => onActionSelected?.Invoke(waveIdx, i))
             {
-                text = $"A{i} {CommandTypeShort(cmd)}"
+                text = $"A{i}"
             };
             card.style.position = Position.Absolute;
             card.style.left = Length.Percent(cursorUnits / totalUnits * 100f);

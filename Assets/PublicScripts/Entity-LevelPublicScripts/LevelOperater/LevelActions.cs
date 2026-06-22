@@ -12,31 +12,31 @@ public class LevelActions
     [Serializable]
     public struct Action
     {
-        [Tooltip("Ö¸ÁîÀàĞÍ:0-ÕÙ»½¿ÉÒÆ¶¯ÊµÌå,1-Éú³É¾²Ö¹ÊµÌå,2-ÏÔÊ¾µØÃæÂ·¾¶,3-ÏÔÊ¾½üµØĞü¸¡Â·¾¶,4-ÏÔÊ¾·ÉĞĞÂ·¾¶,5-ÏÔÊ¾ÓÒ²àÌáÊ¾¿¨,6-ÏÔÊ¾¾çÇé")] public int CommandType;
-        [Header("Í¨ÓÃÊôĞÔ")]
-        [Tooltip("¾àÀëÉÏÒ»¶¯×÷µÄ¼ä¸ô")] public float GapFromLastAction;
-        [Tooltip("¶¯×÷¿ªÊ¼Ç°º¯Êı")] public UnityEvent OnBeforeAction;
-        [Header("½öµ±CommandTypeÎª0£¬1Ê±ĞèÒªÌîĞ´")]
-        [Tooltip("ÊµÌåÔ¤ÖÆÌåĞòºÅ")] public int EntityPrefabSerial;
-        [Tooltip("ÕÙ»½ÊµÌåÕóÓª£¬1-Turret 2-Monster")] public int Camp;
-        [Tooltip("¶¯×÷ÖØ¸´º¯Êı×é£¬¶ÔÉú³ÉÊµÌå½øĞĞ²Ù×÷")] public UnityEvent<Entity> OnActionRepeat;
-        [Header("½öµ±CommandTypeÎª0£¬2£¬3£¬4Ê±ĞèÒªÌîĞ´")]
-        [Tooltip("Â·¾¶Ô¤ÖÆÌåĞòºÅ")] public int PathSerial;
-        [Header("½öµ±CommandTypeÎª0Ê±ĞèÒªÌîĞ´")]
-        [Tooltip("¶¯×÷ÖØ¸´¼ä¸ôÊ±¼äÊı×é£¨³¤¶ÈÎªÖØ¸´´ÎÊı£©")] public float[] GapsFromLastRepeat;
-        [Tooltip("ÊÇ·ñĞŞ¸ÄÊµÌåµÄÄ¿±ê¼ÛÖµ¡¢Ê×ÒªÄ¿±ê¡¢¼ÆËã»÷É±ÊıÊôĞÔ")] public bool ModifyAttributes;
-        [Header("½öµ±CommandTypeÎª0ÇÒModifyAttributesÎªTrueÊ±ĞèÒªÌîĞ´")]
-        [Tooltip("ĞŞ¸ÄµÄÊµÌåÄ¿±ê¼ÛÖµ")] public int ModifyLevelHpConsume;
-        [Tooltip("ĞŞ¸ÄµÄÊµÌåÊÇ·ñÎªÊ×ÒªÄ¿±ê")] public bool ModifyPrimary;
-        [Tooltip("ĞŞ¸ÄµÄÊµÌåÊÇ·ñ¼ÆËã»÷É±")] public bool ModifyCountOperate;
-        [Header("½öµ±CommandTypeÎª1Ê±ĞèÒªÌîĞ´")]
-        [Tooltip("·ÅÖÃÎ»ÖÃ")] public Vector2 Destination;
-        [Tooltip("·ÅÖÃ³¯Ïò")] public int Orientation;
-        [Header("½öµ±CommandTypeÎª5Ê±ĞèÒªÌîĞ´")]
-        [Tooltip("Í·Ïñ")] public Image HeadImage;
-        [Tooltip("ÄÚÈİ")] public string Content;
-        [Tooltip("³ÖĞøÊ±¼ä")] public float DurationTime;
-        [Header("½öµ±CommandTypeÎª6Ê±ĞèÒªÌîĞ´")]
+        [Tooltip("æŒ‡ä»¤ç±»å‹:0-å¬å”¤å¯ç§»åŠ¨å®ä½“,1-ç”Ÿæˆé™æ­¢å®ä½“,2-æ˜¾ç¤ºåœ°é¢è·¯å¾„,3-æ˜¾ç¤ºè¿‘åœ°æ‚¬æµ®è·¯å¾„,4-æ˜¾ç¤ºé£è¡Œè·¯å¾„,5-æ˜¾ç¤ºå³ä¾§æç¤ºå¡,6-æ˜¾ç¤ºå‰§æƒ…")] public int CommandType;
+        // [Header("é€šç”¨å±æ€§")]
+        [Tooltip("è·ç¦»ä¸Šä¸€åŠ¨ä½œçš„é—´éš”")] public float GapFromLastAction;
+        [Tooltip("åŠ¨ä½œå¼€å§‹å‰å‡½æ•°")] public UnityEvent OnBeforeAction;
+        // [Header("ä»…å½“CommandTypeä¸º0ï¼Œ1æ—¶éœ€è¦å¡«å†™")]
+        [Tooltip("å®ä½“é¢„åˆ¶ä½“åºå·")] public int EntityPrefabSerial;
+        [Tooltip("å¬å”¤å®ä½“é˜µè¥ï¼Œ1-Turret 2-Monster")] public int Camp;
+        [Tooltip("åŠ¨ä½œé‡å¤å‡½æ•°ç»„ï¼Œå¯¹ç”Ÿæˆå®ä½“è¿›è¡Œæ“ä½œ")] public UnityEvent<Entity> OnActionRepeat;
+        // [Header("ä»…å½“CommandTypeä¸º0ï¼Œ2ï¼Œ3ï¼Œ4æ—¶éœ€è¦å¡«å†™")]
+        [Tooltip("è·¯å¾„é¢„åˆ¶ä½“åºå·")] public int PathSerial;
+        // [Header("ä»…å½“CommandTypeä¸º0æ—¶éœ€è¦å¡«å†™")]
+        [Tooltip("åŠ¨ä½œé‡å¤é—´éš”æ—¶é—´æ•°ç»„ï¼ˆé•¿åº¦ä¸ºé‡å¤æ¬¡æ•°ï¼‰")] public float[] GapsFromLastRepeat;
+        [Tooltip("æ˜¯å¦ä¿®æ”¹å®ä½“çš„ç›®æ ‡ä»·å€¼ã€é¦–è¦ç›®æ ‡ã€è®¡ç®—å‡»æ€æ•°å±æ€§")] public bool ModifyAttributes;
+        // [Header("ä»…å½“CommandTypeä¸º0ä¸”ModifyAttributesä¸ºTrueæ—¶éœ€è¦å¡«å†™")]
+        [Tooltip("ä¿®æ”¹çš„å®ä½“ç›®æ ‡ä»·å€¼")] public int ModifyLevelHpConsume;
+        [Tooltip("ä¿®æ”¹çš„å®ä½“æ˜¯å¦ä¸ºé¦–è¦ç›®æ ‡")] public bool ModifyPrimary;
+        [Tooltip("ä¿®æ”¹çš„å®ä½“æ˜¯å¦è®¡ç®—å‡»æ€")] public bool ModifyCountOperate;
+        // [Header("ä»…å½“CommandTypeä¸º1æ—¶éœ€è¦å¡«å†™")]
+        [Tooltip("æ”¾ç½®ä½ç½®")] public Vector2 Destination;
+        [Tooltip("æ”¾ç½®æœå‘")] public int Orientation;
+        // [Header("ä»…å½“CommandTypeä¸º5æ—¶éœ€è¦å¡«å†™")]
+        [Tooltip("å¤´åƒ")] public Image HeadImage;
+        [Tooltip("å†…å®¹")] public string Content;
+        [Tooltip("æŒç»­æ—¶é—´")] public float DurationTime;
+        // [Header("ä»…å½“CommandTypeä¸º6æ—¶éœ€è¦å¡«å†™")]
         public string[] Contents;
     }
     [Serializable]

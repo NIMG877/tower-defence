@@ -194,7 +194,7 @@ public static class WaveTimelineSection
         zoomLabel.style.width = 70;
         bar.Add(zoomLabel);
 
-        var slider = new Slider(0.5f, 5f) { value = _zoom };
+        var slider = new Slider(0.1f, 5f) { value = _zoom };
         slider.style.flexGrow = 1;
         slider.style.flexBasis = 0;       // 关键: 从 0 开始 grow, 不让 slider 内部参考宽度污染 bar 的 intrinsic
         slider.style.minWidth = 0;       // 允许 shrink 到 0, 防止 Unity 默认 min-width 顶住

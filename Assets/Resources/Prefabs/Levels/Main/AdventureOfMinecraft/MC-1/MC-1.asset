@@ -238,8 +238,53 @@ MonoBehaviour:
       Content: 
       DurationTime: 0
       Contents: []
+  - Actions:
+    - CommandType: 0
+      GapFromLastAction: 0
+      OnBeforeAction:
+        m_PersistentCalls:
+          m_Calls: []
+      EntityPrefabSerial: 0
+      Camp: 0
+      OnActionRepeat:
+        m_PersistentCalls:
+          m_Calls: []
+      PathSerial: 0
+      GapsFromLastRepeat: []
+      ModifyAttributes: 0
+      ModifyLevelHpConsume: 0
+      ModifyPrimary: 0
+      ModifyCountOperate: 0
+      Destination: {x: 0, y: 0}
+      Orientation: 0
+      HeadImage: {fileID: 0}
+      Content: 
+      DurationTime: 0
+      Contents: []
+    - CommandType: 2
+      GapFromLastAction: 3.86
+      OnBeforeAction:
+        m_PersistentCalls:
+          m_Calls: []
+      EntityPrefabSerial: 0
+      Camp: 0
+      OnActionRepeat:
+        m_PersistentCalls:
+          m_Calls: []
+      PathSerial: 0
+      GapsFromLastRepeat: []
+      ModifyAttributes: 0
+      ModifyLevelHpConsume: 0
+      ModifyPrimary: 0
+      ModifyCountOperate: 0
+      Destination: {x: 0, y: 0}
+      Orientation: 0
+      HeadImage: {fileID: 0}
+      Content: 
+      DurationTime: 0
+      Contents: []
   CheckPoints:
-  - {fileID: 3962162900902801439, guid: b02ca6b735b50cd40ad9a4288909ccd1, type: 3}
+  - {fileID: 3962162900902801439, guid: b7d95427eb322ac4ab9590ba0b126aba, type: 3}
   - {fileID: 4662438118174203867, guid: c69e7eeb822473d4d97207abae38c0dd, type: 3}
   - {fileID: 7054889419872924767, guid: 6d3c3339cd96b6141861fc214fcf667e, type: 3}
   - {fileID: 2255276518616405981, guid: 44b0187e85db7a046ae8831531677c25, type: 3}
