@@ -47,6 +47,13 @@ public class LevelDataEditor : Editor
 
         // PathEditing: 加载 MapCache + 装配 state + section
         var ld = (LevelData)target;
+        // 检测旧数据,banner 提示
+#pragma warning disable CS0618
+        if (ld.CheckPoints != null && ld.CheckPoints.Length > 0 && (ld.Paths == null || ld.Paths.Length == 0))
+#pragma warning restore CS0618
+        {
+            body.Add(MigrationBanner.Build(ld));
+        }
         if (ld.MapPrefab != null)
         {
             try
