@@ -33,7 +33,7 @@ public class LevelDataEditor : Editor
         body.style.paddingBottom = 12;
         body.Add(MetadataSection.Build(serializedObject));
         body.Add(ReferencesSection.Build(serializedObject));
-        body.Add(WaveTimelineSection.Build(serializedObject, OnActionSelected));
+        body.Add(WaveTimelineSection.Build(serializedObject, OnActionSelected, GetCurrentSelection));
         _detailContainer = new VisualElement();
         _detailContainer.style.paddingLeft = 12;
         _detailContainer.style.paddingRight = 12;
@@ -85,6 +85,9 @@ public class LevelDataEditor : Editor
         _selectedAction = (waveIdx, actionIdx);
         RenderDetail();
     }
+
+    // 给 WaveTimelineSection 用的 live 读取入口 (删除按钮要判断"删的是不是当前显示的 action")
+    (int, int) GetCurrentSelection() => _selectedAction;
 
     void RenderDetail()
     {

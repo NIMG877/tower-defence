@@ -14,7 +14,10 @@ public static class WaveTimelineSection
     // 整体缩放 (所有 Wave 共享, static)
     static float _zoom = 1f;
 
-    public static VisualElement Build(SerializedObject so, Action<int, int> onActionSelected)
+    public static VisualElement Build(
+        SerializedObject so,
+        Action<int, int> onActionSelected,
+        Func<(int, int)> getCurrentSelection)
     {
         var section = new VisualElement();
         section.AddToClassList("level-editor-section");
@@ -28,7 +31,7 @@ public static class WaveTimelineSection
         section.Add(wavesListContainer);
 
         // 重建: 在 zoom 变化 / wave 数组变化时调用
-        Action rebuild = () => RebuildWaves(wavesListContainer, wavesProp, so, onActionSelected);
+        Action rebuild = () => RebuildWaves(wavesListContainer, wavesProp, so, onActionSelected, getCurrentSelection);
         rebuild();
 
         // 缩放控件 (位于标题下、Wave 列表之上)
@@ -52,12 +55,12 @@ public static class WaveTimelineSection
         return section;
     }
 
-    static void RebuildWaves(VisualElement container, SerializedProperty wavesProp, SerializedObject so, Action<int, int> onActionSelected)
+    static void RebuildWaves(VisualElement container, SerializedProperty wavesProp, SerializedObject so, Action<int, int> onActionSelected, Func<(int, int)> getCurrentSelection)
     {
         container.Clear();
         for (int w = 0; w < wavesProp.arraySize; w++)
         {
-            container.Add(BuildWaveRow(w, wavesProp.GetArrayElementAtIndex(w), so, onActionSelected));
+            container.Add(BuildWaveRow(w, wavesProp.GetArrayElementAtIndex(w), so, onActionSelected, getCurrentSelection));
         }
     }
 
@@ -243,7 +246,7 @@ public static class WaveTimelineSection
         }
     }
 
-    static VisualElement BuildWaveRow(int waveIdx, SerializedProperty waveProp, SerializedObject so, Action<int, int> onActionSelected)
+    static VisualElement BuildWaveRow(int waveIdx, SerializedProperty waveProp, SerializedObject so, Action<int, int> onActionSelected, Func<(int, int)> getCurrentSelection)
     {
         var row = new VisualElement();
         row.style.backgroundColor = new Color(0.15f, 0.15f, 0.18f);
@@ -308,11 +311,15 @@ public static class WaveTimelineSection
         var delActionBtn = new Button(() =>
         {
             if (actionsProp.arraySize == 0) return;
+            // 判定: 被删的是 arraySize-1, 若当前选中 === (waveIdx, arraySize-1) 则会失效
+            var (selWave, selAction) = getCurrentSelection();
+            bool willInvalidate = selWave == waveIdx && selAction == actionsProp.arraySize - 1;
             if (EditorUtility.DisplayDialog("删除 Action", $"确认删除最后一个 Action? (当前 {actionsProp.arraySize} 个)", "删除", "取消"))
             {
                 Undo.RecordObject(so.targetObject, "Delete Action");
                 actionsProp.DeleteArrayElementAtIndex(actionsProp.arraySize - 1);
                 so.ApplyModifiedProperties();
+                if (willInvalidate) onActionSelected?.Invoke(-1, -1);
             }
         })
         { text = "× 删除 Action" };
@@ -322,11 +329,15 @@ public static class WaveTimelineSection
         // × 删除 Wave 按钮
         var delBtn = new Button(() =>
         {
+            // 判定: 删 waveIdx 会让 >= waveIdx 的所有 wave 索引下移, 当前选中在此范围内即失效
+            var (selWave, _) = getCurrentSelection();
+            bool willInvalidate = selWave >= 0 && waveIdx <= selWave;
             if (EditorUtility.DisplayDialog("删除 Wave", $"确认删除 Wave {waveIdx}?", "删除", "取消"))
             {
                 Undo.RecordObject(so.targetObject, "Delete Wave");
                 waveProp.serializedObject.FindProperty("Waves").DeleteArrayElementAtIndex(waveIdx);
                 so.ApplyModifiedProperties();
+                if (willInvalidate) onActionSelected?.Invoke(-1, -1);
             }
         })
         { text = "× 删除 Wave" };
