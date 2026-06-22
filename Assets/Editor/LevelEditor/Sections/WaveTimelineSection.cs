@@ -121,7 +121,7 @@ public static class WaveTimelineSection
             int actionIndex = i; // 闭包按值捕获, 避免循环结束后 i 越界
             var card = new Button(() => onActionSelected?.Invoke(waveIdx, actionIndex))
             {
-                text = $"A{i} {CommandTypeShort(cmd)}"
+                text = $"A{i}"
             };
             card.style.position = Position.Absolute;
             card.style.left = x;
@@ -181,6 +181,7 @@ public static class WaveTimelineSection
         bar.style.marginBottom = 8;
         bar.style.paddingLeft = 6;
         bar.style.paddingRight = 6;
+        bar.style.maxWidth = Length.Percent(100);  // 防止 bar 超出父级宽度
 
         var zoomLabel = new Label($"缩放 {_zoom:0.0}x");
         zoomLabel.style.fontSize = 11;
@@ -272,7 +273,6 @@ public static class WaveTimelineSection
         timelineScroll.style.borderTopRightRadius = 3;
         timelineScroll.style.borderBottomLeftRadius = 3;
         timelineScroll.style.borderBottomRightRadius = 3;
-        timelineScroll.style.flexShrink = 0;  // 不要被父级压缩
         timelineScroll.horizontalScrollerVisibility = ScrollerVisibility.Auto;
         timelineScroll.verticalScrollerVisibility = ScrollerVisibility.Hidden;  // 仅水平滚动
         row.Add(timelineScroll);
@@ -281,7 +281,6 @@ public static class WaveTimelineSection
         cardsContainer.style.height = 66;
         cardsContainer.style.position = Position.Relative;
         cardsContainer.style.overflow = Overflow.Visible;
-        cardsContainer.style.flexShrink = 0;
         timelineScroll.Add(cardsContainer);  // ScrollView 自动添加到 contentContainer
 
         RenderActionCards(cardsContainer, actionsProp, waveIdx, onActionSelected);
