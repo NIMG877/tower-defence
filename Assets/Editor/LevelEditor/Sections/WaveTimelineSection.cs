@@ -79,8 +79,8 @@ public static class WaveTimelineSection
         }
 
         float maxTime = ComputeMaxTime(actionsProp);
-        float tickInterval = ChooseTickInterval(maxTime);
         float pxPerSec = PixelsPerSecond();
+        float tickInterval = ChooseTickInterval(pxPerSec);
         float containerWidth = Mathf.Max(200f, maxTime * pxPerSec);
         container.style.minWidth = containerWidth;
 
@@ -107,12 +107,15 @@ public static class WaveTimelineSection
         }
 
         // 渲染 action 卡片 (按绝对时间定位, 无 gap 标记)
+        // action[i] 在 cumulativeTime 位置。
+        // 下一个 action 的位置 = 当前 action 位置 + 下一个 action 的 GapFromLastAction
+        // (因为 gap[i] 表示 "和前一个 action 的距离", 即 action[i] 距离 action[i-1] 的时间)
         float cumulativeTime = 0f;
         for (int i = 0; i < actionsProp.arraySize; i++)
         {
             var a = actionsProp.GetArrayElementAtIndex(i);
             int cmd = a.FindPropertyRelative("CommandType").intValue;
-            float gap = Mathf.Max(0f, a.FindPropertyRelative("GapFromLastAction").floatValue);
+            float myGap = Mathf.Max(0f, a.FindPropertyRelative("GapFromLastAction").floatValue);
 
             float x = cumulativeTime * pxPerSec;
             int actionIndex = i; // 闭包按值捕获, 避免循环结束后 i 越界
@@ -132,14 +135,22 @@ public static class WaveTimelineSection
             card.style.paddingRight = 2;
             container.Add(card);
 
-            cumulativeTime += gap;
+            // 推进 cumulativeTime: 用下一个 action 的 gap (它表示"和前一个 action 的距离")
+            // 即下一个 action 距离 action[i] 的时间
+            if (i + 1 < actionsProp.arraySize)
+            {
+                var next = actionsProp.GetArrayElementAtIndex(i + 1);
+                float nextGap = Mathf.Max(0f, next.FindPropertyRelative("GapFromLastAction").floatValue);
+                cumulativeTime += nextGap;
+            }
         }
     }
 
     static float ComputeMaxTime(SerializedProperty actionsProp)
     {
         float total = 0f;
-        for (int i = 0; i < actionsProp.arraySize; i++)
+        // Skip gap[0] (meaningless under "from previous" interpretation)
+        for (int i = 1; i < actionsProp.arraySize; i++)
         {
             var a = actionsProp.GetArrayElementAtIndex(i);
             total += Mathf.Max(0f, a.FindPropertyRelative("GapFromLastAction").floatValue);
@@ -147,15 +158,17 @@ public static class WaveTimelineSection
         return Mathf.Max(1f, total);
     }
 
-    static float ChooseTickInterval(float maxTime)
+    static float ChooseTickInterval(float pxPerSec)
     {
-        // 目标: 5-10 个刻度
-        float[] candidates = { 1f, 2f, 5f, 10f, 15f, 30f, 60f, 120f, 300f };
+        // 目标: 刻度之间约 80 像素 (zoom 越大刻度越细)
+        const float targetPxBetweenTicks = 80f;
+        float ideal = targetPxBetweenTicks / Mathf.Max(1f, pxPerSec);
+        float[] candidates = { 0.1f, 0.2f, 0.5f, 1f, 2f, 5f, 10f, 15f, 30f, 60f, 120f, 300f, 600f };
         foreach (var c in candidates)
         {
-            if (maxTime / c <= 10f) return c;
+            if (c >= ideal) return c;
         }
-        return 600f;
+        return candidates[candidates.Length - 1];
     }
 
     static float PixelsPerSecond() => 24f * _zoom;  // 基础刻度 × zoom
@@ -251,17 +264,24 @@ public static class WaveTimelineSection
         label.style.marginBottom = 4;
         row.Add(label);
 
-        // Action 卡片容器 (顶部刻度标签 + 下方卡片, 高 60, 允许横向溢出)
+        // 横向 ScrollView (timeline 超出 inspector 宽度时可滚动)
+        var timelineScroll = new ScrollView(ScrollViewMode.Horizontal);
+        timelineScroll.style.height = 60;
+        timelineScroll.style.backgroundColor = new Color(0.1f, 0.1f, 0.12f);
+        timelineScroll.style.borderTopLeftRadius = 3;
+        timelineScroll.style.borderTopRightRadius = 3;
+        timelineScroll.style.borderBottomLeftRadius = 3;
+        timelineScroll.style.borderBottomRightRadius = 3;
+        timelineScroll.style.flexShrink = 0;  // 不要被父级压缩
+        timelineScroll.horizontalScrollerVisibility = ScrollerVisibility.Auto;
+        row.Add(timelineScroll);
+
         var cardsContainer = new VisualElement();
         cardsContainer.style.height = 60;
-        cardsContainer.style.backgroundColor = new Color(0.1f, 0.1f, 0.12f);
-        cardsContainer.style.borderTopLeftRadius = 3;
-        cardsContainer.style.borderTopRightRadius = 3;
-        cardsContainer.style.borderBottomLeftRadius = 3;
-        cardsContainer.style.borderBottomRightRadius = 3;
         cardsContainer.style.position = Position.Relative;
         cardsContainer.style.overflow = Overflow.Visible;
-        row.Add(cardsContainer);
+        cardsContainer.style.flexShrink = 0;
+        timelineScroll.Add(cardsContainer);  // ScrollView 自动添加到 contentContainer
 
         RenderActionCards(cardsContainer, actionsProp, waveIdx, onActionSelected);
         cardsContainer.TrackPropertyValue(actionsProp, _ => RenderActionCards(cardsContainer, actionsProp, waveIdx, onActionSelected));
