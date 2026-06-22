@@ -1,0 +1,176 @@
+using UnityEngine;
+using UnityEngine.UIElements;
+
+public static class MapCanvasView
+{
+    public static VisualElement Build(SerializedObject so, PathEditingState state)
+    {
+        var canvas = new VisualElement();
+        canvas.style.width = ViewTransform.CanvasWidth;
+        canvas.style.height = ViewTransform.CanvasHeight;
+        canvas.style.backgroundColor = new Color(0.078f, 0.078f, 0.094f); // rgb(20,20,24)
+        canvas.style.borderTopLeftRadius = 3;
+        canvas.style.borderTopRightRadius = 3;
+        canvas.style.borderBottomLeftRadius = 3;
+        canvas.style.borderBottomRightRadius = 3;
+        canvas.style.borderLeftWidth = 1;
+        canvas.style.borderRightWidth = 1;
+        canvas.style.borderTopWidth = 1;
+        canvas.style.borderBottomWidth = 1;
+        canvas.style.borderLeftColor = new Color(0.235f, 0.235f, 0.275f);
+        canvas.style.borderRightColor = new Color(0.235f, 0.235f, 0.275f);
+        canvas.style.borderTopColor = new Color(0.235f, 0.235f, 0.275f);
+        canvas.style.borderBottomColor = new Color(0.235f, 0.235f, 0.275f);
+        canvas.style.overflow = Overflow.Hidden;
+        canvas.style.position = Position.Relative;
+
+        // 网格 + A* 路径
+        canvas.generateVisualContent += ctx =>
+        {
+            if (state.Cache == null) return;
+            DrawBlocks(ctx, state);
+            DrawPaths(ctx, so, state);
+        };
+
+        // Checkpoint 圆 (作为子 VisualElement 添加,UI Toolkit 自动绘于父 generateVisualContent 之上)
+        canvas.Add(CheckpointLayer.Build(so, state, canvas));
+
+        // Hint + cursor readout
+        var hint = new Label("滚轮缩放 · 中键拖拽 · 左键新建/选中 · 拖动改位置");
+        hint.style.position = Position.Absolute;
+        hint.style.bottom = 4; hint.style.right = 8;
+        hint.style.fontSize = 10;
+        hint.style.color = new Color(0.55f, 0.55f, 0.55f);
+        canvas.Add(hint);
+
+        var cursorReadout = new Label("(0.0, 0.0)");
+        cursorReadout.name = "cursor-readout";
+        cursorReadout.style.position = Position.Absolute;
+        cursorReadout.style.bottom = 4; cursorReadout.style.left = 8;
+        cursorReadout.style.fontSize = 10;
+        cursorReadout.style.color = new Color(0.55f, 0.55f, 0.55f);
+        cursorReadout.style.unityFontStyleAndWeight = FontStyle.Normal;
+        canvas.Add(cursorReadout);
+
+        // 重绘触发:state 变化、Undo/Redo
+        state.Changed += () => canvas.MarkDirtyRepaint();
+        so.Update();
+        Undo.undoRedoPerformed += () => canvas.MarkDirtyRepaint();
+
+        return canvas;
+    }
+
+    static void DrawBlocks(MeshGenerationContext ctx, PathEditingState state)
+    {
+        var p2d = ctx.painter2D;
+        var cache = state.Cache;
+        for (int i = 0; i < cache.ISize; i++)
+        {
+            for (int j = 0; j < cache.JSize; j++)
+            {
+                var bd = cache.Blocks[i, j];
+                if (bd == null) continue;
+
+                var tl = state.View.WorldToScreen(new Vector2(j, i), cache.ISize, cache.JSize);
+                var br = state.View.WorldToScreen(new Vector2(j + 1, i + 1), cache.ISize, cache.JSize);
+                var rect = new Rect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
+
+                Color fill;
+                if (bd.Deadly)
+                    fill = new Color(0.471f, 0.235f, 0.235f); // rgb(120,60,60)
+                else if (bd.PassableType > state.MoveMethod)
+                    fill = new Color(0.157f, 0.157f, 0.157f); // rgb(40,40,40)
+                else
+                    fill = BlockTypeColor(bd.PassableType);
+
+                p2d.fillColor = fill;
+                p2d.BeginPath();
+                p2d.Rect(rect);
+                p2d.Fill();
+
+                // Highland 黄框 / CanSet 青框
+                if (bd.Highland)
+                {
+                    p2d.strokeColor = new Color(0.706f, 0.549f, 0.235f);
+                    p2d.lineWidth = 2;
+                    p2d.BeginPath();
+                    p2d.Rect(rect);
+                    p2d.Stroke();
+                }
+                if (bd.CanSet)
+                {
+                    p2d.strokeColor = new Color(0.549f, 0.784f, 0.706f);
+                    p2d.lineWidth = 2;
+                    p2d.BeginPath();
+                    p2d.Rect(rect);
+                    p2d.Stroke();
+                }
+                if (bd.ProtalOutBlock != null)
+                {
+                    p2d.strokeColor = bd.ProtalColor;
+                    p2d.lineWidth = 2;
+                    p2d.BeginPath();
+                    p2d.Rect(rect);
+                    p2d.Stroke();
+                }
+            }
+        }
+    }
+
+    static Color BlockTypeColor(int passableType) => passableType switch
+    {
+        0 => new Color(0.235f, 0.255f, 0.216f), // rgb(60,65,55)
+        1 => new Color(0.176f, 0.235f, 0.353f), // rgb(45,60,90)
+        2 => new Color(0.196f, 0.314f, 0.353f), // rgb(50,80,90)
+        _ => new Color(0.157f, 0.157f, 0.157f)
+    };
+
+    static void DrawPaths(MeshGenerationContext ctx, SerializedObject so, PathEditingState state)
+    {
+        if (state.SelectedPathIdx < 0) return;
+        var pathsProp = so.FindProperty("Paths");
+        if (pathsProp == null || state.SelectedPathIdx >= pathsProp.arraySize) return;
+
+        var pathProp = pathsProp.GetArrayElementAtIndex(state.SelectedPathIdx);
+        var cpsProp = pathProp.FindPropertyRelative("CheckPoints");
+        if (cpsProp == null || cpsProp.arraySize < 2) return;
+
+        var p2d = ctx.painter2D;
+        var cache = state.Cache;
+
+        for (int k = 0; k < cpsProp.arraySize - 1; k++)
+        {
+            var start = cpsProp.GetArrayElementAtIndex(k).vector2Value;
+            var end = cpsProp.GetArrayElementAtIndex(k + 1).vector2Value;
+
+            var path = EditorPathFinder.AStar(
+                cache.Blocks, cache.ISize, cache.JSize,
+                start, end, cache.EntityR, state.MoveMethod);
+
+            p2d.strokeColor = path == null
+                ? new Color(0.95f, 0.4f, 0.4f)   // 红虚线表示不可达(简化:实线)
+                : new Color(0.306f, 0.788f, 0.627f); // rgb(78,201,160)
+            p2d.lineWidth = 3;
+            p2d.BeginPath();
+
+            if (path != null)
+            {
+                var first = state.View.WorldToScreen(path[0].targetPosition, cache.ISize, cache.JSize);
+                p2d.MoveTo(first);
+                for (int m = 1; m < path.Length; m++)
+                {
+                    var pt = state.View.WorldToScreen(path[m].targetPosition, cache.ISize, cache.JSize);
+                    p2d.LineTo(pt);
+                }
+            }
+            else
+            {
+                var s = state.View.WorldToScreen(start, cache.ISize, cache.JSize);
+                var e = state.View.WorldToScreen(end, cache.ISize, cache.JSize);
+                p2d.MoveTo(s);
+                p2d.LineTo(e);
+            }
+            p2d.Stroke();
+        }
+    }
+}
