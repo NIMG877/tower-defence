@@ -5,7 +5,8 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "BasicScripts",
-        "LevelEditor.Editor"
+        "LevelEditor.Editor",
+        "GameData"
     ],
     "includePlatforms": [
         "Editor"
