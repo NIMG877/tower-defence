@@ -33,7 +33,9 @@ public static class MapCanvasView
         };
 
         // Checkpoint 圆 (作为子 VisualElement 添加,UI Toolkit 自动绘于父 generateVisualContent 之上)
-        canvas.Add(CheckpointLayer.Build(so, state, canvas));
+        var cpLayer = CheckpointLayer.Build(so, state, canvas);
+        canvas.Add(cpLayer);
+        canvas.AddManipulator(new EditorPathManipulator(so, state, canvas, cpLayer));
 
         // Hint + cursor readout
         var hint = new Label("滚轮缩放 · 中键拖拽 · 左键新建/选中 · 拖动改位置");
