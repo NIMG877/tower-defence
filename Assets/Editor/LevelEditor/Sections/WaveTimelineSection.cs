@@ -274,6 +274,7 @@ public static class WaveTimelineSection
         timelineScroll.style.borderBottomRightRadius = 3;
         timelineScroll.style.flexShrink = 0;  // 不要被父级压缩
         timelineScroll.horizontalScrollerVisibility = ScrollerVisibility.Auto;
+        timelineScroll.verticalScrollerVisibility = ScrollerVisibility.Hidden;  // 仅水平滚动
         row.Add(timelineScroll);
 
         var cardsContainer = new VisualElement();
