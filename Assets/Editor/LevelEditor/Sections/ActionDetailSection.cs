@@ -55,6 +55,18 @@ public static class ActionDetailSection
         section.Add(MakeRow("GapFromLastAction",  actionProp.FindPropertyRelative("GapFromLastAction")));
         section.Add(MakeUnityEventRow("OnBeforeAction", actionProp.FindPropertyRelative("OnBeforeAction")));
 
+        // 条件字段容器 (按 CommandType 显隐)
+        var conditionalContainer = new VisualElement();
+        section.Add(conditionalContainer);
+
+        // CommandType 变化时重建条件容器
+        var commandTypeProp = actionProp.FindPropertyRelative("CommandType");
+        RebuildConditional(conditionalContainer, actionProp, commandTypeProp.intValue);
+        commandTypeProp.RegisterValueChangeCallback(evt =>
+        {
+            RebuildConditional(conditionalContainer, actionProp, evt.changedProperty.intValue);
+        });
+
         return section;
     }
 
@@ -99,5 +111,96 @@ public static class ActionDetailSection
         row.Add(imgui);
 
         return row;
+    }
+
+    static void RebuildConditional(VisualElement container, SerializedProperty actionProp, int commandType)
+    {
+        container.Clear();
+
+        // CommandType 0/1: 召唤/静止实体
+        if (commandType == 0 || commandType == 1)
+        {
+            var title = new Label("▸ 召唤/静止参数");
+            title.style.color = new Color(0.3f, 0.8f, 0.6f);
+            title.style.fontSize = 10;
+            title.style.marginTop = 4;
+            title.style.marginBottom = 4;
+            container.Add(title);
+
+            container.Add(MakeRow("EntityPrefabSerial", actionProp.FindPropertyRelative("EntityPrefabSerial")));
+            container.Add(MakeRow("Camp",               actionProp.FindPropertyRelative("Camp")));
+            if (commandType == 0)
+            {
+                container.Add(MakeUnityEventRow("OnActionRepeat", actionProp.FindPropertyRelative("OnActionRepeat")));
+            }
+        }
+
+        // CommandType 0/2/3/4: 路径
+        if (commandType == 0 || commandType == 2 || commandType == 3 || commandType == 4)
+        {
+            container.Add(MakeRow("PathSerial", actionProp.FindPropertyRelative("PathSerial")));
+        }
+
+        // CommandType 0: 重复召唤
+        if (commandType == 0)
+        {
+            var t = new Label("▸ 重复召唤 (仅 CommandType 0)");
+            t.style.color = new Color(0.3f, 0.8f, 0.6f);
+            t.style.fontSize = 10;
+            t.style.marginTop = 4;
+            t.style.marginBottom = 4;
+            container.Add(t);
+
+            container.Add(MakeRow("GapsFromLastRepeat", actionProp.FindPropertyRelative("GapsFromLastRepeat")));
+            container.Add(MakeRow("ModifyAttributes",   actionProp.FindPropertyRelative("ModifyAttributes")));
+
+            var modifyProp = actionProp.FindPropertyRelative("ModifyAttributes");
+            if (modifyProp.boolValue)
+            {
+                container.Add(MakeRow("ModifyLevelHpConsume", actionProp.FindPropertyRelative("ModifyLevelHpConsume")));
+                container.Add(MakeRow("ModifyPrimary",        actionProp.FindPropertyRelative("ModifyPrimary")));
+                container.Add(MakeRow("ModifyCountOperate",   actionProp.FindPropertyRelative("ModifyCountOperate")));
+            }
+            modifyProp.RegisterValueChangeCallback(_ =>
+            {
+                // ModifyAttributes 切换时重建 (展开/收起 ModifyLevelHpConsume 等)
+                RebuildConditional(container, actionProp, commandType);
+            });
+        }
+
+        // CommandType 1: 静止目标位置
+        if (commandType == 1)
+        {
+            container.Add(MakeRow("Destination", actionProp.FindPropertyRelative("Destination")));
+            container.Add(MakeRow("Orientation", actionProp.FindPropertyRelative("Orientation")));
+        }
+
+        // CommandType 5: 对话框
+        if (commandType == 5)
+        {
+            var t = new Label("▸ 对话框 (仅 CommandType 5)");
+            t.style.color = new Color(0.3f, 0.8f, 0.6f);
+            t.style.fontSize = 10;
+            t.style.marginTop = 4;
+            t.style.marginBottom = 4;
+            container.Add(t);
+
+            container.Add(MakeRow("HeadImage",    actionProp.FindPropertyRelative("HeadImage")));
+            container.Add(MakeRow("Content",      actionProp.FindPropertyRelative("Content")));
+            container.Add(MakeRow("DurationTime", actionProp.FindPropertyRelative("DurationTime")));
+        }
+
+        // CommandType 6: 面板
+        if (commandType == 6)
+        {
+            var t = new Label("▸ 面板 (仅 CommandType 6)");
+            t.style.color = new Color(0.3f, 0.8f, 0.6f);
+            t.style.fontSize = 10;
+            t.style.marginTop = 4;
+            t.style.marginBottom = 4;
+            container.Add(t);
+
+            container.Add(MakeRow("Contents", actionProp.FindPropertyRelative("Contents")));
+        }
     }
 }
