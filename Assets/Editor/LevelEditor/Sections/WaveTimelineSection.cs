@@ -24,7 +24,10 @@ public static class WaveTimelineSection
         // 关键: 强制 section 宽度 = 父级 (body.content) 宽度,
         // 防止内部 cardsContainer (minWidth = maxTime*pxPerSec) 通过 ScrollView 把 section 撑大,
         // 进而让 zoom bar 的 slider 也跟着溢出。
-        section.style.width = Length.Percent(100);
+        section.style.width = new StyleLength(new Length(100f, LengthUnit.Percent));
+        section.style.maxWidth = new StyleLength(new Length(100f, LengthUnit.Percent));
+        section.style.minWidth = 0;
+        section.style.overflow = Overflow.Hidden;  // 兜底: 即使上面没拦住, 也裁剪不显示出去
 
         var title = new Label("▸ 波次时间线");
         title.AddToClassList("level-editor-section-title");
@@ -188,16 +191,23 @@ public static class WaveTimelineSection
         bar.style.marginBottom = 8;
         bar.style.paddingLeft = 6;
         bar.style.paddingRight = 6;
-        bar.style.maxWidth = Length.Percent(100);  // 防止 bar 超出父级宽度
+        // 关键: 强制 bar 宽度 = 父级 (section) content 宽度, 不让 slider 默认 min-width 把 bar 撑超
+        bar.style.width = new StyleLength(new Length(100f, LengthUnit.Percent));
+        bar.style.maxWidth = new StyleLength(new Length(100f, LengthUnit.Percent));
+        bar.style.minWidth = 0;
 
         var zoomLabel = new Label($"缩放 {_zoom:0.0}x");
         zoomLabel.style.fontSize = 11;
         zoomLabel.style.color = new Color(0.8f, 0.8f, 0.8f);
         zoomLabel.style.width = 70;
+        zoomLabel.style.flexShrink = 0;  // label 不收缩
         bar.Add(zoomLabel);
 
         var slider = new Slider(0.5f, 5f) { value = _zoom };
         slider.style.flexGrow = 1;
+        slider.style.flexShrink = 1;
+        slider.style.flexBasis = 0;     // 从 0 开始增长, 不被 Unity 默认 min-width 撑住
+        slider.style.minWidth = 0;
         slider.showInputField = false;
         slider.RegisterValueChangedCallback(evt =>
         {
@@ -215,6 +225,7 @@ public static class WaveTimelineSection
             onZoomChanged?.Invoke();
         }) { text = "重置" };
         resetBtn.style.marginLeft = 6;
+        resetBtn.style.flexShrink = 0;  // 重置按钮不收缩
         bar.Add(resetBtn);
 
         return bar;
