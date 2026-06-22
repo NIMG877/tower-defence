@@ -22,7 +22,7 @@ public class LevelDataEditor : Editor
         header.Add(title);
         root.Add(header);
 
-        // Body
+        // Body placeholder
         var body = new VisualElement();
         body.style.paddingLeft = 12;
         body.style.paddingRight = 12;
