@@ -266,7 +266,7 @@ public static class WaveTimelineSection
 
         // 横向 ScrollView (timeline 超出 inspector 宽度时可滚动)
         var timelineScroll = new ScrollView(ScrollViewMode.Horizontal);
-        timelineScroll.style.height = 60;
+        timelineScroll.style.height = 66;
         timelineScroll.style.backgroundColor = new Color(0.1f, 0.1f, 0.12f);
         timelineScroll.style.borderTopLeftRadius = 3;
         timelineScroll.style.borderTopRightRadius = 3;
@@ -277,7 +277,7 @@ public static class WaveTimelineSection
         row.Add(timelineScroll);
 
         var cardsContainer = new VisualElement();
-        cardsContainer.style.height = 60;
+        cardsContainer.style.height = 66;
         cardsContainer.style.position = Position.Relative;
         cardsContainer.style.overflow = Overflow.Visible;
         cardsContainer.style.flexShrink = 0;
