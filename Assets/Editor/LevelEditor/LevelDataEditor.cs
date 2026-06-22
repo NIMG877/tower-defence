@@ -22,13 +22,13 @@ public class LevelDataEditor : Editor
         header.Add(title);
         root.Add(header);
 
-        // Body placeholder
+        // Body
         var body = new VisualElement();
         body.style.paddingLeft = 12;
         body.style.paddingRight = 12;
         body.style.paddingTop = 12;
         body.style.paddingBottom = 12;
-        body.Add(new Label("(Sections will be added in subsequent tasks)"));
+        body.Add(MetadataSection.Build(serializedObject));
         root.Add(body);
 
         return root;
