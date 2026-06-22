@@ -44,7 +44,7 @@ public class LevelDataEditor : Editor
         body.Add(EconomySection.Build(serializedObject));
         root.Add(body);
 
-        // 底部 Playtest 按钮 (简化版, 校验条 Task 17 再加)
+        // 底部状态条 + Playtest 按钮
         var footer = new VisualElement();
         footer.style.backgroundColor = new Color(0.16f, 0.16f, 0.2f);
         footer.style.paddingTop = 8;
@@ -53,10 +53,18 @@ public class LevelDataEditor : Editor
         footer.style.paddingRight = 12;
         footer.style.flexDirection = FlexDirection.Row;
         footer.style.alignItems = Align.Center;
+        footer.style.position = Position.Sticky;
+        footer.style.bottom = 0;
         root.Add(footer);
 
+        Label statusLabel;
+        footer.Add(ValidationBar.Build(serializedObject, out statusLabel));
+
+        var spacer = new VisualElement();
+        spacer.style.flexGrow = 1;
+        footer.Add(spacer);
+
         var playtestBtn = new Button(() => PlaytestLauncher.Playtest((LevelData)target)) { text = "▶ Playtest" };
-        playtestBtn.style.marginLeft = 0;
         playtestBtn.style.backgroundColor = new Color(0.86f, 0.86f, 0.66f);
         playtestBtn.style.color = new Color(0, 0, 0);
         playtestBtn.style.fontSize = 12;
