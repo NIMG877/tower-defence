@@ -105,10 +105,7 @@ public static class ActionDetailSection
 
             container.Add(MakeRow(actionProp.FindPropertyRelative("EntityPrefabSerial")));
             container.Add(MakeRow(actionProp.FindPropertyRelative("Camp")));
-            if (commandType == 0)
-            {
-                container.Add(MakeUnityEventRow(actionProp.FindPropertyRelative("OnActionRepeat")));
-            }
+            container.Add(MakeUnityEventRow(actionProp.FindPropertyRelative("OnActionRepeat")));
         }
 
         // CommandType 0/2/3/4: 路径
