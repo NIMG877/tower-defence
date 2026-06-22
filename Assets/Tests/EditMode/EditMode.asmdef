@@ -4,8 +4,8 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Assembly-CSharp",
-        "Assembly-CSharp-Editor"
+        "BasicScripts",
+        "LevelEditor.Editor"
     ],
     "includePlatforms": [
         "Editor"

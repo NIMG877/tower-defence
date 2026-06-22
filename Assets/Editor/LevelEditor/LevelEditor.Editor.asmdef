@@ -1,0 +1,18 @@
+{
+    "name": "LevelEditor.Editor",
+    "rootNamespace": "",
+    "references": [
+        "BasicScripts"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
