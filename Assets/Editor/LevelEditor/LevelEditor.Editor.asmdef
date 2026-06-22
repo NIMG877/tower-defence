@@ -2,7 +2,8 @@
     "name": "LevelEditor.Editor",
     "rootNamespace": "",
     "references": [
-        "BasicScripts"
+        "BasicScripts",
+        "GameData"
     ],
     "includePlatforms": [
         "Editor"
