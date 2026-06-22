@@ -11,6 +11,8 @@ public class LevelDataEditor : Editor
 {
     (int waveIdx, int actionIdx) _selectedAction = (-1, -1);
     VisualElement _detailContainer;
+    BlockMapCache _mapCache;
+    PathEditingState _pathState;
 
     public override VisualElement CreateInspectorGUI()
     {
@@ -42,6 +44,32 @@ public class LevelDataEditor : Editor
         body.Add(_detailContainer);
         RenderDetail();
         body.Add(EconomySection.Build(serializedObject));
+
+        // PathEditing: 加载 MapCache + 装配 state + section
+        var ld = (LevelData)target;
+        if (ld.MapPrefab != null)
+        {
+            try
+            {
+                _mapCache = BlockMapCache.Load(ld.MapPrefab);
+                _pathState = new PathEditingState { Cache = _mapCache };
+                body.Add(PathEditingSection.Build(serializedObject, _pathState));
+            }
+            catch (System.Exception e)
+            {
+                var err = new Label($"⚠ MapPrefab 加载失败: {e.Message}");
+                err.style.color = new Color(0.95f, 0.4f, 0.4f);
+                body.Add(err);
+            }
+        }
+        else
+        {
+            var warn = new Label("⚠ MapPrefab 未指定,无法可视化路径。请先在 References 设置 MapPrefab。");
+            warn.style.color = new Color(0.95f, 0.7f, 0.3f);
+            warn.style.paddingTop = 8; warn.style.paddingBottom = 8;
+            body.Add(warn);
+        }
+
         root.Add(body);
 
         // 底部状态条 + Playtest 按钮
@@ -108,6 +136,9 @@ public class LevelDataEditor : Editor
     void OnDisable()
     {
         Undo.undoRedoPerformed -= OnUndoRedo;
+        _mapCache?.Dispose();
+        _mapCache = null;
+        _pathState = null;
     }
 
     void OnUndoRedo()
