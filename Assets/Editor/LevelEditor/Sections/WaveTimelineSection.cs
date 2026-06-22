@@ -53,6 +53,106 @@ public static class WaveTimelineSection
         }
     }
 
+    static void RenderActionCards(VisualElement container, SerializedProperty actionsProp, int waveIdx, Action<int, int> onActionSelected)
+    {
+        container.Clear();
+        if (actionsProp.arraySize == 0)
+        {
+            var empty = new Label("(空)");
+            empty.style.color = new Color(0.4f, 0.4f, 0.4f);
+            empty.style.unityTextAlign = TextAnchor.MiddleCenter;
+            empty.style.flexGrow = 1;
+            container.Add(empty);
+            return;
+        }
+
+        // 计算总时长 (累加所有 Gap + 每条 Action 占 1s 占位宽度)
+        float totalUnits = 0f;
+        for (int i = 0; i < actionsProp.arraySize; i++)
+        {
+            var a = actionsProp.GetArrayElementAtIndex(i);
+            totalUnits += 1f; // Action 自身占 1 单位
+            totalUnits += Mathf.Max(0f, a.FindPropertyRelative("GapFromLastAction").floatValue);
+        }
+        if (totalUnits <= 0f) totalUnits = 1f;
+
+        // 渲染
+        float cursorUnits = 0f;
+        for (int i = 0; i < actionsProp.arraySize; i++)
+        {
+            var a = actionsProp.GetArrayElementAtIndex(i);
+            float gap = Mathf.Max(0f, a.FindPropertyRelative("GapFromLastAction").floatValue);
+            int cmd = a.FindPropertyRelative("CommandType").intValue;
+
+            // 间隔标记
+            if (gap > 0f)
+            {
+                var gapEl = new VisualElement();
+                gapEl.style.position = Position.Absolute;
+                gapEl.style.left = Length.Percent(cursorUnits / totalUnits * 100f);
+                gapEl.style.width = Length.Percent(gap / totalUnits * 100f);
+                gapEl.style.height = Length.Percent(100f);
+                gapEl.style.backgroundColor = new Color(0.23f, 0.23f, 0.27f);
+                gapEl.style.flexDirection = FlexDirection.Row;
+                gapEl.style.alignItems = Align.Center;
+                gapEl.style.justifyContent = Justify.Center;
+                var gapLabel = new Label($"gap {gap:0.0}s");
+                gapLabel.style.color = new Color(0.5f, 0.5f, 0.5f);
+                gapLabel.style.fontSize = 9;
+                gapEl.Add(gapLabel);
+                container.Add(gapEl);
+                cursorUnits += gap;
+            }
+
+            // 卡片
+            var card = new Button(() => onActionSelected?.Invoke(waveIdx, i))
+            {
+                text = $"A{i} {CommandTypeShort(cmd)}"
+            };
+            card.style.position = Position.Absolute;
+            card.style.left = Length.Percent(cursorUnits / totalUnits * 100f);
+            card.style.width = Length.Percent(1f / totalUnits * 100f);
+            card.style.height = Length.Percent(100f);
+            card.style.backgroundColor = CommandTypeColor(cmd);
+            card.style.color = new Color(0, 0, 0);
+            card.style.fontSize = 9;
+            card.style.paddingLeft = 2;
+            card.style.paddingRight = 2;
+            container.Add(card);
+            cursorUnits += 1f;
+        }
+    }
+
+    static string CommandTypeShort(int cmd)
+    {
+        switch (cmd)
+        {
+            case 0: return "spawn";
+            case 1: return "static";
+            case 2: return "path↑";
+            case 3: return "path↗";
+            case 4: return "path→";
+            case 5: return "dialog";
+            case 6: return "panel";
+            default: return $"c{cmd}";
+        }
+    }
+
+    static Color CommandTypeColor(int cmd)
+    {
+        switch (cmd)
+        {
+            case 0: return new Color(0.3f, 0.8f, 0.6f);   // 绿
+            case 1: return new Color(0.3f, 0.6f, 0.9f);   // 蓝
+            case 2:
+            case 3:
+            case 4: return new Color(0.86f, 0.8f, 0.66f);  // 黄
+            case 5: return new Color(0.77f, 0.52f, 0.75f); // 紫
+            case 6: return new Color(0.95f, 0.5f, 0.5f);   // 红
+            default: return new Color(0.5f, 0.5f, 0.5f);
+        }
+    }
+
     static VisualElement BuildWaveRow(int waveIdx, SerializedProperty waveProp, SerializedObject so, Action<int, int> onActionSelected)
     {
         var row = new VisualElement();
@@ -84,6 +184,9 @@ public static class WaveTimelineSection
         cardsContainer.style.borderBottomLeftRadius = 3;
         cardsContainer.style.borderBottomRightRadius = 3;
         row.Add(cardsContainer);
+
+        RenderActionCards(cardsContainer, actionsProp, waveIdx, onActionSelected);
+        actionsProp.TrackPropertyValue(actionsProp, _ => RenderActionCards(cardsContainer, actionsProp, waveIdx, onActionSelected));
 
         // + 新增 Action 按钮
         var addActionBtn = new Button(() =>
