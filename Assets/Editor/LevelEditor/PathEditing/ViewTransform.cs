@@ -21,14 +21,34 @@ public struct ViewTransform
     public const float CanvasHeight = 400f;
 
     /// <summary>
-    /// 计算让地图最大维度恰好贴满画布的 Zoom。
+    /// 计算让地图以正方形格子居中贴满画布的 Zoom + Offset。
     /// </summary>
     public static ViewTransform Fit(int iSize, int jSize)
     {
-        // float unitX = CanvasWidth / jSize;
-        // float unitY = CanvasHeight / iSize;
-        // float fitZoom = Mathf.Min(unitX, unitY);
-        return new ViewTransform { Offset = Vector2.zero, Zoom = 1 };
+        float unitX = CanvasWidth / jSize;
+        float unitY = CanvasHeight / iSize;
+        float unit = Mathf.Min(unitX, unitY);
+
+        // Map is square-cell sized at `unit` px per side. Center it in the canvas:
+        //   - If unitX < unitY (j is the wide axis / limiting), map's X spans full CanvasWidth,
+        //     map's Y is shorter than CanvasHeight → center vertically (offset.y).
+        //   - If unitY < unitX, center horizontally (offset.x).
+        // Offset is in WORLD units. WorldToScreen does (world - Offset) * unit, so:
+        //   To get screen X = (CanvasWidth - jSize*unit) / 2 when world.x = 0:
+        //     (0 - Offset.x) * unit = (CanvasWidth - jSize*unit) / 2
+        //     Offset.x = -(CanvasWidth - jSize*unit) / (2*unit)
+        //   To get screen Y = (CanvasHeight + iSize*unit) / 2 when world.y = 0 (Y is flipped):
+        //     CanvasHeight - (0 - Offset.y) * unit = (CanvasHeight + iSize*unit) / 2
+        //     Offset.y = (iSize*unit - CanvasHeight) / (2*unit)
+        float mapWidthPx = jSize * unit;
+        float mapHeightPx = iSize * unit;
+        return new ViewTransform
+        {
+            Offset = new Vector2(
+                -(CanvasWidth - mapWidthPx) / (2f * unit),
+                (mapHeightPx - CanvasHeight) / (2f * unit)),
+            Zoom = 1,
+        };
     }
 
     /// <summary>
@@ -42,10 +62,11 @@ public struct ViewTransform
     {
         float unitX = CanvasWidth / jSize;
         float unitY = CanvasHeight / iSize;
+        float unit = Mathf.Min(unitX, unitY);
         var d = world - Offset;
         return new Vector2(
-            d.x * Zoom * unitX,
-            CanvasHeight - d.y * Zoom * unitY); // Y 翻转
+            d.x * Zoom * unit,
+            CanvasHeight - d.y * Zoom * unit); // Y 翻转
     }
 
     /// <summary>screen 像素 -> editor world (整数=格子中心, Y 翻转后还原)。</summary>
@@ -53,8 +74,9 @@ public struct ViewTransform
     {
         float unitX = CanvasWidth / jSize;
         float unitY = CanvasHeight / iSize;
+        float unit = Mathf.Min(unitX, unitY);
         return new Vector2(
-            screen.x / (Zoom * unitX) + Offset.x,
-            (CanvasHeight - screen.y) / (Zoom * unitY) + Offset.y);
+            screen.x / (Zoom * unit) + Offset.x,
+            (CanvasHeight - screen.y) / (Zoom * unit) + Offset.y);
     }
 }
