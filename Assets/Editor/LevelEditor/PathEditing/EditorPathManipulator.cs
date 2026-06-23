@@ -12,6 +12,8 @@ public sealed class EditorPathManipulator : MouseManipulator
     int _dragCpIdx = -1;
     bool _rightDragging;        // 右键按下进入缩放拖拽模式
     Vector2 _rightDownLocal;    // 右键按下时鼠标位置,缩放以该点为锚
+    Vector2 _dragStartWorld;    // 左键拖 cp 起始时 cp 的世界坐标(累加基点)
+    Vector2 _dragAccumWorld;    // 左键拖 cp 期间累计的世界 delta(每帧 mouseDelta 累加到这里)
 
     public EditorPathManipulator(SerializedObject so, PathEditingState state, VisualElement canvas, VisualElement layer)
     {
@@ -52,14 +54,23 @@ public sealed class EditorPathManipulator : MouseManipulator
         {
             _state.SelectedCheckpointIdx = hitIdx;
             _dragCpIdx = hitIdx;
+            // 记下 cp 原始世界坐标 —— 拖动时用 delta 累加(每帧 mouseDelta 累加到
+            // _dragAccumWorld),而不是追踪鼠标绝对位置。避免"按下时鼠标偏 cp 中心 →
+            // cp 立刻跳到鼠标位置"的突兀感。松手时也用 _dragAccumWorld,跟 Move 阶段同源。
+            var cpProp = _so.FindProperty("Paths").GetArrayElementAtIndex(_state.SelectedPathIdx)
+                .FindPropertyRelative("CheckPoints").GetArrayElementAtIndex(hitIdx);
+            _dragStartWorld = cpProp.vector2Value;
+            _dragAccumWorld = Vector2.zero;
             _state.NotifyChanged();
             target.CaptureMouse();
         }
         else
         {
             // 在空白处新增 checkpoint(snap 由 state.Snap 决定)
+            // 不调 CaptureMouse:新增是原子动作,不需要进入拖拽态;capture 持续到下次
+            // ReleaseMouse 之前会让 canvas 偷走所有后续 mouse 事件(包括 canvas 外的),
+            // 而本路径 _dragCpIdx 永远是 -1,OnMouseUp 左键分支进不去,capture 不会释放。
             AddCheckpointAt(local);
-            target.CaptureMouse();
         }
     }
 
@@ -112,10 +123,16 @@ public sealed class EditorPathManipulator : MouseManipulator
             }
         }
 
-        // 左键拖拽 = 移动 checkpoint
-        if (_dragCpIdx >= 0 && evt.pressedButtons == (1 << (int)MouseButton.LeftMouse))
+        // 左键拖拽 = 移动 checkpoint(delta 累加模式,不是追踪鼠标绝对位置)
+        if (_dragCpIdx >= 0 && evt.pressedButtons == (1 << (int)MouseButton.LeftMouse) && _state.Cache != null)
         {
-            var world = _state.View.ScreenToWorld(evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize);
+            // 累加本帧的世界 delta 到 _dragAccumWorld
+            float unitX = ViewTransform.CanvasWidth / _state.Cache.JSize;
+            float unitY = ViewTransform.CanvasHeight / _state.Cache.ISize;
+            _dragAccumWorld += new Vector2(
+                evt.mouseDelta.x / (_state.View.Zoom * unitX),
+                -evt.mouseDelta.y / (_state.View.Zoom * unitY)); // Y 翻转
+            var world = _dragStartWorld + _dragAccumWorld;
             var writePos = _state.Snap ? ViewTransform.SnapToGrid(world) : world;
             UpdateCheckpointVisual(_dragCpIdx, writePos);
         }
@@ -123,9 +140,12 @@ public sealed class EditorPathManipulator : MouseManipulator
 
     void OnMouseUp(MouseUpEvent evt)
     {
-        if (evt.button == 0 && _dragCpIdx >= 0)
+        if (evt.button == 0 && _dragCpIdx >= 0 && _state.Cache != null)
         {
-            var world = _state.View.ScreenToWorld(evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize);
+            // 用 OnMouseMove 阶段累加的 _dragAccumWorld,不再重新反推屏幕 delta。
+            // 跟 Move 阶段完全同源(都是把 mouseDelta 累加),保证松手时 cp 落在
+            // Move 阶段最后显示的位置,不会有"最后 N 像素漂移"。
+            var world = _dragStartWorld + _dragAccumWorld;
             var writePos = _state.Snap ? ViewTransform.SnapToGrid(world) : world;
             CommitCheckpointPosition(_dragCpIdx, writePos);
             _dragCpIdx = -1;

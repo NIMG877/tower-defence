@@ -83,8 +83,6 @@ public static class MapCanvasView
                 Color fill;
                 if (bd.Deadly)
                     fill = new Color(0.471f, 0.235f, 0.235f); // rgb(120,60,60)
-                else if (bd.PassableType > state.MoveMethod)
-                    fill = new Color(0.157f, 0.157f, 0.157f); // rgb(40,40,40)
                 else
                     fill = BlockTypeColor(bd.PassableType);
 

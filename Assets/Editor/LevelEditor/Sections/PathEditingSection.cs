@@ -78,7 +78,9 @@ public static class PathEditingSection
         root.style.overflow = Overflow.Hidden;
 
         // 初始 fit 视图
-        if (state.Cache != null) state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
+        if (state.Cache != null)
+            state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
+        
         state.NotifyChanged();
 
         return root;
@@ -167,6 +169,9 @@ public static class PathEditingSection
         var delBtn = new Button(() =>
         {
             if (state.SelectedPathIdx < 0 || state.SelectedPathIdx >= pathsProp.arraySize) return;
+            string pathName = MakeChoice(state.SelectedPathIdx);
+            if (!EditorUtility.DisplayDialog("删除 Path", $"确认删除 {pathName}?该路径下的所有 Checkpoint / WaitTime 都会丢失。", "删除", "取消"))
+                return;
             Undo.RecordObject(so.targetObject, "Delete Path");
             pathsProp.DeleteArrayElementAtIndex(state.SelectedPathIdx);
             so.ApplyModifiedProperties();

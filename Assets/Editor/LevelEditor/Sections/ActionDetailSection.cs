@@ -47,7 +47,8 @@ public static class ActionDetailSection
         // 顶部信息条
         var header = new Label($"▸ 已选 Wave[{waveIdx}].Action[{actionIdx}]");
         header.style.color = new Color(0.3f, 0.8f, 0.6f);
-        header.style.fontSize = 10;
+        header.style.fontSize = 12;
+        header.style.unityFontStyleAndWeight = FontStyle.Bold;
         header.style.marginBottom = 4;
         section.Add(header);
 
@@ -117,7 +118,7 @@ public static class ActionDetailSection
         // CommandType 0: 重复召唤
         if (commandType == 0)
         {
-            var t = new Label("▸ 重复召唤 (仅 CommandType 0)");
+            var t = new Label("▸ 重复召唤");
             t.style.color = new Color(0.3f, 0.8f, 0.6f);
             t.style.fontSize = 10;
             t.style.marginTop = 4;
@@ -151,7 +152,7 @@ public static class ActionDetailSection
         // CommandType 5: 对话框
         if (commandType == 5)
         {
-            var t = new Label("▸ 对话框 (仅 CommandType 5)");
+            var t = new Label("▸ 对话框");
             t.style.color = new Color(0.3f, 0.8f, 0.6f);
             t.style.fontSize = 10;
             t.style.marginTop = 4;
@@ -166,7 +167,7 @@ public static class ActionDetailSection
         // CommandType 6: 面板
         if (commandType == 6)
         {
-            var t = new Label("▸ 面板 (仅 CommandType 6)");
+            var t = new Label("▸ 面板");
             t.style.color = new Color(0.3f, 0.8f, 0.6f);
             t.style.fontSize = 10;
             t.style.marginTop = 4;

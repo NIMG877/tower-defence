@@ -25,10 +25,10 @@ public struct ViewTransform
     /// </summary>
     public static ViewTransform Fit(int iSize, int jSize)
     {
-        float unitX = CanvasWidth / jSize;
-        float unitY = CanvasHeight / iSize;
-        float fitZoom = Mathf.Min(unitX, unitY);
-        return new ViewTransform { Offset = Vector2.zero, Zoom = fitZoom };
+        // float unitX = CanvasWidth / jSize;
+        // float unitY = CanvasHeight / iSize;
+        // float fitZoom = Mathf.Min(unitX, unitY);
+        return new ViewTransform { Offset = Vector2.zero, Zoom = 1 };
     }
 
     /// <summary>

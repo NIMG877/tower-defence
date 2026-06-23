@@ -15,7 +15,7 @@ MonoBehaviour:
   _defaults:
     Default: {fileID: 11400000, guid: 3dbbb0bb4c50fd34b894bec64ddf44d9, type: 2}
     Idle: {fileID: 11400000, guid: e6d156b4bbd570d45bf9b826ed99b81e, type: 2}
-    Start: {fileID: 0}
+    Start: {fileID: 11400000, guid: 3dbbb0bb4c50fd34b894bec64ddf44d9, type: 2}
     Die: {fileID: 11400000, guid: 91e16d0f8c0308f4da0ce82df94daccd, type: 2}
   _attack:
     AttackBegin: {fileID: 0}
@@ -41,4 +41,6 @@ MonoBehaviour:
     Animation: {fileID: 11400000, guid: 4f733e8903a971149af273c8abca3e26, type: 2}
   - Name: Die2
     Animation: {fileID: 11400000, guid: 4d3113a5619f2aa418734702381a2b32, type: 2}
+  - Name: Attack
+    Animation: {fileID: 11400000, guid: 973945fbd09c2e144b88eafd91d3b8cb, type: 2}
   _animationGroups: []

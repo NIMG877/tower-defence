@@ -35,15 +35,14 @@ public class LevelDataEditor : Editor
         body.style.paddingBottom = 12;
         body.Add(MetadataSection.Build(serializedObject));
         body.Add(ReferencesSection.Build(serializedObject));
+        body.Add(EconomySection.Build(serializedObject));
         body.Add(WaveTimelineSection.Build(serializedObject, OnActionSelected, GetCurrentSelection));
         _detailContainer = new VisualElement();
-        _detailContainer.style.paddingLeft = 12;
-        _detailContainer.style.paddingRight = 12;
         _detailContainer.style.paddingTop = 6;
         _detailContainer.style.paddingBottom = 6;
         body.Add(_detailContainer);
         RenderDetail();
-        body.Add(EconomySection.Build(serializedObject));
+       
 
         // PathEditing: 加载 MapCache + 装配 state + section
         var ld = (LevelData)target;

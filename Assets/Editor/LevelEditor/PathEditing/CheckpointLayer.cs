@@ -29,8 +29,7 @@ public static class CheckpointLayer
         if (cpsProp == null) return;
 
         var cache = state.Cache;
-        float diameter = cache.EntityR * 2f * (ViewTransform.CanvasWidth / cache.JSize) * state.View.Zoom;
-        diameter = Mathf.Clamp(diameter, 12f, 32f); // 视觉上限下限
+        float diameter = cache.EntityR * 2f * (ViewTransform.CanvasHeight / cache.ISize) * state.View.Zoom;
 
         for (int k = 0; k < cpsProp.arraySize; k++)
         {
