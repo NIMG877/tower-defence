@@ -9,7 +9,7 @@ using UnityEngine;
 public static class EditorPathFinder
 {
     public static MoveParameters[] AStar(
-        BlockData[,] blocks, int iSize, int jSize,
+        BlockState[,] blocks, int iSize, int jSize,
         Vector2 startPoint, Vector2 endPoint, float entityR, int moveMethod)
     {
         // 本地状态:对应运行时实例字段 graph/path/heap/heapCount
@@ -23,11 +23,10 @@ public static class EditorPathFinder
         {
             for (int j = 0; j < jSize; j++)
             {
-                // blocks[i,j] 可能为空(MapPrefab 有空格)或已被销毁(防御)
-                var bd = blocks[i, j];
-                if (bd == null) continue;
-                graph[i, j].plotPos = bd.transform.position;
-                graph[i, j].portalEnter = bd.ProtalOutBlock != null;
+                // BlockState 是值类型,默认即"未配置",但仍然写入 plotPos 以便后续
+                // graph[..].plotPos.x == endJ / .y == endI 终止条件成立
+                graph[i, j].plotPos = new Vector2(j, i);
+                graph[i, j].portalEnter = blocks[i, j].portalOutI != -1;
             }
         }
 
@@ -71,8 +70,7 @@ public static class EditorPathFinder
         {
             for (int j = 0; j < jSize; j++)
             {
-                var bd = blocks[i, j];
-                graph[i, j].Reset(bd != null && bd.PassableType <= moveMethod && !bd.TempOccupy);
+                graph[i, j].Reset(blocks[i, j].passableType <= moveMethod);
             }
         }
         if (!IsBlocked(graph, iSize, jSize, startPoint, endPoint, entityR))
@@ -118,8 +116,7 @@ public static class EditorPathFinder
             {
                 for (int j = 0; j < jSize; j++)
                 {
-                    var bd = blocks[i, j];
-                    graph[i, j].Reset(bd != null && bd.PassableType <= moveMethod);
+                    graph[i, j].Reset(blocks[i, j].passableType <= moveMethod);
                 }
             }
             foreach ((int i, int j) ij in JudgePointInUnWalkableBlock(startPoint, entityR))
@@ -235,17 +232,17 @@ public static class EditorPathFinder
         }
     }
 
-    private static void FindNewFrontier(BlockData[,] blocks, AStarProperty[,] graph, int iSize, int jSize,
+    private static void FindNewFrontier(BlockState[,] blocks, AStarProperty[,] graph, int iSize, int jSize,
         AStarProperty aStarProperty, Vector2 endPoint, HeapEntry[] heap, ref int heapCount)
     {
         int i = (int)aStarProperty.plotPos.y;
         int j = (int)aStarProperty.plotPos.x;
         if (graph[i, j].portalEnter)
         {
-            var portal = blocks[i, j]?.ProtalOutBlock;
-            if (portal == null) return; // 防御:portalEnter 标志位但引用已失效
-            int ti = (int)portal.transform.position.y;
-            int tj = (int)portal.transform.position.x;
+            var bd = blocks[i, j];
+            if (bd.portalOutI == -1 || bd.portalOutJ == -1) return; // 防御:portalEnter 标志位但坐标未配置
+            int ti = bd.portalOutI;
+            int tj = bd.portalOutJ;
             if (graph[ti, tj].marked == false)
             {
                 graph[ti, tj].marked = true;
@@ -290,7 +287,7 @@ public static class EditorPathFinder
         }
     }
 
-    private static MoveParameters[] CorrectTmpPositions(BlockData[,] blocks, AStarProperty[,] graph, MoveParameters[] tmpParameters, float entityR)
+    private static MoveParameters[] CorrectTmpPositions(BlockState[,] blocks, AStarProperty[,] graph, MoveParameters[] tmpParameters, float entityR)
     {
         if (tmpParameters.Length > 1)
         {
@@ -357,7 +354,7 @@ public static class EditorPathFinder
         }
     }
 
-    private static Vector2 FirstBlockLine(BlockData[,] blocks, AStarProperty[,] graph, Vector2 beginPos, Vector2 endPos, Vector2 originPosition, float entityR)
+    private static Vector2 FirstBlockLine(BlockState[,] blocks, AStarProperty[,] graph, Vector2 beginPos, Vector2 endPos, Vector2 originPosition, float entityR)
     {
         if (beginPos == endPos)
         {
@@ -397,9 +394,7 @@ public static class EditorPathFinder
                 p1 = new Vector2Int((int)(beginPos.x + 0.5), (int)(0.5 + (Y[i] + Y[i + 1]) / 2));
                 if (!graph[p1.y, p1.x].Passable)
                 {
-                    var bd = blocks[p1.y, p1.x];
-                    if (bd == null) return new Vector2(-1000, -1000);
-                    return BaseOnBlockNewPoint(bd.transform.position, endPos, beginPos, entityR);
+                    return BaseOnBlockNewPoint(new Vector2(p1.x, p1.y), endPos, beginPos, entityR);
                 }
             }
             return new Vector2(-1000, -1000);
@@ -450,9 +445,7 @@ public static class EditorPathFinder
                 p1 = new Vector2(0.5f + (X[i] + X[i + 1]) / 2, 0.5f + k * (X[i] + X[i + 1]) / 2 + b);
                 if (!graph[(int)p1.y, (int)p1.x].Passable)
                 {
-                    var bd = blocks[(int)p1.y, (int)p1.x];
-                    if (bd == null) return new Vector2(-1000, -1000);
-                    return BaseOnBlockNewPoint(bd.transform.position, endPos, beginPos, entityR);
+                    return BaseOnBlockNewPoint(new Vector2((int)p1.x, (int)p1.y), endPos, beginPos, entityR);
                 }
             }
             return new Vector2(-1000, -1000);
