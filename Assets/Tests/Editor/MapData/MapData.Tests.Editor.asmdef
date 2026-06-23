@@ -3,6 +3,7 @@
     "rootNamespace": "MapData.Tests",
     "references": [
         "BasicScripts",
+        "LevelEditor.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
