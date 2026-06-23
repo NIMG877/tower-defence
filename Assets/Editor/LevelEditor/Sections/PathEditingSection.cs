@@ -99,15 +99,14 @@ public static class PathEditingSection
 
         var pathsProp = so.FindProperty("Paths");
 
-        // 工具:用 path 索引拼显示文本(Name 优先,空时退化为 "Path {i}")
+        // 工具:用 path 索引拼显示文本(格式 "#{i}: {Name}",空 Name 退化为 "Path {i}")
         string MakeChoice(int i)
         {
             var nameProp = pathsProp.GetArrayElementAtIndex(i).FindPropertyRelative("Name");
-            var cps = pathsProp.GetArrayElementAtIndex(i).FindPropertyRelative("CheckPoints");
             var name = nameProp != null && !string.IsNullOrEmpty(nameProp.stringValue)
                 ? nameProp.stringValue
                 : $"Path {i}";
-            return $"{name} (#{i}, {cps.arraySize} cp)";
+            return $"#{i}: {name}";
         }
 
         var choices = new List<string>();
