@@ -169,26 +169,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98c15169cca6fd54088c6e3b3c07ff80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  o_default: {fileID: 11400000, guid: 3dbbb0bb4c50fd34b894bec64ddf44d9, type: 2}
-  o_idle: {fileID: 11400000, guid: e6d156b4bbd570d45bf9b826ed99b81e, type: 2}
-  o_move: {fileID: 11400000, guid: ee31e422c57b16545b7ebba954c551b4, type: 2}
-  o_attack_begin: {fileID: 0}
-  o_attack_end: {fileID: 0}
-  o_start: {fileID: 11400000, guid: 3dbbb0bb4c50fd34b894bec64ddf44d9, type: 2}
-  o_die: {fileID: 11400000, guid: 91e16d0f8c0308f4da0ce82df94daccd, type: 2}
-  o_attack_remote:
-  - {fileID: 11400000, guid: 973945fbd09c2e144b88eafd91d3b8cb, type: 2}
-  o_attack_close:
-  - {fileID: 11400000, guid: 973945fbd09c2e144b88eafd91d3b8cb, type: 2}
-  Default: {fileID: 0}
-  Idle: {fileID: 0}
-  Move: {fileID: 0}
-  Attack_Begin: {fileID: 0}
-  Attack_End: {fileID: 0}
-  Start: {fileID: 0}
-  Die: {fileID: 0}
-  Attack_Remote: []
-  Attack_Close: []
 --- !u!114 &7915518268081645992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -255,8 +235,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _talentName: "\u7206\u70B8"
   _talentDescription: "\u82E6\u529B\u6015\u62E5\u6709\u201C\u7F34\u68B0\u201D\uFF0C\u5F53\u81EA\u8EAB1.414\u5185\u5B58\u5728\u6211\u65B9\u5355\u4F4D\u65F6\uFF0C\u8FDB\u884C1s\u7684\u84C4\u529B\uFF0C\u540E\u53D6\u6D88\u201C\u7F34\u68B0\u201D\u5F00\u59CB\u653B\u51FB\uFF0C0.5s\u540E\u7206\u70B8\uFF0C\u5BF9\u5468\u56F42.915\u7684\u6240\u6709\u5B9E\u4F53\u9020\u6210\u4E00\u5B9A\u500D\u7387\u7684\u7269\u7406\u4F24\u5BB3\uFF0C\u5E76\u4EE5\u4E00\u5B9A\u529B\u5EA6\u63A8\u5F00\u3002\u7206\u70B8\u540E\u89C6\u4F5C\u88AB\u51FB\u5012\u3002\u82E5\u5728\u84C4\u529B\u4E2D\u5931\u53BB\u76EE\u6807\uFF0C\u5219\u4F1A\u8FDB\u5165\u201C\u9000\u706B\u201D\u72B6\u6001\uFF0C\u53D6\u6D88\u672C\u6B21\u84C4\u529B\uFF0C\u5E76\u91CD\u65B0\u83B7\u5F97\u201C\u7F34\u68B0\u201D"
-  _chargeLoop: {fileID: 11400000, guid: 1cd09ba1d909e3448adb862a1fe0e66e, type: 2}
-  _backout: {fileID: 11400000, guid: 4f733e8903a971149af273c8abca3e26, type: 2}
-  _die2: {fileID: 11400000, guid: 4d3113a5619f2aa418734702381a2b32, type: 2}
-  _attack: {fileID: 11400000, guid: 973945fbd09c2e144b88eafd91d3b8cb, type: 2}
+  _chargeLoop: ChargeLoop
+  _backout: BackOut
+  _die2: Die2
+  _attack: Attack
   _boomRadius: 2.915
