@@ -443,10 +443,9 @@ public static class MapEditTab
             {
                 float unitX = ViewTransform.CanvasWidth / _state.Cache.JSize;
                 float unitY = ViewTransform.CanvasHeight / _state.Cache.ISize;
-                _state.View.Offset = new Vector2(
-                    _state.View.Offset.x + evt.mouseDelta.x / (_state.View.Zoom * unitX),
-                    _state.View.Offset.y - evt.mouseDelta.y / (_state.View.Zoom * unitY)
-                );
+                _state.View.Offset -= new Vector2(
+                    evt.mouseDelta.x / (_state.View.Zoom * unitX),
+                    -evt.mouseDelta.y / (_state.View.Zoom * unitY));
                 _repaint();
             }
         }
