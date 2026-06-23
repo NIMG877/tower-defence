@@ -110,7 +110,7 @@ public static class MapEditTab
     {
         readonly SerializedObject _so;
         readonly BlockMapCache _cache;
-        readonly ViewTransform _view;
+        ViewTransform _view;
         readonly BrushState _brush;
         readonly Label _status;
         readonly PathEditingState _state;
