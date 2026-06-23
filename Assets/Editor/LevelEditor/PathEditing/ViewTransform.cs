@@ -2,8 +2,15 @@ using UnityEngine;
 
 /// <summary>
 /// 世界 (grid) 坐标与画布 (screen) 像素坐标之间的双向转换。
-/// Offset + Zoom 模型:world -> ((world - Offset) * Zoom * unit) -> screen。
-/// 与 <see cref="BlockMapCache"/> 解耦 —— 只接受原始 iSize/jSize,以便单元测试可独立构造。
+///
+/// 坐标系约定(editor 视角):
+///   - editor world 单位 = "格子中心",整数 (3, 5) = 第 4 列第 6 行格子中心。
+///   - prefab 中 BlockData 实际 transform.position 在 (3.5, 5.5);editor 不关心
+///     prefab 实际值,所有 cp / snap / 显示都用整数格子中心。
+///   - Y 轴:UI Toolkit 的 localMousePosition 向下为正,但 grid i 索引向上为正,
+///     所以 WorldToScreen 输出要翻转 Y。
+///   - 地图渲染时,cell [i, j] 的范围是 [(j-0.5, i-0.5), (j+0.5, i+0.5)],
+///     中心整数 (j, i) — 调用方自己负责传入边界坐标,这里只管单点转换。
 /// </summary>
 public struct ViewTransform
 {
@@ -25,27 +32,29 @@ public struct ViewTransform
     }
 
     /// <summary>
-    /// 吸附到最近的格子中心。-0.4 应吸附到 (-0.5, -0.5) 而非 (0.5, 0.5),
-    /// 故使用 <see cref="Mathf.Floor"/> (而非 Round) — Floor 给的是"更小整数",+0.5 即格子中心。
+    /// 吸附到最近格子的中心 — editor world 整数即格子中心,直接四舍五入即可。
     /// </summary>
     public static Vector2 SnapToGrid(Vector2 world)
-        => new Vector2(Mathf.Floor(world.x) + 0.5f, Mathf.Floor(world.y) + 0.5f);
+        => new Vector2(Mathf.Round(world.x), Mathf.Round(world.y));
 
+    /// <summary>editor world (整数=格子中心) -> screen 像素(Y 翻转以匹配 grid 方向)。</summary>
     public Vector2 WorldToScreen(Vector2 world, int iSize, int jSize)
     {
         float unitX = CanvasWidth / jSize;
         float unitY = CanvasHeight / iSize;
+        var d = world - Offset;
         return new Vector2(
-            (world.x - Offset.x) * Zoom * unitX,
-            (world.y - Offset.y) * Zoom * unitY);
+            d.x * Zoom * unitX,
+            CanvasHeight - d.y * Zoom * unitY); // Y 翻转
     }
 
+    /// <summary>screen 像素 -> editor world (整数=格子中心, Y 翻转后还原)。</summary>
     public Vector2 ScreenToWorld(Vector2 screen, int iSize, int jSize)
     {
         float unitX = CanvasWidth / jSize;
         float unitY = CanvasHeight / iSize;
         return new Vector2(
             screen.x / (Zoom * unitX) + Offset.x,
-            screen.y / (Zoom * unitY) + Offset.y);
+            (CanvasHeight - screen.y) / (Zoom * unitY) + Offset.y);
     }
 }

@@ -74,8 +74,10 @@ public static class MapCanvasView
                 var bd = cache.Blocks[i, j];
                 if (bd == null) continue;
 
-                var tl = state.View.WorldToScreen(new Vector2(j, i), cache.ISize, cache.JSize);
-                var br = state.View.WorldToScreen(new Vector2(j + 1, i + 1), cache.ISize, cache.JSize);
+                // cell [i,j] 的中心是 (j, i) 整数;UnityEngine.Rect.y 视作"顶",
+                // 顶边对应 grid y = i+0.5(屏幕 y 较小),底边对应 y = i-0.5(屏幕 y 较大)。
+                var tl = state.View.WorldToScreen(new Vector2(j - 0.5f, i + 0.5f), cache.ISize, cache.JSize);
+                var br = state.View.WorldToScreen(new Vector2(j + 0.5f, i - 0.5f), cache.ISize, cache.JSize);
                 var rect = new Rect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
 
                 Color fill;
