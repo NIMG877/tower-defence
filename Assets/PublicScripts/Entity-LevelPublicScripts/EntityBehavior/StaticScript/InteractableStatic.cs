@@ -41,32 +41,32 @@ public class InteractableStatic : MonoBehaviour, IPoolOperation
             bool xFree = true, yFree = true;
             if (AC.x > 0)
             {
-                BlockData bD = MapDataManager.Manager.GetPosBlock((int)thisP.y, (int)thisP.x + 1);
-                if (bD == null || bD.PassableType > 0)
+                BlockState bS = MapDataManager.Manager.GetPosBlock((int)thisP.y, (int)thisP.x + 1);
+                if (bS.passableType > 0)
                 {
                     xFree = false;
                 }
             }
             else if (AC.x < 0)
             {
-                BlockData bD = MapDataManager.Manager.GetPosBlock((int)thisP.y, (int)thisP.x - 1);
-                if (bD == null || bD.PassableType > 0)
+                BlockState bS = MapDataManager.Manager.GetPosBlock((int)thisP.y, (int)thisP.x - 1);
+                if (bS.passableType > 0)
                 {
                     xFree = false;
                 }
             }
             if (AC.y > 0)
             {
-                BlockData bD = MapDataManager.Manager.GetPosBlock((int)thisP.y + 1, (int)thisP.x);
-                if (bD == null || bD.PassableType > 0)
+                BlockState bS = MapDataManager.Manager.GetPosBlock((int)thisP.y + 1, (int)thisP.x);
+                if (bS.passableType > 0)
                 {
                     yFree = false;
                 }
             }
             else if (AC.y < 0)
             {
-                BlockData bD = MapDataManager.Manager.GetPosBlock((int)thisP.y - 1, (int)thisP.x);
-                if (bD == null || bD.PassableType > 0)
+                BlockState bS = MapDataManager.Manager.GetPosBlock((int)thisP.y - 1, (int)thisP.x);
+                if (bS.passableType > 0)
                 {
                     yFree = false;
                 }

@@ -358,7 +358,7 @@ namespace MyUI
         private bool[,] _staticEntityExistBlock;
         private int _canSetType;
         private List<(int i, int j)> _canSetBlockList;
-        private BlockData[,] _blockDatas;
+        private BlockState[,] _blockDatas;
         private int _iSize, _jSize;
 
         // ===== Camera =====
@@ -887,7 +887,7 @@ namespace MyUI
             _pause.image.sprite = _c;
             _pauseMask.SetActive(false);
             _timeMultiple.image.sprite = _x1;
-            _blockDatas = MapDataManager.Manager.BlockDataMatrix;
+            _blockDatas = MapDataManager.Manager.BlockStateMatrix;
             (_iSize, _jSize) = MapDataManager.Manager.MapSize;
             _rangeImgCollection.SetActive(false);
             CostSliderAndCanSetNumUpdate();
@@ -1730,19 +1730,19 @@ namespace MyUI
         // 把上一帧高亮的格子全部还原为白色,避免状态切换后残留绿块。
         private void ResetCanSetBlockColors()
         {
-            var matrix = MapDataManager.Manager.BlockDataMatrix;
             for (int i = 0; i < _canSetBlockList.Count; i++)
             {
-                matrix[_canSetBlockList[i].i, _canSetBlockList[i].j].Material.color = Color.white;
+                ref BlockState bS = ref MapDataManager.Manager.GetPosBlockRef(_canSetBlockList[i].i, _canSetBlockList[i].j);
+                if (bS.material != null) bS.material.color = Color.white;
             }
         }
 
         private void ColorBlockList(Color c)
         {
-            var matrix = MapDataManager.Manager.BlockDataMatrix;
             for (int i = 0; i < _canSetBlockList.Count; i++)
             {
-                matrix[_canSetBlockList[i].i, _canSetBlockList[i].j].Material.color = c;
+                ref BlockState bS = ref MapDataManager.Manager.GetPosBlockRef(_canSetBlockList[i].i, _canSetBlockList[i].j);
+                if (bS.material != null) bS.material.color = c;
             }
         }
 

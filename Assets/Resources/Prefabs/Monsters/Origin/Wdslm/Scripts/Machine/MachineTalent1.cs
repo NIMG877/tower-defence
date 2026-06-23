@@ -131,7 +131,7 @@ public class MachineTalent1 : Talent
     }
     private void FindBestPoint(int type, Entity entity)
     {
-        BlockData[,] map = MapDataManager.Manager.BlockDataMatrix;
+        BlockState[,] map = MapDataManager.Manager.BlockStateMatrix;
         (int iSize, int jSize) = MapDataManager.Manager.MapSize;
         (int x, int y)[] range = entity.Vision.BaseRange;
         int max = 0;
@@ -141,7 +141,7 @@ public class MachineTalent1 : Talent
         {
             for (int j = 0; j < jSize; j++)
             {
-                if (map[i, j].PassableType <= _thisMove.MoveMethod)
+                if (map[i, j].passableType <= _thisMove.MoveMethod)
                 {
                     (int o, int n) = FindBestOrientation((j, i), range);
                     if (n > max)

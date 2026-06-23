@@ -128,7 +128,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
                 {
                     int ii = _thisEntity.Movement.InBlocks[i].i;
                     int jj = _thisEntity.Movement.InBlocks[i].j;
-                    if (ii != -1 && MapDataManager.Manager.GetPosBlock(ii, jj).Highland)
+                    if (ii != -1 && MapDataManager.Manager.GetPosBlock(ii, jj).highland)
                     {
                         if (ii != pos.i && jj != pos.j)
                         {
