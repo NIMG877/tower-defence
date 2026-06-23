@@ -35,19 +35,11 @@ namespace Validation
                 }
             }
 
-            // 规则 3: WaveEntityPrefabIDs 为 null 或空 -> Error
-            if (data.WaveEntityPrefabIDs == null || data.WaveEntityPrefabIDs.Length == 0)
-            {
-                issues.Add(new ValidationIssue(
-                    ValidationSeverity.Error,
-                    "WaveEntityPrefabIDs",
-                    "WaveEntityPrefabIDs 不能为空"));
-            }
+            // 规则 3: (已删除 WaveEntityPrefabIDs 字段 — action 直接持有 EntityID)
 
-            // 规则 4: EntityPrefabSerial 越界 -> Error
-            if (data.Waves != null && data.WaveEntityPrefabIDs != null)
+            // 规则 4: EntityPrefabID 空 -> Error
+            if (data.Waves != null)
             {
-                int prefabCount = data.WaveEntityPrefabIDs.Length;
                 for (int w = 0; w < data.Waves.Length; w++)
                 {
                     var actions = data.Waves[w].Actions;
@@ -55,15 +47,15 @@ namespace Validation
                     for (int a = 0; a < actions.Length; a++)
                     {
                         var act = actions[a];
-                        // 仅对需要 EntityPrefabSerial 的 CommandType 校验 (0, 1)
+                        // 仅对需要 EntityPrefabID 的 CommandType 校验 (0, 1)
                         if (act.CommandType == 0 || act.CommandType == 1)
                         {
-                            if (act.EntityPrefabSerial < 0 || act.EntityPrefabSerial >= prefabCount)
+                            if (act.EntityPrefabID.IsNull)
                             {
                                 issues.Add(new ValidationIssue(
                                     ValidationSeverity.Error,
-                                    $"Waves[{w}].Actions[{a}].EntityPrefabSerial",
-                                    $"EntityPrefabSerial={act.EntityPrefabSerial} 越界 (有效范围 0..{prefabCount - 1})"));
+                                    $"Waves[{w}].Actions[{a}].EntityPrefabID",
+                                    $"EntityPrefabID 为空 (未指定 ID_C)"));
                             }
                         }
                     }

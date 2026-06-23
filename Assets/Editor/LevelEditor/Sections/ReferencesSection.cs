@@ -3,7 +3,8 @@ using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// 引用节: MapPrefab / EnvironmentalControlDevice (单 GameObject) + CheckPoints / WaveEntityPrefabIDs (数组)。
+/// 引用节: MapPrefab / EnvironmentalControlDevice (单 GameObject)。
+/// WaveEntityPrefabIDs 字段已删除 — action 直接持有 EntityID。
 /// </summary>
 public static class ReferencesSection
 {
@@ -19,10 +20,6 @@ public static class ReferencesSection
         section.Add(MakeSingleRow(so.FindProperty("MapPrefab")));
         section.Add(MakeSingleRow(so.FindProperty("EnvironmentalControlDevice")));
 
-        // 数组
-        var idsProp = so.FindProperty("WaveEntityPrefabIDs");
-        section.Add(MakeArrayRow(idsProp));
-
         return section;
     }
 
@@ -31,15 +28,6 @@ public static class ReferencesSection
         var field = new PropertyField(prop);
         field.BindProperty(prop);
         field.style.marginBottom = 4;
-        return field;
-    }
-
-    static VisualElement MakeArrayRow(SerializedProperty arrayProp)
-    {
-        // 直接 PropertyField 让 Unity 自己渲染 ListView (Unity 2022 ListView binding)
-        var field = new PropertyField(arrayProp);
-        field.BindProperty(arrayProp);
-        field.style.marginBottom = 8;
         return field;
     }
 }

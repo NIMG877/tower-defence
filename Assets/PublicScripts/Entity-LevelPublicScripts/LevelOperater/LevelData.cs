@@ -22,7 +22,6 @@ public class LevelData : ScriptableObject
     public GameObject EnvironmentalControlDevice;
     public LevelActions.Wave[] Waves;
     public PathData[] Paths = new PathData[0];
-    public EntityID[] WaveEntityPrefabIDs;
     public int LevelHp;
     public int Cost0;
     public int MaxCost;

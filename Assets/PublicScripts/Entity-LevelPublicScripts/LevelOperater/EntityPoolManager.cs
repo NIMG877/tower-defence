@@ -104,23 +104,25 @@ public class EntityPoolManager : IManagerStartEnd
         entity_pools = new List<EntityPool>();
     }
     private List<EntityPool> entity_pools;
-    public void CreateOrExpandEntityPool(EntityID[] idList, int[] count)
+    public void CreateOrExpandEntityPool(Dictionary<EntityID, int> entityNum)
     {
-        for (int i = 0; i < idList.Length; i++)
+        foreach (var kv in entityNum)
         {
-            EntityPool entityPool = FetchEntityPool(idList[i]);
+            EntityID id = kv.Key;
+            int count = kv.Value;
+            EntityPool entityPool = FetchEntityPool(id);
             if (entityPool == null)
             {
-                entityPool = new EntityPool(idList[i], LevelResourceSharing.LM, count[i]);
+                entityPool = new EntityPool(id, LevelResourceSharing.LM, count);
                 entity_pools.Add(entityPool);
             }
             else
             {
-                entityPool.ExpandEntityPool(count[i]);
+                entityPool.ExpandEntityPool(count);
             }
-            void GenerateCanSpawnEntityPool(EntityID id)
+            void GenerateCanSpawnEntityPool(EntityID iid, int icount)
             {
-                EntityData entityData = GameDataService.EntityRepository.Get(id);
+                EntityData entityData = GameDataService.EntityRepository.Get(iid);
                 var rIdList = entityData.CanSpawnEntityIds;
                 var rNum = entityData.CanSpawnEntityCounts;
                 for (int j = 0; j < rIdList.Count; j++)
@@ -128,17 +130,17 @@ public class EntityPoolManager : IManagerStartEnd
                     EntityPool rEP = FetchEntityPool(rIdList[j]);
                     if (rEP == null)
                     {
-                        rEP = new EntityPool(rIdList[j], LevelResourceSharing.LM, count[i] * rNum[j]);
+                        rEP = new EntityPool(rIdList[j], LevelResourceSharing.LM, icount * rNum[j]);
                         entity_pools.Add(rEP);
                     }
                     else
                     {
-                        rEP.ExpandEntityPool(count[i] * rNum[j]);
+                        rEP.ExpandEntityPool(icount * rNum[j]);
                     }
-                    GenerateCanSpawnEntityPool(rIdList[j]);
+                    GenerateCanSpawnEntityPool(rIdList[j], icount);
                 }
             }
-            GenerateCanSpawnEntityPool(idList[i]);
+            GenerateCanSpawnEntityPool(id, count);
         }
     }
     public EntityPool FetchEntityPool(EntityID id)

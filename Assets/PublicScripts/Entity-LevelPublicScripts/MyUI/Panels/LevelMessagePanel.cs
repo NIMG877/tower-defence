@@ -666,7 +666,10 @@ namespace MyUI
 
         public void InitializeStaticEntityPrefabToSelector(EntityID[] idList, int[] nums)
         {
-            EntityPoolManager.Manager.CreateOrExpandEntityPool(idList, nums);
+            // 新签名:Dictionary<EntityID,int>;并行的两个数组 → 字典
+            var poolDict = new System.Collections.Generic.Dictionary<EntityID, int>(idList.Length);
+            for (int i = 0; i < idList.Length; i++) poolDict[idList[i]] = nums[i];
+            EntityPoolManager.Manager.CreateOrExpandEntityPool(poolDict);
             int countL = _selectorObjects.Count;
             if (countL <= idList.Length)
             {

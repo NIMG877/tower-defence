@@ -45,7 +45,7 @@ public class LevelResourceSharing
         PathDataManager.Manager.CreatePaths(LD.Paths);
         PathDataManager.Manager.Initialize();
         SlidersManager.Manager.Initialize();
-        LevelActionManager.Manager.SetEntityPrefabTypesAndWaves(LD.Waves, LD.WaveEntityPrefabIDs);
+        LevelActionManager.Manager.SetEntityPrefabTypesAndWaves(LD.Waves);
         LevelActionManager.Manager.Initialize();
         LevelRescurceManager.Manager.CanSetNumLeft = LD.CanSetNum;
         LevelRescurceManager.Manager.LevelHpLeft = LD.LevelHp;

@@ -17,7 +17,7 @@ public class LevelActions
         [Tooltip("距离上一动作的间隔")] public float GapFromLastAction;
         [Tooltip("动作开始前函数")] public UnityEvent OnBeforeAction;
         // [Header("仅当CommandType为0，1时需要填写")]
-        [Tooltip("实体预制体序号")] public int EntityPrefabSerial;
+        [Tooltip("实体 ID (直接引用, 不再走 WaveEntityPrefabIDs 索引)")] public EntityID EntityPrefabID;
         [Tooltip("召唤实体阵营，1-Turret 2-Monster")] public int Camp;
         [Tooltip("动作重复函数组，对生成实体进行操作")] public UnityEvent<Entity> OnActionRepeat;
         // [Header("仅当CommandType为0，2，3，4时需要填写")]

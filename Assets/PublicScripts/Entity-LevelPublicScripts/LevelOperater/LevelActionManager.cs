@@ -23,7 +23,6 @@ public class LevelActionManager : IManagerStartEnd
         _printerWalk = new List<TrailRenderer>();
         _printerFly = new List<TrailRenderer>();
     }
-    private EntityID[] _entityIDs;
     private LevelActions.Wave[] _waves;
     private List<Entity> _waveEntities;
     private int _currentIndex;
@@ -132,11 +131,11 @@ public class LevelActionManager : IManagerStartEnd
         switch (action.CommandType)
         {
             case 0:
-                Entity movableEntity = EntityManager.Manager.SetMovableEntity(_entityIDs[action.EntityPrefabSerial], PathDataManager.Manager.GetSectionBeginPos(action.PathSerial), action.Camp, action.PathSerial);
+                Entity movableEntity = EntityManager.Manager.SetMovableEntity(action.EntityPrefabID, PathDataManager.Manager.GetSectionBeginPos(action.PathSerial), action.Camp, action.PathSerial);
                 action.OnActionRepeat?.Invoke(movableEntity);
                 break;
             case 1:
-                Entity staticEntity = EntityManager.Manager.SetStaticEntity(_entityIDs[action.EntityPrefabSerial], action.Destination, action.Camp, action.Orientation);
+                Entity staticEntity = EntityManager.Manager.SetStaticEntity(action.EntityPrefabID, action.Destination, action.Camp, action.Orientation);
                 action.OnActionRepeat?.Invoke(staticEntity);
                 break;
             case 2:
@@ -214,10 +213,9 @@ public class LevelActionManager : IManagerStartEnd
             }
         }
     }
-    public void SetEntityPrefabTypesAndWaves(LevelActions.Wave[] waves, EntityID[] prefab_ids)
+    public void SetEntityPrefabTypesAndWaves(LevelActions.Wave[] waves)
     {
         _waves = waves;
-        _entityIDs = prefab_ids;
     }
     public void MissionEnd(bool win)
     {
@@ -287,19 +285,26 @@ public class LevelActionManager : IManagerStartEnd
     {
         _currentIndex = 0;
         _waveEntities = new List<Entity>();
-        int[] entityNum = new int[_entityIDs.Length];
+        // 从 actions 扫描派生 ID -> 召唤次数,直接喂给 EntityPoolManager(不再走 WaveEntityPrefabIDs 索引)
+        Dictionary<EntityID, int> entityNum = new Dictionary<EntityID, int>();
         for (int i = 0; i < _waves.Length; i++)
         {
             LevelActions.Wave wave = _waves[i];
             for (int j = 0; j < wave.Actions.Length; j++)
             {
                 LevelActions.Action action = wave.Actions[j];
-                entityNum[action.EntityPrefabSerial] += action.CommandType switch
+                int perAction = action.CommandType switch
                 {
                     0 => action.GapsFromLastRepeat.Length,
                     1 => 1,
                     _ => 0,
                 };
+                if (perAction > 0 && !action.EntityPrefabID.IsNull)
+                {
+                    if (!entityNum.ContainsKey(action.EntityPrefabID))
+                        entityNum[action.EntityPrefabID] = 0;
+                    entityNum[action.EntityPrefabID] += perAction;
+                }
                 switch (_waves[i].Actions[j].CommandType)
                 {
                     case 0: break;
@@ -312,7 +317,7 @@ public class LevelActionManager : IManagerStartEnd
                 }
             }
         }
-        EntityPoolManager.Manager.CreateOrExpandEntityPool(_entityIDs, entityNum);
+        EntityPoolManager.Manager.CreateOrExpandEntityPool(entityNum);
     }
     public void ToStart()
     {

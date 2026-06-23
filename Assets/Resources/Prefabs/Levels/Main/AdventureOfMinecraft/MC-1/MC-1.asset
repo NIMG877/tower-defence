@@ -27,7 +27,9 @@ MonoBehaviour:
       OnBeforeAction:
         m_PersistentCalls:
           m_Calls: []
-      EntityPrefabSerial: 0
+      EntityPrefabID:
+        ID_C: m
+        ID_N: 0
       Camp: 2
       OnActionRepeat:
         m_PersistentCalls:
@@ -51,7 +53,9 @@ MonoBehaviour:
       OnBeforeAction:
         m_PersistentCalls:
           m_Calls: []
-      EntityPrefabSerial: 0
+      EntityPrefabID:
+        ID_C: m
+        ID_N: 0
       Camp: 2
       OnActionRepeat:
         m_PersistentCalls:
@@ -77,7 +81,9 @@ MonoBehaviour:
       OnBeforeAction:
         m_PersistentCalls:
           m_Calls: []
-      EntityPrefabSerial: 0
+      EntityPrefabID:
+        ID_C: m
+        ID_N: 0
       Camp: 2
       OnActionRepeat:
         m_PersistentCalls:
@@ -101,7 +107,9 @@ MonoBehaviour:
       OnBeforeAction:
         m_PersistentCalls:
           m_Calls: []
-      EntityPrefabSerial: 1
+      EntityPrefabID:
+        ID_C: m
+        ID_N: 1
       Camp: 2
       OnActionRepeat:
         m_PersistentCalls:
@@ -124,7 +132,9 @@ MonoBehaviour:
       OnBeforeAction:
         m_PersistentCalls:
           m_Calls: []
-      EntityPrefabSerial: 1
+      EntityPrefabID:
+        ID_C: m
+        ID_N: 1
       Camp: 2
       OnActionRepeat:
         m_PersistentCalls:
@@ -148,7 +158,9 @@ MonoBehaviour:
       OnBeforeAction:
         m_PersistentCalls:
           m_Calls: []
-      EntityPrefabSerial: 0
+      EntityPrefabID:
+        ID_C: m
+        ID_N: 0
       Camp: 2
       OnActionRepeat:
         m_PersistentCalls:
@@ -173,7 +185,9 @@ MonoBehaviour:
       OnBeforeAction:
         m_PersistentCalls:
           m_Calls: []
-      EntityPrefabSerial: 1
+      EntityPrefabID:
+        ID_C: m
+        ID_N: 1
       Camp: 2
       OnActionRepeat:
         m_PersistentCalls:
@@ -196,7 +210,9 @@ MonoBehaviour:
       OnBeforeAction:
         m_PersistentCalls:
           m_Calls: []
-      EntityPrefabSerial: 0
+      EntityPrefabID:
+        ID_C: m
+        ID_N: 0
       Camp: 2
       OnActionRepeat:
         m_PersistentCalls:
@@ -220,7 +236,9 @@ MonoBehaviour:
       OnBeforeAction:
         m_PersistentCalls:
           m_Calls: []
-      EntityPrefabSerial: 0
+      EntityPrefabID:
+        ID_C: m
+        ID_N: 0
       Camp: 2
       OnActionRepeat:
         m_PersistentCalls:
@@ -238,9 +256,9 @@ MonoBehaviour:
       Content: 
       DurationTime: 0
       Contents: []
-  CheckPoints: []
   Paths:
-  - CheckPoints:
+  - Name: zombie1
+    CheckPoints:
     - {x: 9, y: 1}
     - {x: 1, y: 1}
     - {x: 1, y: 4}
@@ -260,7 +278,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  - CheckPoints:
+  - Name: zombie2
+    CheckPoints:
     - {x: 9, y: 1}
     - {x: 1, y: 1}
     - {x: 1, y: 4}
@@ -280,7 +299,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  - CheckPoints:
+  - Name: zombie3
+    CheckPoints:
     - {x: 9, y: 1}
     - {x: 1, y: 1}
     - {x: 1, y: 3.5}
@@ -294,7 +314,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  - CheckPoints:
+  - Name: skeleton1
+    CheckPoints:
     - {x: 1, y: 6}
     - {x: 2, y: 6}
     - {x: 7.5, y: 6}
@@ -308,7 +329,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  - CheckPoints:
+  - Name: skeleton2
+    CheckPoints:
     - {x: 1, y: 6}
     - {x: 5.5, y: 6}
     - {x: 9, y: 6}
@@ -320,11 +342,6 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  WaveEntityPrefabIDs:
-  - ID_C: m
-    ID_N: 1
-  - ID_C: m
-    ID_N: 2
   LevelHp: 3
   Cost0: 10
   MaxCost: 99

@@ -27,7 +27,9 @@ MonoBehaviour:
       OnBeforeAction:
         m_PersistentCalls:
           m_Calls: []
-      EntityPrefabSerial: 0
+      EntityPrefabID:
+        ID_C: 
+        ID_N: 0
       Camp: 0
       OnActionRepeat:
         m_PersistentCalls:
@@ -51,7 +53,9 @@ MonoBehaviour:
       OnBeforeAction:
         m_PersistentCalls:
           m_Calls: []
-      EntityPrefabSerial: 0
+      EntityPrefabID:
+        ID_C: 
+        ID_N: 0
       Camp: 0
       OnActionRepeat:
         m_PersistentCalls:
@@ -392,7 +396,6 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  WaveEntityPrefabIDs: []
   LevelHp: 0
   Cost0: 0
   MaxCost: 0

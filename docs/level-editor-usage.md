@@ -7,13 +7,15 @@
 ## 4 个 Section
 
 - **元数据**: 关卡名/代码/描述/相机/转场贴图
-- **引用**: 拖拽 MapPrefab / EnvironmentalControlDevice / CheckPoints / WaveEntityPrefabIDs
+- **引用**: 拖拽 MapPrefab / EnvironmentalControlDevice
 - **波次时间线**: 每条 Wave 一行, Action 渲染为卡片, 卡片宽度按 GapFromLastAction 比例计算
 - **经济**: HP/成本/上限/部署上限/恢复速度
 
 ## 选中 Action 编辑
 
 点时间线上的卡片, 下方内联面板出现该 Action 的字段。CommandType 切换会实时显隐条件字段。
+
+> 2026-06-23 变更:Action 的 `EntityPrefabSerial`(整数索引)已改为 `EntityPrefabID`(直接 EntityID 二元组 `ID_C` + `ID_N`)。`WaveEntityPrefabIDs` 主清单已删除,runtime 直接从 actions 扫描派生池大小。
 
 ## 校验条
 
