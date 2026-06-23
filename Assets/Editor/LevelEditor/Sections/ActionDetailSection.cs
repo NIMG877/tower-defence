@@ -103,7 +103,7 @@ public static class ActionDetailSection
             title.style.marginBottom = 4;
             container.Add(title);
 
-            container.Add(MakeRow(actionProp.FindPropertyRelative("EntityPrefabID")));
+            container.Add(EntityIdPicker.Build(actionProp.FindPropertyRelative("EntityPrefabID")));
             container.Add(MakeRow(actionProp.FindPropertyRelative("Camp")));
             container.Add(MakeUnityEventRow(actionProp.FindPropertyRelative("OnActionRepeat")));
         }

@@ -50,7 +50,8 @@ namespace Validation
                         // 仅对需要 EntityPrefabID 的 CommandType 校验 (0, 1)
                         if (act.CommandType == 0 || act.CommandType == 1)
                         {
-                            if (act.EntityPrefabID.IsNull)
+                            // 注意:Unity 序列化 null string 后读回 "" 而非 null,IsNull 不命中
+                            if (string.IsNullOrEmpty(act.EntityPrefabID.ID_C))
                             {
                                 issues.Add(new ValidationIssue(
                                     ValidationSeverity.Error,
