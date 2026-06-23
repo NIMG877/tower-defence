@@ -4,7 +4,7 @@ public sealed class PathEditingState
 {
     public int SelectedPathIdx;
     public int SelectedCheckpointIdx = -1;
-    public int MoveMethod = 1; // 0=地面 / 1=近地 / 2=飞行
+    public int MoveMethod = 0; // 0=地面 / 1=近地 / 2=飞行
     public ViewTransform View;
     public BlockMapCache _cache; // 内部:设置时自动 Fit
     public BlockMapCache Cache
