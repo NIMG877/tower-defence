@@ -5,9 +5,9 @@ namespace MapData.Tests
 {
     public class EditorPathFinderTests
     {
-        static BlockState[,] MakeGrid(int rows, int cols, System.Action<int, int, BlockState[,]> paint = null)
+        static BlockDataEntry[,] MakeGrid(int rows, int cols, System.Action<int, int, BlockDataEntry[,]> paint = null)
         {
-            var g = new BlockState[rows, cols];
+            var g = new BlockDataEntry[rows, cols];
             if (paint != null) paint(rows, cols, g);
             return g;
         }

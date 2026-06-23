@@ -9,7 +9,7 @@ using UnityEngine;
 public static class EditorPathFinder
 {
     public static MoveParameters[] AStar(
-        BlockState[,] blocks, int iSize, int jSize,
+        BlockDataEntry[,] blocks, int iSize, int jSize,
         Vector2 startPoint, Vector2 endPoint, float entityR, int moveMethod)
     {
         // 本地状态:对应运行时实例字段 graph/path/heap/heapCount
@@ -23,7 +23,7 @@ public static class EditorPathFinder
         {
             for (int j = 0; j < jSize; j++)
             {
-                // BlockState 是值类型,默认即"未配置",但仍然写入 plotPos 以便后续
+                // BlockDataEntry 是值类型,默认即"未配置",但仍然写入 plotPos 以便后续
                 // graph[..].plotPos.x == endJ / .y == endI 终止条件成立
                 graph[i, j].plotPos = new Vector2(j, i);
                 graph[i, j].portalEnter = blocks[i, j].portalOutI != -1;
@@ -232,7 +232,7 @@ public static class EditorPathFinder
         }
     }
 
-    private static void FindNewFrontier(BlockState[,] blocks, AStarProperty[,] graph, int iSize, int jSize,
+    private static void FindNewFrontier(BlockDataEntry[,] blocks, AStarProperty[,] graph, int iSize, int jSize,
         AStarProperty aStarProperty, Vector2 endPoint, HeapEntry[] heap, ref int heapCount)
     {
         int i = (int)aStarProperty.plotPos.y;
@@ -287,7 +287,7 @@ public static class EditorPathFinder
         }
     }
 
-    private static MoveParameters[] CorrectTmpPositions(BlockState[,] blocks, AStarProperty[,] graph, MoveParameters[] tmpParameters, float entityR)
+    private static MoveParameters[] CorrectTmpPositions(BlockDataEntry[,] blocks, AStarProperty[,] graph, MoveParameters[] tmpParameters, float entityR)
     {
         if (tmpParameters.Length > 1)
         {
@@ -354,7 +354,7 @@ public static class EditorPathFinder
         }
     }
 
-    private static Vector2 FirstBlockLine(BlockState[,] blocks, AStarProperty[,] graph, Vector2 beginPos, Vector2 endPos, Vector2 originPosition, float entityR)
+    private static Vector2 FirstBlockLine(BlockDataEntry[,] blocks, AStarProperty[,] graph, Vector2 beginPos, Vector2 endPos, Vector2 originPosition, float entityR)
     {
         if (beginPos == endPos)
         {
