@@ -20,9 +20,7 @@ public static class ReferencesSection
         section.Add(MakeSingleRow(so.FindProperty("EnvironmentalControlDevice")));
 
         // 数组
-        var checkpointsProp = so.FindProperty("CheckPoints");
         var idsProp = so.FindProperty("WaveEntityPrefabIDs");
-        section.Add(MakeArrayRow(checkpointsProp));
         section.Add(MakeArrayRow(idsProp));
 
         return section;
