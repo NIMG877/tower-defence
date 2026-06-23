@@ -1,95 +1,37 @@
 using System;
-using UnityEditor;
-using UnityEngine;
 
 /// <summary>
-/// 加载后的 BlockData 缓存。
-/// 对 prefab asset 用 LoadPrefabContents 复制到隐藏 hierarchy,必须由 Dispose() 释放;
-/// cache 持有的 Blocks[,] 引用指向这些副本的 BlockData,Dispose 前应保证 root 还活着。
+/// 加载后的 BlockDataEntry 缓存。
+/// 直接从 <see cref="LevelData.MapData"/> 构建,不再需要 LoadPrefabContents;
+/// <see cref="Dispose"/> 保留为空操作,供 <c>LevelDataEditor.OnDisable</c> 调用。
 /// </summary>
 public sealed class BlockMapCache : IDisposable
 {
-    public BlockData[,] Blocks;
+    public BlockDataEntry[,] Blocks;
     public int ISize;
     public int JSize;
-    public float EntityR;
-
-    GameObject _prefabContentsRoot; // null = scene 实例(不需要 dispose)
-    bool _disposed;
 
     /// <summary>
-    /// 加载 MapPrefab 解析 BlockData 矩阵。
-    /// 接受 prefab asset 或 scene 中的 GameObject 实例。
+    /// 从 <paramref name="levelData"/> 直接解析 BlockDataEntry 矩阵。
     /// </summary>
-    public static BlockMapCache Load(GameObject mapPrefab)
+    public static BlockMapCache Load(LevelData levelData)
     {
-        if (mapPrefab == null) throw new ArgumentNullException(nameof(mapPrefab));
-
         var cache = new BlockMapCache();
-        GameObject root;
+        if (levelData == null) return cache;
 
-        // PrefabUtility.LoadPrefabContents 仅对 asset prefab 可用;对 scene 实例直接用
-        if (PrefabUtility.IsPartOfPrefabAsset(mapPrefab))
-        {
-            var path = AssetDatabase.GetAssetPath(mapPrefab);
-            if (string.IsNullOrEmpty(path))
-                throw new InvalidOperationException("MapPrefab 缺少有效的 asset 路径,无法 LoadPrefabContents");
-            root = PrefabUtility.LoadPrefabContents(path);
-            if (root == null)
-                throw new InvalidOperationException("MapPrefab 解析后 root 为空(prefab asset 加载失败?)");
-            cache._prefabContentsRoot = root; // 持有 root 引用,防止 BlockData 被销毁
-        }
-        else
-        {
-            root = mapPrefab;
-        }
+        cache.ISize = levelData.iSize;
+        cache.JSize = levelData.jSize;
+        if (cache.ISize <= 0 || cache.JSize <= 0) return cache;
 
-        cache.ParseBlocks(root);
-        cache.EntityR = EntityManager.EntityR;
+        cache.Blocks = new BlockDataEntry[cache.ISize, cache.JSize];
+        foreach (var entry in levelData.MapData)
+        {
+            if (entry.i < 0 || entry.i >= cache.ISize) continue;
+            if (entry.j < 0 || entry.j >= cache.JSize) continue;
+            cache.Blocks[entry.i, entry.j] = entry;
+        }
         return cache;
     }
 
-    void ParseBlocks(GameObject mapRoot)
-    {
-        if (mapRoot == null)
-            throw new InvalidOperationException("ParseBlocks 收到 null root");
-        var mapT = mapRoot.transform;
-        if (mapT == null)
-            throw new InvalidOperationException("MapPrefab 缺少 Transform 组件");
-
-        int childCount = mapT.childCount;
-        int maxI = 0, maxJ = 0;
-        for (int k = 0; k < childCount; k++)
-        {
-            var t = mapT.GetChild(k);
-            if (t == null) continue;
-            if (maxI < t.position.y) maxI = (int)t.position.y;
-            if (maxJ < t.position.x) maxJ = (int)t.position.x;
-        }
-        ISize = maxI + 1;
-        JSize = maxJ + 1;
-        Blocks = new BlockData[ISize, JSize];
-
-        for (int k = 0; k < childCount; k++)
-        {
-            var t = mapT.GetChild(k);
-            if (t == null) continue;
-            if (t.TryGetComponent<BlockData>(out var bd))
-            {
-                Blocks[(int)t.position.y, (int)t.position.x] = bd;
-            }
-        }
-    }
-
-    public void Dispose()
-    {
-        if (_disposed) return;
-        _disposed = true;
-        Blocks = null;
-        if (_prefabContentsRoot != null)
-        {
-            PrefabUtility.UnloadPrefabContents(_prefabContentsRoot);
-            _prefabContentsRoot = null;
-        }
-    }
+    public void Dispose() { }
 }
