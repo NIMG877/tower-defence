@@ -42,7 +42,7 @@ public class LevelResourceSharing
         EffectManager.Manager.Initialize();
         MapDataManager.Manager.CreateMap(LD.MapPrefab);
         MapDataManager.Manager.Initialize();
-        PathDataManager.Manager.CreatePaths(LD.CheckPoints);
+        PathDataManager.Manager.CreatePaths(LD.Paths);
         PathDataManager.Manager.Initialize();
         SlidersManager.Manager.Initialize();
         LevelActionManager.Manager.SetEntityPrefabTypesAndWaves(LD.Waves, LD.WaveEntityPrefabIDs);
