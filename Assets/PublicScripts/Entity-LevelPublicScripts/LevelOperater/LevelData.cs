@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
@@ -19,6 +20,10 @@ public class LevelData : ScriptableObject
     public Texture2D CutToLevelTexture;
     [Space(10)]
     public GameObject MapPrefab;
+    [Header("Map data (new)")]
+    public int iSize;
+    public int jSize;
+    public List<BlockDataEntry> MapData = new List<BlockDataEntry>();
     public GameObject EnvironmentalControlDevice;
     public LevelActions.Wave[] Waves;
     public PathData[] Paths = new PathData[0];
