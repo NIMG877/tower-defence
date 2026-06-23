@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// PathSerial 下拉框:选项源是当前 LevelData.Paths[],文案跟 PathEditingSection
+/// PathSerial 下拉框:选项源是当前 LevelData.Paths[],文案跟 PathEditTab
 /// 的 popup 一致(#{i}: {Name},空 Name 退化 "Path {i}")。
 ///
 /// PathSerial 是 int(索引),直接读写 prop.intValue;无 "-1 / 空" 选项 ——
