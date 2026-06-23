@@ -19,15 +19,24 @@ public static class MapEditorSection
         var cache = BlockMapCache.Load(levelData);
         disposable = cache;
 
-        if (levelData.iSize == 0 || levelData.jSize == 0)
+        // Warnings strip (spec §7). Re-populates whenever the editing state changes.
+        var warningsContainer = new VisualElement();
+        warningsContainer.style.paddingTop = 4;
+        warningsContainer.style.paddingBottom = 4;
+        root.Add(warningsContainer);
+
+        void RefreshWarnings()
         {
-            var placeholder = new Label("⚠ MapData 为空:先在下方设置 iSize / jSize,再开始画地图。");
-            placeholder.style.color = new Color(0.95f, 0.7f, 0.3f);
-            placeholder.style.paddingTop = 8;
-            placeholder.style.paddingBottom = 8;
-            root.Add(placeholder);
-            // Continue building — user might still want to set iSize/jSize.
+            warningsContainer.Clear();
+            foreach (var msg in cache.GetWarnings())
+            {
+                var lbl = new Label("⚠ " + msg);
+                lbl.style.color = new Color(0.95f, 0.7f, 0.3f);
+                lbl.style.paddingTop = 2;
+                warningsContainer.Add(lbl);
+            }
         }
+        // RefreshWarnings is wired to state.Changed below, after `state` is created.
 
         // Size controls
         var sizeRow = new VisualElement();
@@ -57,6 +66,9 @@ public static class MapEditorSection
 
         var state = new PathEditingState { Cache = cache };
         VisualElement currentTab = null;
+
+        state.Changed += RefreshWarnings;
+        RefreshWarnings();
 
         void ShowTab(System.Func<VisualElement> buildTab, Button activeBtn, Button inactiveBtn)
         {
