@@ -156,13 +156,33 @@ public static class PathEditingSection
 
         var delCpBtn = new Button(() =>
         {
-            // 通过 SerializedObject 删除选中 cp
-            var so = root.userData as SerializedObject;
-            // see CheckpointDetailView for delete pattern; toolbar version delegated
+            if (state.SelectedPathIdx < 0 || state.SelectedCheckpointIdx < 0) return;
+            var pathsProp = so.FindProperty("Paths");
+            if (pathsProp == null || state.SelectedPathIdx >= pathsProp.arraySize) return;
+            var pathEl = pathsProp.GetArrayElementAtIndex(state.SelectedPathIdx);
+            var cpsProp = pathEl.FindPropertyRelative("CheckPoints");
+            var wtsProp = pathEl.FindPropertyRelative("WaitTimes");
+            if (cpsProp == null || state.SelectedCheckpointIdx >= cpsProp.arraySize) return;
+            Undo.RecordObject(so.targetObject, "Delete Checkpoint");
+            cpsProp.DeleteArrayElementAtIndex(state.SelectedCheckpointIdx);
+            // WaitTimes 同步缩短(保持两条数组等长)
+            if (wtsProp != null && wtsProp.arraySize > state.SelectedCheckpointIdx)
+                wtsProp.DeleteArrayElementAtIndex(state.SelectedCheckpointIdx);
+            so.ApplyModifiedProperties();
+            // 选中态:如果删的是最后一项就前移,否则保持 idx(让后面 cp 滑上来成为新的"当前")
+            if (state.SelectedCheckpointIdx >= cpsProp.arraySize)
+                state.SelectedCheckpointIdx = cpsProp.arraySize - 1;
+            state.NotifyChanged();
         }) { text = "✕ 删除选中点" };
         delCpBtn.style.marginLeft = 4;
         delCpBtn.style.fontSize = 11;
-        // Active when state.SelectedCheckpointIdx >= 0; bind later
+        // 跟随 state 启用/禁用
+        void SyncDelEnabled()
+        {
+            delCpBtn.SetEnabled(state.SelectedCheckpointIdx >= 0);
+        }
+        state.Changed += SyncDelEnabled;
+        SyncDelEnabled();
         bar.Add(delCpBtn);
 
         var sep1 = new VisualElement();

@@ -66,15 +66,7 @@ public class LevelDataEditor : Editor
             {
                 var err = new Label($"⚠ MapPrefab 加载失败: {e.Message}");
                 err.style.color = new Color(0.95f, 0.4f, 0.4f);
-                err.style.whiteSpace = WhiteSpace.Normal;
                 body.Add(err);
-                // 调试期也把 stack 一并显示,定位 NRE 来源
-                var stack = new Label(e.StackTrace);
-                stack.style.color = new Color(0.85f, 0.6f, 0.6f);
-                stack.style.fontSize = 10;
-                stack.style.whiteSpace = WhiteSpace.Normal;
-                stack.style.marginBottom = 4;
-                body.Add(stack);
                 UnityEngine.Debug.LogError($"[LevelDataEditor] MapPrefab 加载失败: {e}");
             }
         }
