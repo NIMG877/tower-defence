@@ -53,6 +53,10 @@ public static class MapEditTab
         root.Add(BuildToolbar(state));
 
         // Split: canvas (弹性宽) + 右侧固定宽栏
+        // 初始 fit 视图 (BEFORE BuildCanvasContainer so canvas reads a valid Zoom)
+        if (state.Cache != null)
+            state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
+
         var split = new VisualElement();
         split.style.flexDirection = FlexDirection.Row;
         split.style.marginTop = 6;
@@ -75,7 +79,13 @@ public static class MapEditTab
         right.style.height = ViewTransform.CanvasHeight;
         right.style.overflow = Overflow.Hidden;
 
-        // Brush panel (top, flexGrow)
+        // Right panel order: Size (top, fixed) + Brush (middle, flexGrow) + Cell (bottom, fixed)
+        var sizePanel = BuildSizePanel(so);
+        sizePanel.style.flexShrink = 0;
+        sizePanel.style.marginBottom = 4;
+        right.Add(sizePanel);
+
+        // Brush panel (middle, flexGrow)
         var brush = new BrushState();
         var brushPanel = BuildBrushPanel(brush, state, canvasContainer);
         brushPanel.style.flexGrow = 1;
@@ -94,10 +104,6 @@ public static class MapEditTab
         root.Add(split);
 
         root.style.overflow = Overflow.Hidden;
-
-        // 初始 fit 视图
-        if (state.Cache != null)
-            state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
 
         state.NotifyChanged();
 
@@ -170,10 +176,8 @@ public static class MapEditTab
         };
 
         // Manipulator
-        var view = new ViewTransform();
-        state.View = view;
         var brush = new BrushState();
-        var manip = new MapEditManipulator(so, cache, view, brush, status, state, () => canvas.MarkDirtyRepaint());
+        var manip = new MapEditManipulator(so, cache, brush, status, state, () => canvas.MarkDirtyRepaint());
         canvas.AddManipulator(manip);
 
         // Repaint on state change / undo
@@ -302,6 +306,53 @@ public static class MapEditTab
         return panel;
     }
 
+    static VisualElement BuildSizePanel(SerializedObject so)
+    {
+        var panel = new VisualElement();
+        panel.style.flexDirection = FlexDirection.Column;
+        panel.style.backgroundColor = new Color(0.078f, 0.078f, 0.094f);
+        panel.style.borderTopLeftRadius = 3;
+        panel.style.borderTopRightRadius = 3;
+        panel.style.borderBottomLeftRadius = 3;
+        panel.style.borderBottomRightRadius = 3;
+        panel.style.paddingTop = 4; panel.style.paddingBottom = 4;
+        panel.style.paddingLeft = 6; panel.style.paddingRight = 6;
+
+        var title = new Label("▸ Map size");
+        title.style.color = new Color(0.611f, 0.863f, 0.996f);
+        title.style.fontSize = 11;
+        title.style.unityFontStyleAndWeight = FontStyle.Bold;
+        title.style.marginBottom = 4;
+        panel.Add(title);
+
+        panel.Add(MakeLabeledIntField("iSize (rows)", so, "iSize"));
+        panel.Add(MakeLabeledIntField("jSize (cols)", so, "jSize"));
+
+        return panel;
+    }
+
+    static VisualElement MakeLabeledIntField(string label, SerializedObject so, string propName)
+    {
+        var row = new VisualElement();
+        row.style.flexDirection = FlexDirection.Row;
+        row.style.alignItems = Align.Center;
+        var lbl = new Label(label);
+        lbl.style.minWidth = 90;
+        lbl.style.fontSize = 11;
+        row.Add(lbl);
+        var prop = so.FindProperty(propName);
+        var field = new IntegerField { value = prop.intValue };
+        field.style.flexGrow = 1;
+        field.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(so.targetObject, $"Change {propName}");
+            prop.intValue = Mathf.Max(0, evt.newValue);
+            so.ApplyModifiedProperties();
+        });
+        row.Add(field);
+        return row;
+    }
+
     static VisualElement MakeToggle(string label, bool initial, System.Action<bool> onChange)
     {
         var row = new VisualElement();
@@ -326,16 +377,15 @@ public static class MapEditTab
     {
         readonly SerializedObject _so;
         readonly BlockMapCache _cache;
-        ViewTransform _view;
         readonly BrushState _brush;
         readonly Label _status;
         readonly PathEditingState _state;
         readonly System.Action _repaint;
 
-        public MapEditManipulator(SerializedObject so, BlockMapCache cache, ViewTransform view,
+        public MapEditManipulator(SerializedObject so, BlockMapCache cache,
             BrushState brush, Label status, PathEditingState state, System.Action repaint)
         {
-            _so = so; _cache = cache; _view = view; _brush = brush;
+            _so = so; _cache = cache; _brush = brush;
             _status = status; _state = state; _repaint = repaint;
         }
 
@@ -358,14 +408,14 @@ public static class MapEditTab
         void OnWheel(WheelEvent evt)
         {
             float delta = -evt.delta.y;
-            _view.Zoom = Mathf.Clamp(_view.Zoom * Mathf.Pow(1.01f, delta), 0.25f, 16f);
+            _state.View.Zoom = Mathf.Clamp(_state.View.Zoom * Mathf.Pow(1.01f, delta), 0.25f, 16f);
             _repaint();
         }
 
         (int i, int j)? ScreenToCell(Vector2 local)
         {
             if (_cache.Blocks == null) return null;
-            var world = _view.ScreenToWorld(local, _cache.ISize, _cache.JSize);
+            var world = _state.View.ScreenToWorld(local, _cache.ISize, _cache.JSize);
             int i = (int)(world.y + 0.5f);
             int j = (int)(world.x + 0.5f);
             if (i < 0 || j < 0 || i >= _cache.ISize || j >= _cache.JSize) return null;

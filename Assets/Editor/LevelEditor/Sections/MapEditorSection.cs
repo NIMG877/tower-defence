@@ -39,15 +39,6 @@ public static class MapEditorSection
         }
         // RefreshWarnings is wired to state.Changed below, after `state` is created.
 
-        // Size controls
-        var sizeRow = new VisualElement();
-        sizeRow.style.flexDirection = FlexDirection.Row;
-        sizeRow.style.paddingTop = 4;
-        sizeRow.style.paddingBottom = 4;
-        sizeRow.Add(MakeLabeledIntField("iSize (rows)", so, "iSize", cache));
-        sizeRow.Add(MakeLabeledIntField("jSize (cols)", so, "jSize", cache));
-        root.Add(sizeRow);
-
         // Tab container
         var tabBar = new VisualElement();
         tabBar.style.flexDirection = FlexDirection.Row;
@@ -92,30 +83,5 @@ public static class MapEditorSection
         ShowTab(() => MapEditTab.Build(so, cache, state), mapTabBtn, pathTabBtn);
 
         return root;
-    }
-
-    static VisualElement MakeLabeledIntField(string label, SerializedObject so, string propName, BlockMapCache cache)
-    {
-        var row = new VisualElement();
-        row.style.flexDirection = FlexDirection.Row;
-        row.style.alignItems = Align.Center;
-        row.style.marginRight = 12;
-        var lbl = new Label(label);
-        lbl.style.minWidth = 80;
-        row.Add(lbl);
-        var prop = so.FindProperty(propName);
-        var field = new IntegerField { value = prop.intValue };
-        field.style.width = 60;
-        field.RegisterValueChangedCallback(evt =>
-        {
-            Undo.RecordObject(so.targetObject, $"Change {propName}");
-            prop.intValue = Mathf.Max(0, evt.newValue);
-            so.ApplyModifiedProperties();
-            // Note: cache is stale until user reloads section. The section
-            // could be torn down and rebuilt on size change; for simplicity
-            // we leave the rebuild to the user closing/reopening the inspector.
-        });
-        row.Add(field);
-        return row;
     }
 }
