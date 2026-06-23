@@ -22,12 +22,51 @@ public static class CheckpointListView
         root.style.paddingLeft = 6; root.style.paddingRight = 6;
         root.style.marginBottom = 6;
 
-        var header = new Label("▸ Checkpoints");
+        // Header:▸ [name TextField] (N cp)
+        var headerRow = new VisualElement();
+        headerRow.style.flexDirection = FlexDirection.Row;
+        headerRow.style.alignItems = Align.Center;
+        headerRow.style.marginBottom = 4;
+        headerRow.style.flexShrink = 0;
+
+        // ▸ 前缀
+        var prefix = new Label("▸");
+        prefix.style.color = new Color(0.611f, 0.863f, 0.996f);
+        prefix.style.fontSize = 11;
+        prefix.style.flexShrink = 0;
+        prefix.style.marginRight = 4;
+        headerRow.Add(prefix);
+
+        // name TextField(给当前 path 命名)
+        var nameField = new TextField { value = "" };
+        nameField.style.flexGrow = 1;
+        nameField.style.flexShrink = 1;
+        nameField.style.minWidth = 0;
+        nameField.style.marginRight = 4;
+        nameField.style.fontSize = 11;
+        nameField.tooltip = "当前路径的显示名(可空)";
+        nameField.RegisterValueChangedCallback(evt =>
+        {
+            if (state.SelectedPathIdx < 0) return;
+            var arr = so.FindProperty("Paths");
+            if (arr == null || state.SelectedPathIdx >= arr.arraySize) return;
+            var nameProp = arr.GetArrayElementAtIndex(state.SelectedPathIdx).FindPropertyRelative("Name");
+            if (nameProp == null) return;
+            Undo.RecordObject(so.targetObject, "Rename Path");
+            nameProp.stringValue = evt.newValue ?? "";
+            so.ApplyModifiedProperties();
+            state.NotifyChanged();
+        });
+        headerRow.Add(nameField);
+
+        // (N cp) 计数
+        var header = new Label("Checkpoints");
         header.style.color = new Color(0.611f, 0.863f, 0.996f);
         header.style.fontSize = 11;
-        header.style.marginBottom = 4;
         header.style.flexShrink = 0;
-        root.Add(header);
+        headerRow.Add(header);
+
+        root.Add(headerRow);
 
         // 用 ScrollView 包裹行列表 — 当 cp 多时只滚动这部分,不影响 detail
         var scroll = new ScrollView(ScrollViewMode.Vertical);
@@ -43,13 +82,23 @@ public static class CheckpointListView
         void Rebuild()
         {
             list.Clear();
-            if (state.SelectedPathIdx < 0) return;
+            if (state.SelectedPathIdx < 0)
+            {
+                header.text = "(未选中)";
+                nameField.SetValueWithoutNotify("");
+                nameField.SetEnabled(false);
+                return;
+            }
+            nameField.SetEnabled(true);
             var pathProp = so.FindProperty("Paths").GetArrayElementAtIndex(state.SelectedPathIdx);
             var cpsProp = pathProp.FindPropertyRelative("CheckPoints");
             var wtsProp = pathProp.FindPropertyRelative("WaitTimes");
+            var nameProp = pathProp.FindPropertyRelative("Name");
             if (cpsProp == null) return;
 
-            header.text = $"▸ Checkpoints ({cpsProp.arraySize})";
+            header.text = $"({cpsProp.arraySize} cp)";
+            // 同步 nameField(防止 state.Changed 触发时 TextField 显示与 SerializedProperty 不一致)
+            if (nameProp != null) nameField.SetValueWithoutNotify(nameProp.stringValue ?? "");
 
             for (int k = 0; k < cpsProp.arraySize; k++)
             {
