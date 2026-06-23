@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -36,29 +35,47 @@ public static class PathEditingSection
 
         // Path picker
         root.Add(BuildPathPicker(so, state));
-
-        // Toolbar(canvas 还没建,用闭包延迟获取引用)
-        VisualElement canvasRef = null;
-        root.Add(BuildToolbar(so, state, root, () => canvasRef));
-
+        // Toolbar
+        root.Add(BuildToolbar(so, state, root));
         // Split: canvas + side panel
+        // 画布固定 600x400,不被父压缩(flexShrink=0);水平溢出走 root 滚动
         var split = new VisualElement();
         split.style.flexDirection = FlexDirection.Row;
         split.style.marginTop = 6;
+        split.style.flexShrink = 0;
 
-        canvasRef = MapCanvasView.Build(so, state);
-        split.Add(canvasRef);
+        var canvas = MapCanvasView.Build(so, state);
+        canvas.style.flexShrink = 0;
+        split.Add(canvas);
 
+        // 右侧栏:总高度不超过画布高度,内部 vertical,list flexGrow 占剩余,detail 固定高
         var right = new VisualElement();
         right.style.flexDirection = FlexDirection.Column;
         right.style.flexGrow = 1;
+        right.style.flexShrink = 1;
         right.style.marginLeft = 8;
         right.style.minWidth = 180;
-        right.Add(CheckpointListView.Build(so, state));
-        right.Add(CheckpointDetailView.Build(so, state));
-        split.Add(right);
+        right.style.height = ViewTransform.CanvasHeight; // 上限 = 画布高度
+        right.style.maxHeight = ViewTransform.CanvasHeight;
+        right.style.overflow = Overflow.Hidden; // 内部各自处理滚动
 
+        var listView = CheckpointListView.Build(so, state);
+        listView.style.flexGrow = 1; // 占据剩余高度
+        listView.style.flexShrink = 1;
+        listView.style.minHeight = 60; // 即使 detail 高,list 至少 60px
+        listView.style.overflow = Overflow.Hidden; // 内部 list 容器单独滚动
+        right.Add(listView);
+
+        var detailView = CheckpointDetailView.Build(so, state);
+        detailView.style.flexShrink = 0; // 高度固定,不被压
+        detailView.style.marginTop = 4;
+        right.Add(detailView);
+
+        split.Add(right);
         root.Add(split);
+
+        // 整体允许水平滚动(画布固定 600,inspector 窄时画布完整可见)
+        root.style.overflow = Overflow.Hidden; // 自身不滚,外层(inspector body)滚
 
         // 初始 fit 视图
         if (state.Cache != null) state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
@@ -141,7 +158,7 @@ public static class PathEditingSection
         return row;
     }
 
-    static VisualElement BuildToolbar(SerializedObject so, PathEditingState state, VisualElement root, Func<VisualElement> getCanvas)
+    static VisualElement BuildToolbar(SerializedObject so, PathEditingState state, VisualElement root)
     {
         var bar = new VisualElement();
         bar.style.flexDirection = FlexDirection.Row;
@@ -235,15 +252,7 @@ public static class PathEditingSection
         var resetBtn = new Button(() =>
         {
             if (state.Cache != null)
-            {
-                // 用 canvas 实际 contentRect 让 Fit 基于可见区域,而不是 600×400 默认
-                var canvas = getCanvas();
-                var size = canvas != null ? canvas.contentRect.size : Vector2.zero;
-                if (size.x > 1f && size.y > 1f)
-                    state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize, size.x, size.y);
-                else
-                    state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
-            }
+                state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
             state.NotifyChanged();
         }) { text = "↺ 重置视图" };
         resetBtn.style.fontSize = 11;

@@ -26,11 +26,19 @@ public static class CheckpointListView
         header.style.color = new Color(0.611f, 0.863f, 0.996f);
         header.style.fontSize = 11;
         header.style.marginBottom = 4;
+        header.style.flexShrink = 0;
         root.Add(header);
 
+        // 用 ScrollView 包裹行列表 — 当 cp 多时只滚动这部分,不影响 detail
+        var scroll = new ScrollView(ScrollViewMode.Vertical);
+        scroll.name = "cp-list-scroll";
+        scroll.style.flexGrow = 1;
+        scroll.style.minHeight = 0;
         var list = new VisualElement();
         list.name = "cp-list";
-        root.Add(list);
+        list.style.flexShrink = 0; // 行高度累加,允许撑出 ScrollView
+        scroll.Add(list);
+        root.Add(scroll);
 
         void Rebuild()
         {
