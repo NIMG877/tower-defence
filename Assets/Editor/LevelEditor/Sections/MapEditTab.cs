@@ -62,8 +62,11 @@ public static class MapEditTab
         split.style.marginTop = 6;
         split.style.flexShrink = 0;
 
+        // Brush panel (middle, flexGrow) — created FIRST so canvas + brush share one instance
+        var brush = new BrushState();
+
         // 画布容器(flexGrow=1 占满剩余宽度,最小宽 320,高度固定 400)
-        var canvasContainer = BuildCanvasContainer(so, cache, state);
+        var canvasContainer = BuildCanvasContainer(so, cache, brush, state);
         canvasContainer.style.flexGrow = 1;
         canvasContainer.style.flexShrink = 1;
         canvasContainer.style.minWidth = 320;
@@ -86,7 +89,6 @@ public static class MapEditTab
         right.Add(sizePanel);
 
         // Brush panel (middle, flexGrow)
-        var brush = new BrushState();
         var brushPanel = BuildBrushPanel(brush, state, canvasContainer);
         brushPanel.style.flexGrow = 1;
         brushPanel.style.flexShrink = 1;
@@ -129,7 +131,7 @@ public static class MapEditTab
         return row;
     }
 
-    static VisualElement BuildCanvasContainer(SerializedObject so, BlockMapCache cache, PathEditingState state)
+    static VisualElement BuildCanvasContainer(SerializedObject so, BlockMapCache cache, BrushState brush, PathEditingState state)
     {
         var canvas = new VisualElement();
         canvas.style.width = ViewTransform.CanvasWidth;
@@ -176,7 +178,6 @@ public static class MapEditTab
         };
 
         // Manipulator
-        var brush = new BrushState();
         var manip = new MapEditManipulator(so, cache, brush, status, state, () => canvas.MarkDirtyRepaint());
         canvas.AddManipulator(manip);
 
