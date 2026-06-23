@@ -38,10 +38,13 @@ public static class EntityIdPicker
         row.style.alignItems = Align.Center;
         row.style.marginBottom = 2;
 
-        // 字段名 Label(模拟 PropertyField 的左侧标签),Tooltip 走 SerializedProperty.tooltip
+        // 字段名 Label(模拟 PropertyField 的左侧标签)
+        // 用 width(固定) 而非 minWidth:label 文本 "EntityPrefabID" 自然宽 ~110px,
+        // 如果只设 minWidth,label 会按内容撑开,picker 虽然 flexGrow=1 也吃不准剩余空间
         var fieldLabel = new Label(prop.displayName) { tooltip = prop.tooltip };
-        fieldLabel.style.minWidth = 90;
+        fieldLabel.style.width = 120;
         fieldLabel.style.marginRight = 4;
+        fieldLabel.style.flexShrink = 0;
         fieldLabel.style.unityTextAlign = TextAnchor.MiddleLeft;
         row.Add(fieldLabel);
 
@@ -93,6 +96,7 @@ public static class EntityIdPicker
 
         var popup = new PopupField<string>(display, initialIdx);
         popup.style.flexGrow = 1;
+        popup.style.flexShrink = 1;
         popup.style.minWidth = 0;
         popup.RegisterValueChangedCallback(evt =>
         {
