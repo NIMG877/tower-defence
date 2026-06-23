@@ -64,8 +64,8 @@ public static class EntityIdPicker
             var d = all[i];
             if (d == null || string.IsNullOrEmpty(d.ID.ID_C)) continue; // 跳过 OnValidate 报警的脏数据
             ids.Add(d.ID);
-            string label = !string.IsNullOrEmpty(d.ChineseName)
-                ? $"{d.ID.ID_C}-{d.ID.ID_N} ({d.ChineseName})"
+            string label = !string.IsNullOrEmpty(d.EnglishName)
+                ? $"{d.ID.ID_C}-{d.ID.ID_N} ({d.EnglishName})"
                 : $"{d.ID.ID_C}-{d.ID.ID_N}";
             display.Add(label);
         }
