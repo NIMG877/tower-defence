@@ -122,6 +122,21 @@ public class LevelDataEditor : Editor
     void OnEnable()
     {
         Undo.undoRedoPerformed += OnUndoRedo;
+        var ld = (LevelData)target;
+        if (ld.MapData != null && ld.MapData.Count == 0)
+        {
+            try
+            {
+                if (MapAutoMigrator.MigrateLevelData(ld))
+                {
+                    Debug.Log($"[LevelDataEditor] Auto-migrated {ld.MapData.Count} blocks from {ld.name}");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[LevelDataEditor] Auto-migration failed: {e}");
+            }
+        }
     }
 
     void OnDisable()
