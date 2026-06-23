@@ -113,6 +113,10 @@ public class MapDataManager : IManagerStartEnd
             return default;
         }
     }
+    public bool IsValid(int i, int j)
+    {
+        return BlockStateMatrix != null && i >= 0 && i < iSize && j >= 0 && j < jSize;
+    }
     public BlockState[] GetCricleCoverBlocks((float x, float y) posC, float r)
     {
         (int i, int j) ij0 = ((int)(posC.y + 0.5), (int)(posC.x + 0.5));
@@ -211,7 +215,7 @@ public class MapDataManager : IManagerStartEnd
                 {
                     x = pos.x + originRange[i].x;
                     y = pos.y + originRange[i].y;
-                    if (GetPosBlock(y, x) != null)
+                    if (IsValid(y, x))
                     {
                         rangeList.Add((x, y));
                     }
@@ -222,7 +226,7 @@ public class MapDataManager : IManagerStartEnd
                 {
                     x = pos.x + originRange[i].y;
                     y = pos.y - originRange[i].x;
-                    if (GetPosBlock(y, x) != null)
+                    if (IsValid(y, x))
                     {
                         rangeList.Add((x, y));
                     }
@@ -233,7 +237,7 @@ public class MapDataManager : IManagerStartEnd
                 {
                     x = pos.x - originRange[i].x;
                     y = pos.y - originRange[i].y;
-                    if (GetPosBlock(y, x) != null)
+                    if (IsValid(y, x))
                     {
                         rangeList.Add((x, y));
                     }
@@ -244,7 +248,7 @@ public class MapDataManager : IManagerStartEnd
                 {
                     x = pos.x - originRange[i].y;
                     y = pos.y + originRange[i].x;
-                    if (GetPosBlock(y, x) != null)
+                    if (IsValid(y, x))
                     {
                         rangeList.Add((x, y));
                     }
