@@ -77,12 +77,15 @@ public sealed class EditorPathManipulator : MouseManipulator
             readout.text = $"({world.x:F1}, {world.y:F1})";
         }
 
-        // 中键拖拽 = 平移
-        if (evt.pressedButtons == (1 << (int)MouseButton.MiddleMouse))
+        // 中键拖拽 = 平移(屏幕像素 1:1,鼠标 N px = 视角 N px)
+        if (evt.pressedButtons == (1 << (int)MouseButton.MiddleMouse) && _state.Cache != null)
         {
+            float unitX = ViewTransform.CanvasWidth / _state.Cache.JSize;
+            float unitY = ViewTransform.CanvasHeight / _state.Cache.ISize;
+            // 鼠标 Y 向下 → grid y 减小(让"鼠标下,图也下"的自然手感)
             _state.View.Offset -= new Vector2(
-                evt.mouseDelta.x / _state.View.Zoom,
-                evt.mouseDelta.y / _state.View.Zoom);
+                evt.mouseDelta.x / (_state.View.Zoom * unitX),
+                -evt.mouseDelta.y / (_state.View.Zoom * unitY));
             _state.NotifyChanged();
         }
 
