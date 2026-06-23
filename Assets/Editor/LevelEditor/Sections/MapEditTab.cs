@@ -160,7 +160,7 @@ public static class MapEditTab
         canvas.Add(status);
 
         // Hint label (bottom-right)
-        var hint = new Label("左键:画刷 / portal源 · 右键:清除 · 滚轮:缩放");
+        var hint = new Label("左键:画刷 / portal源 · 右键拖:缩放 · 中键拖:平移");
         hint.name = "canvas-hint";
         hint.style.position = Position.Absolute;
         hint.style.bottom = 4; hint.style.right = 8;
@@ -244,7 +244,7 @@ public static class MapEditTab
         portalRow.Add(portalEnum);
         panel.Add(portalRow);
 
-        var hint = new Label("提示:左键应用画刷;portal 两段式;右键清除。");
+        var hint = new Label("提示:左键应用画刷;portal 两段式;右键拖=缩放;中键拖=平移。");
         hint.style.fontSize = 10;
         hint.style.color = new Color(0.55f, 0.55f, 0.55f);
         hint.style.marginTop = 8;
@@ -389,12 +389,16 @@ public static class MapEditTab
             _status = status; _state = state; _repaint = repaint;
         }
 
+        bool _rightDragging;
+        bool _midDragging;
+        Vector2 _rightDownLocal;
+        Vector2 _midDownLocal;
+
         protected override void RegisterCallbacksOnTarget()
         {
             target.RegisterCallback<MouseDownEvent>(OnMouseDown);
             target.RegisterCallback<MouseMoveEvent>(OnMouseMove);
             target.RegisterCallback<MouseUpEvent>(OnMouseUp);
-            target.RegisterCallback<WheelEvent>(OnWheel);
         }
 
         protected override void UnregisterCallbacksFromTarget()
@@ -402,14 +406,6 @@ public static class MapEditTab
             target.UnregisterCallback<MouseDownEvent>(OnMouseDown);
             target.UnregisterCallback<MouseMoveEvent>(OnMouseMove);
             target.UnregisterCallback<MouseUpEvent>(OnMouseUp);
-            target.UnregisterCallback<WheelEvent>(OnWheel);
-        }
-
-        void OnWheel(WheelEvent evt)
-        {
-            float delta = -evt.delta.y;
-            _state.View.Zoom = Mathf.Clamp(_state.View.Zoom * Mathf.Pow(1.01f, delta), 0.25f, 16f);
-            _repaint();
         }
 
         (int i, int j)? ScreenToCell(Vector2 local)
@@ -426,17 +422,53 @@ public static class MapEditTab
         {
             var cell = ScreenToCell(evt.localMousePosition);
             _status.text = cell.HasValue ? $"(i, j): ({cell.Value.i}, {cell.Value.j})" : "(i, j): -";
+
+            // Right-drag: zoom (anchor at right-down cursor)
+            if (_rightDragging && _state.Cache != null)
+            {
+                float delta = -evt.mouseDelta.y;
+                float newZoom = Mathf.Clamp(_state.View.Zoom * Mathf.Pow(1.01f, delta), 0.25f, 16f);
+                if (!Mathf.Approximately(newZoom, _state.View.Zoom))
+                {
+                    var worldBefore = _state.View.ScreenToWorld(_rightDownLocal, _state.Cache.ISize, _state.Cache.JSize);
+                    _state.View.Zoom = newZoom;
+                    var worldAfter = _state.View.ScreenToWorld(_rightDownLocal, _state.Cache.ISize, _state.Cache.JSize);
+                    _state.View.Offset += worldBefore - worldAfter;
+                    _repaint();
+                }
+            }
+
+            // Middle-drag: pan (delta form, matches EditorPathManipulator)
+            if (_midDragging && _state.Cache != null)
+            {
+                float unitX = ViewTransform.CanvasWidth / _state.Cache.JSize;
+                float unitY = ViewTransform.CanvasHeight / _state.Cache.ISize;
+                _state.View.Offset = new Vector2(
+                    _state.View.Offset.x + evt.mouseDelta.x / (_state.View.Zoom * unitX),
+                    _state.View.Offset.y - evt.mouseDelta.y / (_state.View.Zoom * unitY)
+                );
+                _repaint();
+            }
         }
 
         void OnMouseDown(MouseDownEvent evt)
         {
-            if (evt.button == 1) // right-click: clear
+            if (evt.button == (int)MouseButton.RightMouse)
             {
-                var cell = ScreenToCell(evt.localMousePosition);
-                if (cell.HasValue) ClearCell(cell.Value);
+                _rightDragging = true;
+                _rightDownLocal = evt.localMousePosition;
+                target.CaptureMouse();
+                return;
+            }
+            if (evt.button == (int)MouseButton.MiddleMouse)
+            {
+                _midDragging = true;
+                _midDownLocal = evt.localMousePosition;
+                target.CaptureMouse();
                 return;
             }
             if (evt.button != 0) return;
+
             var c = ScreenToCell(evt.localMousePosition);
             if (!c.HasValue) return;
 
@@ -459,7 +491,21 @@ public static class MapEditTab
             ApplyBrush(c.Value);
         }
 
-        void OnMouseUp(MouseUpEvent evt) { /* drag-to-paint handled by repeated MouseDown if you want; future extension */ }
+        void OnMouseUp(MouseUpEvent evt)
+        {
+            if (evt.button == (int)MouseButton.RightMouse && _rightDragging)
+            {
+                _rightDragging = false;
+                target.ReleaseMouse();
+                return;
+            }
+            if (evt.button == (int)MouseButton.MiddleMouse && _midDragging)
+            {
+                _midDragging = false;
+                target.ReleaseMouse();
+                return;
+            }
+        }
 
         // === SerializedProperty writes ===
         SerializedProperty MapDataProp() => _so.FindProperty("MapData");
@@ -504,20 +550,6 @@ public static class MapEditTab
             entry.FindPropertyRelative("portalOutI").intValue = dst.i;
             entry.FindPropertyRelative("portalOutJ").intValue = dst.j;
             _so.ApplyModifiedProperties();
-            RefreshCacheFromSO();
-            _state.NotifyChanged();
-        }
-
-        void ClearCell((int i, int j) cell)
-        {
-            Undo.RecordObject(_so.targetObject, "Clear Block");
-            var mapData = MapDataProp();
-            int idx = FindEntryIndex(mapData, cell);
-            if (idx >= 0)
-            {
-                mapData.DeleteArrayElementAtIndex(idx);
-                _so.ApplyModifiedProperties();
-            }
             RefreshCacheFromSO();
             _state.NotifyChanged();
         }
