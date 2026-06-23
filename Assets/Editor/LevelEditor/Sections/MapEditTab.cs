@@ -63,6 +63,7 @@ public static class MapEditTab
         root.Add(canvasContainer);
 
         var view = new ViewTransform();
+        state.View = view;
         var canvas = new VisualElement();
         canvas.style.flexGrow = 1;
         canvasContainer.Add(canvas);
@@ -74,7 +75,7 @@ public static class MapEditTab
         void Repaint()
         {
             canvas.generateVisualContent = null;
-            canvas.generateVisualContent = ctx => MapCanvasView.DrawBlocks(ctx, state, view);
+            canvas.generateVisualContent = ctx => MapCanvasView.DrawBlocks(ctx, state);
             canvas.MarkDirtyRepaint();
         }
         state.Changed += Repaint;
@@ -138,7 +139,12 @@ public static class MapEditTab
             target.UnregisterCallback<WheelEvent>(OnWheel);
         }
 
-        void OnWheel(WheelEvent evt) { _view.Zoom(evt.delta.y); _repaint(); }
+        void OnWheel(WheelEvent evt)
+        {
+            float delta = -evt.delta.y;
+            _view.Zoom = Mathf.Clamp(_view.Zoom * Mathf.Pow(1.01f, delta), 0.25f, 16f);
+            _repaint();
+        }
 
         (int i, int j)? ScreenToCell(Vector2 local)
         {

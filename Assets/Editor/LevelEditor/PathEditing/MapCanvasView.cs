@@ -63,7 +63,7 @@ public static class MapCanvasView
         return canvas;
     }
 
-    static void DrawBlocks(MeshGenerationContext ctx, PathEditingState state)
+    public static void DrawBlocks(MeshGenerationContext ctx, PathEditingState state)
     {
         var p2d = ctx.painter2D;
         var cache = state.Cache;
