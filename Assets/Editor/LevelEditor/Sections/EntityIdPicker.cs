@@ -38,6 +38,13 @@ public static class EntityIdPicker
         row.style.alignItems = Align.Center;
         row.style.marginBottom = 2;
 
+        // 字段名 Label(模拟 PropertyField 的左侧标签),Tooltip 走 SerializedProperty.tooltip
+        var fieldLabel = new Label(prop.displayName) { tooltip = prop.tooltip };
+        fieldLabel.style.minWidth = 90;
+        fieldLabel.style.marginRight = 4;
+        fieldLabel.style.unityTextAlign = TextAnchor.MiddleLeft;
+        row.Add(fieldLabel);
+
         // EntityPrefabID 是 struct,SerializedProperty 路径里能直接 FindPropertyRelative
         var idCProp = prop.FindPropertyRelative("ID_C");
         var idNProp = prop.FindPropertyRelative("ID_N");
@@ -87,7 +94,6 @@ public static class EntityIdPicker
         var popup = new PopupField<string>(display, initialIdx);
         popup.style.flexGrow = 1;
         popup.style.minWidth = 0;
-        popup.tooltip = "选 EntityID(来源:Resources/GameDatas/EntityDataCollection)";
         popup.RegisterValueChangedCallback(evt =>
         {
             int idx = display.IndexOf(evt.newValue);
