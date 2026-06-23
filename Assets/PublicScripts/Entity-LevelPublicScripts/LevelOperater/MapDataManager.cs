@@ -851,7 +851,7 @@ public class MapDataManager : IManagerStartEnd
                 p1 = new Vector2(0.5f + (X[i] + X[i + 1]) / 2, 0.5f + k * (X[i] + X[i + 1]) / 2 + b);
                 if (!graph[(int)p1.y, (int)p1.x].Passable)
                 {
-                    return BaseOnBlockNewPoint(new Vector2(p1.x + 0.5f, p1.y + 0.5f), endPos, beginPos, entityR);
+                    return BaseOnBlockNewPoint(p1, endPos, beginPos, entityR);
                 }
             }
             return new Vector2(-1000, -1000);
