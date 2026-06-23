@@ -13,6 +13,7 @@ public class LevelDataEditor : Editor
     VisualElement _detailContainer;
     BlockMapCache _mapCache;
     PathEditingState _pathState;
+    IDisposable _sectionDisposable;
 
     public override VisualElement CreateInspectorGUI()
     {
@@ -44,30 +45,20 @@ public class LevelDataEditor : Editor
         RenderDetail();
        
 
-        // PathEditing: 加载 MapCache + 装配 state + section
+        // Map editor + path editor section (uses LevelData.MapData, prefab is optional)
         var ld = (LevelData)target;
-        if (ld.MapPrefab != null)
+        try
         {
-            try
-            {
-                _mapCache = BlockMapCache.Load(ld.MapPrefab);
-                _pathState = new PathEditingState { Cache = _mapCache };
-                body.Add(PathEditingSection.Build(serializedObject, _pathState));
-            }
-            catch (System.Exception e)
-            {
-                var err = new Label($"⚠ MapPrefab 加载失败: {e.Message}");
-                err.style.color = new Color(0.95f, 0.4f, 0.4f);
-                body.Add(err);
-                UnityEngine.Debug.LogError($"[LevelDataEditor] MapPrefab 加载失败: {e}");
-            }
+            _mapCache = BlockMapCache.Load(ld);
+            _pathState = new PathEditingState { Cache = _mapCache };
+            body.Add(MapEditorSection.Build(serializedObject, ld, out _sectionDisposable));
         }
-        else
+        catch (System.Exception e)
         {
-            var warn = new Label("⚠ MapPrefab 未指定,无法可视化路径。请先在 References 设置 MapPrefab。");
-            warn.style.color = new Color(0.95f, 0.7f, 0.3f);
-            warn.style.paddingTop = 8; warn.style.paddingBottom = 8;
-            body.Add(warn);
+            var err = new Label($"⚠ MapEditorSection 构建失败: {e.Message}");
+            err.style.color = new Color(0.95f, 0.4f, 0.4f);
+            body.Add(err);
+            UnityEngine.Debug.LogError($"[LevelDataEditor] MapEditorSection 构建失败: {e}");
         }
 
         root.Add(body);
@@ -136,7 +127,8 @@ public class LevelDataEditor : Editor
     void OnDisable()
     {
         Undo.undoRedoPerformed -= OnUndoRedo;
-        _mapCache?.Dispose();
+        _sectionDisposable?.Dispose();
+        _sectionDisposable = null;
         _mapCache = null;
         _pathState = null;
     }
