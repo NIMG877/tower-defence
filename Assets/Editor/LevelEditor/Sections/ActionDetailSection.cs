@@ -111,7 +111,7 @@ public static class ActionDetailSection
         // CommandType 0/2/3/4: 路径
         if (commandType == 0 || commandType == 2 || commandType == 3 || commandType == 4)
         {
-            container.Add(MakeRow(actionProp.FindPropertyRelative("PathSerial")));
+            container.Add(PathSerialPicker.Build(actionProp.FindPropertyRelative("PathSerial")));
         }
 
         // CommandType 0: 重复召唤
