@@ -15,6 +15,9 @@ MonoBehaviour:
   LevelName: Test
   LevelCode: H12-4
   LevelDescription: "\u6D4B\u8BD5\u4F7F\u7528\u5173\u5361"
+  CameraSize: 0
+  CameraPos: {x: 0, y: 0}
+  CutToLevelTexture: {fileID: 0}
   MapPrefab: {fileID: 3960715908125169980, guid: 662d55c29b44f8c4a900869c869e800b, type: 3}
   EnvironmentalControlDevice: {fileID: 0}
   Waves:
@@ -25,6 +28,7 @@ MonoBehaviour:
         m_PersistentCalls:
           m_Calls: []
       EntityPrefabSerial: 0
+      Camp: 0
       OnActionRepeat:
         m_PersistentCalls:
           m_Calls: []
@@ -32,6 +36,10 @@ MonoBehaviour:
       GapsFromLastRepeat:
       - 0
       - 0.3
+      ModifyAttributes: 0
+      ModifyLevelHpConsume: 0
+      ModifyPrimary: 0
+      ModifyCountOperate: 0
       Destination: {x: 0, y: 0}
       Orientation: 0
       HeadImage: {fileID: 0}
@@ -44,6 +52,7 @@ MonoBehaviour:
         m_PersistentCalls:
           m_Calls: []
       EntityPrefabSerial: 0
+      Camp: 0
       OnActionRepeat:
         m_PersistentCalls:
           m_Calls: []
@@ -349,15 +358,43 @@ MonoBehaviour:
       - 10
       - 10
       - 10
+      ModifyAttributes: 0
+      ModifyLevelHpConsume: 0
+      ModifyPrimary: 0
+      ModifyCountOperate: 0
       Destination: {x: 0, y: 0}
       Orientation: 0
       HeadImage: {fileID: 0}
       Content: 
       DurationTime: 0
       Contents: []
-  CheckPoints:
-  - {fileID: 633545819668264307, guid: 09fea233962b2504486bca9580326f74, type: 3}
-  - {fileID: 835287226393006363, guid: 4e28deba8670e3f49bebf4d9307bc0df, type: 3}
-  WaveEntityPrefabTypes:
-  - {fileID: 5752354500556713093, guid: 7ea9229f7e5516a47add7f80d60c59e7, type: 3}
-  - {fileID: 4310881110139641480, guid: 6f05fa325c4c4f54b8a9b3e8e28c0972, type: 3}
+  CheckPoints: []
+  Paths:
+  - CheckPoints:
+    - {x: 2, y: 1}
+    - {x: 0.77, y: 7.8}
+    - {x: 9.68, y: 9.79}
+    - {x: 8.91, y: 0.71}
+    WaitTimes:
+    - 0
+    - 0
+    - 0
+    - 0
+  - CheckPoints:
+    - {x: 2, y: 1}
+    - {x: 2, y: 3}
+    - {x: 6.51, y: 3}
+    - {x: 4.23, y: 3}
+    - {x: 9, y: 3}
+    WaitTimes:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  WaveEntityPrefabIDs: []
+  LevelHp: 0
+  Cost0: 0
+  MaxCost: 0
+  CanSetNum: 0
+  CostRecoverSpeed: 0

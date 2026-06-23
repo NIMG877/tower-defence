@@ -96,21 +96,21 @@ public static class MapCanvasView
                 if (bd.Highland)
                 {
                     p2d.strokeColor = new Color(0.706f, 0.549f, 0.235f);
-                    p2d.lineWidth = 2;
+                    p2d.lineWidth = 0.5f;
                     BeginRectPath(p2d, rect);
                     p2d.Stroke();
                 }
                 if (bd.CanSet)
                 {
                     p2d.strokeColor = new Color(0.549f, 0.784f, 0.706f);
-                    p2d.lineWidth = 2;
+                    p2d.lineWidth = 0.5f;
                     BeginRectPath(p2d, rect);
                     p2d.Stroke();
                 }
                 if (bd.ProtalOutBlock != null)
                 {
                     p2d.strokeColor = bd.ProtalColor;
-                    p2d.lineWidth = 2;
+                    p2d.lineWidth = 0.5f;
                     BeginRectPath(p2d, rect);
                     p2d.Stroke();
                 }
@@ -162,7 +162,7 @@ public static class MapCanvasView
             p2d.strokeColor = path == null
                 ? new Color(0.95f, 0.4f, 0.4f)   // 红虚线表示不可达(简化:实线)
                 : new Color(0.306f, 0.788f, 0.627f); // rgb(78,201,160)
-            p2d.lineWidth = 3;
+            p2d.lineWidth = 1.5f;
             p2d.BeginPath();
 
             if (path != null)

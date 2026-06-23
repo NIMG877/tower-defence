@@ -98,17 +98,29 @@ public static class PathEditingSection
         row.Add(label);
 
         var pathsProp = so.FindProperty("Paths");
-        var choices = new List<string>();
-        for (int i = 0; i < pathsProp.arraySize; i++)
+
+        // 工具:用 path 索引拼显示文本(Name 优先,空时退化为 "Path {i}")
+        string MakeChoice(int i)
         {
+            var nameProp = pathsProp.GetArrayElementAtIndex(i).FindPropertyRelative("Name");
             var cps = pathsProp.GetArrayElementAtIndex(i).FindPropertyRelative("CheckPoints");
-            choices.Add($"Path {i}: {(cps != null ? cps.arraySize : 0)} checkpoints");
+            var name = nameProp != null && !string.IsNullOrEmpty(nameProp.stringValue)
+                ? nameProp.stringValue
+                : $"Path {i}";
+            return $"{name} (#{i}, {cps.arraySize} cp)";
         }
+
+        var choices = new List<string>();
+        for (int i = 0; i < pathsProp.arraySize; i++) choices.Add(MakeChoice(i));
         if (choices.Count == 0) choices.Add("(暂无路径)");
 
         int initialIdx = Mathf.Clamp(state.SelectedPathIdx, 0, Mathf.Max(0, choices.Count - 1));
         var popup = new PopupField<string>(choices, initialIdx);
-        popup.style.flexGrow = 1;
+        // popup 限宽 — text 越长越可能被压;给一个 flexBasis 避免完全占满
+        popup.style.flexGrow = 0;
+        popup.style.flexShrink = 1;
+        popup.style.minWidth = 0;
+        popup.style.maxWidth = 240;
         popup.RegisterValueChangedCallback(evt =>
         {
             int idx = choices.IndexOf(evt.newValue);
@@ -120,6 +132,64 @@ public static class PathEditingSection
             }
         });
         row.Add(popup);
+
+        // 路径名 TextField — 改这里直接改当前 path 的 Name
+        var nameLabel = new Label("名:");
+        nameLabel.style.fontSize = 11;
+        nameLabel.style.color = new Color(0.706f, 0.706f, 0.706f);
+        nameLabel.style.marginLeft = 6;
+        row.Add(nameLabel);
+
+        var nameField = new TextField { value = "" };
+        nameField.style.flexGrow = 1;
+        nameField.style.flexShrink = 1;
+        nameField.style.minWidth = 0;
+        nameField.tooltip = "当前路径的显示名(可空)";
+        nameField.RegisterValueChangedCallback(evt =>
+        {
+            if (state.SelectedPathIdx < 0) return;
+            var arr = so.FindProperty("Paths");
+            if (arr == null || state.SelectedPathIdx >= arr.arraySize) return;
+            var el = arr.GetArrayElementAtIndex(state.SelectedPathIdx);
+            var nameProp = el.FindPropertyRelative("Name");
+            if (nameProp == null) return;
+            Undo.RecordObject(so.targetObject, "Rename Path");
+            nameProp.stringValue = evt.newValue ?? "";
+            so.ApplyModifiedProperties();
+            state.NotifyChanged();
+        });
+        // 跟随 state 重绑 — SelectedPathIdx 切换时刷新显示
+        void SyncNameField()
+        {
+            if (state.SelectedPathIdx < 0)
+            {
+                nameField.SetValueWithoutNotify("");
+                nameField.SetEnabled(false);
+                return;
+            }
+            nameField.SetEnabled(true);
+            var arr = so.FindProperty("Paths");
+            if (arr == null || state.SelectedPathIdx >= arr.arraySize) return;
+            var nameProp = arr.GetArrayElementAtIndex(state.SelectedPathIdx).FindPropertyRelative("Name");
+            nameField.SetValueWithoutNotify(nameProp != null ? nameProp.stringValue : "");
+        }
+        state.Changed += SyncNameField;
+        SyncNameField();
+        row.Add(nameField);
+
+        // 让 row 不被父级 split 占用的列宽挤压,确保 popup 拿到合理空间
+        row.style.flexShrink = 0;
+
+        // 路径变化时也要同步刷新 popup 文本(因为 Name 改了 choice 文字会变)
+        void RebuildPopup()
+        {
+            choices.Clear();
+            for (int i = 0; i < pathsProp.arraySize; i++) choices.Add(MakeChoice(i));
+            if (choices.Count == 0) choices.Add("(暂无路径)");
+            int cur = Mathf.Clamp(state.SelectedPathIdx, 0, Mathf.Max(0, choices.Count - 1));
+            popup.SetValueWithoutNotify(choices[cur]);
+        }
+        state.Changed += RebuildPopup;
 
         var newBtn = new Button(() =>
         {

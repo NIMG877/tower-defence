@@ -3,6 +3,7 @@ using UnityEngine;
 [System.Serializable]
 public struct PathData
 {
+    public string Name;            // 编辑器内标识,可空(为空时退化为 "Path {i}")
     public Vector2[] CheckPoints;
     public float[]   WaitTimes;
 }

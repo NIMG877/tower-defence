@@ -49,10 +49,10 @@ public static class CheckpointLayer
             dot.style.borderTopRightRadius = diameter / 2f;
             dot.style.borderBottomLeftRadius = diameter / 2f;
             dot.style.borderBottomRightRadius = diameter / 2f;
-            dot.style.borderLeftWidth = 2;
-            dot.style.borderRightWidth = 2;
-            dot.style.borderTopWidth = 2;
-            dot.style.borderBottomWidth = 2;
+            dot.style.borderLeftWidth = 1;
+            dot.style.borderRightWidth = 1;
+            dot.style.borderTopWidth = 1;
+            dot.style.borderBottomWidth = 1;
 
             bool selected = (k == state.SelectedCheckpointIdx);
             dot.style.backgroundColor = selected
@@ -62,13 +62,13 @@ public static class CheckpointLayer
             dot.style.borderRightColor = dot.style.borderLeftColor;
             dot.style.borderTopColor = dot.style.borderLeftColor;
             dot.style.borderBottomColor = dot.style.borderLeftColor;
-            // 选中态用更粗边框 + 更高 alpha 背景区分(IStyle 没有 boxShadow,改用 border-width 视觉强化)
+            // 选中态略粗 + 更高 alpha 背景区分
             if (selected)
             {
-                dot.style.borderLeftWidth = 4;
-                dot.style.borderRightWidth = 4;
-                dot.style.borderTopWidth = 4;
-                dot.style.borderBottomWidth = 4;
+                dot.style.borderLeftWidth = 1;
+                dot.style.borderRightWidth = 1;
+                dot.style.borderTopWidth = 1;
+                dot.style.borderBottomWidth = 1;
             }
 
             dot.style.alignItems = Align.Center;

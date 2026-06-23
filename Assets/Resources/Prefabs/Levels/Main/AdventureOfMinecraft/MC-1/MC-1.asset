@@ -238,57 +238,88 @@ MonoBehaviour:
       Content: 
       DurationTime: 0
       Contents: []
-  - Actions:
-    - CommandType: 0
-      GapFromLastAction: 0
-      OnBeforeAction:
-        m_PersistentCalls:
-          m_Calls: []
-      EntityPrefabSerial: 0
-      Camp: 0
-      OnActionRepeat:
-        m_PersistentCalls:
-          m_Calls: []
-      PathSerial: 0
-      GapsFromLastRepeat: []
-      ModifyAttributes: 0
-      ModifyLevelHpConsume: 0
-      ModifyPrimary: 0
-      ModifyCountOperate: 0
-      Destination: {x: 0, y: 0}
-      Orientation: 0
-      HeadImage: {fileID: 0}
-      Content: 
-      DurationTime: 0
-      Contents: []
-    - CommandType: 2
-      GapFromLastAction: 3.86
-      OnBeforeAction:
-        m_PersistentCalls:
-          m_Calls: []
-      EntityPrefabSerial: 0
-      Camp: 0
-      OnActionRepeat:
-        m_PersistentCalls:
-          m_Calls: []
-      PathSerial: 0
-      GapsFromLastRepeat: []
-      ModifyAttributes: 0
-      ModifyLevelHpConsume: 0
-      ModifyPrimary: 0
-      ModifyCountOperate: 0
-      Destination: {x: 0, y: 0}
-      Orientation: 0
-      HeadImage: {fileID: 0}
-      Content: 
-      DurationTime: 0
-      Contents: []
-  CheckPoints:
-  - {fileID: 3962162900902801439, guid: b7d95427eb322ac4ab9590ba0b126aba, type: 3}
-  - {fileID: 4662438118174203867, guid: c69e7eeb822473d4d97207abae38c0dd, type: 3}
-  - {fileID: 7054889419872924767, guid: 6d3c3339cd96b6141861fc214fcf667e, type: 3}
-  - {fileID: 2255276518616405981, guid: 44b0187e85db7a046ae8831531677c25, type: 3}
-  - {fileID: 2255276518616405981, guid: ac6bc99adf97b4744ac7d12489119dfb, type: 3}
+  CheckPoints: []
+  Paths:
+  - CheckPoints:
+    - {x: 9, y: 1}
+    - {x: 1, y: 1}
+    - {x: 1, y: 4}
+    - {x: 4.5, y: 4}
+    - {x: 4.5, y: 3}
+    - {x: 1, y: 3}
+    - {x: 1, y: 4}
+    - {x: 7, y: 4}
+    - {x: 7, y: 3}
+    WaitTimes:
+    - 0
+    - 0
+    - 0
+    - 8
+    - 8
+    - 0
+    - 0
+    - 0
+    - 0
+  - CheckPoints:
+    - {x: 9, y: 1}
+    - {x: 1, y: 1}
+    - {x: 1, y: 4}
+    - {x: 3.5, y: 4}
+    - {x: 3.5, y: 3}
+    - {x: 1, y: 3}
+    - {x: 1, y: 4}
+    - {x: 7, y: 4}
+    - {x: 7, y: 3}
+    WaitTimes:
+    - 0
+    - 0
+    - 0
+    - 8
+    - 8
+    - 0
+    - 0
+    - 0
+    - 0
+  - CheckPoints:
+    - {x: 9, y: 1}
+    - {x: 1, y: 1}
+    - {x: 1, y: 3.5}
+    - {x: 4.5, y: 3.5}
+    - {x: 6.5, y: 3.5}
+    - {x: 7, y: 3}
+    WaitTimes:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - CheckPoints:
+    - {x: 1, y: 6}
+    - {x: 2, y: 6}
+    - {x: 7.5, y: 6}
+    - {x: 9, y: 6}
+    - {x: 9, y: 3}
+    - {x: 7, y: 3}
+    WaitTimes:
+    - 0
+    - 30
+    - 24
+    - 0
+    - 0
+    - 0
+  - CheckPoints:
+    - {x: 1, y: 6}
+    - {x: 5.5, y: 6}
+    - {x: 9, y: 6}
+    - {x: 9, y: 3}
+    - {x: 8, y: 3}
+    WaitTimes:
+    - 0
+    - 20
+    - 0
+    - 0
+    - 0
   WaveEntityPrefabIDs:
   - ID_C: m
     ID_N: 1

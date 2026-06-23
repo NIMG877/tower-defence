@@ -1111,18 +1111,121 @@ MonoBehaviour:
       Content: 
       DurationTime: 0
       Contents: []
-  CheckPoints:
-  - {fileID: 633545819668264307, guid: f1693bf50e61bd7469c812e4616a7b96, type: 3}
-  - {fileID: 7824917626484161073, guid: 37000685782933d4cb096db0898a2888, type: 3}
-  - {fileID: 7824917626484161073, guid: 9337ca42da0c04f48b0dffd6cb5bc991, type: 3}
-  WaveEntityPrefabTypes:
-  - {fileID: 5752354500556713093, guid: d6ce07bac3ee74548a909bcb9705f070, type: 3}
-  - {fileID: 5752354500556713093, guid: 5f05e4f441fc99b47b607c71a9b492b7, type: 3}
-  - {fileID: 5752354500556713093, guid: 461c764bb2af5664c80f113967cdd7fe, type: 3}
-  - {fileID: 5752354500556713093, guid: e46a9ab09aba9134d813f105c1ed7a8e, type: 3}
-  - {fileID: 5752354500556713093, guid: e2f0c2132e54fe2478ff70faf809315a, type: 3}
-  - {fileID: 5752354500556713093, guid: 81f85669bcd1ae94e8166c0cce9fe582, type: 3}
-  - {fileID: 5752354500556713093, guid: bc4b0ef1d2be31b48a3db7577e19ab64, type: 3}
+  CheckPoints: []
+  Paths:
+  - CheckPoints:
+    - {x: 1, y: 1}
+    - {x: 10, y: 1}
+    - {x: 6, y: 1}
+    - {x: 10, y: 1}
+    - {x: 4, y: 3}
+    - {x: 10, y: 1.5}
+    - {x: 5, y: 8}
+    - {x: 10, y: 2.5}
+    - {x: 1, y: 6}
+    - {x: 7, y: 5}
+    - {x: 5, y: 3}
+    - {x: 8, y: 5}
+    - {x: 10, y: 2}
+    - {x: 7, y: 3}
+    - {x: 10, y: 3}
+    - {x: 10, y: 8}
+    - {x: 10, y: 3.5}
+    - {x: 7, y: 8}
+    - {x: 7, y: 1}
+    - {x: 5, y: 1}
+    - {x: 4, y: 3.5}
+    - {x: 3, y: 5}
+    - {x: 4, y: 7}
+    - {x: 1, y: 8}
+    - {x: 0.75, y: 4}
+    - {x: 1, y: 1}
+    - {x: 1.25, y: 4}
+    - {x: 2, y: 8}
+    - {x: 3.5, y: 8}
+    - {x: 7, y: 7}
+    - {x: 7.5, y: 5}
+    - {x: 7, y: 3}
+    - {x: 6, y: 1}
+    - {x: 5, y: 2}
+    - {x: 5, y: 4}
+    - {x: 3, y: 4}
+    - {x: 3, y: 3}
+    - {x: 4.75, y: 3}
+    - {x: 10, y: 4.25}
+    - {x: 7, y: 4}
+    - {x: 8, y: 8}
+    - {x: 5, y: 7}
+    - {x: 3.25, y: 6.25}
+    - {x: 3.25, y: 7}
+    - {x: 4, y: 7.5}
+    - {x: 4, y: 4}
+    - {x: 9.25, y: 1}
+    WaitTimes:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - CheckPoints:
+    - {x: 1, y: 1}
+    - {x: 1, y: 5}
+    - {x: 4, y: 8}
+    WaitTimes:
+    - 0
+    - 0
+    - 0
+  - CheckPoints:
+    - {x: 1, y: 1}
+    - {x: 1, y: 5}
+    - {x: 4, y: 8}
+    WaitTimes:
+    - 0
+    - 0
+    - 0
+  WaveEntityPrefabIDs: []
   LevelHp: 3
   Cost0: 99
   MaxCost: 99
