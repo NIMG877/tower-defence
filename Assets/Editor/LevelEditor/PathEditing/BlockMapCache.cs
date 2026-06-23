@@ -10,6 +10,7 @@ public sealed class BlockMapCache : IDisposable
     public BlockDataEntry[,] Blocks;
     public int ISize;
     public int JSize;
+    public float EntityR;
 
     /// <summary>
     /// 从 <paramref name="levelData"/> 直接解析 BlockDataEntry 矩阵。
@@ -21,6 +22,7 @@ public sealed class BlockMapCache : IDisposable
 
         cache.ISize = levelData.iSize;
         cache.JSize = levelData.jSize;
+        cache.EntityR = EntityManager.EntityR;
         if (cache.ISize <= 0 || cache.JSize <= 0) return cache;
 
         cache.Blocks = new BlockDataEntry[cache.ISize, cache.JSize];
