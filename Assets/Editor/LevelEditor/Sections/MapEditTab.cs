@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 /// <summary>
 /// Map-paint tab. See spec §4.3. Single-field brush with portal two-click mode.
 /// Writes to <c>LevelData.MapData</c> via SerializedProperty + Undo.
+/// Layout matches PathEditTab: green collapsible header, canvas left, brush right.
 /// </summary>
 public static class MapEditTab
 {
@@ -24,22 +25,200 @@ public static class MapEditTab
     public static VisualElement Build(SerializedObject so, BlockMapCache cache, PathEditingState state)
     {
         var root = new VisualElement();
-        root.style.flexDirection = FlexDirection.Row;
+        root.style.backgroundColor = new Color(0.118f, 0.118f, 0.133f);
+        root.style.paddingTop = 8; root.style.paddingBottom = 8;
+        root.style.paddingLeft = 8; root.style.paddingRight = 8;
+        root.style.borderTopLeftRadius = 3;
+        root.style.borderTopRightRadius = 3;
+        root.style.borderBottomLeftRadius = 3;
+        root.style.borderBottomRightRadius = 3;
+        root.style.borderLeftWidth = 1;
+        root.style.borderRightWidth = 1;
+        root.style.borderTopWidth = 1;
+        root.style.borderBottomWidth = 1;
+        root.style.borderLeftColor = new Color(0.306f, 0.788f, 0.627f);
+        root.style.borderRightColor = new Color(0.306f, 0.788f, 0.627f);
+        root.style.borderTopColor = new Color(0.306f, 0.788f, 0.627f);
+        root.style.borderBottomColor = new Color(0.306f, 0.788f, 0.627f);
 
-        // === Brush panel (left) ===
-        var panel = new VisualElement();
-        panel.style.width = 200;
-        panel.style.paddingRight = 8;
-        panel.style.borderRightWidth = 1;
-        panel.style.borderRightColor = new Color(0.3f, 0.3f, 0.3f);
-        root.Add(panel);
+        // Header
+        var header = new Label("▸ Map Editing");
+        header.style.color = new Color(0.306f, 0.788f, 0.627f);
+        header.style.fontSize = 12;
+        header.style.unityFontStyleAndWeight = FontStyle.Bold;
+        header.style.marginBottom = 6;
+        root.Add(header);
 
+        // Toolbar
+        root.Add(BuildToolbar(state));
+
+        // Split: canvas (弹性宽) + 右侧固定宽栏
+        var split = new VisualElement();
+        split.style.flexDirection = FlexDirection.Row;
+        split.style.marginTop = 6;
+        split.style.flexShrink = 0;
+
+        // 画布容器(flexGrow=1 占满剩余宽度,最小宽 320,高度固定 400)
+        var canvasContainer = BuildCanvasContainer(so, cache, state);
+        canvasContainer.style.flexGrow = 1;
+        canvasContainer.style.flexShrink = 1;
+        canvasContainer.style.minWidth = 320;
+        split.Add(canvasContainer);
+
+        // 右侧栏:固定宽 220,高度 = 画布高度
+        var right = new VisualElement();
+        right.style.flexDirection = FlexDirection.Column;
+        right.style.flexShrink = 0;
+        right.style.flexGrow = 0;
+        right.style.width = 220;
+        right.style.marginLeft = 8;
+        right.style.height = ViewTransform.CanvasHeight;
+        right.style.overflow = Overflow.Hidden;
+
+        // Brush panel (top, flexGrow)
         var brush = new BrushState();
+        var brushPanel = BuildBrushPanel(brush, state, canvasContainer);
+        brushPanel.style.flexGrow = 1;
+        brushPanel.style.flexShrink = 1;
+        brushPanel.style.minHeight = 100;
+        brushPanel.style.overflow = Overflow.Hidden;
+        right.Add(brushPanel);
+
+        // Selected cell panel (bottom, flexShrink 0)
+        var cellPanel = BuildSelectedCellPanel(state);
+        cellPanel.style.flexShrink = 0;
+        cellPanel.style.marginTop = 4;
+        right.Add(cellPanel);
+
+        split.Add(right);
+        root.Add(split);
+
+        root.style.overflow = Overflow.Hidden;
+
+        // 初始 fit 视图
+        if (state.Cache != null)
+            state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
+
+        state.NotifyChanged();
+
+        return root;
+    }
+
+    static VisualElement BuildToolbar(PathEditingState state)
+    {
+        var row = new VisualElement();
+        row.style.flexDirection = FlexDirection.Row;
+        row.style.alignItems = Align.Center;
+        row.style.marginBottom = 4;
+
+        var resetBtn = new Button(() =>
+        {
+            if (state.Cache != null)
+                state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
+            state.NotifyChanged();
+        }) { text = "↻ 重置视图" };
+        resetBtn.style.fontSize = 11;
+        row.Add(resetBtn);
+
+        return row;
+    }
+
+    static VisualElement BuildCanvasContainer(SerializedObject so, BlockMapCache cache, PathEditingState state)
+    {
+        var canvas = new VisualElement();
+        canvas.style.width = ViewTransform.CanvasWidth;
+        canvas.style.height = ViewTransform.CanvasHeight;
+        canvas.style.backgroundColor = new Color(0.078f, 0.078f, 0.094f);
+        canvas.style.borderTopLeftRadius = 3;
+        canvas.style.borderTopRightRadius = 3;
+        canvas.style.borderBottomLeftRadius = 3;
+        canvas.style.borderBottomRightRadius = 3;
+        canvas.style.borderLeftWidth = 1;
+        canvas.style.borderRightWidth = 1;
+        canvas.style.borderTopWidth = 1;
+        canvas.style.borderBottomWidth = 1;
+        canvas.style.borderLeftColor = new Color(0.235f, 0.235f, 0.275f);
+        canvas.style.borderRightColor = new Color(0.235f, 0.235f, 0.275f);
+        canvas.style.borderTopColor = new Color(0.235f, 0.235f, 0.275f);
+        canvas.style.borderBottomColor = new Color(0.235f, 0.235f, 0.275f);
+        canvas.style.overflow = Overflow.Hidden;
+        canvas.style.position = Position.Relative;
+
+        // Status label (bottom-left)
+        var status = new Label("(i, j): -");
+        status.name = "canvas-status";
+        status.style.position = Position.Absolute;
+        status.style.bottom = 4; status.style.left = 8;
+        status.style.fontSize = 10;
+        status.style.color = new Color(0.55f, 0.55f, 0.55f);
+        canvas.Add(status);
+
+        // Hint label (bottom-right)
+        var hint = new Label("左键:画刷 / portal源 · 右键:清除 · 滚轮:缩放");
+        hint.name = "canvas-hint";
+        hint.style.position = Position.Absolute;
+        hint.style.bottom = 4; hint.style.right = 8;
+        hint.style.fontSize = 10;
+        hint.style.color = new Color(0.55f, 0.55f, 0.55f);
+        canvas.Add(hint);
+
+        // Draw blocks
+        canvas.generateVisualContent = ctx =>
+        {
+            if (state.Cache == null) return;
+            MapCanvasView.DrawBlocks(ctx, state);
+        };
+
+        // Manipulator
+        var view = new ViewTransform();
+        state.View = view;
+        var brush = new BrushState();
+        var manip = new MapEditManipulator(so, cache, view, brush, status, state, () => canvas.MarkDirtyRepaint());
+        canvas.AddManipulator(manip);
+
+        // Repaint on state change / undo
+        state.Changed += () => canvas.MarkDirtyRepaint();
+        Undo.undoRedoPerformed += () => canvas.MarkDirtyRepaint();
+
+        // Cleanup on detach
+        canvas.RegisterCallback<DetachFromPanelEvent>(_ =>
+        {
+            state.Changed -= () => canvas.MarkDirtyRepaint();
+            Undo.undoRedoPerformed -= () => canvas.MarkDirtyRepaint();
+        });
+
+        return canvas;
+    }
+
+    static VisualElement BuildBrushPanel(BrushState brush, PathEditingState state, VisualElement canvasContainer)
+    {
+        var panel = new VisualElement();
+        panel.style.flexDirection = FlexDirection.Column;
+        panel.style.backgroundColor = new Color(0.078f, 0.078f, 0.094f);
+        panel.style.borderTopLeftRadius = 3;
+        panel.style.borderTopRightRadius = 3;
+        panel.style.borderBottomLeftRadius = 3;
+        panel.style.borderBottomRightRadius = 3;
+        panel.style.paddingTop = 4; panel.style.paddingBottom = 4;
+        panel.style.paddingLeft = 6; panel.style.paddingRight = 6;
+
+        var title = new Label("画刷");
+        title.style.color = new Color(0.306f, 0.788f, 0.627f);
+        title.style.fontSize = 11;
+        title.style.unityFontStyleAndWeight = FontStyle.Bold;
+        title.style.marginBottom = 4;
+        panel.Add(title);
+
         panel.Add(MakeToggle("Highland", brush.highland, v => brush.highland = v));
         panel.Add(MakeToggle("CanSet",   brush.canSet,   v => brush.canSet = v));
 
-        var passableRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-        passableRow.Add(new Label("PassableType") { style = { minWidth = 100 } });
+        var passableRow = new VisualElement();
+        passableRow.style.flexDirection = FlexDirection.Row;
+        passableRow.style.alignItems = Align.Center;
+        var passableLbl = new Label("PassableType");
+        passableLbl.style.minWidth = 90;
+        passableLbl.style.fontSize = 11;
+        passableRow.Add(passableLbl);
         var passableField = new IntegerField { value = brush.passableType };
         passableField.style.flexGrow = 1;
         passableField.RegisterValueChangedCallback(evt => brush.passableType = Mathf.Clamp(evt.newValue, 0, 3));
@@ -48,61 +227,98 @@ public static class MapEditTab
 
         panel.Add(MakeToggle("Deadly", brush.deadly, v => brush.deadly = v));
 
-        var portalLabel = new Label("Portal mode");
-        panel.Add(portalLabel);
+        var portalRow = new VisualElement();
+        portalRow.style.flexDirection = FlexDirection.Row;
+        portalRow.style.alignItems = Align.Center;
+        var portalLbl = new Label("Portal");
+        portalLbl.style.minWidth = 90;
+        portalLbl.style.fontSize = 11;
+        portalRow.Add(portalLbl);
         var portalEnum = new EnumField(brush.portalMode);
+        portalEnum.style.flexGrow = 1;
         portalEnum.RegisterValueChangedCallback(evt => brush.portalMode = (PortalMode)evt.newValue);
-        panel.Add(portalEnum);
+        portalRow.Add(portalEnum);
+        panel.Add(portalRow);
 
-        panel.Add(new Label("提示:点击格子应用画刷;portal 模式两段式。右键 = 清除。"));
+        var hint = new Label("提示:左键应用画刷;portal 两段式;右键清除。");
+        hint.style.fontSize = 10;
+        hint.style.color = new Color(0.55f, 0.55f, 0.55f);
+        hint.style.marginTop = 8;
+        hint.style.whiteSpace = WhiteSpace.Normal;
+        panel.Add(hint);
 
-        // === Canvas (right) ===
-        var canvasContainer = new VisualElement();
-        canvasContainer.style.flexGrow = 1;
-        canvasContainer.style.minHeight = 400;
-        root.Add(canvasContainer);
-
-        var view = new ViewTransform();
-        state.View = view;
-        var canvas = new VisualElement();
-        canvas.style.flexGrow = 1;
-        canvasContainer.Add(canvas);
-
-        var status = new Label("(i, j): -");
-        status.style.paddingTop = 4;
-        canvasContainer.Add(status);
-
-        void Repaint()
-        {
-            canvas.generateVisualContent = null;
-            canvas.generateVisualContent = ctx => MapCanvasView.DrawBlocks(ctx, state);
-            canvas.MarkDirtyRepaint();
-        }
-        state.Changed += Repaint;
-        Repaint();
-
-        // === Manipulator ===
-        var manip = new MapEditManipulator(so, cache, view, brush, status, state, Repaint);
-        canvas.AddManipulator(manip);
-
-        // Repaint when undo/redo changes MapData
-        Undo.undoRedoPerformed += Repaint;
-
-        // Cleanup on detach
-        canvas.RegisterCallback<DetachFromPanelEvent>(_ =>
-        {
-            state.Changed -= Repaint;
-            Undo.undoRedoPerformed -= Repaint;
-        });
-
-        return root;
+        return panel;
     }
 
-    static Toggle MakeToggle(string label, bool initial, System.Action<bool> onChange)
+    static VisualElement BuildSelectedCellPanel(PathEditingState state)
     {
-        var t = new Toggle(label) { value = initial };
+        var panel = new VisualElement();
+        panel.style.flexDirection = FlexDirection.Column;
+        panel.style.backgroundColor = new Color(0.078f, 0.078f, 0.094f);
+        panel.style.borderTopLeftRadius = 3;
+        panel.style.borderTopRightRadius = 3;
+        panel.style.borderBottomLeftRadius = 3;
+        panel.style.borderBottomRightRadius = 3;
+        panel.style.paddingTop = 4; panel.style.paddingBottom = 4;
+        panel.style.paddingLeft = 6; panel.style.paddingRight = 6;
+
+        var title = new Label("▸ Cell");
+        title.style.color = new Color(0.611f, 0.863f, 0.996f);
+        title.style.fontSize = 11;
+        title.style.unityFontStyleAndWeight = FontStyle.Bold;
+        title.style.marginBottom = 4;
+        panel.Add(title);
+
+        var posLabel = new Label("(i, j): -");
+        posLabel.name = "cell-pos";
+        posLabel.style.fontSize = 10;
+        panel.Add(posLabel);
+
+        var highlandLbl = new Label("highland: -");
+        highlandLbl.name = "cell-highland";
+        highlandLbl.style.fontSize = 10;
+        panel.Add(highlandLbl);
+
+        var canSetLbl = new Label("canSet: -");
+        canSetLbl.name = "cell-canset";
+        canSetLbl.style.fontSize = 10;
+        panel.Add(canSetLbl);
+
+        var passableLbl = new Label("passable: -");
+        passableLbl.name = "cell-passable";
+        passableLbl.style.fontSize = 10;
+        panel.Add(passableLbl);
+
+        var deadlyLbl = new Label("deadly: -");
+        deadlyLbl.name = "cell-deadly";
+        deadlyLbl.style.fontSize = 10;
+        panel.Add(deadlyLbl);
+
+        var portalLbl = new Label("portal: -");
+        portalLbl.name = "cell-portal";
+        portalLbl.style.fontSize = 10;
+        panel.Add(portalLbl);
+
+        return panel;
+    }
+
+    static VisualElement MakeToggle(string label, bool initial, System.Action<bool> onChange)
+    {
+        var row = new VisualElement();
+        row.style.flexDirection = FlexDirection.Row;
+        row.style.alignItems = Align.Center;
+
+        var lbl = new Label(label);
+        lbl.style.minWidth = 90;
+        lbl.style.fontSize = 11;
+        row.Add(lbl);
+
+        var t = new Toggle { value = initial };
+        t.style.marginLeft = 0;
         t.RegisterValueChangedCallback(evt => onChange(evt.newValue));
-        return t;
+        row.Add(t);
+
+        return row;
     }
 
     // === Manipulator ===
