@@ -28,7 +28,10 @@ public sealed class BlockMapCache : IDisposable
         // PrefabUtility.LoadPrefabContents 仅对 asset prefab 可用;对 scene 实例退化为直接遍历
         if (PrefabUtility.IsPartOfPrefabAsset(mapPrefab))
         {
-            root = PrefabUtility.LoadPrefabContents(AssetDatabase.GetAssetPath(mapPrefab));
+            var path = AssetDatabase.GetAssetPath(mapPrefab);
+            if (string.IsNullOrEmpty(path))
+                throw new InvalidOperationException("MapPrefab 缺少有效的 asset 路径,无法 LoadPrefabContents");
+            root = PrefabUtility.LoadPrefabContents(path);
             isPrefabContents = true;
         }
         else
@@ -38,6 +41,8 @@ public sealed class BlockMapCache : IDisposable
 
         try
         {
+            if (root == null)
+                throw new InvalidOperationException("MapPrefab 解析后 root 为空(prefab asset 加载失败?)");
             cache.ParseBlocks(root);
             cache.EntityR = EntityManager.EntityR;
         }
@@ -51,11 +56,18 @@ public sealed class BlockMapCache : IDisposable
 
     void ParseBlocks(GameObject mapRoot)
     {
-        int childCount = mapRoot.transform.childCount;
+        if (mapRoot == null)
+            throw new InvalidOperationException("ParseBlocks 收到 null root");
+        var mapT = mapRoot.transform;
+        if (mapT == null)
+            throw new InvalidOperationException("MapPrefab 缺少 Transform 组件");
+
+        int childCount = mapT.childCount;
         int maxI = 0, maxJ = 0;
         for (int k = 0; k < childCount; k++)
         {
-            var t = mapRoot.transform.GetChild(k);
+            var t = mapT.GetChild(k);
+            if (t == null) continue;
             if (maxI < t.position.y) maxI = (int)t.position.y;
             if (maxJ < t.position.x) maxJ = (int)t.position.x;
         }
@@ -65,7 +77,8 @@ public sealed class BlockMapCache : IDisposable
 
         for (int k = 0; k < childCount; k++)
         {
-            var t = mapRoot.transform.GetChild(k);
+            var t = mapT.GetChild(k);
+            if (t == null) continue;
             if (t.TryGetComponent<BlockData>(out var bd))
             {
                 Blocks[(int)t.position.y, (int)t.position.x] = bd;
