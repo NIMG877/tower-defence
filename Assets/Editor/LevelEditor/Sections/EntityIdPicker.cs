@@ -5,7 +5,8 @@ using UnityEngine.UIElements;
 
 /// <summary>
 /// EntityPrefabID 下拉框:从 EntityDataCollection 拉所有 EntityData,选项文案
-/// "<c>-<n> (ChineseName)",首位 "(空)" 表示 EntityID.Null。
+/// "<c>-<n> (ChineseName)"。不允许空值 —— 加载时若当前 ID_C 为空,自动落回
+/// 第一个真实实体并写回(带 Undo, 用户可撤销)。
 ///
 /// 写回:通过 SerializedProperty 的 ID_C / ID_N 子字段双写,支持 Undo。
 /// 缓存:EntityDataCollection 整个编辑器生命周期只加载一次;若资产被外部
@@ -58,10 +59,6 @@ public static class EntityIdPicker
         var ids = new List<EntityID>();
         var display = new List<string>();
 
-        // 首位:空槽
-        ids.Add(new EntityID(null, 0));
-        display.Add("(空)");
-
         for (int i = 0; i < all.Length; i++)
         {
             var d = all[i];
@@ -73,15 +70,33 @@ public static class EntityIdPicker
             display.Add(label);
         }
 
+        if (ids.Count == 0)
+        {
+            var placeholder = new Label("(无实体数据 — Resources/GameDatas/EntityDataCollection 为空)");
+            placeholder.style.flexGrow = 1;
+            placeholder.style.color = new Color(0.706f, 0.4f, 0.4f);
+            placeholder.style.unityFontStyleAndWeight = FontStyle.Italic;
+            row.Add(placeholder);
+            return row;
+        }
+
         // 当前值(注意:Unity 序列化 null string 后,stringValue 读回的是 "" 而非 null)
         var current = new EntityID(
             string.IsNullOrEmpty(idCProp.stringValue) ? null : idCProp.stringValue,
             idNProp.intValue);
         int initialIdx = 0;
-        if (!current.IsNull)
+        if (current.IsNull)
+        {
+            // 不允许空:落回第一个真实实体并写回
+            Undo.RecordObject(prop.serializedObject.targetObject, "Initialize EntityPrefabID");
+            idCProp.stringValue = ids[0].ID_C;
+            idNProp.intValue = ids[0].ID_N;
+            prop.serializedObject.ApplyModifiedProperties();
+        }
+        else
         {
             bool found = false;
-            for (int i = 1; i < ids.Count; i++) // skip (空)
+            for (int i = 0; i < ids.Count; i++)
             {
                 if (ids[i].Equals(current)) { initialIdx = i; found = true; break; }
             }
@@ -103,8 +118,12 @@ public static class EntityIdPicker
             int idx = display.IndexOf(evt.newValue);
             if (idx < 0) return;
             var picked = ids[idx];
+            if (ids[idx].Equals(new EntityID(
+                    string.IsNullOrEmpty(idCProp.stringValue) ? null : idCProp.stringValue,
+                    idNProp.intValue)))
+                return; // 没变
             Undo.RecordObject(prop.serializedObject.targetObject, "Change EntityPrefabID");
-            idCProp.stringValue = picked.ID_C; // null 表示空槽
+            idCProp.stringValue = picked.ID_C;
             idNProp.intValue = picked.ID_N;
             prop.serializedObject.ApplyModifiedProperties();
         });
