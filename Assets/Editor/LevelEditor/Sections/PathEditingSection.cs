@@ -37,45 +37,45 @@ public static class PathEditingSection
         root.Add(BuildPathPicker(so, state));
         // Toolbar
         root.Add(BuildToolbar(so, state, root));
-        // Split: canvas + side panel
-        // 画布固定 600x400,不被父压缩(flexShrink=0);水平溢出走 root 滚动
+        // Split: canvas (弹性宽) + 右侧固定宽栏
         var split = new VisualElement();
         split.style.flexDirection = FlexDirection.Row;
         split.style.marginTop = 6;
         split.style.flexShrink = 0;
 
         var canvas = MapCanvasView.Build(so, state);
-        canvas.style.flexShrink = 0;
+        // 画布:flexGrow=1 占满剩余宽度,最小宽 320(避免太挤),高度固定 400
+        canvas.style.flexGrow = 1;
+        canvas.style.flexShrink = 1;
+        canvas.style.minWidth = 320;
         split.Add(canvas);
 
-        // 右侧栏:总高度不超过画布高度,内部 vertical,list flexGrow 占剩余,detail 固定高
+        // 右侧栏:固定宽 220,高度 = 画布高度
         var right = new VisualElement();
         right.style.flexDirection = FlexDirection.Column;
-        right.style.flexGrow = 1;
-        right.style.flexShrink = 1;
+        right.style.flexShrink = 0;
+        right.style.flexGrow = 0;
+        right.style.width = 220;
         right.style.marginLeft = 8;
-        right.style.minWidth = 180;
-        right.style.height = ViewTransform.CanvasHeight; // 上限 = 画布高度
-        right.style.maxHeight = ViewTransform.CanvasHeight;
-        right.style.overflow = Overflow.Hidden; // 内部各自处理滚动
+        right.style.height = ViewTransform.CanvasHeight;
+        right.style.overflow = Overflow.Hidden;
 
         var listView = CheckpointListView.Build(so, state);
-        listView.style.flexGrow = 1; // 占据剩余高度
+        listView.style.flexGrow = 1;
         listView.style.flexShrink = 1;
-        listView.style.minHeight = 60; // 即使 detail 高,list 至少 60px
-        listView.style.overflow = Overflow.Hidden; // 内部 list 容器单独滚动
+        listView.style.minHeight = 60;
+        listView.style.overflow = Overflow.Hidden;
         right.Add(listView);
 
         var detailView = CheckpointDetailView.Build(so, state);
-        detailView.style.flexShrink = 0; // 高度固定,不被压
+        detailView.style.flexShrink = 0;
         detailView.style.marginTop = 4;
         right.Add(detailView);
 
         split.Add(right);
         root.Add(split);
 
-        // 整体允许水平滚动(画布固定 600,inspector 窄时画布完整可见)
-        root.style.overflow = Overflow.Hidden; // 自身不滚,外层(inspector body)滚
+        root.style.overflow = Overflow.Hidden;
 
         // 初始 fit 视图
         if (state.Cache != null) state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
