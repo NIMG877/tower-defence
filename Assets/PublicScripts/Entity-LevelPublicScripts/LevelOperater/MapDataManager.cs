@@ -25,7 +25,7 @@ public class MapDataManager : IManagerStartEnd
             return _instance;
         }
     }
-    private MapDataManager() { }
+    public MapDataManager() { }
     private struct AStarProperty
     {
         public Vector2 plotPos;
@@ -50,7 +50,8 @@ public class MapDataManager : IManagerStartEnd
             priority = 0;
         }
     }
-    public BlockData[,] BlockDataMatrix;
+    public BlockState[,] BlockStateMatrix;
+    private LevelData _levelData;
     public bool[,] HigherCanSetBlock
     {
         get
@@ -60,7 +61,7 @@ public class MapDataManager : IManagerStartEnd
             {
                 for (int j = 0; j < jSize; j++)
                 {
-                    high[i, j] = BlockDataMatrix[i, j].Highland && BlockDataMatrix[i, j].CanSet;
+                    high[i, j] = BlockStateMatrix[i, j].highland && BlockStateMatrix[i, j].canSet;
                 }
             }
             return high;
@@ -75,7 +76,7 @@ public class MapDataManager : IManagerStartEnd
             {
                 for (int j = 0; j < jSize; j++)
                 {
-                    low[i, j] = !BlockDataMatrix[i, j].Highland && !BlockDataMatrix[i, j].Deadly && BlockDataMatrix[i, j].CanSet;
+                    low[i, j] = !BlockStateMatrix[i, j].highland && !BlockStateMatrix[i, j].deadly && BlockStateMatrix[i, j].canSet;
                 }
             }
             return low;
@@ -91,26 +92,31 @@ public class MapDataManager : IManagerStartEnd
     private int heapCount;
     private AStarProperty[,] graph;
     private List<MoveParameters> path = new List<MoveParameters>();
-    private int iSize;
-    private int jSize;
+    public int iSize;
+    public int jSize;
     public (int iSize, int jSize) MapSize { get { return (iSize, jSize); } }
     private GameObject _map;
 
-    public BlockData GetPosBlock(int ii, int jj)
+    public ref BlockState GetPosBlockRef(int i, int j)
+    {
+        return ref BlockStateMatrix[i, j];
+    }
+
+    public BlockState GetPosBlock(int ii, int jj)
     {
         if (ii >= 0 && jj >= 0 && ii < iSize && jj < jSize)
         {
-            return BlockDataMatrix[ii, jj];
+            return BlockStateMatrix[ii, jj];
         }
         else
         {
-            return null;
+            return default;
         }
     }
-    public BlockData[] GetCricleCoverBlocks((float x, float y) posC, float r)
+    public BlockState[] GetCricleCoverBlocks((float x, float y) posC, float r)
     {
         (int i, int j) ij0 = ((int)(posC.y + 0.5), (int)(posC.x + 0.5));
-        BlockData[] bDatas = new BlockData[4];
+        BlockState[] bDatas = new BlockState[4];
         bDatas[0] = GetPosBlock(ij0.i, ij0.j);
         float k = 0.5f - r;
         if (Math.Abs(posC.x - ij0.j) < k && Math.Abs(posC.y - ij0.i) < k)
@@ -146,41 +152,46 @@ public class MapDataManager : IManagerStartEnd
     }
     public void MapInitialize()
     {
-        int childCount = _map.transform.childCount;
-        iSize = 0;
-        jSize = 0;
-        for (int i = 0; i < childCount; i++)
+        iSize = _levelData != null ? _levelData.iSize : 0;
+        jSize = _levelData != null ? _levelData.jSize : 0;
+        BlockStateMatrix = (iSize > 0 && jSize > 0) ? new BlockState[iSize, jSize] : null;
+
+        if (_levelData != null)
         {
-            Vector2 pos = _map.transform.GetChild(i).position;
-            if (iSize <= pos.y)
+            foreach (var entry in _levelData.MapData)
             {
-                iSize = (int)pos.y;
-            }
-            if (jSize <= pos.x)
-            {
-                jSize = (int)pos.x;
-            }
-        }
-        iSize++;
-        jSize++;
-        BlockDataMatrix = new BlockData[iSize, jSize];
-        for (int i = 0; i < childCount; i++)
-        {
-            if (_map.transform.GetChild(i).TryGetComponent(out BlockData blockData))
-            {
-                BlockDataMatrix[(int)blockData.transform.position.y, (int)blockData.transform.position.x] = blockData;
-                blockData.Material = blockData.GetComponent<MeshRenderer>().material;//��ȡ����
+                if (entry.i < 0 || entry.i >= iSize || entry.j < 0 || entry.j >= jSize) continue;
+                BlockStateMatrix[entry.i, entry.j] = entry.ToBlockState();
             }
         }
 
-        graph = new AStarProperty[iSize, jSize];
-        heap = new HeapEntry[iSize * jSize + 16];
-        for (int i = 0; i < iSize; i++)
+        if (_map != null)
         {
-            for (int j = 0; j < jSize; j++)
+            for (int k = 0; k < _map.transform.childCount; k++)
             {
-                graph[i, j].plotPos = BlockDataMatrix[i, j].transform.position;
-                graph[i, j].portalEnter = BlockDataMatrix[i, j].ProtalOutBlock != null;
+                var child = _map.transform.GetChild(k);
+                int ci = (int)child.position.y;
+                int cj = (int)child.position.x;
+                if (ci < 0 || ci >= iSize || cj < 0 || cj >= jSize) continue;
+                var mr = child.GetComponent<MeshRenderer>();
+                if (mr == null) continue;
+                var s = BlockStateMatrix[ci, cj];
+                s.material = mr.material;
+                BlockStateMatrix[ci, cj] = s;
+            }
+        }
+
+        graph = (iSize > 0 && jSize > 0) ? new AStarProperty[iSize, jSize] : null;
+        heap = (iSize > 0 && jSize > 0) ? new HeapEntry[iSize * jSize + 16] : null;
+        if (graph != null)
+        {
+            for (int i = 0; i < iSize; i++)
+            {
+                for (int j = 0; j < jSize; j++)
+                {
+                    graph[i, j].plotPos = new Vector2(j, i);
+                    graph[i, j].portalEnter = BlockStateMatrix[i, j].portalOutI != -1;
+                }
             }
         }
         EntityManager.Manager.BlockEntitysInitialize(iSize, jSize);
@@ -283,7 +294,7 @@ public class MapDataManager : IManagerStartEnd
         {
             for (int j = 0; j < jSize; j++)
             {
-                graph[i, j].Reset(BlockDataMatrix[i, j].PassableType <= moveMethod && !BlockDataMatrix[i, j].TempOccupy);
+                graph[i, j].Reset(BlockStateMatrix[i, j].passableType <= moveMethod);
             }
         }
         if (!IsBlocked(startPoint, endPoint, entityR))
@@ -329,7 +340,7 @@ public class MapDataManager : IManagerStartEnd
             {
                 for (int j = 0; j < jSize; j++)
                 {
-                    graph[i, j].Reset(BlockDataMatrix[i, j].PassableType <= moveMethod);
+                    graph[i, j].Reset(BlockStateMatrix[i, j].passableType <= moveMethod);
                 }
             }
             foreach ((int i, int j) ij in JudgePointInUnWalkableBlock(startPoint, entityR))
@@ -438,7 +449,7 @@ public class MapDataManager : IManagerStartEnd
         {
             for (int j = 0; j < jSize; j++)
             {
-                graph[i, j].Reset(BlockDataMatrix[i, j].PassableType <= 0 && !BlockDataMatrix[i, j].TempOccupy);
+                graph[i, j].Reset(BlockStateMatrix[i, j].passableType <= 0);
             }
         }
         path.Clear();
@@ -480,7 +491,7 @@ public class MapDataManager : IManagerStartEnd
             {
                 for (int j = 0; j < jSize; j++)
                 {
-                    graph[i, j].Reset(BlockDataMatrix[i, j].PassableType <= 0);
+                    graph[i, j].Reset(BlockStateMatrix[i, j].passableType <= 0);
                 }
             }
             foreach ((int i, int j) ij in JudgePointInUnWalkableBlock(startPoint, entityR))
@@ -604,8 +615,8 @@ public class MapDataManager : IManagerStartEnd
         int j = (int)aStarProperty.plotPos.x;
         if (graph[i, j].portalEnter)
         {
-            int ti = (int)BlockDataMatrix[i, j].ProtalOutBlock.transform.position.y;
-            int tj = (int)BlockDataMatrix[i, j].ProtalOutBlock.transform.position.x;
+            int ti = BlockStateMatrix[i, j].portalOutI;
+            int tj = BlockStateMatrix[i, j].portalOutJ;
             if (graph[ti, tj].marked == false)
             {
                 graph[ti, tj].marked = true;
@@ -655,8 +666,8 @@ public class MapDataManager : IManagerStartEnd
         int j = (int)aStarProperty.plotPos.x;
         if (graph[i, j].portalEnter)
         {
-            int ti = (int)BlockDataMatrix[i, j].ProtalOutBlock.transform.position.y;
-            int tj = (int)BlockDataMatrix[i, j].ProtalOutBlock.transform.position.x;
+            int ti = BlockStateMatrix[i, j].portalOutI;
+            int tj = BlockStateMatrix[i, j].portalOutJ;
             if (graph[ti, tj].marked == false)
             {
                 graph[ti, tj].marked = true;
@@ -789,7 +800,7 @@ public class MapDataManager : IManagerStartEnd
                 p1 = new Vector2Int((int)(beginPos.x + 0.5), (int)(0.5 + (Y[i] + Y[i + 1]) / 2));
                 if (!graph[p1.y, p1.x].Passable)
                 {
-                    return BaseOnBlockNewPoint(BlockDataMatrix[p1.y, p1.x].transform.position, endPos, beginPos, entityR);
+                    return BaseOnBlockNewPoint(new Vector2(p1.x + 0.5f, p1.y + 0.5f), endPos, beginPos, entityR);
                 }
             }
             return new Vector2(-1000, -1000);
@@ -840,7 +851,7 @@ public class MapDataManager : IManagerStartEnd
                 p1 = new Vector2(0.5f + (X[i] + X[i + 1]) / 2, 0.5f + k * (X[i] + X[i + 1]) / 2 + b);
                 if (!graph[(int)p1.y, (int)p1.x].Passable)
                 {
-                    return BaseOnBlockNewPoint(BlockDataMatrix[(int)p1.y, (int)p1.x].transform.position, endPos, beginPos, entityR);
+                    return BaseOnBlockNewPoint(new Vector2(p1.x + 0.5f, p1.y + 0.5f), endPos, beginPos, entityR);
                 }
             }
             return new Vector2(-1000, -1000);
@@ -1020,6 +1031,10 @@ public class MapDataManager : IManagerStartEnd
     public void CreateMap(GameObject map)
     {
         _map = UnityEngine.Object.Instantiate(map, LevelResourceSharing.LM);
+    }
+    public void AttachLevelData(LevelData levelData)
+    {
+        _levelData = levelData;
     }
     public void Initialize()
     {
