@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -40,8 +41,16 @@ public static class WaveTimelineSection
         // 缩放控件 (位于标题下、Wave 列表之上)
         section.Add(BuildZoomControls(rebuild));
 
-        // 监听 Waves 数组变化 (Undo/Redo, 外部 mutation)
-        section.TrackPropertyValue(wavesProp, _ => rebuild());
+        // 监听 Waves 数组结构变化 (add/delete wave, Undo/Redo) — 字段级变更不再触发整条 timeline 重建
+        int lastWaveCount = wavesProp.arraySize;
+        section.TrackPropertyValue(wavesProp, _ =>
+        {
+            if (wavesProp.arraySize != lastWaveCount)
+            {
+                lastWaveCount = wavesProp.arraySize;
+                rebuild();
+            }
+        });
 
         // + 新增 Wave 按钮
         var addWaveBtn = new Button(() =>
@@ -67,22 +76,76 @@ public static class WaveTimelineSection
         }
     }
 
+    // 存于 cardsContainer.userData — 增量更新用, 避免任何字段变更都重建整树
+    class WaveTimelineState
+    {
+        public List<VisualElement> tickLines = new();
+        public List<Label> tickLabels = new();
+        public List<Button> cards = new();
+        public VisualElement emptyLabel;
+        public int lastActionCount = -1;
+    }
+
     static void RenderActionCards(VisualElement container, SerializedProperty actionsProp, int waveIdx, Action<int, int> onActionSelected)
     {
-        container.Clear();
-        if (actionsProp.arraySize == 0)
+        var state = container.userData as WaveTimelineState;
+        if (state == null)
         {
-            var empty = new Label("(空 · 0s)");
-            empty.style.color = new Color(0.4f, 0.4f, 0.4f);
-            empty.style.unityTextAlign = TextAnchor.MiddleCenter;
-            empty.style.position = Position.Absolute;
-            empty.style.left = 0;
-            empty.style.right = 0;
-            empty.style.top = 0;
-            empty.style.bottom = 0;
-            container.Add(empty);
-            return;
+            state = new WaveTimelineState();
+            container.userData = state;
         }
+
+        // 结构性变更 (add/delete action) 才做整树重建; 字段级变更走下面的增量更新
+        if (state.lastActionCount != actionsProp.arraySize)
+        {
+            container.Clear();
+            state.tickLines.Clear();
+            state.tickLabels.Clear();
+            state.cards.Clear();
+            state.emptyLabel = null;
+
+            if (actionsProp.arraySize == 0)
+            {
+                var empty = new Label("(空 · 0s)");
+                empty.style.color = new Color(0.4f, 0.4f, 0.4f);
+                empty.style.unityTextAlign = TextAnchor.MiddleCenter;
+                empty.style.position = Position.Absolute;
+                empty.style.left = 0;
+                empty.style.right = 0;
+                empty.style.top = 0;
+                empty.style.bottom = 0;
+                container.Add(empty);
+                state.emptyLabel = empty;
+            }
+            else
+            {
+                // 先把 card 元素都创建出来, 位置 / 颜色在下面增量更新里设
+                for (int i = 0; i < actionsProp.arraySize; i++)
+                {
+                    int actionIndex = i; // 闭包按值捕获
+                    var card = new Button(() => onActionSelected?.Invoke(waveIdx, actionIndex))
+                    {
+                        text = $"A{i}"
+                    };
+                    card.style.position = Position.Absolute;
+                    card.style.top = 22;
+                    card.style.height = 28;
+                    card.style.width = 36;
+                    card.style.color = new Color(0, 0, 0);
+                    card.style.fontSize = 9;
+                    card.style.paddingLeft = 2;
+                    card.style.paddingRight = 2;
+                    container.Add(card);
+                    state.cards.Add(card);
+                }
+            }
+
+            state.lastActionCount = actionsProp.arraySize;
+        }
+
+        if (actionsProp.arraySize == 0) return;
+
+        // === 增量更新 (字段级变更走这里, O(actions + ticks) 次 style 赋值) ===
 
         float maxTime = ComputeMaxTime(actionsProp);
         float pxPerSec = PixelsPerSecond();
@@ -90,59 +153,57 @@ public static class WaveTimelineSection
         float containerWidth = Mathf.Max(200f, maxTime * pxPerSec);
         container.style.minWidth = containerWidth;
 
-        // 渲染刻度 (tick + label)
-        for (float t = 0f; t <= maxTime + 0.001f; t += tickInterval)
+        // ticks: 复用现有元素, 数量变化时再增删
+        int requiredTickCount = 0;
+        for (float t = 0f; t <= maxTime + 0.001f; t += tickInterval) requiredTickCount++;
+
+        while (state.tickLines.Count < requiredTickCount)
         {
-            float x = t * pxPerSec;
             var tick = new VisualElement();
             tick.style.position = Position.Absolute;
-            tick.style.left = x;
             tick.style.top = 18;
             tick.style.bottom = 0;
             tick.style.width = 1;
             tick.style.backgroundColor = new Color(0.25f, 0.25f, 0.3f);
             container.Add(tick);
+            state.tickLines.Add(tick);
 
-            var label = new Label($"{t:0.#}s");
+            var label = new Label();
             label.style.position = Position.Absolute;
-            label.style.left = x + 2;
             label.style.top = 0;
             label.style.fontSize = 9;
             label.style.color = new Color(0.55f, 0.55f, 0.55f);
             container.Add(label);
+            state.tickLabels.Add(label);
+        }
+        while (state.tickLines.Count > requiredTickCount)
+        {
+            state.tickLines[state.tickLines.Count - 1].RemoveFromHierarchy();
+            state.tickLines.RemoveAt(state.tickLines.Count - 1);
+            state.tickLabels[state.tickLabels.Count - 1].RemoveFromHierarchy();
+            state.tickLabels.RemoveAt(state.tickLabels.Count - 1);
+        }
+        int ti = 0;
+        for (float t = 0f; t <= maxTime + 0.001f; t += tickInterval)
+        {
+            float x = t * pxPerSec;
+            state.tickLines[ti].style.left = x;
+            state.tickLabels[ti].style.left = x + 2;
+            state.tickLabels[ti].text = $"{t:0.#}s";
+            ti++;
         }
 
-        // 渲染 action 卡片 (按绝对时间定位, 无 gap 标记)
-        // action[i] 在 cumulativeTime 位置。
-        // 下一个 action 的位置 = 当前 action 位置 + 下一个 action 的 GapFromLastAction
-        // (因为 gap[i] 表示 "和前一个 action 的距离", 即 action[i] 距离 action[i-1] 的时间)
+        // cards: 就地更新 left + CommandType 颜色
         float cumulativeTime = 0f;
         for (int i = 0; i < actionsProp.arraySize; i++)
         {
             var a = actionsProp.GetArrayElementAtIndex(i);
+            var card = state.cards[i];
+            card.style.left = cumulativeTime * pxPerSec;
+
             int cmd = a.FindPropertyRelative("CommandType").intValue;
-            float myGap = Mathf.Max(0f, a.FindPropertyRelative("GapFromLastAction").floatValue);
-
-            float x = cumulativeTime * pxPerSec;
-            int actionIndex = i; // 闭包按值捕获, 避免循环结束后 i 越界
-            var card = new Button(() => onActionSelected?.Invoke(waveIdx, actionIndex))
-            {
-                text = $"A{i}"
-            };
-            card.style.position = Position.Absolute;
-            card.style.left = x;
-            card.style.top = 22;  // 位于刻度标签之下
-            card.style.height = 28;
-            card.style.width = 36;  // 固定宽度
             card.style.backgroundColor = CommandTypeColor(cmd);
-            card.style.color = new Color(0, 0, 0);
-            card.style.fontSize = 9;
-            card.style.paddingLeft = 2;
-            card.style.paddingRight = 2;
-            container.Add(card);
 
-            // 推进 cumulativeTime: 用下一个 action 的 gap (它表示"和前一个 action 的距离")
-            // 即下一个 action 距离 action[i] 的时间
             if (i + 1 < actionsProp.arraySize)
             {
                 var next = actionsProp.GetArrayElementAtIndex(i + 1);
