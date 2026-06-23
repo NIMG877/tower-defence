@@ -72,7 +72,6 @@ public static class MapCanvasView
             for (int j = 0; j < cache.JSize; j++)
             {
                 var bd = cache.Blocks[i, j];
-                if (bd == null) continue;
 
                 // cell [i,j] 的中心是 (j, i) 整数;UnityEngine.Rect.y 视作"顶",
                 // 顶边对应 grid y = i+0.5(屏幕 y 较小),底边对应 y = i-0.5(屏幕 y 较大)。
@@ -81,33 +80,33 @@ public static class MapCanvasView
                 var rect = new Rect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
 
                 Color fill;
-                if (bd.Deadly)
+                if (bd.deadly)
                     fill = new Color(0.471f, 0.235f, 0.235f); // rgb(120,60,60)
                 else
-                    fill = BlockTypeColor(bd.PassableType);
+                    fill = BlockTypeColor(bd.passableType);
 
                 p2d.fillColor = fill;
                 BeginRectPath(p2d, rect);
                 p2d.Fill();
 
                 // Highland 黄框 / CanSet 青框
-                if (bd.Highland)
+                if (bd.highland)
                 {
                     p2d.strokeColor = new Color(0.706f, 0.549f, 0.235f);
                     p2d.lineWidth = 0.5f;
                     BeginRectPath(p2d, rect);
                     p2d.Stroke();
                 }
-                if (bd.CanSet)
+                if (bd.canSet)
                 {
                     p2d.strokeColor = new Color(0.549f, 0.784f, 0.706f);
                     p2d.lineWidth = 0.5f;
                     BeginRectPath(p2d, rect);
                     p2d.Stroke();
                 }
-                if (bd.ProtalOutBlock != null)
+                if (bd.portalOutI != -1)
                 {
-                    p2d.strokeColor = bd.ProtalColor;
+                    p2d.strokeColor = bd.portalColor;
                     p2d.lineWidth = 0.5f;
                     BeginRectPath(p2d, rect);
                     p2d.Stroke();
