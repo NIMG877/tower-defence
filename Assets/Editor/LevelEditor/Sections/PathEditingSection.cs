@@ -36,7 +36,7 @@ public static class PathEditingSection
         // Path picker
         root.Add(BuildPathPicker(so, state));
         // Toolbar
-        root.Add(BuildToolbar(state, root));
+        root.Add(BuildToolbar(so, state, root));
         // Split: canvas + side panel
         var split = new VisualElement();
         split.style.flexDirection = FlexDirection.Row;
@@ -137,7 +137,7 @@ public static class PathEditingSection
         return row;
     }
 
-    static VisualElement BuildToolbar(PathEditingState state, VisualElement root)
+    static VisualElement BuildToolbar(SerializedObject so, PathEditingState state, VisualElement root)
     {
         var bar = new VisualElement();
         bar.style.flexDirection = FlexDirection.Row;
