@@ -10,6 +10,7 @@ using UnityEngine;
 public sealed class BlockMapCache : IDisposable
 {
     public BlockDataEntry[,] Blocks;
+    public bool[,] HasEntry;
     public int ISize;
     public int JSize;
     public float EntityR;
@@ -32,11 +33,13 @@ public sealed class BlockMapCache : IDisposable
         if (cache.ISize <= 0 || cache.JSize <= 0) return cache;
 
         cache.Blocks = new BlockDataEntry[cache.ISize, cache.JSize];
+        cache.HasEntry = new bool[cache.ISize, cache.JSize];
         foreach (var entry in levelData.MapData)
         {
             if (entry.i < 0 || entry.i >= cache.ISize) continue;
             if (entry.j < 0 || entry.j >= cache.JSize) continue;
             cache.Blocks[entry.i, entry.j] = entry;
+            cache.HasEntry[entry.i, entry.j] = true;
         }
         return cache;
     }

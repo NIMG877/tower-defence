@@ -572,7 +572,10 @@ public static class MapEditTab
             // Reset to default first
             for (int i = 0; i < _cache.ISize; i++)
             for (int j = 0; j < _cache.JSize; j++)
+            {
                 _cache.Blocks[i, j] = default;
+                if (_cache.HasEntry != null) _cache.HasEntry[i, j] = false;
+            }
 
             var mapData = MapDataProp();
             for (int k = 0; k < mapData.arraySize; k++)
@@ -592,6 +595,7 @@ public static class MapEditTab
                     portalOutJ = e.FindPropertyRelative("portalOutJ").intValue,
                     portalColor = e.FindPropertyRelative("portalColor").colorValue,
                 };
+                if (_cache.HasEntry != null) _cache.HasEntry[i, j] = true;
             }
         }
     }

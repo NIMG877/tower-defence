@@ -71,6 +71,9 @@ public static class MapCanvasView
         {
             for (int j = 0; j < cache.JSize; j++)
             {
+                // 没有 MapData entry 的格子不画(让 canvas 背景透出来)
+                if (!cache.HasEntry[i, j]) continue;
+
                 var bd = cache.Blocks[i, j];
 
                 // cell [i,j] 的中心是 (j, i) 整数;UnityEngine.Rect.y 视作"顶",
