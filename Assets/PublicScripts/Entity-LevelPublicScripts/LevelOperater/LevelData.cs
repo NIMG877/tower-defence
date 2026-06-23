@@ -21,8 +21,6 @@ public class LevelData : ScriptableObject
     public GameObject MapPrefab;
     public GameObject EnvironmentalControlDevice;
     public LevelActions.Wave[] Waves;
-    [System.Obsolete("Use Paths[] instead. Kept temporarily for legacy asset migration.")]
-    public GameObject[] CheckPoints;
     public PathData[] Paths = new PathData[0];
     public EntityID[] WaveEntityPrefabIDs;
     public int LevelHp;

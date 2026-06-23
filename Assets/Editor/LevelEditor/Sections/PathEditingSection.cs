@@ -158,10 +158,8 @@ public static class PathEditingSection
             state.SelectedPathIdx = pathsProp.arraySize - 1;
             state.SelectedCheckpointIdx = -1;
             state.NotifyChanged();
-            // Rebuild picker to show new path
-            row.RemoveFromHierarchy();
-            // Note: full rebuild deferred to caller; simpler: add a new path then trigger section refresh
-            // — handled by caller (LevelDataEditor) re-calling Build() on Paths property change
+            // 不要 RemoveFromHierarchy:会破坏事件订阅,UI 立即消失,只能等 inspector 重建才恢复
+            // state.NotifyChanged() 已经触发 RebuildPopup,popup 会刷新到新 path
         }) { text = "+ 新建" };
         newBtn.style.marginLeft = 4;
         row.Add(newBtn);
@@ -193,12 +191,6 @@ public static class PathEditingSection
         bar.style.alignItems = Align.Center;
         bar.style.borderTopLeftRadius = 3; bar.style.borderTopRightRadius = 3;
         bar.style.borderBottomLeftRadius = 3; bar.style.borderBottomRightRadius = 3;
-
-        var addCpBtn = new Button(() => { /* delegated to Manipulator left-click on empty */ })
-        { text = "⊕ 新建点 (左键空白)" };
-        addCpBtn.style.fontSize = 11;
-        addCpBtn.SetEnabled(false); // 提示用法:实际通过左键操作
-        bar.Add(addCpBtn);
 
         var delCpBtn = new Button(() =>
         {

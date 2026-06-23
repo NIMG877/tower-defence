@@ -28,23 +28,7 @@ public class PathDataManager:IManagerStartEnd
         public List<MoveParameters[]> MoveParameters1;
         public List<MoveParameters[]> MoveParameters2;
         public bool NeedUpdate;
-        public Path(GameObject path)
-        {
-            int checkPointNum = path.transform.childCount;
-            CheckPoints = new Vector2[checkPointNum];
-            WaitTimes = new float[checkPointNum];
-            for (int i = 0; i < checkPointNum; i++)
-            {
-                Transform checkPointi = path.transform.GetChild(i);
-                CheckPoints[i] = checkPointi.position;
-                WaitTimes[i] = float.Parse(checkPointi.name);
-            }
-            MoveParameters0 = new List<MoveParameters[]>();
-            MoveParameters1 = new List<MoveParameters[]>();
-            MoveParameters2 = new List<MoveParameters[]>();
-            NeedUpdate = true;
-        }
-        // 新格式:直接吃 LevelData.PathData(由 editor Path Editing 写入)
+        // 直接吃 LevelData.PathData(由 editor Path Editing 写入)
         public Path(PathData data)
         {
             CheckPoints = data.CheckPoints ?? new Vector2[0];
@@ -65,26 +49,7 @@ public class PathDataManager:IManagerStartEnd
     private MapDataManager _mapDataManager;
     private Path[] _paths;
 
-    public PathDataManager(GameObject[] paths)
-    {
-        CreatePaths(paths);
-    }
-    public void CreatePaths(GameObject[] paths)
-    {
-        _paths = new Path[paths.Length];
-        float entityR = EntityManager.EntityR;
-        for (int i = 0; i < _paths.Length; i++)
-        {
-            _paths[i] = new Path(paths[i]);
-            for (int j = 0; j < _paths[i].CheckPoints.Length - 1; j++)
-            {
-                _paths[i].MoveParameters0.Add(_mapDataManager.AStarWayFinding(_paths[i].CheckPoints[j], _paths[i].CheckPoints[j + 1], 0));
-                _paths[i].MoveParameters1.Add(_mapDataManager.AStarWayFinding(_paths[i].CheckPoints[j], _paths[i].CheckPoints[j + 1], 1));
-                _paths[i].MoveParameters2.Add(_mapDataManager.AStarWayFinding(_paths[i].CheckPoints[j], _paths[i].CheckPoints[j + 1], 2));
-            }
-        }
-    }
-    // 新格式入口:从 LevelData.Paths[] 直接构造,不再依赖 prefab 旧格式
+    // 从 LevelData.Paths[] 直接构造,不再依赖 prefab 旧格式
     public void CreatePaths(PathData[] paths)
     {
         _paths = new Path[paths != null ? paths.Length : 0];
