@@ -71,18 +71,17 @@ public sealed class EditorPathManipulator : MouseManipulator
     {
         // cursor readout
         var readout = _canvas.Q<Label>("cursor-readout");
-        var size = _canvas.contentRect.size;
         if (readout != null && _state.Cache != null)
         {
-            var world = _state.View.ScreenToWorld(evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize, size.x, size.y);
+            var world = _state.View.ScreenToWorld(evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize);
             readout.text = $"({world.x:F1}, {world.y:F1})";
         }
 
         // 中键拖拽 = 平移(屏幕像素 1:1,鼠标 N px = 视角 N px)
         if (evt.pressedButtons == (1 << (int)MouseButton.MiddleMouse) && _state.Cache != null)
         {
-            float unitX = size.x / _state.Cache.JSize;
-            float unitY = size.y / _state.Cache.ISize;
+            float unitX = ViewTransform.CanvasWidth / _state.Cache.JSize;
+            float unitY = ViewTransform.CanvasHeight / _state.Cache.ISize;
             // 鼠标 Y 向下 → grid y 减小(让"鼠标下,图也下"的自然手感)
             _state.View.Offset -= new Vector2(
                 evt.mouseDelta.x / (_state.View.Zoom * unitX),
@@ -90,12 +89,11 @@ public sealed class EditorPathManipulator : MouseManipulator
             _state.NotifyChanged();
         }
 
-        // 左键拖拽 = 移动 checkpoint (视觉跟随,不写 SerializedProperty)
+        // 左键拖拽 = 移动 checkpoint (视觉跟随,不写 SerializedProperty;不再 snap)
         if (_dragCpIdx >= 0 && evt.pressedButtons == (1 << (int)MouseButton.LeftMouse))
         {
-            var world = _state.View.ScreenToWorld(evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize, size.x, size.y);
-            var snapped = ViewTransform.SnapToGrid(world);
-            UpdateCheckpointVisual(_dragCpIdx, snapped);
+            var world = _state.View.ScreenToWorld(evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize);
+            UpdateCheckpointVisual(_dragCpIdx, world);
         }
     }
 
@@ -103,11 +101,9 @@ public sealed class EditorPathManipulator : MouseManipulator
     {
         if (evt.button == 0 && _dragCpIdx >= 0)
         {
-            // 松手一次性写回
-            var size = _canvas.contentRect.size;
-            var world = _state.View.ScreenToWorld(evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize, size.x, size.y);
-            var snapped = ViewTransform.SnapToGrid(world);
-            CommitCheckpointPosition(_dragCpIdx, snapped);
+            // 松手一次性写回(自由坐标,不再 snap)
+            var world = _state.View.ScreenToWorld(evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize);
+            CommitCheckpointPosition(_dragCpIdx, world);
             _dragCpIdx = -1;
             target.ReleaseMouse();
         }
@@ -124,10 +120,9 @@ public sealed class EditorPathManipulator : MouseManipulator
         // 以鼠标位置为中心缩放
         if (_state.Cache != null)
         {
-            var size = _canvas.contentRect.size;
-            var worldBefore = _state.View.ScreenToWorld(evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize, size.x, size.y);
+            var worldBefore = _state.View.ScreenToWorld(evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize);
             _state.View.Zoom = newZoom;
-            var worldAfter = _state.View.ScreenToWorld(evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize, size.x, size.y);
+            var worldAfter = _state.View.ScreenToWorld(evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize);
             _state.View.Offset += worldBefore - worldAfter;
         }
         _state.NotifyChanged();
@@ -146,8 +141,7 @@ public sealed class EditorPathManipulator : MouseManipulator
 
     void AddCheckpointAt(Vector2 local)
     {
-        var size = _canvas.contentRect.size;
-        var world = _state.View.ScreenToWorld(local, _state.Cache.ISize, _state.Cache.JSize, size.x, size.y);
+        var world = _state.View.ScreenToWorld(local, _state.Cache.ISize, _state.Cache.JSize);
         var snapped = ViewTransform.SnapToGrid(world);
         var pathProp = _so.FindProperty("Paths");
         var pathEl = pathProp.GetArrayElementAtIndex(_state.SelectedPathIdx);
@@ -170,8 +164,7 @@ public sealed class EditorPathManipulator : MouseManipulator
     {
         if (_layer.ElementAt(idx) is VisualElement dot && _state.Cache != null)
         {
-            var size = _canvas.contentRect.size;
-            var screen = _state.View.WorldToScreen(worldPos, _state.Cache.ISize, _state.Cache.JSize, size.x, size.y);
+            var screen = _state.View.WorldToScreen(worldPos, _state.Cache.ISize, _state.Cache.JSize);
             float d = dot.layout.width;
             dot.style.left = screen.x - d / 2f;
             dot.style.top = screen.y - d / 2f;
