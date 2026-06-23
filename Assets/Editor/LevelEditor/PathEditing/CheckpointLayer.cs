@@ -62,14 +62,13 @@ public static class CheckpointLayer
             dot.style.borderRightColor = dot.style.borderLeftColor;
             dot.style.borderTopColor = dot.style.borderLeftColor;
             dot.style.borderBottomColor = dot.style.borderLeftColor;
+            // 选中态用更粗边框 + 更高 alpha 背景区分(IStyle 没有 boxShadow,改用 border-width 视觉强化)
             if (selected)
             {
-                dot.style.boxShadow = new Shadow
-                {
-                    offset = Vector2.zero,
-                    blurRadius = 12,
-                    color = new Color(1f, 0.784f, 0.314f, 0.7f)
-                };
+                dot.style.borderLeftWidth = 4;
+                dot.style.borderRightWidth = 4;
+                dot.style.borderTopWidth = 4;
+                dot.style.borderBottomWidth = 4;
             }
 
             dot.style.alignItems = Align.Center;

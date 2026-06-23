@@ -180,7 +180,9 @@ public static class PathEditingSection
         for (int k = 0; k < 3; k++)
         {
             int captured = k;
-            var btn = new Button(() =>
+            // 先创建 Button 再注册 click,避免 lambda 在 btn 声明前捕获
+            var btn = new Button { text = methods[k] };
+            btn.clicked += () =>
             {
                 state.MoveMethod = captured;
                 state.NotifyChanged();
@@ -189,7 +191,7 @@ public static class PathEditingSection
                     if (child is Button b && methods.Contains(b.text)) b.style.backgroundColor = StyleKeyword.Null;
                 btn.style.backgroundColor = new Color(0.306f, 0.788f, 0.627f);
                 btn.style.color = Color.black;
-            }) { text = methods[k] };
+            };
             btn.style.marginLeft = 2;
             btn.style.fontSize = 11;
             if (k == state.MoveMethod)

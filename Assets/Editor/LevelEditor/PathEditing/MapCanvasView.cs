@@ -87,8 +87,7 @@ public static class MapCanvasView
                     fill = BlockTypeColor(bd.PassableType);
 
                 p2d.fillColor = fill;
-                p2d.BeginPath();
-                p2d.Rect(rect);
+                BeginRectPath(p2d, rect);
                 p2d.Fill();
 
                 // Highland 黄框 / CanSet 青框
@@ -96,24 +95,21 @@ public static class MapCanvasView
                 {
                     p2d.strokeColor = new Color(0.706f, 0.549f, 0.235f);
                     p2d.lineWidth = 2;
-                    p2d.BeginPath();
-                    p2d.Rect(rect);
+                    BeginRectPath(p2d, rect);
                     p2d.Stroke();
                 }
                 if (bd.CanSet)
                 {
                     p2d.strokeColor = new Color(0.549f, 0.784f, 0.706f);
                     p2d.lineWidth = 2;
-                    p2d.BeginPath();
-                    p2d.Rect(rect);
+                    BeginRectPath(p2d, rect);
                     p2d.Stroke();
                 }
                 if (bd.ProtalOutBlock != null)
                 {
                     p2d.strokeColor = bd.ProtalColor;
                     p2d.lineWidth = 2;
-                    p2d.BeginPath();
-                    p2d.Rect(rect);
+                    BeginRectPath(p2d, rect);
                     p2d.Stroke();
                 }
             }
@@ -127,6 +123,17 @@ public static class MapCanvasView
         2 => new Color(0.196f, 0.314f, 0.353f), // rgb(50,80,90)
         _ => new Color(0.157f, 0.157f, 0.157f)
     };
+
+    // Painter2D 没有 Rect(...) 方法,改用 4 顶点 + ClosePath 拼矩形
+    static void BeginRectPath(Painter2D p2d, Rect r)
+    {
+        p2d.BeginPath();
+        p2d.MoveTo(new Vector2(r.x, r.y));
+        p2d.LineTo(new Vector2(r.xMax, r.y));
+        p2d.LineTo(new Vector2(r.xMax, r.yMax));
+        p2d.LineTo(new Vector2(r.x, r.yMax));
+        p2d.ClosePath();
+    }
 
     static void DrawPaths(MeshGenerationContext ctx, SerializedObject so, PathEditingState state)
     {

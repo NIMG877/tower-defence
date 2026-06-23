@@ -33,7 +33,7 @@ public static class CheckpointDetailView
         posYField.style.marginBottom = 2;
         waitField.style.marginBottom = 2;
 
-        var cpProp = new SerializedProperty();
+        var cpProp = new SerializedProperty[1]; // SerializedProperty 没有 public ctor,改用数组容器
         void Bind()
         {
             if (state.SelectedCheckpointIdx < 0)
@@ -50,9 +50,9 @@ public static class CheckpointDetailView
             header.text = $"▸ Checkpoint #{state.SelectedCheckpointIdx}";
             posXField.SetEnabled(true); posYField.SetEnabled(true); waitField.SetEnabled(true);
 
-            cpProp = cpsProp.GetArrayElementAtIndex(state.SelectedCheckpointIdx);
-            posXField.BindProperty(cpProp.FindPropertyRelative("x"));
-            posYField.BindProperty(cpProp.FindPropertyRelative("y"));
+            cpProp[0] = cpsProp.GetArrayElementAtIndex(state.SelectedCheckpointIdx);
+            posXField.BindProperty(cpProp[0].FindPropertyRelative("x"));
+            posYField.BindProperty(cpProp[0].FindPropertyRelative("y"));
             if (wtsProp != null && state.SelectedCheckpointIdx < wtsProp.arraySize)
                 waitField.BindProperty(wtsProp.GetArrayElementAtIndex(state.SelectedCheckpointIdx));
         }
