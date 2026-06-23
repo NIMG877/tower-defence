@@ -39,7 +39,7 @@ public static class MapCanvasView
         canvas.AddManipulator(new EditorPathManipulator(so, state, canvas, cpLayer));
 
         // Hint + cursor readout
-        var hint = new Label("滚轮缩放 · 中键拖拽 · 左键新建/选中 · 拖动改位置");
+        var hint = new Label("右键拖拽缩放 · 中键拖拽平移 · 左键新建/选中 · 拖动改位置");
         hint.style.position = Position.Absolute;
         hint.style.bottom = 4; hint.style.right = 8;
         hint.style.fontSize = 10;

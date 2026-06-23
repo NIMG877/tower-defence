@@ -10,13 +10,15 @@ public sealed class EditorPathManipulator : MouseManipulator
     VisualElement _layer;
 
     int _dragCpIdx = -1;
-    Vector2 _dragVisualOffset; // 拖动期间,圆点的视觉偏移(只更新 style)
+    bool _rightDragging;        // 右键按下进入缩放拖拽模式
+    Vector2 _rightDownLocal;    // 右键按下时鼠标位置,缩放以该点为锚
 
     public EditorPathManipulator(SerializedObject so, PathEditingState state, VisualElement canvas, VisualElement layer)
     {
         _so = so; _state = state; _canvas = canvas; _layer = layer;
         activators.Add(new ManipulatorActivationFilter { button = MouseButton.LeftMouse });
         activators.Add(new ManipulatorActivationFilter { button = MouseButton.MiddleMouse });
+        activators.Add(new ManipulatorActivationFilter { button = MouseButton.RightMouse });
     }
 
     protected override void RegisterCallbacksOnTarget()
@@ -24,7 +26,7 @@ public sealed class EditorPathManipulator : MouseManipulator
         target.RegisterCallback<MouseDownEvent>(OnMouseDown);
         target.RegisterCallback<MouseMoveEvent>(OnMouseMove);
         target.RegisterCallback<MouseUpEvent>(OnMouseUp);
-        target.RegisterCallback<WheelEvent>(OnWheel);
+        // 不再监听 WheelEvent — 缩放改用右键拖拽
     }
 
     protected override void UnregisterCallbacksFromTarget()
@@ -32,12 +34,12 @@ public sealed class EditorPathManipulator : MouseManipulator
         target.UnregisterCallback<MouseDownEvent>(OnMouseDown);
         target.UnregisterCallback<MouseMoveEvent>(OnMouseMove);
         target.UnregisterCallback<MouseUpEvent>(OnMouseUp);
-        target.UnregisterCallback<WheelEvent>(OnWheel);
     }
 
     void OnMouseDown(MouseDownEvent evt)
     {
         if (evt.button == 0) OnLeftDown(evt);
+        else if (evt.button == 1) OnRightDown(evt);
         else if (evt.button == 2) OnMiddleDown(evt);
     }
 
@@ -50,16 +52,22 @@ public sealed class EditorPathManipulator : MouseManipulator
         {
             _state.SelectedCheckpointIdx = hitIdx;
             _dragCpIdx = hitIdx;
-            _dragVisualOffset = Vector2.zero;
             _state.NotifyChanged();
             target.CaptureMouse();
         }
         else
         {
-            // 在空白处新增 checkpoint
+            // 在空白处新增 checkpoint(snap 由 state.Snap 决定)
             AddCheckpointAt(local);
             target.CaptureMouse();
         }
+    }
+
+    void OnRightDown(MouseDownEvent evt)
+    {
+        _rightDragging = true;
+        _rightDownLocal = evt.localMousePosition;
+        target.CaptureMouse();
     }
 
     void OnMiddleDown(MouseDownEvent evt)
@@ -74,26 +82,42 @@ public sealed class EditorPathManipulator : MouseManipulator
         if (readout != null && _state.Cache != null)
         {
             var world = _state.View.ScreenToWorld(evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize);
-            readout.text = $"({world.x:F1}, {world.y:F1})";
+            readout.text = $"({world.x:F2}, {world.y:F2})";
         }
 
-        // 中键拖拽 = 平移(屏幕像素 1:1,鼠标 N px = 视角 N px)
+        // 中键拖拽 = 平移(屏幕像素 1:1)
         if (evt.pressedButtons == (1 << (int)MouseButton.MiddleMouse) && _state.Cache != null)
         {
             float unitX = ViewTransform.CanvasWidth / _state.Cache.JSize;
             float unitY = ViewTransform.CanvasHeight / _state.Cache.ISize;
-            // 鼠标 Y 向下 → grid y 减小(让"鼠标下,图也下"的自然手感)
             _state.View.Offset -= new Vector2(
                 evt.mouseDelta.x / (_state.View.Zoom * unitX),
                 -evt.mouseDelta.y / (_state.View.Zoom * unitY));
             _state.NotifyChanged();
         }
 
-        // 左键拖拽 = 移动 checkpoint (视觉跟随,不写 SerializedProperty;不再 snap)
+        // 右键拖拽 = 缩放(以按下时鼠标位置为锚,垂直位移 1 像素 = zoom * 1.01)
+        if (_rightDragging && _state.Cache != null)
+        {
+            float delta = -evt.mouseDelta.y; // 鼠标上 = 放大(zoom 增加)
+            float newZoom = Mathf.Clamp(_state.View.Zoom * Mathf.Pow(1.01f, delta), 0.25f, 16f);
+            if (!Mathf.Approximately(newZoom, _state.View.Zoom))
+            {
+                // 以右键按下位置为锚缩放
+                var worldBefore = _state.View.ScreenToWorld(_rightDownLocal, _state.Cache.ISize, _state.Cache.JSize);
+                _state.View.Zoom = newZoom;
+                var worldAfter = _state.View.ScreenToWorld(_rightDownLocal, _state.Cache.ISize, _state.Cache.JSize);
+                _state.View.Offset += worldBefore - worldAfter;
+                _state.NotifyChanged();
+            }
+        }
+
+        // 左键拖拽 = 移动 checkpoint
         if (_dragCpIdx >= 0 && evt.pressedButtons == (1 << (int)MouseButton.LeftMouse))
         {
             var world = _state.View.ScreenToWorld(evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize);
-            UpdateCheckpointVisual(_dragCpIdx, world);
+            var writePos = _state.Snap ? ViewTransform.SnapToGrid(world) : world;
+            UpdateCheckpointVisual(_dragCpIdx, writePos);
         }
     }
 
@@ -101,31 +125,21 @@ public sealed class EditorPathManipulator : MouseManipulator
     {
         if (evt.button == 0 && _dragCpIdx >= 0)
         {
-            // 松手一次性写回(自由坐标,不再 snap)
             var world = _state.View.ScreenToWorld(evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize);
-            CommitCheckpointPosition(_dragCpIdx, world);
+            var writePos = _state.Snap ? ViewTransform.SnapToGrid(world) : world;
+            CommitCheckpointPosition(_dragCpIdx, writePos);
             _dragCpIdx = -1;
+            target.ReleaseMouse();
+        }
+        else if (evt.button == 1 && _rightDragging)
+        {
+            _rightDragging = false;
             target.ReleaseMouse();
         }
         else if (evt.button == 2)
         {
             target.ReleaseMouse();
         }
-    }
-
-    void OnWheel(WheelEvent evt)
-    {
-        float oldZoom = _state.View.Zoom;
-        float newZoom = Mathf.Clamp(oldZoom * (1f - evt.delta.y * 0.05f), 0.25f, 4f);
-        // 以鼠标位置为中心缩放
-        if (_state.Cache != null)
-        {
-            var worldBefore = _state.View.ScreenToWorld(evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize);
-            _state.View.Zoom = newZoom;
-            var worldAfter = _state.View.ScreenToWorld(evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize);
-            _state.View.Offset += worldBefore - worldAfter;
-        }
-        _state.NotifyChanged();
     }
 
     int HitTestCheckpoint(Vector2 local)
@@ -142,17 +156,15 @@ public sealed class EditorPathManipulator : MouseManipulator
     void AddCheckpointAt(Vector2 local)
     {
         var world = _state.View.ScreenToWorld(local, _state.Cache.ISize, _state.Cache.JSize);
-        var snapped = ViewTransform.SnapToGrid(world);
+        var writePos = _state.Snap ? ViewTransform.SnapToGrid(world) : world;
         var pathProp = _so.FindProperty("Paths");
         var pathEl = pathProp.GetArrayElementAtIndex(_state.SelectedPathIdx);
-        // 实际路径:Paths[i].CheckPoints;由于 Unity 序列化数组嵌套,正确路径是
-        //   pathEl.FindPropertyRelative("CheckPoints")
         var cpsProp = pathEl.FindPropertyRelative("CheckPoints");
         var wtsProp = pathEl.FindPropertyRelative("WaitTimes");
 
         Undo.RecordObject(_so.targetObject, "Add Checkpoint");
         cpsProp.arraySize++;
-        cpsProp.GetArrayElementAtIndex(cpsProp.arraySize - 1).vector2Value = snapped;
+        cpsProp.GetArrayElementAtIndex(cpsProp.arraySize - 1).vector2Value = writePos;
         wtsProp.arraySize++;
         wtsProp.GetArrayElementAtIndex(wtsProp.arraySize - 1).floatValue = 0f;
         _so.ApplyModifiedProperties();

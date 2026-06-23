@@ -206,6 +206,24 @@ public static class PathEditingSection
         SyncDelEnabled();
         bar.Add(delCpBtn);
 
+        // 格点吸附 toggle(off 时自由坐标,on 时 0.25 粒度)
+        var snapBtn = new Button(() =>
+        {
+            state.Snap = !state.Snap;
+            state.NotifyChanged();
+        }) { text = state.Snap ? "◉ 格点吸附 (.25)" : "○ 格点吸附 (.25)" };
+        snapBtn.style.marginLeft = 4;
+        snapBtn.style.fontSize = 11;
+        snapBtn.tooltip = "开启后,新建/移动 checkpoint 都会吸附到 0.25 粒度格点(每格 4 个点)";
+        void SyncSnapVisual()
+        {
+            snapBtn.text = state.Snap ? "◉ 格点吸附 (.25)" : "○ 格点吸附 (.25)";
+            snapBtn.style.color = state.Snap ? new Color(0.306f, 0.788f, 0.627f) : new Color(0.706f, 0.706f, 0.706f);
+        }
+        state.Changed += SyncSnapVisual;
+        SyncSnapVisual();
+        bar.Add(snapBtn);
+
         var sep1 = new VisualElement();
         sep1.style.width = 1; sep1.style.height = 16;
         sep1.style.backgroundColor = new Color(0.314f, 0.314f, 0.314f);

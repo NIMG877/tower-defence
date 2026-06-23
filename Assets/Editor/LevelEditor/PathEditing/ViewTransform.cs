@@ -32,10 +32,10 @@ public struct ViewTransform
     }
 
     /// <summary>
-    /// 吸附到最近格子的中心 — editor world 整数即格子中心,直接四舍五入即可。
+    /// 吸附到 0.25 粒度的格点(每格 4 个可吸附点:0, .25, .5, .75)。
     /// </summary>
     public static Vector2 SnapToGrid(Vector2 world)
-        => new Vector2(Mathf.Round(world.x), Mathf.Round(world.y));
+        => new Vector2(Mathf.Round(world.x * 4f) / 4f, Mathf.Round(world.y * 4f) / 4f);
 
     /// <summary>editor world (整数=格子中心) -> screen 像素(Y 翻转以匹配 grid 方向)。</summary>
     public Vector2 WorldToScreen(Vector2 world, int iSize, int jSize)
