@@ -35,15 +35,18 @@ public static class PathEditingSection
 
         // Path picker
         root.Add(BuildPathPicker(so, state));
-        // Toolbar
-        root.Add(BuildToolbar(so, state, root));
+
+        // Toolbar(canvas 还没建,用闭包延迟获取引用)
+        VisualElement canvasRef = null;
+        root.Add(BuildToolbar(so, state, root, () => canvasRef));
+
         // Split: canvas + side panel
         var split = new VisualElement();
         split.style.flexDirection = FlexDirection.Row;
         split.style.marginTop = 6;
 
-        var canvas = MapCanvasView.Build(so, state);
-        split.Add(canvas);
+        canvasRef = MapCanvasView.Build(so, state);
+        split.Add(canvasRef);
 
         var right = new VisualElement();
         right.style.flexDirection = FlexDirection.Column;
@@ -137,7 +140,7 @@ public static class PathEditingSection
         return row;
     }
 
-    static VisualElement BuildToolbar(SerializedObject so, PathEditingState state, VisualElement root)
+    static VisualElement BuildToolbar(SerializedObject so, PathEditingState state, VisualElement root, Func<VisualElement> getCanvas)
     {
         var bar = new VisualElement();
         bar.style.flexDirection = FlexDirection.Row;
@@ -231,7 +234,15 @@ public static class PathEditingSection
         var resetBtn = new Button(() =>
         {
             if (state.Cache != null)
-                state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
+            {
+                // 用 canvas 实际 contentRect 让 Fit 基于可见区域,而不是 600×400 默认
+                var canvas = getCanvas();
+                var size = canvas != null ? canvas.contentRect.size : Vector2.zero;
+                if (size.x > 1f && size.y > 1f)
+                    state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize, size.x, size.y);
+                else
+                    state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
+            }
             state.NotifyChanged();
         }) { text = "↺ 重置视图" };
         resetBtn.style.fontSize = 11;

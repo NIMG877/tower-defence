@@ -7,8 +7,10 @@ public static class MapCanvasView
     public static VisualElement Build(SerializedObject so, PathEditingState state)
     {
         var canvas = new VisualElement();
-        canvas.style.width = ViewTransform.CanvasWidth;
+        // 自适应父容器宽度(用 minHeight 保留期望画布高度,flexGrow 让它填满 inspector 实际宽度)
+        canvas.style.minHeight = ViewTransform.CanvasHeight;
         canvas.style.height = ViewTransform.CanvasHeight;
+        canvas.style.flexGrow = 1;
         canvas.style.backgroundColor = new Color(0.078f, 0.078f, 0.094f); // rgb(20,20,24)
         canvas.style.borderTopLeftRadius = 3;
         canvas.style.borderTopRightRadius = 3;
@@ -18,19 +20,35 @@ public static class MapCanvasView
         canvas.style.borderRightWidth = 1;
         canvas.style.borderTopWidth = 1;
         canvas.style.borderBottomWidth = 1;
-        canvas.style.borderLeftColor = new Color(0.235f, 0.235f, 0.275f);
-        canvas.style.borderRightColor = new Color(0.235f, 0.235f, 0.275f);
-        canvas.style.borderTopColor = new Color(0.235f, 0.235f, 0.275f);
-        canvas.style.borderBottomColor = new Color(0.235f, 0.235f, 0.275f);
+        canvas.style.borderLeftColor = new Color(0.235f, 0.235f, 0.235f);
+        canvas.style.borderRightColor = new Color(0.235f, 0.235f, 0.235f);
+        canvas.style.borderTopColor = new Color(0.235f, 0.235f, 0.235f);
+        canvas.style.borderBottomColor = new Color(0.235f, 0.235f, 0.235f);
         canvas.style.overflow = Overflow.Hidden;
         canvas.style.position = Position.Relative;
+
+        // 当 canvas 大小变化(inspector 宽度变了 / 第一次 layout)时,自动重 Fit
+        canvas.RegisterCallback<GeometryChangedEvent>(_ =>
+        {
+            if (state.Cache == null) return;
+            var size = canvas.contentRect.size;
+            if (size.x <= 1f || size.y <= 1f) return;
+            // 只在 Zoom 为 0(未初始化)或 canvas 尺寸发生明显变化时重 Fit
+            if (state.View.Zoom <= 0f)
+                state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize, size.x, size.y);
+        });
 
         // 网格 + A* 路径
         canvas.generateVisualContent += ctx =>
         {
             if (state.Cache == null) return;
-            DrawBlocks(ctx, state);
-            DrawPaths(ctx, so, state);
+            var size = canvas.contentRect.size;
+            if (size.x <= 1f || size.y <= 1f) return;
+            // 首次绘制时若 View 仍为默认,按 canvas 实际尺寸 Fit
+            if (state.View.Zoom <= 0f)
+                state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize, size.x, size.y);
+            DrawBlocks(ctx, state, size);
+            DrawPaths(ctx, so, state, size);
         };
 
         // Checkpoint 圆 (作为子 VisualElement 添加,UI Toolkit 自动绘于父 generateVisualContent 之上)
@@ -63,10 +81,11 @@ public static class MapCanvasView
         return canvas;
     }
 
-    static void DrawBlocks(MeshGenerationContext ctx, PathEditingState state)
+    static void DrawBlocks(MeshGenerationContext ctx, PathEditingState state, Vector2 canvasSize)
     {
         var p2d = ctx.painter2D;
         var cache = state.Cache;
+        var view = state.View;
         for (int i = 0; i < cache.ISize; i++)
         {
             for (int j = 0; j < cache.JSize; j++)
@@ -76,8 +95,8 @@ public static class MapCanvasView
 
                 // cell [i,j] 的中心是 (j, i) 整数;UnityEngine.Rect.y 视作"顶",
                 // 顶边对应 grid y = i+0.5(屏幕 y 较小),底边对应 y = i-0.5(屏幕 y 较大)。
-                var tl = state.View.WorldToScreen(new Vector2(j - 0.5f, i + 0.5f), cache.ISize, cache.JSize);
-                var br = state.View.WorldToScreen(new Vector2(j + 0.5f, i - 0.5f), cache.ISize, cache.JSize);
+                var tl = view.WorldToScreen(new Vector2(j - 0.5f, i + 0.5f), cache.ISize, cache.JSize, canvasSize.x, canvasSize.y);
+                var br = view.WorldToScreen(new Vector2(j + 0.5f, i - 0.5f), cache.ISize, cache.JSize, canvasSize.x, canvasSize.y);
                 var rect = new Rect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
 
                 Color fill;
@@ -137,7 +156,7 @@ public static class MapCanvasView
         p2d.ClosePath();
     }
 
-    static void DrawPaths(MeshGenerationContext ctx, SerializedObject so, PathEditingState state)
+    static void DrawPaths(MeshGenerationContext ctx, SerializedObject so, PathEditingState state, Vector2 canvasSize)
     {
         if (state.SelectedPathIdx < 0) return;
         var pathsProp = so.FindProperty("Paths");
@@ -149,6 +168,7 @@ public static class MapCanvasView
 
         var p2d = ctx.painter2D;
         var cache = state.Cache;
+        var view = state.View;
 
         for (int k = 0; k < cpsProp.arraySize - 1; k++)
         {
@@ -167,18 +187,18 @@ public static class MapCanvasView
 
             if (path != null)
             {
-                var first = state.View.WorldToScreen(path[0].targetPosition, cache.ISize, cache.JSize);
+                var first = view.WorldToScreen(path[0].targetPosition, cache.ISize, cache.JSize, canvasSize.x, canvasSize.y);
                 p2d.MoveTo(first);
                 for (int m = 1; m < path.Length; m++)
                 {
-                    var pt = state.View.WorldToScreen(path[m].targetPosition, cache.ISize, cache.JSize);
+                    var pt = view.WorldToScreen(path[m].targetPosition, cache.ISize, cache.JSize, canvasSize.x, canvasSize.y);
                     p2d.LineTo(pt);
                 }
             }
             else
             {
-                var s = state.View.WorldToScreen(start, cache.ISize, cache.JSize);
-                var e = state.View.WorldToScreen(end, cache.ISize, cache.JSize);
+                var s = view.WorldToScreen(start, cache.ISize, cache.JSize, canvasSize.x, canvasSize.y);
+                var e = view.WorldToScreen(end, cache.ISize, cache.JSize, canvasSize.x, canvasSize.y);
                 p2d.MoveTo(s);
                 p2d.LineTo(e);
             }
