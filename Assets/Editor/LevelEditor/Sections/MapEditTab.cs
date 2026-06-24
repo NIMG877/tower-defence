@@ -203,20 +203,8 @@ public static class MapEditTab
         bar.style.borderTopLeftRadius = 3; bar.style.borderTopRightRadius = 3;
         bar.style.borderBottomLeftRadius = 3; bar.style.borderBottomRightRadius = 3;
 
-        // ✕ 删除选中点(当前悬停格的 MapData 条目)
-        var delCellBtn = new Button(() =>
-        {
-            if (state.HoverCell.HasValue) EraseEntry(so, state, canvasContainer, state.HoverCell.Value);
-        }) { text = "✕ 删除选中点" };
-        delCellBtn.style.marginLeft = 4;
-        delCellBtn.style.fontSize = 11;
-        void SyncDelEnabled()
-        {
-            delCellBtn.SetEnabled(state.HoverCell.HasValue);
-        }
-        state.Changed += SyncDelEnabled;
-        SyncDelEnabled();
-        bar.Add(delCellBtn);
+        // 工具栏原"✕ 删除选中点"按钮已删 —— 它的功能("删当前 hover cell 的 entry")
+        // 跟 Eraser 工具的左键单击完全重复,而且 Eraser 还支持拖动连续擦。
 
         var sep1 = new VisualElement();
         sep1.style.width = 1; sep1.style.height = 16;
@@ -233,6 +221,8 @@ public static class MapEditTab
         //   active  → ◉ [name] + 绿色字 (0.306, 0.788, 0.627)
         //   inactive→ ○ [name] + 灰色字 (0.706, 0.706, 0.706)
         // 三个并列工具:Brush / Eraser / Portal(Portal 隐藏 brush 面板,左键走两段式)
+        // 固定 height=20 — Chinese vs Latin 字符字形度量不同,Portal(P/l 有 ascender/descender)
+        // 不固定会让它比画刷/笔擦高一截
         var tools = new[] { "画刷", "笔擦", "Portal" };
         var toolButtons = new Button[tools.Length];
         for (int k = 0; k < tools.Length; k++)
@@ -248,6 +238,7 @@ public static class MapEditTab
             };
             btn.style.marginLeft = 4;
             btn.style.fontSize = 11;
+            btn.style.height = 20; // 三个按钮统一高度
             toolButtons[k] = btn;
             bar.Add(btn);
         }
@@ -627,19 +618,6 @@ public static class MapEditTab
         row.Add(t);
 
         return (row, t);
-    }
-
-    static void EraseEntry(SerializedObject so, PathEditingState state, VisualElement canvasContainer, (int i, int j) cell)
-    {
-        Undo.RecordObject(so.targetObject, "Erase Block");
-        var mapData = so.FindProperty("MapData");
-        int idx = MapEditManipulator.FindEntryIndex(mapData, cell);
-        if (idx < 0) return; // 已为空,no-op
-        mapData.DeleteArrayElementAtIndex(idx);
-        so.ApplyModifiedProperties();
-        MapEditManipulator.RefreshCacheFromSOStatic(so, state.Cache);
-        state.NotifyChanged();
-        canvasContainer.MarkDirtyRepaint();
     }
 
     // === Manipulator ===
