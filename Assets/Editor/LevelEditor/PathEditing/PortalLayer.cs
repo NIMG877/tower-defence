@@ -22,9 +22,9 @@ public static class PortalLayer
     // 虚线 / 箭头规格
     const float DashLen = 6f;
     const float GapLen = 4f;
-    const float ArrowLen = 10f;
-    const float ArrowWidth = 6f;
-    const float LineWidth = 2f;
+    const float ArrowLen = 6f;
+    const float ArrowWidth = 5f;
+    const float LineWidth = 1f;
 
     public static VisualElement Build(MapEditTab.BrushState brush, PathEditingState state, VisualElement canvas)
     {
@@ -55,10 +55,10 @@ public static class PortalLayer
             }
 
             // 2) 预览线 — brush=null 表示路径 tab(无预览,只画已生效的);
-            //    map tab 仅在 portal 模式 + 第一段已点 + 鼠标在 canvas 上时画
+            //    map tab 仅在 Portal 工具激活 + 第一段已点 + 鼠标在 canvas 上时画
             if (brush != null
                 && mouseOver
-                && brush.portalMode == MapEditTab.PortalMode.SetPortalOut
+                && brush.tool == MapEditTab.BrushState.Tool.Portal
                 && brush.pendingPortalSource.HasValue)
             {
                 var (i, j) = brush.pendingPortalSource.Value;

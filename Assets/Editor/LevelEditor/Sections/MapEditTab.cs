@@ -10,17 +10,14 @@ using UnityEngine.UIElements;
 /// </summary>
 public static class MapEditTab
 {
-    public enum PortalMode { Off, SetPortalOut }
-
     public class BrushState
     {
-        public enum Tool { Brush, Eraser }
+        public enum Tool { Brush, Eraser, Portal }
         public Tool tool = Tool.Brush;
         public bool highland;
         public bool canSet;
         public int  passableType;
         public bool deadly;
-        public PortalMode portalMode = PortalMode.Off;
         public (int i, int j)? pendingPortalSource;
 
         public enum Preset { None, Highland, Ground, Den }
@@ -233,9 +230,10 @@ public static class MapEditTab
         bar.Add(toolLabel);
 
         // 工具按钮:圆形符号 + 文字色(跟格点吸附的 ◉/○ 视觉一致)
-        //   active  → ◉ 画刷/笔擦 + 绿色字 (0.306, 0.788, 0.627)
-        //   inactive→ ○ 画刷/笔擦 + 灰色字 (0.706, 0.706, 0.706)
-        var tools = new[] { "画刷", "笔擦" };
+        //   active  → ◉ [name] + 绿色字 (0.306, 0.788, 0.627)
+        //   inactive→ ○ [name] + 灰色字 (0.706, 0.706, 0.706)
+        // 三个并列工具:Brush / Eraser / Portal(Portal 隐藏 brush 面板,左键走两段式)
+        var tools = new[] { "画刷", "笔擦", "Portal" };
         var toolButtons = new Button[tools.Length];
         for (int k = 0; k < tools.Length; k++)
         {
@@ -483,30 +481,9 @@ public static class MapEditTab
         });
         panel.Add(deadlyRow);
 
-        // Portal:同样行内布局,row flexShrink:0 防垂直拉伸
-        // Portal 改变不算"离开预设"(portal 是正交维度)
-        var portalRow = new VisualElement();
-        portalRow.style.flexDirection = FlexDirection.Row;
-        portalRow.style.alignItems = Align.Center;
-        portalRow.style.flexShrink = 0;
-        var portalLbl = new Label("Portal");
-        portalLbl.style.minWidth = 90;
-        portalLbl.style.fontSize = 11;
-        portalLbl.style.flexShrink = 0;
-        portalRow.Add(portalLbl);
-        var portalEnum = new EnumField(brush.portalMode);
-        portalEnum.style.flexGrow = 1;
-        portalEnum.style.flexShrink = 1;
-        portalEnum.style.minWidth = 0;
-        portalEnum.RegisterValueChangedCallback(evt =>
-        {
-            brush.portalMode = (PortalMode)evt.newValue;
-            state.NotifyChanged(); // 切到 SetPortalOut/Off 都要让 PortalLayer 重新评估
-        });
-        portalRow.Add(portalEnum);
-        panel.Add(portalRow);
+        // Portal 已提升为顶层工具(与画刷/笔擦并列),所以这里不再有 Portal 字段。
 
-        var hint = new Label("提示:左键按住拖动可连续画/擦;portal 两段式;右键拖=缩放;中键拖=平移。");
+        var hint = new Label("提示:左键按住拖动可连续画/擦;Portal 工具两段式;右键拖=缩放;中键拖=平移。");
         hint.style.fontSize = 10;
         hint.style.color = new Color(0.55f, 0.55f, 0.55f);
         hint.style.marginTop = 8;
@@ -522,7 +499,6 @@ public static class MapEditTab
             canSetToggle.SetValueWithoutNotify(brush.canSet);
             passableField.SetValueWithoutNotify(brush.passableType);
             deadlyToggle.SetValueWithoutNotify(brush.deadly);
-            portalEnum.SetValueWithoutNotify(brush.portalMode);
 
             // 预设按钮高亮(active=绿底黑字,其他=默认)
             for (int k = 0; k < presetButtons.Length; k++)
@@ -817,8 +793,8 @@ public static class MapEditTab
                 return;
             }
 
-            // Brush 模式:portal 两段式(单次点击,不进入拖动)
-            if (_brush.portalMode == PortalMode.SetPortalOut)
+            // Portal 模式:两段式(单次点击,不进入拖动)
+            if (_brush.tool == BrushState.Tool.Portal)
             {
                 if (!_brush.pendingPortalSource.HasValue)
                 {
