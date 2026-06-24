@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 /// <summary>
 /// Map-paint tab. See spec §4.3. Single-field brush with portal two-click mode.
 /// Writes to <c>LevelData.MapData</c> via SerializedProperty + Undo.
-/// Layout matches PathEditTab: green collapsible header, canvas left, brush right.
+/// Layout matches PathEditTab: green collapsible header, path-picker-style size row, toolbar, canvas left, brush right.
 /// </summary>
 public static class MapEditTab
 {
@@ -14,6 +14,8 @@ public static class MapEditTab
 
     class BrushState
     {
+        public enum Tool { Brush, Eraser }
+        public Tool tool = Tool.Brush;
         public bool highland;
         public bool canSet;
         public int  passableType;
@@ -49,24 +51,27 @@ public static class MapEditTab
         header.style.marginBottom = 6;
         root.Add(header);
 
-        // Toolbar
-        root.Add(BuildToolbar(state));
+        // 1) Size row (path-picker 风格)
+        root.Add(BuildMapSizeRow(so));
 
-        // Split: canvas (弹性宽) + 右侧固定宽栏
-        // 初始 fit 视图 (BEFORE BuildCanvasContainer so canvas reads a valid Zoom)
-        if (state.Cache != null)
-            state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
+        // 2) Toolbar (path 工具栏风格:删除 + 工具切换 + 重置)
+        // brush 实例在 Build 内部创建,toolbar 需要持有它以同步 active 视觉
+        var brush = new BrushState();
+        var canvasContainer = BuildCanvasContainer(so, cache, brush, state);
 
+        // Build brush panel first so toolbar can grab a direct reference for visibility toggling
+        var brushPanel = BuildBrushPanel(brush, state);
+        brushPanel.name = "brush-panel-container";
+
+        root.Add(BuildToolbar(so, brush, state, canvasContainer, brushPanel));
+
+        // 3) Split: canvas + 右侧栏
         var split = new VisualElement();
         split.style.flexDirection = FlexDirection.Row;
         split.style.marginTop = 6;
         split.style.flexShrink = 0;
 
-        // Brush panel (middle, flexGrow) — created FIRST so canvas + brush share one instance
-        var brush = new BrushState();
-
         // 画布容器(flexGrow=1 占满剩余宽度,最小宽 320,高度固定 400)
-        var canvasContainer = BuildCanvasContainer(so, cache, brush, state);
         canvasContainer.style.flexGrow = 1;
         canvasContainer.style.flexShrink = 1;
         canvasContainer.style.minWidth = 320;
@@ -82,17 +87,10 @@ public static class MapEditTab
         right.style.height = ViewTransform.CanvasHeight;
         right.style.overflow = Overflow.Hidden;
 
-        // Right panel order: Size (top, fixed) + Brush (middle, flexGrow) + Cell (bottom, fixed)
-        var sizePanel = BuildSizePanel(so);
-        sizePanel.style.flexShrink = 0;
-        sizePanel.style.marginBottom = 4;
-        right.Add(sizePanel);
-
-        // Brush panel (middle, flexGrow)
-        var brushPanel = BuildBrushPanel(brush, state, canvasContainer);
+        // Brush panel (top, flexGrow, 仅 Brush 工具时可见)
         brushPanel.style.flexGrow = 1;
         brushPanel.style.flexShrink = 1;
-        brushPanel.style.minHeight = 100;
+        brushPanel.style.minHeight = 60;
         brushPanel.style.overflow = Overflow.Hidden;
         right.Add(brushPanel);
 
@@ -107,28 +105,128 @@ public static class MapEditTab
 
         root.style.overflow = Overflow.Hidden;
 
+        // 初始 fit 视图 (在 BuildCanvasContainer 之后调用,canvas 已就绪)
+        if (state.Cache != null)
+            state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
+
         state.NotifyChanged();
 
         return root;
     }
 
-    static VisualElement BuildToolbar(PathEditingState state)
+    static VisualElement BuildMapSizeRow(SerializedObject so)
     {
         var row = new VisualElement();
         row.style.flexDirection = FlexDirection.Row;
         row.style.alignItems = Align.Center;
         row.style.marginBottom = 4;
+        row.style.flexShrink = 0;
+
+        var label = new Label("▸ Map size");
+        label.style.color = new Color(0.611f, 0.863f, 0.996f);
+        label.style.minWidth = 90;
+        label.style.fontSize = 11;
+        row.Add(label);
+
+        row.Add(MakeLabeledIntField("iSize (rows)", so, "iSize"));
+        row.Add(MakeLabeledIntField("jSize (cols)", so, "jSize"));
+
+        return row;
+    }
+
+    static VisualElement BuildToolbar(SerializedObject so, BrushState brush, PathEditingState state, VisualElement canvasContainer, VisualElement brushPanel)
+    {
+        var bar = new VisualElement();
+        bar.style.flexDirection = FlexDirection.Row;
+        bar.style.backgroundColor = new Color(0.157f, 0.157f, 0.157f);
+        bar.style.paddingTop = 4; bar.style.paddingBottom = 4;
+        bar.style.paddingLeft = 6; bar.style.paddingRight = 6;
+        bar.style.alignItems = Align.Center;
+        bar.style.borderTopLeftRadius = 3; bar.style.borderTopRightRadius = 3;
+        bar.style.borderBottomLeftRadius = 3; bar.style.borderBottomRightRadius = 3;
+
+        // ✕ 删除选中点(当前悬停格的 MapData 条目)
+        var delCellBtn = new Button(() =>
+        {
+            if (state.HoverCell.HasValue) EraseEntry(so, state, canvasContainer, state.HoverCell.Value);
+        }) { text = "✕ 删除选中点" };
+        delCellBtn.style.marginLeft = 4;
+        delCellBtn.style.fontSize = 11;
+        void SyncDelEnabled()
+        {
+            delCellBtn.SetEnabled(state.HoverCell.HasValue);
+        }
+        state.Changed += SyncDelEnabled;
+        SyncDelEnabled();
+        bar.Add(delCellBtn);
+
+        var sep1 = new VisualElement();
+        sep1.style.width = 1; sep1.style.height = 16;
+        sep1.style.backgroundColor = new Color(0.314f, 0.314f, 0.314f);
+        sep1.style.marginLeft = 6; sep1.style.marginRight = 6;
+        bar.Add(sep1);
+
+        var toolLabel = new Label("工具:");
+        toolLabel.style.fontSize = 11;
+        toolLabel.style.color = new Color(0.706f, 0.706f, 0.706f);
+        bar.Add(toolLabel);
+
+        var tools = new[] { "🖌 画刷", "🧹 笔擦" };
+        var toolButtons = new Button[tools.Length];
+        for (int k = 0; k < tools.Length; k++)
+        {
+            int captured = k;
+            var btn = new Button { text = tools[k] };
+            btn.clicked += () =>
+            {
+                brush.tool = (BrushState.Tool)captured;
+                state.NotifyChanged();
+                // 工具切换后,canvas 视觉也需要刷新(光标形状、提示文本等)
+                canvasContainer.MarkDirtyRepaint();
+            };
+            btn.style.marginLeft = 4;
+            btn.style.fontSize = 11;
+            toolButtons[k] = btn;
+            bar.Add(btn);
+        }
+        void SyncToolVisual()
+        {
+            int active = (int)brush.tool;
+            for (int k = 0; k < toolButtons.Length; k++)
+            {
+                if (k == active)
+                {
+                    toolButtons[k].style.backgroundColor = new Color(0.306f, 0.788f, 0.627f);
+                    toolButtons[k].style.color = Color.black;
+                }
+                else
+                {
+                    toolButtons[k].style.backgroundColor = StyleKeyword.Null;
+                    toolButtons[k].style.color = StyleKeyword.Null;
+                }
+            }
+            // Brush 工具隐藏时,brush 面板也同步隐藏(避免空白占位)
+            brushPanel.style.display = brush.tool == BrushState.Tool.Brush ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+        state.Changed += SyncToolVisual;
+        SyncToolVisual();
+
+        var sep2 = new VisualElement();
+        sep2.style.width = 1; sep2.style.height = 16;
+        sep2.style.backgroundColor = new Color(0.314f, 0.314f, 0.314f);
+        sep2.style.marginLeft = 6; sep2.style.marginRight = 6;
+        bar.Add(sep2);
 
         var resetBtn = new Button(() =>
         {
             if (state.Cache != null)
                 state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
             state.NotifyChanged();
-        }) { text = "↻ 重置视图" };
+        }) { text = "↺ 重置视图" };
         resetBtn.style.fontSize = 11;
-        row.Add(resetBtn);
+        bar.Add(resetBtn);
 
-        return row;
+        return bar;
     }
 
     static VisualElement BuildCanvasContainer(SerializedObject so, BlockMapCache cache, BrushState brush, PathEditingState state)
@@ -162,7 +260,7 @@ public static class MapEditTab
         canvas.Add(status);
 
         // Hint label (bottom-right)
-        var hint = new Label("左键:画刷 / portal源 · 右键拖:缩放 · 中键拖:平移");
+        var hint = new Label("左键:画刷 / 笔擦 · 右键拖:缩放 · 中键拖:平移");
         hint.name = "canvas-hint";
         hint.style.position = Position.Absolute;
         hint.style.bottom = 4; hint.style.right = 8;
@@ -188,6 +286,7 @@ public static class MapEditTab
         // Cleanup on detach
         canvas.RegisterCallback<DetachFromPanelEvent>(_ =>
         {
+            state.HoverCell = null;
             state.Changed -= () => canvas.MarkDirtyRepaint();
             Undo.undoRedoPerformed -= () => canvas.MarkDirtyRepaint();
         });
@@ -195,24 +294,44 @@ public static class MapEditTab
         return canvas;
     }
 
-    static VisualElement BuildBrushPanel(BrushState brush, PathEditingState state, VisualElement canvasContainer)
+    static VisualElement BuildBrushPanel(BrushState brush, PathEditingState state)
     {
         var panel = new VisualElement();
         panel.style.flexDirection = FlexDirection.Column;
-        panel.style.backgroundColor = new Color(0.078f, 0.078f, 0.094f);
-        panel.style.borderTopLeftRadius = 3;
-        panel.style.borderTopRightRadius = 3;
-        panel.style.borderBottomLeftRadius = 3;
-        panel.style.borderBottomRightRadius = 3;
+        panel.style.backgroundColor = new Color(0.118f, 0.118f, 0.118f);
+        panel.style.borderTopLeftRadius = 3; panel.style.borderTopRightRadius = 3;
+        panel.style.borderBottomLeftRadius = 3; panel.style.borderBottomRightRadius = 3;
+        panel.style.borderLeftWidth = 1; panel.style.borderRightWidth = 1;
+        panel.style.borderTopWidth = 1; panel.style.borderBottomWidth = 1;
+        panel.style.borderLeftColor = new Color(0.235f, 0.235f, 0.275f);
+        panel.style.borderRightColor = new Color(0.235f, 0.235f, 0.275f);
+        panel.style.borderTopColor = new Color(0.235f, 0.235f, 0.275f);
+        panel.style.borderBottomColor = new Color(0.235f, 0.235f, 0.275f);
         panel.style.paddingTop = 4; panel.style.paddingBottom = 4;
         panel.style.paddingLeft = 6; panel.style.paddingRight = 6;
+        panel.style.marginBottom = 6;
 
-        var title = new Label("画刷");
-        title.style.color = new Color(0.306f, 0.788f, 0.627f);
+        // Header row: ▸ + title
+        var headerRow = new VisualElement();
+        headerRow.style.flexDirection = FlexDirection.Row;
+        headerRow.style.alignItems = Align.Center;
+        headerRow.style.marginBottom = 4;
+        headerRow.style.flexShrink = 0;
+
+        var prefix = new Label("▸");
+        prefix.style.color = new Color(0.611f, 0.863f, 0.996f);
+        prefix.style.fontSize = 11;
+        prefix.style.flexShrink = 0;
+        prefix.style.marginRight = 4;
+        headerRow.Add(prefix);
+
+        var title = new Label("画刷 (highland, canSet, passable, deadly, portal)");
+        title.style.color = new Color(0.611f, 0.863f, 0.996f);
         title.style.fontSize = 11;
         title.style.unityFontStyleAndWeight = FontStyle.Bold;
-        title.style.marginBottom = 4;
-        panel.Add(title);
+        title.style.flexShrink = 1;
+        headerRow.Add(title);
+        panel.Add(headerRow);
 
         panel.Add(MakeToggle("Highland", brush.highland, v => brush.highland = v));
         panel.Add(MakeToggle("CanSet",   brush.canSet,   v => brush.canSet = v));
@@ -259,20 +378,23 @@ public static class MapEditTab
     {
         var panel = new VisualElement();
         panel.style.flexDirection = FlexDirection.Column;
-        panel.style.backgroundColor = new Color(0.078f, 0.078f, 0.094f);
-        panel.style.borderTopLeftRadius = 3;
-        panel.style.borderTopRightRadius = 3;
-        panel.style.borderBottomLeftRadius = 3;
-        panel.style.borderBottomRightRadius = 3;
+        panel.style.backgroundColor = new Color(0.118f, 0.118f, 0.118f);
+        panel.style.borderTopLeftRadius = 3; panel.style.borderTopRightRadius = 3;
+        panel.style.borderBottomLeftRadius = 3; panel.style.borderBottomRightRadius = 3;
+        panel.style.borderLeftWidth = 1; panel.style.borderRightWidth = 1;
+        panel.style.borderTopWidth = 1; panel.style.borderBottomWidth = 1;
+        panel.style.borderLeftColor = new Color(0.235f, 0.235f, 0.275f);
+        panel.style.borderRightColor = new Color(0.235f, 0.235f, 0.275f);
+        panel.style.borderTopColor = new Color(0.235f, 0.235f, 0.275f);
+        panel.style.borderBottomColor = new Color(0.235f, 0.235f, 0.275f);
         panel.style.paddingTop = 4; panel.style.paddingBottom = 4;
         panel.style.paddingLeft = 6; panel.style.paddingRight = 6;
 
-        var title = new Label("▸ Cell");
-        title.style.color = new Color(0.611f, 0.863f, 0.996f);
-        title.style.fontSize = 11;
-        title.style.unityFontStyleAndWeight = FontStyle.Bold;
-        title.style.marginBottom = 4;
-        panel.Add(title);
+        var header = new Label("▸ Cell");
+        header.style.color = new Color(0.611f, 0.863f, 0.996f);
+        header.style.fontSize = 11;
+        header.style.marginBottom = 4;
+        panel.Add(header);
 
         var posLabel = new Label("(i, j): -");
         posLabel.name = "cell-pos";
@@ -304,30 +426,44 @@ public static class MapEditTab
         portalLbl.style.fontSize = 10;
         panel.Add(portalLbl);
 
-        return panel;
-    }
-
-    static VisualElement BuildSizePanel(SerializedObject so)
-    {
-        var panel = new VisualElement();
-        panel.style.flexDirection = FlexDirection.Column;
-        panel.style.backgroundColor = new Color(0.078f, 0.078f, 0.094f);
-        panel.style.borderTopLeftRadius = 3;
-        panel.style.borderTopRightRadius = 3;
-        panel.style.borderBottomLeftRadius = 3;
-        panel.style.borderBottomRightRadius = 3;
-        panel.style.paddingTop = 4; panel.style.paddingBottom = 4;
-        panel.style.paddingLeft = 6; panel.style.paddingRight = 6;
-
-        var title = new Label("▸ Map size");
-        title.style.color = new Color(0.611f, 0.863f, 0.996f);
-        title.style.fontSize = 11;
-        title.style.unityFontStyleAndWeight = FontStyle.Bold;
-        title.style.marginBottom = 4;
-        panel.Add(title);
-
-        panel.Add(MakeLabeledIntField("iSize (rows)", so, "iSize"));
-        panel.Add(MakeLabeledIntField("jSize (cols)", so, "jSize"));
+        // 同步悬停格的内容:有 entry 时显示字段值,无 entry 或悬停为 null 时显示 (empty)
+        void Bind()
+        {
+            if (!state.HoverCell.HasValue || state.Cache == null || state.Cache.Blocks == null)
+            {
+                posLabel.text = "(i, j): -";
+                highlandLbl.text = "highland: -";
+                canSetLbl.text = "canSet: -";
+                passableLbl.text = "passable: -";
+                deadlyLbl.text = "deadly: -";
+                portalLbl.text = "portal: -";
+                return;
+            }
+            var (i, j) = state.HoverCell.Value;
+            if (i < 0 || j < 0 || i >= state.Cache.ISize || j >= state.Cache.JSize ||
+                state.Cache.HasEntry == null || !state.Cache.HasEntry[i, j])
+            {
+                posLabel.text = $"(i, j): ({i}, {j})";
+                highlandLbl.text = "highland: (empty)";
+                canSetLbl.text = "canSet: (empty)";
+                passableLbl.text = "passable: (empty)";
+                deadlyLbl.text = "deadly: (empty)";
+                portalLbl.text = "portal: (empty)";
+                return;
+            }
+            var e = state.Cache.Blocks[i, j];
+            posLabel.text = $"(i, j): ({i}, {j})";
+            highlandLbl.text = $"highland: {e.highland}";
+            canSetLbl.text = $"canSet: {e.canSet}";
+            passableLbl.text = $"passable: {e.passableType}";
+            deadlyLbl.text = $"deadly: {e.deadly}";
+            if (e.portalOutI >= 0 && e.portalOutJ >= 0)
+                portalLbl.text = $"portal: -> ({e.portalOutI}, {e.portalOutJ})";
+            else
+                portalLbl.text = "portal: -";
+        }
+        state.Changed += Bind;
+        Bind();
 
         return panel;
     }
@@ -337,6 +473,9 @@ public static class MapEditTab
         var row = new VisualElement();
         row.style.flexDirection = FlexDirection.Row;
         row.style.alignItems = Align.Center;
+        row.style.flexGrow = 1;
+        row.style.flexShrink = 1;
+        row.style.minWidth = 0;
         var lbl = new Label(label);
         lbl.style.minWidth = 90;
         lbl.style.fontSize = 11;
@@ -344,6 +483,7 @@ public static class MapEditTab
         var prop = so.FindProperty(propName);
         var field = new IntegerField { value = prop.intValue };
         field.style.flexGrow = 1;
+        field.style.minWidth = 0;
         field.RegisterValueChangedCallback(evt =>
         {
             Undo.RecordObject(so.targetObject, $"Change {propName}");
@@ -373,6 +513,19 @@ public static class MapEditTab
         return row;
     }
 
+    static void EraseEntry(SerializedObject so, PathEditingState state, VisualElement canvasContainer, (int i, int j) cell)
+    {
+        Undo.RecordObject(so.targetObject, "Erase Block");
+        var mapData = so.FindProperty("MapData");
+        int idx = MapEditManipulator.FindEntryIndex(mapData, cell);
+        if (idx < 0) return; // 已为空,no-op
+        mapData.DeleteArrayElementAtIndex(idx);
+        so.ApplyModifiedProperties();
+        MapEditManipulator.RefreshCacheFromSOStatic(so, state.Cache);
+        state.NotifyChanged();
+        canvasContainer.MarkDirtyRepaint();
+    }
+
     // === Manipulator ===
     class MapEditManipulator : MouseManipulator
     {
@@ -400,6 +553,7 @@ public static class MapEditTab
             target.RegisterCallback<MouseDownEvent>(OnMouseDown);
             target.RegisterCallback<MouseMoveEvent>(OnMouseMove);
             target.RegisterCallback<MouseUpEvent>(OnMouseUp);
+            target.RegisterCallback<MouseLeaveEvent>(OnMouseLeave);
         }
 
         protected override void UnregisterCallbacksFromTarget()
@@ -407,6 +561,7 @@ public static class MapEditTab
             target.UnregisterCallback<MouseDownEvent>(OnMouseDown);
             target.UnregisterCallback<MouseMoveEvent>(OnMouseMove);
             target.UnregisterCallback<MouseUpEvent>(OnMouseUp);
+            target.UnregisterCallback<MouseLeaveEvent>(OnMouseLeave);
         }
 
         (int i, int j)? ScreenToCell(Vector2 local)
@@ -423,6 +578,12 @@ public static class MapEditTab
         {
             var cell = ScreenToCell(evt.localMousePosition);
             _status.text = cell.HasValue ? $"(i, j): ({cell.Value.i}, {cell.Value.j})" : "(i, j): -";
+            // 同步 hover 状态(供 toolbar 的删除按钮使用)
+            if (!NullableEquals(cell, _state.HoverCell))
+            {
+                _state.HoverCell = cell;
+                _state.NotifyChanged();
+            }
 
             // Right-drag: zoom (anchor at right-down cursor)
             if (_rightDragging && _state.Cache != null)
@@ -451,6 +612,22 @@ public static class MapEditTab
             }
         }
 
+        void OnMouseLeave(MouseLeaveEvent evt)
+        {
+            if (_state.HoverCell.HasValue)
+            {
+                _state.HoverCell = null;
+                _state.NotifyChanged();
+            }
+        }
+
+        static bool NullableEquals((int i, int j)? a, (int i, int j)? b)
+        {
+            if (a.HasValue != b.HasValue) return false;
+            if (!a.HasValue) return true;
+            return a.Value.i == b.Value.i && a.Value.j == b.Value.j;
+        }
+
         void OnMouseDown(MouseDownEvent evt)
         {
             if (evt.button == (int)MouseButton.RightMouse)
@@ -472,6 +649,14 @@ public static class MapEditTab
             var c = ScreenToCell(evt.localMousePosition);
             if (!c.HasValue) return;
 
+            // Eraser 模式:擦除该格的 MapData 条目
+            if (_brush.tool == BrushState.Tool.Eraser)
+            {
+                EraseEntry(c.Value);
+                return;
+            }
+
+            // Brush 模式:portal 两段式
             if (_brush.portalMode == PortalMode.SetPortalOut)
             {
                 if (!_brush.pendingPortalSource.HasValue)
@@ -509,6 +694,18 @@ public static class MapEditTab
 
         // === SerializedProperty writes ===
         SerializedProperty MapDataProp() => _so.FindProperty("MapData");
+
+        void EraseEntry((int i, int j) cell)
+        {
+            Undo.RecordObject(_so.targetObject, "Erase Block");
+            var mapData = MapDataProp();
+            int idx = FindEntryIndex(mapData, cell);
+            if (idx < 0) return; // 已为空,no-op
+            mapData.DeleteArrayElementAtIndex(idx);
+            _so.ApplyModifiedProperties();
+            RefreshCacheFromSO();
+            _state.NotifyChanged();
+        }
 
         void ApplyBrush((int i, int j) cell)
         {
@@ -554,7 +751,7 @@ public static class MapEditTab
             _state.NotifyChanged();
         }
 
-        static int FindEntryIndex(SerializedProperty mapData, (int i, int j) cell)
+        public static int FindEntryIndex(SerializedProperty mapData, (int i, int j) cell)
         {
             for (int k = 0; k < mapData.arraySize; k++)
             {
@@ -567,24 +764,29 @@ public static class MapEditTab
 
         void RefreshCacheFromSO()
         {
+            RefreshCacheFromSOStatic(_so, _cache);
+        }
+
+        public static void RefreshCacheFromSOStatic(SerializedObject so, BlockMapCache cache)
+        {
             // Rebuild Blocks[,] from the SO. Simple: re-read each entry.
-            if (_cache.Blocks == null) return;
+            if (cache.Blocks == null) return;
             // Reset to default first
-            for (int i = 0; i < _cache.ISize; i++)
-            for (int j = 0; j < _cache.JSize; j++)
+            for (int i = 0; i < cache.ISize; i++)
+            for (int j = 0; j < cache.JSize; j++)
             {
-                _cache.Blocks[i, j] = default;
-                if (_cache.HasEntry != null) _cache.HasEntry[i, j] = false;
+                cache.Blocks[i, j] = default;
+                if (cache.HasEntry != null) cache.HasEntry[i, j] = false;
             }
 
-            var mapData = MapDataProp();
+            var mapData = so.FindProperty("MapData");
             for (int k = 0; k < mapData.arraySize; k++)
             {
                 var e = mapData.GetArrayElementAtIndex(k);
                 int i = e.FindPropertyRelative("i").intValue;
                 int j = e.FindPropertyRelative("j").intValue;
-                if (i < 0 || j < 0 || i >= _cache.ISize || j >= _cache.JSize) continue;
-                _cache.Blocks[i, j] = new BlockDataEntry
+                if (i < 0 || j < 0 || i >= cache.ISize || j >= cache.JSize) continue;
+                cache.Blocks[i, j] = new BlockDataEntry
                 {
                     i = i, j = j,
                     highland = e.FindPropertyRelative("highland").boolValue,
@@ -595,7 +797,7 @@ public static class MapEditTab
                     portalOutJ = e.FindPropertyRelative("portalOutJ").intValue,
                     portalColor = e.FindPropertyRelative("portalColor").colorValue,
                 };
-                if (_cache.HasEntry != null) _cache.HasEntry[i, j] = true;
+                if (cache.HasEntry != null) cache.HasEntry[i, j] = true;
             }
         }
     }
