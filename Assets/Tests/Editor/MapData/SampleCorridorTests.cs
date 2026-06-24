@@ -51,7 +51,16 @@ namespace MapData.Tests
         static bool CallSampleCorridor(Array graph, Vector2 a, Vector2 b)
         {
             Assert.IsNotNull(SampleCorridorMethod, "SampleCorridor not found on MapPathFinder");
-            return (bool)SampleCorridorMethod.Invoke(null, new object[] { graph, a, b });
+            var ret = SampleCorridorMethod.Invoke(null, new object[] { graph, a, b });
+            // 新签名 (bool blocked, Vector2 hitPoint):返回 struct/value tuple
+            return (bool)ret.GetType().GetField("blocked").GetValue(ret);
+        }
+
+        static Vector2 CallSampleCorridorHit(Array graph, Vector2 a, Vector2 b)
+        {
+            Assert.IsNotNull(SampleCorridorMethod, "SampleCorridor not found on MapPathFinder");
+            var ret = SampleCorridorMethod.Invoke(null, new object[] { graph, a, b });
+            return (Vector2)ret.GetType().GetField("hitPoint").GetValue(ret);
         }
 
         [Test]
@@ -104,6 +113,46 @@ namespace MapData.Tests
             var g = MakeGraph(3, 3, (1, 1));
             Assert.IsFalse(CallSampleCorridor(g, new Vector2(1.5f, 1.5f), new Vector2(1.5f, 1.5f)),
                 "zero-length corridor should be trivially clear");
+        }
+
+        // ===== 返回首个撞墙点的 hitPoint 语义(给 FirstBlockLine 用) =====
+
+        [Test]
+        public void Hit_returns_zero_when_clear()
+        {
+            var g = MakeGraph(5, 5);
+            var hit = CallSampleCorridorHit(g, new Vector2(0.5f, 0.5f), new Vector2(4.5f, 0.5f));
+            Assert.AreEqual(Vector2.zero, hit, "clear corridor should report hitPoint == zero");
+        }
+
+        /// <summary>
+        /// 撞墙时 hitPoint 必须指向**第一个撞到的 cell** 的中心(垂直线)。
+        /// 老 mid-point 算法在垂直线时,Y 列表第一个被检查的 mid-point 是
+        /// ((endPos.y + beginPos.y) / 2) 附近 → 对应 cell 中心。
+        /// DDA 应当报告**射线最先进入的 impassable cell 中心**。
+        /// (0.5,0.5) → (4.5,0.5) 撞 (0,0):hitPoint ≈ (0.5, 0.5)
+        /// (0.5,0.5) → (4.5,0.5) 撞 (2,0):hitPoint ≈ (2.5, 0.5)
+        /// </summary>
+        [Test]
+        public void Hit_returns_first_wall_cell_center_horizontal_line()
+        {
+            var g = MakeGraph(5, 1, (2, 0)); // (0,0)..(4,0) 中只有 (2,0) 不可走
+            var hit = CallSampleCorridorHit(g, new Vector2(0.5f, 0.5f), new Vector2(4.5f, 0.5f));
+            Assert.AreEqual(new Vector2(2.5f, 0.5f), hit,
+                "DDA should report the center of the first wall cell entered");
+        }
+
+        /// <summary>
+        /// 对角线撞墙:撞到的 cell 中心。
+        /// (0.5,0.5)→(3.5,3.5) 撞 (1,1):hitPoint ≈ (1.5, 1.5)
+        /// </summary>
+        [Test]
+        public void Hit_returns_first_wall_cell_center_diagonal()
+        {
+            var g = MakeGraph(4, 4, (1, 1));
+            var hit = CallSampleCorridorHit(g, new Vector2(0.5f, 0.5f), new Vector2(3.5f, 3.5f));
+            Assert.AreEqual(new Vector2(1.5f, 1.5f), hit,
+                "diagonal DDA should report the center of the first wall cell");
         }
     }
 }

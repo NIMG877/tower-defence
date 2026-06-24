@@ -276,100 +276,20 @@ public static class MapPathFinder
 
     private static Vector2 FirstBlockLine(Tile[,] tiles, AStarProperty[,] graph, Vector2 beginPos, Vector2 endPos, Vector2 originPosition, float entityR)
     {
-        if (beginPos == endPos)
+        if (beginPos == endPos) return new Vector2(-1000, -1000);
+
+        // perp = origin 在 begin→end 法向上的偏移分量,长度 = entityR
+        Vector2 se = endPos - beginPos;
+        Vector2 so = originPosition - beginPos;
+        Vector2 projectOnSe = (so.x * se.x + so.y * se.y) / se.sqrMagnitude * se;
+        Vector2 perp = (projectOnSe - so).normalized * entityR;
+
+        var (blocked, hitPoint) = SampleCorridor(graph, beginPos + perp, endPos + perp);
+        if (blocked)
         {
-            return new Vector2(-1000, -1000);
+            return BaseOnBlockNewPoint(hitPoint, endPos + perp, beginPos + perp, entityR);
         }
-        else if (beginPos.x == endPos.x)
-        {
-            Vector2Int p1;
-            if (originPosition.x > beginPos.x)
-            {
-                beginPos.x -= entityR;
-                endPos.x -= entityR;
-            }
-            else
-            {
-                beginPos.x += entityR;
-                endPos.x += entityR;
-            }
-            List<float> Y = new List<float>() { endPos.y };
-            if (beginPos.y < endPos.y)
-            {
-                for (int i = (int)(endPos.y + 0.5f) - 1; i >= beginPos.y + 0.5f; i--)
-                {
-                    Y.Add(i + 0.5f);
-                }
-            }
-            else
-            {
-                for (int i = (int)(endPos.y + 0.5f); i <= beginPos.y + 0.5f; i++)
-                {
-                    Y.Add(i + 0.5f);
-                }
-            }
-            Y.Add(beginPos.y);
-            for (int i = 0; i < Y.Count - 1; i++)
-            {
-                p1 = new Vector2Int((int)(beginPos.x + 0.5), (int)(0.5 + (Y[i] + Y[i + 1]) / 2));
-                if (!graph[p1.y, p1.x].Passable)
-                {
-                    return BaseOnBlockNewPoint(new Vector2(p1.x, p1.y), endPos, beginPos, entityR);
-                }
-            }
-            return new Vector2(-1000, -1000);
-        }
-        else
-        {
-            Vector2 p1, p2;
-            p1 = endPos - beginPos;
-            p2 = originPosition - beginPos;
-            p1 = (((p1.x * p2.x + p1.y * p2.y) / p1.sqrMagnitude) * (endPos - beginPos) + beginPos - originPosition).normalized * entityR;
-            beginPos += p1;
-            endPos += p1;
-            float k = (beginPos.y - endPos.y) / (beginPos.x - endPos.x);
-            float b = beginPos.y - k * beginPos.x;
-            List<float> X = new List<float>() { beginPos.x, endPos.x };
-            if (beginPos.y < endPos.y)
-            {
-                for (int i = (int)(beginPos.y + 0.5f); i <= endPos.y - 0.5f; i++)
-                {
-                    X.Add((i + 0.5f - b) / k);
-                }
-            }
-            else
-            {
-                for (int i = (int)(endPos.y + 0.5f); i <= beginPos.y - 0.5f; i++)
-                {
-                    X.Add((i + 0.5f - b) / k);
-                }
-            }
-            if (beginPos.x < endPos.x)
-            {
-                for (int i = (int)(beginPos.x + 0.5f); i <= endPos.x - 0.5f; i++)
-                {
-                    X.Add(i + 0.5f);
-                }
-                X.Sort((x, y) => -x.CompareTo(y));
-            }
-            else
-            {
-                for (int i = (int)(endPos.x + 0.5f); i <= beginPos.x - 0.5f; i++)
-                {
-                    X.Add(i + 0.5f);
-                }
-                X.Sort();
-            }
-            for (int i = 0; i < X.Count - 1; i++)
-            {
-                p1 = new Vector2(0.5f + (X[i] + X[i + 1]) / 2, 0.5f + k * (X[i] + X[i + 1]) / 2 + b);
-                if (!graph[(int)p1.y, (int)p1.x].Passable)
-                {
-                    return BaseOnBlockNewPoint(new Vector2((int)p1.x, (int)p1.y), endPos, beginPos, entityR);
-                }
-            }
-            return new Vector2(-1000, -1000);
-        }
+        return new Vector2(-1000, -1000);
     }
 
     private static bool IsBlocked(AStarProperty[,] graph, int iSize, int jSize,
@@ -381,86 +301,59 @@ public static class MapPathFinder
         }
         Vector2 dir = endPos - beginPos;
         Vector2 perp = new Vector2(-dir.y, dir.x).normalized * entityR;
-        if (SampleCorridor(graph, beginPos + perp, endPos + perp)) return true;
-        return SampleCorridor(graph, beginPos - perp, endPos - perp);
+        if (SampleCorridor(graph, beginPos + perp, endPos + perp).blocked) return true;
+        return SampleCorridor(graph, beginPos - perp, endPos - perp).blocked;
     }
 
     /// <summary>
-    /// 沿 begin→end 直线扫,检查所经过的 cell 是否全部 Passable。
-    /// 任一不可走 → true(撞墙)。全部可走 → false(走廊畅通)。
-    /// 实现:Amanatides-Woo 2D DDA,逐格步进,无中点采样,无除零。
+    /// 沿 begin→end 直线扫,返回 (撞墙?, 首个撞墙 cell 中心)。
+    /// 撞墙 → (true, hitPoint);畅通 → (false, Vector2.zero)。
+    /// hitPoint 给 FirstBlockLine 做 BaseOnBlockNewPoint 输入。
+    /// 实现:Amanatides-Woo 2D DDA + super-cover(tie 双轴同进,任一 cell 不可走即报)。
     /// </summary>
-    private static bool SampleCorridor(AStarProperty[,] graph,
+    private static (bool blocked, Vector2 hitPoint) SampleCorridor(AStarProperty[,] graph,
         Vector2 beginPos, Vector2 endPos)
     {
-        if (beginPos == endPos) return false;
+        if (beginPos == endPos) return (false, Vector2.zero);
         float dx = endPos.x - beginPos.x;
         float dy = endPos.y - beginPos.y;
         int stepJ = dx == 0 ? 0 : (dx > 0 ? 1 : -1);
         int stepI = dy == 0 ? 0 : (dy > 0 ? 1 : -1);
-        // tMax = 沿射线到达下一个 cell 边界的参数 t(0~1);tDelta = 走一个 cell 所需的 t。
-        // 用 (1/|dx|, 1/|dy|) 算 tDelta,避免 dx==0 时除零。
+        // tDelta = 走一个 cell 所需的 t;用 (1/|dx|, 1/|dy|) 避免 dx==0 时除零。
         float tDeltaJ = dx == 0 ? float.PositiveInfinity : 1f / Mathf.Abs(dx);
         float tDeltaI = dy == 0 ? float.PositiveInfinity : 1f / Mathf.Abs(dy);
         int i = Mathf.FloorToInt(beginPos.y);
         int j = Mathf.FloorToInt(beginPos.x);
-        // 起 cell 边界上的 t(从 cell 内一点走到 cell 右边/下边界的距离占比)
+        // tMax = 沿射线到达下一个 cell 边界的参数 t(0~1)
         float tMaxJ = stepJ > 0 ? ((j + 1) - beginPos.x) * tDeltaJ
                      : stepJ < 0 ? (beginPos.x - j) * tDeltaJ : float.PositiveInfinity;
         float tMaxI = stepI > 0 ? ((i + 1) - beginPos.y) * tDeltaI
                      : stepI < 0 ? (beginPos.y - i) * tDeltaI : float.PositiveInfinity;
-        if (CheckTouchedCells(graph, beginPos.x, beginPos.y)) return true;
+        if (IsBlockedCell(graph, i, j)) return (true, new Vector2(j + 0.5f, i + 0.5f));
         while (i != Mathf.FloorToInt(endPos.y) || j != Mathf.FloorToInt(endPos.x))
         {
-            float tNext = Mathf.Min(tMaxI, tMaxJ);
             if (tMaxI < tMaxJ)
             {
                 tMaxI += tDeltaI;
                 i += stepI;
+                if (IsBlockedCell(graph, i, j)) return (true, new Vector2(j + 0.5f, i + 0.5f));
             }
             else if (tMaxJ < tMaxI)
             {
                 tMaxJ += tDeltaJ;
                 j += stepJ;
+                if (IsBlockedCell(graph, i, j)) return (true, new Vector2(j + 0.5f, i + 0.5f));
             }
-            else
+            else // tie:super-cover 双轴同进,任一 cell 不可走即报撞墙
             {
-                tMaxJ += tDeltaJ;
-                j += stepJ;
-                tMaxI += tDeltaI;
-                i += stepI;
-            }
-            if (CheckTouchedCells(graph, beginPos.x + dx * Mathf.Clamp01(tNext),
-                    beginPos.y + dy * Mathf.Clamp01(tNext))) return true;
-        }
-        if (CheckTouchedCells(graph, endPos.x, endPos.y)) return true;
-        return false;
-    }
-
-    private static bool CheckTouchedCells(AStarProperty[,] graph, float x, float y)
-    {
-        bool onVerticalGridLine = IsOnGridLine(x);
-        bool onHorizontalGridLine = IsOnGridLine(y);
-        int baseJ = Mathf.FloorToInt(x);
-        int baseI = Mathf.FloorToInt(y);
-        int minJ = onVerticalGridLine ? baseJ - 1 : baseJ;
-        int maxJ = onVerticalGridLine ? baseJ : baseJ;
-        int minI = onHorizontalGridLine ? baseI - 1 : baseI;
-        int maxI = onHorizontalGridLine ? baseI : baseI;
-
-        for (int checkI = minI; checkI <= maxI; checkI++)
-        {
-            for (int checkJ = minJ; checkJ <= maxJ; checkJ++)
-            {
-                if (IsBlockedCell(graph, checkI, checkJ)) return true;
+                tMaxI += tDeltaI; i += stepI;
+                tMaxJ += tDeltaJ; j += stepJ;
+                if (IsBlockedCell(graph, i, j)) return (true, new Vector2(j + 0.5f, i + 0.5f));
+                // 另一半 cell 是 tie 前的另一轴 step 结果:用 (i - stepI, j - stepJ) 找回
+                if (IsBlockedCell(graph, i - stepI, j - stepJ)) return (true, new Vector2(j - stepJ + 0.5f, i - stepI + 0.5f));
             }
         }
-        return false;
-    }
-
-    private static bool IsOnGridLine(float value)
-    {
-        return value == Mathf.Round(value);
+        return (false, Vector2.zero);
     }
 
     private static bool IsBlockedCell(AStarProperty[,] graph, int i, int j)

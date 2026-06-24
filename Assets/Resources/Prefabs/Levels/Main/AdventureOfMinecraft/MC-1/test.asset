@@ -19,10 +19,37 @@ MonoBehaviour:
   CameraPos: {x: 0, y: 0}
   CutToLevelTexture: {fileID: 0}
   MapPrefab: {fileID: 0}
-  iSize: 5
-  jSize: 5
+  iSize: 10
+  jSize: 10
   MapData:
-  - i: 4
+  - i: 9
+    j: 0
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 9
+    j: 1
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 9
+    j: 2
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 9
     j: 3
     highland: 0
     canSet: 1
@@ -31,7 +58,142 @@ MonoBehaviour:
     portalOutI: -1
     portalOutJ: -1
     portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 4
+  - i: 9
+    j: 4
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 9
+    j: 5
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 9
+    j: 6
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 9
+    j: 7
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 9
+    j: 8
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 9
+    j: 9
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 8
+    j: 9
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 8
+    j: 8
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 8
+    j: 7
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 8
+    j: 6
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 8
+    j: 5
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 8
+    j: 4
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 8
+    j: 3
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 8
+    j: 2
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 8
+    j: 1
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 8
     j: 0
     highland: 0
     canSet: 1
@@ -40,8 +202,350 @@ MonoBehaviour:
     portalOutI: -1
     portalOutJ: -1
     portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 3
+  - i: 7
     j: 0
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 7
+    j: 1
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 7
+    j: 2
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 7
+    j: 3
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 7
+    j: 4
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 7
+    j: 5
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 7
+    j: 6
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 7
+    j: 7
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 7
+    j: 8
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 7
+    j: 9
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 6
+    j: 9
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 6
+    j: 8
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 6
+    j: 7
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 6
+    j: 6
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 6
+    j: 5
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 6
+    j: 4
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 6
+    j: 3
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 6
+    j: 2
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 6
+    j: 1
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 6
+    j: 0
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 5
+    j: 0
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 5
+    j: 1
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 5
+    j: 2
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 5
+    j: 3
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 5
+    j: 4
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 5
+    j: 5
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 5
+    j: 6
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 5
+    j: 7
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 5
+    j: 8
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 5
+    j: 9
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 4
+    j: 9
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 4
+    j: 8
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 3
+    j: 8
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 3
+    j: 7
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 3
+    j: 6
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 3
+    j: 5
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 3
+    j: 4
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 3
+    j: 3
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 3
+    j: 2
     highland: 0
     canSet: 1
     passableType: 0
@@ -51,50 +555,14 @@ MonoBehaviour:
     portalColor: {r: 0, g: 0, b: 0, a: 0}
   - i: 3
     j: 1
-    highland: 0
-    canSet: 0
-    passableType: 1
-    deadly: 1
-    portalOutI: -1
-    portalOutJ: -1
-    portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 3
-    j: 3
-    highland: 0
-    canSet: 0
-    passableType: 1
-    deadly: 1
-    portalOutI: -1
-    portalOutJ: -1
-    portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 3
-    j: 4
-    highland: 0
+    highland: 1
     canSet: 1
-    passableType: 0
+    passableType: 2
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
     portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 1
-    j: 1
-    highland: 0
-    canSet: 0
-    passableType: 1
-    deadly: 1
-    portalOutI: -1
-    portalOutJ: -1
-    portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 0
-    j: 1
-    highland: 0
-    canSet: 1
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-    portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 0
+  - i: 3
     j: 0
     highland: 0
     canSet: 1
@@ -103,38 +571,29 @@ MonoBehaviour:
     portalOutI: -1
     portalOutJ: -1
     portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 0
-    j: 3
-    highland: 0
-    canSet: 1
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-    portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 1
-    j: 3
-    highland: 0
-    canSet: 0
-    passableType: 1
-    deadly: 1
-    portalOutI: -1
-    portalOutJ: -1
-    portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 1
-    j: 4
-    highland: 0
-    canSet: 1
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-    portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 1
+  - i: 4
     j: 0
     highland: 0
     canSet: 1
     passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 4
+    j: 7
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 4
+    j: 6
+    highland: 1
+    canSet: 1
+    passableType: 2
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
@@ -148,6 +607,204 @@ MonoBehaviour:
     portalOutI: -1
     portalOutJ: -1
     portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 4
+    j: 3
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 4
+    j: 2
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 4
+    j: 1
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 4
+    j: 5
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 3
+    j: 9
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 2
+    j: 9
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 1
+    j: 9
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 0
+    j: 9
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 1
+    j: 8
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 2
+    j: 8
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 0
+    j: 8
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 2
+    j: 7
+    highland: 0
+    canSet: 0
+    passableType: 1
+    deadly: 1
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 1
+    j: 7
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 0
+    j: 7
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 2
+    j: 6
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 1
+    j: 6
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 0
+    j: 6
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 2
+    j: 5
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 1
+    j: 5
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 0
+    j: 5
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 2
+    j: 4
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 1
+    j: 4
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
   - i: 0
     j: 4
     highland: 0
@@ -157,62 +814,8 @@ MonoBehaviour:
     portalOutI: -1
     portalOutJ: -1
     portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 4
-    j: 2
-    highland: 1
-    canSet: 1
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-    portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 3
-    j: 2
-    highland: 1
-    canSet: 1
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-    portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 2
-    j: 2
-    highland: 1
-    canSet: 1
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-    portalColor: {r: 0, g: 0, b: 0, a: 0}
   - i: 1
-    j: 2
-    highland: 1
-    canSet: 1
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-    portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 0
-    j: 2
-    highland: 1
-    canSet: 1
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-    portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 2
-    j: 0
-    highland: 1
-    canSet: 1
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-    portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 2
-    j: 1
+    j: 3
     highland: 1
     canSet: 1
     passableType: 2
@@ -229,11 +832,92 @@ MonoBehaviour:
     portalOutI: -1
     portalOutJ: -1
     portalColor: {r: 0, g: 0, b: 0, a: 0}
-  - i: 2
-    j: 4
+  - i: 0
+    j: 2
     highland: 0
     canSet: 1
     passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 1
+    j: 2
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 2
+    j: 2
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 0
+    j: 3
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 0
+    j: 1
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 0
+    j: 0
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 1
+    j: 0
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 2
+    j: 0
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 2
+    j: 1
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 1
+    j: 1
+    highland: 1
+    canSet: 1
+    passableType: 2
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
@@ -241,21 +925,14 @@ MonoBehaviour:
   EnvironmentalControlDevice: {fileID: 0}
   Waves: []
   Paths:
-  - Name: path0
+  - Name: 
     CheckPoints:
-    - {x: 2.9492025, y: 4.1116734}
-    - {x: 4.0580845, y: 2.9941313}
-    - {x: 2.913378, y: -0.056303456}
+    - {x: 9.049409, y: 9.062564}
+    - {x: 8.891235, y: 7.0023026}
+    - {x: 6.873728, y: 5.228718}
+    - {x: 5.5655904, y: 1.9262085}
     WaitTimes:
     - 0
-    - 0
-    - 0
-  - Name: path1
-    CheckPoints:
-    - {x: 2.91942, y: 4.1010323}
-    - {x: 4.17671, y: 3.007189}
-    - {x: 3.1331594, y: 0.17828658}
-    WaitTimes:
     - 0
     - 0
     - 0

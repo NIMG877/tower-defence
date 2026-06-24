@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: char_4046_ebnhlz_Material
-  m_Shader: {fileID: 4800000, guid: 365883f61d7180e479d7623937ad4342, type: 3}
+  m_Shader: {fileID: 4800000, guid: df493f466aed486094ef97e97e4394f9, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -40,16 +40,24 @@ Material:
     - _CanvasGroupCompatible: 0
     - _ColorMask: 15
     - _CorrectiveRotation: 1
-    - _Cutoff: 0
+    - _Cutoff: 0.218
+    - _DepthAnchorY: 0
+    - _DepthOffset: 0
+    - _DepthPoseAngle: -30
+    - _DepthSplitY: 0
     - _DoubleSidedLighting: 0
     - _FillPhase: 0
     - _HolograficEffect: 1
+    - _LowerDepthBlend: 0
+    - _LowerDepthPoseAngle: 0
+    - _MaxRayDepthCorrection: 1
     - _NoiseIntensity: 0.4
     - _OrthoProjection: 1
     - _OutlineMipLevel: 0
     - _OutlineReferenceTexWidth: 1024
     - _OutlineSmoothness: 1
     - _OutlineWidth: 8
+    - _RayPlaneMinDenom: 0
     - _RotateAngle: 0
     - _ScrollSpeed: 2.07
     - _ShadowAlphaCutoff: 0
