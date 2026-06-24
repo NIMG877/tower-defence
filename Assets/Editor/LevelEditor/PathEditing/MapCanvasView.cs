@@ -71,16 +71,23 @@ public static class MapCanvasView
         {
             for (int j = 0; j < cache.JSize; j++)
             {
-                // 没有 MapData entry 的格子不画(让 canvas 背景透出来)
-                if (!cache.HasEntry[i, j]) continue;
-
-                var bd = cache.Blocks[i, j];
-
                 // cell [i,j] 的中心是 (j, i) 整数;UnityEngine.Rect.y 视作"顶",
                 // 顶边对应 grid y = i+0.5(屏幕 y 较小),底边对应 y = i-0.5(屏幕 y 较大)。
                 var tl = state.View.WorldToScreen(new Vector2(j - 0.5f, i + 0.5f), cache.ISize, cache.JSize);
                 var br = state.View.WorldToScreen(new Vector2(j + 0.5f, i - 0.5f), cache.ISize, cache.JSize);
                 var rect = new Rect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
+
+                // 没有 MapData entry 的格子:不填充,只画细格线让人看见 grid 边界
+                if (!cache.HasEntry[i, j])
+                {
+                    p2d.strokeColor = new Color(0.2f, 0.2f, 0.24f);
+                    p2d.lineWidth = 0.5f;
+                    BeginRectPath(p2d, rect);
+                    p2d.Stroke();
+                    continue;
+                }
+
+                var bd = cache.Blocks[i, j];
 
                 Color fill;
                 if (bd.deadly)
