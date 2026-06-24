@@ -28,7 +28,7 @@ public static class MapPathFinder
                 graph[i, j].Reset(tiles[i, j].passableType <= moveMethod);
             }
         }
-        if (!IsBlocked(graph, iSize, jSize, startPoint, endPoint, entityR))
+        if (!IsBlocked(graph, startPoint, endPoint, entityR))
         {
             return new MoveParameters[2] { new MoveParameters(startPoint, false), new MoveParameters(endPoint, false) };
         }
@@ -60,7 +60,7 @@ public static class MapPathFinder
                 }
                 path.Insert(0, new MoveParameters(startPoint, false));
                 path[path.Count - 1].targetPosition = endPoint;
-                return CorrectTmpPositions(tiles, graph, path.ToArray(), entityR);
+                return CorrectTmpPositions(graph, path.ToArray(), entityR);
                 //return path.ToArray();
             }
             FindNewFrontier(tiles, graph, iSize, jSize, peeked, endPoint, heap, ref heapCount);
@@ -207,7 +207,7 @@ public static class MapPathFinder
         }
     }
 
-    private static MoveParameters[] CorrectTmpPositions(Tile[,] tiles, AStarProperty[,] graph, MoveParameters[] tmpParameters, float entityR)
+    private static MoveParameters[] CorrectTmpPositions(AStarProperty[,] graph, MoveParameters[] tmpParameters, float entityR)
     {
         if (tmpParameters.Length > 1)
         {
@@ -242,7 +242,7 @@ public static class MapPathFinder
                     }
                     else if (tmpMoveParameters[i].whetherToEnterPortal == false)
                     {
-                        if (FirstBlockLine(tiles, graph, tmpMoveParameters[i].targetPosition, tmpMoveParameters[i + 2].targetPosition, tmpMoveParameters[i + 1].targetPosition, entityR).x == -1000)
+                        if (FirstBlockLine(graph, tmpMoveParameters[i].targetPosition, tmpMoveParameters[i + 2].targetPosition, tmpMoveParameters[i + 1].targetPosition, entityR).x == -1000)
                         {
                             tmpMoveParameters.RemoveAt(i + 1);
                         }
@@ -253,7 +253,7 @@ public static class MapPathFinder
                             tmpMoveParameters.RemoveAt(i + 1);
                             for (float alpha = 0.1f; alpha <= 1; alpha += 0.1f)
                             {
-                                Vector2 tmp = FirstBlockLine(tiles, graph, tmpMoveParameters[i].targetPosition, tmpCPos + alpha * tmpDPos, tmpCPos, entityR);
+                                Vector2 tmp = FirstBlockLine(graph, tmpMoveParameters[i].targetPosition, tmpCPos + alpha * tmpDPos, tmpCPos, entityR);
                                 if (tmp.x != -1000)
                                 {
                                     i++;
@@ -274,7 +274,7 @@ public static class MapPathFinder
         }
     }
 
-    private static Vector2 FirstBlockLine(Tile[,] tiles, AStarProperty[,] graph, Vector2 beginPos, Vector2 endPos, Vector2 originPosition, float entityR)
+    private static Vector2 FirstBlockLine(AStarProperty[,] graph, Vector2 beginPos, Vector2 endPos, Vector2 originPosition, float entityR)
     {
         if (beginPos == endPos) return new Vector2(-1000, -1000);
 
@@ -283,22 +283,14 @@ public static class MapPathFinder
         Vector2 so = originPosition - beginPos;
         Vector2 projectOnSe = (so.x * se.x + so.y * se.y) / se.sqrMagnitude * se;
         Vector2 perp = (projectOnSe - so).normalized * entityR;
-
         var (blocked, hitPoint) = SampleCorridor(graph, beginPos + perp, endPos + perp);
-        if (blocked)
-        {
-            return BaseOnBlockNewPoint(hitPoint, endPos + perp, beginPos + perp, entityR);
-        }
+        if (blocked) return BaseOnBlockNewPoint(hitPoint, endPos, beginPos, entityR);
         return new Vector2(-1000, -1000);
     }
 
-    private static bool IsBlocked(AStarProperty[,] graph, int iSize, int jSize,
-        Vector2 beginPos, Vector2 endPos, float entityR)
+    private static bool IsBlocked(AStarProperty[,] graph, Vector2 beginPos, Vector2 endPos, float entityR)
     {
-        if (beginPos == endPos)
-        {
-            return false;
-        }
+        if (beginPos == endPos) return false;
         Vector2 dir = endPos - beginPos;
         Vector2 perp = new Vector2(-dir.y, dir.x).normalized * entityR;
         if (SampleCorridor(graph, beginPos + perp, endPos + perp).blocked) return true;
@@ -306,8 +298,9 @@ public static class MapPathFinder
     }
 
     /// <summary>
-    /// 沿 begin→end 直线扫,返回 (撞墙?, 首个撞墙 cell 中心)。
-    /// 撞墙 → (true, hitPoint);畅通 → (false, Vector2.zero)。
+    /// 沿 begin→end 直线扫,返回 (撞墙?, 首个撞墙 cell 索引)。
+    /// 撞墙 → (true, hitPoint);hitPoint = (j, i),整数 cell index(跟原 FirstBlockLine 一致)。
+    /// 畅通 → (false, Vector2.zero)。
     /// hitPoint 给 FirstBlockLine 做 BaseOnBlockNewPoint 输入。
     /// 实现:Amanatides-Woo 2D DDA + super-cover(tie 双轴同进,任一 cell 不可走即报)。
     /// </summary>
@@ -322,35 +315,33 @@ public static class MapPathFinder
         // tDelta = 走一个 cell 所需的 t;用 (1/|dx|, 1/|dy|) 避免 dx==0 时除零。
         float tDeltaJ = dx == 0 ? float.PositiveInfinity : 1f / Mathf.Abs(dx);
         float tDeltaI = dy == 0 ? float.PositiveInfinity : 1f / Mathf.Abs(dy);
-        int i = Mathf.FloorToInt(beginPos.y);
-        int j = Mathf.FloorToInt(beginPos.x);
+        int i = Mathf.FloorToInt(beginPos.y+0.5f);
+        int j = Mathf.FloorToInt(beginPos.x+0.5f);
         // tMax = 沿射线到达下一个 cell 边界的参数 t(0~1)
-        float tMaxJ = stepJ > 0 ? ((j + 1) - beginPos.x) * tDeltaJ
-                     : stepJ < 0 ? (beginPos.x - j) * tDeltaJ : float.PositiveInfinity;
-        float tMaxI = stepI > 0 ? ((i + 1) - beginPos.y) * tDeltaI
-                     : stepI < 0 ? (beginPos.y - i) * tDeltaI : float.PositiveInfinity;
-        if (IsBlockedCell(graph, i, j)) return (true, new Vector2(j + 0.5f, i + 0.5f));
-        while (i != Mathf.FloorToInt(endPos.y) || j != Mathf.FloorToInt(endPos.x))
+        float tMaxJ = stepJ > 0 ? (j + 0.5f - beginPos.x) * tDeltaJ
+                     : stepJ < 0 ? (beginPos.x - j + 0.5f) * tDeltaJ : float.PositiveInfinity;
+        float tMaxI = stepI > 0 ? (i + 0.5f - beginPos.y) * tDeltaI
+                     : stepI < 0 ? (beginPos.y - i + 0.5f) * tDeltaI : float.PositiveInfinity;
+        if (IsBlockedCell(graph, i, j)) return (true, new Vector2(j, i));
+        while (i != Mathf.FloorToInt(endPos.y+0.5f) || j != Mathf.FloorToInt(endPos.x+0.5f))
         {
             if (tMaxI < tMaxJ)
             {
                 tMaxI += tDeltaI;
                 i += stepI;
-                if (IsBlockedCell(graph, i, j)) return (true, new Vector2(j + 0.5f, i + 0.5f));
+                if (IsBlockedCell(graph, i, j)) return (true, new Vector2(j, i));
             }
             else if (tMaxJ < tMaxI)
             {
                 tMaxJ += tDeltaJ;
                 j += stepJ;
-                if (IsBlockedCell(graph, i, j)) return (true, new Vector2(j + 0.5f, i + 0.5f));
+                if (IsBlockedCell(graph, i, j)) return (true, new Vector2(j, i));
             }
             else // tie:super-cover 双轴同进,任一 cell 不可走即报撞墙
             {
                 tMaxI += tDeltaI; i += stepI;
                 tMaxJ += tDeltaJ; j += stepJ;
-                if (IsBlockedCell(graph, i, j)) return (true, new Vector2(j + 0.5f, i + 0.5f));
-                // 另一半 cell 是 tie 前的另一轴 step 结果:用 (i - stepI, j - stepJ) 找回
-                if (IsBlockedCell(graph, i - stepI, j - stepJ)) return (true, new Vector2(j - stepJ + 0.5f, i - stepI + 0.5f));
+                if (IsBlockedCell(graph, i, j)) return (true, new Vector2(j, i));
             }
         }
         return (false, Vector2.zero);
