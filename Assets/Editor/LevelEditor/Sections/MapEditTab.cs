@@ -621,7 +621,7 @@ public static class MapEditTab
     }
 
     // === Manipulator ===
-    class MapEditManipulator : MouseManipulator
+    public class MapEditManipulator : MouseManipulator
     {
         readonly SerializedObject _so;
         readonly BlockMapCache _cache;
@@ -935,11 +935,14 @@ public static class MapEditTab
         {
             // Rebuild Blocks[,] from the SO. Simple: re-read each entry.
             if (cache.Blocks == null) return;
-            // Reset to default first
+            // 未画刷格子用 Tile.Default() (= passableType=2),与 BlockMapCache.Load 保持一致 —
+            // 否则画刷后从 map tab 切回 path tab 时,A* 看到的未画刷格子 passableType 会从 2
+            // 跳成 0(默认 struct 零值),地面 moveMethod=0 会穿过所有墙,路径画错。
+            var defaultTile = Tile.Default();
             for (int i = 0; i < cache.ISize; i++)
             for (int j = 0; j < cache.JSize; j++)
             {
-                cache.Blocks[i, j] = default;
+                cache.Blocks[i, j] = defaultTile;
                 if (cache.HasEntry != null) cache.HasEntry[i, j] = false;
             }
 

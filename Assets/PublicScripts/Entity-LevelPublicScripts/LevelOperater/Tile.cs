@@ -22,4 +22,25 @@ public struct Tile
     public int   portalOutI;    // -1 = no portal
     public int   portalOutJ;    // -1 = no portal
     public Color portalColor;
+
+    /// <summary>
+    /// 未画刷格子的默认状态。
+    ///   passableType = 2 → 对 moveMethod(地面/近地)不可走
+    ///   portalOutI/J = -1 → sentinel "no portal",避免 A* 把它当 portal 入口
+    ///   其余默认 (false / 0 / transparent)
+    /// 注意:C# 9 不支持 struct 字段初始化器(要 C# 10),所以这里用静态工厂。
+    /// 矩阵初始化处必须显式用 Tile.Default(),new Tile[iSize, jSize] 仍是 0/false。
+    /// </summary>
+    public static Tile Default() => new Tile
+    {
+        i = 0,
+        j = 0,
+        highland = false,
+        canSet = false,
+        passableType = 2,
+        deadly = false,
+        portalOutI = -1,
+        portalOutJ = -1,
+        portalColor = default,
+    };
 }

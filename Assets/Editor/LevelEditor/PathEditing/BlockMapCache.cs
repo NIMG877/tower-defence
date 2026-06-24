@@ -35,6 +35,12 @@ public sealed class BlockMapCache : IDisposable
 
         cache.Blocks = new Tile[cache.ISize, cache.JSize];
         cache.HasEntry = new bool[cache.ISize, cache.JSize];
+        // Tile 是 struct,new Tile[..] 给的是 default(Tile);手动填 Tile.Default() 让
+        // 未画刷格子也是 passableType=2 / portalOutI/J=-1(与 runtime 行为一致)
+        var defaultTile = Tile.Default();
+        for (int i = 0; i < cache.ISize; i++)
+        for (int j = 0; j < cache.JSize; j++)
+            cache.Blocks[i, j] = defaultTile;
         foreach (var entry in levelData.MapData)
         {
             if (entry.i < 0 || entry.i >= cache.ISize) continue;

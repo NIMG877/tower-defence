@@ -167,8 +167,19 @@ public class MapDataManager : IManagerStartEnd
     {
         iSize = _levelData != null ? _levelData.iSize : 0;
         jSize = _levelData != null ? _levelData.jSize : 0;
+        // Tile 是 struct,new Tile[iSize, jSize] 给的是 default(Tile) (int=0, bool=false),
+        // 不会跑 Tile.Default() 的字段赋值,所以这里手动填一遍。这样:
+        //   - 未画刷格子的 passableType=2 (所有 moveMethod 都能走)
+        //   - 未画刷格子的 portalOutI/J=-1 (避开 A* 的 portalEnter 误判)
         Tiles         = (iSize > 0 && jSize > 0) ? new Tile[iSize, jSize]    : null;
         TileMaterials = (iSize > 0 && jSize > 0) ? new Material[iSize, jSize] : null;
+        if (Tiles != null)
+        {
+            var d = Tile.Default();
+            for (int i = 0; i < iSize; i++)
+            for (int j = 0; j < jSize; j++)
+                Tiles[i, j] = d;
+        }
 
         if (_levelData != null)
         {
