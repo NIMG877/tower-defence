@@ -61,6 +61,7 @@ public static class MapPathFinder
                 path.Insert(0, new MoveParameters(startPoint, false));
                 path[path.Count - 1].targetPosition = endPoint;
                 return CorrectTmpPositions(tiles, graph, path.ToArray(), entityR);
+                //return path.ToArray();
             }
             FindNewFrontier(tiles, graph, iSize, jSize, peeked, endPoint, heap, ref heapCount);
         }
@@ -378,162 +379,93 @@ public static class MapPathFinder
         {
             return false;
         }
-        else if (beginPos.x == endPos.x)
+        Vector2 dir = endPos - beginPos;
+        Vector2 perp = new Vector2(-dir.y, dir.x).normalized * entityR;
+        if (SampleCorridor(graph, beginPos + perp, endPos + perp)) return true;
+        return SampleCorridor(graph, beginPos - perp, endPos - perp);
+    }
+
+    /// <summary>
+    /// 沿 begin→end 直线扫,检查所经过的 cell 是否全部 Passable。
+    /// 任一不可走 → true(撞墙)。全部可走 → false(走廊畅通)。
+    /// 实现:Amanatides-Woo 2D DDA,逐格步进,无中点采样,无除零。
+    /// </summary>
+    private static bool SampleCorridor(AStarProperty[,] graph,
+        Vector2 beginPos, Vector2 endPos)
+    {
+        if (beginPos == endPos) return false;
+        float dx = endPos.x - beginPos.x;
+        float dy = endPos.y - beginPos.y;
+        int stepJ = dx == 0 ? 0 : (dx > 0 ? 1 : -1);
+        int stepI = dy == 0 ? 0 : (dy > 0 ? 1 : -1);
+        // tMax = 沿射线到达下一个 cell 边界的参数 t(0~1);tDelta = 走一个 cell 所需的 t。
+        // 用 (1/|dx|, 1/|dy|) 算 tDelta,避免 dx==0 时除零。
+        float tDeltaJ = dx == 0 ? float.PositiveInfinity : 1f / Mathf.Abs(dx);
+        float tDeltaI = dy == 0 ? float.PositiveInfinity : 1f / Mathf.Abs(dy);
+        int i = Mathf.FloorToInt(beginPos.y);
+        int j = Mathf.FloorToInt(beginPos.x);
+        // 起 cell 边界上的 t(从 cell 内一点走到 cell 右边/下边界的距离占比)
+        float tMaxJ = stepJ > 0 ? ((j + 1) - beginPos.x) * tDeltaJ
+                     : stepJ < 0 ? (beginPos.x - j) * tDeltaJ : float.PositiveInfinity;
+        float tMaxI = stepI > 0 ? ((i + 1) - beginPos.y) * tDeltaI
+                     : stepI < 0 ? (beginPos.y - i) * tDeltaI : float.PositiveInfinity;
+        if (CheckTouchedCells(graph, beginPos.x, beginPos.y)) return true;
+        while (i != Mathf.FloorToInt(endPos.y) || j != Mathf.FloorToInt(endPos.x))
         {
-            //1
-            beginPos.x += entityR;
-            endPos.x += entityR;
-            Vector2 p1;
-            List<float> Y = new List<float>() { endPos.y };
-            if (beginPos.y < endPos.y)
+            float tNext = Mathf.Min(tMaxI, tMaxJ);
+            if (tMaxI < tMaxJ)
             {
-                for (int i = (int)(endPos.y + 0.5f) - 1; i >= beginPos.y + 0.5f; i--)
-                {
-                    Y.Add(i + 0.5f);
-                }
+                tMaxI += tDeltaI;
+                i += stepI;
+            }
+            else if (tMaxJ < tMaxI)
+            {
+                tMaxJ += tDeltaJ;
+                j += stepJ;
             }
             else
             {
-                for (int i = (int)(endPos.y + 0.5f); i <= beginPos.y + 0.5f; i++)
-                {
-                    Y.Add(i + 0.5f);
-                }
+                tMaxJ += tDeltaJ;
+                j += stepJ;
+                tMaxI += tDeltaI;
+                i += stepI;
             }
-            Y.Add(beginPos.y);
-            for (int i = 0; i < Y.Count - 1; i++)
-            {
-                p1 = new Vector2(beginPos.x + 0.5f, 0.5f + (Y[i] + Y[i + 1]) / 2);
-                if (!graph[(int)p1.y, (int)p1.x].Passable)
-                {
-                    return true;
-                }
-            }
-            //2
-            beginPos.x -= 2 * entityR;
-            endPos.x -= 2 * entityR;
-            Y = new List<float>() { endPos.y };
-            if (beginPos.y < endPos.y)
-            {
-                for (int i = (int)(endPos.y + 0.5f) - 1; i >= beginPos.y + 0.5f; i--)
-                {
-                    Y.Add(i + 0.5f);
-                }
-            }
-            else
-            {
-                for (int i = (int)(endPos.y + 0.5f); i <= beginPos.y + 0.5f; i++)
-                {
-                    Y.Add(i + 0.5f);
-                }
-            }
-            Y.Add(beginPos.y);
-            for (int i = 0; i < Y.Count - 1; i++)
-            {
-                p1 = new Vector2(beginPos.x + 0.5f, 0.5f + (Y[i] + Y[i + 1]) / 2);
-                if (!graph[(int)p1.y, (int)p1.x].Passable)
-                {
-                    return true;
-                }
-            }
-            return false;
+            if (CheckTouchedCells(graph, beginPos.x + dx * Mathf.Clamp01(tNext),
+                    beginPos.y + dy * Mathf.Clamp01(tNext))) return true;
         }
-        else
+        if (CheckTouchedCells(graph, endPos.x, endPos.y)) return true;
+        return false;
+    }
+
+    private static bool CheckTouchedCells(AStarProperty[,] graph, float x, float y)
+    {
+        bool onVerticalGridLine = IsOnGridLine(x);
+        bool onHorizontalGridLine = IsOnGridLine(y);
+        int baseJ = Mathf.FloorToInt(x);
+        int baseI = Mathf.FloorToInt(y);
+        int minJ = onVerticalGridLine ? baseJ - 1 : baseJ;
+        int maxJ = onVerticalGridLine ? baseJ : baseJ;
+        int minI = onHorizontalGridLine ? baseI - 1 : baseI;
+        int maxI = onHorizontalGridLine ? baseI : baseI;
+
+        for (int checkI = minI; checkI <= maxI; checkI++)
         {
-            //1
-            Vector2 p1, rVec2;
-            p1 = endPos - beginPos;
-            p1.Set(-p1.y, p1.x);
-            p1 = p1.normalized * entityR;
-            rVec2 = new Vector2(p1.x, p1.y);
-            beginPos += rVec2;
-            endPos += rVec2;
-            float k = (beginPos.y - endPos.y) / (beginPos.x - endPos.x);
-            float b = beginPos.y - k * beginPos.x;
-            List<float> X = new List<float>() { beginPos.x, endPos.x };
-            if (beginPos.y < endPos.y)
+            for (int checkJ = minJ; checkJ <= maxJ; checkJ++)
             {
-                for (int i = (int)(beginPos.y + 0.5f); i <= endPos.y - 0.5f; i++)
-                {
-                    X.Add((i + 0.5f - b) / k);
-                }
+                if (IsBlockedCell(graph, checkI, checkJ)) return true;
             }
-            else
-            {
-                for (int i = (int)(endPos.y + 0.5f); i <= beginPos.y - 0.5f; i++)
-                {
-                    X.Add((i + 0.5f - b) / k);
-                }
-            }
-            if (beginPos.x < endPos.x)
-            {
-                for (int i = (int)(beginPos.x + 0.5f); i <= endPos.x - 0.5f; i++)
-                {
-                    X.Add(i + 0.5f);
-                }
-                X.Sort((x, y) => -x.CompareTo(y));
-            }
-            else
-            {
-                for (int i = (int)(endPos.x + 0.5f); i <= beginPos.x - 0.5f; i++)
-                {
-                    X.Add(i + 0.5f);
-                }
-                X.Sort();
-            }
-            for (int i = 0; i < X.Count - 1; i++)
-            {
-                p1 = new Vector2(0.5f + (X[i] + X[i + 1]) / 2, 0.5f + k * (X[i] + X[i + 1]) / 2 + b);
-                if (!graph[(int)p1.y, (int)p1.x].Passable)
-                {
-                    return true;
-                }
-            }
-            //2
-            beginPos -= 2 * rVec2;
-            endPos -= 2 * rVec2;
-            k = (beginPos.y - endPos.y) / (beginPos.x - endPos.x);
-            b = beginPos.y - k * beginPos.x;
-            X = new List<float>() { beginPos.x, endPos.x };
-            if (beginPos.y < endPos.y)
-            {
-                for (int i = (int)(beginPos.y + 0.5f); i <= endPos.y - 0.5f; i++)
-                {
-                    X.Add((i + 0.5f - b) / k);
-                }
-            }
-            else
-            {
-                for (int i = (int)(endPos.y + 0.5f); i <= beginPos.y - 0.5f; i++)
-                {
-                    X.Add((i + 0.5f - b) / k);
-                }
-            }
-            if (beginPos.x < endPos.x)
-            {
-                for (int i = (int)(beginPos.x + 0.5f); i <= endPos.x - 0.5f; i++)
-                {
-                    X.Add(i + 0.5f);
-                }
-                X.Sort((x, y) => -x.CompareTo(y));
-            }
-            else
-            {
-                for (int i = (int)(endPos.x + 0.5f); i <= beginPos.x - 0.5f; i++)
-                {
-                    X.Add(i + 0.5f);
-                }
-                X.Sort();
-            }
-            for (int i = 0; i < X.Count - 1; i++)
-            {
-                p1 = new Vector2(0.5f + (X[i] + X[i + 1]) / 2, 0.5f + k * (X[i] + X[i + 1]) / 2 + b);
-                if (!graph[(int)p1.y, (int)p1.x].Passable)
-                {
-                    return true;
-                }
-            }
-            return false;
         }
+        return false;
+    }
+
+    private static bool IsOnGridLine(float value)
+    {
+        return value == Mathf.Round(value);
+    }
+
+    private static bool IsBlockedCell(AStarProperty[,] graph, int i, int j)
+    {
+        return i < 0 || j < 0 || i >= graph.GetLength(0) || j >= graph.GetLength(1) || !graph[i, j].Passable;
     }
 
     private static Vector2 BaseOnBlockNewPoint(Vector2 blockCenterPosition, Vector2 endPosition, Vector2 startPosition, float entityR)
