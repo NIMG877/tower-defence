@@ -171,12 +171,15 @@ public static class MapEditTab
         toolLabel.style.color = new Color(0.706f, 0.706f, 0.706f);
         bar.Add(toolLabel);
 
-        var tools = new[] { "🖌 画刷", "🧹 笔擦" };
+        // 工具按钮:圆形符号 + 文字色(跟格点吸附的 ◉/○ 视觉一致)
+        //   active  → ◉ 画刷/笔擦 + 绿色字 (0.306, 0.788, 0.627)
+        //   inactive→ ○ 画刷/笔擦 + 灰色字 (0.706, 0.706, 0.706)
+        var tools = new[] { "画刷", "笔擦" };
         var toolButtons = new Button[tools.Length];
         for (int k = 0; k < tools.Length; k++)
         {
             int captured = k;
-            var btn = new Button { text = tools[k] };
+            var btn = new Button { text = $"○ {tools[k]}" };
             btn.clicked += () =>
             {
                 brush.tool = (BrushState.Tool)captured;
@@ -194,16 +197,11 @@ public static class MapEditTab
             int active = (int)brush.tool;
             for (int k = 0; k < toolButtons.Length; k++)
             {
-                if (k == active)
-                {
-                    toolButtons[k].style.backgroundColor = new Color(0.306f, 0.788f, 0.627f);
-                    toolButtons[k].style.color = Color.black;
-                }
-                else
-                {
-                    toolButtons[k].style.backgroundColor = StyleKeyword.Null;
-                    toolButtons[k].style.color = StyleKeyword.Null;
-                }
+                bool on = (k == active);
+                toolButtons[k].text = on ? $"◉ {tools[k]}" : $"○ {tools[k]}";
+                toolButtons[k].style.color = on
+                    ? new Color(0.306f, 0.788f, 0.627f)
+                    : new Color(0.706f, 0.706f, 0.706f);
             }
             // Brush 工具隐藏时,brush 面板也同步隐藏(避免空白占位)
             brushPanel.style.display = brush.tool == BrushState.Tool.Brush ? DisplayStyle.Flex : DisplayStyle.None;
@@ -260,7 +258,7 @@ public static class MapEditTab
         canvas.Add(status);
 
         // Hint label (bottom-right)
-        var hint = new Label("左键:画刷 / 笔擦 · 右键拖:缩放 · 中键拖:平移");
+        var hint = new Label("左键拖:画/擦 · 右键拖:缩放 · 中键拖:平移");
         hint.name = "canvas-hint";
         hint.style.position = Position.Absolute;
         hint.style.bottom = 4; hint.style.right = 8;
@@ -364,7 +362,7 @@ public static class MapEditTab
         portalRow.Add(portalEnum);
         panel.Add(portalRow);
 
-        var hint = new Label("提示:左键应用画刷;portal 两段式;右键拖=缩放;中键拖=平移。");
+        var hint = new Label("提示:左键按住拖动可连续画/擦;portal 两段式;右键拖=缩放;中键拖=平移。");
         hint.style.fontSize = 10;
         hint.style.color = new Color(0.55f, 0.55f, 0.55f);
         hint.style.marginTop = 8;
@@ -545,8 +543,11 @@ public static class MapEditTab
 
         bool _rightDragging;
         bool _midDragging;
+        bool _leftDragging;          // 画刷/笔擦 拖动绘制中
         Vector2 _rightDownLocal;
         Vector2 _midDownLocal;
+        (int i, int j)? _lastPaintedCell;  // 拖动期间上次应用的格子(去重)
+        int _undoGroup;              // 拖动开始时的 undo group,MouseUp 时 collapse 整段
 
         protected override void RegisterCallbacksOnTarget()
         {
@@ -610,6 +611,14 @@ public static class MapEditTab
                     -evt.mouseDelta.y / (_state.View.Zoom * unitY));
                 _repaint();
             }
+
+            // Left-drag: 连续画/擦(去重:只在新进入一个 cell 时才应用)
+            if (_leftDragging && cell.HasValue && !NullableEquals(cell, _lastPaintedCell))
+            {
+                if (_brush.tool == BrushState.Tool.Eraser) EraseEntry(cell.Value);
+                else                                       ApplyBrush(cell.Value);
+                _lastPaintedCell = cell;
+            }
         }
 
         void OnMouseLeave(MouseLeaveEvent evt)
@@ -649,14 +658,19 @@ public static class MapEditTab
             var c = ScreenToCell(evt.localMousePosition);
             if (!c.HasValue) return;
 
-            // Eraser 模式:擦除该格的 MapData 条目
+            // Eraser 模式:擦除该格的 MapData 条目(支持按住拖动连续擦)
             if (_brush.tool == BrushState.Tool.Eraser)
             {
+                _leftDragging = true;
+                target.CaptureMouse();
+                _undoGroup = Undo.GetCurrentGroup();
+                Undo.SetCurrentGroupName("Erase Blocks");
                 EraseEntry(c.Value);
+                _lastPaintedCell = c;
                 return;
             }
 
-            // Brush 模式:portal 两段式
+            // Brush 模式:portal 两段式(单次点击,不进入拖动)
             if (_brush.portalMode == PortalMode.SetPortalOut)
             {
                 if (!_brush.pendingPortalSource.HasValue)
@@ -673,7 +687,14 @@ public static class MapEditTab
                 _repaint();
                 return;
             }
+
+            // Brush 默认模式:按住左键可连续画
+            _leftDragging = true;
+            target.CaptureMouse();
+            _undoGroup = Undo.GetCurrentGroup();
+            Undo.SetCurrentGroupName("Paint Blocks");
             ApplyBrush(c.Value);
+            _lastPaintedCell = c;
         }
 
         void OnMouseUp(MouseUpEvent evt)
@@ -689,6 +710,14 @@ public static class MapEditTab
                 _midDragging = false;
                 target.ReleaseMouse();
                 return;
+            }
+            if (evt.button == 0 && _leftDragging)
+            {
+                _leftDragging = false;
+                target.ReleaseMouse();
+                // 把整段拖动合并成一个 undo 条目(默认每格一个 undo,体感割裂)
+                Undo.CollapseUndoOperations(_undoGroup);
+                _lastPaintedCell = null;
             }
         }
 
