@@ -99,11 +99,8 @@ public sealed class EditorPathManipulator : MouseManipulator
         // 中键拖拽 = 平移(屏幕像素 1:1)
         if (evt.pressedButtons == (1 << (int)MouseButton.MiddleMouse) && _state.Cache != null)
         {
-            float unitX = ViewTransform.CanvasWidth / _state.Cache.JSize;
-            float unitY = ViewTransform.CanvasHeight / _state.Cache.ISize;
-            _state.View.Offset -= new Vector2(
-                evt.mouseDelta.x / (_state.View.Zoom * unitX),
-                -evt.mouseDelta.y / (_state.View.Zoom * unitY));
+            _state.View.Offset -= ViewTransform.ScreenDeltaToWorldDelta(
+                evt.mouseDelta, _state.Cache.ISize, _state.Cache.JSize, _state.View.Zoom);
             _state.NotifyChanged();
         }
 
@@ -127,11 +124,8 @@ public sealed class EditorPathManipulator : MouseManipulator
         if (_dragCpIdx >= 0 && evt.pressedButtons == (1 << (int)MouseButton.LeftMouse) && _state.Cache != null)
         {
             // 累加本帧的世界 delta 到 _dragAccumWorld
-            float unitX = ViewTransform.CanvasWidth / _state.Cache.JSize;
-            float unitY = ViewTransform.CanvasHeight / _state.Cache.ISize;
-            _dragAccumWorld += new Vector2(
-                evt.mouseDelta.x / (_state.View.Zoom * unitX),
-                -evt.mouseDelta.y / (_state.View.Zoom * unitY)); // Y 翻转
+            _dragAccumWorld += ViewTransform.ScreenDeltaToWorldDelta(
+                evt.mouseDelta, _state.Cache.ISize, _state.Cache.JSize, _state.View.Zoom);
             var world = _dragStartWorld + _dragAccumWorld;
             var writePos = _state.Snap ? ViewTransform.SnapToGrid(world) : world;
             UpdateCheckpointVisual(_dragCpIdx, writePos);

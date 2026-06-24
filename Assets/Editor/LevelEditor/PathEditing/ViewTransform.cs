@@ -79,4 +79,20 @@ public struct ViewTransform
             screen.x / (Zoom * unit) + Offset.x,
             (CanvasHeight - screen.y) / (Zoom * unit) + Offset.y);
     }
+
+    /// <summary>
+    /// 中键 pan / cp 拖动共用的"屏幕像素 → 世界 delta"换算,返回要 OFFSET -= 的量。
+    /// 关键:必须用 min(unitX, unitY) — 与 WorldToScreen/ScreenToWorld 一致,否则 iSize≠jSize 时
+    /// 某一轴会出现"鼠标走 N 像素,世界只走 N × (min/max)"的滞后。
+    /// Y 已翻转(屏幕向下 → 世界向上)。
+    /// </summary>
+    public static Vector2 ScreenDeltaToWorldDelta(Vector2 mouseDelta, int iSize, int jSize, float zoom)
+    {
+        float unitX = CanvasWidth / jSize;
+        float unitY = CanvasHeight / iSize;
+        float unit = Mathf.Min(unitX, unitY);
+        return new Vector2(
+            mouseDelta.x / (zoom * unit),
+            -mouseDelta.y / (zoom * unit));
+    }
 }

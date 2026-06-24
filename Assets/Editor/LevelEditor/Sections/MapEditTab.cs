@@ -618,11 +618,8 @@ public static class MapEditTab
             // Middle-drag: pan (delta form, matches EditorPathManipulator)
             if (_midDragging && _state.Cache != null)
             {
-                float unitX = ViewTransform.CanvasWidth / _state.Cache.JSize;
-                float unitY = ViewTransform.CanvasHeight / _state.Cache.ISize;
-                _state.View.Offset -= new Vector2(
-                    evt.mouseDelta.x / (_state.View.Zoom * unitX),
-                    -evt.mouseDelta.y / (_state.View.Zoom * unitY));
+                _state.View.Offset -= ViewTransform.ScreenDeltaToWorldDelta(
+                    evt.mouseDelta, _state.Cache.ISize, _state.Cache.JSize, _state.View.Zoom);
                 _repaint();
             }
 
