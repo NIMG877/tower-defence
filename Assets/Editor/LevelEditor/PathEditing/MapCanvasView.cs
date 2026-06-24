@@ -166,7 +166,7 @@ public static class MapCanvasView
             var start = cpsProp.GetArrayElementAtIndex(k).vector2Value;
             var end = cpsProp.GetArrayElementAtIndex(k + 1).vector2Value;
 
-            var path = EditorPathFinder.AStar(
+            var path = MapPathFinder.AStar<BlockDataEntry>(
                 cache.Blocks, cache.ISize, cache.JSize,
                 start, end, cache.EntityR, state.MoveMethod);
 
