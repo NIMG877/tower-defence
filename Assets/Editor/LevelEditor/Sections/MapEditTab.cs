@@ -22,6 +22,39 @@ public static class MapEditTab
         public bool deadly;
         public PortalMode portalMode = PortalMode.Off;
         public (int i, int j)? pendingPortalSource;
+
+        public enum Preset { None, Highland, Ground, Den }
+
+        /// <summary>
+        /// 当前选中的预设。None = 自定义(用户改过字段)。
+        /// 改字段会自动清空,点预设按钮会自动应用。
+        /// </summary>
+        public Preset activePreset = Preset.None;
+
+        /// <summary>
+        /// 预设数据(索引 0=Highland, 1=Ground, 2=Den — 与 Preset enum 偏移 1 对齐)。
+        /// Tuple: (highland, canSet, passableType, deadly)
+        /// </summary>
+        public static readonly (bool hl, bool cs, int pt, bool dl)[] PresetData =
+        {
+            (true,  true,  2, false),  // Highland 高台
+            (false, true,  0, false),  // Ground   地面
+            (false, false, 1, true),   // Den      地穴
+        };
+
+        public static readonly string[] PresetNames = { "Highland", "Ground", "Den" };
+
+        /// <summary>
+        /// 应用预设到 brush 字段(不改 portalMode — portal 是独立维度)。
+        /// </summary>
+        public void ApplyPreset(Preset p)
+        {
+            if (p == Preset.None) return;
+            int idx = (int)p - 1; // Preset.Highland=1 → PresetData[0]
+            var (hl, cs, pt, dl) = PresetData[idx];
+            highland = hl; canSet = cs; passableType = pt; deadly = dl;
+            activePreset = p;
+        }
     }
 
     public static VisualElement Build(SerializedObject so, BlockMapCache cache, PathEditingState state)
@@ -351,7 +384,7 @@ public static class MapEditTab
         prefix.style.marginRight = 4;
         headerRow.Add(prefix);
 
-        var title = new Label("画刷 (highland, canSet, passable, deadly, portal)");
+        var title = new Label("画刷");
         title.style.color = new Color(0.611f, 0.863f, 0.996f);
         title.style.fontSize = 11;
         title.style.unityFontStyleAndWeight = FontStyle.Bold;
@@ -359,8 +392,58 @@ public static class MapEditTab
         headerRow.Add(title);
         panel.Add(headerRow);
 
-        panel.Add(MakeToggle("Highland", brush.highland, v => brush.highland = v));
-        panel.Add(MakeToggle("CanSet",   brush.canSet,   v => brush.canSet = v));
+        // Preset row: 3 个互斥按钮(Highland/Ground/Den),active 高亮绿底黑字
+        // 模仿 PathEditTab 的 moveMethod 视觉规范
+        var presetRow = new VisualElement();
+        presetRow.style.flexDirection = FlexDirection.Row;
+        presetRow.style.alignItems = Align.Center;
+        presetRow.style.marginBottom = 4;
+        presetRow.style.flexShrink = 0;
+
+        var presetLabel = new Label("Preset:");
+        presetLabel.style.fontSize = 11;
+        presetLabel.style.color = new Color(0.706f, 0.706f, 0.706f);
+        presetLabel.style.marginRight = 4;
+        presetLabel.style.flexShrink = 0;
+        presetRow.Add(presetLabel);
+
+        var presetButtons = new Button[BrushState.PresetNames.Length];
+        for (int k = 0; k < presetButtons.Length; k++)
+        {
+            int captured = k;
+            var btn = new Button { text = BrushState.PresetNames[captured] };
+            btn.style.flexGrow = 1;
+            btn.style.flexShrink = 1;
+            btn.style.minWidth = 0;
+            btn.style.marginLeft = 2;
+            btn.style.fontSize = 11;
+            btn.clicked += () =>
+            {
+                brush.ApplyPreset((BrushState.Preset)(captured + 1)); // Preset.Highland=1 → PresetData[0]
+                state.NotifyChanged();
+            };
+            presetButtons[captured] = btn;
+            presetRow.Add(btn);
+        }
+        panel.Add(presetRow);
+
+        // 字段行 — 改任意字段会清掉 activePreset 并 NotifyChanged
+        // (这样 SyncFromBrush 会看到 activePreset=None,按钮高亮就消了)
+        var (highlandRow, highlandToggle) = MakeToggle("Highland", brush.highland, v =>
+        {
+            brush.highland = v;
+            brush.activePreset = BrushState.Preset.None;
+            state.NotifyChanged();
+        });
+        panel.Add(highlandRow);
+
+        var (canSetRow, canSetToggle) = MakeToggle("CanSet", brush.canSet, v =>
+        {
+            brush.canSet = v;
+            brush.activePreset = BrushState.Preset.None;
+            state.NotifyChanged();
+        });
+        panel.Add(canSetRow);
 
         // PassableType:行内布局(Label + 裸 IntegerField)与 MakeToggle 一致
         // 注意 row 必须 flexShrink:0 — 在 Column 父容器里,flexGrow:1 会让子节点垂直拉伸
@@ -378,13 +461,25 @@ public static class MapEditTab
         passableField.style.flexGrow = 1;
         passableField.style.flexShrink = 1;
         passableField.style.minWidth = 0;
-        passableField.RegisterValueChangedCallback(evt => brush.passableType = Mathf.Clamp(evt.newValue, 0, 3));
+        passableField.RegisterValueChangedCallback(evt =>
+        {
+            brush.passableType = Mathf.Clamp(evt.newValue, 0, 3);
+            brush.activePreset = BrushState.Preset.None;
+            state.NotifyChanged();
+        });
         passableRow.Add(passableField);
         panel.Add(passableRow);
 
-        panel.Add(MakeToggle("Deadly", brush.deadly, v => brush.deadly = v));
+        var (deadlyRow, deadlyToggle) = MakeToggle("Deadly", brush.deadly, v =>
+        {
+            brush.deadly = v;
+            brush.activePreset = BrushState.Preset.None;
+            state.NotifyChanged();
+        });
+        panel.Add(deadlyRow);
 
         // Portal:同样行内布局,row flexShrink:0 防垂直拉伸
+        // Portal 改变不算"离开预设"(portal 是正交维度)
         var portalRow = new VisualElement();
         portalRow.style.flexDirection = FlexDirection.Row;
         portalRow.style.alignItems = Align.Center;
@@ -408,6 +503,30 @@ public static class MapEditTab
         hint.style.marginTop = 8;
         hint.style.whiteSpace = WhiteSpace.Normal;
         panel.Add(hint);
+
+        // SyncFromBrush: 同步所有字段 UI 到 brush 状态 + 高亮 active 预设按钮
+        // 注册到 state.Changed — 预设按钮点击 / 字段手动改都会触发
+        void SyncFromBrush()
+        {
+            // 字段 UI 同步(SetValueWithoutNotify 不触发 value-changed 回调,无递归)
+            highlandToggle.SetValueWithoutNotify(brush.highland);
+            canSetToggle.SetValueWithoutNotify(brush.canSet);
+            passableField.SetValueWithoutNotify(brush.passableType);
+            deadlyToggle.SetValueWithoutNotify(brush.deadly);
+            portalEnum.SetValueWithoutNotify(brush.portalMode);
+
+            // 预设按钮高亮(active=绿底黑字,其他=默认)
+            for (int k = 0; k < presetButtons.Length; k++)
+            {
+                bool on = brush.activePreset == (BrushState.Preset)(k + 1);
+                presetButtons[k].style.backgroundColor = on
+                    ? new Color(0.306f, 0.788f, 0.627f)
+                    : new StyleColor(StyleKeyword.Null);
+                presetButtons[k].style.color = on ? Color.black : new StyleColor(StyleKeyword.Null);
+            }
+        }
+        state.Changed += SyncFromBrush;
+        SyncFromBrush();
 
         return panel;
     }
@@ -506,7 +625,7 @@ public static class MapEditTab
         return panel;
     }
 
-    static VisualElement MakeToggle(string label, bool initial, System.Action<bool> onChange)
+    static (VisualElement row, Toggle toggle) MakeToggle(string label, bool initial, System.Action<bool> onChange)
     {
         var row = new VisualElement();
         row.style.flexDirection = FlexDirection.Row;
@@ -522,7 +641,7 @@ public static class MapEditTab
         t.RegisterValueChangedCallback(evt => onChange(evt.newValue));
         row.Add(t);
 
-        return row;
+        return (row, t);
     }
 
     static void EraseEntry(SerializedObject so, PathEditingState state, VisualElement canvasContainer, (int i, int j) cell)
