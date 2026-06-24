@@ -10,9 +10,9 @@ using UnityEngine.UIElements;
 /// </summary>
 public static class MapEditTab
 {
-    enum PortalMode { Off, SetPortalOut }
+    public enum PortalMode { Off, SetPortalOut }
 
-    class BrushState
+    public class BrushState
     {
         public enum Tool { Brush, Eraser }
         public Tool tool = Tool.Brush;
@@ -338,6 +338,11 @@ public static class MapEditTab
         var manip = new MapEditManipulator(so, cache, brush, status, state, () => canvas.MarkDirtyRepaint());
         canvas.AddManipulator(manip);
 
+        // Portal 关系层(已生效 portal 永久显示 + portal 模式第一段点击后的预览线)
+        // 加在 manipulator 之后、status/hint 之前 → 绘于 blocks 之上,但底部状态文字仍在最上
+        var portalLayer = PortalLayer.Build(brush, state, canvas);
+        canvas.Add(portalLayer);
+
         // Repaint on state change / undo
         state.Changed += () => canvas.MarkDirtyRepaint();
         Undo.undoRedoPerformed += () => canvas.MarkDirtyRepaint();
@@ -493,7 +498,11 @@ public static class MapEditTab
         portalEnum.style.flexGrow = 1;
         portalEnum.style.flexShrink = 1;
         portalEnum.style.minWidth = 0;
-        portalEnum.RegisterValueChangedCallback(evt => brush.portalMode = (PortalMode)evt.newValue);
+        portalEnum.RegisterValueChangedCallback(evt =>
+        {
+            brush.portalMode = (PortalMode)evt.newValue;
+            state.NotifyChanged(); // 切到 SetPortalOut/Off 都要让 PortalLayer 重新评估
+        });
         portalRow.Add(portalEnum);
         panel.Add(portalRow);
 
@@ -710,6 +719,14 @@ public static class MapEditTab
 
         void OnMouseMove(MouseMoveEvent evt)
         {
+            // 把鼠标世界坐标写到 state,PortalLayer 画预览线终点用(要在 ScreenToCell 之前,
+            // 因为画预览线时 mouse 可能落在格点外,世界坐标仍有效)
+            if (_state.Cache != null)
+            {
+                _state.MouseWorld = _state.View.ScreenToWorld(
+                    evt.localMousePosition, _state.Cache.ISize, _state.Cache.JSize);
+            }
+
             var cell = ScreenToCell(evt.localMousePosition);
             _status.text = cell.HasValue ? $"(i, j): ({cell.Value.i}, {cell.Value.j})" : "(i, j): -";
             // 同步 hover 状态(供 toolbar 的删除按钮使用)
@@ -806,6 +823,9 @@ public static class MapEditTab
                 if (!_brush.pendingPortalSource.HasValue)
                 {
                     _brush.pendingPortalSource = c;
+                    // 触发 PortalLayer 重绘(出现预览线)。SetPortalOut 内会 NotifyChanged,
+                    // 这里只有第一段需要手动触发。
+                    _state.NotifyChanged();
                 }
                 else
                 {
