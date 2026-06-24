@@ -6,7 +6,7 @@ using UnityEngine;
 /// minus runtime state. See spec §3.1.
 /// </summary>
 [System.Serializable]
-public struct BlockDataEntry
+public struct BlockDataEntry : IPathable
 {
     public int   i;
     public int   j;
@@ -29,4 +29,8 @@ public struct BlockDataEntry
         portalColor = portalColor,
         material    = null,
     };
+
+    int IPathable.PassableType => passableType;
+    int IPathable.PortalOutI   => portalOutI;
+    int IPathable.PortalOutJ   => portalOutJ;
 }
