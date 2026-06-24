@@ -126,10 +126,38 @@ public static class MapEditTab
         label.style.color = new Color(0.611f, 0.863f, 0.996f);
         label.style.minWidth = 90;
         label.style.fontSize = 11;
+        label.style.flexShrink = 0;
         row.Add(label);
 
-        row.Add(MakeLabeledIntField("iSize (rows)", so, "iSize"));
-        row.Add(MakeLabeledIntField("jSize (cols)", so, "jSize"));
+        // 用 Unity 自带 label 的 IntegerField,Unity 内部已经处理好 label + 输入框的排版
+        // flexGrow:1 + minWidth:0 让两个 field 在剩余空间里均分;label 宽度不算进去
+        var iSizeField = new IntegerField("iSize (rows)") { value = so.FindProperty("iSize").intValue };
+        iSizeField.style.flexGrow = 1;
+        iSizeField.style.flexShrink = 1;
+        iSizeField.style.minWidth = 0;
+        iSizeField.style.marginLeft = 4;
+        var iProp = so.FindProperty("iSize");
+        iSizeField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(so.targetObject, "Change iSize");
+            iProp.intValue = Mathf.Max(0, evt.newValue);
+            so.ApplyModifiedProperties();
+        });
+        row.Add(iSizeField);
+
+        var jSizeField = new IntegerField("jSize (cols)") { value = so.FindProperty("jSize").intValue };
+        jSizeField.style.flexGrow = 1;
+        jSizeField.style.flexShrink = 1;
+        jSizeField.style.minWidth = 0;
+        jSizeField.style.marginLeft = 4;
+        var jProp = so.FindProperty("jSize");
+        jSizeField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(so.targetObject, "Change jSize");
+            jProp.intValue = Mathf.Max(0, evt.newValue);
+            so.ApplyModifiedProperties();
+        });
+        row.Add(jSizeField);
 
         return row;
     }
@@ -334,30 +362,33 @@ public static class MapEditTab
         panel.Add(MakeToggle("Highland", brush.highland, v => brush.highland = v));
         panel.Add(MakeToggle("CanSet",   brush.canSet,   v => brush.canSet = v));
 
-        var passableRow = new VisualElement();
-        passableRow.style.flexDirection = FlexDirection.Row;
-        passableRow.style.alignItems = Align.Center;
-        var passableLbl = new Label("PassableType");
-        passableLbl.style.minWidth = 90;
-        passableLbl.style.fontSize = 11;
-        passableRow.Add(passableLbl);
-        var passableField = new IntegerField { value = brush.passableType };
+        // PassableType — Unity 自带 label 的 IntegerField,内部已处理好 label+input 排版
+        var passableField = new IntegerField("PassableType") { value = brush.passableType };
         passableField.style.flexGrow = 1;
+        passableField.style.flexShrink = 1;
+        passableField.style.minWidth = 0;
         passableField.RegisterValueChangedCallback(evt => brush.passableType = Mathf.Clamp(evt.newValue, 0, 3));
-        passableRow.Add(passableField);
-        panel.Add(passableRow);
+        panel.Add(passableField);
 
         panel.Add(MakeToggle("Deadly", brush.deadly, v => brush.deadly = v));
 
+        // Portal — EnumField 没有 labeled 构造器,手动 Label + EnumField
+        // row 必须 flexGrow:1+flexShrink:1+minWidth:0 才能撑满面板宽,否则行宽=内容宽,field 不拉伸
         var portalRow = new VisualElement();
         portalRow.style.flexDirection = FlexDirection.Row;
         portalRow.style.alignItems = Align.Center;
+        portalRow.style.flexGrow = 1;
+        portalRow.style.flexShrink = 1;
+        portalRow.style.minWidth = 0;
         var portalLbl = new Label("Portal");
         portalLbl.style.minWidth = 90;
         portalLbl.style.fontSize = 11;
+        portalLbl.style.flexShrink = 0;
         portalRow.Add(portalLbl);
         var portalEnum = new EnumField(brush.portalMode);
         portalEnum.style.flexGrow = 1;
+        portalEnum.style.flexShrink = 1;
+        portalEnum.style.minWidth = 0;
         portalEnum.RegisterValueChangedCallback(evt => brush.portalMode = (PortalMode)evt.newValue);
         portalRow.Add(portalEnum);
         panel.Add(portalRow);
@@ -464,32 +495,6 @@ public static class MapEditTab
         Bind();
 
         return panel;
-    }
-
-    static VisualElement MakeLabeledIntField(string label, SerializedObject so, string propName)
-    {
-        var row = new VisualElement();
-        row.style.flexDirection = FlexDirection.Row;
-        row.style.alignItems = Align.Center;
-        row.style.flexGrow = 1;
-        row.style.flexShrink = 1;
-        row.style.minWidth = 0;
-        var lbl = new Label(label);
-        lbl.style.minWidth = 90;
-        lbl.style.fontSize = 11;
-        row.Add(lbl);
-        var prop = so.FindProperty(propName);
-        var field = new IntegerField { value = prop.intValue };
-        field.style.flexGrow = 1;
-        field.style.minWidth = 0;
-        field.RegisterValueChangedCallback(evt =>
-        {
-            Undo.RecordObject(so.targetObject, $"Change {propName}");
-            prop.intValue = Mathf.Max(0, evt.newValue);
-            so.ApplyModifiedProperties();
-        });
-        row.Add(field);
-        return row;
     }
 
     static VisualElement MakeToggle(string label, bool initial, System.Action<bool> onChange)
