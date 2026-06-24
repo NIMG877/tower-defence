@@ -362,24 +362,33 @@ public static class MapEditTab
         panel.Add(MakeToggle("Highland", brush.highland, v => brush.highland = v));
         panel.Add(MakeToggle("CanSet",   brush.canSet,   v => brush.canSet = v));
 
-        // PassableType — Unity 自带 label 的 IntegerField,内部已处理好 label+input 排版
-        var passableField = new IntegerField("PassableType") { value = brush.passableType };
+        // PassableType:行内布局(Label + 裸 IntegerField)与 MakeToggle 一致
+        // 注意 row 必须 flexShrink:0 — 在 Column 父容器里,flexGrow:1 会让子节点垂直拉伸
+        // 横向拉伸靠 IntegerField 自己的 flexGrow:1(在 row 的主轴 = 水平)
+        var passableRow = new VisualElement();
+        passableRow.style.flexDirection = FlexDirection.Row;
+        passableRow.style.alignItems = Align.Center;
+        passableRow.style.flexShrink = 0;
+        var passableLbl = new Label("PassableType");
+        passableLbl.style.minWidth = 90;
+        passableLbl.style.fontSize = 11;
+        passableLbl.style.flexShrink = 0;
+        passableRow.Add(passableLbl);
+        var passableField = new IntegerField { value = brush.passableType };
         passableField.style.flexGrow = 1;
         passableField.style.flexShrink = 1;
         passableField.style.minWidth = 0;
         passableField.RegisterValueChangedCallback(evt => brush.passableType = Mathf.Clamp(evt.newValue, 0, 3));
-        panel.Add(passableField);
+        passableRow.Add(passableField);
+        panel.Add(passableRow);
 
         panel.Add(MakeToggle("Deadly", brush.deadly, v => brush.deadly = v));
 
-        // Portal — EnumField 没有 labeled 构造器,手动 Label + EnumField
-        // row 必须 flexGrow:1+flexShrink:1+minWidth:0 才能撑满面板宽,否则行宽=内容宽,field 不拉伸
+        // Portal:同样行内布局,row flexShrink:0 防垂直拉伸
         var portalRow = new VisualElement();
         portalRow.style.flexDirection = FlexDirection.Row;
         portalRow.style.alignItems = Align.Center;
-        portalRow.style.flexGrow = 1;
-        portalRow.style.flexShrink = 1;
-        portalRow.style.minWidth = 0;
+        portalRow.style.flexShrink = 0;
         var portalLbl = new Label("Portal");
         portalLbl.style.minWidth = 90;
         portalLbl.style.fontSize = 11;
