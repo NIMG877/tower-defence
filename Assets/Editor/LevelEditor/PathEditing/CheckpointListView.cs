@@ -89,8 +89,16 @@ public static class CheckpointListView
                 nameField.SetEnabled(false);
                 return;
             }
+            var pathsArr = so.FindProperty("Paths");
+            if (pathsArr == null || state.SelectedPathIdx >= pathsArr.arraySize)
+            {
+                header.text = "(路径为空)";
+                nameField.SetValueWithoutNotify("");
+                nameField.SetEnabled(false);
+                return;
+            }
             nameField.SetEnabled(true);
-            var pathProp = so.FindProperty("Paths").GetArrayElementAtIndex(state.SelectedPathIdx);
+            var pathProp = pathsArr.GetArrayElementAtIndex(state.SelectedPathIdx);
             var cpsProp = pathProp.FindPropertyRelative("CheckPoints");
             var wtsProp = pathProp.FindPropertyRelative("WaitTimes");
             var nameProp = pathProp.FindPropertyRelative("Name");

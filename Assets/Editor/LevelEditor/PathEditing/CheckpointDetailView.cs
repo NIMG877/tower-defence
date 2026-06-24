@@ -42,7 +42,14 @@ public static class CheckpointDetailView
                 posXField.SetEnabled(false); posYField.SetEnabled(false); waitField.SetEnabled(false);
                 return;
             }
-            var pathProp = so.FindProperty("Paths").GetArrayElementAtIndex(state.SelectedPathIdx);
+            var pathsArr = so.FindProperty("Paths");
+            if (pathsArr == null || state.SelectedPathIdx >= pathsArr.arraySize)
+            {
+                header.text = "▸ Checkpoint detail (路径为空)";
+                posXField.SetEnabled(false); posYField.SetEnabled(false); waitField.SetEnabled(false);
+                return;
+            }
+            var pathProp = pathsArr.GetArrayElementAtIndex(state.SelectedPathIdx);
             var cpsProp = pathProp.FindPropertyRelative("CheckPoints");
             var wtsProp = pathProp.FindPropertyRelative("WaitTimes");
             if (cpsProp == null || state.SelectedCheckpointIdx >= cpsProp.arraySize) return;
