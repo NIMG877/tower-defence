@@ -7,9 +7,11 @@ Shader "TD/Characters/Spine Arknights Depth" {
 		// the character were standing upright in the 3D stage.
 		_DepthPoseAngle ("Upper Body Depth Angle", Range(-89,89)) = -30
 		_LowerDepthPoseAngle ("Lower Body Depth Angle", Range(-89,89)) = 0
+		_DepthAnchorY ("Depth Anchor Local Y", Float) = 0
 		_DepthSplitY ("Depth Split Local Y", Float) = 0
 		_LowerDepthBlend ("Lower Body Blend Range", Float) = 0
 		_DepthOffset ("Depth Offset", Float) = 0
+		_MaxRayDepthCorrection ("Max Ray Depth Correction", Float) = 1
 
 		[HideInInspector] _StencilRef("Stencil Reference", Float) = 1.0
 		[HideInInspector][Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp("Stencil Comparison", Float) = 8

@@ -131,7 +131,7 @@ public class MachineTalent1 : Talent
     }
     private void FindBestPoint(int type, Entity entity)
     {
-        BlockState[,] map = MapDataManager.Manager.BlockStateMatrix;
+        Tile[,] map = MapDataManager.Manager.Tiles;
         (int iSize, int jSize) = MapDataManager.Manager.MapSize;
         (int x, int y)[] range = entity.Vision.BaseRange;
         int max = 0;

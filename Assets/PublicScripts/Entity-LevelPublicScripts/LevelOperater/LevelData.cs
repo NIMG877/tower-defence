@@ -23,7 +23,7 @@ public class LevelData : ScriptableObject
     [Header("Map data (new)")]
     public int iSize;
     public int jSize;
-    public List<BlockDataEntry> MapData = new List<BlockDataEntry>();
+    public List<Tile> MapData = new List<Tile>();
     public GameObject EnvironmentalControlDevice;
     public LevelActions.Wave[] Waves;
     public PathData[] Paths = new PathData[0];

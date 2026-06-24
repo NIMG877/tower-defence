@@ -358,7 +358,7 @@ namespace MyUI
         private bool[,] _staticEntityExistBlock;
         private int _canSetType;
         private List<(int i, int j)> _canSetBlockList;
-        private BlockState[,] _blockDatas;
+        private Tile[,] _blockDatas;
         private int _iSize, _jSize;
 
         // ===== Camera =====
@@ -887,7 +887,7 @@ namespace MyUI
             _pause.image.sprite = _c;
             _pauseMask.SetActive(false);
             _timeMultiple.image.sprite = _x1;
-            _blockDatas = MapDataManager.Manager.BlockStateMatrix;
+            _blockDatas = MapDataManager.Manager.Tiles;
             (_iSize, _jSize) = MapDataManager.Manager.MapSize;
             _rangeImgCollection.SetActive(false);
             CostSliderAndCanSetNumUpdate();
@@ -1732,8 +1732,8 @@ namespace MyUI
         {
             for (int i = 0; i < _canSetBlockList.Count; i++)
             {
-                ref BlockState bS = ref MapDataManager.Manager.GetPosBlockRef(_canSetBlockList[i].i, _canSetBlockList[i].j);
-                if (bS.material != null) bS.material.color = Color.white;
+                ref Material mat = ref MapDataManager.Manager.GetMaterialRef(_canSetBlockList[i].i, _canSetBlockList[i].j);
+                if (mat != null) mat.color = Color.white;
             }
         }
 
@@ -1741,8 +1741,8 @@ namespace MyUI
         {
             for (int i = 0; i < _canSetBlockList.Count; i++)
             {
-                ref BlockState bS = ref MapDataManager.Manager.GetPosBlockRef(_canSetBlockList[i].i, _canSetBlockList[i].j);
-                if (bS.material != null) bS.material.color = c;
+                ref Material mat = ref MapDataManager.Manager.GetMaterialRef(_canSetBlockList[i].i, _canSetBlockList[i].j);
+                if (mat != null) mat.color = c;
             }
         }
 

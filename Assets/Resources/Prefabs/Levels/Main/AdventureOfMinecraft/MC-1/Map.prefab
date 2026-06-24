@@ -2738,7 +2738,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _highland: 0
-  _canSet: 1
+  _canSet: 0
   _passableType: 0
   ProtalOutBlock: {fileID: 0}
   ProtalColor: {r: 0, g: 0, b: 0, a: 0}
@@ -2945,7 +2945,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _highland: 0
-  _canSet: 1
+  _canSet: 0
   _passableType: 0
   ProtalOutBlock: {fileID: 0}
   ProtalColor: {r: 0, g: 0, b: 0, a: 0}
@@ -6445,7 +6445,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _highland: 0
-  _canSet: 1
+  _canSet: 0
   _passableType: 0
   ProtalOutBlock: {fileID: 0}
   ProtalColor: {r: 0, g: 0, b: 0, a: 0}

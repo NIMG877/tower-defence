@@ -862,7 +862,7 @@ public static class MapEditTab
             entry.FindPropertyRelative("canSet").boolValue = _brush.canSet;
             entry.FindPropertyRelative("passableType").intValue = _brush.passableType;
             entry.FindPropertyRelative("deadly").boolValue = _brush.deadly;
-            // portalOutI/J 的 -1 是 "no portal" sentinel(见 BlockDataEntry.cs:17-18)。
+            // portalOutI/J 的 -1 是 "no portal" sentinel(见 Tile.cs:18-19)。
             // 新建 entry 时 Unity 给 int 字段的默认值是 0,会让 Cell panel 误显示
             // "portal: -> (0, 0)"。新建时显式写 -1;已有 entry 上的 portal 不动 ——
             // 用户可能想保留现有的 portal 出口,只是改其他字段。
@@ -950,7 +950,7 @@ public static class MapEditTab
                 int i = e.FindPropertyRelative("i").intValue;
                 int j = e.FindPropertyRelative("j").intValue;
                 if (i < 0 || j < 0 || i >= cache.ISize || j >= cache.JSize) continue;
-                cache.Blocks[i, j] = new BlockDataEntry
+                cache.Blocks[i, j] = new Tile
                 {
                     i = i, j = j,
                     highland = e.FindPropertyRelative("highland").boolValue,

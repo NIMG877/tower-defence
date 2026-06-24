@@ -51,9 +51,9 @@ namespace MapData.Tests
         public void MigrateLevelData_returns_false_when_already_migrated()
         {
             var ld = ScriptableObject.CreateInstance<LevelData>();
-            ld.MapData = new System.Collections.Generic.List<BlockDataEntry>
+            ld.MapData = new System.Collections.Generic.List<Tile>
             {
-                new BlockDataEntry { i = 0, j = 0 },
+                new Tile { i = 0, j = 0 },
             };
             try
             {
@@ -70,7 +70,7 @@ namespace MapData.Tests
         {
             var ld = ScriptableObject.CreateInstance<LevelData>();
             ld.MapPrefab = null;
-            ld.MapData = new System.Collections.Generic.List<BlockDataEntry>();
+            ld.MapData = new System.Collections.Generic.List<Tile>();
             try
             {
                 Assert.IsFalse(MapAutoMigrator.MigrateLevelData(ld));

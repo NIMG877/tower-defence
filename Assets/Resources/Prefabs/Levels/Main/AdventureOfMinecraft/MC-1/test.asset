@@ -1,0 +1,266 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb7f1744c96d9834491e7169ccef37cc, type: 3}
+  m_Name: test
+  m_EditorClassIdentifier: 
+  LevelName: 
+  LevelCode: 
+  LevelDescription: 
+  CameraSize: 0
+  CameraPos: {x: 0, y: 0}
+  CutToLevelTexture: {fileID: 0}
+  MapPrefab: {fileID: 0}
+  iSize: 5
+  jSize: 5
+  MapData:
+  - i: 4
+    j: 3
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 4
+    j: 0
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 3
+    j: 0
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 3
+    j: 1
+    highland: 0
+    canSet: 0
+    passableType: 1
+    deadly: 1
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 3
+    j: 3
+    highland: 0
+    canSet: 0
+    passableType: 1
+    deadly: 1
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 3
+    j: 4
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 1
+    j: 1
+    highland: 0
+    canSet: 0
+    passableType: 1
+    deadly: 1
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 0
+    j: 1
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 0
+    j: 0
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 0
+    j: 3
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 1
+    j: 3
+    highland: 0
+    canSet: 0
+    passableType: 1
+    deadly: 1
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 1
+    j: 4
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 1
+    j: 0
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 4
+    j: 4
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 0
+    j: 4
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 4
+    j: 2
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 3
+    j: 2
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 2
+    j: 2
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 1
+    j: 2
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 0
+    j: 2
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 2
+    j: 0
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 2
+    j: 1
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 2
+    j: 3
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  - i: 2
+    j: 4
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+    portalColor: {r: 0, g: 0, b: 0, a: 0}
+  EnvironmentalControlDevice: {fileID: 0}
+  Waves: []
+  Paths:
+  - Name: path0
+    CheckPoints:
+    - {x: 2.9492025, y: 4.1116734}
+    - {x: 4.0580845, y: 2.9941313}
+    - {x: 2.913378, y: -0.056303456}
+    WaitTimes:
+    - 0
+    - 0
+    - 0
+  - Name: path1
+    CheckPoints:
+    - {x: 2.91942, y: 4.1010323}
+    - {x: 4.17671, y: 3.007189}
+    - {x: 3.1331594, y: 0.17828658}
+    WaitTimes:
+    - 0
+    - 0
+    - 0
+  LevelHp: 0
+  Cost0: 0
+  MaxCost: 0
+  CanSetNum: 0
+  CostRecoverSpeed: 0

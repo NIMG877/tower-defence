@@ -19,15 +19,15 @@ public static class MapAutoMigrator
 
     /// <summary>
     /// Read all <c>BlockData</c> MBs from a prefab root's children and produce
-    /// a list of <see cref="BlockDataEntry"/>. Coordinates are taken from
+    /// a list of <see cref="Tile"/>. Coordinates are taken from
     /// each child's transform.position (integer part — y maps to i, x maps to j).
     /// Returns an empty list when <paramref name="prefabRoot"/> is null or
     /// when the legacy <c>BlockData</c> type is not loaded in the current
     /// build (post-deletion state).
     /// </summary>
-    public static List<BlockDataEntry> ReadFromPrefab(GameObject prefabRoot)
+    public static List<Tile> ReadFromPrefab(GameObject prefabRoot)
     {
-        var result = new List<BlockDataEntry>();
+        var result = new List<Tile>();
         if (prefabRoot == null) return result;
 
         var blockDataType = System.Type.GetType($"{BlockDataTypeName}, {BlockDataAssemblyName}");
@@ -57,7 +57,7 @@ public static class MapAutoMigrator
                 portalOutJ = (int)portalOut.transform.position.x;
             }
 
-            result.Add(new BlockDataEntry
+            result.Add(new Tile
             {
                 i            = i,
                 j            = j,
@@ -122,7 +122,7 @@ public static class MapAutoMigrator
     public static bool MigrateLevelData(LevelData levelData)
     {
         if (levelData == null) return false;
-        if (levelData.MapData == null) levelData.MapData = new List<BlockDataEntry>();
+        if (levelData.MapData == null) levelData.MapData = new List<Tile>();
         if (levelData.MapData.Count > 0) return false; // already migrated
 
         if (levelData.MapPrefab == null) return false;

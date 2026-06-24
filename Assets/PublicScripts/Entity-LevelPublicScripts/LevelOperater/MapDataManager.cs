@@ -50,7 +50,8 @@ public class MapDataManager : IManagerStartEnd
             priority = 0;
         }
     }
-    public BlockState[,] BlockStateMatrix;
+    public Tile[,]    Tiles;          // dense runtime matrix, mirrors LevelData.MapData but indexed by (i, j)
+    public Material[,] TileMaterials; // parallel array — per-cell renderer material from MapPrefab, or null
     private LevelData _levelData;
     public bool[,] HigherCanSetBlock
     {
@@ -61,7 +62,7 @@ public class MapDataManager : IManagerStartEnd
             {
                 for (int j = 0; j < jSize; j++)
                 {
-                    high[i, j] = BlockStateMatrix[i, j].highland && BlockStateMatrix[i, j].canSet;
+                    high[i, j] = Tiles[i, j].highland && Tiles[i, j].canSet;
                 }
             }
             return high;
@@ -76,7 +77,7 @@ public class MapDataManager : IManagerStartEnd
             {
                 for (int j = 0; j < jSize; j++)
                 {
-                    low[i, j] = !BlockStateMatrix[i, j].highland && !BlockStateMatrix[i, j].deadly && BlockStateMatrix[i, j].canSet;
+                    low[i, j] = !Tiles[i, j].highland && !Tiles[i, j].deadly && Tiles[i, j].canSet;
                 }
             }
             return low;
@@ -97,16 +98,24 @@ public class MapDataManager : IManagerStartEnd
     public (int iSize, int jSize) MapSize { get { return (iSize, jSize); } }
     private GameObject _map;
 
-    public ref BlockState GetPosBlockRef(int i, int j)
+    public ref Tile GetPosBlockRef(int i, int j)
     {
-        return ref BlockStateMatrix[i, j];
+        return ref Tiles[i, j];
     }
 
-    public BlockState GetPosBlock(int ii, int jj)
+    /// <summary>
+    /// 与 <see cref="TileMaterials"/> 平行的 ref 访问,供可放置高亮等"需要改材质色"的场景用。
+    /// </summary>
+    public ref Material GetMaterialRef(int i, int j)
+    {
+        return ref TileMaterials[i, j];
+    }
+
+    public Tile GetPosBlock(int ii, int jj)
     {
         if (ii >= 0 && jj >= 0 && ii < iSize && jj < jSize)
         {
-            return BlockStateMatrix[ii, jj];
+            return Tiles[ii, jj];
         }
         else
         {
@@ -115,12 +124,12 @@ public class MapDataManager : IManagerStartEnd
     }
     public bool IsValid(int i, int j)
     {
-        return BlockStateMatrix != null && i >= 0 && i < iSize && j >= 0 && j < jSize;
+        return Tiles != null && i >= 0 && i < iSize && j >= 0 && j < jSize;
     }
-    public BlockState[] GetCricleCoverBlocks((float x, float y) posC, float r)
+    public Tile[] GetCricleCoverBlocks((float x, float y) posC, float r)
     {
         (int i, int j) ij0 = ((int)(posC.y + 0.5), (int)(posC.x + 0.5));
-        BlockState[] bDatas = new BlockState[4];
+        Tile[] bDatas = new Tile[4];
         bDatas[0] = GetPosBlock(ij0.i, ij0.j);
         float k = 0.5f - r;
         if (Math.Abs(posC.x - ij0.j) < k && Math.Abs(posC.y - ij0.i) < k)
@@ -158,14 +167,15 @@ public class MapDataManager : IManagerStartEnd
     {
         iSize = _levelData != null ? _levelData.iSize : 0;
         jSize = _levelData != null ? _levelData.jSize : 0;
-        BlockStateMatrix = (iSize > 0 && jSize > 0) ? new BlockState[iSize, jSize] : null;
+        Tiles         = (iSize > 0 && jSize > 0) ? new Tile[iSize, jSize]    : null;
+        TileMaterials = (iSize > 0 && jSize > 0) ? new Material[iSize, jSize] : null;
 
         if (_levelData != null)
         {
             foreach (var entry in _levelData.MapData)
             {
                 if (entry.i < 0 || entry.i >= iSize || entry.j < 0 || entry.j >= jSize) continue;
-                BlockStateMatrix[entry.i, entry.j] = entry.ToBlockState();
+                Tiles[entry.i, entry.j] = entry;
             }
         }
 
@@ -179,9 +189,7 @@ public class MapDataManager : IManagerStartEnd
                 if (ci < 0 || ci >= iSize || cj < 0 || cj >= jSize) continue;
                 var mr = child.GetComponent<MeshRenderer>();
                 if (mr == null) continue;
-                var s = BlockStateMatrix[ci, cj];
-                s.material = mr.material;
-                BlockStateMatrix[ci, cj] = s;
+                TileMaterials[ci, cj] = mr.material;
             }
         }
 
@@ -194,7 +202,7 @@ public class MapDataManager : IManagerStartEnd
                 for (int j = 0; j < jSize; j++)
                 {
                     graph[i, j].plotPos = new Vector2(j, i);
-                    graph[i, j].portalEnter = BlockStateMatrix[i, j].portalOutI != -1;
+                    graph[i, j].portalEnter = Tiles[i, j].portalOutI != -1;
                 }
             }
         }
@@ -259,7 +267,7 @@ public class MapDataManager : IManagerStartEnd
     }
     public MoveParameters[] AStarWayFinding(Vector2 startPoint, Vector2 endPoint, int moveMethod)
     {
-        return MapPathFinder.AStar(BlockStateMatrix, iSize, jSize, startPoint, endPoint, EntityManager.EntityR, moveMethod);
+        return MapPathFinder.AStar(Tiles, iSize, jSize, startPoint, endPoint, EntityManager.EntityR, moveMethod);
     }
     public MoveParameters[] AStarWayFinding_Jump(Vector2 startPoint, Vector2 endPoint, Vector2Int[] jumpRange)
     {
@@ -302,7 +310,7 @@ public class MapDataManager : IManagerStartEnd
         {
             for (int j = 0; j < jSize; j++)
             {
-                graph[i, j].Reset(BlockStateMatrix[i, j].passableType <= 0);
+                graph[i, j].Reset(Tiles[i, j].passableType <= 0);
             }
         }
         path.Clear();
@@ -344,7 +352,7 @@ public class MapDataManager : IManagerStartEnd
             {
                 for (int j = 0; j < jSize; j++)
                 {
-                    graph[i, j].Reset(BlockStateMatrix[i, j].passableType <= 0);
+                    graph[i, j].Reset(Tiles[i, j].passableType <= 0);
                 }
             }
             foreach ((int i, int j) ij in JudgePointInUnWalkableBlock(startPoint, entityR))
@@ -468,8 +476,8 @@ public class MapDataManager : IManagerStartEnd
         int j = (int)aStarProperty.plotPos.x;
         if (graph[i, j].portalEnter)
         {
-            int ti = BlockStateMatrix[i, j].portalOutI;
-            int tj = BlockStateMatrix[i, j].portalOutJ;
+            int ti = Tiles[i, j].portalOutI;
+            int tj = Tiles[i, j].portalOutJ;
             if (graph[ti, tj].marked == false)
             {
                 graph[ti, tj].marked = true;

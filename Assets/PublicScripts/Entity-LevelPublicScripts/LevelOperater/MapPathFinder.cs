@@ -9,176 +9,62 @@ using UnityEngine;
 /// and the editor-side copy in
 /// <c>Assets/Editor/LevelEditor/PathEditing/EditorPathFinder.cs</c>
 /// (now deleted). All state is local to the call — no singletons, no
-/// instance fields. Tiles are passed as <c>T[,]</c> where
-/// <c>T : struct, IPathable</c>, so the editor's <see cref="BlockDataEntry"/>
-/// and the runtime's <see cref="BlockState"/> both feed the same algorithm.
+/// instance fields. Reads <see cref="Tile.passableType"/> / portal coords
+/// from a <c>Tile[,]</c> matrix.
 /// </summary>
 public static class MapPathFinder
 {
-    public static MoveParameters[] AStar<T>(
-        T[,] tiles, int iSize, int jSize,
-        Vector2 startPoint, Vector2 endPoint, float entityR, int moveMethod)
-        where T : struct, IPathable
+    public static MoveParameters[] AStar(Tile[,] tiles, int iSize, int jSize,Vector2 startPoint, Vector2 endPoint, float entityR, int moveMethod)
     {
-        // 本地状态:对应运行时实例字段 graph/path/heap/heapCount
         var graph = new AStarProperty[iSize, jSize];
-        var path = new List<MoveParameters>();
-        var heap = new HeapEntry[iSize * jSize + 16];
+        var heap = new HeapEntry[iSize * jSize];
         int heapCount = 0;
-
-        // 初始化 plotPos / portalEnter(对应运行时 MapInitialize:182-184)
         for (int i = 0; i < iSize; i++)
         {
             for (int j = 0; j < jSize; j++)
             {
-                // BlockState/BlockDataEntry 是值类型,默认即"未配置",但仍然写入 plotPos 以便后续
-                // graph[..].plotPos.x == endJ / .y == endI 终止条件成立
                 graph[i, j].plotPos = new Vector2(j, i);
-                graph[i, j].portalEnter = tiles[i, j].PortalOutI != -1;
-            }
-        }
-
-        // --- 局部函数:对应运行时 AStarWayFinding 内的同名闭包 ---
-        (int i, int j)[] JudgePointInUnWalkableBlock(Vector2 point, float entityR)
-        {
-            List<(int i, int j)> ijs = new List<(int i, int j)>(4);
-            (int i, int j) ij0 = ((int)(point.y + 0.5), (int)(point.x + 0.5));
-            if (!graph[ij0.i, ij0.j].Passable)
-            {
-                ijs.Add(ij0);
-            }
-            float k = 0.5f - entityR;
-            if (Math.Abs(point.x - ij0.j) < k && Math.Abs(point.y - ij0.i) < k)
-            {
-                return ijs.ToArray();
-            }
-            else
-            {
-                int dx = (point.x - ij0.j) > 0 ? 1 : -1;
-                int dy = (point.y - ij0.i) > 0 ? 1 : -1;
-                Vector2 pV = new Vector2(ij0.j + 0.5f * dx, ij0.i + 0.5f * dy);
-                if (Vector2.Distance(pV, point) <= entityR)
-                {
-                    if (!graph[ij0.i + dy, ij0.j].Passable) ijs.Add((ij0.i + dy, ij0.j));
-                    if (!graph[ij0.i, ij0.j + dx].Passable) ijs.Add((ij0.i, ij0.j + dx));
-                    if (!graph[ij0.i + dy, ij0.j + dx].Passable) ijs.Add((ij0.i + dy, ij0.j + dx));
-                    return ijs.ToArray();
-                }
-                else
-                {
-                    if ((pV.y - point.y) * dy <= entityR && !graph[ij0.i + dy, ij0.j].Passable) ijs.Add((ij0.i + dy, ij0.j));
-                    if ((pV.x - point.x) * dx <= entityR && !graph[ij0.i, ij0.j + dx].Passable) ijs.Add((ij0.i, ij0.j + dx));
-                    return ijs.ToArray();
-                }
-            }
-        }
-
-        bool isReach = false;
-        for (int i = 0; i < iSize; i++)
-        {
-            for (int j = 0; j < jSize; j++)
-            {
-                graph[i, j].Reset(tiles[i, j].PassableType <= moveMethod);
+                graph[i, j].portalEnter = tiles[i, j].portalOutI != -1;
+                graph[i, j].Reset(tiles[i, j].passableType <= moveMethod);
             }
         }
         if (!IsBlocked(graph, iSize, jSize, startPoint, endPoint, entityR))
         {
             return new MoveParameters[2] { new MoveParameters(startPoint, false), new MoveParameters(endPoint, false) };
         }
-        path.Clear();
-        HeapClear(heap, ref heapCount);
-        foreach ((int i, int j) ij in JudgePointInUnWalkableBlock(startPoint, entityR))
-        {
-            graph[ij.i, ij.j].Passable = true;
-        }
-        foreach ((int i, int j) ij in JudgePointInUnWalkableBlock(endPoint, entityR))
-        {
-            graph[ij.i, ij.j].Passable = true;
-        }
-        int startI = (int)(startPoint.y + 0.5f);
-        int startJ = (int)(startPoint.x + 0.5f);
-        int endI = (int)(endPoint.y + 0.5f);
-        int endJ = (int)(endPoint.x + 0.5f);
+        foreach (var ij in JudgePointInUnWalkableBlock(graph, startPoint, entityR)) graph[ij.i, ij.j].Passable = true;
+        foreach (var ij in JudgePointInUnWalkableBlock(graph, endPoint,   entityR)) graph[ij.i, ij.j].Passable = true;
+        int startI = (int)(startPoint.y + 0.5f), startJ = (int)(startPoint.x + 0.5f);
+        int endI   = (int)(endPoint.y + 0.5f),   endJ   = (int)(endPoint.x + 0.5f);
         graph[startI, startJ] = Change(graph[startI, startJ], true, true, 0, Distance(startPoint, endPoint));
-        graph[endI, endJ] = Change(graph[endI, endJ], true, false, 0, 0);
+        graph[endI, endJ]     = Change(graph[endI, endJ],     true, false, 0, 0);
         HeapPush(heap, ref heapCount, startI, startJ, graph[startI, startJ].priority);
-        AStarProperty current = default;
         while (heapCount > 0)
         {
-            current = graph[heap[0].i, heap[0].j];
-            if (current.plotPos.x == endJ && current.plotPos.y == endI)
+            AStarProperty peeked = graph[heap[0].i, heap[0].j];
+            HeapPop(heap, ref heapCount);
+            if (peeked.plotPos.x == endJ && peeked.plotPos.y == endI)
             {
-                isReach = true;
-                break;
-            }
-            else
-            {
-                FindNewFrontier(tiles, graph, iSize, jSize, current, endPoint, heap, ref heapCount);
-                HeapPop(heap, ref heapCount);
-            }
-        }
-        if (!isReach)
-        {
-            HeapClear(heap, ref heapCount);
-            for (int i = 0; i < iSize; i++)
-            {
-                for (int j = 0; j < jSize; j++)
+                var path = new List<MoveParameters>();
+                var current = peeked;
+                while (current.plotPosCameFrom.x != current.plotPos.x || current.plotPosCameFrom.y != current.plotPos.y)
                 {
-                    graph[i, j].Reset(tiles[i, j].PassableType <= moveMethod);
-                }
-            }
-            foreach ((int i, int j) ij in JudgePointInUnWalkableBlock(startPoint, entityR))
-            {
-                graph[ij.i, ij.j].Passable = true;
-            }
-            foreach ((int i, int j) ij in JudgePointInUnWalkableBlock(endPoint, entityR))
-            {
-                graph[ij.i, ij.j].Passable = true;
-            }
-            graph[startI, startJ] = Change(graph[startI, startJ], true, true, 0, Distance(startPoint, endPoint));
-            graph[endI, endJ] = Change(graph[endI, endJ], true, false, 0, 0);
-            HeapPush(heap, ref heapCount, startI, startJ, graph[startI, startJ].priority);
-            current = graph[heap[0].i, heap[0].j];
-            while (heapCount > 0)
-            {
-                current = graph[heap[0].i, heap[0].j];
-                if (current.plotPos.x == endJ && current.plotPos.y == endI)
-                {
-                    isReach = true;
-                    break;
-                }
-                else
-                {
-                    FindNewFrontier(tiles, graph, iSize, jSize, current, endPoint, heap, ref heapCount);
-                    HeapPop(heap, ref heapCount);
-                }
-            }
-        }
-        if (isReach)
-        {
-            while (current.plotPosCameFrom.x != current.plotPos.x || current.plotPosCameFrom.y != current.plotPos.y)
-            {
-                if (current.portalOut == false)
-                {
+                    bool wasPortalExit = current.portalOut;
                     path.Insert(0, new MoveParameters(current.plotPos, false));
                     current = graph[current.plotPosCameFrom.y, current.plotPosCameFrom.x];
+                    if (wasPortalExit)
+                    {
+                        path.Insert(0, new MoveParameters(current.plotPos, true));
+                        current = graph[current.plotPosCameFrom.y, current.plotPosCameFrom.x];
+                    }
                 }
-                else
-                {
-                    path.Insert(0, new MoveParameters(current.plotPos, false));
-                    current = graph[current.plotPosCameFrom.y, current.plotPosCameFrom.x];
-                    path.Insert(0, new MoveParameters(current.plotPos, true));
-                    current = graph[current.plotPosCameFrom.y, current.plotPosCameFrom.x];
-                }
+                path.Insert(0, new MoveParameters(startPoint, false));
+                path[path.Count - 1].targetPosition = endPoint;
+                return CorrectTmpPositions(tiles, graph, path.ToArray(), entityR);
             }
-            path.Insert(0, new MoveParameters(startPoint, false));
-            path[path.Count - 1].targetPosition = endPoint;
-            return CorrectTmpPositions(tiles, graph, path.ToArray(), entityR);
+            FindNewFrontier(tiles, graph, iSize, jSize, peeked, endPoint, heap, ref heapCount);
         }
-        else
-        {
-            return null;
-        }
+        return null;
     }
 
     // ===== 私有静态辅助方法(运行时实例方法 → 纯函数) =====
@@ -192,14 +78,40 @@ public static class MapPathFinder
         return aStarProperty;
     }
 
+    /// <summary>
+    /// 返回 point 半径 entityR 内所有不可走的 cell(cp 偏离格心时被强制 mark 为 Passable 用)。
+    /// </summary>
+    private static (int i, int j)[] JudgePointInUnWalkableBlock(AStarProperty[,] graph, Vector2 point, float entityR)
+    {
+        List<(int i, int j)> ijs = new List<(int i, int j)>(4);
+        (int i, int j) ij0 = ((int)(point.y + 0.5), (int)(point.x + 0.5));
+        if (!graph[ij0.i, ij0.j].Passable)
+        {
+            ijs.Add(ij0);
+        }
+        float k = 0.5f - entityR;
+        if (Math.Abs(point.x - ij0.j) < k && Math.Abs(point.y - ij0.i) < k)
+        {
+            return ijs.ToArray();
+        }
+        int dx = (point.x - ij0.j) > 0 ? 1 : -1;
+        int dy = (point.y - ij0.i) > 0 ? 1 : -1;
+        Vector2 pV = new Vector2(ij0.j + 0.5f * dx, ij0.i + 0.5f * dy);
+        if (Vector2.Distance(pV, point) <= entityR)
+        {
+            if (!graph[ij0.i + dy, ij0.j].Passable) ijs.Add((ij0.i + dy, ij0.j));
+            if (!graph[ij0.i, ij0.j + dx].Passable) ijs.Add((ij0.i, ij0.j + dx));
+            if (!graph[ij0.i + dy, ij0.j + dx].Passable) ijs.Add((ij0.i + dy, ij0.j + dx));
+            return ijs.ToArray();
+        }
+        if ((pV.y - point.y) * dy <= entityR && !graph[ij0.i + dy, ij0.j].Passable) ijs.Add((ij0.i + dy, ij0.j));
+        if ((pV.x - point.x) * dx <= entityR && !graph[ij0.i, ij0.j + dx].Passable) ijs.Add((ij0.i, ij0.j + dx));
+        return ijs.ToArray();
+    }
+
     private static float Distance(Vector2 pos1, Vector2 pos2)
     {
         return Math.Abs(pos1.x - pos2.x) + Math.Abs(pos1.y - pos2.y);
-    }
-
-    private static void HeapClear(HeapEntry[] heap, ref int heapCount)
-    {
-        heapCount = 0;
     }
 
     private static void HeapPush(HeapEntry[] heap, ref int heapCount, int i, int j, float priority)
@@ -239,18 +151,17 @@ public static class MapPathFinder
         }
     }
 
-    private static void FindNewFrontier<T>(T[,] tiles, AStarProperty[,] graph, int iSize, int jSize,
+    private static void FindNewFrontier(Tile[,] tiles, AStarProperty[,] graph, int iSize, int jSize,
         AStarProperty aStarProperty, Vector2 endPoint, HeapEntry[] heap, ref int heapCount)
-        where T : struct, IPathable
     {
         int i = (int)aStarProperty.plotPos.y;
         int j = (int)aStarProperty.plotPos.x;
         if (graph[i, j].portalEnter)
         {
             var bd = tiles[i, j];
-            if (bd.PortalOutI == -1 || bd.PortalOutJ == -1) return; // 防御:portalEnter 标志位但坐标未配置
-            int ti = bd.PortalOutI;
-            int tj = bd.PortalOutJ;
+            if (bd.portalOutI == -1 || bd.portalOutJ == -1) return; // 防御:portalEnter 标志位但坐标未配置
+            int ti = bd.portalOutI;
+            int tj = bd.portalOutJ;
             if (graph[ti, tj].marked == false)
             {
                 graph[ti, tj].marked = true;
@@ -295,8 +206,7 @@ public static class MapPathFinder
         }
     }
 
-    private static MoveParameters[] CorrectTmpPositions<T>(T[,] tiles, AStarProperty[,] graph, MoveParameters[] tmpParameters, float entityR)
-        where T : struct, IPathable
+    private static MoveParameters[] CorrectTmpPositions(Tile[,] tiles, AStarProperty[,] graph, MoveParameters[] tmpParameters, float entityR)
     {
         if (tmpParameters.Length > 1)
         {
@@ -363,8 +273,7 @@ public static class MapPathFinder
         }
     }
 
-    private static Vector2 FirstBlockLine<T>(T[,] tiles, AStarProperty[,] graph, Vector2 beginPos, Vector2 endPos, Vector2 originPosition, float entityR)
-        where T : struct, IPathable
+    private static Vector2 FirstBlockLine(Tile[,] tiles, AStarProperty[,] graph, Vector2 beginPos, Vector2 endPos, Vector2 originPosition, float entityR)
     {
         if (beginPos == endPos)
         {

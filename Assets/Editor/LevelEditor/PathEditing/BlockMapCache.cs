@@ -4,13 +4,13 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// 加载后的 BlockDataEntry 缓存。
+/// 加载后的 Tile 缓存。
 /// 直接从 <see cref="LevelData.MapData"/> 构建,不再需要 LoadPrefabContents;
 /// <see cref="Dispose"/> 保留为空操作,供 <c>LevelDataEditor.OnDisable</c> 调用。
 /// </summary>
 public sealed class BlockMapCache : IDisposable
 {
-    public BlockDataEntry[,] Blocks;
+    public Tile[,] Blocks;
     public bool[,] HasEntry;
     public int ISize;
     public int JSize;
@@ -20,7 +20,7 @@ public sealed class BlockMapCache : IDisposable
     public LevelData LevelData => _levelDataRef;
 
     /// <summary>
-    /// 从 <paramref name="levelData"/> 直接解析 BlockDataEntry 矩阵。
+    /// 从 <paramref name="levelData"/> 直接解析 Tile 矩阵。
     /// </summary>
     public static BlockMapCache Load(LevelData levelData)
     {
@@ -33,7 +33,7 @@ public sealed class BlockMapCache : IDisposable
         cache.EntityR = EntityManager.EntityR;
         if (cache.ISize <= 0 || cache.JSize <= 0) return cache;
 
-        cache.Blocks = new BlockDataEntry[cache.ISize, cache.JSize];
+        cache.Blocks = new Tile[cache.ISize, cache.JSize];
         cache.HasEntry = new bool[cache.ISize, cache.JSize];
         foreach (var entry in levelData.MapData)
         {
