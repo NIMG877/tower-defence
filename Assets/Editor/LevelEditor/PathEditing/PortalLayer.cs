@@ -54,8 +54,10 @@ public static class PortalLayer
                 }
             }
 
-            // 2) 预览线 — 仅 portal 模式 + 第一段已点 + 鼠标在 canvas 上
-            if (mouseOver
+            // 2) 预览线 — brush=null 表示路径 tab(无预览,只画已生效的);
+            //    map tab 仅在 portal 模式 + 第一段已点 + 鼠标在 canvas 上时画
+            if (brush != null
+                && mouseOver
                 && brush.portalMode == MapEditTab.PortalMode.SetPortalOut
                 && brush.pendingPortalSource.HasValue)
             {

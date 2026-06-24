@@ -38,6 +38,10 @@ public static class MapCanvasView
         canvas.Add(cpLayer);
         canvas.AddManipulator(new EditorPathManipulator(so, state, canvas, cpLayer));
 
+        // Portal 关系层(只渲染已生效的 portal 线;brush=null → 不画预览线)
+        var portalLayer = PortalLayer.Build(null, state, canvas);
+        canvas.Add(portalLayer);
+
         // Hint + cursor readout
         var hint = new Label("右键拖拽缩放 · 中键拖拽平移 · 左键新建/选中 · 拖动改位置");
         hint.style.position = Position.Absolute;

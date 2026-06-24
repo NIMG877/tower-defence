@@ -823,15 +823,19 @@ public static class MapEditTab
                 if (!_brush.pendingPortalSource.HasValue)
                 {
                     _brush.pendingPortalSource = c;
-                    // 触发 PortalLayer 重绘(出现预览线)。SetPortalOut 内会 NotifyChanged,
-                    // 这里只有第一段需要手动触发。
+                    // 触发 PortalLayer 重绘(出现预览线)。SetPortalOut/ClearPortalOut
+                    // 内部会 NotifyChanged,这里只有第一段需要手动触发。
                     _state.NotifyChanged();
                 }
                 else
                 {
                     var src = _brush.pendingPortalSource.Value;
                     var dst = c.Value;
-                    SetPortalOut(src, dst);
+                    // 第二段落在第一段同一格 = 清除该格的 portal
+                    if (src.i == dst.i && src.j == dst.j)
+                        ClearPortalOut(src);
+                    else
+                        SetPortalOut(src, dst);
                     _brush.pendingPortalSource = null;
                 }
                 _repaint();
@@ -934,6 +938,24 @@ public static class MapEditTab
             var entry = mapData.GetArrayElementAtIndex(idx);
             entry.FindPropertyRelative("portalOutI").intValue = dst.i;
             entry.FindPropertyRelative("portalOutJ").intValue = dst.j;
+            _so.ApplyModifiedProperties();
+            RefreshCacheFromSO();
+            _state.NotifyChanged();
+        }
+
+        /// <summary>
+        /// 清除 cell 上的 portal 出口(把 portalOutI/J 写回 -1)。
+        /// entry 不存在(no-op);若该格本来就是无 portal(no-op,只是写回相同的 -1)。
+        /// </summary>
+        void ClearPortalOut((int i, int j) cell)
+        {
+            Undo.RecordObject(_so.targetObject, "Clear Portal");
+            var mapData = MapDataProp();
+            int idx = FindEntryIndex(mapData, cell);
+            if (idx < 0) return; // 没 entry → 没 portal 可清
+            var entry = mapData.GetArrayElementAtIndex(idx);
+            entry.FindPropertyRelative("portalOutI").intValue = -1;
+            entry.FindPropertyRelative("portalOutJ").intValue = -1;
             _so.ApplyModifiedProperties();
             RefreshCacheFromSO();
             _state.NotifyChanged();
