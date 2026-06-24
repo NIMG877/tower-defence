@@ -871,7 +871,8 @@ public static class MapEditTab
             Undo.RecordObject(_so.targetObject, "Paint Block");
             var mapData = MapDataProp();
             int idx = FindEntryIndex(mapData, cell);
-            if (idx < 0)
+            bool isNew = (idx < 0);
+            if (isNew)
             {
                 idx = mapData.arraySize;
                 mapData.InsertArrayElementAtIndex(idx);
@@ -883,7 +884,15 @@ public static class MapEditTab
             entry.FindPropertyRelative("canSet").boolValue = _brush.canSet;
             entry.FindPropertyRelative("passableType").intValue = _brush.passableType;
             entry.FindPropertyRelative("deadly").boolValue = _brush.deadly;
-            // portalOutI/J unchanged on regular paint
+            // portalOutI/J 的 -1 是 "no portal" sentinel(见 BlockDataEntry.cs:17-18)。
+            // 新建 entry 时 Unity 给 int 字段的默认值是 0,会让 Cell panel 误显示
+            // "portal: -> (0, 0)"。新建时显式写 -1;已有 entry 上的 portal 不动 ——
+            // 用户可能想保留现有的 portal 出口,只是改其他字段。
+            if (isNew)
+            {
+                entry.FindPropertyRelative("portalOutI").intValue = -1;
+                entry.FindPropertyRelative("portalOutJ").intValue = -1;
+            }
             _so.ApplyModifiedProperties();
             RefreshCacheFromSO();
             _state.NotifyChanged();
