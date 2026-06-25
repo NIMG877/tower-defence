@@ -253,70 +253,20 @@ public static class MapEditTab
 
     static VisualElement BuildCanvasContainer(SerializedObject so, BlockMapCache cache, BrushState brush, PathEditingState state)
     {
-        var canvas = new VisualElement();
-        canvas.style.width = ViewTransform.CanvasWidth;
-        canvas.style.height = ViewTransform.CanvasHeight;
-        canvas.style.backgroundColor = EditorTheme.CanvasBg;
-        canvas.style.borderTopLeftRadius = 3;
-        canvas.style.borderTopRightRadius = 3;
-        canvas.style.borderBottomLeftRadius = 3;
-        canvas.style.borderBottomRightRadius = 3;
-        canvas.style.borderLeftWidth = 1;
-        canvas.style.borderRightWidth = 1;
-        canvas.style.borderTopWidth = 1;
-        canvas.style.borderBottomWidth = 1;
-        canvas.style.borderLeftColor = EditorTheme.Border;
-        canvas.style.borderRightColor = EditorTheme.Border;
-        canvas.style.borderTopColor = EditorTheme.Border;
-        canvas.style.borderBottomColor = EditorTheme.Border;
-        canvas.style.overflow = Overflow.Hidden;
-        canvas.style.position = Position.Relative;
+        // chrome / status / hint / repaint / cleanup 全部交给 EditorCanvasShell
+        // onDetach 清 HoverCell —— 原本写在 detach 回调里,这里挪进 shell 的清理钩子
+        var (canvas, status) = EditorCanvasShell.Build(state,
+            statusText: "(i, j): -",
+            hintText: "左键拖:画/擦 · 右键拖:缩放 · 中键拖:平移",
+            onDetach: () => state.HoverCell = null);
 
-        // Status label (bottom-left)
-        var status = new Label("(i, j): -");
-        status.name = "canvas-status";
-        status.style.position = Position.Absolute;
-        status.style.bottom = 4; status.style.left = 8;
-        status.style.fontSize = 10;
-        status.style.color = EditorTheme.HintText;
-        canvas.Add(status);
-
-        // Hint label (bottom-right)
-        var hint = new Label("左键拖:画/擦 · 右键拖:缩放 · 中键拖:平移");
-        hint.name = "canvas-hint";
-        hint.style.position = Position.Absolute;
-        hint.style.bottom = 4; hint.style.right = 8;
-        hint.style.fontSize = 10;
-        hint.style.color = EditorTheme.HintText;
-        canvas.Add(hint);
-
-        // Draw blocks
-        canvas.generateVisualContent = ctx =>
-        {
-            if (state.Cache == null) return;
-            MapCanvasView.DrawBlocks(ctx, state);
-        };
-
-        // Manipulator
         var manip = new MapEditManipulator(so, cache, brush, status, state, () => canvas.MarkDirtyRepaint());
         canvas.AddManipulator(manip);
 
         // Portal 关系层(已生效 portal 永久显示 + portal 模式第一段点击后的预览线)
-        // 加在 manipulator 之后、status/hint 之前 → 绘于 blocks 之上,但底部状态文字仍在最上
+        // 装在 status/hint 之后 → 绘于它们之上(若有 portal 箭头伸到底部)
         var portalLayer = PortalLayer.Build(brush, state, canvas);
         canvas.Add(portalLayer);
-
-        // Repaint on state change / undo
-        state.Changed += () => canvas.MarkDirtyRepaint();
-        Undo.undoRedoPerformed += () => canvas.MarkDirtyRepaint();
-
-        // Cleanup on detach
-        canvas.RegisterCallback<DetachFromPanelEvent>(_ =>
-        {
-            state.HoverCell = null;
-            state.Changed -= () => canvas.MarkDirtyRepaint();
-            Undo.undoRedoPerformed -= () => canvas.MarkDirtyRepaint();
-        });
 
         return canvas;
     }

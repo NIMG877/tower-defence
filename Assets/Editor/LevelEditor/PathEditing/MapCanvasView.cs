@@ -6,32 +6,14 @@ public static class MapCanvasView
 {
     public static VisualElement Build(SerializedObject so, PathEditingState state)
     {
-        var canvas = new VisualElement();
-        canvas.style.width = ViewTransform.CanvasWidth;
-        canvas.style.height = ViewTransform.CanvasHeight;
-        canvas.style.backgroundColor = EditorTheme.CanvasBg; // rgb(20,20,24)
-        canvas.style.borderTopLeftRadius = 3;
-        canvas.style.borderTopRightRadius = 3;
-        canvas.style.borderBottomLeftRadius = 3;
-        canvas.style.borderBottomRightRadius = 3;
-        canvas.style.borderLeftWidth = 1;
-        canvas.style.borderRightWidth = 1;
-        canvas.style.borderTopWidth = 1;
-        canvas.style.borderBottomWidth = 1;
-        canvas.style.borderLeftColor = EditorTheme.Border;
-        canvas.style.borderRightColor = EditorTheme.Border;
-        canvas.style.borderTopColor = EditorTheme.Border;
-        canvas.style.borderBottomColor = EditorTheme.Border;
-        canvas.style.overflow = Overflow.Hidden;
-        canvas.style.position = Position.Relative;
-
-        // 网格 + A* 路径
-        canvas.generateVisualContent += ctx =>
-        {
-            if (state.Cache == null) return;
-            DrawBlocks(ctx, state);
-            DrawPaths(ctx, so, state);
-        };
+        // chrome / status / hint / repaint / cleanup 全部交给 EditorCanvasShell。
+        // drawExtra 注入 DrawPaths(在 DrawBlocks 之后画 A* 折线)。
+        var (canvas, cursorReadout) = EditorCanvasShell.Build(state,
+            statusText: "(0.0, 0.0)",
+            hintText: "右键拖拽缩放 · 中键拖拽平移 · 左键新建/选中 · 拖动改位置",
+            drawExtra: ctx => DrawPaths(ctx, so, state));
+        // EditorPathManipulator 通过 canvas.Q<Label>("cursor-readout") 拿这个 label
+        cursorReadout.name = "cursor-readout";
 
         // Checkpoint 圆 (作为子 VisualElement 添加,UI Toolkit 自动绘于父 generateVisualContent 之上)
         var cpLayer = CheckpointLayer.Build(so, state, canvas);
@@ -41,28 +23,6 @@ public static class MapCanvasView
         // Portal 关系层(只渲染已生效的 portal 线;brush=null → 不画预览线)
         var portalLayer = PortalLayer.Build(null, state, canvas);
         canvas.Add(portalLayer);
-
-        // Hint + cursor readout
-        var hint = new Label("右键拖拽缩放 · 中键拖拽平移 · 左键新建/选中 · 拖动改位置");
-        hint.style.position = Position.Absolute;
-        hint.style.bottom = 4; hint.style.right = 8;
-        hint.style.fontSize = 10;
-        hint.style.color = EditorTheme.HintText;
-        canvas.Add(hint);
-
-        var cursorReadout = new Label("(0.0, 0.0)");
-        cursorReadout.name = "cursor-readout";
-        cursorReadout.style.position = Position.Absolute;
-        cursorReadout.style.bottom = 4; cursorReadout.style.left = 8;
-        cursorReadout.style.fontSize = 10;
-        cursorReadout.style.color = EditorTheme.HintText;
-        cursorReadout.style.unityFontStyleAndWeight = FontStyle.Normal;
-        canvas.Add(cursorReadout);
-
-        // 重绘触发:state 变化、Undo/Redo
-        state.Changed += () => canvas.MarkDirtyRepaint();
-        so.Update();
-        Undo.undoRedoPerformed += () => canvas.MarkDirtyRepaint();
 
         return canvas;
     }
