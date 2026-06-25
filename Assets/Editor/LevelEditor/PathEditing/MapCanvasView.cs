@@ -38,7 +38,7 @@ public static class MapCanvasView
         //    旧实现是每空 cell 一个 stroke rect,100x100 全空要 16k 顶点。
         DrawGridLines(p2d, state, cache);
 
-        // 2) 每个有 entry 的 cell:fill + highland 描边;canSet=false 在格中心画 ×
+        // 2) 每个有 entry 的 cell:fill + canSet=false X;highland 外轮廓单独画(扫描线)
         for (int i = 0; i < cache.ISize; i++)
         {
             for (int j = 0; j < cache.JSize; j++)
@@ -54,15 +54,7 @@ public static class MapCanvasView
                 BeginRectPath(p2d, rect);
                 p2d.Fill();
 
-                // highland 黄框;canSet=false 在格中心画 × 提示不可放;portal 出口格
-                // 在画布上无独立标记,PortalLayer 会画源→出口虚线箭头
-                if (bd.highland)
-                {
-                    p2d.strokeColor = new Color(0.706f, 0.549f, 0.235f);
-                    p2d.lineWidth = 0.5f;
-                    BeginRectPath(p2d, rect);
-                    p2d.Stroke();
-                }
+                // canSet=false 在格中心画 × 提示不可放;highland 外轮廓由 DrawHighlandOutline 单独画
                 if (!bd.canSet)
                 {
                     p2d.strokeColor = new Color(0.5f, 0.5f, 0.5f); // 中等深灰
@@ -71,6 +63,11 @@ public static class MapCanvasView
                 }
             }
         }
+
+        // 3) highland 外轮廓:全 grid 扫描,4 方向各一个 path + 一次 Stroke(批处理);
+        //    每方向内连续 highland 段合并成一条长边(扫描线),避免逐 cell 短边浪费。
+        //    画在 fill + X 之后,所以线在最上层。
+        DrawHighlandOutline(p2d, state, cache);
     }
 
     static Rect CellRect(PathEditingState state, int i, int j, BlockMapCache cache)
@@ -107,6 +104,132 @@ public static class MapCanvasView
             p2d.LineTo(right);
         }
         p2d.Stroke();
+    }
+
+    // highland 区块的外轮廓:每个 cell 检查 4 邻居,只在边界处画边。
+    // 优化 A(扫描线):每个方向找连续段,合并成一条长边(50x50 块从 200 短边降到 4 长边)。
+    // 优化 B(批处理):4 方向各一个 BeginPath/Stroke,全 grid 只 4 次 mesh 提交(原来 N 次)。
+    // 空 cell 是 Tile.Default() { highland = false },所以对全 grid 扫描无需特判 HasEntry。
+    static void DrawHighlandOutline(Painter2D p2d, PathEditingState state, BlockMapCache cache)
+    {
+        p2d.strokeColor = new Color(0.706f, 0.549f, 0.235f);
+        p2d.lineWidth = 0.5f;
+
+        // Pass 1: top edges — 高地方向(world y = i + 0.5,邻 cell 在 (i+1, j))
+        p2d.BeginPath();
+        for (int i = 0; i < cache.ISize; i++)
+        {
+            int runStart = -1;
+            for (int j = 0; j < cache.JSize; j++)
+            {
+                bool needTop = cache.Blocks[i, j].highland
+                    && (i + 1 >= cache.ISize || !cache.Blocks[i + 1, j].highland);
+                if (needTop)
+                {
+                    if (runStart < 0) runStart = j;
+                }
+                else if (runStart >= 0)
+                {
+                    AddHorizontalEdge(p2d, state, cache, worldY: i + 0.5f, jStart: runStart, jEnd: j - 1);
+                    runStart = -1;
+                }
+            }
+            if (runStart >= 0)
+                AddHorizontalEdge(p2d, state, cache, worldY: i + 0.5f, jStart: runStart, jEnd: cache.JSize - 1);
+        }
+        p2d.Stroke();
+
+        // Pass 2: bottom edges — 世界 y = i - 0.5,邻 cell 在 (i-1, j)
+        p2d.BeginPath();
+        for (int i = 0; i < cache.ISize; i++)
+        {
+            int runStart = -1;
+            for (int j = 0; j < cache.JSize; j++)
+            {
+                bool needBottom = cache.Blocks[i, j].highland
+                    && (i - 1 < 0 || !cache.Blocks[i - 1, j].highland);
+                if (needBottom)
+                {
+                    if (runStart < 0) runStart = j;
+                }
+                else if (runStart >= 0)
+                {
+                    AddHorizontalEdge(p2d, state, cache, worldY: i - 0.5f, jStart: runStart, jEnd: j - 1);
+                    runStart = -1;
+                }
+            }
+            if (runStart >= 0)
+                AddHorizontalEdge(p2d, state, cache, worldY: i - 0.5f, jStart: runStart, jEnd: cache.JSize - 1);
+        }
+        p2d.Stroke();
+
+        // Pass 3: left edges — 世界 x = j - 0.5,邻 cell 在 (i, j-1)
+        p2d.BeginPath();
+        for (int j = 0; j < cache.JSize; j++)
+        {
+            int runStart = -1;
+            for (int i = 0; i < cache.ISize; i++)
+            {
+                bool needLeft = cache.Blocks[i, j].highland
+                    && (j - 1 < 0 || !cache.Blocks[i, j - 1].highland);
+                if (needLeft)
+                {
+                    if (runStart < 0) runStart = i;
+                }
+                else if (runStart >= 0)
+                {
+                    AddVerticalEdge(p2d, state, cache, worldX: j - 0.5f, iStart: runStart, iEnd: i - 1);
+                    runStart = -1;
+                }
+            }
+            if (runStart >= 0)
+                AddVerticalEdge(p2d, state, cache, worldX: j - 0.5f, iStart: runStart, iEnd: cache.ISize - 1);
+        }
+        p2d.Stroke();
+
+        // Pass 4: right edges — 世界 x = j + 0.5,邻 cell 在 (i, j+1)
+        p2d.BeginPath();
+        for (int j = 0; j < cache.JSize; j++)
+        {
+            int runStart = -1;
+            for (int i = 0; i < cache.ISize; i++)
+            {
+                bool needRight = cache.Blocks[i, j].highland
+                    && (j + 1 >= cache.JSize || !cache.Blocks[i, j + 1].highland);
+                if (needRight)
+                {
+                    if (runStart < 0) runStart = i;
+                }
+                else if (runStart >= 0)
+                {
+                    AddVerticalEdge(p2d, state, cache, worldX: j + 0.5f, iStart: runStart, iEnd: i - 1);
+                    runStart = -1;
+                }
+            }
+            if (runStart >= 0)
+                AddVerticalEdge(p2d, state, cache, worldX: j + 0.5f, iStart: runStart, iEnd: cache.ISize - 1);
+        }
+        p2d.Stroke();
+    }
+
+    // 单条水平边:world y 固定,从 (jStart-0.5, worldY) 到 (jEnd+0.5, worldY)
+    static void AddHorizontalEdge(Painter2D p2d, PathEditingState state, BlockMapCache cache,
+        float worldY, int jStart, int jEnd)
+    {
+        var a = state.View.WorldToScreen(new Vector2(jStart - 0.5f, worldY), cache.ISize, cache.JSize);
+        var b = state.View.WorldToScreen(new Vector2(jEnd + 0.5f, worldY), cache.ISize, cache.JSize);
+        p2d.MoveTo(a);
+        p2d.LineTo(b);
+    }
+
+    // 单条垂直边:world x 固定,从 (worldX, iStart-0.5) 到 (worldX, iEnd+0.5)
+    static void AddVerticalEdge(Painter2D p2d, PathEditingState state, BlockMapCache cache,
+        float worldX, int iStart, int iEnd)
+    {
+        var a = state.View.WorldToScreen(new Vector2(worldX, iStart - 0.5f), cache.ISize, cache.JSize);
+        var b = state.View.WorldToScreen(new Vector2(worldX, iEnd + 0.5f), cache.ISize, cache.JSize);
+        p2d.MoveTo(a);
+        p2d.LineTo(b);
     }
 
     static Color BlockTypeColor(int passableType) => passableType switch
