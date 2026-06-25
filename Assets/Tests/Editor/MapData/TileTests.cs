@@ -17,7 +17,6 @@ namespace MapData.Tests
             Assert.IsFalse(t.deadly);
             Assert.AreEqual(-1, t.portalOutI);
             Assert.AreEqual(-1, t.portalOutJ);
-            Assert.AreEqual(default(Color), t.portalColor);
         }
 
         [Test]

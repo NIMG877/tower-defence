@@ -886,7 +886,6 @@ public static class MapEditTab
                     deadly = e.FindPropertyRelative("deadly").boolValue,
                     portalOutI = e.FindPropertyRelative("portalOutI").intValue,
                     portalOutJ = e.FindPropertyRelative("portalOutJ").intValue,
-                    portalColor = e.FindPropertyRelative("portalColor").colorValue,
                 };
                 if (cache.HasEntry != null) cache.HasEntry[i, j] = true;
             }

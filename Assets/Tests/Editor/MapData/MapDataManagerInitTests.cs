@@ -26,7 +26,7 @@ namespace MapData.Tests
             {
                 new Tile { i = 0, j = 0, highland = true },
                 new Tile { i = 2, j = 1, passableType = 3, deadly = true },
-                new Tile { i = 1, j = 2, portalOutI = 0, portalOutJ = 0, portalColor = Color.red },
+                new Tile { i = 1, j = 2, portalOutI = 0, portalOutJ = 0 },
             };
 
             var mgr = new MapDataManager();
@@ -47,7 +47,6 @@ namespace MapData.Tests
 
             Assert.AreEqual(0, mgr.Tiles[1, 2].portalOutI);
             Assert.AreEqual(0, mgr.Tiles[1, 2].portalOutJ);
-            Assert.AreEqual(Color.red, mgr.Tiles[1, 2].portalColor);
 
             // unlisted cell: default
             Assert.IsFalse(mgr.Tiles[3, 2].highland);

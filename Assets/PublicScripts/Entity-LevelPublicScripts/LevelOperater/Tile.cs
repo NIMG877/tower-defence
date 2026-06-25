@@ -21,7 +21,6 @@ public struct Tile
     public bool  deadly;
     public int   portalOutI;    // -1 = no portal
     public int   portalOutJ;    // -1 = no portal
-    public Color portalColor;
 
     /// <summary>
     /// 未画刷格子的默认状态。
@@ -41,6 +40,5 @@ public struct Tile
         deadly = false,
         portalOutI = -1,
         portalOutJ = -1,
-        portalColor = default,
     };
 }

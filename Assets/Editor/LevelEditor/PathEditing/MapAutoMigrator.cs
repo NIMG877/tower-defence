@@ -46,7 +46,6 @@ public static class MapAutoMigrator
             bool highland    = (bool)GetField(bd, "_highland", false);
             bool canSet      = (bool)GetField(bd, "_canSet", false);
             bool deadly      = (bool)GetProp(bd, "Deadly", false);
-            Color protalColor = (Color)GetProp(bd, "ProtalColor", default(Color));
 
             // Portal target lookup via reflection (legacy property name).
             var portalOut = GetProp(bd, "ProtalOutBlock", null) as Component;
@@ -67,7 +66,6 @@ public static class MapAutoMigrator
                 deadly       = deadly,
                 portalOutI   = portalOutI,
                 portalOutJ   = portalOutJ,
-                portalColor  = protalColor,
             });
         }
         return result;

@@ -31,39 +31,31 @@ public static class MapCanvasView
     {
         var p2d = ctx.painter2D;
         var cache = state.Cache;
+
+        // 1) 整张 grid 一次性画完(单 path,JSize+1 + ISize+1 条线,共约
+        //    (ISize + JSize + 2) × 4 顶点)。Fill 之后会被 cell 的填充覆盖,
+        //    视觉上还是只在空 cell 上看到 grid。
+        //    旧实现是每空 cell 一个 stroke rect,100x100 全空要 16k 顶点。
+        DrawGridLines(p2d, state, cache);
+
+        // 2) 每个有 entry 的 cell:fill + highland 描边;canSet=false 在格中心画 ×
         for (int i = 0; i < cache.ISize; i++)
         {
             for (int j = 0; j < cache.JSize; j++)
             {
-                // cell [i,j] 的中心是 (j, i) 整数;UnityEngine.Rect.y 视作"顶",
-                // 顶边对应 grid y = i+0.5(屏幕 y 较小),底边对应 y = i-0.5(屏幕 y 较大)。
-                var tl = state.View.WorldToScreen(new Vector2(j - 0.5f, i + 0.5f), cache.ISize, cache.JSize);
-                var br = state.View.WorldToScreen(new Vector2(j + 0.5f, i - 0.5f), cache.ISize, cache.JSize);
-                var rect = new Rect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
-
-                // 没有 MapData entry 的格子:不填充,只画细格线让人看见 grid 边界
-                if (!cache.HasEntry[i, j])
-                {
-                    p2d.strokeColor = new Color(0.2f, 0.2f, 0.24f);
-                    p2d.lineWidth = 0.5f;
-                    BeginRectPath(p2d, rect);
-                    p2d.Stroke();
-                    continue;
-                }
-
+                if (!cache.HasEntry[i, j]) continue;
                 var bd = cache.Blocks[i, j];
+                var rect = CellRect(state, i, j, cache);
 
-                Color fill;
-                if (bd.deadly)
-                    fill = new Color(0.471f, 0.235f, 0.235f); // rgb(120,60,60)
-                else
-                    fill = BlockTypeColor(bd.passableType);
-
+                Color fill = bd.deadly
+                    ? new Color(0.471f, 0.235f, 0.235f) // rgb(120,60,60)
+                    : BlockTypeColor(bd.passableType);
                 p2d.fillColor = fill;
                 BeginRectPath(p2d, rect);
                 p2d.Fill();
 
-                // Highland 黄框 / CanSet 青框
+                // highland 黄框;canSet=false 在格中心画 × 提示不可放;portal 出口格
+                // 在画布上无独立标记,PortalLayer 会画源→出口虚线箭头
                 if (bd.highland)
                 {
                     p2d.strokeColor = new Color(0.706f, 0.549f, 0.235f);
@@ -71,22 +63,50 @@ public static class MapCanvasView
                     BeginRectPath(p2d, rect);
                     p2d.Stroke();
                 }
-                if (bd.canSet)
+                if (!bd.canSet)
                 {
-                    p2d.strokeColor = new Color(0.549f, 0.784f, 0.706f);
+                    p2d.strokeColor = new Color(0.5f, 0.5f, 0.5f); // 中等深灰
                     p2d.lineWidth = 0.5f;
-                    BeginRectPath(p2d, rect);
-                    p2d.Stroke();
-                }
-                if (bd.portalOutI != -1)
-                {
-                    p2d.strokeColor = bd.portalColor;
-                    p2d.lineWidth = 0.5f;
-                    BeginRectPath(p2d, rect);
-                    p2d.Stroke();
+                    DrawCellX(p2d, rect);
                 }
             }
         }
+    }
+
+    static Rect CellRect(PathEditingState state, int i, int j, BlockMapCache cache)
+    {
+        // cell [i,j] 的中心是 (j, i) 整数;Rect.y 视作"顶",
+        // 顶边对应 grid y = i+0.5(屏幕 y 较小),底边对应 y = i-0.5(屏幕 y 较大)。
+        var tl = state.View.WorldToScreen(new Vector2(j - 0.5f, i + 0.5f), cache.ISize, cache.JSize);
+        var br = state.View.WorldToScreen(new Vector2(j + 0.5f, i - 0.5f), cache.ISize, cache.JSize);
+        return new Rect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
+    }
+
+    static void DrawGridLines(Painter2D p2d, PathEditingState state, BlockMapCache cache)
+    {
+        p2d.strokeColor = new Color(0.2f, 0.2f, 0.24f);
+        p2d.lineWidth = 0.5f;
+        p2d.BeginPath();
+
+        // 全部 JSize+1 条竖直线(x = -0.5, 0.5, ..., JSize-0.5)
+        for (int k = 0; k <= cache.JSize; k++)
+        {
+            float x = k - 0.5f;
+            var top = state.View.WorldToScreen(new Vector2(x, -0.5f), cache.ISize, cache.JSize);
+            var bot = state.View.WorldToScreen(new Vector2(x, cache.ISize - 0.5f), cache.ISize, cache.JSize);
+            p2d.MoveTo(top);
+            p2d.LineTo(bot);
+        }
+        // 全部 ISize+1 条水平线(y = -0.5, 0.5, ..., ISize-0.5)
+        for (int k = 0; k <= cache.ISize; k++)
+        {
+            float y = k - 0.5f;
+            var left = state.View.WorldToScreen(new Vector2(-0.5f, y), cache.ISize, cache.JSize);
+            var right = state.View.WorldToScreen(new Vector2(cache.JSize - 0.5f, y), cache.ISize, cache.JSize);
+            p2d.MoveTo(left);
+            p2d.LineTo(right);
+        }
+        p2d.Stroke();
     }
 
     static Color BlockTypeColor(int passableType) => passableType switch
@@ -97,7 +117,10 @@ public static class MapCanvasView
         _ => new Color(0.157f, 0.157f, 0.157f)
     };
 
-    // Painter2D 没有 Rect(...) 方法,改用 4 顶点 + ClosePath 拼矩形
+    // Painter2D 没有 Rect(...) 方法,用 4 个 LineTo 拼矩形(显式回到起点)。
+    // mesh 顶点数与 ClosePath 等价 —— Painter2D 的 ClosePath 就是加一条
+    // LineTo 回起点,不是"标记闭合"零顶点的语义。4 个 LineTo 让 4 条边一目了然,
+    // 代码更清晰,顺手去掉对 ClosePath 隐式行为的依赖。
     static void BeginRectPath(Painter2D p2d, Rect r)
     {
         p2d.BeginPath();
@@ -105,7 +128,26 @@ public static class MapCanvasView
         p2d.LineTo(new Vector2(r.xMax, r.y));
         p2d.LineTo(new Vector2(r.xMax, r.yMax));
         p2d.LineTo(new Vector2(r.x, r.yMax));
-        p2d.ClosePath();
+        p2d.LineTo(new Vector2(r.x, r.y));
+    }
+
+    // 两条对角线形成 ×。默认占格 50%(每边 inset 25%),比 edge-to-edge 看起来更像"标记"而不是
+    // 把格切割开的痕迹。顶点账:2 quad = 8 vertices,无 join(对角线在中心交叉但不共享端点)。
+    // 比 rect stroke(4 边 + 4 join ≈ 16-48 vertices)省一半以上。
+    static void DrawCellX(Painter2D p2d, Rect r)
+    {
+        const float Inset = 0.25f;
+        float x0 = r.x + r.width  * Inset;
+        float y0 = r.y + r.height * Inset;
+        float x1 = r.xMax - r.width  * Inset;
+        float y1 = r.yMax - r.height * Inset;
+
+        p2d.BeginPath();
+        p2d.MoveTo(new Vector2(x0, y0));
+        p2d.LineTo(new Vector2(x1, y1));
+        p2d.MoveTo(new Vector2(x1, y0));
+        p2d.LineTo(new Vector2(x0, y1));
+        p2d.Stroke();
     }
 
     static void DrawPaths(MeshGenerationContext ctx, SerializedObject so, PathEditingState state)
