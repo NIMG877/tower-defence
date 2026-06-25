@@ -77,9 +77,8 @@ public static class PathEditTab
 
         root.style.overflow = Overflow.Hidden;
 
-        // 初始 fit 视图
-        if (state.Cache != null)
-            state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
+        // 视图 Fit 由 MapEditorSection.Build 在 inspector 首次打开时统一处理,
+        // 这里不再 Fit — 切到本 tab 时保留用户已调整的视图。
 
         state.NotifyChanged();
 

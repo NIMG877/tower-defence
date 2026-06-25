@@ -47,6 +47,12 @@ public static class MapEditorSection
         root.Add(body);
 
         var state = new PathEditingState { Cache = cache };
+
+        // 首次加载 Fit:仅在 inspector 打开时执行一次(此时 state.Cache 已就绪)。
+        // tab Build 内部不再做 Fit,以避免每次切 tab 时把用户已平移/缩放过的视图重置掉。
+        if (state.Cache != null)
+            state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
+
         VisualElement currentTab = null;
 
         void RefreshWarnings()
