@@ -20,26 +20,37 @@ public static class MapEditTab
         public bool deadly;
         public (int i, int j)? pendingPortalSource;
 
-        public enum Preset { None, Highland, Ground, Den }
+        public enum Preset { None, Ground, Highland, Den }
 
         /// <summary>
         /// 当前选中的预设。None = 自定义(用户改过字段)。
         /// 改字段会自动清空,点预设按钮会自动应用。
+        /// 默认 Ground(由构造器 ApplyPreset 设置),所以打开面板即可直接画可放置的地面。
         /// </summary>
-        public Preset activePreset = Preset.None;
+        public Preset activePreset;
 
         /// <summary>
-        /// 预设数据(索引 0=Highland, 1=Ground, 2=Den — 与 Preset enum 偏移 1 对齐)。
+        /// 字段初值 = Ground 预设。打开地图编辑面板时即可直接画可放置的地面,
+        /// Ground 按钮同时高亮。PresetData 是字段默认值的唯一来源,改 Ground
+        /// 定义后这里自动跟随。
+        /// </summary>
+        public BrushState()
+        {
+            ApplyPreset(Preset.Ground);
+        }
+
+        /// <summary>
+        /// 预设数据(索引 0=Ground, 1=Highland, 2=Den — 与 Preset enum 偏移 1 对齐)。
         /// Tuple: (highland, canSet, passableType, deadly)
         /// </summary>
         public static readonly (bool hl, bool cs, int pt, bool dl)[] PresetData =
         {
+            (false, true,  0, false),  // Ground   地面(默认)
             (true,  true,  2, false),  // Highland 高台
-            (false, true,  0, false),  // Ground   地面
             (false, false, 1, true),   // Den      地穴
         };
 
-        public static readonly string[] PresetNames = { "Highland", "Ground", "Den" };
+        public static readonly string[] PresetNames = { "Ground", "Highland", "Den" };
 
         /// <summary>
         /// 应用预设到 brush 字段(不改 portalMode — portal 是独立维度)。
@@ -47,7 +58,7 @@ public static class MapEditTab
         public void ApplyPreset(Preset p)
         {
             if (p == Preset.None) return;
-            int idx = (int)p - 1; // Preset.Highland=1 → PresetData[0]
+            int idx = (int)p - 1; // Preset.Ground=1 → PresetData[0]
             var (hl, cs, pt, dl) = PresetData[idx];
             highland = hl; canSet = cs; passableType = pt; deadly = dl;
             activePreset = p;
@@ -310,7 +321,7 @@ public static class MapEditTab
         headerRow.Add(title);
         panel.Add(headerRow);
 
-        // Preset row: 3 个互斥按钮(Highland/Ground/Den),active 高亮绿底黑字
+        // Preset row: 3 个互斥按钮(Ground/Highland/Den),active 高亮绿底黑字
         // 模仿 PathEditTab 的 moveMethod 视觉规范
         var presetRow = new VisualElement();
         presetRow.style.flexDirection = FlexDirection.Row;
@@ -337,7 +348,7 @@ public static class MapEditTab
             btn.style.fontSize = 11;
             btn.clicked += () =>
             {
-                brush.ApplyPreset((BrushState.Preset)(captured + 1)); // Preset.Highland=1 → PresetData[0]
+                brush.ApplyPreset((BrushState.Preset)(captured + 1)); // Preset.Ground=1 → PresetData[0]
                 state.NotifyChanged();
             };
             presetButtons[captured] = btn;
