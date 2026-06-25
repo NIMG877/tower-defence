@@ -21,7 +21,39 @@ MonoBehaviour:
   MapPrefab: {fileID: 0}
   iSize: 2
   jSize: 2
-  MapData: []
+  MapData:
+  - i: 1
+    j: 1
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 1
+    j: 0
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 0
+    j: 0
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 0
+    j: 1
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
   EnvironmentalControlDevice: {fileID: 0}
   Waves: []
   Paths:

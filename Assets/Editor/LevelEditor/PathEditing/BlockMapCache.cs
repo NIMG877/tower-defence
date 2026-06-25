@@ -66,7 +66,7 @@ public sealed class BlockMapCache : IDisposable
         EntityR = fresh.EntityR;
     }
 
-    public enum WarningKind { OutOfRange, Duplicate, LegacyPrefab }
+    public enum WarningKind { OutOfRange, Duplicate }
 
     /// <summary>
     /// 一条诊断警告。I/J 仅对 OutOfRange / Duplicate 有意义。
@@ -117,14 +117,6 @@ public sealed class BlockMapCache : IDisposable
             }
         }
 
-        if (_levelDataRef != null && _levelDataRef.MapPrefab != null
-            && HasLegacyBlockData(_levelDataRef.MapPrefab))
-        {
-            warnings.Add(new CacheWarning(
-                WarningKind.LegacyPrefab,
-                "MapPrefab still has legacy BlockData components — auto-clean on next save"));
-        }
-
         return warnings;
     }
 
@@ -155,17 +147,6 @@ public sealed class BlockMapCache : IDisposable
         }
         if (removed > 0) so.ApplyModifiedProperties();
         return removed;
-    }
-
-    static bool HasLegacyBlockData(GameObject prefab)
-    {
-        if (prefab == null) return false;
-        foreach (var mb in prefab.GetComponentsInChildren<MonoBehaviour>(true))
-        {
-            if (mb == null) continue; // missing-script entry
-            if (mb.GetType().Name == "BlockData") return true;
-        }
-        return false;
     }
 
     public void Dispose() { }

@@ -407,9 +407,7 @@ public static class MapEditTab
         });
         panel.Add(deadlyRow);
 
-        // Portal 已提升为顶层工具(与画刷/笔擦并列),所以这里不再有 Portal 字段。
-
-        var hint = new Label("提示:左键按住拖动可连续画/擦;Portal 工具两段式;右键拖=缩放;中键拖=平移。");
+        var hint = new Label("左键按住拖动可连续画/擦");
         hint.style.fontSize = 10;
         hint.style.color = EditorTheme.HintText;
         hint.style.marginTop = 8;

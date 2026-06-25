@@ -55,7 +55,7 @@ public static class MapEditorSection
             var warnings = cache.GetWarnings();
             if (warnings.Count == 0) return;
 
-            // Group by kind (preserving spec §7 order: OutOfRange, Duplicate, LegacyPrefab)
+            // Group by kind (preserving spec §7 order: OutOfRange, Duplicate)
             var byKind = new Dictionary<BlockMapCache.WarningKind, List<BlockMapCache.CacheWarning>>();
             foreach (var w in warnings)
             {
@@ -95,18 +95,6 @@ public static class MapEditorSection
                     dupList,
                     cleanTooltip: null,
                     onClean: null);
-            }
-
-            if (byKind.TryGetValue(BlockMapCache.WarningKind.LegacyPrefab, out var legacyList))
-            {
-                foreach (var w in legacyList)
-                {
-                    var lbl = new Label(w.Message);
-                    lbl.style.color = WarningColor;
-                    lbl.style.paddingTop = 2;
-                    lbl.style.whiteSpace = WhiteSpace.Normal;
-                    warningsContainer.Add(lbl);
-                }
             }
         }
 

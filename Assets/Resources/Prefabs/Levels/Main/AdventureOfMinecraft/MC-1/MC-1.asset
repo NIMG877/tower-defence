@@ -25,7 +25,7 @@ MonoBehaviour:
   - i: 7
     j: 0
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -33,7 +33,7 @@ MonoBehaviour:
   - i: 6
     j: 0
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -41,7 +41,7 @@ MonoBehaviour:
   - i: 5
     j: 0
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -49,7 +49,7 @@ MonoBehaviour:
   - i: 4
     j: 0
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -57,7 +57,7 @@ MonoBehaviour:
   - i: 3
     j: 0
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -65,7 +65,7 @@ MonoBehaviour:
   - i: 2
     j: 0
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -73,7 +73,7 @@ MonoBehaviour:
   - i: 1
     j: 0
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -81,7 +81,7 @@ MonoBehaviour:
   - i: 0
     j: 0
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -89,7 +89,7 @@ MonoBehaviour:
   - i: 0
     j: 1
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -145,7 +145,7 @@ MonoBehaviour:
   - i: 7
     j: 1
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -153,7 +153,7 @@ MonoBehaviour:
   - i: 7
     j: 2
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -182,14 +182,6 @@ MonoBehaviour:
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
-  - i: 3
-    j: 2
-    highland: 0
-    canSet: 1
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
   - i: 2
     j: 2
     highland: 1
@@ -209,7 +201,7 @@ MonoBehaviour:
   - i: 0
     j: 2
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -217,7 +209,7 @@ MonoBehaviour:
   - i: 0
     j: 3
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -273,7 +265,7 @@ MonoBehaviour:
   - i: 7
     j: 3
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -281,7 +273,7 @@ MonoBehaviour:
   - i: 7
     j: 4
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -337,7 +329,7 @@ MonoBehaviour:
   - i: 0
     j: 4
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -345,7 +337,7 @@ MonoBehaviour:
   - i: 0
     j: 5
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -401,7 +393,7 @@ MonoBehaviour:
   - i: 7
     j: 5
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -409,7 +401,7 @@ MonoBehaviour:
   - i: 7
     j: 6
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -465,7 +457,7 @@ MonoBehaviour:
   - i: 0
     j: 6
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -473,7 +465,7 @@ MonoBehaviour:
   - i: 0
     j: 7
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -529,7 +521,7 @@ MonoBehaviour:
   - i: 7
     j: 8
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -537,7 +529,7 @@ MonoBehaviour:
   - i: 7
     j: 7
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -593,7 +585,7 @@ MonoBehaviour:
   - i: 0
     j: 8
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -649,7 +641,7 @@ MonoBehaviour:
   - i: 7
     j: 9
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -657,7 +649,7 @@ MonoBehaviour:
   - i: 7
     j: 10
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -665,7 +657,7 @@ MonoBehaviour:
   - i: 6
     j: 10
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -673,7 +665,7 @@ MonoBehaviour:
   - i: 5
     j: 10
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -681,7 +673,7 @@ MonoBehaviour:
   - i: 4
     j: 10
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -689,7 +681,7 @@ MonoBehaviour:
   - i: 3
     j: 10
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -697,7 +689,7 @@ MonoBehaviour:
   - i: 2
     j: 10
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -705,7 +697,7 @@ MonoBehaviour:
   - i: 1
     j: 10
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -713,7 +705,7 @@ MonoBehaviour:
   - i: 0
     j: 10
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -721,8 +713,16 @@ MonoBehaviour:
   - i: 0
     j: 9
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 3
+    j: 2
+    highland: 0
+    canSet: 1
+    passableType: 0
     deadly: 0
     portalOutI: -1
     portalOutJ: -1

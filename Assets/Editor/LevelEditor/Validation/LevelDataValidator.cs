@@ -81,13 +81,13 @@ namespace Validation
                     $"MaxCost ({data.MaxCost}) 不能小于 Cost0 ({data.Cost0})"));
             }
 
-            // 规则 8: MapPrefab == null -> Error
+            // 规则 8: MapPrefab == null -> Warning
             if (data.MapPrefab == null)
             {
                 issues.Add(new ValidationIssue(
-                    ValidationSeverity.Error,
+                    ValidationSeverity.Warning,
                     "MapPrefab",
-                    "MapPrefab 不能为空"));
+                    "MapPrefab 未指定 (cells will render without materials)"));
             }
 
             // 规则 9: CutToLevelTexture == null -> Warning

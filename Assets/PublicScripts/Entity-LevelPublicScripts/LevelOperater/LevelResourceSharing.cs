@@ -41,6 +41,7 @@ public class LevelResourceSharing
         EntityPoolManager.Manager.Initialize();
         EffectManager.Manager.Initialize();
         MapDataManager.Manager.CreateMap(LD.MapPrefab);
+        MapDataManager.Manager.AttachLevelData(LD);
         MapDataManager.Manager.Initialize();
         PathDataManager.Manager.CreatePaths(LD.Paths);
         PathDataManager.Manager.Initialize();

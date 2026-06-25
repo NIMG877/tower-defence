@@ -5,7 +5,6 @@ using UnityEngine;
 ///
 /// 坐标系约定(editor 视角):
 ///   - editor world 单位 = "格子中心",整数 (3, 5) = 第 4 列第 6 行格子中心。
-///   - prefab 中 BlockData 实际 transform.position 在 (3.5, 5.5);editor 不关心
 ///     prefab 实际值,所有 cp / snap / 显示都用整数格子中心。
 ///   - Y 轴:UI Toolkit 的 localMousePosition 向下为正,但 grid i 索引向上为正,
 ///     所以 WorldToScreen 输出要翻转 Y。

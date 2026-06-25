@@ -32,13 +32,7 @@ public static class MapCanvasView
         var p2d = ctx.painter2D;
         var cache = state.Cache;
 
-        // 1) 整张 grid 一次性画完(单 path,JSize+1 + ISize+1 条线,共约
-        //    (ISize + JSize + 2) × 4 顶点)。Fill 之后会被 cell 的填充覆盖,
-        //    视觉上还是只在空 cell 上看到 grid。
-        //    旧实现是每空 cell 一个 stroke rect,100x100 全空要 16k 顶点。
-        DrawGridLines(p2d, state, cache);
-
-        // 2) 每个有 entry 的 cell:fill + canSet=false X;highland 外轮廓单独画(扫描线)
+        // 1) 每个有 entry 的 cell:fill + canSet=false X
         for (int i = 0; i < cache.ISize; i++)
         {
             for (int j = 0; j < cache.JSize; j++)
@@ -63,6 +57,12 @@ public static class MapCanvasView
                 }
             }
         }
+
+        // 2) 整张 grid 一次性画完(单 path,JSize+1 + ISize+1 条线,共约
+        //    (ISize + JSize + 2) × 4 顶点)。Fill 之后会被 cell 的填充覆盖,
+        //    视觉上还是只在空 cell 上看到 grid。
+        //    旧实现是每空 cell 一个 stroke rect,100x100 全空要 16k 顶点。
+        DrawGridLines(p2d, state, cache);
 
         // 3) highland 外轮廓:全 grid 扫描,4 方向各一个 path + 一次 Stroke(批处理);
         //    每方向内连续 highland 段合并成一条长边(扫描线),避免逐 cell 短边浪费。
