@@ -251,7 +251,7 @@ public static class MapPathFinder
                             Vector2 tmpDPos = tmpMoveParameters[i + 2].targetPosition - tmpMoveParameters[i + 1].targetPosition;
                             Vector2 tmpCPos = tmpMoveParameters[i + 1].targetPosition;
                             tmpMoveParameters.RemoveAt(i + 1);
-                            for (float alpha = 0.1f; alpha <= 1; alpha += 0.1f)
+                            for (float alpha = 0.001f; alpha <= 1; alpha += 0.001f)
                             {
                                 Vector2 tmp = FirstBlockLine(graph, tmpMoveParameters[i].targetPosition, tmpCPos + alpha * tmpDPos, tmpCPos, entityR);
                                 if (tmp.x != -1000)

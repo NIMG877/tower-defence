@@ -9,7 +9,7 @@ public static class MapCanvasView
         var canvas = new VisualElement();
         canvas.style.width = ViewTransform.CanvasWidth;
         canvas.style.height = ViewTransform.CanvasHeight;
-        canvas.style.backgroundColor = new Color(0.078f, 0.078f, 0.094f); // rgb(20,20,24)
+        canvas.style.backgroundColor = EditorTheme.CanvasBg; // rgb(20,20,24)
         canvas.style.borderTopLeftRadius = 3;
         canvas.style.borderTopRightRadius = 3;
         canvas.style.borderBottomLeftRadius = 3;
@@ -18,10 +18,10 @@ public static class MapCanvasView
         canvas.style.borderRightWidth = 1;
         canvas.style.borderTopWidth = 1;
         canvas.style.borderBottomWidth = 1;
-        canvas.style.borderLeftColor = new Color(0.235f, 0.235f, 0.275f);
-        canvas.style.borderRightColor = new Color(0.235f, 0.235f, 0.275f);
-        canvas.style.borderTopColor = new Color(0.235f, 0.235f, 0.275f);
-        canvas.style.borderBottomColor = new Color(0.235f, 0.235f, 0.275f);
+        canvas.style.borderLeftColor = EditorTheme.Border;
+        canvas.style.borderRightColor = EditorTheme.Border;
+        canvas.style.borderTopColor = EditorTheme.Border;
+        canvas.style.borderBottomColor = EditorTheme.Border;
         canvas.style.overflow = Overflow.Hidden;
         canvas.style.position = Position.Relative;
 
@@ -47,7 +47,7 @@ public static class MapCanvasView
         hint.style.position = Position.Absolute;
         hint.style.bottom = 4; hint.style.right = 8;
         hint.style.fontSize = 10;
-        hint.style.color = new Color(0.55f, 0.55f, 0.55f);
+        hint.style.color = EditorTheme.HintText;
         canvas.Add(hint);
 
         var cursorReadout = new Label("(0.0, 0.0)");
@@ -55,7 +55,7 @@ public static class MapCanvasView
         cursorReadout.style.position = Position.Absolute;
         cursorReadout.style.bottom = 4; cursorReadout.style.left = 8;
         cursorReadout.style.fontSize = 10;
-        cursorReadout.style.color = new Color(0.55f, 0.55f, 0.55f);
+        cursorReadout.style.color = EditorTheme.HintText;
         cursorReadout.style.unityFontStyleAndWeight = FontStyle.Normal;
         canvas.Add(cursorReadout);
 

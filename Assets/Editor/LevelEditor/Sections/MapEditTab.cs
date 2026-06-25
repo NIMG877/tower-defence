@@ -57,7 +57,7 @@ public static class MapEditTab
     public static VisualElement Build(SerializedObject so, BlockMapCache cache, PathEditingState state)
     {
         var root = new VisualElement();
-        root.style.backgroundColor = new Color(0.118f, 0.118f, 0.133f);
+        root.style.backgroundColor = EditorTheme.TabBg;
         root.style.paddingTop = 8; root.style.paddingBottom = 8;
         root.style.paddingLeft = 8; root.style.paddingRight = 8;
         root.style.borderTopLeftRadius = 3;
@@ -68,14 +68,14 @@ public static class MapEditTab
         root.style.borderRightWidth = 1;
         root.style.borderTopWidth = 1;
         root.style.borderBottomWidth = 1;
-        root.style.borderLeftColor = new Color(0.306f, 0.788f, 0.627f);
-        root.style.borderRightColor = new Color(0.306f, 0.788f, 0.627f);
-        root.style.borderTopColor = new Color(0.306f, 0.788f, 0.627f);
-        root.style.borderBottomColor = new Color(0.306f, 0.788f, 0.627f);
+        root.style.borderLeftColor = EditorTheme.AccentGreen;
+        root.style.borderRightColor = EditorTheme.AccentGreen;
+        root.style.borderTopColor = EditorTheme.AccentGreen;
+        root.style.borderBottomColor = EditorTheme.AccentGreen;
 
         // Header
         var header = new Label("▸ Map Editing");
-        header.style.color = new Color(0.306f, 0.788f, 0.627f);
+        header.style.color = EditorTheme.AccentGreen;
         header.style.fontSize = 12;
         header.style.unityFontStyleAndWeight = FontStyle.Bold;
         header.style.marginBottom = 6;
@@ -153,7 +153,7 @@ public static class MapEditTab
         row.style.flexShrink = 0;
 
         var label = new Label("▸ Map size");
-        label.style.color = new Color(0.611f, 0.863f, 0.996f);
+        label.style.color = EditorTheme.SubHeader;
         label.style.minWidth = 90;
         label.style.fontSize = 11;
         label.style.flexShrink = 0;
@@ -196,7 +196,7 @@ public static class MapEditTab
     {
         var bar = new VisualElement();
         bar.style.flexDirection = FlexDirection.Row;
-        bar.style.backgroundColor = new Color(0.157f, 0.157f, 0.157f);
+        bar.style.backgroundColor = EditorTheme.ToolbarBg;
         bar.style.paddingTop = 4; bar.style.paddingBottom = 4;
         bar.style.paddingLeft = 6; bar.style.paddingRight = 6;
         bar.style.alignItems = Align.Center;
@@ -206,73 +206,47 @@ public static class MapEditTab
         // 工具栏原"✕ 删除选中点"按钮已删 —— 它的功能("删当前 hover cell 的 entry")
         // 跟 Eraser 工具的左键单击完全重复,而且 Eraser 还支持拖动连续擦。
 
-        var sep1 = new VisualElement();
-        sep1.style.width = 1; sep1.style.height = 16;
-        sep1.style.backgroundColor = new Color(0.314f, 0.314f, 0.314f);
-        sep1.style.marginLeft = 6; sep1.style.marginRight = 6;
-        bar.Add(sep1);
+        bar.Add(EditorTabShell.MakeVerticalSeparator());
 
         var toolLabel = new Label("工具:");
         toolLabel.style.fontSize = 11;
-        toolLabel.style.color = new Color(0.706f, 0.706f, 0.706f);
+        toolLabel.style.color = EditorTheme.MutedText;
         bar.Add(toolLabel);
 
         // 工具按钮:圆形符号 + 文字色(跟格点吸附的 ◉/○ 视觉一致)
-        //   active  → ◉ [name] + 绿色字 (0.306, 0.788, 0.627)
-        //   inactive→ ○ [name] + 灰色字 (0.706, 0.706, 0.706)
+        //   active  → ◉ [name] + 绿色字 (EditorTheme.AccentGreen)
+        //   inactive→ ○ [name] + 灰色字 (EditorTheme.MutedText)
         // 三个并列工具:Brush / Eraser / Portal(Portal 隐藏 brush 面板,左键走两段式)
-        // 固定 height=20 — Chinese vs Latin 字符字形度量不同,Portal(P/l 有 ascender/descender)
-        // 不固定会让它比画刷/笔擦高一截
+        // 高度由 MakeToggleButton 固定为 20 — Chinese vs Latin 字符字形度量不同,
+        // Portal(P/l 有 ascender/descender) 不固定会让它比画刷/笔擦高一截。
         var tools = new[] { "画刷", "笔擦", "Portal" };
-        var toolButtons = new Button[tools.Length];
         for (int k = 0; k < tools.Length; k++)
         {
             int captured = k;
-            var btn = new Button { text = $"○ {tools[k]}" };
-            btn.clicked += () =>
-            {
-                brush.tool = (BrushState.Tool)captured;
-                state.NotifyChanged();
-                // 工具切换后,canvas 视觉也需要刷新(光标形状、提示文本等)
-                canvasContainer.MarkDirtyRepaint();
-            };
+            var btn = EditorTabShell.MakeToggleButton(state, tools[k],
+                isActive: () => brush.tool == (BrushState.Tool)captured,
+                onClick: () =>
+                {
+                    brush.tool = (BrushState.Tool)captured;
+                    state.NotifyChanged();
+                    // 工具切换后,canvas 视觉也需要刷新(光标形状、提示文本等)
+                    canvasContainer.MarkDirtyRepaint();
+                });
             btn.style.marginLeft = 4;
-            btn.style.fontSize = 11;
-            btn.style.height = 20; // 三个按钮统一高度
-            toolButtons[k] = btn;
             bar.Add(btn);
         }
-        void SyncToolVisual()
+        // Brush 工具隐藏时,brush 面板也同步隐藏(避免空白占位)。
+        // 按钮视觉由 MakeToggleButton 内部 state.Changed 订阅驱动,这里只管面板可见性。
+        void SyncBrushPanelVisibility()
         {
-            int active = (int)brush.tool;
-            for (int k = 0; k < toolButtons.Length; k++)
-            {
-                bool on = (k == active);
-                toolButtons[k].text = on ? $"◉ {tools[k]}" : $"○ {tools[k]}";
-                toolButtons[k].style.color = on
-                    ? new Color(0.306f, 0.788f, 0.627f)
-                    : new Color(0.706f, 0.706f, 0.706f);
-            }
-            // Brush 工具隐藏时,brush 面板也同步隐藏(避免空白占位)
             brushPanel.style.display = brush.tool == BrushState.Tool.Brush ? DisplayStyle.Flex : DisplayStyle.None;
         }
-        state.Changed += SyncToolVisual;
-        SyncToolVisual();
+        state.Changed += SyncBrushPanelVisibility;
+        SyncBrushPanelVisibility();
 
-        var sep2 = new VisualElement();
-        sep2.style.width = 1; sep2.style.height = 16;
-        sep2.style.backgroundColor = new Color(0.314f, 0.314f, 0.314f);
-        sep2.style.marginLeft = 6; sep2.style.marginRight = 6;
-        bar.Add(sep2);
+        bar.Add(EditorTabShell.MakeVerticalSeparator());
 
-        var resetBtn = new Button(() =>
-        {
-            if (state.Cache != null)
-                state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
-            state.NotifyChanged();
-        }) { text = "↺ 重置视图" };
-        resetBtn.style.fontSize = 11;
-        bar.Add(resetBtn);
+        bar.Add(EditorTabShell.MakeResetButton(state));
 
         return bar;
     }
@@ -282,7 +256,7 @@ public static class MapEditTab
         var canvas = new VisualElement();
         canvas.style.width = ViewTransform.CanvasWidth;
         canvas.style.height = ViewTransform.CanvasHeight;
-        canvas.style.backgroundColor = new Color(0.078f, 0.078f, 0.094f);
+        canvas.style.backgroundColor = EditorTheme.CanvasBg;
         canvas.style.borderTopLeftRadius = 3;
         canvas.style.borderTopRightRadius = 3;
         canvas.style.borderBottomLeftRadius = 3;
@@ -291,10 +265,10 @@ public static class MapEditTab
         canvas.style.borderRightWidth = 1;
         canvas.style.borderTopWidth = 1;
         canvas.style.borderBottomWidth = 1;
-        canvas.style.borderLeftColor = new Color(0.235f, 0.235f, 0.275f);
-        canvas.style.borderRightColor = new Color(0.235f, 0.235f, 0.275f);
-        canvas.style.borderTopColor = new Color(0.235f, 0.235f, 0.275f);
-        canvas.style.borderBottomColor = new Color(0.235f, 0.235f, 0.275f);
+        canvas.style.borderLeftColor = EditorTheme.Border;
+        canvas.style.borderRightColor = EditorTheme.Border;
+        canvas.style.borderTopColor = EditorTheme.Border;
+        canvas.style.borderBottomColor = EditorTheme.Border;
         canvas.style.overflow = Overflow.Hidden;
         canvas.style.position = Position.Relative;
 
@@ -304,7 +278,7 @@ public static class MapEditTab
         status.style.position = Position.Absolute;
         status.style.bottom = 4; status.style.left = 8;
         status.style.fontSize = 10;
-        status.style.color = new Color(0.55f, 0.55f, 0.55f);
+        status.style.color = EditorTheme.HintText;
         canvas.Add(status);
 
         // Hint label (bottom-right)
@@ -313,7 +287,7 @@ public static class MapEditTab
         hint.style.position = Position.Absolute;
         hint.style.bottom = 4; hint.style.right = 8;
         hint.style.fontSize = 10;
-        hint.style.color = new Color(0.55f, 0.55f, 0.55f);
+        hint.style.color = EditorTheme.HintText;
         canvas.Add(hint);
 
         // Draw blocks
@@ -351,15 +325,15 @@ public static class MapEditTab
     {
         var panel = new VisualElement();
         panel.style.flexDirection = FlexDirection.Column;
-        panel.style.backgroundColor = new Color(0.118f, 0.118f, 0.118f);
+        panel.style.backgroundColor = EditorTheme.PanelBg;
         panel.style.borderTopLeftRadius = 3; panel.style.borderTopRightRadius = 3;
         panel.style.borderBottomLeftRadius = 3; panel.style.borderBottomRightRadius = 3;
         panel.style.borderLeftWidth = 1; panel.style.borderRightWidth = 1;
         panel.style.borderTopWidth = 1; panel.style.borderBottomWidth = 1;
-        panel.style.borderLeftColor = new Color(0.235f, 0.235f, 0.275f);
-        panel.style.borderRightColor = new Color(0.235f, 0.235f, 0.275f);
-        panel.style.borderTopColor = new Color(0.235f, 0.235f, 0.275f);
-        panel.style.borderBottomColor = new Color(0.235f, 0.235f, 0.275f);
+        panel.style.borderLeftColor = EditorTheme.Border;
+        panel.style.borderRightColor = EditorTheme.Border;
+        panel.style.borderTopColor = EditorTheme.Border;
+        panel.style.borderBottomColor = EditorTheme.Border;
         panel.style.paddingTop = 4; panel.style.paddingBottom = 4;
         panel.style.paddingLeft = 6; panel.style.paddingRight = 6;
         panel.style.marginBottom = 6;
@@ -372,14 +346,14 @@ public static class MapEditTab
         headerRow.style.flexShrink = 0;
 
         var prefix = new Label("▸");
-        prefix.style.color = new Color(0.611f, 0.863f, 0.996f);
+        prefix.style.color = EditorTheme.SubHeader;
         prefix.style.fontSize = 11;
         prefix.style.flexShrink = 0;
         prefix.style.marginRight = 4;
         headerRow.Add(prefix);
 
         var title = new Label("画刷");
-        title.style.color = new Color(0.611f, 0.863f, 0.996f);
+        title.style.color = EditorTheme.SubHeader;
         title.style.fontSize = 11;
         title.style.unityFontStyleAndWeight = FontStyle.Bold;
         title.style.flexShrink = 1;
@@ -396,7 +370,7 @@ public static class MapEditTab
 
         var presetLabel = new Label("Preset:");
         presetLabel.style.fontSize = 11;
-        presetLabel.style.color = new Color(0.706f, 0.706f, 0.706f);
+        presetLabel.style.color = EditorTheme.MutedText;
         presetLabel.style.marginRight = 4;
         presetLabel.style.flexShrink = 0;
         presetRow.Add(presetLabel);
@@ -476,7 +450,7 @@ public static class MapEditTab
 
         var hint = new Label("提示:左键按住拖动可连续画/擦;Portal 工具两段式;右键拖=缩放;中键拖=平移。");
         hint.style.fontSize = 10;
-        hint.style.color = new Color(0.55f, 0.55f, 0.55f);
+        hint.style.color = EditorTheme.HintText;
         hint.style.marginTop = 8;
         hint.style.whiteSpace = WhiteSpace.Normal;
         panel.Add(hint);
@@ -496,7 +470,7 @@ public static class MapEditTab
             {
                 bool on = brush.activePreset == (BrushState.Preset)(k + 1);
                 presetButtons[k].style.backgroundColor = on
-                    ? new Color(0.306f, 0.788f, 0.627f)
+                    ? EditorTheme.AccentGreen
                     : new StyleColor(StyleKeyword.Null);
                 presetButtons[k].style.color = on ? Color.black : new StyleColor(StyleKeyword.Null);
             }
@@ -511,20 +485,20 @@ public static class MapEditTab
     {
         var panel = new VisualElement();
         panel.style.flexDirection = FlexDirection.Column;
-        panel.style.backgroundColor = new Color(0.118f, 0.118f, 0.118f);
+        panel.style.backgroundColor = EditorTheme.PanelBg;
         panel.style.borderTopLeftRadius = 3; panel.style.borderTopRightRadius = 3;
         panel.style.borderBottomLeftRadius = 3; panel.style.borderBottomRightRadius = 3;
         panel.style.borderLeftWidth = 1; panel.style.borderRightWidth = 1;
         panel.style.borderTopWidth = 1; panel.style.borderBottomWidth = 1;
-        panel.style.borderLeftColor = new Color(0.235f, 0.235f, 0.275f);
-        panel.style.borderRightColor = new Color(0.235f, 0.235f, 0.275f);
-        panel.style.borderTopColor = new Color(0.235f, 0.235f, 0.275f);
-        panel.style.borderBottomColor = new Color(0.235f, 0.235f, 0.275f);
+        panel.style.borderLeftColor = EditorTheme.Border;
+        panel.style.borderRightColor = EditorTheme.Border;
+        panel.style.borderTopColor = EditorTheme.Border;
+        panel.style.borderBottomColor = EditorTheme.Border;
         panel.style.paddingTop = 4; panel.style.paddingBottom = 4;
         panel.style.paddingLeft = 6; panel.style.paddingRight = 6;
 
         var header = new Label("▸ Cell");
-        header.style.color = new Color(0.611f, 0.863f, 0.996f);
+        header.style.color = EditorTheme.SubHeader;
         header.style.fontSize = 11;
         header.style.marginBottom = 4;
         panel.Add(header);

@@ -9,7 +9,7 @@ public static class PathEditTab
     public static VisualElement Build(SerializedObject so, PathEditingState state)
     {
         var root = new VisualElement();
-        root.style.backgroundColor = new Color(0.118f, 0.118f, 0.133f);
+        root.style.backgroundColor = EditorTheme.TabBg;
         root.style.paddingTop = 8; root.style.paddingBottom = 8;
         root.style.paddingLeft = 8; root.style.paddingRight = 8;
         root.style.borderTopLeftRadius = 3;
@@ -20,14 +20,14 @@ public static class PathEditTab
         root.style.borderRightWidth = 1;
         root.style.borderTopWidth = 1;
         root.style.borderBottomWidth = 1;
-        root.style.borderLeftColor = new Color(0.306f, 0.788f, 0.627f);
-        root.style.borderRightColor = new Color(0.306f, 0.788f, 0.627f);
-        root.style.borderTopColor = new Color(0.306f, 0.788f, 0.627f);
-        root.style.borderBottomColor = new Color(0.306f, 0.788f, 0.627f);
+        root.style.borderLeftColor = EditorTheme.AccentGreen;
+        root.style.borderRightColor = EditorTheme.AccentGreen;
+        root.style.borderTopColor = EditorTheme.AccentGreen;
+        root.style.borderBottomColor = EditorTheme.AccentGreen;
 
         // Header
         var header = new Label("▸ Path Editing");
-        header.style.color = new Color(0.306f, 0.788f, 0.627f);
+        header.style.color = EditorTheme.AccentGreen;
         header.style.fontSize = 12;
         header.style.unityFontStyleAndWeight = FontStyle.Bold;
         header.style.marginBottom = 6;
@@ -94,7 +94,7 @@ public static class PathEditTab
         row.style.marginBottom = 4;
 
         var label = new Label("当前编辑路径");
-        label.style.color = new Color(0.611f, 0.863f, 0.996f);
+        label.style.color = EditorTheme.SubHeader;
         label.style.minWidth = 90;
         label.style.fontSize = 11;
         row.Add(label);
@@ -180,7 +180,7 @@ public static class PathEditTab
             state.NotifyChanged();
         }) { text = "删除" };
         delBtn.style.marginLeft = 4;
-        delBtn.style.backgroundColor = new Color(0.471f, 0.235f, 0.235f);
+        delBtn.style.backgroundColor = EditorTheme.Danger;
         row.Add(delBtn);
 
         return row;
@@ -190,7 +190,7 @@ public static class PathEditTab
     {
         var bar = new VisualElement();
         bar.style.flexDirection = FlexDirection.Row;
-        bar.style.backgroundColor = new Color(0.157f, 0.157f, 0.157f);
+        bar.style.backgroundColor = EditorTheme.ToolbarBg;
         bar.style.paddingTop = 4; bar.style.paddingBottom = 4;
         bar.style.paddingLeft = 6; bar.style.paddingRight = 6;
         bar.style.alignItems = Align.Center;
@@ -229,32 +229,18 @@ public static class PathEditTab
         bar.Add(delCpBtn);
 
         // 格点吸附 toggle(off 时自由坐标,on 时 0.25 粒度)
-        var snapBtn = new Button(() =>
-        {
-            state.Snap = !state.Snap;
-            state.NotifyChanged();
-        }) { text = state.Snap ? "◉ 格点吸附 (.25)" : "○ 格点吸附 (.25)" };
+        var snapBtn = EditorTabShell.MakeToggleButton(state, "格点吸附 (.25)",
+            isActive: () => state.Snap,
+            onClick: () => { state.Snap = !state.Snap; state.NotifyChanged(); });
         snapBtn.style.marginLeft = 4;
-        snapBtn.style.fontSize = 11;
         snapBtn.tooltip = "开启后,新建/移动 checkpoint 都会吸附到 0.25 粒度格点(每格 4 个点)";
-        void SyncSnapVisual()
-        {
-            snapBtn.text = state.Snap ? "◉ 格点吸附 (.25)" : "○ 格点吸附 (.25)";
-            snapBtn.style.color = state.Snap ? new Color(0.306f, 0.788f, 0.627f) : new Color(0.706f, 0.706f, 0.706f);
-        }
-        state.Changed += SyncSnapVisual;
-        SyncSnapVisual();
         bar.Add(snapBtn);
 
-        var sep1 = new VisualElement();
-        sep1.style.width = 1; sep1.style.height = 16;
-        sep1.style.backgroundColor = new Color(0.314f, 0.314f, 0.314f);
-        sep1.style.marginLeft = 6; sep1.style.marginRight = 6;
-        bar.Add(sep1);
+        bar.Add(EditorTabShell.MakeVerticalSeparator());
 
         var moveLabel = new Label("moveMethod:");
         moveLabel.style.fontSize = 11;
-        moveLabel.style.color = new Color(0.706f, 0.706f, 0.706f);
+        moveLabel.style.color = EditorTheme.MutedText;
         bar.Add(moveLabel);
 
         var methods = new[] { "地面", "近地", "飞行" };
@@ -270,33 +256,22 @@ public static class PathEditTab
                 // Update button visuals
                 foreach (var child in bar.Children())
                     if (child is Button b && methods.Contains(b.text)) b.style.backgroundColor = StyleKeyword.Null;
-                btn.style.backgroundColor = new Color(0.306f, 0.788f, 0.627f);
+                btn.style.backgroundColor = EditorTheme.AccentGreen;
                 btn.style.color = Color.black;
             };
             btn.style.marginLeft = 2;
             btn.style.fontSize = 11;
             if (k == state.MoveMethod)
             {
-                btn.style.backgroundColor = new Color(0.306f, 0.788f, 0.627f);
+                btn.style.backgroundColor = EditorTheme.AccentGreen;
                 btn.style.color = Color.black;
             }
             bar.Add(btn);
         }
 
-        var sep2 = new VisualElement();
-        sep2.style.width = 1; sep2.style.height = 16;
-        sep2.style.backgroundColor = new Color(0.314f, 0.314f, 0.314f);
-        sep2.style.marginLeft = 6; sep2.style.marginRight = 6;
-        bar.Add(sep2);
+        bar.Add(EditorTabShell.MakeVerticalSeparator());
 
-        var resetBtn = new Button(() =>
-        {
-            if (state.Cache != null)
-                state.View = ViewTransform.Fit(state.Cache.ISize, state.Cache.JSize);
-            state.NotifyChanged();
-        }) { text = "↺ 重置视图" };
-        resetBtn.style.fontSize = 11;
-        bar.Add(resetBtn);
+        bar.Add(EditorTabShell.MakeResetButton(state));
 
         return bar;
     }
