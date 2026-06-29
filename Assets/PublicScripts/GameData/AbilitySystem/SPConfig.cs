@@ -5,7 +5,7 @@ namespace AbilitySystem
 {
     public enum SpRecoverMode { Natural, OnAttackSuccessfully, OnAfterHurt, Other }
     public enum SpConsumeMode { Natural, OnAttackSuccessfully, OnAfterHurt, Instant, Other, NoConsume }
-    public enum AbilityOpenMode { Auto, OnAttackAnimBegin, OnBeforeHurt, Manual, Other }
+    public enum AbilityOpenMode { Auto, OnAttackAnimBegin, OnBeforeHurt, Manual, Other, OnDeadlyHurt }
 
     [Serializable]
     public class SPConfig

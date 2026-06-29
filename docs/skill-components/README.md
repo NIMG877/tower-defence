@@ -80,6 +80,16 @@ callers.
 - [DestroyBuff](DestroyBuff.md) — destroys buffs from a BlackBoard
   pair that `ApplyBuff` wrote.
 
+- [ApplyAbnormalState](ApplyAbnormalState.md) - applies or aura-synchronizes
+  abnormal states and optionally writes target/state pairs.
+- [DestroyAbnormalState](DestroyAbnormalState.md) - removes abnormal states
+  from pairs written by `ApplyAbnormalState`.
+
+### Entity lifecycle
+
+- [DestroyEntity](DestroyEntity.md) - calls `Entity.Die()` for self or a
+  Blackboard entity list.
+
 ### Combat
 
 - [AttackEventValueModifier](AttackEventValueModifier.md) — generic
@@ -137,6 +147,10 @@ callers.
   modify-numeric. `key` and `value` both support `fromBlackboard=true`.
 
 ## Conditional triggers
+
+`OnTick` is dispatched once per physics tick to active abilities. It is useful
+for components that must re-evaluate changing Blackboard inputs, such as an
+`EntitySelector` followed by `ApplyBuff` in `mode=aura`.
 
 Every `ComponentConfig` has a `triggers[]` array of `ConditionConfig`
 entries. Each entry declares a `triggerEvent` plus a condition

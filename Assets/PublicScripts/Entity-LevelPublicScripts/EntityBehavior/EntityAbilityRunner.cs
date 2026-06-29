@@ -187,6 +187,7 @@ public class EntityAbilityRunner
         {
             var a = _abilities[i];
             if (!a.isActive) continue;
+            DispatchToAbility(a, new TickEvent { deltaTime = dt });
             for (int c = 0; c < a.components.Count; c++)
             {
                 var comp = a.components[c];
@@ -447,7 +448,7 @@ public class EntityAbilityRunner
     private void OnAfterHurt(Entity origin, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType, bool isDeadly)
     {
         DispatchEvent(new AfterHurtEvent { origin = origin, damage = damage, multiplyer = multiplyer, defPenetrate = defPenetrate, mgrPenetrate = mgrPenetrate, defPenetrate_value = defPenetrate_value, mgrPenetrate_value = mgrPenetrate_value, damageType = damageType, applyType = applyType, isDeadly = isDeadly });
-        for (int i = 0; i < _abilities.Count; i++) _abilities[i].spEngine?.OnAfterHurt(applyType);
+        for (int i = 0; i < _abilities.Count; i++) _abilities[i].spEngine?.OnAfterHurt(applyType, isDeadly);
     }
 
     private void OnAttackAnimBegin()

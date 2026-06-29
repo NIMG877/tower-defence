@@ -1,0 +1,294 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
+  m_Name: zombie_t1
+  m_EditorClassIdentifier: 
+  abilityId: zombie_t1
+  abilityName: "\u5C79\u7ACB\u4E0D\u5012"
+  description: "\u50F5\u5C38\u9996\u6B21\u53D7\u5230\u81F4\u547D\u4F24\u5BB3\u65F6\uFF0C\u8FDB\u5165\u6301\u7EED\u65F6\u95F48s\u7684\u201C\u5C79\u7ACB\u4E0D\u5012\u201D\u72B6\u6001\u3002\u671F\u95F4\u751F\u547D\u503C\u4E0D\u4F4E\u4E8E1\uFF0C\u5F3A\u5316\u81EA\u8EAB\u5E76\u4E3A\u534A\u5F841\u5185\u7684\u540C\u9635\u8425\u5355\u4F4D\u63D0\u4F9B\u653B\u51FB\u529B\u548C\u653B\u901F\u52A0\u6210\uFF0C\u7ED3\u675F\u65F6\u6B7B\u4EA1\u3002"
+  icon: {fileID: 0}
+  Kind: 0
+  sp:
+    totalSp: 0
+    initialSp: 0
+    chargeNum: 1
+    abilityAmount: 8
+    recoverMode: 3
+    consumeMode: 0
+    openMode: 5
+    recoverForbidDuringAbility: 1
+    canManualClose: 0
+  components:
+  - componentType: ApplyDamage
+    parameters:
+      entries:
+      - key: targetMode
+        value: self
+        fromBlackboard: 0
+        type: 3
+      - key: baseValueMode
+        value: fixed
+        fromBlackboard: 0
+        type: 3
+      - key: baseValue
+        value: 1
+        fromBlackboard: 0
+        type: 1
+      - key: damageType
+        value: 3
+        fromBlackboard: 0
+        type: 0
+      - key: applyType
+        value: 2
+        fromBlackboard: 0
+        type: 0
+    triggers:
+    - triggerEvent: 2
+      groups: []
+  - componentType: ApplyAbnormalState
+    parameters:
+      entries:
+      - key: abnormalTypes
+        value: 3
+        fromBlackboard: 0
+        type: 3
+      - key: abnormalTimes
+        value: -10
+        fromBlackboard: 0
+        type: 3
+      - key: outputTarget
+        value: zombie_t1_abnormal_targets
+        fromBlackboard: 0
+        type: 3
+      - key: outputState
+        value: zombie_t1_abnormal_states
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 2
+      groups: []
+  - componentType: ApplyBuff
+    parameters:
+      entries:
+      - key: buffTypes
+        value: atk_delta_percent,atkspd_delta_value,mspeed_delta_percent
+        fromBlackboard: 0
+        type: 3
+      - key: buffValues
+        value: 0.5,60,0.6
+        fromBlackboard: 0
+        type: 3
+      - key: buffId
+        value: selfStrength
+        fromBlackboard: 0
+        type: 3
+      - key: buffTime
+        value: -10
+        fromBlackboard: 0
+        type: 1
+      - key: isWhiteList
+        value: True
+        fromBlackboard: 0
+        type: 2
+      - key: outputTarget
+        value: zombie_t1_self_buff_targets
+        fromBlackboard: 0
+        type: 3
+      - key: outputBuff
+        value: zombie_t1_self_buffs
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 2
+      groups: []
+  - componentType: ApplyAnimationOverride
+    parameters:
+      entries:
+      - key: mode
+        value: override
+        fromBlackboard: 0
+        type: 3
+      - key: slots
+        value: Idle,Move,Start,AttackClose,AttackRemote
+        fromBlackboard: 0
+        type: 3
+      - key: resources
+        value: Idle2,Move2,1to2,Attack2,Attack2
+        fromBlackboard: 0
+        type: 3
+      - key: outputKey
+        value: zombie_t1_animation_overrides
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 2
+      groups: []
+  - componentType: ApplyAnimationOverride
+    parameters:
+      entries:
+      - key: mode
+        value: once
+        fromBlackboard: 0
+        type: 3
+      - key: slots
+        value: Start
+        fromBlackboard: 0
+        type: 3
+      - key: resources
+        value: 1to2
+        fromBlackboard: 0
+        type: 3
+      - key: state
+        value: Start
+        fromBlackboard: 0
+        type: 3
+      - key: forceChange
+        value: True
+        fromBlackboard: 0
+        type: 2
+    triggers:
+    - triggerEvent: 2
+      groups: []
+  - componentType: EntitySelector
+    parameters:
+      entries:
+      - key: subjectMode
+        value: self
+        fromBlackboard: 0
+        type: 3
+      - key: selectionMode
+        value: radius
+        fromBlackboard: 0
+        type: 3
+      - key: campRelation
+        value: same
+        fromBlackboard: 0
+        type: 3
+      - key: radius
+        value: 1
+        fromBlackboard: 0
+        type: 1
+      - key: force
+        value: False
+        fromBlackboard: 0
+        type: 2
+      - key: excludeSubjects
+        value: False
+        fromBlackboard: 0
+        type: 2
+      - key: outputEntitiesKey
+        value: zombie_t1_aura_targets
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 16
+      groups: []
+  - componentType: ApplyBuff
+    parameters:
+      entries:
+      - key: mode
+        value: aura
+        fromBlackboard: 0
+        type: 3
+      - key: buffTypes
+        value: atk_delta_percent,atkspd_delta_value
+        fromBlackboard: 0
+        type: 3
+      - key: buffValues
+        value: 0.3,20
+        fromBlackboard: 0
+        type: 3
+      - key: buffId
+        value: zombieStrength
+        fromBlackboard: 0
+        type: 3
+      - key: buffTime
+        value: -10
+        fromBlackboard: 0
+        type: 1
+      - key: isWhiteList
+        value: True
+        fromBlackboard: 0
+        type: 2
+      - key: blackboardKey
+        value: zombie_t1_aura_targets
+        fromBlackboard: 0
+        type: 3
+      - key: outputTarget
+        value: zombie_t1_aura_buff_targets
+        fromBlackboard: 0
+        type: 3
+      - key: outputBuff
+        value: zombie_t1_aura_buffs
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 16
+      groups: []
+  - componentType: DestroyBuff
+    parameters:
+      entries:
+      - key: inputTarget
+        value: zombie_t1_self_buff_targets
+        fromBlackboard: 0
+        type: 3
+      - key: inputBuff
+        value: zombie_t1_self_buffs
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 3
+      groups: []
+  - componentType: DestroyBuff
+    parameters:
+      entries:
+      - key: inputTarget
+        value: zombie_t1_aura_buff_targets
+        fromBlackboard: 0
+        type: 3
+      - key: inputBuff
+        value: zombie_t1_aura_buffs
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 3
+      groups: []
+  - componentType: DestroyAbnormalState
+    parameters:
+      entries:
+      - key: inputTarget
+        value: zombie_t1_abnormal_targets
+        fromBlackboard: 0
+        type: 3
+      - key: inputState
+        value: zombie_t1_abnormal_states
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 3
+      groups: []
+  - componentType: RemoveAnimationOverride
+    parameters:
+      entries:
+      - key: inputKey
+        value: zombie_t1_animation_overrides
+        fromBlackboard: 0
+        type: 3
+    triggers:
+    - triggerEvent: 3
+      groups: []
+  - componentType: DestroyEntity
+    parameters:
+      entries: []
+    triggers:
+    - triggerEvent: 3
+      groups: []

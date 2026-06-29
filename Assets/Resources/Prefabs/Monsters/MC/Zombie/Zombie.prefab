@@ -9803,7 +9803,6 @@ GameObject:
   - component: {fileID: 6918839178590651092}
   - component: {fileID: 7915518268081645992}
   - component: {fileID: -4401687450290542570}
-  - component: {fileID: 8005667684480780664}
   m_Layer: 0
   m_Name: Zombie
   m_TagString: Untagged
@@ -9840,17 +9839,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98c15169cca6fd54088c6e3b3c07ff80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  o_default: {fileID: 11400000, guid: 6aa84bc05c5fc034d98dd69ccf9fe084, type: 2}
-  o_idle: {fileID: 11400000, guid: f208a73e329de564dad1a8cdc71a00bd, type: 2}
-  o_move: {fileID: 11400000, guid: 81fe51a3e85cbc64faf42fff78b49e52, type: 2}
-  o_attack_begin: {fileID: 0}
-  o_attack_end: {fileID: 0}
-  o_start: {fileID: 11400000, guid: 6aa84bc05c5fc034d98dd69ccf9fe084, type: 2}
-  o_die: {fileID: 11400000, guid: 42f304e7c7f02734eacec57240f2dc0f, type: 2}
-  o_attack_remote:
-  - {fileID: 11400000, guid: 591fee8fa70d5574291b1a97d2f5a7ab, type: 2}
-  o_attack_close:
-  - {fileID: 11400000, guid: 591fee8fa70d5574291b1a97d2f5a7ab, type: 2}
 --- !u!114 &7915518268081645992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9903,34 +9891,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b8f5bd5b58612f44b7e392028029c95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &8005667684480780664
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5752354500556713093}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4abef47da148b0e4c978ea9a368352ec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _talentName: "\u5C79\u7ACB\u4E0D\u5012"
-  _talentDescription: "\u50F5\u5C38\u9996\u6B21\u53D7\u5230\u81F4\u547D\u4F24\u5BB3\u65F6\uFF0C\u8FDB\u5165\u6301\u7EED\u65F6\u95F48s\u7684\u201C\u5C79\u7ACB\u4E0D\u5012\u201D\u72B6\u6001\u3002\u201C\u5C79\u7ACB\u4E0D\u5012\u201D\u72B6\u6001\u671F\u95F4\uFF0C\u50F5\u5C38\u751F\u547D\u503C\u4E0D\u5C0F\u4E8E1\uFF0C\u4F7F\u79BB\u81EA\u8EAB\u8DDD\u79BB\u4E0D\u5927\u4E8E1\u7684\u6240\u6709\u654C\u65B9\u5355\u4F4D\u653B\u51FB\u529B+30%\uFF0C\u653B\u51FB\u901F\u5EA6+50\uFF0C\u540C\u65F6\u4F7F\u81EA\u8EAB\u653B\u51FB\u529B\u989D\u5916+50%\uFF0C\u653B\u51FB\u901F\u5EA6\u989D\u5916+80\uFF0C\u79FB\u52A8\u901F\u5EA6\u989D\u5916+100%"
-  _idle2: Idle2
-  _move2: Move2
-  _1to2: 1to2
-  _attack2: Attack2
-  _angryTime: 8
-  _buffRadius: 1
-  _buffEffect: {fileID: 4175382614404887974, guid: 960cdd08cb967cb48b657ae8070c4794, type: 3}
-  _buffTypes: 010000000e000000
-  _buffValues:
-  - 0.3
-  - 20
-  _additionalBuffEffect: {fileID: 3348083806808885109}
-  _additionalBuffTypes: 010000000e00000014000000
-  _additionalBuffValues:
-  - 0.5
-  - 60
-  - 0.6

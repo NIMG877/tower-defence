@@ -81,6 +81,11 @@ namespace AbilitySystem
     {
         public override TriggerEvent TriggerEvent => AbilitySystem.TriggerEvent.OnBeforeDieAnimation;
     }
+    public class TickEvent : AbilityEvent
+    {
+        public override TriggerEvent TriggerEvent => AbilitySystem.TriggerEvent.OnTick;
+        public float deltaTime;
+    }
     public class AbilityBeginEvent : AbilityEvent
     {
         public override TriggerEvent TriggerEvent => AbilitySystem.TriggerEvent.OnAbilityBegin;

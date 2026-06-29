@@ -477,6 +477,8 @@ namespace AbilitySystem
         OnBeforeHurt, OnAfterHurt,
         // 动画相关事件
         OnAttackAnimBegin,OnBeforeDieAnimation,
+        // 通用物理帧事件。追加在末尾以保持既有 asset 的枚举序号稳定。
+        OnTick,
     }
 
     public enum AbilityKind

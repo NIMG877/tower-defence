@@ -71,11 +71,13 @@ namespace AbilitySystem
             if (_cfg.consumeMode == SpConsumeMode.OnAttackSuccessfully && _isActive) ConsumeAmount(1f);
         }
 
-        public void OnAfterHurt(int applyType)
+        public void OnAfterHurt(int applyType, bool isDeadly)
         {
             if (applyType != 0 && applyType != 1) return;
             if (_cfg.recoverMode == SpRecoverMode.OnAfterHurt) RecoverSp(1f);
             if (_cfg.consumeMode == SpConsumeMode.OnAfterHurt && _isActive) ConsumeAmount(1f);
+            if (!_isActive && isDeadly && _cfg.openMode == AbilityOpenMode.OnDeadlyHurt && CanBegin())
+                StartAbility();
         }
 
         public void OnAttackAnimBegin()

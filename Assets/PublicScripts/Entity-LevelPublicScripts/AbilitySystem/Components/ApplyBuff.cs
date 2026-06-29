@@ -25,6 +25,7 @@ namespace AbilitySystem.Components
         private Func<BuffType[]> _types;
         private Func<float[]> _values;
         private Func<bool> _isWhiteList;
+        private Func<string> _mode;
         // Output keys (optional). When both are set, OnTrigger appends this round's
         // (target, created-buff) pairs to the per-Entity shared blackboard at these
         // keys. Targets without a buffController are skipped entirely (not appended),
@@ -44,6 +45,7 @@ namespace AbilitySystem.Components
             _buffTime        = p.GetFloatLazy ("buffTime",      -10f,         bb);
             _toSelf          = p.GetBoolLazy  ("toSelf",        true,         bb);
             _isWhiteList     = p.GetBoolLazy  ("isWhiteList",   false,        bb);
+            _mode            = p.GetStringLazy("mode",          "normal",     bb);
             _inputTargetKey  = p.GetStringLazy("blackboardKey", "",           bb);
             _outputTargetKey = p.GetStringLazy("outputTarget",  "",           bb);
             _outputBuffKey   = p.GetStringLazy("outputBuff",    "",           bb);
@@ -56,6 +58,20 @@ namespace AbilitySystem.Components
 
             List<Entity> targets = ResolveTargets(ctx);
             if (targets == null) return;
+
+            string mode = Normalize(_mode());
+            if (mode == "aura")
+            {
+                SyncAura(ctx, targets);
+                return;
+            }
+            if (mode != "normal")
+            {
+                OneShotWarn.WarnOnce(
+                    "apply-buff-mode:" + mode,
+                    $"ApplyBuff: unknown mode '{_mode()}'; expected 'normal' or 'aura'.");
+                return;
+            }
 
             bool needWrite = !string.IsNullOrEmpty(_outputTargetKey()) && !string.IsNullOrEmpty(_outputBuffKey());
 
@@ -82,6 +98,106 @@ namespace AbilitySystem.Components
             {
                 AppendToBlackboard(ctx, roundTargets, roundBuffs);
             }
+        }
+
+        private void SyncAura(AbilityContext ctx, List<Entity> targets)
+        {
+            string targetKey = _outputTargetKey();
+            string buffKey = _outputBuffKey();
+            if (ctx.sharedBlackboard == null || string.IsNullOrEmpty(_inputTargetKey())
+                || string.IsNullOrEmpty(targetKey) || string.IsNullOrEmpty(buffKey))
+            {
+                OneShotWarn.WarnOnce(
+                    "apply-buff-aura-keys",
+                    "ApplyBuff: mode='aura' requires blackboardKey, outputTarget, and outputBuff.");
+                return;
+            }
+
+            BuffType[] types = _types();
+            float[] values = _values();
+            if (types.Length != values.Length)
+            {
+                OneShotWarn.WarnOnce(
+                    "apply-buff-aura-length",
+                    $"ApplyBuff: buffTypes/buffValues length mismatch ({types.Length}/{values.Length}); skipping aura sync.");
+                return;
+            }
+
+            var oldTargets = ctx.sharedBlackboard.Get<List<Entity>>(targetKey, null) ?? new List<Entity>();
+            var oldBuffs = ctx.sharedBlackboard.Get<List<Buff>>(buffKey, null) ?? new List<Buff>();
+            var nextTargets = new List<Entity>();
+            var nextBuffs = new List<Buff>();
+            var desired = new HashSet<Entity>();
+            var retained = new HashSet<Buff>();
+
+            for (int i = 0; i < targets.Count; i++)
+            {
+                Entity target = targets[i];
+                if (target == null || target.buffController == null || !desired.Add(target)) continue;
+
+                Buff tracked = FindTrackedBuff(target, oldTargets, oldBuffs);
+                if (tracked != null && target.buffController.Buffs.Contains(tracked))
+                {
+                    target.buffController.SetBuffValues(values, tracked);
+                    tracked.buff_time = _buffTime();
+                }
+                else
+                {
+                    tracked = target.buffController.CreateBuff(
+                        types, null, _buffId(), values, _buffTime(), _isWhiteList());
+                }
+
+                nextTargets.Add(target);
+                nextBuffs.Add(tracked);
+                if (tracked != null) retained.Add(tracked);
+            }
+
+            int oldCount = Math.Min(oldTargets.Count, oldBuffs.Count);
+            for (int i = 0; i < oldCount; i++)
+            {
+                Entity target = oldTargets[i];
+                Buff buff = oldBuffs[i];
+                if (target == null || target.buffController == null || buff == null || retained.Contains(buff)) continue;
+                if (target.buffController.Buffs.Contains(buff)) target.buffController.DestroyBuff(buff);
+            }
+
+            ctx.sharedBlackboard.Remove(targetKey);
+            ctx.sharedBlackboard.Remove(buffKey);
+            ctx.sharedBlackboard.Set(targetKey, nextTargets);
+            ctx.sharedBlackboard.Set(buffKey, nextBuffs);
+        }
+
+        private static Buff FindTrackedBuff(Entity target, List<Entity> targets, List<Buff> buffs)
+        {
+            int count = Math.Min(targets.Count, buffs.Count);
+            for (int i = 0; i < count; i++)
+                if (targets[i] == target) return buffs[i];
+            return null;
+        }
+
+        public override void OnTeardown(AbilityContext ctx)
+        {
+            if (Normalize(_mode()) != "aura" || ctx.sharedBlackboard == null) return;
+            string targetKey = _outputTargetKey();
+            string buffKey = _outputBuffKey();
+            if (string.IsNullOrEmpty(targetKey) || string.IsNullOrEmpty(buffKey)) return;
+
+            var targets = ctx.sharedBlackboard.Get<List<Entity>>(targetKey, null);
+            var buffs = ctx.sharedBlackboard.Get<List<Buff>>(buffKey, null);
+            if (targets != null && buffs != null)
+            {
+                int count = Math.Min(targets.Count, buffs.Count);
+                for (int i = 0; i < count; i++)
+                {
+                    Entity target = targets[i];
+                    Buff buff = buffs[i];
+                    if (target != null && target.buffController != null && buff != null
+                        && target.buffController.Buffs.Contains(buff))
+                        target.buffController.DestroyBuff(buff);
+                }
+            }
+            ctx.sharedBlackboard.Remove(targetKey);
+            ctx.sharedBlackboard.Remove(buffKey);
         }
 
         // Accumulate this round's targets/buffs into the per-Entity shared
@@ -119,6 +235,11 @@ namespace AbilitySystem.Components
             Entity t = _toSelf() ? ctx.entity : null;
             if (t == null || t.buffController == null) return null;
             return new List<Entity> { t };
+        }
+
+        private static string Normalize(string value)
+        {
+            return string.IsNullOrEmpty(value) ? "" : value.Trim().ToLowerInvariant();
         }
     }
 }
