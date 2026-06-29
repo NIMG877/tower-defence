@@ -635,7 +635,6 @@ GameObject:
   - component: {fileID: 6918839178590651092}
   - component: {fileID: -2194638516088659704}
   - component: {fileID: -4401687450290542570}
-  - component: {fileID: -5442854074331212778}
   m_Layer: 0
   m_Name: Skeleton
   m_TagString: Untagged
@@ -672,17 +671,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98c15169cca6fd54088c6e3b3c07ff80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  o_default: {fileID: 11400000, guid: e240b36ab00b7d24193b818db5dab5d2, type: 2}
-  o_idle: {fileID: 11400000, guid: 32096c44820b16442bd7f8936c8950e9, type: 2}
-  o_move: {fileID: 11400000, guid: f9ac4a9f41609164d891d2be18249667, type: 2}
-  o_attack_begin: {fileID: 0}
-  o_attack_end: {fileID: 0}
-  o_start: {fileID: 11400000, guid: e240b36ab00b7d24193b818db5dab5d2, type: 2}
-  o_die: {fileID: 11400000, guid: 489c016c06ae9b646ac9b9253d5ea682, type: 2}
-  o_attack_remote:
-  - {fileID: 11400000, guid: 7bb5625fa381cdc4bbde52bf675a02b7, type: 2}
-  o_attack_close:
-  - {fileID: 11400000, guid: 7bb5625fa381cdc4bbde52bf675a02b7, type: 2}
 --- !u!114 &-2194638516088659704
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -735,31 +723,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b8f5bd5b58612f44b7e392028029c95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &-5442854074331212778
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5752354500556713093}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b1e032611abdc44e8f470816c68dc66, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _talentName: 
-  _talentDescription: 
-  _eAttack: ExtraAttack
-  _bulletData:
-    BulletPrefab: {fileID: 7814424976800272869, guid: 026bd73124e002e4d998c0a821b31243, type: 3}
-    BulletTrailPrefab: {fileID: 179391116157181972, guid: 16610a73ec06bb24da5b91cb1883312e, type: 3}
-    BulletSpawnEffect: {fileID: 0}
-    BulletDestroyEffect: {fileID: 0}
-    BulletSpeed: 3
-    BulletType: 0
-    AllowNoTarget: 0
-    DevitationXRate: 0
-    DevitationYValue: 0
 --- !u!1 &5932237591310399698
 GameObject:
   m_ObjectHideFlags: 0

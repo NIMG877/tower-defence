@@ -1,0 +1,32 @@
+# SharedTargetExtraAttack
+
+Consumes shared attack requests from the owning entity's Blackboard and
+performs interruptible extra attacks against their exact targets.
+
+**Registered as:** `SharedTargetExtraAttack`
+
+## Parameters
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `queueKey` | String | `shared_attack_requests` | Input `List<SharedAttackRequest>` Blackboard key. |
+| `activeSourceKey` | String | `shared_attack_source` | Writes the active request sender so `ShareAttackTarget` can prevent echo. |
+| `attackAnimation` | String | `""` | Named Animation Group used for both `AttackClose` and `AttackRemote`. |
+| `abnormalType` | Int | `0` | Abnormal state held while the queue is nonempty. Supported range `0..3`. |
+| `abnormalTime` | Float | `-10` | Abnormal-state duration; the default is permanent until explicitly removed. |
+
+## Triggers and lifecycle
+
+Configure the same component instance for `OnTick`, `OnAttackSuccessfully`,
+and `OnAttackInterrupt`.
+
+- `OnTick`: removes invalid queue-front targets, applies the abnormal state,
+  and attempts the first exact-target attack unless the entity is in `Start`
+  or another shared extra attack is active.
+- `OnAttackSuccessfully`: consumes the active request.
+- `OnAttackInterrupt`: clears the active marker but retains the request for a
+  later retry.
+- Teardown clears the queue/source keys and removes its abnormal state.
+
+The underlying abnormal-state API has no source handle, so removing the state
+can also remove the same type applied by another system.

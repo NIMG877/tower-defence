@@ -99,6 +99,11 @@ callers.
 - [ApplyDamage](ApplyDamage.md) - applies direct attack-based or fixed-value
   damage to the event target, self, or a Blackboard entity list.
 
+- [ShareAttackTarget](ShareAttackTarget.md) - relays a current attack target
+  to selected allied ability users, optionally through a communication bullet.
+- [SharedTargetExtraAttack](SharedTargetExtraAttack.md) - consumes relayed
+  targets as queued, exact-target extra attacks.
+
 ### Entity selection
 
 - [EntitySelector](EntitySelector.md) - selects entities by subject, event
