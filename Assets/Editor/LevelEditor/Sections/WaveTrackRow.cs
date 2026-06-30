@@ -31,9 +31,10 @@ public static class WaveTrackRow
         row.style.flexDirection = FlexDirection.Row;
         row.style.marginBottom = 4;
 
-        // === 左侧:轨道头 (15% 总宽) ===
+        // === 左侧:轨道头 (与 timelineScroll 按 flexGrow 15:85 分总宽) ===
         var header = new VisualElement();
-        header.style.width = new Length(15, LengthUnit.Percent);
+        header.style.flexGrow = 15;   // 占 row 宽度的 15/(15+85) = 15%
+        header.style.flexBasis = 0;
         header.style.flexShrink = 0;
         header.style.flexDirection = FlexDirection.Column;
         header.style.backgroundColor = new Color(0.13f, 0.13f, 0.16f);
@@ -91,7 +92,6 @@ public static class WaveTrackRow
         lockBtn.style.flexGrow = 2;
         lockBtn.style.flexBasis = 0;
         lockBtn.style.flexShrink = 0;
-        lockBtn.style.marginRight = 4;
         btnRow.Add(lockBtn);
 
         // + 按钮(纯文字)
@@ -115,7 +115,6 @@ public static class WaveTrackRow
         addActionBtn.style.flexGrow = 1;
         addActionBtn.style.flexBasis = 0;
         addActionBtn.style.flexShrink = 0;
-        addActionBtn.style.marginRight = 4;
         btnRow.Add(addActionBtn);
 
         // × 25%
@@ -136,6 +135,7 @@ public static class WaveTrackRow
         delActionBtn.style.flexGrow = 1;
         delActionBtn.style.flexBasis = 0;
         delActionBtn.style.flexShrink = 0;
+        delActionBtn.style.marginRight = 0;
         btnRow.Add(delActionBtn);
 
         // 占位:删除 Wave / Wave 块删除按钮已由外层 WaveTimelineSection 提供
@@ -144,8 +144,9 @@ public static class WaveTrackRow
 
         // === 右侧:时间轴 ===
         var timelineScroll = new ScrollView(ScrollViewMode.Horizontal);
-        timelineScroll.style.width = new Length(85, LengthUnit.Percent);  // 右栏占总宽 85%
-        timelineScroll.style.flexGrow = 0;
+        timelineScroll.style.flexGrow = 85;   // 占 row 宽度的 85/(15+85) = 85%
+        timelineScroll.style.flexBasis = 0;
+        timelineScroll.style.flexShrink = 0;
         timelineScroll.style.height = 70;
         timelineScroll.style.backgroundColor = new Color(0.1f, 0.1f, 0.12f);
         timelineScroll.style.borderTopRightRadius = 3;
