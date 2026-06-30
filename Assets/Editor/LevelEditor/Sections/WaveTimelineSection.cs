@@ -14,6 +14,7 @@ public static class WaveTimelineSection
 {
     // 整体缩放 (所有 Wave 共享, static)
     static float _zoom = 1f;
+    public static float Zoom => _zoom;
 
     public static VisualElement Build(
         SerializedObject so,
@@ -286,7 +287,7 @@ public static class WaveTimelineSection
         }
     }
 
-    static Color CommandTypeColor(int cmd)
+    public static Color CommandTypeColor(int cmd)
     {
         switch (cmd)
         {
