@@ -64,7 +64,10 @@ public static class WaveTrackRow
 
         // Name(可编辑)
         var nameField = new TextField { value = trackProp.FindPropertyRelative("Name").stringValue };
+        nameField.label = "";   // 隐藏内置 Label,留出全部宽度给输入区
         nameField.style.flexGrow = 1;
+        nameField.style.flexBasis = 0;  // 配合 flexGrow,允许收缩到 0,避免被内部 padding 挤
+        nameField.style.minWidth = 0;
         nameField.style.marginLeft = 2;
         nameField.style.marginRight = 2;
         nameField.RegisterValueChangedCallback(evt =>
