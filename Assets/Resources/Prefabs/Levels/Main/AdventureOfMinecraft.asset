@@ -16,3 +16,5 @@ MonoBehaviour:
   LevelCollectionDescription: "\u5F53\u4F60\u8BEF\u5165\u4E00\u4E2A\u65B0\u5947\u7684\u4E16\u754C\uFF0C\u4F60\u4F1A\u9047\u5230\u4EC0\u4E48\u6837\u4EE4\u4EBA\u96BE\u5FD8\u7684\u5947\u9047\u5462\uFF1F"
   LevelPaths:
   - Prefabs/Levels/Main/AdventureOfMinecraft/MC-1/MC-1
+  - Prefabs/Levels/Main/AdventureOfMinecraft/MC-2/MC-2
+  - Prefabs/Levels/Main/AdventureOfMinecraft/MC-3/MC-3

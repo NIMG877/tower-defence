@@ -420,6 +420,78 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 7d6b84033e6602140b4829f8674e4306, type: 2}
     AnimationResources: {fileID: 11400000, guid: 70eb60c57ea57be4d8adbabb43102e8b, type: 2}
   - ID:
+      ID_C: c
+      ID_N: 7
+    ChineseName: "\u8299\u84C9"
+    EnglishName: Hibisc
+    Description: "\u7F57\u5FB7\u5C9B\u533B\u7597\u5E72\u5458\u8299\u84C9\uFF0C\u5C06\u4E3A\u4F24\u5458\u63D0\u4F9B\u53EF\u9760\u7684\u533B\u7597\u63F4\u52A9\u3002\n\u8BF7\u5C0F\u5FC3\u5904\u7406\u5979\u4E0E\u5E72\u5458\u708E\u7194\u95F4\u7684\u5173\u7CFB\u3002"
+    Prefab: {fileID: 467946140099409809, guid: e3a3e81c00ba86e49ba0dfc284ab424f, type: 3}
+    HeadImage: {fileID: 21300000, guid: b4ad92afc093b364f95df6cb80c44f22, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: 568a0895f8d4b2542b9f03e31854b420, type: 3}
+    WholeImage: {fileID: 21300000, guid: 41a80ba1d61e984489e33d9bc1f24b04, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 3
+    CharacterInfluence: "\u7F57\u5FB7\u5C9B"
+    CharacterJob: 5
+    CharacterSubJob: "\u533B\u5E08"
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    - {x: 0, y: 2}
+    - {x: 0, y: 3}
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    - {x: 1, y: 2}
+    - {x: 1, y: 3}
+    - {x: -1, y: 0}
+    - {x: -1, y: 1}
+    - {x: -1, y: 2}
+    - {x: -1, y: 3}
+    VisionRadius: 0
+    Attack: 408
+    BaseAttackTime: 2.85
+    AttackNum: 1
+    DamageType: 3
+    MaxHp: 1220
+    Defense: 110
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    StunImmune: 0
+    SilenceImmune: 0
+    SleepImmune: 0
+    FrozenImmune: 0
+    LevitateImmune: 0
+    DisarmedCombatImmune: 0
+    FearedImmune: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 15
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 1
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: 74a7d2040c8b79442a54bd87961769d5, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: bfb4d0f2a2b00134585e846bdb20816e, type: 2}
+    AnimationResources: {fileID: 11400000, guid: db1cfe2d343af164e8ae810c8e47b817, type: 2}
+  - ID:
       ID_C: m
       ID_N: 1
     ChineseName: "\u50F5\u5C38"
@@ -474,9 +546,9 @@ MonoBehaviour:
     MoveSpeed: 0.5
     MassLevel: 1
     MoveMethod: 0
-    Skills:
+    Skills: []
+    Talents:
     - {fileID: 11400000, guid: 0fa3a5a5548d012448f51c66faaafe07, type: 2}
-    Talents: []
     AnimationResources: {fileID: 11400000, guid: 5c5f405e5ac452d43a6e420f1522f197, type: 2}
   - ID:
       ID_C: m
@@ -594,7 +666,7 @@ MonoBehaviour:
     MoveMethod: 0
     Skills: []
     Talents: []
-    AnimationResources: {fileID: 11400000, guid: d0c65e57c85fd7f4a859cc396ef72414, type: 2}
+    AnimationResources: {fileID: 0}
   - ID:
       ID_C: m
       ID_N: 4

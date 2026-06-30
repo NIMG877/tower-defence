@@ -43,7 +43,7 @@ Material:
     - _Cutoff: 0.218
     - _DepthAnchorY: 0
     - _DepthOffset: 0
-    - _DepthPoseAngle: -30
+    - _DepthPoseAngle: 0
     - _DepthSplitY: 0
     - _DoubleSidedLighting: 0
     - _FillPhase: 0
