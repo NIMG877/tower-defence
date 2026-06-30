@@ -28,41 +28,9 @@ public static class WaveMigrator
             return;
         }
 
-        for (int w = 0; w < ld.Waves.Length; w++)
-        {
-            var wave = ld.Waves[w];
-            var oldActions = wave.LegacyActions;
-            if (oldActions == null)
-            {
-                // 已是新结构但 SchemaVersion 未更新(用户中途保存过),跳过 Actions 转换
-                continue;
-            }
-
-            var newActions = new LevelActions.Action[oldActions.Length];
-            float cumulative = 0f;
-            for (int i = 0; i < oldActions.Length; i++)
-            {
-                var a = oldActions[i];
-                if (i == 0) cumulative = 0f;
-                else cumulative += Mathf.Max(0f, a.GapFromLastAction);
-                a.TriggerTime = cumulative;
-                newActions[i] = a;
-            }
-
-            wave.Tracks = new[]
-            {
-                new LevelActions.Track
-                {
-                    Name = "默认",
-                    TrackColor = DefaultTrackColor(0),
-                    Locked = false,
-                    Actions = newActions,
-                }
-            };
-            wave.LegacyActions = null;
-            ld.Waves[w] = wave;
-        }
-
+        // Phase 1b+:LegacyActions 字段已删除。这里只兜底 v1 → v2 未在 Phase 1a 跑过迁移的关卡
+        // (理论上不会发生,但 InitializeOnLoad 仍扫一遍以防 commit 跨分支合并时漏过)。
+        Debug.LogWarning($"[WaveMigrator] 关卡 {ld.name} SchemaVersion={ld.SchemaVersion} 但 Tracks 为空,无法自动恢复 v1 数据,请手动重建或从 git 找回 Phase 1a 前的版本。");
         ld.SchemaVersion = 2;
     }
 

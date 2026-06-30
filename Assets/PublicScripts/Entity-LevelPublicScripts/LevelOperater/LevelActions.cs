@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class LevelActions
@@ -13,10 +12,6 @@ public class LevelActions
     public struct Wave
     {
         public Track[] Tracks;
-
-        // ↓ 临时:所有 LevelData 迁移完成后删除(Phase 1b)
-        [SerializeField, HideInInspector, FormerlySerializedAs("Actions")]
-        internal Action[] LegacyActions;
     }
 
     [Serializable]
@@ -32,9 +27,6 @@ public class LevelActions
     public struct Action
     {
         [Tooltip("指令类型:0-召唤可移动实体,1-生成静止实体,2-显示地面路径,3-显示近地悬浮路径,4-显示飞行路径,5-显示右侧提示卡,6-显示剧情")] public int CommandType;
-        // ↓ Phase 1a 保留旧字段,Phase 1b 删除
-        [Tooltip("距上一 Action 间隔(v1 字段,迁移后无效)")] public float GapFromLastAction;
-        // ↓ 新增:绝对触发时间(秒),Wave 开始后 N 秒触发
         [Tooltip("绝对触发时间(秒),Wave 开始后 N 秒触发")] public float TriggerTime;
         [Tooltip("动作开始前函数")] public UnityEvent OnBeforeAction;
         [Tooltip("实体 ID")] public EntityID EntityPrefabID;
