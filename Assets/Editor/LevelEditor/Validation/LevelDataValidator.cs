@@ -159,6 +159,31 @@ namespace Validation
                 }
             }
 
+            // 规则 11: TriggerTime ≥ 0(所有 Action)
+            if (data.Waves != null)
+            {
+                for (int w = 0; w < data.Waves.Length; w++)
+                {
+                    var tracks = data.Waves[w].Tracks;
+                    if (tracks == null) continue;
+                    for (int t = 0; t < tracks.Length; t++)
+                    {
+                        var actions = tracks[t].Actions;
+                        if (actions == null) continue;
+                        for (int a = 0; a < actions.Length; a++)
+                        {
+                            if (actions[a].TriggerTime < 0f)
+                            {
+                                issues.Add(new ValidationIssue(
+                                    ValidationSeverity.Error,
+                                    $"Waves[{w}].Tracks[{t}].Actions[{a}].TriggerTime",
+                                    $"Wave {w} 轨道 {t} 上 Action 触发时间 TriggerTime = {actions[a].TriggerTime} 为负值"));
+                            }
+                        }
+                    }
+                }
+            }
+
             return issues;
         }
     }
