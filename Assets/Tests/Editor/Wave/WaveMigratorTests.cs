@@ -104,16 +104,16 @@ namespace Wave.Tests
                 {
                     LegacyActions = new[]
                     {
-                        MakeV1Action(0f),
-                        MakeV1Action(-1f), // 异常输入
+                        MakeV1Action(0f),       // cumulative after i=0 = 0
+                        MakeV1Action(-1f),      // negative gap is clamped via max(0, -1) = 0, so cumulative stays at 0
                     }
                 }
             };
 
             WaveMigrator.MigrateLevelData(ld);
 
-            Assert.AreEqual(1f, ld.Waves[0].Tracks[0].Actions[1].TriggerTime, 0.0001f,
-                "negative gap should not reduce TriggerTime below previous cumulative");
+            Assert.AreEqual(0f, ld.Waves[0].Tracks[0].Actions[1].TriggerTime, 0.0001f,
+                "negative gap is clamped to 0, cumulative stays at previous value (0)");
 
             Object.DestroyImmediate(ld);
         }
