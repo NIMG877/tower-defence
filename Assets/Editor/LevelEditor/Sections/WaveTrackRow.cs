@@ -85,45 +85,21 @@ public static class WaveTrackRow
         btnRow.style.alignItems = Align.Center;
         header.Add(btnRow);
 
-        // Color swatch
+        // 颜色选择器(UI Toolkit 自带 ColorField:色块 + 点击弹拾色器,带 hex/吸管/调色板全套)
         var colorProp = trackProp.FindPropertyRelative("TrackColor");
-        var swatch = new VisualElement();
-        swatch.style.width = 18;
-        swatch.style.height = 18;
-        swatch.style.borderTopLeftRadius = 2;
-        swatch.style.borderTopRightRadius = 2;
-        swatch.style.borderBottomLeftRadius = 2;
-        swatch.style.borderBottomRightRadius = 2;
-        swatch.style.marginLeft = 18; // 对齐 Name(跳过 drag handle 宽度)
-        swatch.style.marginRight = 2;
-        swatch.style.backgroundColor = colorProp.colorValue;
-        swatch.style.borderLeftWidth = 1;
-        swatch.style.borderRightWidth = 1;
-        swatch.style.borderTopWidth = 1;
-        swatch.style.borderBottomWidth = 1;
-        swatch.style.borderLeftColor = new Color(0.3f, 0.3f, 0.3f);
-        swatch.style.borderRightColor = new Color(0.3f, 0.3f, 0.3f);
-        swatch.style.borderTopColor = new Color(0.3f, 0.3f, 0.3f);
-        swatch.style.borderBottomColor = new Color(0.3f, 0.3f, 0.3f);
-        btnRow.Add(swatch);
-
-        // 颜色按钮(纯文字,避免 emoji 字形问题)
-        var colorPickerBtn = new Button(() =>
+        var colorField = new ColorField { value = colorProp.colorValue };
+        colorField.label = "";  // 隐藏 Label,只保留色块 + 弹窗按钮
+        colorField.showAlpha = false;
+        colorField.style.marginLeft = 18; // 对齐 Name(跳过 drag handle 宽度)
+        colorField.style.marginRight = 4;
+        colorField.RegisterValueChangedCallback(evt =>
         {
-            EditorGUI.BeginChangeCheck();
-            Color newColor = EditorGUILayout.ColorField("Track Color", colorProp.colorValue);
-            if (EditorGUI.EndChangeCheck())
-            {
-                Undo.RecordObject(so.targetObject, "Change Track Color");
-                colorProp.colorValue = newColor;
-                so.ApplyModifiedProperties();
-                swatch.style.backgroundColor = newColor;
-                rebuild?.Invoke();
-            }
-        }) { text = "颜色" };
-        colorPickerBtn.style.marginLeft = 2;
-        colorPickerBtn.style.marginRight = 4;
-        btnRow.Add(colorPickerBtn);
+            Undo.RecordObject(so.targetObject, "Change Track Color");
+            colorProp.colorValue = evt.newValue;
+            so.ApplyModifiedProperties();
+            rebuild?.Invoke();
+        });
+        btnRow.Add(colorField);
 
         // Lock button(纯文字)
         var lockProp = trackProp.FindPropertyRelative("Locked");
