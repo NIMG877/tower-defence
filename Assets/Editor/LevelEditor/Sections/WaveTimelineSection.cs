@@ -15,6 +15,14 @@ public static class WaveTimelineSection
 // 所有 Track 的删除 Action 按钮(供选中状态变化时刷新 enabled)
     static readonly List<Button> _allDelActionBtns = new();
 
+    // 所有 Track 的详情容器(按 (waveIdx, trackIdx) 索引;选中变化时 ShowDetail 走这里)
+    static readonly Dictionary<(int, int), VisualElement> _trackDetailContainers = new();
+    // 当前显示详情的 (waveIdx, trackIdx);-1,-1 = 无
+    static (int, int) _currentDetailKey = (-1, -1);
+
+    // 所有 Track 的 State(供选中变化时刷新卡片边框高亮)
+    static readonly List<WaveTrackRow.State> _allTrackStates = new();
+
     public static VisualElement Build(
         SerializedObject so,
         Action<int, int, int> onActionSelected,
@@ -35,7 +43,7 @@ public static class WaveTimelineSection
         Action rebuild = () => RebuildWaves(wavesListContainer, wavesProp, so, onActionSelected, getCurrentSelection);
         rebuild();
 
-        // 顶层按钮行:[ + 新增 Wave | × 删除 Wave ] (flexGrow 1:1,同宽)
+        // 顶层按钮行:只有 + 新增 Wave (老的 × 删除 Wave 已删,删除走 per-Wave scaleHeader 里的 ×)
         var topBtnRow = new VisualElement();
         topBtnRow.style.flexDirection = FlexDirection.Row;
         topBtnRow.style.marginTop = 6;
@@ -52,31 +60,8 @@ public static class WaveTimelineSection
         addWaveBtn.style.flexGrow = 1;
         addWaveBtn.style.flexBasis = 0;
         addWaveBtn.style.flexShrink = 0;
-        addWaveBtn.style.marginRight = 4;
+        addWaveBtn.style.marginRight = 0;
         topBtnRow.Add(addWaveBtn);
-
-        // 顶层删除 Wave:删 selW(选中 Action 所属的 Wave)
-        var delWaveBtn = new Button(() =>
-        {
-            var (selW, _, _) = getCurrentSelection();
-            if (selW < 0 || selW >= wavesProp.arraySize)
-            {
-                EditorUtility.DisplayDialog("删除 Wave", "请先选中一个 Wave 内的 Action 再删除。", "确定");
-                return;
-            }
-            if (EditorUtility.DisplayDialog("删除 Wave", $"确认删除 Wave {selW}?", "删除", "取消"))
-            {
-                Undo.RecordObject(so.targetObject, "Delete Wave");
-                wavesProp.DeleteArrayElementAtIndex(selW);
-                so.ApplyModifiedProperties();
-                onActionSelected?.Invoke(-1, -1, -1);  // 选中必然失效
-            }
-        })
-        { text = "× 删除 Wave" };
-        delWaveBtn.style.flexGrow = 1;
-        delWaveBtn.style.flexBasis = 0;
-        delWaveBtn.style.flexShrink = 0;
-        topBtnRow.Add(delWaveBtn);
 
         section.Add(topBtnRow);
 
@@ -98,11 +83,11 @@ public static class WaveTimelineSection
         container.Clear();
         for (int w = 0; w < wavesProp.arraySize; w++)
         {
-            container.Add(BuildWaveBlock(w, wavesProp.GetArrayElementAtIndex(w), so, onActionSelected, getCurrentSelection));
+            container.Add(BuildWaveBlock(w, wavesProp, wavesProp.GetArrayElementAtIndex(w), so, onActionSelected, getCurrentSelection));
         }
     }
 
-    static VisualElement BuildWaveBlock(int waveIdx, SerializedProperty waveProp, SerializedObject so, Action<int, int, int> onActionSelected, Func<(int, int, int)> getCurrentSelection)
+    static VisualElement BuildWaveBlock(int waveIdx, SerializedProperty wavesProp, SerializedProperty waveProp, SerializedObject so, Action<int, int, int> onActionSelected, Func<(int, int, int)> getCurrentSelection)
     {
         var block = new VisualElement();
         block.style.backgroundColor = new Color(0.15f, 0.15f, 0.18f);
@@ -126,35 +111,37 @@ public static class WaveTimelineSection
         block.Add(label);
 
         // === 顶部共享刻度尺 ScrollView (sticky 不随竖滚,横向滚动与所有 Track 同步) ===
-        // 镜像 Track 行的 15:85 flex 布局:左侧 15% header 列(放 "时间轴" Label),右侧 85% 放 scaleScroll
+        // flex 1:4 布局:左侧 × 删除 Wave 按钮,右侧 scaleScroll
         var scaleRow = new VisualElement();
         scaleRow.style.flexDirection = FlexDirection.Row;
         scaleRow.style.marginBottom = 2;
         block.Add(scaleRow);
 
-        // 左侧 15% - "时间轴" label (与 Track 行的 header 列对齐)
-        var scaleHeader = new VisualElement();
-        scaleHeader.style.flexGrow = 15;
-        scaleHeader.style.flexBasis = 0;
-        scaleHeader.style.flexShrink = 0;
-        scaleHeader.style.flexDirection = FlexDirection.Column;
-        scaleHeader.style.borderTopLeftRadius = 3;
-        scaleHeader.style.borderBottomLeftRadius = 3;
-        scaleRow.Add(scaleHeader);
+        // 左侧 1/5 - × 删除 Wave (删本 Wave 块)
+        var delWaveHereBtn = new Button(() =>
+        {
+            if (wavesProp == null || wavesProp.arraySize == 0) return;
+            if (EditorUtility.DisplayDialog("删除 Wave", $"确认删除 Wave {waveIdx}?", "删除", "取消"))
+            {
+                Undo.RecordObject(so.targetObject, "Delete Wave");
+                wavesProp.DeleteArrayElementAtIndex(waveIdx);
+                so.ApplyModifiedProperties();
+                onActionSelected?.Invoke(-1, -1, -1);  // 选中必然失效
+            }
+        })
+        { text = "×" };
+        delWaveHereBtn.style.flexGrow = 21;
+        delWaveHereBtn.style.flexBasis = 0;
+        delWaveHereBtn.style.flexShrink = 0;
+        delWaveHereBtn.style.height = 18;
+        scaleRow.Add(delWaveHereBtn);
 
-        var timeAxisLabel = new Label("时间轴");
-        timeAxisLabel.style.color = new Color(0.6f, 0.6f, 0.6f);
-        timeAxisLabel.style.fontSize = 10;
-        timeAxisLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-        timeAxisLabel.style.marginTop = 4;
-        scaleHeader.Add(timeAxisLabel);
-
-        // 右侧 85% - scaleScroll (与 Track 行的 timelineScroll 对齐)
+        // 右侧 4/5 - scaleScroll (与 Track 行的 timelineScroll 对齐)
         var scaleScroll = new ScrollView(ScrollViewMode.Horizontal);
-        scaleScroll.style.flexGrow = 85;
+        scaleScroll.style.flexGrow = 90;
         scaleScroll.style.flexBasis = 0;
         scaleScroll.style.flexShrink = 0;
-        scaleScroll.style.height = 22;
+        scaleScroll.style.height = 18;
         scaleScroll.style.backgroundColor = new Color(0.08f, 0.08f, 0.1f);
         scaleScroll.style.borderTopRightRadius = 3;
         scaleScroll.style.borderBottomRightRadius = 3;
@@ -216,11 +203,17 @@ public static class WaveTimelineSection
             tracksContainer.Clear();
             // 清空旧的 Track ScrollView 引用 (保留 scaleScroll)
             while (syncedScrollViews.Count > 1) syncedScrollViews.RemoveAt(syncedScrollViews.Count - 1);
+            // 清空本 Wave 的 Track 详情容器索引,避免旧引用残留
+            for (int t = 0; t <= tracksProp.arraySize; t++)
+                _trackDetailContainers.Remove((waveIdx, t));
+            // 清空本 Wave 的 Track State(供 RefreshActionCardBorders),旧 cardsContainer 已 detached
+            _allTrackStates.RemoveAll(s => s.WaveIdx == waveIdx);
 
             for (int t = 0; t < tracksProp.arraySize; t++)
             {
                 var row = WaveTrackRow.Build(
                     waveIdx, t,
+                    tracksProp,
                     tracksProp.GetArrayElementAtIndex(t),
                     so, onActionSelected, getCurrentSelection,
                     () => 24f * _zoom);
@@ -252,7 +245,7 @@ public static class WaveTimelineSection
             }
         });
 
-        // 按钮行:[ + 新增 Track | 删除 Track | 缩放条 ] (flexGrow 1:1:1,同宽)
+        // 按钮行:[ + 新增 Track | 缩放条 ] (flexGrow 1:1,同宽。删除 Track 走 row 最左的 ×)
         var btnRow = new VisualElement();
         btnRow.style.flexDirection = FlexDirection.Row;
         btnRow.style.marginTop = 4;
@@ -275,28 +268,7 @@ public static class WaveTimelineSection
         addTrackBtn.style.marginRight = 4;
         btnRow.Add(addTrackBtn);
 
-        // 2. 删除 Track (删当前 Wave 的最后一个 Track)
-        var delTrackBtn = new Button(() =>
-        {
-            if (tracksProp.arraySize == 0) return;
-            int lastIdx = tracksProp.arraySize - 1;
-            if (EditorUtility.DisplayDialog("删除 Track", $"确认删除 Track {lastIdx}?", "删除", "取消"))
-            {
-                Undo.RecordObject(so.targetObject, "Delete Track");
-                tracksProp.DeleteArrayElementAtIndex(lastIdx);
-                so.ApplyModifiedProperties();
-                var (selW, selT, _) = getCurrentSelection();
-                if (selW == waveIdx && selT == lastIdx) onActionSelected?.Invoke(-1, -1, -1);
-            }
-        })
-        { text = "删除 Track" };
-        delTrackBtn.style.flexGrow = 1;
-        delTrackBtn.style.flexBasis = 0;
-        delTrackBtn.style.flexShrink = 0;
-        delTrackBtn.style.marginRight = 4;
-        btnRow.Add(delTrackBtn);
-
-        // 3. 缩放条:Label "缩放 X.Xx" + Slider (本 Wave 独立 _zoom,改它只影响本 Wave)
+        // 2. 缩放条:Label "缩放 X.Xx" + Slider (本 Wave 独立 _zoom,改它只影响本 Wave)
         var zoomContainer = new VisualElement();
         zoomContainer.style.flexGrow = 1;
         zoomContainer.style.flexBasis = 0;
@@ -343,7 +315,8 @@ public static class WaveTimelineSection
                     if (actionsProp != null)
                         WaveActionCard.Render(rs.CardsContainer, actionsProp, waveIdx, tIdx, onActionSelected,
                             () => tracksProp.GetArrayElementAtIndex(tIdx).FindPropertyRelative("Locked").boolValue,
-                            () => 24f * _zoom);
+                            () => 24f * _zoom,
+                            getCurrentSelection);
                 }
             }
         }
@@ -375,6 +348,87 @@ public static class WaveTimelineSection
                     && selA >= 0 && selA < rs.ActionsProp.arraySize;
                 btn.SetEnabled(enabled);
             }
+        }
+    }
+
+    /// <summary>
+    /// 注册 Track 的详情容器。Wave / Track 重建时(track 数量变化)会先 ClearTrackDetailContainers 再重新注册。
+    /// </summary>
+    public static void RegisterTrackDetailContainer(int waveIdx, int trackIdx, VisualElement container)
+    {
+        _trackDetailContainers[(waveIdx, trackIdx)] = container;
+    }
+
+    /// <summary>
+    /// 注册 Track 的完整 State(供选中变化时刷新卡片边框高亮)。Rebuild 时会清掉旧条目。
+    /// </summary>
+    public static void RegisterTrackState(WaveTrackRow.State state)
+    {
+        _allTrackStates.Add(state);
+    }
+
+    /// <summary>
+    /// 清空所有静态集合。Inspector 重建(撤销/重做/脚本重载/域重载)时调用,
+    /// 避免持有的 stale SerializedProperty 在旧 SerializedObject 被 Dispose 后被访问。
+    /// </summary>
+    public static void ResetAllStaticState()
+    {
+        _allDelActionBtns.Clear();
+        _allTrackStates.Clear();
+        _trackDetailContainers.Clear();
+        _currentDetailKey = (-1, -1);
+    }
+
+    /// <summary>
+    /// 清空所有 Track 详情容器索引(在 rebuildWaves / rebuildTracks 之前调用,避免 stale 引用)。
+    /// </summary>
+    public static void ClearTrackDetailContainers()
+    {
+        _trackDetailContainers.Clear();
+        _currentDetailKey = (-1, -1);
+    }
+
+    /// <summary>
+    /// 在指定 (waveIdx, trackIdx) 的 Track 行下方显示 Action 详情;同时隐藏所有其他 Track 的详情。
+    /// actionIdx < 0 → 全部隐藏(等同 ClearDetail)。
+    /// 没找到对应容器(例如 Wave / Track 已删)→ 也全部隐藏。
+    /// </summary>
+    public static void ShowDetail(int waveIdx, int trackIdx, int actionIdx, SerializedObject so)
+    {
+        // 先清掉当前显示的(无论是不是同一行)
+        if (_currentDetailKey.Item1 >= 0 && _trackDetailContainers.TryGetValue(_currentDetailKey, out var prev))
+        {
+            if (prev.parent != null)
+            {
+                prev.Clear();
+                prev.style.display = DisplayStyle.None;
+            }
+        }
+        _currentDetailKey = (-1, -1);
+
+        if (actionIdx < 0) return;
+        var key = (waveIdx, trackIdx);
+        if (!_trackDetailContainers.TryGetValue(key, out var container) || container.parent == null) return;
+        var detail = ActionDetailSection.Build(so, waveIdx, trackIdx, actionIdx);
+        container.Add(detail);
+        container.style.display = DisplayStyle.Flex;
+        _currentDetailKey = key;
+    }
+
+    /// <summary>
+    /// 刷新所有 Track 卡片边框(选中 → 3px 亮琥珀;未激活 Track → 1px 琥珀;普通 → 1px 灰)。
+    /// 选中变化时调用,清掉旧的"亮琥珀"高亮并加到新选中的卡片上。
+    /// 自动剔除 detached (rebuild 后旧元素) 的 State。
+    /// </summary>
+    public static void RefreshActionCardBorders()
+    {
+        _allTrackStates.RemoveAll(s => s.CardsContainer == null || s.CardsContainer.parent == null);
+        foreach (var s in _allTrackStates)
+        {
+            if (s.ActionsProp == null) continue;
+            WaveActionCard.Render(
+                s.CardsContainer, s.ActionsProp, s.WaveIdx, s.TrackIdx,
+                s.OnActionSelected, s.IsLocked, s.GetPxPerSec, s.GetCurrentSelection);
         }
     }
 

@@ -33,7 +33,7 @@ public static class WaveScaleBar
         {
             var tick = new VisualElement();
             tick.style.position = Position.Absolute;
-            tick.style.top = 18;
+            tick.style.top = 12;
             tick.style.bottom = 0;
             tick.style.width = 1;
             tick.style.backgroundColor = new Color(0.25f, 0.25f, 0.3f);

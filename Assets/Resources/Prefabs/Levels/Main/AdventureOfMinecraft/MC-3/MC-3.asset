@@ -337,7 +337,7 @@ MonoBehaviour:
   - i: 4
     j: 7
     highland: 1
-    canSet: 0
+    canSet: 1
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -393,7 +393,7 @@ MonoBehaviour:
   - i: 4
     j: 8
     highland: 1
-    canSet: 0
+    canSet: 1
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -664,107 +664,232 @@ MonoBehaviour:
     portalOutJ: -1
   EnvironmentalControlDevice: {fileID: 6308497817176099097, guid: ba0fe5a46e68e4b469b07be44468fc35, type: 3}
   Waves:
-  - Actions:
-    - CommandType: 0
-      GapFromLastAction: 0
-      OnBeforeAction:
-        m_PersistentCalls:
-          m_Calls: []
-      EntityPrefabID:
-        ID_C: m
-        ID_N: 2
-      Camp: 2
-      OnActionRepeat:
-        m_PersistentCalls:
-          m_Calls: []
-      PathSerial: 3
-      GapsFromLastRepeat:
-      - 0
-      ModifyAttributes: 0
-      ModifyLevelHpConsume: 0
-      ModifyPrimary: 0
-      ModifyCountOperate: 0
-      Destination: {x: 0, y: 0}
-      Orientation: 0
-      HeadImage: {fileID: 0}
-      Content: 
-      DurationTime: 0
-      Contents: []
-    - CommandType: 0
-      GapFromLastAction: 1
-      OnBeforeAction:
-        m_PersistentCalls:
-          m_Calls: []
-      EntityPrefabID:
-        ID_C: m
-        ID_N: 2
-      Camp: 2
-      OnActionRepeat:
-        m_PersistentCalls:
-          m_Calls: []
-      PathSerial: 7
-      GapsFromLastRepeat:
-      - 0
-      ModifyAttributes: 0
-      ModifyLevelHpConsume: 0
-      ModifyPrimary: 0
-      ModifyCountOperate: 0
-      Destination: {x: 0, y: 0}
-      Orientation: 0
-      HeadImage: {fileID: 0}
-      Content: 
-      DurationTime: 0
-      Contents: []
-    - CommandType: 0
-      GapFromLastAction: 0.5
-      OnBeforeAction:
-        m_PersistentCalls:
-          m_Calls: []
-      EntityPrefabID:
-        ID_C: m
-        ID_N: 2
-      Camp: 2
-      OnActionRepeat:
-        m_PersistentCalls:
-          m_Calls: []
-      PathSerial: 2
-      GapsFromLastRepeat:
-      - 0
-      ModifyAttributes: 0
-      ModifyLevelHpConsume: 0
-      ModifyPrimary: 0
-      ModifyCountOperate: 0
-      Destination: {x: 0, y: 0}
-      Orientation: 0
-      HeadImage: {fileID: 0}
-      Content: 
-      DurationTime: 0
-      Contents: []
-    - CommandType: 0
-      GapFromLastAction: 0.5
-      OnBeforeAction:
-        m_PersistentCalls:
-          m_Calls: []
-      EntityPrefabID:
-        ID_C: m
-        ID_N: 2
-      Camp: 2
-      OnActionRepeat:
-        m_PersistentCalls:
-          m_Calls: []
-      PathSerial: 1
-      GapsFromLastRepeat:
-      - 0
-      ModifyAttributes: 0
-      ModifyLevelHpConsume: 0
-      ModifyPrimary: 0
-      ModifyCountOperate: 0
-      Destination: {x: 0, y: 0}
-      Orientation: 0
-      HeadImage: {fileID: 0}
-      Content: 
-      DurationTime: 0
-      Contents: []
+  - Tracks:
+    - Name: Track 0
+      Locked: 0
+      Actions:
+      - CommandType: 0
+        TriggerTime: 1
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: c
+          ID_N: 1
+        Camp: 0
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 0
+        GapsFromLastRepeat: []
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 2
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: c
+          ID_N: 1
+        Camp: 0
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 0
+        GapsFromLastRepeat: []
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 3
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: c
+          ID_N: 1
+        Camp: 0
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 0
+        GapsFromLastRepeat: []
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 4.49
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: c
+          ID_N: 1
+        Camp: 0
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 0
+        GapsFromLastRepeat: []
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 6
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: c
+          ID_N: 1
+        Camp: 0
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 0
+        GapsFromLastRepeat: []
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+    - Name: Track 1
+      Locked: 0
+      Actions:
+      - CommandType: 0
+        TriggerTime: 1
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: c
+          ID_N: 1
+        Camp: 0
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 0
+        GapsFromLastRepeat: []
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+    - Name: Track 2
+      Locked: 0
+      Actions:
+      - CommandType: 0
+        TriggerTime: 2
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: c
+          ID_N: 1
+        Camp: 0
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 0
+        GapsFromLastRepeat: []
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 3.06
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: c
+          ID_N: 1
+        Camp: 0
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 0
+        GapsFromLastRepeat: []
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 4.12
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: c
+          ID_N: 1
+        Camp: 0
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 0
+        GapsFromLastRepeat: []
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
   Paths:
   - Name: skeleton_s
     CheckPoints:
@@ -772,7 +897,6 @@ MonoBehaviour:
     - {x: 1, y: 1}
     - {x: 2, y: 3}
     - {x: 1, y: 5}
-    - {x: 1.5, y: 6}
     - {x: 2, y: 5}
     - {x: 1, y: 3}
     - {x: 2, y: 1}
@@ -783,7 +907,6 @@ MonoBehaviour:
     - 5
     - 1
     - 2
-    - 1
     - 1
     - 2
     - 1
@@ -796,7 +919,7 @@ MonoBehaviour:
     - {x: 9, y: 2}
     WaitTimes:
     - 0
-    - 60
+    - 90
     - 0
   - Name: skeleton_l2
     CheckPoints:
@@ -805,7 +928,7 @@ MonoBehaviour:
     - {x: 9, y: 2}
     WaitTimes:
     - 0
-    - 60
+    - 90
     - 0
   - Name: skeleton_l3
     CheckPoints:
@@ -814,16 +937,16 @@ MonoBehaviour:
     - {x: 9, y: 2}
     WaitTimes:
     - 0
-    - 60
+    - 90
     - 0
-  - Name: skeleton_l4
+  - Name: skeleton_l6
     CheckPoints:
     - {x: -0, y: 1}
     - {x: 1, y: 5}
     - {x: 9, y: 2}
     WaitTimes:
     - 0
-    - 60
+    - 90
     - 0
   - Name: skeleton_l5
     CheckPoints:
@@ -832,17 +955,17 @@ MonoBehaviour:
     - {x: 9, y: 2}
     WaitTimes:
     - 0
-    - 60
+    - 90
     - 0
-  - Name: skeleton_l6
+  - Name: skeleton_l4
     CheckPoints:
     - {x: -0, y: 1}
     - {x: 1, y: 1}
     - {x: 9, y: 2}
     WaitTimes:
     - 0
+    - 90
     - 0
-    - 60
   - Name: skeleton_r1
     CheckPoints:
     - {x: 5, y: 7}
@@ -850,7 +973,55 @@ MonoBehaviour:
     - {x: 9, y: 2}
     WaitTimes:
     - 0
-    - 60
+    - 10
+    - 0
+  - Name: zombie0
+    CheckPoints:
+    - {x: 5, y: -0}
+    - {x: 5, y: 1}
+    - {x: 6, y: 5}
+    - {x: 9, y: 5}
+    WaitTimes:
+    - 0
+    - 5
+    - 0
+    - 0
+  - Name: zombie1
+    CheckPoints:
+    - {x: 5, y: -0}
+    - {x: 6, y: 5}
+    - {x: 9, y: 5}
+    WaitTimes:
+    - 0
+    - 0
+    - 0
+  - Name: zombie2
+    CheckPoints:
+    - {x: 5, y: -0}
+    - {x: 6, y: 6}
+    - {x: 9, y: 5}
+    WaitTimes:
+    - 0
+    - 0
+    - 0
+  - Name: zombie_buff1
+    CheckPoints:
+    - {x: 5, y: -0}
+    - {x: 6, y: 4}
+    - {x: 3, y: 4}
+    - {x: 1, y: 4}
+    - {x: 1, y: 6}
+    - {x: 4, y: 6}
+    - {x: 5, y: 6}
+    - {x: 9, y: 5}
+    WaitTimes:
+    - 0
+    - 3
+    - 10
+    - 0
+    - 0
+    - 0
+    - 0
     - 0
   LevelHp: 100
   Cost0: 10

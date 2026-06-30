@@ -12,9 +12,6 @@ public struct PathData
 [CreateAssetMenu]
 public class LevelData : ScriptableObject
 {
-    [Tooltip("数据 schema 版本;v1 = 0/未设,v2 = Tracks 结构")]
-    public int SchemaVersion = 2;
-
     public string LevelName;
     public string LevelCode;
     public string LevelDescription;

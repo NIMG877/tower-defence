@@ -17,15 +17,20 @@ public static class WaveTrackRow
         public Button DelActionBtn;            // 删除 Action 按钮(供 WaveTimelineSection 刷新 enabled)
         public VisualElement CardsContainer;  // 时间轴容器
         public ScrollView TimelineScroll;      // 时间轴 ScrollView(供 WaveTimelineSection 同步横向滚动)
+        public VisualElement DetailContainer;  // 详情容器(选中 Action 时把 ActionDetailSection 塞这里)
         public Func<float> GetPxPerSec;        // 拿本 Wave 当前 pxPerSec(每 Wave 独立缩放)
         public SerializedProperty ActionsProp; // Actions 数组属性(供 RefreshDelActionBtnStates 判断 selA 越界)
         public int WaveIdx;                    // 所属 Wave(供 WaveTimelineSection 刷新 enabled 时匹配 selW)
         public int TrackIdx;                   // 所属 Track(同上,匹配 selT)
+        public Func<bool> IsLocked;            // 本 Track 是否 Locked(供 WaveActionCard.Render 判断未激活描边)
+        public Action<int, int, int> OnActionSelected;  // 卡片点击回调(供 RefreshActionCardBorders 重渲染)
+        public Func<(int, int, int)> GetCurrentSelection;  // 当前选中(供 WaveActionCard.Render 判断高亮)
     }
 
     public static VisualElement Build(
         int waveIdx,
         int trackIdx,
+        SerializedProperty tracksProp,
         SerializedProperty trackProp,
         SerializedObject so,
         Action<int, int, int> onActionSelected,
@@ -34,12 +39,35 @@ public static class WaveTrackRow
     {
         var row = new VisualElement();
         row.AddToClassList("level-editor-section");
-        row.style.flexDirection = FlexDirection.Row;
+        row.style.flexDirection = FlexDirection.Column;  // 上下两行:contentRow(× + header + timeline) + detailContainer
         row.style.marginBottom = 4;
 
-        // === 左侧:轨道头 (与 timelineScroll 按 flexGrow 15:85 分总宽) ===
+        // contentRow:承载 × 删除 / header / timelineScroll 三栏(原 Row 布局)
+        var contentRow = new VisualElement();
+        contentRow.style.flexDirection = FlexDirection.Row;
+        row.Add(contentRow);
+
+        // === 最左:× 删除 Track (与 header / timelineScroll 按 2:13:85 分总宽) ===
+        var delTrackBtn = new Button(() =>
+        {
+            if (EditorUtility.DisplayDialog("删除 Track", $"确认删除 Track {trackIdx}?", "删除", "取消"))
+            {
+                Undo.RecordObject(so.targetObject, "Delete Track");
+                tracksProp.DeleteArrayElementAtIndex(trackIdx);
+                so.ApplyModifiedProperties();
+                onActionSelected?.Invoke(-1, -1, -1);  // 选中必然失效
+            }
+        })
+        { text = "×" };
+        delTrackBtn.style.flexGrow = 1;
+        delTrackBtn.style.flexBasis = 0;
+        delTrackBtn.style.flexShrink = 0;
+        delTrackBtn.style.height = 40;
+        contentRow.Add(delTrackBtn);
+
+        // === 中部:轨道头 (13% 总宽) ===
         var header = new VisualElement();
-        header.style.flexGrow = 15;   // 占 row 宽度的 15/(15+85) = 15%
+        header.style.flexGrow = 20;
         header.style.flexBasis = 0;
         header.style.flexShrink = 0;
         header.style.flexDirection = FlexDirection.Column;
@@ -47,10 +75,10 @@ public static class WaveTrackRow
         header.style.height = 40;
         header.style.borderTopLeftRadius = 3;
         header.style.borderBottomLeftRadius = 3;
-        row.Add(header);
+        contentRow.Add(header);
 
-        // === 右栏:时间轴 (85% 总宽) ===
-        // timelineScroll 在下方单独设置 width=85%
+        // === 右栏:时间轴 (80% 总宽) ===
+        // timelineScroll 在下方单独设置 width=80%
 
         // 第一行:Name 输入框 (100% header 宽)
         var nameRow = new VisualElement();
@@ -152,7 +180,7 @@ public static class WaveTrackRow
 
         // === 右侧:时间轴 ===
         var timelineScroll = new ScrollView(ScrollViewMode.Horizontal);
-        timelineScroll.style.flexGrow = 85;   // 占 row 宽度的 85/(15+85) = 85%
+        timelineScroll.style.flexGrow = 90;
         timelineScroll.style.flexBasis = 0;
         timelineScroll.style.flexShrink = 0;
         timelineScroll.style.height = 40;
@@ -161,13 +189,20 @@ public static class WaveTrackRow
         timelineScroll.style.borderBottomRightRadius = 3;
         timelineScroll.horizontalScrollerVisibility = ScrollerVisibility.Auto;
         timelineScroll.verticalScrollerVisibility = ScrollerVisibility.Hidden;
-        row.Add(timelineScroll);
+        contentRow.Add(timelineScroll);
 
         var cardsContainer = new VisualElement();
         cardsContainer.style.height = 30;
         cardsContainer.style.position = Position.Relative;
         cardsContainer.style.overflow = Overflow.Visible;
         timelineScroll.Add(cardsContainer);
+
+        // 详情容器:选中 Action 时显示(在 contentRow 下方),默认折叠
+        var detailContainer = new VisualElement();
+        detailContainer.style.display = DisplayStyle.None;
+        detailContainer.style.marginTop = 2;
+        detailContainer.style.width = Length.Percent(100);
+        row.Add(detailContainer);
 
         // Track 状态对象(后续 Phase 3 增量更新用)
         var state = new State
@@ -177,21 +212,27 @@ public static class WaveTrackRow
             DelActionBtn = delActionBtn,
             CardsContainer = cardsContainer,
             TimelineScroll = timelineScroll,
+            DetailContainer = detailContainer,
             GetPxPerSec = getPxPerSec,
             ActionsProp = actionsProp0,
             WaveIdx = waveIdx,
             TrackIdx = trackIdx,
+            IsLocked = () => lockProp.boolValue,
+            OnActionSelected = onActionSelected,
+            GetCurrentSelection = getCurrentSelection,
         };
         delActionBtn.userData = state;  // WaveTimelineSection.RefreshDelActionBtnStates 通过 userData 拿 WaveIdx/TrackIdx/ActionsProp
         WaveTimelineSection.RegisterDelActionBtn(delActionBtn);  // 注册到全局供选中变化时刷新
+        WaveTimelineSection.RegisterTrackDetailContainer(waveIdx, trackIdx, detailContainer);  // 注册 detail 容器,ShowDetail 时按 (waveIdx, trackIdx) 找
+        WaveTimelineSection.RegisterTrackState(state);  // 注册到全局,选中变化时刷新所有卡片的边框高亮
         cardsContainer.userData = state;
         row.userData = state;   // 暴露给 WaveTimelineSection 用于横向滚动同步
 
         // 卡片渲染(委托给 WaveActionCard)
         var actionsProp = trackProp.FindPropertyRelative("Actions");
-        WaveActionCard.Render(cardsContainer, actionsProp, waveIdx, trackIdx, onActionSelected, () => lockProp.boolValue, getPxPerSec);
+        WaveActionCard.Render(cardsContainer, actionsProp, waveIdx, trackIdx, onActionSelected, () => lockProp.boolValue, getPxPerSec, getCurrentSelection);
         cardsContainer.TrackPropertyValue(actionsProp, _ =>
-            WaveActionCard.Render(cardsContainer, actionsProp, waveIdx, trackIdx, onActionSelected, () => lockProp.boolValue, getPxPerSec));
+            WaveActionCard.Render(cardsContainer, actionsProp, waveIdx, trackIdx, onActionSelected, () => lockProp.boolValue, getPxPerSec, getCurrentSelection));
 
         return row;
     }

@@ -11,13 +11,17 @@ using UnityEngine.UIElements;
 public class LevelDataEditor : Editor
 {
     (int waveIdx, int trackIdx, int actionIdx) _selectedAction = (-1, -1, -1);
-    VisualElement _detailContainer;
     BlockMapCache _mapCache;
     PathEditingState _pathState;
     IDisposable _sectionDisposable;
 
     public override VisualElement CreateInspectorGUI()
     {
+        // Inspector 重建时清空 WaveTimelineSection 持有的静态集合,
+        // 避免 stale SerializedProperty 引用旧 SerializedObject(Dispose 后 arraySize 抛 NRE)
+        WaveTimelineSection.ResetAllStaticState();
+        _selectedAction = (-1, -1, -1);
+
         var root = new VisualElement();
         root.style.flexDirection = FlexDirection.Column;
 
@@ -39,11 +43,6 @@ public class LevelDataEditor : Editor
         body.Add(ReferencesSection.Build(serializedObject));
         body.Add(EconomySection.Build(serializedObject));
         body.Add(WaveTimelineSection.Build(serializedObject, OnActionSelected, GetCurrentSelection));
-        _detailContainer = new VisualElement();
-        _detailContainer.style.paddingTop = 6;
-        _detailContainer.style.paddingBottom = 6;
-        body.Add(_detailContainer);
-        RenderDetail();
        
 
         // Map editor + path editor section (uses LevelData.MapData, prefab is optional)
@@ -104,23 +103,12 @@ public class LevelDataEditor : Editor
     {
         _selectedAction = (waveIdx, trackIdx, actionIdx);
         WaveTimelineSection.RefreshDelActionBtnStates(waveIdx, trackIdx, actionIdx);
-        RenderDetail();
+        WaveTimelineSection.RefreshActionCardBorders();  // 卡片边框高亮跟随选中刷新
+        WaveTimelineSection.ShowDetail(waveIdx, trackIdx, actionIdx, serializedObject);
     }
 
     // 给 WaveTimelineSection 用的 live 读取入口 (删除按钮要判断"删的是不是当前显示的 action")
     (int, int, int) GetCurrentSelection() => _selectedAction;
-
-    void RenderDetail()
-    {
-        if (_detailContainer == null) return;
-        _detailContainer.Clear();
-        if (_selectedAction.waveIdx < 0) return;
-        _detailContainer.Add(ActionDetailSection.Build(
-            serializedObject,
-            _selectedAction.waveIdx,
-            _selectedAction.trackIdx,
-            _selectedAction.actionIdx));
-    }
 
     void OnEnable()
     {
@@ -139,6 +127,7 @@ public class LevelDataEditor : Editor
     void OnUndoRedo()
     {
         serializedObject.Update();
-        RenderDetail();
+        // 撤销 / 重做可能改动了 Action 字段,刷新当前 Track 下方的详情面板
+        WaveTimelineSection.ShowDetail(_selectedAction.waveIdx, _selectedAction.trackIdx, _selectedAction.actionIdx, serializedObject);
     }
 }

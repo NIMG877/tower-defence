@@ -7,8 +7,8 @@ using UnityEngine.UIElements;
 
 /// <summary>
 /// Action 卡片渲染。
-/// 结构性变化(add/delete)整 cardsContainer 重建,字段级变化只更新现有卡片的 left/width/backgroundColor(O(N) 增量)。
-/// 未激活 Track(Locked=true):卡片描边色变琥珀,提示设计师该轨道不参与运行时(详见 LevelActionManager / LevelActionScheduler 的 Locked skip)。
+/// 结构性变化(add/delete)整 cardsContainer 重建,字段级变化只更新现有卡片的 left/width/backgroundColor/border(O(N) 增量)。
+/// 边框三态(优先级从高到低):选中(1px 亮琥珀) > 未激活 Track(1px 琥珀) > 普通(1px 灰)。
 /// </summary>
 public static class WaveActionCard
 {
@@ -27,7 +27,8 @@ public static class WaveActionCard
         int trackIdx,
         Action<int, int, int> onActionSelected,
         Func<bool> isLocked,
-        Func<float> getPxPerSec)
+        Func<float> getPxPerSec,
+        Func<(int, int, int)> getCurrentSelection)
     {
         var state = container.userData as State;
         if (state == null)
@@ -49,7 +50,7 @@ public static class WaveActionCard
                 empty.style.unityTextAlign = TextAnchor.MiddleCenter;
                 empty.style.position = Position.Absolute;
                 empty.style.left = 8;
-                empty.style.top = 26;
+                empty.style.top = 3.5f;
                 container.Add(empty);
             }
             else
@@ -78,6 +79,7 @@ public static class WaveActionCard
 
         // 增量更新:位置 + 宽度 + 颜色
         float pxPerSec = getPxPerSec();
+        var (selW, selT, selA) = getCurrentSelection();
         for (int i = 0; i < actionsProp.arraySize; i++)
         {
             var a = actionsProp.GetArrayElementAtIndex(i);
@@ -92,15 +94,37 @@ public static class WaveActionCard
             card.style.width = width;
             card.style.backgroundColor = CommandTypeColor(cmd);
 
-            // 未激活 Track:卡片描边色变琥珀(运行时该 Track 的 Action 不被加载)
-            card.style.borderLeftWidth = 1;
-            card.style.borderRightWidth = 1;
-            card.style.borderTopWidth = 1;
-            card.style.borderBottomWidth = 1;
-            card.style.borderLeftColor = isLocked() ? new Color(0.8f, 0.6f, 0.2f) : new Color(0.3f, 0.3f, 0.3f);
-            card.style.borderRightColor = card.style.borderLeftColor;
-            card.style.borderTopColor = card.style.borderLeftColor;
-            card.style.borderBottomColor = card.style.borderLeftColor;
+            // 边框三态(优先级从高到低):选中 > 未激活 Track > 普通
+            // - 选中:3px 亮琥珀,视觉强调当前编辑对象
+            // - 未激活 Track(Locked):1px 琥珀,提示运行时该 Action 不参与
+            // - 普通:1px 灰
+            bool isSelected = selW == waveIdx && selT == trackIdx && selA == i;
+            bool locked = isLocked();
+            Color borderColor;
+            float borderWidth;
+            if (isSelected)
+            {
+                borderColor = new Color(1f, 0.7f, 0.15f);  // 亮琥珀(高亮)
+                borderWidth = 1f;
+            }
+            else if (locked)
+            {
+                borderColor = new Color(0.8f, 0.6f, 0.2f);  // 琥珀(未激活)
+                borderWidth = 1f;
+            }
+            else
+            {
+                borderColor = new Color(0.3f, 0.3f, 0.3f);  // 灰(普通)
+                borderWidth = 1f;
+            }
+            card.style.borderLeftWidth = borderWidth;
+            card.style.borderRightWidth = borderWidth;
+            card.style.borderTopWidth = borderWidth;
+            card.style.borderBottomWidth = borderWidth;
+            card.style.borderLeftColor = borderColor;
+            card.style.borderRightColor = borderColor;
+            card.style.borderTopColor = borderColor;
+            card.style.borderBottomColor = borderColor;
         }
     }
 
