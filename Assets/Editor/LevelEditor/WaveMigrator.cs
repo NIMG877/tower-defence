@@ -22,6 +22,11 @@ public static class WaveMigrator
     {
         if (ld == null) return;
         if (ld.SchemaVersion >= 2) return;
+        if (ld.Waves == null)
+        {
+            ld.SchemaVersion = 2;
+            return;
+        }
 
         for (int w = 0; w < ld.Waves.Length; w++)
         {
