@@ -13,7 +13,6 @@ public static class WaveTrackRow
     public class State
     {
         public TextField NameField;
-        public VisualElement ColorSwatch;
         public Button LockButton;
         public VisualElement DragHandle;
         public VisualElement CardsContainer;  // 时间轴容器
@@ -165,7 +164,6 @@ public static class WaveTrackRow
         var state = new State
         {
             NameField = nameField,
-            ColorSwatch = swatch,
             LockButton = lockBtn,
             DragHandle = dragHandle,
             CardsContainer = cardsContainer,
