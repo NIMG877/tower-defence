@@ -86,7 +86,11 @@ public static class WaveTrackRow
             so.ApplyModifiedProperties();
             lockBtn.text = lockProp.boolValue ? "解锁" : "锁定";
         };
-        lockBtn.style.width = new Length(40, LengthUnit.Percent);
+        // 用 flexGrow(2/1/1) + flexBasis(0) 实现"扣除 margin 后按 50/25/25 分剩余宽度"
+        // 比直接 width% + marginRight 更精确——margin 不挤压按钮视觉宽度
+        lockBtn.style.flexGrow = 2;
+        lockBtn.style.flexBasis = 0;
+        lockBtn.style.flexShrink = 0;
         lockBtn.style.marginRight = 4;
         btnRow.Add(lockBtn);
 
@@ -108,7 +112,9 @@ public static class WaveTrackRow
             newAction.FindPropertyRelative("GapsFromLastRepeat").arraySize = 0;
             so.ApplyModifiedProperties();
         }) { text = "+" };
-        addActionBtn.style.width = new Length(25, LengthUnit.Percent);
+        addActionBtn.style.flexGrow = 1;
+        addActionBtn.style.flexBasis = 0;
+        addActionBtn.style.flexShrink = 0;
         addActionBtn.style.marginRight = 4;
         btnRow.Add(addActionBtn);
 
@@ -127,7 +133,9 @@ public static class WaveTrackRow
                 if (willInvalidate) onActionSelected?.Invoke(-1, -1, -1);
             }
         }) { text = "×" };
-        delActionBtn.style.width = new Length(25, LengthUnit.Percent);
+        delActionBtn.style.flexGrow = 1;
+        delActionBtn.style.flexBasis = 0;
+        delActionBtn.style.flexShrink = 0;
         btnRow.Add(delActionBtn);
 
         // 占位:删除 Wave / Wave 块删除按钮已由外层 WaveTimelineSection 提供
