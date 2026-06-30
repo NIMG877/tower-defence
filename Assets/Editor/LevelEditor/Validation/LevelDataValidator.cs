@@ -19,18 +19,22 @@ namespace Validation
                 issues.Add(new ValidationIssue(ValidationSeverity.Error, "Waves", "Waves 不能为空"));
             }
 
-            // 规则 2: 任一 Wave.Actions 为 null 或空 -> Warning
+            // 规则 2: 任一 Wave.Tracks[t].Actions 为 null 或空 -> Warning
             if (data.Waves != null)
             {
-                for (int i = 0; i < data.Waves.Length; i++)
+                for (int w = 0; w < data.Waves.Length; w++)
                 {
-                    var wave = data.Waves[i];
-                    if (wave.Actions == null || wave.Actions.Length == 0)
+                    var tracks = data.Waves[w].Tracks;
+                    if (tracks == null) continue;
+                    for (int t = 0; t < tracks.Length; t++)
                     {
-                        issues.Add(new ValidationIssue(
-                            ValidationSeverity.Warning,
-                            $"Waves[{i}].Actions",
-                            $"Wave {i} 的 Actions 为空"));
+                        if (tracks[t].Actions == null || tracks[t].Actions.Length == 0)
+                        {
+                            issues.Add(new ValidationIssue(
+                                ValidationSeverity.Warning,
+                                $"Waves[{w}].Tracks[{t}].Actions",
+                                $"Wave {w} 轨道 {t} 的 Actions 为空"));
+                        }
                     }
                 }
             }
@@ -42,21 +46,26 @@ namespace Validation
             {
                 for (int w = 0; w < data.Waves.Length; w++)
                 {
-                    var actions = data.Waves[w].Actions;
-                    if (actions == null) continue;
-                    for (int a = 0; a < actions.Length; a++)
+                    var tracks = data.Waves[w].Tracks;
+                    if (tracks == null) continue;
+                    for (int t = 0; t < tracks.Length; t++)
                     {
-                        var act = actions[a];
-                        // 仅对需要 EntityPrefabID 的 CommandType 校验 (0, 1)
-                        if (act.CommandType == 0 || act.CommandType == 1)
+                        var actions = tracks[t].Actions;
+                        if (actions == null) continue;
+                        for (int a = 0; a < actions.Length; a++)
                         {
-                            // 注意:Unity 序列化 null string 后读回 "" 而非 null,IsNull 不命中
-                            if (string.IsNullOrEmpty(act.EntityPrefabID.ID_C))
+                            var act = actions[a];
+                            // 仅对需要 EntityPrefabID 的 CommandType 校验 (0, 1)
+                            if (act.CommandType == 0 || act.CommandType == 1)
                             {
-                                issues.Add(new ValidationIssue(
-                                    ValidationSeverity.Error,
-                                    $"Waves[{w}].Actions[{a}].EntityPrefabID",
-                                    $"EntityPrefabID 为空 (未指定 ID_C)"));
+                                // 注意:Unity 序列化 null string 后读回 "" 而非 null,IsNull 不命中
+                                if (string.IsNullOrEmpty(act.EntityPrefabID.ID_C))
+                                {
+                                    issues.Add(new ValidationIssue(
+                                        ValidationSeverity.Error,
+                                        $"Waves[{w}].Tracks[{t}].Actions[{a}].EntityPrefabID.ID_C",
+                                        $"EntityPrefabID 为空 (未指定 ID_C)"));
+                                }
                             }
                         }
                     }
