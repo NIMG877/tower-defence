@@ -4,13 +4,13 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// Action 详情面板: 接收 waveIdx/actionIdx, 绑定对应 SerializedProperty 子路径。
-/// 基础字段: CommandType / GapFromLastAction / OnBeforeAction。
+/// Action 详情面板: 接收 waveIdx/trackIdx/actionIdx, 绑定对应 SerializedProperty 子路径。
+/// 基础字段: CommandType / TriggerTime / OnBeforeAction。
 /// 条件字段 (按 CommandType 显隐): 后续任务添加。
 /// </summary>
 public static class ActionDetailSection
 {
-    public static VisualElement Build(SerializedObject so, int waveIdx, int actionIdx)
+    public static VisualElement Build(SerializedObject so, int waveIdx, int trackIdx, int actionIdx)
     {
         var section = new VisualElement();
         section.style.backgroundColor = new Color(0.1f, 0.1f, 0.12f);
@@ -31,10 +31,10 @@ public static class ActionDetailSection
         section.style.borderTopColor = new Color(0.3f, 0.8f, 0.6f);
         section.style.borderBottomColor = new Color(0.3f, 0.8f, 0.6f);
 
-        var actionsProp = so.FindProperty($"Waves.Array.data[{waveIdx}].Actions");
+        var actionsProp = so.FindProperty($"Waves.Array.data[{waveIdx}].Tracks.Array.data[{trackIdx}].Actions");
         if (actionsProp == null)
         {
-            section.Add(new Label($"Wave {waveIdx} not found"));
+            section.Add(new Label($"Wave {waveIdx} / Track {trackIdx} not found"));
             return section;
         }
         var actionProp = actionsProp.GetArrayElementAtIndex(actionIdx);
@@ -45,7 +45,7 @@ public static class ActionDetailSection
         }
 
         // 顶部信息条
-        var header = new Label($"▸ 已选 Wave[{waveIdx}].Action[{actionIdx}]");
+        var header = new Label($"▸ 已选 Wave[{waveIdx}].Track[{trackIdx}].Action[{actionIdx}]");
         header.style.color = new Color(0.3f, 0.8f, 0.6f);
         header.style.fontSize = 12;
         header.style.unityFontStyleAndWeight = FontStyle.Bold;
@@ -54,7 +54,7 @@ public static class ActionDetailSection
 
         // 基础字段 (始终显示)
         section.Add(MakeRow(actionProp.FindPropertyRelative("CommandType")));
-        section.Add(MakeRow(actionProp.FindPropertyRelative("GapFromLastAction")));
+        section.Add(MakeRow(actionProp.FindPropertyRelative("TriggerTime")));
         section.Add(MakeUnityEventRow(actionProp.FindPropertyRelative("OnBeforeAction")));
 
         // 条件字段容器 (按 CommandType 显隐)
