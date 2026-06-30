@@ -41,8 +41,8 @@ public class LevelActionManager : IManagerStartEnd
     private async void WaveProcess(LevelActions.Wave wave, CancellationToken cancellationToken)
     {
         _holdingWaveWhileExistWaveEntities = true;
-
         var scheduled = LevelActionScheduler.CollectAndSortActions(wave);
+        _actionProcessNum = scheduled.Count;
         float waveStartTime = Time.time;
         int total = scheduled.Count;
 
