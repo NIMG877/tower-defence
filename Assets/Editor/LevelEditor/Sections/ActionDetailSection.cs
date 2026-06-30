@@ -66,6 +66,16 @@ public static class ActionDetailSection
         RebuildConditional(conditionalContainer, actionProp, commandTypeProp.intValue, section);
         section.TrackPropertyValue(commandTypeProp, _ => RebuildConditional(conditionalContainer, actionProp, commandTypeProp.intValue, section));
 
+        // Track ModifyAttributes changes (register once per Build)
+        var modifyProp = actionProp.FindPropertyRelative("ModifyAttributes");
+        section.TrackPropertyValue(modifyProp, _ =>
+        {
+            if (commandTypeProp.intValue == 0)  // ModifyAttributes only meaningful for CommandType 0
+            {
+                RebuildConditional(conditionalContainer, actionProp, commandTypeProp.intValue, section);
+            }
+        });
+
         return section;
     }
 
@@ -135,11 +145,6 @@ public static class ActionDetailSection
                 container.Add(MakeRow(actionProp.FindPropertyRelative("ModifyPrimary")));
                 container.Add(MakeRow(actionProp.FindPropertyRelative("ModifyCountOperate")));
             }
-            section.TrackPropertyValue(modifyProp, _ =>
-            {
-                // ModifyAttributes 切换时重建 (展开/收起 ModifyLevelHpConsume 等)
-                RebuildConditional(container, actionProp, commandType, section);
-            });
         }
 
         // CommandType 1: 静止目标位置
