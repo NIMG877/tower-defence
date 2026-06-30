@@ -41,17 +41,20 @@ public class LevelActionManager : IManagerStartEnd
     private async void WaveProcess(LevelActions.Wave wave, CancellationToken cancellationToken)
     {
         _holdingWaveWhileExistWaveEntities = true;
-        LevelActions.Action[] actions = wave.Actions;
-        _actionProcessNum = actions.Length;
-        for (int i = 0; i < actions.Length; i++)
+
+        var scheduled = LevelActionScheduler.CollectAndSortActions(wave);
+        float waveStartTime = Time.time;
+        int total = scheduled.Count;
+
+        for (int i = 0; i < total; i++)
         {
-            if (actions[i].GapFromLastAction > 0)
-            {
-                await UniTask.WaitForSeconds(actions[i].GapFromLastAction, false, PlayerLoopTiming.Update, cancellationToken);
-            }
-            ActionProcess(actions[i], LevelResourceSharing.LevelCtk);
+            var entry = scheduled[i];
+            float dueTime = waveStartTime + Mathf.Max(0f, entry.Action.TriggerTime);
+            float wait = dueTime - Time.time;
+            if (wait > 0f)
+                await UniTask.WaitForSeconds(wait, false, PlayerLoopTiming.Update, cancellationToken);
+            ActionProcess(entry.Action, LevelResourceSharing.LevelCtk);
         }
-        //_cancellationTokens.Remove(cancellationToken);
     }
     private async void ActionProcess(LevelActions.Action action, CancellationToken cancellationToken)
     {
@@ -64,18 +67,7 @@ public class LevelActionManager : IManagerStartEnd
             ActionRepeat(action);
         }
         _actionProcessNum--;
-        if (!_holdingWaveWhileExistWaveEntities && _actionProcessNum == 0)
-        {
-            if (_currentIndex < _waves.Length - 1)
-            {
-                _currentIndex++;
-                WaveProcess(_waves[_currentIndex], LevelResourceSharing.LevelCtk);
-            }
-            else
-            {
-                MissionEnd(true);
-            }
-        }
+        TryAdvanceWave();
         //_cancellationTokenSources.Remove(cancellationToken);
     }
     private async void PathPrinterMove(TrailRenderer pathPrinter, int pathSerial, int sectionSerial, int pointSerial, int moveMethod, CancellationToken cancellationToken)
@@ -155,20 +147,18 @@ public class LevelActionManager : IManagerStartEnd
         int num = 0;
         for (int i = 0; i < _waves.Length; i++)
         {
-            for (int j = 0; j < _waves[i].Actions.Length; j++)
+            if (_waves[i].Tracks == null) continue;
+            for (int t = 0; t < _waves[i].Tracks.Length; t++)
             {
-                LevelActions.Action action = _waves[i].Actions[j];
-                if (action.CommandType == 0)
+                var actions = _waves[i].Tracks[t].Actions;
+                if (actions == null) continue;
+                for (int j = 0; j < actions.Length; j++)
                 {
-                    if (action.ModifyAttributes && action.ModifyCountOperate)
+                    LevelActions.Action action = actions[j];
+                    if (action.CommandType == 0)
                     {
                         num += action.GapsFromLastRepeat.Length;
                     }
-                    else
-                    {
-                        num += action.GapsFromLastRepeat.Length;
-                    }
-
                 }
             }
         }
@@ -183,34 +173,28 @@ public class LevelActionManager : IManagerStartEnd
     {
         if (_waveEntities.Remove(entity))
         {
-            if (_waveEntities.Count == 0 && _actionProcessNum == 0)
-            {
-                if (_currentIndex < _waves.Length - 1)
-                {
-                    _currentIndex++;
-                    WaveProcess(_waves[_currentIndex], LevelResourceSharing.LevelCtk);
-                }
-                else
-                {
-                    MissionEnd(true);
-                }
-            }
+            TryAdvanceWave();
         }
     }
     public void ReleaseCurrentWave()
     {
         _holdingWaveWhileExistWaveEntities = false;
-        if (_actionProcessNum == 0)
+        TryAdvanceWave();
+    }
+    private void TryAdvanceWave()
+    {
+        if (_actionProcessNum != 0) return;
+        bool okToAdvance = !_holdingWaveWhileExistWaveEntities || _waveEntities.Count == 0;
+        if (!okToAdvance) return;
+
+        if (_currentIndex < _waves.Length - 1)
         {
-            if (_currentIndex < _waves.Length - 1)
-            {
-                _currentIndex++;
-                WaveProcess(_waves[_currentIndex], LevelResourceSharing.LevelCtk);
-            }
-            else
-            {
-                MissionEnd(true);
-            }
+            _currentIndex++;
+            WaveProcess(_waves[_currentIndex], LevelResourceSharing.LevelCtk);
+        }
+        else
+        {
+            MissionEnd(true);
         }
     }
     public void SetEntityPrefabTypesAndWaves(LevelActions.Wave[] waves)
