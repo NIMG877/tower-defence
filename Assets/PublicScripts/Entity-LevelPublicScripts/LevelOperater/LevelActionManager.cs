@@ -150,6 +150,7 @@ public class LevelActionManager : IManagerStartEnd
             if (_waves[i].Tracks == null) continue;
             for (int t = 0; t < _waves[i].Tracks.Length; t++)
             {
+                if (_waves[i].Tracks[t].Locked) continue;  // 未激活 Track:不贡献 entity 数
                 var actions = _waves[i].Tracks[t].Actions;
                 if (actions == null) continue;
                 for (int j = 0; j < actions.Length; j++)
@@ -277,6 +278,7 @@ public class LevelActionManager : IManagerStartEnd
             if (wave.Tracks == null) continue;
             for (int t = 0; t < wave.Tracks.Length; t++)
             {
+                if (wave.Tracks[t].Locked) continue;  // 未激活 Track:其 Action 不参与 entityNum 扫描
                 LevelActions.Action[] actions = wave.Tracks[t].Actions;
                 if (actions == null) continue;
                 for (int j = 0; j < actions.Length; j++)

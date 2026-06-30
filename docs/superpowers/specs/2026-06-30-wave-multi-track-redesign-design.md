@@ -282,6 +282,7 @@ private static void MigrateV1ToV2(LevelData ld)
 | `WaveTimelineSection.cs` | 入口 + 时间标尺 + 容纳 N 个 TrackRow,**重写** |
 | `WaveTrackRow.cs`(新) | 单条轨道:轨道头 + 时间轴 + Action 卡片 |
 | `WaveActionCard.cs`(新) | 卡片渲染 + 拖拽手柄(中段改 TriggerTime, 右沿改持续时间) |
+| `WaveScaleBar.cs`(新) | 顶部时间刻度尺(ticks + labels);和卡片共用 cardsContainer,横向同步滚动 |
 | `ActionDetailSection.cs` | 路径多一层 Track,`GapFromLastAction` 字段名换 `TriggerTime`,其它原样 |
 | `LevelDataEditor.cs` | onActionSelected 改三元组 `(waveIdx, trackIdx, actionIdx)` |
 
@@ -310,6 +311,8 @@ private static void MigrateV1ToV2(LevelData ld)
 
 **时间标尺**
 - 高度 ~22px,顶部一行 tick + label
+- **位置**:Wave 顶部 sticky(每个 Wave block 独立一行,在所有 Track 行上方),不随竖滚滚动
+- **横向滚动同步**:scaleScroll + 每条 Track 的 timelineScroll 共享 `horizontalScroller.value`,任意一个滚动其余跟随
 - 复用现有 `ChooseTickInterval`(`WaveTimelineSection.cs:228`)
 - 缩放 slider 全 Wave 共享(沿用 `_zoom` static,注释保留多 Inspector 副作用说明)
 

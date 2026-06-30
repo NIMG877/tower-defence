@@ -103,6 +103,7 @@ public class LevelDataEditor : Editor
     void OnActionSelected(int waveIdx, int trackIdx, int actionIdx)
     {
         _selectedAction = (waveIdx, trackIdx, actionIdx);
+        WaveTimelineSection.RefreshDelActionBtnStates(waveIdx, trackIdx, actionIdx);
         RenderDetail();
     }
 

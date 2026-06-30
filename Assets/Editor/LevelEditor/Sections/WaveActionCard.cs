@@ -6,9 +6,9 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// Action 卡片渲染 + 拖拽手柄。
-/// 中段拖拽改 TriggerTime,右沿拖拽改持续时间(spawner = 按比例缩放 GapsFromLastRepeat,dialog = 改 DurationTime,其它不可拖)。
-/// 锁定轨道(pickingMode=Ignore)不接收鼠标。
+/// Action 卡片渲染。
+/// 结构性变化(add/delete)整 cardsContainer 重建,字段级变化只更新现有卡片的 left/width/backgroundColor(O(N) 增量)。
+/// 未激活 Track(Locked=true):卡片描边色变琥珀,提示设计师该轨道不参与运行时(详见 LevelActionManager / LevelActionScheduler 的 Locked skip)。
 /// </summary>
 public static class WaveActionCard
 {
@@ -18,7 +18,6 @@ public static class WaveActionCard
         public int LastActionCount = -1;
     }
 
-    static float PixelsPerSecond() => 24f * WaveTimelineSection.Zoom;
     static Color CommandTypeColor(int cmd) => WaveTimelineSection.CommandTypeColor(cmd);
 
     public static void Render(
@@ -28,7 +27,7 @@ public static class WaveActionCard
         int trackIdx,
         Action<int, int, int> onActionSelected,
         Func<bool> isLocked,
-        Action rebuild)
+        Func<float> getPxPerSec)
     {
         var state = container.userData as State;
         if (state == null)
@@ -61,29 +60,24 @@ public static class WaveActionCard
                     var card = new Button(() => onActionSelected?.Invoke(waveIdx, trackIdx, actionIdx))
                     { text = $"A{i}" };
                     card.style.position = Position.Absolute;
-                    card.style.top = 22;
-                    card.style.height = 36;
-                    card.style.width = 60;  // 起始宽度,Render 阶段按 Duration 调整
+                    card.style.top = 0;
+                    card.style.height = 23;
+                    card.style.marginTop = 3.5f;
+                    // card.style.width = 60;  // 起始宽度,Render 阶段按 Duration 调整
                     card.style.color = new Color(0, 0, 0);
                     card.style.fontSize = 9;
                     card.style.paddingLeft = 2;
                     card.style.paddingRight = 2;
                     container.Add(card);
                     state.Cards.Add(card);
-
-                    // 拖拽手柄:中段 → TriggerTime,右沿 → Duration
-                    var drag = new ActionCardDragManipulator(card, actionsProp, actionIdx, isLocked, rebuild);
-                    card.AddManipulator(drag);
                 }
             }
 
             state.LastActionCount = actionsProp.arraySize;
         }
 
-        if (actionsProp.arraySize == 0) return;
-
         // 增量更新:位置 + 宽度 + 颜色
-        float pxPerSec = PixelsPerSecond();
+        float pxPerSec = getPxPerSec();
         for (int i = 0; i < actionsProp.arraySize; i++)
         {
             var a = actionsProp.GetArrayElementAtIndex(i);
@@ -98,7 +92,7 @@ public static class WaveActionCard
             card.style.width = width;
             card.style.backgroundColor = CommandTypeColor(cmd);
 
-            // 锁定轨道:卡片描边变色提示
+            // 未激活 Track:卡片描边色变琥珀(运行时该 Track 的 Action 不被加载)
             card.style.borderLeftWidth = 1;
             card.style.borderRightWidth = 1;
             card.style.borderTopWidth = 1;
@@ -139,108 +133,6 @@ public static class WaveActionCard
             case 6: // 静态 / 剧情:无右端,返回 triggerTime(纯点)
             default:
                 return triggerTime;
-        }
-    }
-}
-
-/// <summary>
-/// ActionCard 的拖拽 Manipulator:
-/// - 中段按下:水平拖动改 TriggerTime(吸附 0.1s,Shift 关闭)
-/// - 右沿:Phase 3 基础版未实现(留作 follow-up),所有拖动都按 TriggerTime 处理
-/// </summary>
-public class ActionCardDragManipulator : MouseManipulator
-{
-    const float RightEdgeWidth = 6f;
-    const float DragThresholdPx = 4f;  // 超过此距离才视为"拖动",否则当作点击(避免鼠标抖动造成 TriggerTime 跳变)
-
-    readonly SerializedProperty _actionsProp;
-    readonly int _actionIdx;
-    readonly Func<bool> _isLocked;
-    readonly Action _rebuild;
-
-    Vector2 _startMouse;
-    float _startTriggerTime;
-    bool _dragging;  // 鼠标是否已越过门槛进入拖动状态
-
-    public ActionCardDragManipulator(VisualElement target, SerializedProperty actionsProp, int actionIdx, Func<bool> isLocked, Action rebuild)
-    {
-        this.target = target;
-        _actionsProp = actionsProp;
-        _actionIdx = actionIdx;
-        _isLocked = isLocked;
-        _rebuild = rebuild;
-        activators.Add(new ManipulatorActivationFilter { button = MouseButton.LeftMouse });
-    }
-
-    static float PixelsPerSecond() => 24f * WaveTimelineSection.Zoom;
-
-    protected override void RegisterCallbacksOnTarget()
-    {
-        target.RegisterCallback<MouseDownEvent>(OnMouseDown);
-        target.RegisterCallback<MouseMoveEvent>(OnMouseMove);
-        target.RegisterCallback<MouseUpEvent>(OnMouseUp);
-    }
-
-    protected override void UnregisterCallbacksFromTarget()
-    {
-        target.UnregisterCallback<MouseDownEvent>(OnMouseDown);
-        target.UnregisterCallback<MouseMoveEvent>(OnMouseMove);
-        target.UnregisterCallback<MouseUpEvent>(OnMouseUp);
-    }
-
-    void OnMouseDown(MouseDownEvent evt)
-    {
-        if (_isLocked()) return;
-        var actionProp = _actionsProp.GetArrayElementAtIndex(_actionIdx);
-        _startMouse = evt.mousePosition;
-        _startTriggerTime = actionProp.FindPropertyRelative("TriggerTime").floatValue;
-        _dragging = false;  // 起始未拖动
-        target.CaptureMouse();
-        // 不 StopPropagation,让 Button 的 click 也触发(选中 Action)
-    }
-
-    void OnMouseMove(MouseMoveEvent evt)
-    {
-        if (!target.HasMouseCapture()) return;
-
-        float dx = evt.mousePosition.x - _startMouse.x;
-
-        // 门槛检查:鼠标移动距离 < 4px 时视为点击,不应用 TriggerTime 改动
-        if (!_dragging)
-        {
-            if (Mathf.Abs(dx) < DragThresholdPx) return;
-            _dragging = true;
-            evt.StopPropagation();  // 进入拖动后吃掉事件,避免触发 Button click
-        }
-
-        var actionProp = _actionsProp.GetArrayElementAtIndex(_actionIdx);
-        float pxPerSec = PixelsPerSecond();
-
-        if (evt.shiftKey)
-        {
-            // 关闭吸附
-        }
-        else
-        {
-            float rawDelta = dx / pxPerSec;
-            float snapped = Mathf.Round(rawDelta * 10f) / 10f;
-            dx = snapped * pxPerSec;
-        }
-
-        float newTrigger = Mathf.Max(0f, _startTriggerTime + dx / pxPerSec);
-        actionProp.FindPropertyRelative("TriggerTime").floatValue = newTrigger;
-        _actionsProp.serializedObject.ApplyModifiedProperties();
-        _rebuild?.Invoke();
-    }
-
-    void OnMouseUp(MouseUpEvent evt)
-    {
-        if (target.HasMouseCapture())
-        {
-            target.ReleaseMouse();
-            // 只有真正拖动过才 StopPropagation,避免误吞点击事件
-            if (_dragging) evt.StopPropagation();
-            _dragging = false;
         }
     }
 }

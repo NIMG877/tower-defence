@@ -21,6 +21,7 @@ public static class LevelActionScheduler
 
         for (int t = 0; t < wave.Tracks.Length; t++)
         {
+            if (wave.Tracks[t].Locked) continue;  // 未激活 Track:其 Action 不进入调度列表
             var actions = wave.Tracks[t].Actions;
             if (actions == null) continue;
             for (int a = 0; a < actions.Length; a++)
