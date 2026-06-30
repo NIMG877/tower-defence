@@ -108,13 +108,15 @@ public static class WaveTrackRow
 
         // Lock button
         var lockProp = trackProp.FindPropertyRelative("Locked");
-        var lockBtn = new Button(() =>
+        bool initialLocked = lockProp.boolValue;
+        var lockBtn = new Button { text = initialLocked ? "🔒" : "🔓" };
+        lockBtn.clicked += () =>
         {
             Undo.RecordObject(so.targetObject, "Toggle Track Lock");
             lockProp.boolValue = !lockProp.boolValue;
             so.ApplyModifiedProperties();
             lockBtn.text = lockProp.boolValue ? "🔒" : "🔓";
-        }) { text = lockProp.boolValue ? "🔒" : "🔓" };
+        };
         lockBtn.style.width = 22;
         lockBtn.style.height = 18;
         lockBtn.style.fontSize = 10;

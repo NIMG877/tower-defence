@@ -161,8 +161,8 @@ public class ActionCardDragManipulator : MouseManipulator
     float _startTriggerTime;
 
     public ActionCardDragManipulator(VisualElement target, SerializedProperty actionsProp, int actionIdx, Func<bool> isLocked, Action rebuild)
-        : base(target)
     {
+        this.target = target;
         _actionsProp = actionsProp;
         _actionIdx = actionIdx;
         _isLocked = isLocked;
