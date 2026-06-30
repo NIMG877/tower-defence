@@ -14,7 +14,6 @@ public static class WaveTrackRow
     {
         public TextField NameField;
         public Button LockButton;
-        public VisualElement DragHandle;
         public VisualElement CardsContainer;  // 时间轴容器
     }
 
@@ -32,11 +31,10 @@ public static class WaveTrackRow
         row.style.flexDirection = FlexDirection.Row;
         row.style.marginBottom = 4;
 
-        // === 左侧:轨道头 ===
+        // === 左侧:轨道头 (15% 总宽) ===
         var header = new VisualElement();
-        header.style.width = new Length(180, LengthUnit.Pixel);   // 显式宽度,容纳 ≡ + Name + 3 按钮
-        header.style.minWidth = new Length(180, LengthUnit.Pixel); // 防止被 flex 容器挤压
-        header.style.flexShrink = 0;                                // 不参与横向 flex 收缩
+        header.style.width = new Length(15, LengthUnit.Percent);
+        header.style.flexShrink = 0;
         header.style.flexDirection = FlexDirection.Column;
         header.style.backgroundColor = new Color(0.13f, 0.13f, 0.16f);
         header.style.paddingTop = 4;
@@ -47,28 +45,21 @@ public static class WaveTrackRow
         header.style.borderBottomLeftRadius = 3;
         row.Add(header);
 
-        // 第一行:拖拽手柄 + Name
+        // === 右栏:时间轴 (85% 总宽) ===
+        // timelineScroll 在下方单独设置 width=85%
+
+        // 第一行:Name 输入框 (100% header 宽)
         var nameRow = new VisualElement();
         nameRow.style.flexDirection = FlexDirection.Row;
         nameRow.style.alignItems = Align.Center;
         header.Add(nameRow);
 
-        // 排序手柄(占位,Phase 3 内简化版只显示不动)
-        var dragHandle = new Label("≡");
-        dragHandle.style.fontSize = 14;
-        dragHandle.style.color = new Color(0.6f, 0.6f, 0.6f);
-        dragHandle.style.unityTextAlign = TextAnchor.MiddleCenter;
-        dragHandle.style.width = 16;
-        nameRow.Add(dragHandle);
-
-        // Name(可编辑)
+        // Name(可编辑)——占满 nameRow 全部宽度(用户要求 100%)
         var nameField = new TextField { value = trackProp.FindPropertyRelative("Name").stringValue };
         nameField.label = "";   // 隐藏内置 Label,留出全部宽度给输入区
         nameField.style.flexGrow = 1;
-        nameField.style.flexBasis = 0;  // 配合 flexGrow,允许收缩到 0,避免被内部 padding 挤
+        nameField.style.flexBasis = 0;
         nameField.style.minWidth = 0;
-        nameField.style.marginLeft = 2;
-        nameField.style.marginRight = 2;
         nameField.RegisterValueChangedCallback(evt =>
         {
             Undo.RecordObject(so.targetObject, "Rename Track");
@@ -77,14 +68,14 @@ public static class WaveTrackRow
         });
         nameRow.Add(nameField);
 
-        // 第二行:颜色 / 锁 / + / × 按钮行
+        // 第二行:锁定 40% / + 25% / × 25%
         var btnRow = new VisualElement();
         btnRow.style.flexDirection = FlexDirection.Row;
         btnRow.style.marginTop = 4;
         btnRow.style.alignItems = Align.Center;
         header.Add(btnRow);
 
-        // Lock button(纯文字)
+        // 锁定 40%
         var lockProp = trackProp.FindPropertyRelative("Locked");
         bool initialLocked = lockProp.boolValue;
         var lockBtn = new Button { text = initialLocked ? "解锁" : "锁定" };
@@ -95,7 +86,7 @@ public static class WaveTrackRow
             so.ApplyModifiedProperties();
             lockBtn.text = lockProp.boolValue ? "解锁" : "锁定";
         };
-        lockBtn.style.marginLeft = 18;  // 对齐 Name(跳过 drag handle 宽度)
+        lockBtn.style.width = new Length(40, LengthUnit.Percent);
         lockBtn.style.marginRight = 4;
         btnRow.Add(lockBtn);
 
@@ -117,11 +108,11 @@ public static class WaveTrackRow
             newAction.FindPropertyRelative("GapsFromLastRepeat").arraySize = 0;
             so.ApplyModifiedProperties();
         }) { text = "+" };
-        addActionBtn.style.width = 28;
-        addActionBtn.style.marginRight = 2;
+        addActionBtn.style.width = new Length(25, LengthUnit.Percent);
+        addActionBtn.style.marginRight = 4;
         btnRow.Add(addActionBtn);
 
-        // × 按钮(纯文字)
+        // × 25%
         var delActionBtn = new Button(() =>
         {
             var actionsProp = trackProp.FindPropertyRelative("Actions");
@@ -136,7 +127,7 @@ public static class WaveTrackRow
                 if (willInvalidate) onActionSelected?.Invoke(-1, -1, -1);
             }
         }) { text = "×" };
-        delActionBtn.style.width = 28;
+        delActionBtn.style.width = new Length(25, LengthUnit.Percent);
         btnRow.Add(delActionBtn);
 
         // 占位:删除 Wave / Wave 块删除按钮已由外层 WaveTimelineSection 提供
@@ -145,7 +136,8 @@ public static class WaveTrackRow
 
         // === 右侧:时间轴 ===
         var timelineScroll = new ScrollView(ScrollViewMode.Horizontal);
-        timelineScroll.style.flexGrow = 1;
+        timelineScroll.style.width = new Length(85, LengthUnit.Percent);  // 右栏占总宽 85%
+        timelineScroll.style.flexGrow = 0;
         timelineScroll.style.height = 70;
         timelineScroll.style.backgroundColor = new Color(0.1f, 0.1f, 0.12f);
         timelineScroll.style.borderTopRightRadius = 3;
@@ -165,7 +157,6 @@ public static class WaveTrackRow
         {
             NameField = nameField,
             LockButton = lockBtn,
-            DragHandle = dragHandle,
             CardsContainer = cardsContainer,
         };
         cardsContainer.userData = state;
