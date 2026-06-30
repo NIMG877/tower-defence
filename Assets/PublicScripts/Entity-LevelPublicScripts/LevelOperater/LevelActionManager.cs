@@ -290,34 +290,47 @@ public class LevelActionManager : IManagerStartEnd
         for (int i = 0; i < _waves.Length; i++)
         {
             LevelActions.Wave wave = _waves[i];
-            for (int j = 0; j < wave.Actions.Length; j++)
+            if (wave.Tracks == null) continue;
+            for (int t = 0; t < wave.Tracks.Length; t++)
             {
-                LevelActions.Action action = wave.Actions[j];
-                int perAction = action.CommandType switch
+                LevelActions.Action[] actions = wave.Tracks[t].Actions;
+                if (actions == null) continue;
+                for (int j = 0; j < actions.Length; j++)
                 {
-                    0 => action.GapsFromLastRepeat.Length,
-                    1 => 1,
-                    _ => 0,
-                };
-                if (perAction > 0 && !action.EntityPrefabID.IsNull)
-                {
-                    if (!entityNum.ContainsKey(action.EntityPrefabID))
-                        entityNum[action.EntityPrefabID] = 0;
-                    entityNum[action.EntityPrefabID] += perAction;
-                }
-                switch (_waves[i].Actions[j].CommandType)
-                {
-                    case 0: break;
-                    case 1: break;
-                    case 2: _waves[i].Actions[j].GapsFromLastRepeat = new float[2] { 0, printerLifeTime }; break;
-                    case 3: _waves[i].Actions[j].GapsFromLastRepeat = new float[2] { 0, printerLifeTime }; break;
-                    case 4: _waves[i].Actions[j].GapsFromLastRepeat = new float[2] { 0, printerLifeTime }; break;
-                    case 5: break;
-                    case 6: break;
+                    LevelActions.Action action = actions[j];
+                    int perAction = action.CommandType switch
+                    {
+                        0 => action.GapsFromLastRepeat.Length,
+                        1 => 1,
+                        _ => 0,
+                    };
+                    if (perAction > 0 && !action.EntityPrefabID.IsNull)
+                    {
+                        if (!entityNum.ContainsKey(action.EntityPrefabID))
+                            entityNum[action.EntityPrefabID] = 0;
+                        entityNum[action.EntityPrefabID] += perAction;
+                    }
+                    switch (action.CommandType)
+                    {
+                        case 0: break;
+                        case 1: break;
+                        case 2: actions[j] = WithGaps(action, new float[2] { 0, printerLifeTime }); break;
+                        case 3: actions[j] = WithGaps(action, new float[2] { 0, printerLifeTime }); break;
+                        case 4: actions[j] = WithGaps(action, new float[2] { 0, printerLifeTime }); break;
+                        case 5: break;
+                        case 6: break;
+                    }
                 }
             }
         }
         EntityPoolManager.Manager.CreateOrExpandEntityPool(entityNum);
+    }
+
+    // 辅助:struct Action 改字段后回写
+    static LevelActions.Action WithGaps(LevelActions.Action a, float[] gaps)
+    {
+        a.GapsFromLastRepeat = gaps;
+        return a;
     }
     public void ToStart()
     {
