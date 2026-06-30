@@ -143,7 +143,6 @@ public static class WaveTimelineSection
             tracksProp.InsertArrayElementAtIndex(tracksProp.arraySize);
             var newTrack = tracksProp.GetArrayElementAtIndex(tracksProp.arraySize - 1);
             newTrack.FindPropertyRelative("Name").stringValue = $"Track {tracksProp.arraySize - 1}";
-            newTrack.FindPropertyRelative("TrackColor").colorValue = WaveMigrator.DefaultTrackColor(tracksProp.arraySize - 1);
             newTrack.FindPropertyRelative("Locked").boolValue = false;
             newTrack.FindPropertyRelative("Actions").arraySize = 0;
             so.ApplyModifiedProperties();

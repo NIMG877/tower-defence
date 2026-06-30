@@ -21,12 +21,5 @@ namespace Wave.Tests
 
             Object.DestroyImmediate(ld);
         }
-
-        [Test]
-        public void DefaultTrackColor_palette_wraps_at_5()
-        {
-            Assert.AreEqual(WaveMigrator.DefaultTrackColor(0), WaveMigrator.DefaultTrackColor(5));
-            Assert.AreEqual(WaveMigrator.DefaultTrackColor(1), WaveMigrator.DefaultTrackColor(6));
-        }
     }
 }

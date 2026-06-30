@@ -18,7 +18,6 @@ public class LevelActions
     public struct Track
     {
         public string Name;
-        public Color TrackColor;
         public bool Locked;
         public Action[] Actions;
     }

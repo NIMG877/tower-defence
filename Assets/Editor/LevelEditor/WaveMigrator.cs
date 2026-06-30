@@ -7,17 +7,6 @@ using UnityEngine;
 /// </summary>
 public static class WaveMigrator
 {
-    static readonly Color[] Palette =
-    {
-        new Color(0.55f, 0.55f, 0.55f),
-        new Color(0.30f, 0.80f, 0.60f),
-        new Color(0.30f, 0.60f, 0.90f),
-        new Color(0.86f, 0.80f, 0.66f),
-        new Color(0.77f, 0.52f, 0.75f),
-    };
-
-    public static Color DefaultTrackColor(int trackIndex) => Palette[trackIndex % Palette.Length];
-
     public static void MigrateLevelData(LevelData ld)
     {
         if (ld == null) return;

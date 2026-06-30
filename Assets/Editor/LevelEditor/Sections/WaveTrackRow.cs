@@ -85,22 +85,6 @@ public static class WaveTrackRow
         btnRow.style.alignItems = Align.Center;
         header.Add(btnRow);
 
-        // 颜色选择器(UI Toolkit 自带 ColorField:色块 + 点击弹拾色器,带 hex/吸管/调色板全套)
-        var colorProp = trackProp.FindPropertyRelative("TrackColor");
-        var colorField = new ColorField { value = colorProp.colorValue };
-        colorField.label = "";  // 隐藏 Label,只保留色块 + 弹窗按钮
-        colorField.showAlpha = false;
-        colorField.style.marginLeft = 18; // 对齐 Name(跳过 drag handle 宽度)
-        colorField.style.marginRight = 4;
-        colorField.RegisterValueChangedCallback(evt =>
-        {
-            Undo.RecordObject(so.targetObject, "Change Track Color");
-            colorProp.colorValue = evt.newValue;
-            so.ApplyModifiedProperties();
-            rebuild?.Invoke();
-        });
-        btnRow.Add(colorField);
-
         // Lock button(纯文字)
         var lockProp = trackProp.FindPropertyRelative("Locked");
         bool initialLocked = lockProp.boolValue;
@@ -112,6 +96,7 @@ public static class WaveTrackRow
             so.ApplyModifiedProperties();
             lockBtn.text = lockProp.boolValue ? "解锁" : "锁定";
         };
+        lockBtn.style.marginLeft = 18;  // 对齐 Name(跳过 drag handle 宽度)
         lockBtn.style.marginRight = 4;
         btnRow.Add(lockBtn);
 
