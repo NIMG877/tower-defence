@@ -10,7 +10,7 @@ using UnityEngine.UIElements;
 [CustomEditor(typeof(LevelData))]
 public class LevelDataEditor : Editor
 {
-    (int waveIdx, int actionIdx) _selectedAction = (-1, -1);
+    (int waveIdx, int trackIdx, int actionIdx) _selectedAction = (-1, -1, -1);
     VisualElement _detailContainer;
     BlockMapCache _mapCache;
     PathEditingState _pathState;
@@ -100,14 +100,14 @@ public class LevelDataEditor : Editor
         return root;
     }
 
-    void OnActionSelected(int waveIdx, int actionIdx)
+    void OnActionSelected(int waveIdx, int trackIdx, int actionIdx)
     {
-        _selectedAction = (waveIdx, actionIdx);
+        _selectedAction = (waveIdx, trackIdx, actionIdx);
         RenderDetail();
     }
 
     // 给 WaveTimelineSection 用的 live 读取入口 (删除按钮要判断"删的是不是当前显示的 action")
-    (int, int) GetCurrentSelection() => _selectedAction;
+    (int, int, int) GetCurrentSelection() => _selectedAction;
 
     void RenderDetail()
     {
@@ -117,6 +117,7 @@ public class LevelDataEditor : Editor
         _detailContainer.Add(ActionDetailSection.Build(
             serializedObject,
             _selectedAction.waveIdx,
+            _selectedAction.trackIdx,
             _selectedAction.actionIdx));
     }
 
