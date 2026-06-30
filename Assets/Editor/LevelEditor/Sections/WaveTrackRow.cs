@@ -34,8 +34,8 @@ public static class WaveTrackRow
 
         // === 左侧:轨道头 ===
         var header = new VisualElement();
-        header.style.width = new Length(240, LengthUnit.Pixel);   // 显式宽度,容纳 ≡ + Name + 4 按钮 + 色块
-        header.style.minWidth = new Length(240, LengthUnit.Pixel); // 防止被 flex 容器挤压
+        header.style.width = new Length(180, LengthUnit.Pixel);   // 显式宽度,容纳 ≡ + Name + 3 按钮
+        header.style.minWidth = new Length(180, LengthUnit.Pixel); // 防止被 flex 容器挤压
         header.style.flexShrink = 0;                                // 不参与横向 flex 收缩
         header.style.flexDirection = FlexDirection.Column;
         header.style.backgroundColor = new Color(0.13f, 0.13f, 0.16f);
@@ -116,8 +116,8 @@ public static class WaveTrackRow
             newAction.FindPropertyRelative("TriggerTime").floatValue = maxTrig + 1f;
             newAction.FindPropertyRelative("GapsFromLastRepeat").arraySize = 0;
             so.ApplyModifiedProperties();
-        }) { text = "+ Action" };
-        addActionBtn.style.flexGrow = 1;
+        }) { text = "+" };
+        addActionBtn.style.width = 28;
         addActionBtn.style.marginRight = 2;
         btnRow.Add(addActionBtn);
 
