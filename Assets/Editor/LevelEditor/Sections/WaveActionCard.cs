@@ -151,6 +151,7 @@ public static class WaveActionCard
 public class ActionCardDragManipulator : MouseManipulator
 {
     const float RightEdgeWidth = 6f;
+    const float DragThresholdPx = 4f;  // 超过此距离才视为"拖动",否则当作点击(避免鼠标抖动造成 TriggerTime 跳变)
 
     readonly SerializedProperty _actionsProp;
     readonly int _actionIdx;
@@ -159,6 +160,7 @@ public class ActionCardDragManipulator : MouseManipulator
 
     Vector2 _startMouse;
     float _startTriggerTime;
+    bool _dragging;  // 鼠标是否已越过门槛进入拖动状态
 
     public ActionCardDragManipulator(VisualElement target, SerializedProperty actionsProp, int actionIdx, Func<bool> isLocked, Action rebuild)
     {
@@ -192,17 +194,27 @@ public class ActionCardDragManipulator : MouseManipulator
         var actionProp = _actionsProp.GetArrayElementAtIndex(_actionIdx);
         _startMouse = evt.mousePosition;
         _startTriggerTime = actionProp.FindPropertyRelative("TriggerTime").floatValue;
+        _dragging = false;  // 起始未拖动
         target.CaptureMouse();
-        evt.StopPropagation();
+        // 不 StopPropagation,让 Button 的 click 也触发(选中 Action)
     }
 
     void OnMouseMove(MouseMoveEvent evt)
     {
         if (!target.HasMouseCapture()) return;
 
+        float dx = evt.mousePosition.x - _startMouse.x;
+
+        // 门槛检查:鼠标移动距离 < 4px 时视为点击,不应用 TriggerTime 改动
+        if (!_dragging)
+        {
+            if (Mathf.Abs(dx) < DragThresholdPx) return;
+            _dragging = true;
+            evt.StopPropagation();  // 进入拖动后吃掉事件,避免触发 Button click
+        }
+
         var actionProp = _actionsProp.GetArrayElementAtIndex(_actionIdx);
         float pxPerSec = PixelsPerSecond();
-        float dx = evt.mousePosition.x - _startMouse.x;
 
         if (evt.shiftKey)
         {
@@ -219,7 +231,6 @@ public class ActionCardDragManipulator : MouseManipulator
         actionProp.FindPropertyRelative("TriggerTime").floatValue = newTrigger;
         _actionsProp.serializedObject.ApplyModifiedProperties();
         _rebuild?.Invoke();
-        evt.StopPropagation();
     }
 
     void OnMouseUp(MouseUpEvent evt)
@@ -227,7 +238,9 @@ public class ActionCardDragManipulator : MouseManipulator
         if (target.HasMouseCapture())
         {
             target.ReleaseMouse();
-            evt.StopPropagation();
+            // 只有真正拖动过才 StopPropagation,避免误吞点击事件
+            if (_dragging) evt.StopPropagation();
+            _dragging = false;
         }
     }
 }

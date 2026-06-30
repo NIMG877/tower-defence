@@ -35,8 +35,9 @@ public static class WaveTrackRow
 
         // === 左侧:轨道头 ===
         var header = new VisualElement();
-        header.style.width = 180;
+        header.style.width = 200;
         header.style.flexShrink = 0;
+        header.style.flexDirection = FlexDirection.Column;
         header.style.backgroundColor = new Color(0.13f, 0.13f, 0.16f);
         header.style.paddingTop = 4;
         header.style.paddingBottom = 4;
@@ -46,13 +47,19 @@ public static class WaveTrackRow
         header.style.borderBottomLeftRadius = 3;
         row.Add(header);
 
+        // 第一行:拖拽手柄 + Name
+        var nameRow = new VisualElement();
+        nameRow.style.flexDirection = FlexDirection.Row;
+        nameRow.style.alignItems = Align.Center;
+        header.Add(nameRow);
+
         // 排序手柄(占位,Phase 3 内简化版只显示不动)
         var dragHandle = new Label("≡");
         dragHandle.style.fontSize = 14;
         dragHandle.style.color = new Color(0.6f, 0.6f, 0.6f);
         dragHandle.style.unityTextAlign = TextAnchor.MiddleCenter;
         dragHandle.style.width = 16;
-        header.Add(dragHandle);
+        nameRow.Add(dragHandle);
 
         // Name(可编辑)
         var nameField = new TextField { value = trackProp.FindPropertyRelative("Name").stringValue };
@@ -65,9 +72,16 @@ public static class WaveTrackRow
             trackProp.FindPropertyRelative("Name").stringValue = evt.newValue;
             so.ApplyModifiedProperties();
         });
-        header.Add(nameField);
+        nameRow.Add(nameField);
 
-        // Color swatch + 颜色选择按钮
+        // 第二行:颜色 / 锁 / + / × 按钮行
+        var btnRow = new VisualElement();
+        btnRow.style.flexDirection = FlexDirection.Row;
+        btnRow.style.marginTop = 4;
+        btnRow.style.alignItems = Align.Center;
+        header.Add(btnRow);
+
+        // Color swatch
         var colorProp = trackProp.FindPropertyRelative("TrackColor");
         var swatch = new VisualElement();
         swatch.style.width = 18;
@@ -76,6 +90,7 @@ public static class WaveTrackRow
         swatch.style.borderTopRightRadius = 2;
         swatch.style.borderBottomLeftRadius = 2;
         swatch.style.borderBottomRightRadius = 2;
+        swatch.style.marginLeft = 18; // 对齐 Name(跳过 drag handle 宽度)
         swatch.style.marginRight = 2;
         swatch.style.backgroundColor = colorProp.colorValue;
         swatch.style.borderLeftWidth = 1;
@@ -86,9 +101,11 @@ public static class WaveTrackRow
         swatch.style.borderRightColor = new Color(0.3f, 0.3f, 0.3f);
         swatch.style.borderTopColor = new Color(0.3f, 0.3f, 0.3f);
         swatch.style.borderBottomColor = new Color(0.3f, 0.3f, 0.3f);
+        btnRow.Add(swatch);
+
+        // 颜色按钮(纯文字,避免 emoji 字形问题)
         var colorPickerBtn = new Button(() =>
         {
-            // 简化:打开系统 ColorField 弹窗
             EditorGUI.BeginChangeCheck();
             Color newColor = EditorGUILayout.ColorField("Track Color", colorProp.colorValue);
             if (EditorGUI.EndChangeCheck())
@@ -99,33 +116,66 @@ public static class WaveTrackRow
                 swatch.style.backgroundColor = newColor;
                 rebuild?.Invoke();
             }
-        }) { text = "🎨" };
-        colorPickerBtn.style.width = 22;
-        colorPickerBtn.style.height = 18;
-        colorPickerBtn.style.fontSize = 9;
-        header.Add(colorPickerBtn);
-        header.Add(swatch);
+        }) { text = "颜色" };
+        colorPickerBtn.style.marginLeft = 2;
+        colorPickerBtn.style.marginRight = 4;
+        btnRow.Add(colorPickerBtn);
 
-        // Lock button
+        // Lock button(纯文字)
         var lockProp = trackProp.FindPropertyRelative("Locked");
         bool initialLocked = lockProp.boolValue;
-        var lockBtn = new Button { text = initialLocked ? "🔒" : "🔓" };
+        var lockBtn = new Button { text = initialLocked ? "解锁" : "锁定" };
         lockBtn.clicked += () =>
         {
             Undo.RecordObject(so.targetObject, "Toggle Track Lock");
             lockProp.boolValue = !lockProp.boolValue;
             so.ApplyModifiedProperties();
-            lockBtn.text = lockProp.boolValue ? "🔒" : "🔓";
+            lockBtn.text = lockProp.boolValue ? "解锁" : "锁定";
         };
-        lockBtn.style.width = 22;
-        lockBtn.style.height = 18;
-        lockBtn.style.fontSize = 10;
-        header.Add(lockBtn);
+        lockBtn.style.marginRight = 4;
+        btnRow.Add(lockBtn);
 
-        // + / × 行内按钮
-        var btnRow = new VisualElement();
-        btnRow.style.flexDirection = FlexDirection.Row;
-        btnRow.style.marginTop = 4;
+        // + 按钮(纯文字)
+        var addActionBtn = new Button(() =>
+        {
+            var actionsProp = trackProp.FindPropertyRelative("Actions");
+            Undo.RecordObject(so.targetObject, "Add Action");
+            actionsProp.InsertArrayElementAtIndex(actionsProp.arraySize);
+            var newAction = actionsProp.GetArrayElementAtIndex(actionsProp.arraySize - 1);
+            newAction.FindPropertyRelative("CommandType").intValue = 0;
+            float maxTrig = 0f;
+            for (int i = 0; i < actionsProp.arraySize - 1; i++)
+            {
+                float t = actionsProp.GetArrayElementAtIndex(i).FindPropertyRelative("TriggerTime").floatValue;
+                if (t > maxTrig) maxTrig = t;
+            }
+            newAction.FindPropertyRelative("TriggerTime").floatValue = maxTrig + 1f;
+            newAction.FindPropertyRelative("GapsFromLastRepeat").arraySize = 0;
+            so.ApplyModifiedProperties();
+        }) { text = "+ Action" };
+        addActionBtn.style.flexGrow = 1;
+        addActionBtn.style.marginRight = 2;
+        btnRow.Add(addActionBtn);
+
+        // × 按钮(纯文字)
+        var delActionBtn = new Button(() =>
+        {
+            var actionsProp = trackProp.FindPropertyRelative("Actions");
+            if (actionsProp.arraySize == 0) return;
+            var (selW, selT, selA) = getCurrentSelection();
+            bool willInvalidate = selW == waveIdx && selT == trackIdx && selA == actionsProp.arraySize - 1;
+            if (EditorUtility.DisplayDialog("删除 Action", $"确认删除 Track {trackIdx} 的最后一个 Action?", "删除", "取消"))
+            {
+                Undo.RecordObject(so.targetObject, "Delete Action");
+                actionsProp.DeleteArrayElementAtIndex(actionsProp.arraySize - 1);
+                so.ApplyModifiedProperties();
+                if (willInvalidate) onActionSelected?.Invoke(-1, -1, -1);
+            }
+        }) { text = "×" };
+        delActionBtn.style.width = 28;
+        btnRow.Add(delActionBtn);
+
+        // 占位:删除 Wave / Wave 块删除按钮已由外层 WaveTimelineSection 提供
 
         var addActionBtn = new Button(() =>
         {
