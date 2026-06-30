@@ -177,45 +177,6 @@ public static class WaveTrackRow
 
         // 占位:删除 Wave / Wave 块删除按钮已由外层 WaveTimelineSection 提供
 
-        var addActionBtn = new Button(() =>
-        {
-            var actionsProp = trackProp.FindPropertyRelative("Actions");
-            Undo.RecordObject(so.targetObject, "Add Action");
-            actionsProp.InsertArrayElementAtIndex(actionsProp.arraySize);
-            var newAction = actionsProp.GetArrayElementAtIndex(actionsProp.arraySize - 1);
-            newAction.FindPropertyRelative("CommandType").intValue = 0;
-            // TriggerTime = 同 Track 内最大值 + 1s(空 Track 则 0)
-            float maxTrig = 0f;
-            for (int i = 0; i < actionsProp.arraySize - 1; i++)
-            {
-                float t = actionsProp.GetArrayElementAtIndex(i).FindPropertyRelative("TriggerTime").floatValue;
-                if (t > maxTrig) maxTrig = t;
-            }
-            newAction.FindPropertyRelative("TriggerTime").floatValue = maxTrig + 1f;
-            newAction.FindPropertyRelative("GapsFromLastRepeat").arraySize = 0;
-            so.ApplyModifiedProperties();
-        }) { text = "+" };
-        addActionBtn.style.flexGrow = 1;
-        addActionBtn.style.marginRight = 2;
-        btnRow.Add(addActionBtn);
-
-        var delActionBtn = new Button(() =>
-        {
-            var actionsProp = trackProp.FindPropertyRelative("Actions");
-            if (actionsProp.arraySize == 0) return;
-            var (selW, selT, selA) = getCurrentSelection();
-            bool willInvalidate = selW == waveIdx && selT == trackIdx && selA == actionsProp.arraySize - 1;
-            if (EditorUtility.DisplayDialog("删除 Action", $"确认删除 Track {trackIdx} 的最后一个 Action?", "删除", "取消"))
-            {
-                Undo.RecordObject(so.targetObject, "Delete Action");
-                actionsProp.DeleteArrayElementAtIndex(actionsProp.arraySize - 1);
-                so.ApplyModifiedProperties();
-                if (willInvalidate) onActionSelected?.Invoke(-1, -1, -1);
-            }
-        }) { text = "×" };
-        delActionBtn.style.flexGrow = 1;
-        btnRow.Add(delActionBtn);
-
         header.Add(btnRow);
 
         // === 右侧:时间轴 ===
