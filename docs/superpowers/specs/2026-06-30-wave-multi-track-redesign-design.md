@@ -47,7 +47,6 @@ public struct Wave
 public struct Track
 {
     public string Name;        // 设计师命名,默认"默认"
-    public Color TrackColor;   // 轨道色块 + 卡片描边
     public bool Locked;        // 锁定后时间轴上拖不动
     public Action[] Actions;
 }
@@ -238,26 +237,12 @@ private static void MigrateV1ToV2(LevelData ld)
         wave.Tracks = new[] { new LevelActions.Track
         {
             Name = "默认",
-            TrackColor = DefaultTrackColor(0),
             Locked = false,
             Actions = newActions,
         } };
         wave.LegacyActions = null;   // 清空,标脏
         ld.Waves[w] = wave;          // struct 回写
     }
-}
-
-private static Color DefaultTrackColor(int trackIndex)
-{
-    Color[] palette =
-    {
-        new Color(0.55f, 0.55f, 0.55f),
-        new Color(0.30f, 0.80f, 0.60f),
-        new Color(0.30f, 0.60f, 0.90f),
-        new Color(0.86f, 0.80f, 0.66f),
-        new Color(0.77f, 0.52f, 0.75f),
-    };
-    return palette[trackIndex % palette.Length];
 }
 ```
 
@@ -330,7 +315,6 @@ private static Color DefaultTrackColor(int trackIndex)
 
 **轨道头**
 - **命名**:行内可编辑 TextField,默认"默认 / 路径预览 / 支援 / Boss"
-- **色块**:点击 → 5 色快捷 + Custom(EditorWindow)
 - **锁定图标**:🔓 / 🔒 toggle
 - **拖拽手柄(≡)**:垂直拖动改 Track 数组顺序(同 Wave 内)
 - **[+]**:在本 Track 末尾追加新 Action,默认 `CommandType=0, TriggerTime=本 Track 最大值+1s`
@@ -359,7 +343,7 @@ private static Color DefaultTrackColor(int trackIndex)
 
 ### 5.5 颜色规则
 
-TrackIndex 轮转 5 色(灰 / 绿 / 蓝 / 黄 / 紫,≥5 循环);卡片描边 = TrackColor,卡片填充 = CommandType 对应色(沿用现有 `CommandTypeColor`)。
+2026-06-30 移除:Track 不再带颜色(用户反馈视觉信号收益不大,锁定状态已有橙色描边)。Action 卡片填色仍按 `CommandType`(沿用 `WaveTimelineSection.CommandTypeColor`)。
 
 ## 6. 实施顺序(每个阶段单独 PR / 提交)
 
