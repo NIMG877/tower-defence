@@ -9,21 +9,21 @@ using UnityEngine.UIElements;
 /// Action 卡片渲染。
 /// 结构性变化(add/delete)整 cardsContainer 重建,字段级变化只更新现有卡片的 left/width/backgroundColor/border(O(N) 增量)。
 /// 边框三态(优先级从高到低):选中(1px 亮琥珀) > 未激活 Track(1px 琥珀) > 普通(1px 灰)。
-/// Repeat 标记:GapsFromLastRepeat.Length >= 2 时,在每个 repeat 触发位置画小菱形,标识每次重复的实际触发点。
+/// Repeat 标记:GapsFromLastRepeat.Length >= 1 时,每个 repeat 触发位置画一个小正方形标记。
 /// </summary>
 public static class WaveActionCard
 {
     public class State
     {
         public List<Button> Cards = new();
-        public List<VisualElement> DiamondContainers = new();  // 每个 card 内一个,作为 diamond 的容器(覆盖 card)
+        public List<VisualElement> SquareContainers = new();  // 每个 card 内一个,作为 square 的容器(覆盖 card)
         public int LastActionCount = -1;
     }
 
     const float CARD_HEIGHT = 23f;        // 卡片渲染高度
-    const float DIAMOND_SIZE = 5f;        // 菱形边长(旋转前)
-    const float DIAMOND_HALF = DIAMOND_SIZE / 2f;
-    const float DIAMOND_TOP = (CARD_HEIGHT - DIAMOND_SIZE) / 2f;  // 9 → 居中
+    const float SQUARE_SIZE = 5f;         // 正方形边长
+    const float SQUARE_HALF = SQUARE_SIZE / 2f;
+    const float SQUARE_TOP = (CARD_HEIGHT - SQUARE_SIZE) / 2f;  // 9 → 居中
 
     static Color CommandTypeColor(int cmd) => WaveTimelineSection.CommandTypeColor(cmd);
 
@@ -79,16 +79,16 @@ public static class WaveActionCard
                     container.Add(card);
                     state.Cards.Add(card);
 
-                    // diamond 容器:覆盖整个 card,内含每个 repeat 的菱形标记
-                    var diamondContainer = new VisualElement();
-                    diamondContainer.style.position = Position.Absolute;
-                    diamondContainer.style.left = 0;
-                    diamondContainer.style.right = 0;
-                    diamondContainer.style.top = 0;
-                    diamondContainer.style.bottom = 0;
-                    diamondContainer.pickingMode = PickingMode.Ignore;  // 不拦截 card 点击
-                    card.Add(diamondContainer);
-                    state.DiamondContainers.Add(diamondContainer);
+                    // square 容器:覆盖整个 card,内含每个 repeat 的正方形标记
+                    var squareContainer = new VisualElement();
+                    squareContainer.style.position = Position.Absolute;
+                    squareContainer.style.left = 0;
+                    squareContainer.style.right = 0;
+                    squareContainer.style.top = 0;
+                    squareContainer.style.bottom = 0;
+                    squareContainer.pickingMode = PickingMode.Ignore;  // 不拦截 card 点击
+                    card.Add(squareContainer);
+                    state.SquareContainers.Add(squareContainer);
                 }
             }
 
@@ -144,14 +144,14 @@ public static class WaveActionCard
             card.style.borderTopColor = borderColor;
             card.style.borderBottomColor = borderColor;
 
-            // ===== Repeat 菱形标记 =====
-            // GapsFromLastRepeat.Length = N 时,画 N 个菱形 — 每次 repeat 触发点各一个。
+            // ===== Repeat 正方形标记 =====
+            // GapsFromLastRepeat.Length = N 时,画 N 个正方形 — 每次 repeat 触发点各一个。
             // g 从 0 开始:第 g 次 repeat 在 triggerTime + sum(gaps[0..g]) 位置。
-            // 例:gaps=[0, 32, 32, 16] → 4 个菱形,中心在 card.left + 0/+32/+64/+80 px。
-            //   - g=0 时 cumGap=0 → 菱形贴卡片左端(主触发后立即 repeat 的视觉化)
-            //   - g=3 时 cumGap=sum(全部) → 菱形在卡片右端(最后一次 repeat)
-            var diamondContainer = state.DiamondContainers[i];
-            diamondContainer.Clear();
+            // 例:gaps=[0, 32, 32, 16] → 4 个正方形,中心在 card.left + 0/+32/+64/+80 px。
+            //   - g=0 时 cumGap=0 → 正方形贴卡片左端(主触发后立即 repeat 的视觉化)
+            //   - g=3 时 cumGap=sum(全部) → 正方形在卡片右端(最后一次 repeat)
+            var squareContainer = state.SquareContainers[i];
+            squareContainer.Clear();
             var gapsProp = a.FindPropertyRelative("GapsFromLastRepeat");
             int gapCount = gapsProp.arraySize;
             if (gapCount >= 1)
@@ -161,16 +161,15 @@ public static class WaveActionCard
                 {
                     cumGap += Mathf.Max(0f, gapsProp.GetArrayElementAtIndex(g).floatValue);
                     float centerX = cumGap * pxPerSec;
-                    var diamond = new VisualElement();
-                    diamond.style.position = Position.Absolute;
-                    diamond.style.width = DIAMOND_SIZE;
-                    diamond.style.height = DIAMOND_SIZE;
-                    diamond.style.left = centerX - DIAMOND_HALF;
-                    diamond.style.top = DIAMOND_TOP;
-                    diamond.style.backgroundColor = new Color(0.05f, 0.3f, 0.15f);  // 更深绿(比 spawner 卡片绿 0.3/0.8/0.6 深)
-                    diamond.style.rotate = new StyleRotate(new Rotate(new Angle(45f, AngleUnit.Degree)));
-                    diamond.pickingMode = PickingMode.Ignore;  // 不拦截 card 点击
-                    diamondContainer.Add(diamond);
+                    var square = new VisualElement();
+                    square.style.position = Position.Absolute;
+                    square.style.width = SQUARE_SIZE;
+                    square.style.height = SQUARE_SIZE;
+                    square.style.left = centerX - SQUARE_HALF;
+                    square.style.top = SQUARE_TOP;
+                    square.style.backgroundColor = new Color(0.05f, 0.3f, 0.15f);  // 深绿(比 spawner 卡片绿 0.3/0.8/0.6 深)
+                    square.pickingMode = PickingMode.Ignore;  // 不拦截 card 点击
+                    squareContainer.Add(square);
                 }
             }
         }
