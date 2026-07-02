@@ -110,7 +110,12 @@ public static class WaveActionCard
 
             int cmd = a.FindPropertyRelative("CommandType").intValue;
             float duration = ComputeEndTime(a, cmd) - triggerTime;
-            float width = Mathf.Max(20f, duration * pxPerSec);
+            // 宽度规则:
+            // - CommandType 2/3/4 path preview:固定 20px(不随 GapsFromLastRepeat 或 zoom 变化)
+            // - 其他 cmd:duration * pxPerSec,最小 20px(防止纯点不可见)
+            float width = (cmd == 2 || cmd == 3 || cmd == 4)
+                ? 20f
+                : Mathf.Max(20f, duration * pxPerSec);
             card.style.width = width;
             card.style.backgroundColor = CommandTypeColor(cmd);
 
