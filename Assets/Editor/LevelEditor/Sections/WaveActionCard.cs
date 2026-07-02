@@ -21,9 +21,9 @@ public static class WaveActionCard
     }
 
     const float CARD_HEIGHT = 23f;        // 卡片渲染高度
-    const float DIAMOND_SIZE = 7f;        // 菱形边长(旋转前)
+    const float DIAMOND_SIZE = 5f;        // 菱形边长(旋转前)
     const float DIAMOND_HALF = DIAMOND_SIZE / 2f;
-    const float DIAMOND_TOP = (CARD_HEIGHT - DIAMOND_SIZE) / 2f;  // 7.5 → 居中
+    const float DIAMOND_TOP = (CARD_HEIGHT - DIAMOND_SIZE) / 2f;  // 9 → 居中
 
     static Color CommandTypeColor(int cmd) => WaveTimelineSection.CommandTypeColor(cmd);
 
@@ -167,7 +167,7 @@ public static class WaveActionCard
                     diamond.style.height = DIAMOND_SIZE;
                     diamond.style.left = centerX - DIAMOND_HALF;
                     diamond.style.top = DIAMOND_TOP;
-                    diamond.style.backgroundColor = new Color(0.1f, 0.4f, 0.2f);  // 深绿(比 spawner 卡片绿 0.3/0.8/0.6 深)
+                    diamond.style.backgroundColor = new Color(0.05f, 0.3f, 0.15f);  // 更深绿(比 spawner 卡片绿 0.3/0.8/0.6 深)
                     diamond.style.rotate = new StyleRotate(new Rotate(new Angle(45f, AngleUnit.Degree)));
                     diamond.pickingMode = PickingMode.Ignore;  // 不拦截 card 点击
                     diamondContainer.Add(diamond);
