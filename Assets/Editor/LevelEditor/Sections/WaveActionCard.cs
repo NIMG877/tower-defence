@@ -21,9 +21,9 @@ public static class WaveActionCard
     }
 
     const float CARD_HEIGHT = 23f;        // 卡片渲染高度
-    const float SQUARE_SIZE = 5f;         // 正方形边长
+    const float SQUARE_SIZE = 10f;        // 正方形边长
     const float SQUARE_HALF = SQUARE_SIZE / 2f;
-    const float SQUARE_TOP = (CARD_HEIGHT - SQUARE_SIZE) / 2f;  // 9 → 居中
+    const float SQUARE_TOP = (CARD_HEIGHT - SQUARE_SIZE) / 2f;  // 6.5 → 居中
 
     static Color CommandTypeColor(int cmd) => WaveTimelineSection.CommandTypeColor(cmd);
 
