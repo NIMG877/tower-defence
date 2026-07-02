@@ -9,14 +9,21 @@ using UnityEngine.UIElements;
 /// Action 卡片渲染。
 /// 结构性变化(add/delete)整 cardsContainer 重建,字段级变化只更新现有卡片的 left/width/backgroundColor/border(O(N) 增量)。
 /// 边框三态(优先级从高到低):选中(1px 亮琥珀) > 未激活 Track(1px 琥珀) > 普通(1px 灰)。
+/// Repeat 标记:GapsFromLastRepeat.Length >= 2 时,在每个 repeat 触发位置画小菱形,标识每次重复的实际触发点。
 /// </summary>
 public static class WaveActionCard
 {
     public class State
     {
         public List<Button> Cards = new();
+        public List<VisualElement> DiamondContainers = new();  // 每个 card 内一个,作为 diamond 的容器(覆盖 card)
         public int LastActionCount = -1;
     }
+
+    const float CARD_HEIGHT = 23f;        // 卡片渲染高度
+    const float DIAMOND_SIZE = 7f;        // 菱形边长(旋转前)
+    const float DIAMOND_HALF = DIAMOND_SIZE / 2f;
+    const float DIAMOND_TOP = (CARD_HEIGHT - DIAMOND_SIZE) / 2f;  // 7.5 → 居中
 
     static Color CommandTypeColor(int cmd) => WaveTimelineSection.CommandTypeColor(cmd);
 
@@ -71,6 +78,17 @@ public static class WaveActionCard
                     card.style.paddingRight = 2;
                     container.Add(card);
                     state.Cards.Add(card);
+
+                    // diamond 容器:覆盖整个 card,内含每个 repeat 的菱形标记
+                    var diamondContainer = new VisualElement();
+                    diamondContainer.style.position = Position.Absolute;
+                    diamondContainer.style.left = 0;
+                    diamondContainer.style.right = 0;
+                    diamondContainer.style.top = 0;
+                    diamondContainer.style.bottom = 0;
+                    diamondContainer.pickingMode = PickingMode.Ignore;  // 不拦截 card 点击
+                    card.Add(diamondContainer);
+                    state.DiamondContainers.Add(diamondContainer);
                 }
             }
 
@@ -125,6 +143,34 @@ public static class WaveActionCard
             card.style.borderRightColor = borderColor;
             card.style.borderTopColor = borderColor;
             card.style.borderBottomColor = borderColor;
+
+            // ===== Repeat 菱形标记 =====
+            // GapsFromLastRepeat.Length >= 2 时,除主触发(已由卡片左端表示)外,每个 repeat 在累计时间位置画一个菱形。
+            // g 从 1 开始(跳过 gaps[0]):它之前的 gaps 之和 = 该 repeat 的相对触发偏移。
+            // 例:gaps=[0, 32, 32, 16] → 3 个菱形,中心在 card.left + 0/+32/+64 px。
+            var diamondContainer = state.DiamondContainers[i];
+            diamondContainer.Clear();
+            var gapsProp = a.FindPropertyRelative("GapsFromLastRepeat");
+            int gapCount = gapsProp.arraySize;
+            if (gapCount >= 2)
+            {
+                float cumGap = 0f;
+                for (int g = 1; g < gapCount; g++)
+                {
+                    cumGap += Mathf.Max(0f, gapsProp.GetArrayElementAtIndex(g - 1).floatValue);
+                    float centerX = cumGap * pxPerSec;
+                    var diamond = new VisualElement();
+                    diamond.style.position = Position.Absolute;
+                    diamond.style.width = DIAMOND_SIZE;
+                    diamond.style.height = DIAMOND_SIZE;
+                    diamond.style.left = centerX - DIAMOND_HALF;
+                    diamond.style.top = DIAMOND_TOP;
+                    diamond.style.backgroundColor = new Color(0.05f, 0.05f, 0.05f);  // 深灰近黑,在亮色卡片上清晰可见
+                    diamond.style.rotate = new StyleRotate(new Rotate(new Angle(45f, AngleUnit.Degree)));
+                    diamond.pickingMode = PickingMode.Ignore;  // 不拦截 card 点击
+                    diamondContainer.Add(diamond);
+                }
+            }
         }
     }
 
