@@ -74,8 +74,10 @@ public static class WaveActionCard
                     // card.style.width = 60;  // 起始宽度,Render 阶段按 Duration 调整
                     card.style.color = new Color(0, 0, 0);
                     card.style.fontSize = 9;
-                    card.style.paddingLeft = 2;
-                    card.style.paddingRight = 2;
+                    card.style.paddingLeft = 0;
+                    card.style.paddingRight = 0;
+                    card.style.marginLeft=0;
+                    card.style.marginRight=0;
                     container.Add(card);
                     state.Cards.Add(card);
 
@@ -145,6 +147,7 @@ public static class WaveActionCard
             card.style.borderBottomColor = borderColor;
 
             // ===== Repeat 正方形标记 =====
+            // 仅 CommandType == 0(spawner)绘制。其他类型(静态/路径预览/dialog/剧情)无运行时 repeat 行为。
             // GapsFromLastRepeat.Length = N 时,画 N 个正方形 — 每次 repeat 触发点各一个。
             // g 从 0 开始:第 g 次 repeat 在 triggerTime + sum(gaps[0..g]) 位置。
             // 例:gaps=[0, 32, 32, 16] → 4 个正方形,中心在 card.left + 0/+32/+64/+80 px。
@@ -152,24 +155,27 @@ public static class WaveActionCard
             //   - g=3 时 cumGap=sum(全部) → 正方形在卡片右端(最后一次 repeat)
             var squareContainer = state.SquareContainers[i];
             squareContainer.Clear();
-            var gapsProp = a.FindPropertyRelative("GapsFromLastRepeat");
-            int gapCount = gapsProp.arraySize;
-            if (gapCount >= 1)
+            if (cmd == 0)
             {
-                float cumGap = 0f;
-                for (int g = 0; g < gapCount; g++)
+                var gapsProp = a.FindPropertyRelative("GapsFromLastRepeat");
+                int gapCount = gapsProp.arraySize;
+                if (gapCount >= 1)
                 {
-                    cumGap += Mathf.Max(0f, gapsProp.GetArrayElementAtIndex(g).floatValue);
-                    float centerX = cumGap * pxPerSec;
-                    var square = new VisualElement();
-                    square.style.position = Position.Absolute;
-                    square.style.width = SQUARE_SIZE;
-                    square.style.height = SQUARE_SIZE;
-                    square.style.left = centerX - SQUARE_HALF;
-                    square.style.top = SQUARE_TOP;
-                    square.style.backgroundColor = new Color(0.05f, 0.3f, 0.15f);  // 深绿(比 spawner 卡片绿 0.3/0.8/0.6 深)
-                    square.pickingMode = PickingMode.Ignore;  // 不拦截 card 点击
-                    squareContainer.Add(square);
+                    float cumGap = 0f;
+                    for (int g = 0; g < gapCount; g++)
+                    {
+                        cumGap += Mathf.Max(0f, gapsProp.GetArrayElementAtIndex(g).floatValue);
+                        float centerX = cumGap * pxPerSec;
+                        var square = new VisualElement();
+                        square.style.position = Position.Absolute;
+                        square.style.width = SQUARE_SIZE;
+                        square.style.height = SQUARE_SIZE;
+                        square.style.left = centerX - SQUARE_HALF - 1;
+                        square.style.top = SQUARE_TOP;
+                        square.style.backgroundColor = new Color(0.05f, 0.3f, 0.15f);  // 深绿(比 spawner 卡片绿 0.3/0.8/0.6 深)
+                        square.pickingMode = PickingMode.Ignore;  // 不拦截 card 点击
+                        squareContainer.Add(square);
+                    }
                 }
             }
         }
