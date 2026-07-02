@@ -145,19 +145,21 @@ public static class WaveActionCard
             card.style.borderBottomColor = borderColor;
 
             // ===== Repeat 菱形标记 =====
-            // GapsFromLastRepeat.Length >= 2 时,除主触发(已由卡片左端表示)外,每个 repeat 在累计时间位置画一个菱形。
-            // g 从 1 开始(跳过 gaps[0]):它之前的 gaps 之和 = 该 repeat 的相对触发偏移。
-            // 例:gaps=[0, 32, 32, 16] → 3 个菱形,中心在 card.left + 0/+32/+64 px。
+            // GapsFromLastRepeat.Length = N 时,画 N 个菱形 — 每次 repeat 触发点各一个。
+            // g 从 0 开始:第 g 次 repeat 在 triggerTime + sum(gaps[0..g]) 位置。
+            // 例:gaps=[0, 32, 32, 16] → 4 个菱形,中心在 card.left + 0/+32/+64/+80 px。
+            //   - g=0 时 cumGap=0 → 菱形贴卡片左端(主触发后立即 repeat 的视觉化)
+            //   - g=3 时 cumGap=sum(全部) → 菱形在卡片右端(最后一次 repeat)
             var diamondContainer = state.DiamondContainers[i];
             diamondContainer.Clear();
             var gapsProp = a.FindPropertyRelative("GapsFromLastRepeat");
             int gapCount = gapsProp.arraySize;
-            if (gapCount >= 2)
+            if (gapCount >= 1)
             {
                 float cumGap = 0f;
-                for (int g = 1; g < gapCount; g++)
+                for (int g = 0; g < gapCount; g++)
                 {
-                    cumGap += Mathf.Max(0f, gapsProp.GetArrayElementAtIndex(g - 1).floatValue);
+                    cumGap += Mathf.Max(0f, gapsProp.GetArrayElementAtIndex(g).floatValue);
                     float centerX = cumGap * pxPerSec;
                     var diamond = new VisualElement();
                     diamond.style.position = Position.Absolute;
@@ -165,7 +167,7 @@ public static class WaveActionCard
                     diamond.style.height = DIAMOND_SIZE;
                     diamond.style.left = centerX - DIAMOND_HALF;
                     diamond.style.top = DIAMOND_TOP;
-                    diamond.style.backgroundColor = new Color(0.05f, 0.05f, 0.05f);  // 深灰近黑,在亮色卡片上清晰可见
+                    diamond.style.backgroundColor = new Color(0.1f, 0.4f, 0.2f);  // 深绿(比 spawner 卡片绿 0.3/0.8/0.6 深)
                     diamond.style.rotate = new StyleRotate(new Rotate(new Angle(45f, AngleUnit.Degree)));
                     diamond.pickingMode = PickingMode.Ignore;  // 不拦截 card 点击
                     diamondContainer.Add(diamond);
