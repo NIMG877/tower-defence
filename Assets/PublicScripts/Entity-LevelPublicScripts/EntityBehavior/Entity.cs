@@ -22,8 +22,6 @@ public class Entity : MonoBehaviour, IPoolOperation
     [HideInInspector] public AttackBase AttackBase;
     [HideInInspector] public MoveBase MoveBase;
     public InteractableStatic InteractableStatic;
-    [HideInInspector] public Skill[] abilities; // [transitional] prefab scripts read this; remove when prefab Skill subclasses (WdslmSkill3 / MachineTalent1 / etc.) migrate to AbilitySystem
-    [HideInInspector] public Talent[] Talents;
 
     // === 子系统持有 ===
     private EntityStats _stats;
@@ -213,10 +211,6 @@ public class Entity : MonoBehaviour, IPoolOperation
         _vision.InitializeFromData(EntityData);
         Stats.AttributesCaculateFirst(EntityData);
         Movement.Initialize();
-
-        // [transitional] prefab Skill subclasses (WdslmSkill3 / MachineTalent1 / etc.) read this.
-        // Remove when those prefab scripts migrate to AbilitySystem.
-        this.abilities = GetComponents<Skill>();
 
         _skillRunner.PreWarm();
     }
