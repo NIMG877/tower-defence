@@ -11,6 +11,7 @@ namespace AbilitySystem.Components
         private Func<string> _selectionMode;
         private Func<string> _campRelation;
         private Func<float> _radius;
+        private Func<float> _minRadius;
         private Func<float> _squareLength;
         private Func<bool> _force;
         private Func<bool> _excludeSubjects;
@@ -25,6 +26,7 @@ namespace AbilitySystem.Components
             _selectionMode = p.GetStringLazy("selectionMode", "radius", bb);
             _campRelation = p.GetStringLazy("campRelation", "opposing", bb);
             _radius = p.GetFloatLazy("radius", 1f, bb);
+            _minRadius = p.GetFloatLazy("minRadius", 0f, bb);
             _squareLength = p.GetFloatLazy("squareLength", 1f, bb);
             _force = p.GetBoolLazy("force", false, bb);
             _excludeSubjects = p.GetBoolLazy("excludeSubjects", false, bb);
@@ -100,6 +102,8 @@ namespace AbilitySystem.Components
                     return SelectVision(subject);
                 case "range":
                     return SelectRange(subject);
+                case "ring":
+                    return SelectRing(subject);
                 default:
                     return SelectRadius(subject);
             }
@@ -144,6 +148,24 @@ namespace AbilitySystem.Components
                 results,
                 sameCamp => EntityManager.Manager.EntitySelector_Radius(
                     (position.x, position.y), subject.Camp, sameCamp, _radius(), _force()));
+            return results;
+        }
+
+        private List<Entity> SelectRing(Entity subject)
+        {
+            List<Entity> results = SelectRadius(subject);
+            float minRadius = Math.Max(0f, _minRadius());
+            if (minRadius <= 0f) return results;
+
+            float minRadiusSquared = minRadius * minRadius;
+            var center = subject.transform.position;
+            results.RemoveAll(entity =>
+            {
+                var position = entity.transform.position;
+                float deltaX = position.x - center.x;
+                float deltaY = position.y - center.y;
+                return deltaX * deltaX + deltaY * deltaY < minRadiusSquared;
+            });
             return results;
         }
 

@@ -107,7 +107,7 @@ callers.
 ### Entity selection
 
 - [EntitySelector](EntitySelector.md) - selects entities by subject, event
-  target, vision, radius, or range and writes the result/count to Blackboard.
+  target, vision, radius, ring, or range and writes the result/count to Blackboard.
 - [EntityFilter](EntityFilter.md) - filters attack target candidates with
   configurable OR groups of AND conditions.
 

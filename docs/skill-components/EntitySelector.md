@@ -11,9 +11,10 @@ results, then overwrites optional Blackboard entity-list and count outputs.
 |---|---|---|---|
 | `subjectMode` | String | `self` | Subject source: `self`, `eventTarget`, or `blackboard`. |
 | `subjectBlackboardKey` | String | `""` | Input `List<Entity>` key used by `subjectMode=blackboard`. |
-| `selectionMode` | String | `radius` | Selection method: `subject`, `eventTarget`, `vision`, `radius`, or `range`. |
-| `campRelation` | String | `opposing` | Select entities of the `same`, `opposing`, or `both` camp relative to each subject. Used by `vision`, `radius`, and `range`. |
+| `selectionMode` | String | `radius` | Selection method: `subject`, `eventTarget`, `vision`, `radius`, `ring`, or `range`. |
+| `campRelation` | String | `opposing` | Select entities of the `same`, `opposing`, or `both` camp relative to each subject. Used by `vision`, `radius`, `ring`, and `range`. |
 | `radius` | Float | `1` | Radius passed to `EntitySelector_Radius`. |
+| `minRadius` | Float | `0` | Inner radius used only by `selectionMode=ring`; negative values are treated as `0`. |
 | `squareLength` | Float | `1` | Square half-length passed to `EntitySelector_Range`. |
 | `force` | Bool | `False` | Passed through to the EntityManager selector methods. |
 | `excludeSubjects` | Bool | `False` | Remove every resolved subject from the merged result. |
@@ -24,6 +25,11 @@ results, then overwrites optional Blackboard entity-list and count outputs.
 `range` uses each subject's calculated `Vision.Range`; a subject with a null
 range contributes no entities. `vision` reads the subject's current cached
 vision lists.
+
+`ring` first performs the same outer-radius selection as `radius`, then keeps
+entities whose distance from the subject is greater than or equal to
+`minRadius`. Its effective interval is `minRadius <= distance <= radius`.
+When `minRadius` is greater than a non-negative `radius`, the result is empty.
 
 ## Blackboard behavior
 
