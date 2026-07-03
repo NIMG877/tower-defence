@@ -758,34 +758,6 @@ MonoBehaviour:
         Content: 
         DurationTime: 0
         Contents: []
-      - CommandType: 0
-        TriggerTime: 3
-        OnBeforeAction:
-          m_PersistentCalls:
-            m_Calls: []
-        EntityPrefabID:
-          ID_C: m
-          ID_N: 1
-        Camp: 2
-        OnActionRepeat:
-          m_PersistentCalls:
-            m_Calls: []
-        PathSerial: 0
-        GapsFromLastRepeat:
-        - 0
-        - 32
-        - 32
-        - 16
-        ModifyAttributes: 0
-        ModifyLevelHpConsume: 0
-        ModifyPrimary: 0
-        ModifyCountOperate: 0
-        Destination: {x: 0, y: 0}
-        Orientation: 0
-        HeadImage: {fileID: 0}
-        Content: 
-        DurationTime: 0
-        Contents: []
       - CommandType: 2
         TriggerTime: 13
         OnBeforeAction:
@@ -956,6 +928,37 @@ MonoBehaviour:
         PathSerial: 2
         GapsFromLastRepeat:
         - 0
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+    - Name: Track 1
+      Locked: 1
+      Actions:
+      - CommandType: 0
+        TriggerTime: 3
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 1
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 0
+        GapsFromLastRepeat:
+        - 0
+        - 32
+        - 32
+        - 16
         ModifyAttributes: 0
         ModifyLevelHpConsume: 0
         ModifyPrimary: 0

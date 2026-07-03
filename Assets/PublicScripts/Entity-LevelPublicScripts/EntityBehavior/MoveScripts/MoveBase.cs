@@ -3,6 +3,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class MoveBase : MonoBehaviour, IPoolOperation
 {
@@ -61,6 +64,10 @@ public class MoveBase : MonoBehaviour, IPoolOperation
                Gizmos.DrawWireCube(new Vector3(_thisEntity.Movement.InBlocks[i].j, _thisEntity.Movement.InBlocks[i].i, 0), new Vector3(1, 1, 1));
            }
        }
+#if UNITY_EDITOR
+       Handles.Label(this.transform.position-0.1f*Vector3.up, $"{PathDataManager.Manager.GetSection(_currentPathSerial, _currentSectionSerial, _moveMethod).Item1-_forceUnmoveTime:F5}",
+           new GUIStyle { normal = { textColor = Color.red }, alignment = TextAnchor.MiddleCenter });
+#endif
     }
     public void CountPriority()
     {

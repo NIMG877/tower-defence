@@ -458,12 +458,12 @@ public static class WaveTimelineSection
     }
 
     /// <summary>
-    /// 选 tick 间隔:目标间距约 80px,从 {0.1, 0.2, 0.5, 1, 2, 5, ...} 里挑第一个 ≥ ideal。
+    /// 选 tick 间隔:目标间距约 40px,从 {0.1, 0.2, 0.5, 1, 2, 5, ...} 里挑第一个 ≥ ideal。
     /// zoom 越大刻度越细。
     /// </summary>
     public static float ChooseTickInterval(float pxPerSec)
     {
-        const float targetPxBetweenTicks = 80f;
+        const float targetPxBetweenTicks = 40f;
         float ideal = targetPxBetweenTicks / Mathf.Max(1f, pxPerSec);
         float[] candidates = { 0.1f, 0.2f, 0.5f, 1f, 2f, 5f, 10f, 15f, 30f, 60f, 120f, 300f, 600f };
         foreach (var c in candidates)

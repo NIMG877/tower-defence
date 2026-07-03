@@ -55,7 +55,36 @@ MonoBehaviour:
     portalOutI: -1
     portalOutJ: -1
   EnvironmentalControlDevice: {fileID: 0}
-  Waves: []
+  Waves:
+  - Tracks:
+    - Name: Track 0
+      Locked: 0
+      Actions:
+      - CommandType: 0
+        TriggerTime: 1
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: c
+          ID_N: 1
+        Camp: 0
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 0
+        GapsFromLastRepeat:
+        - 0
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
   Paths:
   - Name: 
     CheckPoints:

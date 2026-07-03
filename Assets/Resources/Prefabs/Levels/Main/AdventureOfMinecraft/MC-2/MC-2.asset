@@ -529,496 +529,496 @@ MonoBehaviour:
   EnvironmentalControlDevice: {fileID: 6308497817176099097, guid: ba0fe5a46e68e4b469b07be44468fc35, type: 3}
   Waves:
   - Tracks:
-    - Name: ""
+    - Name: Trank1
       Locked: 0
       Actions:
-        - CommandType: 2
-          TriggerTime: 0
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: c
-            ID_N: 1
-          Camp: 0
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 0
-          GapsFromLastRepeat:
-          - 0
-          - 0.8
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 2
-          TriggerTime: 1
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: c
-            ID_N: 1
-          Camp: 0
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 1
-          GapsFromLastRepeat:
-          - 0
-          - 0.8
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 0
-          TriggerTime: 3
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: m
-            ID_N: 1
-          Camp: 2
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 0
-          GapsFromLastRepeat:
-          - 0
-          - 25
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 0
-          TriggerTime: 4
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: m
-            ID_N: 1
-          Camp: 2
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 1
-          GapsFromLastRepeat:
-          - 0
-          - 25
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 3
-          TriggerTime: 22
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: m
-            ID_N: 1
-          Camp: 2
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 2
-          GapsFromLastRepeat:
-          - 0
-          - 0.8
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 0
-          TriggerTime: 25
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: m
-            ID_N: 2
-          Camp: 2
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 2
-          GapsFromLastRepeat:
-          - 0
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 3
-          TriggerTime: 43
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: m
-            ID_N: 2
-          Camp: 2
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 3
-          GapsFromLastRepeat:
-          - 0
-          - 0.8
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 3
-          TriggerTime: 44
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: m
-            ID_N: 2
-          Camp: 2
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 4
-          GapsFromLastRepeat:
-          - 0
-          - 0.8
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 0
-          TriggerTime: 46
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: m
-            ID_N: 1
-          Camp: 2
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 4
-          GapsFromLastRepeat:
-          - 0
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 0
-          TriggerTime: 50
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: m
-            ID_N: 1
-          Camp: 2
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 3
-          GapsFromLastRepeat:
-          - 0
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 3
-          TriggerTime: 60
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: m
-            ID_N: 1
-          Camp: 2
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 2
-          GapsFromLastRepeat:
-          - 0
-          - 0.8
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 0
-          TriggerTime: 63
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: m
-            ID_N: 2
-          Camp: 2
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 7
-          GapsFromLastRepeat:
-          - 0
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 0
-          TriggerTime: 64
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: m
-            ID_N: 2
-          Camp: 2
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 8
-          GapsFromLastRepeat:
-          - 0
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 0
-          TriggerTime: 72
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: m
-            ID_N: 1
-          Camp: 2
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 5
-          GapsFromLastRepeat:
-          - 0
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 0
-          TriggerTime: 76
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: m
-            ID_N: 1
-          Camp: 2
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 6
-          GapsFromLastRepeat:
-          - 0
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 3
-          TriggerTime: 84
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: m
-            ID_N: 1
-          Camp: 2
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 9
-          GapsFromLastRepeat:
-          - 0
-          - 0.8
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 2
-          TriggerTime: 85
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: m
-            ID_N: 1
-          Camp: 2
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 10
-          GapsFromLastRepeat:
-          - 0
-          - 0.8
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 0
-          TriggerTime: 87
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: m
-            ID_N: 1
-          Camp: 2
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 9
-          GapsFromLastRepeat:
-          - 0
-          - 2
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
-        - CommandType: 0
-          TriggerTime: 88
-          OnBeforeAction:
-            m_PersistentCalls:
-              m_Calls: []
-          EntityPrefabID:
-            ID_C: m
-            ID_N: 1
-          Camp: 2
-          OnActionRepeat:
-            m_PersistentCalls:
-              m_Calls: []
-          PathSerial: 10
-          GapsFromLastRepeat:
-          - 0
-          - 2
-          ModifyAttributes: 0
-          ModifyLevelHpConsume: 0
-          ModifyPrimary: 0
-          ModifyCountOperate: 0
-          Destination: {x: 0, y: 0}
-          Orientation: 0
-          HeadImage: {fileID: 0}
-          Content: 
-          DurationTime: 0
-          Contents: []
+      - CommandType: 2
+        TriggerTime: 0
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: c
+          ID_N: 1
+        Camp: 0
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 0
+        GapsFromLastRepeat:
+        - 0
+        - 0.8
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 2
+        TriggerTime: 1
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: c
+          ID_N: 1
+        Camp: 0
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 1
+        GapsFromLastRepeat:
+        - 0
+        - 0.8
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 3
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 1
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 0
+        GapsFromLastRepeat:
+        - 0
+        - 25
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 4
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 1
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 1
+        GapsFromLastRepeat:
+        - 0
+        - 25
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 3
+        TriggerTime: 22
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 1
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 2
+        GapsFromLastRepeat:
+        - 0
+        - 0.8
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 25
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 2
+        GapsFromLastRepeat:
+        - 0
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 3
+        TriggerTime: 43
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 3
+        GapsFromLastRepeat:
+        - 0
+        - 0.8
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 3
+        TriggerTime: 44
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 4
+        GapsFromLastRepeat:
+        - 0
+        - 0.8
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 46
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 1
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 4
+        GapsFromLastRepeat:
+        - 0
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 50
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 1
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 3
+        GapsFromLastRepeat:
+        - 0
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 3
+        TriggerTime: 60
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 1
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 2
+        GapsFromLastRepeat:
+        - 0
+        - 0.8
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 63
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 7
+        GapsFromLastRepeat:
+        - 0
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 64
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 8
+        GapsFromLastRepeat:
+        - 0
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 72
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 1
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 5
+        GapsFromLastRepeat:
+        - 0
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 76
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 1
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 6
+        GapsFromLastRepeat:
+        - 0
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 3
+        TriggerTime: 84
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 1
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 9
+        GapsFromLastRepeat:
+        - 0
+        - 0.8
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 2
+        TriggerTime: 85
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 1
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 10
+        GapsFromLastRepeat:
+        - 0
+        - 0.8
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 87
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 1
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 9
+        GapsFromLastRepeat:
+        - 0
+        - 2
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 88
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 1
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 10
+        GapsFromLastRepeat:
+        - 0
+        - 2
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
   Paths:
   - Name: zombie1
     CheckPoints:
