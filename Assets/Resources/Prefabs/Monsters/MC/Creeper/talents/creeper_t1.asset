@@ -11,20 +11,86 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: creeper_t1
-  m_EditorClassIdentifier: 
-  abilityId: 
-  abilityName: 
-  description: 
+  m_EditorClassIdentifier:
+  abilityId: creeper_t1
+  abilityName: "\u7206\u70B8"
+  description: "\u9644\u8FD1\u5B58\u5728\u6211\u65B9\u5355\u4F4D\u65F6\u84C4\u529B1\u79D2\uFF0C\u7136\u540E\u7206\u70B8\uFF0C\u5BF9\u534A\u5F842.915\u5185\u7684\u5B9E\u4F53\u9020\u6210\u8DDD\u79BB\u8870\u51CF\u7684\u7269\u7406\u4F24\u5BB3\u548C\u51B2\u91CF\uFF1B\u84C4\u529B\u671F\u95F4\u5931\u53BB\u76EE\u6807\u5219\u9000\u706B\u3002"
   icon: {fileID: 0}
-  Kind: 0
-  sp:
-    totalSp: 0
-    initialSp: 0
-    chargeNum: 1
-    abilityAmount: 0
-    recoverMode: 0
-    consumeMode: 0
-    openMode: 0
-    recoverForbidDuringAbility: 0
-    canManualClose: 0
-  components: []
+  Kind: 1
+  sp: {totalSp: 0, initialSp: 0, chargeNum: 1, abilityAmount: 0, recoverMode: 0, consumeMode: 5, openMode: 0, recoverForbidDuringAbility: 0, canManualClose: 0}
+  components:
+  - componentType: ApplyAbnormalState
+    parameters: {entries: [{key: abnormalTypes, value: 2, fromBlackboard: 0, type: 3}, {key: abnormalTimes, value: -10, fromBlackboard: 0, type: 3}]}
+    triggers: [{triggerEvent: 1, groups: []}]
+  - componentType: EntitySelector
+    parameters: {entries: [{key: selectionMode, value: vision, fromBlackboard: 0, type: 3}, {key: outputCountKey, value: creeper_t1_trigger_count, fromBlackboard: 0, type: 3}]}
+    triggers: [{triggerEvent: 16, groups: []}]
+  - componentType: ChargeStateController
+    parameters:
+      entries:
+      - {key: targetCountKey, value: creeper_t1_trigger_count, fromBlackboard: 0, type: 3}
+      - {key: phaseKey, value: creeper_t1_phase, fromBlackboard: 0, type: 3}
+      - {key: phaseEnteredKey, value: creeper_t1_phase_entered, fromBlackboard: 0, type: 3}
+      - {key: chargeDuration, value: 1, fromBlackboard: 0, type: 1}
+      - {key: backoutAnimation, value: BackOut, fromBlackboard: 0, type: 3}
+      - {key: attackAnimation, value: Attack, fromBlackboard: 0, type: 3}
+    triggers: [{triggerEvent: 16, groups: []}]
+  - componentType: ApplyAbnormalState
+    parameters: {entries: [{key: abnormalTypes, value: 0, fromBlackboard: 0, type: 3}, {key: abnormalTimes, value: -10, fromBlackboard: 0, type: 3}, {key: outputTarget, value: creeper_t1_root_targets, fromBlackboard: 0, type: 3}, {key: outputState, value: creeper_t1_root_states, fromBlackboard: 0, type: 3}]}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: charging}, {op: 1, leftKey: creeper_t1_phase_entered, rightValue: True}]}]}]
+  - componentType: ApplyAnimationOverride
+    parameters: {entries: [{key: slots, value: Idle, fromBlackboard: 0, type: 3}, {key: resources, value: ChargeLoop, fromBlackboard: 0, type: 3}]}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: charging}, {op: 1, leftKey: creeper_t1_phase_entered, rightValue: True}]}]}]
+  - componentType: ApplyAnimationOverride
+    parameters: {entries: [{key: slots, value: Idle, fromBlackboard: 0, type: 3}, {key: resources, value: BackOut, fromBlackboard: 0, type: 3}]}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: backout}, {op: 1, leftKey: creeper_t1_phase_entered, rightValue: True}]}]}]
+  - componentType: ApplyAnimationOverride
+    parameters: {entries: [{key: slots, value: Idle, fromBlackboard: 0, type: 3}, {key: resources, value: Attack, fromBlackboard: 0, type: 3}]}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: attack}, {op: 1, leftKey: creeper_t1_phase_entered, rightValue: True}]}]}]
+  - componentType: DestroyAbnormalState
+    parameters: {entries: [{key: inputTarget, value: creeper_t1_root_targets, fromBlackboard: 0, type: 3}, {key: inputState, value: creeper_t1_root_states, fromBlackboard: 0, type: 3}]}
+    triggers:
+    - {triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: idle}, {op: 1, leftKey: creeper_t1_phase_entered, rightValue: True}]}]}
+    - {triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}
+  - componentType: EntitySelector
+    parameters: {entries: [{key: selectionMode, value: ring, fromBlackboard: 0, type: 3}, {key: campRelation, value: both, fromBlackboard: 0, type: 3}, {key: minRadius, value: 0, fromBlackboard: 0, type: 1}, {key: radius, value: 0.25, fromBlackboard: 0, type: 1}, {key: outputEntitiesKey, value: creeper_t1_bucket_1, fromBlackboard: 0, type: 3}]}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
+  - componentType: ApplyDamage
+    parameters: {entries: [{key: targetMode, value: blackboard, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: creeper_t1_bucket_1, fromBlackboard: 0, type: 3}, {key: multiplier, value: 3, fromBlackboard: 0, type: 1}, {key: applyType, value: 1, fromBlackboard: 0, type: 0}]}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
+  - componentType: ApplyImpulse
+    parameters: {entries: [{key: targetMode, value: blackboard, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: creeper_t1_bucket_1, fromBlackboard: 0, type: 3}, {key: strengthLevel, value: 5, fromBlackboard: 0, type: 0}]}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
+  - componentType: EntitySelector
+    parameters: {entries: [{key: selectionMode, value: ring, fromBlackboard: 0, type: 3}, {key: campRelation, value: both, fromBlackboard: 0, type: 3}, {key: minRadius, value: 0.25, fromBlackboard: 0, type: 1}, {key: radius, value: 0.5, fromBlackboard: 0, type: 1}, {key: outputEntitiesKey, value: creeper_t1_bucket_2, fromBlackboard: 0, type: 3}]}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
+  - componentType: ApplyDamage
+    parameters: {entries: [{key: targetMode, value: blackboard, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: creeper_t1_bucket_2, fromBlackboard: 0, type: 3}, {key: multiplier, value: 2, fromBlackboard: 0, type: 1}, {key: applyType, value: 1, fromBlackboard: 0, type: 0}]}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
+  - componentType: ApplyImpulse
+    parameters: {entries: [{key: targetMode, value: blackboard, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: creeper_t1_bucket_2, fromBlackboard: 0, type: 3}, {key: strengthLevel, value: 4, fromBlackboard: 0, type: 0}]}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
+  - componentType: EntitySelector
+    parameters: {entries: [{key: selectionMode, value: ring, fromBlackboard: 0, type: 3}, {key: campRelation, value: both, fromBlackboard: 0, type: 3}, {key: minRadius, value: 0.5, fromBlackboard: 0, type: 1}, {key: radius, value: 1.664, fromBlackboard: 0, type: 1}, {key: outputEntitiesKey, value: creeper_t1_bucket_3, fromBlackboard: 0, type: 3}]}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
+  - componentType: ApplyDamage
+    parameters: {entries: [{key: targetMode, value: blackboard, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: creeper_t1_bucket_3, fromBlackboard: 0, type: 3}, {key: multiplier, value: 1, fromBlackboard: 0, type: 1}, {key: applyType, value: 1, fromBlackboard: 0, type: 0}]}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
+  - componentType: ApplyImpulse
+    parameters: {entries: [{key: targetMode, value: blackboard, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: creeper_t1_bucket_3, fromBlackboard: 0, type: 3}, {key: strengthLevel, value: 3, fromBlackboard: 0, type: 0}]}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
+  - componentType: EntitySelector
+    parameters: {entries: [{key: selectionMode, value: ring, fromBlackboard: 0, type: 3}, {key: campRelation, value: both, fromBlackboard: 0, type: 3}, {key: minRadius, value: 1.664, fromBlackboard: 0, type: 1}, {key: radius, value: 2.915, fromBlackboard: 0, type: 1}, {key: outputEntitiesKey, value: creeper_t1_bucket_4, fromBlackboard: 0, type: 3}]}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
+  - componentType: ApplyDamage
+    parameters: {entries: [{key: targetMode, value: blackboard, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: creeper_t1_bucket_4, fromBlackboard: 0, type: 3}, {key: multiplier, value: 0.5, fromBlackboard: 0, type: 1}, {key: applyType, value: 1, fromBlackboard: 0, type: 0}]}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
+  - componentType: ApplyImpulse
+    parameters: {entries: [{key: targetMode, value: blackboard, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: creeper_t1_bucket_4, fromBlackboard: 0, type: 3}, {key: strengthLevel, value: 2, fromBlackboard: 0, type: 0}]}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
+  - componentType: ApplyAnimationOverride
+    parameters: {entries: [{key: mode, value: override, fromBlackboard: 0, type: 3}, {key: slots, value: Die, fromBlackboard: 0, type: 3}, {key: resources, value: Die2, fromBlackboard: 0, type: 3}]}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
+  - componentType: DestroyEntity
+    parameters: {entries: []}
+    triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
