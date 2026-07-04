@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-
+using UnityEngine;
 namespace AbilitySystem.Components
 {
     [RegisterComponent("SharedTargetExtraAttack")]
@@ -28,6 +28,7 @@ namespace AbilitySystem.Components
 
         public override void OnTrigger(AbilityContext ctx)
         {
+            Debug.Log($"[SharedTargetExtraAttack] Triggered for entity {ctx.entity?.name} with event {ctx.currentEvent?.GetType().Name}");
             if (ctx.currentEvent is TickEvent)
             {
                 ProcessQueue(ctx);
@@ -41,7 +42,11 @@ namespace AbilitySystem.Components
             if (ctx.currentEvent is AttackInterruptEvent && _isExtraAttack)
             {
                 _isExtraAttack = false;
-                ctx.sharedBlackboard?.Remove(_activeSourceKey());
+                Blackboard bb = ctx.sharedBlackboard;
+                if (bb == null) return;
+                bb.Remove(_activeSourceKey());
+                bb.Remove(_queueKey());
+                ReleaseAbnormal(ctx.entity);
             }
         }
 
