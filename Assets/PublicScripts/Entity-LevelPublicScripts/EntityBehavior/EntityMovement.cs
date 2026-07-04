@@ -39,18 +39,15 @@ public class EntityMovement
     public Vector2 Position
     {
         get => _entity.transform.position;
-        set => SetPosition(value, true);
+        set => SetPosition(value);
     }
     /// <summary>
     /// 替代原 Entity.EntityPosition setter。设置 transform.position 并按需刷新所在格位。
     /// </summary>
-    public void SetPosition(Vector2 value, bool refreshBlocks = true)
+    public void SetPosition(Vector2 value)
     {
         _entity.transform.position = value;
-        if (refreshBlocks)
-        {
-            FindSelfInBlocks(value);
-        }
+        FindSelfInBlocks(value);
     }
 
     // === 格位 ===

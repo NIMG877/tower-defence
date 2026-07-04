@@ -482,7 +482,7 @@ public class EntityAbilityRunner
         if (!a.isActive && !bypassActiveGate) return;
         if (!a.componentsByTrigger.TryGetValue(evt.TriggerEvent, out var list)) return;
 
-        Debug.Log($"[EntityAbilityRunner] Dispatching event {evt.TriggerEvent} to ability {a.config.abilityName}");
+        //Debug.Log($"[EntityAbilityRunner] Dispatching event {evt.TriggerEvent} to ability {a.config.abilityName}");
 
         var evalCtx = new ConditionEvalContext
         {

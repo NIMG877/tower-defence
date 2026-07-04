@@ -72,7 +72,7 @@ public class Entity : MonoBehaviour, IPoolOperation
     public Vector2 EntityPosition
     {
         get { return Movement.Position; }
-        set { Movement.SetPosition(value, true); }
+        set { Movement.SetPosition(value); }
     }
 
     public EntityPool thisEntityPool;

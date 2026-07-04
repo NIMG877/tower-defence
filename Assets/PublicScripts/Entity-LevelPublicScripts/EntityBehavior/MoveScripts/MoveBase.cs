@@ -127,8 +127,8 @@ public class MoveBase : MonoBehaviour, IPoolOperation
                 Vector2 originPos = _thisEntity.Movement.Position;
                 _thisEntity.Movement.Position = _thisEntity.Movement.Position + (_unBalancedMoveSpeed - _unBalancedMoveSpeed.normalized * 0.5f * MIU_G * Time.fixedDeltaTime) * Time.fixedDeltaTime;
                 _unBalancedMoveSpeed -= _unBalancedMoveSpeed.normalized * MIU_G * Time.fixedDeltaTime;
-                int xConstrain = 0;//-1̨ʵߣ1̨ʵұ
-                int yConstrain = 0;//-1̨ʵ±ߣ1̨ʵϱ
+                int xConstrain = 0;
+                int yConstrain = 0;
                 (int x, int y) xyConstrain = (0, 0);
                 (int i, int j) pos = ((int)(originPos.y + 0.5), (int)(originPos.x + 0.5));
                 for (int i = 0; i < _thisEntity.Movement.InBlocks.Length; i++)
