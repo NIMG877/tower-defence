@@ -164,7 +164,7 @@ namespace AbilitySystem.Components
                 var position = entity.transform.position;
                 float deltaX = position.x - center.x;
                 float deltaY = position.y - center.y;
-                return deltaX * deltaX + deltaY * deltaY < minRadiusSquared;
+                return deltaX * deltaX + deltaY * deltaY <= minRadiusSquared;
             });
             return results;
         }

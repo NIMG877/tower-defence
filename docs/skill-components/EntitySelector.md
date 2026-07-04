@@ -27,8 +27,10 @@ range contributes no entities. `vision` reads the subject's current cached
 vision lists.
 
 `ring` first performs the same outer-radius selection as `radius`, then keeps
-entities whose distance from the subject is greater than or equal to
-`minRadius`. Its effective interval is `minRadius <= distance <= radius`.
+entities whose distance from the subject is strictly greater than
+`minRadius`. Its effective interval is `minRadius < distance <= radius`.
+With the default `minRadius=0`, an entity exactly at the subject's center is
+excluded.
 When `minRadius` is greater than a non-negative `radius`, the result is empty.
 
 ## Blackboard behavior

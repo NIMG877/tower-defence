@@ -90,6 +90,11 @@ callers.
 - [DestroyEntity](DestroyEntity.md) - calls `Entity.Die()` for self or a
   Blackboard entity list.
 
+### State flow
+
+- [ChargeStateController](ChargeStateController.md) - controls a cancellable
+  charge sequence and publishes phase transitions to Blackboard.
+
 ### Combat
 
 - [AttackEventValueModifier](AttackEventValueModifier.md) — generic
@@ -98,6 +103,8 @@ callers.
   removed `AttackMultiplierBoost` and `SetAttackCombo`.
 - [ApplyDamage](ApplyDamage.md) - applies direct attack-based or fixed-value
   damage to the event target, self, or a Blackboard entity list.
+- [ApplyImpulse](ApplyImpulse.md) - applies an outward movement impulse to the
+  event target, self, or a Blackboard entity list.
 
 - [ShareAttackTarget](ShareAttackTarget.md) - relays a current attack target
   to selected allied ability users, optionally through a communication bullet.
