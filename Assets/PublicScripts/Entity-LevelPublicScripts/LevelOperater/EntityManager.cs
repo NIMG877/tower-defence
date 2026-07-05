@@ -47,39 +47,6 @@ public class EntityManager : IManagerStartEnd
             return se;
         }
     }
-    public bool[,] MovableEntity0ExistBlock
-    {
-        get
-        {
-            bool[,] m0e = new bool[_iSize, _jSize];
-            for (int i = 0; i < _iSize; i++)
-            {
-                for (int j = 0; j < _jSize; j++)
-                {
-                    for (int k = 0; k < _blockMonsters[i, j].Count; k++)
-                    {
-                        if (_blockTurrets[i, j][k].EntityData.MoveMethod == 0)
-                        {
-                            m0e[i, j] = true;
-                            break;
-                        }
-                    }
-                    if (m0e[i, j] != true)
-                    {
-                        for (int k = 0; k < _blockTurrets[i, j].Count; k++)
-                        {
-                            if (_blockTurrets[i, j][k].EntityData.MoveMethod == 0)
-                            {
-                                m0e[i, j] = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            return m0e;
-        }
-    }
     public delegate void OperationsAfterSetEntity(Entity entity);
     public event OperationsAfterSetEntity OnAfterSetEntity;
 

@@ -5,7 +5,6 @@ public enum OrderLogic
     ResistFirst_Priority_Des,
     Priority_Des,
     Hprate_NoFull_Asc,
-    ResistFirst_OtherCampFirst_Priority_Des,
     Defense_Des,
 }
 
@@ -77,7 +76,6 @@ public class Entity : MonoBehaviour, IPoolOperation
 
     public EntityPool thisEntityPool;
     [SerializeField] public Transform TempContainer;
-    protected OrderLogic EntityOrderLogic;
     /// <summary>
     /// 朝向 0-up 1-right 2-down 3-left。setter 走 <see cref="SetOrientation"/>（带 Vision 同步副作用）。
     /// </summary>

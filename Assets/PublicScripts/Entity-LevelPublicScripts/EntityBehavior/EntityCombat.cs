@@ -3,13 +3,13 @@ using System.Collections.Generic;
 /// <summary>
 /// 实体战斗子系统（POCO）。
 /// 持有：
-///   1. AttackBase 引用（sibling MonoBehaviour，保留作为子组件桥）
+///   1. Entity 引用（排序时读 _entity.Movement.ResistList / .Camp）
 ///   2. EntityUpdate 方法（原 Entity.EntityUpDate）—— 过滤不可参与或不可选择的实体
 ///   3. PriorityOrder 方法（原 Entity.PriorityOrder）—— 按 OrderLogic 排序
 ///
 /// 设计要点：
 ///   - POCO，构造接受 Entity 引用。
-///   - 需要访问其他子系统的属性：Stats.IsActive / Stats.Selectable / Stats.CurrentHpRate / Movement.ResistList / Movement.Priority / Movement.Camp。
+///   - 需要访问其他子系统的属性：Stats.IsActive / Stats.Selectable / Stats.CurrentHpRate / Movement.ResistList / Movement.Priority。
 ///   - 其他实体的属性通过 `entity.Stats.X` / `entity.Movement.X` 访问（不再用旧的 `entity.participateIn` / `entity.entityResistList` 等字段）。
 /// </summary>
 public class EntityCombat
@@ -44,7 +44,6 @@ public class EntityCombat
     {
         List<Entity> entitiesList = new List<Entity>(originList);
         List<Entity> resistList = _entity.Movement.ResistList;
-        int myCamp = _entity.Movement.Camp;
         switch (orderLogic)
         {
             case OrderLogic.ResistFirst_Priority_Des:
@@ -83,22 +82,6 @@ public class EntityCombat
                 break;
             case OrderLogic.Defense_Des:
                 entitiesList.Sort((x, y) => y.Stats.DefS.CompareTo(x.Stats.DefS));
-                break;
-            case OrderLogic.ResistFirst_OtherCampFirst_Priority_Des:
-                for (int i = 0; i < entitiesList.Count - 1; i++)
-                {
-                    for (int j = i + 1; j < entitiesList.Count; j++)
-                    {
-                        bool containI = resistList.Contains(entitiesList[i]);
-                        bool containJ = resistList.Contains(entitiesList[j]);
-                        bool isTurretI = entitiesList[i].Movement.Camp != myCamp;
-                        bool isTurretJ = entitiesList[j].Movement.Camp != myCamp;
-                        if ((!containI && containJ) || (containI == containJ && entitiesList[i].Movement.Priority < entitiesList[j].Movement.Priority))
-                        {
-                            (entitiesList[i], entitiesList[j]) = (entitiesList[j], entitiesList[i]);
-                        }
-                    }
-                }
                 break;
             default: break;
         }
