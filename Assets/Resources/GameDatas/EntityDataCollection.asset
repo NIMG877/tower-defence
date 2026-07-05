@@ -665,7 +665,8 @@ MonoBehaviour:
     MassLevel: 1
     MoveMethod: 0
     Skills: []
-    Talents: []
+    Talents:
+    - {fileID: 11400000, guid: 7686315d8385e1748857a2dc52d6d713, type: 2}
     AnimationResources: {fileID: 11400000, guid: d0c65e57c85fd7f4a859cc396ef72414, type: 2}
   - ID:
       ID_C: m

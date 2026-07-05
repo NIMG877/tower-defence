@@ -28,7 +28,6 @@ namespace AbilitySystem.Components
 
         public override void OnTrigger(AbilityContext ctx)
         {
-            Debug.Log($"[SharedTargetExtraAttack] Triggered for entity {ctx.entity?.name} with event {ctx.currentEvent?.GetType().Name}");
             if (ctx.currentEvent is TickEvent)
             {
                 ProcessQueue(ctx);
@@ -70,7 +69,7 @@ namespace AbilitySystem.Components
                 ReleaseAbnormal(ctx.entity);
                 return;
             }
-
+            
             ApplyAbnormal(ctx.entity);
             if (_isExtraAttack || ctx.entity.entityAM == null
                 || ctx.entity.entityAM.CurrentState == EntityState.Start)

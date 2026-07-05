@@ -5226,7 +5226,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7346695484381571506}
-  - component: {fileID: 1073844574134519908}
   - component: {fileID: 6918839178590651092}
   - component: {fileID: -2194638516088659704}
   - component: {fileID: -4401687450290542570}
@@ -5255,54 +5254,6 @@ Transform:
   - {fileID: 4894191541608152254}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1073844574134519908
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5752354500556713093}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 464e5370c78639e4db5946b6303ec0b5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entity_name: "\u5973\u5DEB"
-  description: "\u5973\u5DEB\u662F\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u4F1A\u4F7F\u7528\u836F\u6C34\u7684\u602A\u7269\u3002\u5B83\u539F\u672C\u53EA\u662F\u5728\u6751\u5E84\u4E2D\u5B89\u5C45\u4E50\u4E1A\u7684\u6751\u6C11\uFF0C\u4F46\u4E00\u9053\u96F7\u51FB\u4E2D\u4E86\u5B83\uFF0C\u4E8E\u662F\u5B83\u5C31\u5F02\u53D8\u6210\u4E86\u5973\u5DEB\u3002\u7531\u4E8E\u5B83\u5177\u6709\u4EBA\u7C7B\u7684\u667A\u6167\uFF0C\u6240\u4EE5\u4ED6\u638C\u63E1\u4E86\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u53E4\u8001\u800C\u53C8\u590D\u6742\u7684\u836F\u6C34\u917F\u9020\u6280\u672F"
-  entity_head_img: {fileID: 21300000, guid: a80c6599d7282eb469df468504119c56, type: 3}
-  entity_halfBody_img: {fileID: 0}
-  entity_hole_img: {fileID: 0}
-  atk_range: []
-  atk_radius: 3
-  max_hp: 12500
-  atk: 200
-  base_attack_time: 5
-  def: 375
-  magic_resistance: 50
-  phDoge: 0
-  mgDoge: 0
-  block_occupation: 1
-  attack_num: 1
-  taunt_level: 0
-  damageType: 0
-  SkillSelect: 0
-  skills:
-  - {fileID: 4369353878438980624}
-  talents:
-  - {fileID: 2941180825537635724}
-  can_spawn_entity_datas: []
-  characterRarity: 0
-  characterInfluence: 
-  characterClass: 0
-  monsterId: 207
-  monsterStatus: 1
-  monsterLabel: "\u96F7\u51FB\u5F02\u53D8\u4F53"
-  isPrimary: 0
-  countOperated: 0
-  _levelHpComsume: 1
-  _moveSpeed: 0.25
-  _massLevel: 1
-  _moveMethod: 0
 --- !u!114 &6918839178590651092
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5315,26 +5266,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98c15169cca6fd54088c6e3b3c07ff80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  o_default: {fileID: 11400000, guid: 9811179e9b94bf9468e569a2f73fc2c0, type: 2}
-  o_idle: {fileID: 11400000, guid: e52f5742ffeca99409dcb9d62d01cf27, type: 2}
-  o_move: {fileID: 11400000, guid: 3acde88b1c05a704980f72a3b61cefd6, type: 2}
-  o_attack_begin: {fileID: 0}
-  o_attack_end: {fileID: 0}
-  o_start: {fileID: 11400000, guid: 9811179e9b94bf9468e569a2f73fc2c0, type: 2}
-  o_die: {fileID: 11400000, guid: 8b2d5c13620b3be4199b1d675cfd55f1, type: 2}
-  o_attack_remote:
-  - {fileID: 11400000, guid: 06becb426b8f5124ca96598bea7ebcf3, type: 2}
-  o_attack_close:
-  - {fileID: 11400000, guid: 06becb426b8f5124ca96598bea7ebcf3, type: 2}
-  Default: {fileID: 0}
-  Idle: {fileID: 0}
-  Move: {fileID: 0}
-  Attack_Begin: {fileID: 0}
-  Attack_End: {fileID: 0}
-  Start: {fileID: 0}
-  Die: {fileID: 0}
-  Attack_Remote: []
-  Attack_Close: []
 --- !u!114 &-2194638516088659704
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5413,8 +5344,7 @@ MonoBehaviour:
   _canCloseSkill: 0
   _skillAttackRange: []
   _medicalLiquidLight: {fileID: 1374118063392710916}
-  _drink:
-  - {fileID: 11400000, guid: 814303d5a5345124ab4abfe63a41a250, type: 2}
+  _drink: 
 --- !u!114 &2941180825537635724
 MonoBehaviour:
   m_ObjectHideFlags: 0

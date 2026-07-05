@@ -12,20 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb7f1744c96d9834491e7169ccef37cc, type: 3}
   m_Name: MC-4
   m_EditorClassIdentifier: 
-  LevelName: skeleton show
+  LevelName: "creeper\uFF1F"
   LevelCode: MC-4
   LevelDescription: skeleton show
   CameraSize: 4.5
   CameraPos: {x: 4.5, y: 3.5}
   CutToLevelTexture: {fileID: 2800000, guid: f44a6d0f153c7f8478b214480fd37139, type: 3}
-  MapPrefab: {fileID: 3960715908125169980, guid: cb5d58cb44b16664cb23112d30af6a5c, type: 3}
+  MapPrefab: {fileID: 3960715908125169980, guid: 336e0bf83ab9e7d4bb01411607564202, type: 3}
   iSize: 8
-  jSize: 10
+  jSize: 9
   MapData:
-  - i: 1
+  - i: 3
     j: 1
     highland: 0
-    canSet: 0
+    canSet: 1
     passableType: 0
     deadly: 0
     portalOutI: -1
@@ -33,31 +33,7 @@ MonoBehaviour:
   - i: 2
     j: 1
     highland: 0
-    canSet: 0
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 3
-    j: 1
-    highland: 0
-    canSet: 0
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 3
-    j: 2
-    highland: 0
-    canSet: 0
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 1
-    j: 2
-    highland: 0
-    canSet: 0
+    canSet: 1
     passableType: 0
     deadly: 0
     portalOutI: -1
@@ -65,7 +41,15 @@ MonoBehaviour:
   - i: 2
     j: 2
     highland: 0
-    canSet: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 3
+    j: 2
+    highland: 0
+    canSet: 1
     passableType: 0
     deadly: 0
     portalOutI: -1
@@ -73,7 +57,7 @@ MonoBehaviour:
   - i: 4
     j: 1
     highland: 0
-    canSet: 0
+    canSet: 1
     passableType: 0
     deadly: 0
     portalOutI: -1
@@ -81,360 +65,8 @@ MonoBehaviour:
   - i: 4
     j: 2
     highland: 0
-    canSet: 0
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 5
-    j: 2
-    highland: 0
-    canSet: 0
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 5
-    j: 1
-    highland: 0
-    canSet: 0
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 6
-    j: 0
-    highland: 1
-    canSet: 0
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 5
-    j: 0
-    highland: 1
-    canSet: 0
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 4
-    j: 0
-    highland: 1
-    canSet: 0
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 3
-    j: 0
-    highland: 1
-    canSet: 0
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 2
-    j: 0
-    highland: 1
-    canSet: 0
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 1
-    j: 0
-    highland: 0
-    canSet: 0
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 0
-    j: 0
-    highland: 1
-    canSet: 0
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 0
-    j: 1
-    highland: 1
-    canSet: 0
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 0
-    j: 2
-    highland: 1
-    canSet: 0
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 0
-    j: 3
-    highland: 1
-    canSet: 0
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 1
-    j: 3
-    highland: 0
-    canSet: 0
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 2
-    j: 3
-    highland: 0
-    canSet: 0
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 3
-    j: 3
-    highland: 0
-    canSet: 0
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 4
-    j: 3
-    highland: 0
-    canSet: 0
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 5
-    j: 3
-    highland: 0
-    canSet: 0
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 5
-    j: 4
-    highland: 1
-    canSet: 0
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 3
-    j: 4
-    highland: 1
-    canSet: 0
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 1
-    j: 4
-    highland: 1
-    canSet: 0
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 6
-    j: 1
-    highland: 0
-    canSet: 0
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 6
-    j: 2
-    highland: 0
-    canSet: 0
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 6
-    j: 3
-    highland: 0
-    canSet: 0
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 6
-    j: 4
-    highland: 0
-    canSet: 0
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 7
-    j: 0
-    highland: 1
-    canSet: 0
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 7
-    j: 1
-    highland: 1
-    canSet: 0
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 7
-    j: 2
-    highland: 1
-    canSet: 0
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 7
-    j: 3
-    highland: 1
-    canSet: 0
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 7
-    j: 4
-    highland: 1
-    canSet: 0
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 5
-    j: 6
-    highland: 0
     canSet: 1
     passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 5
-    j: 7
-    highland: 0
-    canSet: 1
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 4
-    j: 7
-    highland: 1
-    canSet: 1
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 3
-    j: 7
-    highland: 1
-    canSet: 1
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 2
-    j: 7
-    highland: 0
-    canSet: 1
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 1
-    j: 7
-    highland: 0
-    canSet: 1
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 7
-    j: 8
-    highland: 1
-    canSet: 1
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 6
-    j: 8
-    highland: 0
-    canSet: 1
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 5
-    j: 8
-    highland: 0
-    canSet: 1
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 4
-    j: 8
-    highland: 1
-    canSet: 1
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 3
-    j: 8
-    highland: 1
-    canSet: 1
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 2
-    j: 8
-    highland: 0
-    canSet: 1
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 1
-    j: 8
-    highland: 0
-    canSet: 1
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 0
-    j: 8
-    highland: 1
-    canSet: 1
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 0
-    j: 7
-    highland: 1
-    canSet: 1
-    passableType: 2
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
@@ -448,9 +80,9 @@ MonoBehaviour:
     portalOutJ: -1
   - i: 0
     j: 5
-    highland: 0
+    highland: 1
     canSet: 0
-    passableType: 0
+    passableType: 2
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
@@ -462,67 +94,83 @@ MonoBehaviour:
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
-  - i: 6
-    j: 7
-    highland: 0
-    canSet: 1
-    passableType: 0
+  - i: 0
+    j: 3
+    highland: 1
+    canSet: 0
+    passableType: 2
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
-  - i: 6
-    j: 6
-    highland: 0
-    canSet: 1
-    passableType: 0
+  - i: 0
+    j: 2
+    highland: 1
+    canSet: 0
+    passableType: 2
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
-  - i: 6
-    j: 5
-    highland: 0
-    canSet: 1
-    passableType: 0
+  - i: 0
+    j: 1
+    highland: 1
+    canSet: 0
+    passableType: 2
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
-  - i: 5
-    j: 5
-    highland: 0
-    canSet: 1
-    passableType: 0
+  - i: 0
+    j: 0
+    highland: 1
+    canSet: 0
+    passableType: 2
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
-  - i: 4
-    j: 5
-    highland: 0
-    canSet: 1
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 4
-    j: 6
-    highland: 0
-    canSet: 1
-    passableType: 0
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 3
-    j: 6
-    highland: 0
-    canSet: 1
-    passableType: 0
+  - i: 1
+    j: 0
+    highland: 1
+    canSet: 0
+    passableType: 2
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
   - i: 2
-    j: 6
-    highland: 0
-    canSet: 1
-    passableType: 0
+    j: 0
+    highland: 1
+    canSet: 0
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 3
+    j: 0
+    highland: 1
+    canSet: 0
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 4
+    j: 0
+    highland: 1
+    canSet: 0
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 5
+    j: 0
+    highland: 1
+    canSet: 0
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 6
+    j: 0
+    highland: 1
+    canSet: 0
+    passableType: 2
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
@@ -542,10 +190,90 @@ MonoBehaviour:
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
-  - i: 2
-    j: 5
+  - i: 1
+    j: 4
     highland: 0
     canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 1
+    j: 3
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 1
+    j: 2
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 1
+    j: 1
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 2
+    j: 4
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 2
+    j: 5
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 2
+    j: 6
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 2
+    j: 3
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 3
+    j: 3
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 4
+    j: 3
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 3
+    j: 4
+    highland: 0
+    canSet: 0
     passableType: 0
     deadly: 0
     portalOutI: -1
@@ -558,8 +286,112 @@ MonoBehaviour:
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
+  - i: 3
+    j: 6
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 3
+    j: 7
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
   - i: 4
-    j: 4
+    j: 5
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 4
+    j: 6
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 4
+    j: 7
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 2
+    j: 7
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 1
+    j: 7
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 0
+    j: 7
+    highland: 1
+    canSet: 0
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 5
+    j: 5
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 6
+    j: 5
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 6
+    j: 8
+    highland: 1
+    canSet: 0
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 5
+    j: 8
+    highland: 1
+    canSet: 0
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 4
+    j: 8
+    highland: 1
+    canSet: 0
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 3
+    j: 8
     highland: 1
     canSet: 0
     passableType: 2
@@ -567,7 +399,31 @@ MonoBehaviour:
     portalOutI: -1
     portalOutJ: -1
   - i: 2
-    j: 4
+    j: 8
+    highland: 1
+    canSet: 0
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 1
+    j: 8
+    highland: 1
+    canSet: 0
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 0
+    j: 8
+    highland: 1
+    canSet: 0
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 7
+    j: 8
     highland: 1
     canSet: 0
     passableType: 2
@@ -577,7 +433,7 @@ MonoBehaviour:
   - i: 7
     j: 7
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
@@ -585,21 +441,69 @@ MonoBehaviour:
   - i: 7
     j: 6
     highland: 1
-    canSet: 1
+    canSet: 0
     passableType: 2
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
   - i: 7
     j: 5
-    highland: 0
+    highland: 1
     canSet: 0
-    passableType: 0
+    passableType: 2
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
   - i: 7
-    j: 9
+    j: 4
+    highland: 1
+    canSet: 0
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 7
+    j: 3
+    highland: 1
+    canSet: 0
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 7
+    j: 2
+    highland: 1
+    canSet: 0
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 7
+    j: 1
+    highland: 1
+    canSet: 0
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 7
+    j: 0
+    highland: 1
+    canSet: 0
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 4
+    j: 4
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 5
+    j: 4
     highland: 1
     canSet: 1
     passableType: 2
@@ -607,39 +511,31 @@ MonoBehaviour:
     portalOutI: -1
     portalOutJ: -1
   - i: 6
-    j: 9
-    highland: 1
+    j: 4
+    highland: 0
     canSet: 1
-    passableType: 2
+    passableType: 0
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
-  - i: 4
-    j: 9
-    highland: 1
+  - i: 6
+    j: 3
+    highland: 0
     canSet: 1
-    passableType: 2
+    passableType: 0
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
-  - i: 3
-    j: 9
-    highland: 1
+  - i: 6
+    j: 2
+    highland: 0
     canSet: 1
-    passableType: 2
+    passableType: 0
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
-  - i: 1
-    j: 9
-    highland: 1
-    canSet: 1
-    passableType: 2
-    deadly: 0
-    portalOutI: -1
-    portalOutJ: -1
-  - i: 0
-    j: 9
+  - i: 5
+    j: 2
     highland: 1
     canSet: 1
     passableType: 2
@@ -647,17 +543,57 @@ MonoBehaviour:
     portalOutI: -1
     portalOutJ: -1
   - i: 5
-    j: 9
+    j: 3
     highland: 0
-    canSet: 0
+    canSet: 1
     passableType: 0
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
-  - i: 2
-    j: 9
+  - i: 6
+    j: 1
     highland: 0
-    canSet: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 5
+    j: 1
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 6
+    j: 7
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 6
+    j: 6
+    highland: 0
+    canSet: 1
+    passableType: 0
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 5
+    j: 6
+    highland: 1
+    canSet: 1
+    passableType: 2
+    deadly: 0
+    portalOutI: -1
+    portalOutJ: -1
+  - i: 5
+    j: 7
+    highland: 0
+    canSet: 1
     passableType: 0
     deadly: 0
     portalOutI: -1
@@ -668,6 +604,236 @@ MonoBehaviour:
     - Name: Track 0
       Locked: 0
       Actions:
+      - CommandType: 0
+        TriggerTime: 0
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 0
+        GapsFromLastRepeat:
+        - 0
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 0.1
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 1
+        GapsFromLastRepeat:
+        - 0
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 0.2
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 2
+        GapsFromLastRepeat:
+        - 0
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 0.3
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 3
+        GapsFromLastRepeat:
+        - 0
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 2
+        TriggerTime: 0.5
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 0
+        GapsFromLastRepeat:
+        - 0
+        - 0.8
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 2
+        TriggerTime: 0.7
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 1
+        GapsFromLastRepeat:
+        - 0
+        - 0.8
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 2
+        TriggerTime: 0.9
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 2
+        GapsFromLastRepeat:
+        - 0
+        - 0.8
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 2
+        TriggerTime: 1.1
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 3
+        GapsFromLastRepeat:
+        - 0
+        - 0.8
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 2
+        TriggerTime: 2.8
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 4
+        GapsFromLastRepeat:
+        - 0
+        - 0.8
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
       - CommandType: 0
         TriggerTime: 5
         OnBeforeAction:
@@ -680,18 +846,274 @@ MonoBehaviour:
         OnActionRepeat:
           m_PersistentCalls:
             m_Calls: []
-        PathSerial: 0
+        PathSerial: 4
         GapsFromLastRepeat:
         - 0
-        - 1
-        - 1
-        - 1
-        - 1
-        - 1
-        - 1
-        - 1
-        - 1
-        - 1
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+    - Name: zombies
+      Locked: 0
+      Actions:
+      - CommandType: 2
+        TriggerTime: 15
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: c
+          ID_N: 1
+        Camp: 0
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 5
+        GapsFromLastRepeat:
+        - 0
+        - 0.8
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 18
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 1
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 5
+        GapsFromLastRepeat:
+        - 0
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 30
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 1
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 7
+        GapsFromLastRepeat:
+        - 0
+        - 10
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+    - Name: creepers
+      Locked: 0
+      Actions:
+      - CommandType: 0
+        TriggerTime: 41
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 3
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 6
+        GapsFromLastRepeat:
+        - 0
+        - 19
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+    - Name: skeletons
+      Locked: 0
+      Actions:
+      - CommandType: 2
+        TriggerTime: 31
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: c
+          ID_N: 1
+        Camp: 0
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 8
+        GapsFromLastRepeat:
+        - 0
+        - 0.8
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 33
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 8
+        GapsFromLastRepeat:
+        - 0
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 3
+        TriggerTime: 38
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 9
+        GapsFromLastRepeat:
+        - 0
+        - 0.8
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 41
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 9
+        GapsFromLastRepeat:
+        - 0
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 2
+        TriggerTime: 52
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 10
+        GapsFromLastRepeat:
+        - 0
+        - 0.8
+        ModifyAttributes: 0
+        ModifyLevelHpConsume: 0
+        ModifyPrimary: 0
+        ModifyCountOperate: 0
+        Destination: {x: 0, y: 0}
+        Orientation: 0
+        HeadImage: {fileID: 0}
+        Content: 
+        DurationTime: 0
+        Contents: []
+      - CommandType: 0
+        TriggerTime: 55
+        OnBeforeAction:
+          m_PersistentCalls:
+            m_Calls: []
+        EntityPrefabID:
+          ID_C: m
+          ID_N: 2
+        Camp: 2
+        OnActionRepeat:
+          m_PersistentCalls:
+            m_Calls: []
+        PathSerial: 10
+        GapsFromLastRepeat:
+        - 0
         ModifyAttributes: 0
         ModifyLevelHpConsume: 0
         ModifyPrimary: 0
@@ -703,12 +1125,110 @@ MonoBehaviour:
         DurationTime: 0
         Contents: []
   Paths:
-  - Name: 
+  - Name: skeleton0_1
     CheckPoints:
-    - {x: 5, y: 5}
-    - {x: 9, y: 5}
+    - {x: 1, y: 3}
+    - {x: 7, y: 3}
+    WaitTimes:
+    - 200
+    - 0
+  - Name: skeleton0_2
+    CheckPoints:
+    - {x: 2, y: 4}
+    - {x: 4, y: 4}
+    - {x: 7, y: 3}
+    WaitTimes:
+    - 200
+    - 0
+    - 0
+  - Name: skeleton0_3
+    CheckPoints:
+    - {x: 2, y: 2}
+    - {x: 4, y: 2}
+    - {x: 7, y: 3}
+    WaitTimes:
+    - 200
+    - 0
+    - 0
+  - Name: skeleton0_4
+    CheckPoints:
+    - {x: 3, y: 3}
+    - {x: 7, y: 3}
+    WaitTimes:
+    - 200
+    - 0
+  - Name: creeper0
+    CheckPoints:
+    - {x: 1, y: 6}
+    - {x: 1, y: 5}
+    - {x: 2, y: 3}
+    - {x: 7, y: 3}
     WaitTimes:
     - 0
+    - 3
+    - 0
+    - 0
+  - Name: zombie0
+    CheckPoints:
+    - {x: 1, y: 6}
+    - {x: 1, y: 5}
+    - {x: 2, y: 3}
+    - {x: 7, y: 3}
+    WaitTimes:
+    - 0
+    - 3
+    - 0
+    - 0
+  - Name: creeper1
+    CheckPoints:
+    - {x: 1, y: 6}
+    - {x: 1, y: 5}
+    - {x: 2, y: 3}
+    - {x: 7, y: 3}
+    WaitTimes:
+    - 0
+    - 0
+    - 0
+    - 0
+  - Name: zombie1
+    CheckPoints:
+    - {x: 1, y: 6}
+    - {x: 1, y: 5}
+    - {x: 2, y: 3}
+    - {x: 7, y: 3}
+    WaitTimes:
+    - 0
+    - 0
+    - 0
+    - 0
+  - Name: skeleton1
+    CheckPoints:
+    - {x: 1, y: 6}
+    - {x: 4.5, y: 6}
+    - {x: 7, y: 1}
+    WaitTimes:
+    - 0
+    - 200
+    - 0
+  - Name: skeleton2
+    CheckPoints:
+    - {x: 1, y: 6}
+    - {x: 2, y: 6}
+    - {x: 7, y: 1}
+    WaitTimes:
+    - 0
+    - 200
+    - 0
+  - Name: skeleton3
+    CheckPoints:
+    - {x: 1, y: 6}
+    - {x: 3, y: 6}
+    - {x: 3.5, y: 3.25}
+    - {x: 7, y: 1}
+    WaitTimes:
+    - 0
+    - 0
+    - 200
     - 0
   LevelHp: 100
   Cost0: 10
