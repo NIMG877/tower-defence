@@ -71,12 +71,16 @@ MonoBehaviour:
   - componentType: ApplyBuff
     parameters:
       entries:
-      - key: buffTypes
-        value: phdoge_delta_rate
+      - key: attributes
+        value: PhysicalDodge
         fromBlackboard: 0
         type: 3
-      - key: buffValues
-        value: 0.25
+      - key: ops
+        value: MulFinal
+        fromBlackboard: 0
+        type: 3
+      - key: magnitudes
+        value: 0.75
         fromBlackboard: 0
         type: 3
       - key: buffId

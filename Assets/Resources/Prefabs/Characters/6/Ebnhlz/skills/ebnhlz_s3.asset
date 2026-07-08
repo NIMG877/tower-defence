@@ -31,11 +31,15 @@ MonoBehaviour:
   - componentType: ApplyBuff
     parameters:
       entries:
-      - key: buffTypes
-        value: atkspd_delta_value,atk_delta_percent
+      - key: attributes
+        value: AttackSpeed,Attack
         fromBlackboard: 0
         type: 3
-      - key: buffValues
+      - key: ops
+        value: AddFlat,AddPercent
+        fromBlackboard: 0
+        type: 3
+      - key: magnitudes
         value: 80,0.65
         fromBlackboard: 0
         type: 3

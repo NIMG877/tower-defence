@@ -79,11 +79,15 @@ MonoBehaviour:
   - componentType: ApplyBuff
     parameters:
       entries:
-      - key: buffTypes
-        value: atk_delta_percent,atkspd_delta_value,mspeed_delta_percent
+      - key: attributes
+        value: Attack,AttackSpeed,MoveSpeed
         fromBlackboard: 0
         type: 3
-      - key: buffValues
+      - key: ops
+        value: AddPercent,AddFlat,AddPercent
+        fromBlackboard: 0
+        type: 3
+      - key: magnitudes
         value: 0.5,60,0.6
         fromBlackboard: 0
         type: 3
@@ -199,11 +203,15 @@ MonoBehaviour:
         value: aura
         fromBlackboard: 0
         type: 3
-      - key: buffTypes
-        value: atk_delta_percent,atkspd_delta_value
+      - key: attributes
+        value: Attack,AttackSpeed
         fromBlackboard: 0
         type: 3
-      - key: buffValues
+      - key: ops
+        value: AddPercent,AddFlat
+        fromBlackboard: 0
+        type: 3
+      - key: magnitudes
         value: 0.3,20
         fromBlackboard: 0
         type: 3
