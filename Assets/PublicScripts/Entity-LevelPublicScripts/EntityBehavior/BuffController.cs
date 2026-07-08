@@ -11,6 +11,8 @@ public class Buff
     public string buff_name;
     public Entity origin_entity;
     public GameObject buff_effect;
+    /// <summary>store 侧的 group token，AddModifiers 时分配，RemoveModifiers 时回传。0=未加入。</summary>
+    public int modifierToken;
     public Buff(float buff_time, string buff_name, Entity origin_entity, Modifier[] modifiers, GameObject buff_effect)
     {
         this.modifiers = modifiers ?? System.Array.Empty<Modifier>();
@@ -18,6 +20,7 @@ public class Buff
         this.buff_name = buff_name;
         this.origin_entity = origin_entity;
         this.buff_effect = buff_effect;
+        this.modifierToken = 0;
     }
 }
 public class BuffController : MonoBehaviour, IPoolOperation
@@ -143,7 +146,8 @@ public class BuffController : MonoBehaviour, IPoolOperation
     /// <param name="destroyBuff">要销毁的 buff 实例</param>
     public void DestroyBuff(Buff destroyBuff)
     {
-        if (destroyBuff.modifiers != null) _store.RemoveModifiers(destroyBuff.modifiers);
+        if (destroyBuff.modifierToken != 0) _store.RemoveModifiers(destroyBuff.modifierToken);
+        destroyBuff.modifierToken = 0;
         white_list_buffs.Remove(destroyBuff);
         normal_buffs.Remove(destroyBuff);
         if (!(white_list_buffs.Contains(destroyBuff) || normal_buffs.Contains(destroyBuff)))
@@ -160,10 +164,10 @@ public class BuffController : MonoBehaviour, IPoolOperation
     /// <param name="setTarget">目标 Buff</param>
     public void SetBuffValues(Modifier[] newModifiers, Buff setTarget)
     {
-        Modifier[] old = setTarget.modifiers;
-        if (old != null) _store.RemoveModifiers(old);
+        // 移除旧 group（若已加入），再为新快照分配新 group
+        if (setTarget.modifierToken != 0) _store.RemoveModifiers(setTarget.modifierToken);
         setTarget.modifiers = newModifiers ?? System.Array.Empty<Modifier>();
-        _store.AddModifiers(setTarget.modifiers);
+        setTarget.modifierToken = _store.AddModifiers(setTarget.modifiers);
     }
     private void BuffUpdate()
     {
