@@ -44,9 +44,9 @@ public class MCEnvironmentalDevice : MonoBehaviour, IManagerStartEnd
         private Buff _hungryBuff;
 
         // 0=Attack(AddPercent), 1=AttackSpeed(AddFlat)
-        private Modifier[] _fullBuffValue = new Modifier[2] { new Modifier(Attributes.Attack, ModifierOp.AddPercent, 0.15f), new Modifier(Attributes.AttackSpeed, ModifierOp.AddFlat, 30f) };
-        private Modifier[] _hungryBuffValue = new Modifier[2] { new Modifier(Attributes.Attack, ModifierOp.AddPercent, -0.15f), new Modifier(Attributes.AttackSpeed, ModifierOp.AddFlat, -30f) };
-        private Modifier[] _normalBuffValue = new Modifier[2] { new Modifier(Attributes.Attack, ModifierOp.AddPercent, 0f), new Modifier(Attributes.AttackSpeed, ModifierOp.AddFlat, 0f) };
+        private Modifier[] _fullBuffValue = new Modifier[2] { new Modifier("Attack", ModifierOp.AddPercent, 0.15f), new Modifier("AttackSpeed", ModifierOp.AddFlat, 30f) };
+        private Modifier[] _hungryBuffValue = new Modifier[2] { new Modifier("Attack", ModifierOp.AddPercent, -0.15f), new Modifier("AttackSpeed", ModifierOp.AddFlat, -30f) };
+        private Modifier[] _normalBuffValue = new Modifier[2] { new Modifier("Attack", ModifierOp.AddPercent, 0f), new Modifier("AttackSpeed", ModifierOp.AddFlat, 0f) };
 
         public EntityAndHungryMessage(Entity entity, float hungryValue, int type)
         {
@@ -54,7 +54,7 @@ public class MCEnvironmentalDevice : MonoBehaviour, IManagerStartEnd
             HungryValue = hungryValue;
             HungryState = type;
             _operationTimer = 1;
-            _hungryBuff = entity.buffController.CreateBuff(new Modifier[2] { new Modifier(Attributes.Attack, ModifierOp.AddPercent, 0.15f), new Modifier(Attributes.AttackSpeed, ModifierOp.AddFlat, 30f) }, null, "hungryBuff", -5, true);
+            _hungryBuff = entity.buffController.CreateBuff(new Modifier[2] { new Modifier("Attack", ModifierOp.AddPercent, 0.15f), new Modifier("AttackSpeed", ModifierOp.AddFlat, 30f) }, null, "hungryBuff", -5, true);
         }
         public void Update()
         {

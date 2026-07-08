@@ -7,7 +7,7 @@ public class Skill1 : Skill
     public GameObject Skill1Effect;
     private Talent1 _talent1;
     private Buff _skill1Buff;
-    private Modifier[] _modifiers = new Modifier[1] { new Modifier(Attributes.AttackSpeed, ModifierOp.AddFlat, 120f) };
+    private Modifier[] _modifiers = new Modifier[1] { new Modifier("AttackSpeed", ModifierOp.AddFlat, 120f) };
     public override void Initialize()
     {
         base.Initialize();

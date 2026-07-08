@@ -67,26 +67,26 @@ public class EntityStats
 
     // === 计算属性（computed property：_store.GetFinal，O(1) 实时计算） ===
     // 流水线末段，无中间储存；store 置脏即影响下次读取，调用方不可能读到陈旧值。
-    public float MaxHpS => Math.Max(0.001f, _store.GetFinal(Attributes.MaxHp));
-    public float DefS => Math.Max(0, _store.GetFinal(Attributes.Defense));
-    public float MagicResistanceS => Math.Max(0, _store.GetFinal(Attributes.MagicResistance));
-    public float PhysicalDodgeS => 1 - (1 - _physicalDodgeBase) * _store.GetFinal(Attributes.PhysicalDodge);
-    public float MagicDodgeS => 1 - (1 - _magicDodgeBase) * _store.GetFinal(Attributes.MagicDodge);
-    public int BlockOccupationS => Math.Max(0, _blockOccupationBase + (int)_store.GetFinal(Attributes.BlockOccupation));
-    public float AttackS => Math.Max(0, _store.GetFinal(Attributes.Attack));
-    public float BaseAttackTimeS => Math.Max(0.001f, _store.GetFinal(Attributes.BaseAttackTime) * 100 / Math.Max(1, _store.GetFinal(Attributes.AttackSpeed)));
+    public float MaxHpS => Math.Max(0.001f, _store.GetFinal("MaxHp"));
+    public float DefS => Math.Max(0, _store.GetFinal("Defense"));
+    public float MagicResistanceS => Math.Max(0, _store.GetFinal("MagicResistance"));
+    public float PhysicalDodgeS => 1 - (1 - _physicalDodgeBase) * _store.GetFinal("PhysicalDodge");
+    public float MagicDodgeS => 1 - (1 - _magicDodgeBase) * _store.GetFinal("MagicDodge");
+    public int BlockOccupationS => Math.Max(0, _blockOccupationBase + (int)_store.GetFinal("BlockOccupation"));
+    public float AttackS => Math.Max(0, _store.GetFinal("Attack"));
+    public float BaseAttackTimeS => Math.Max(0.001f, _store.GetFinal("BaseAttackTime") * 100 / Math.Max(1, _store.GetFinal("AttackSpeed")));
     public int AttackNumS
     {
         get
         {
             if (_attackNumBase >= 0)
-                return Math.Max(0, _attackNumBase + (int)_store.GetFinal(Attributes.AttackNum));
+                return Math.Max(0, _attackNumBase + (int)_store.GetFinal("AttackNum"));
             else
                 return -1;
         }
     }
-    public int AttackMinNumS => Math.Max(0, _attackMinNumBase + (int)_store.GetFinal(Attributes.AttackMinNum));
-    public float MoveSpeedS => Math.Max(0.01f, _store.GetFinal(Attributes.MoveSpeed));
+    public int AttackMinNumS => Math.Max(0, _attackMinNumBase + (int)_store.GetFinal("AttackMinNum"));
+    public float MoveSpeedS => Math.Max(0.01f, _store.GetFinal("MoveSpeed"));
 
     // === HP ===
     public float CurrentHp => _currentHpRate * MaxHpS;
@@ -95,7 +95,7 @@ public class EntityStats
         get => _currentHpRate;
         set => _currentHpRate = Math.Min(1, value);
     }
-    public float HpRecover => Math.Max(0, _store.GetFinal(Attributes.HpRecover));
+    public float HpRecover => Math.Max(0, _store.GetFinal("HpRecover"));
 
     // === 状态标志 ===
     public bool IsActive
@@ -144,21 +144,21 @@ public class EntityStats
         // HpRecover base=0（纯增量属性）。Dodge/Rate 类属性 base 见下方说明：
         //   Dodge base=0：modifier 存未命中概率(1-旧值)，基础闪避在下游 _xxxDodgeBase 体现。
         //   DamageRate base=1：无减免 buff 时 Final=1，伤害不变。
-        _store.SetBase(Attributes.MaxHp, data.MaxHp);
-        _store.SetBase(Attributes.Defense, data.Defense);
-        _store.SetBase(Attributes.MagicResistance, data.MagicResistance);
-        _store.SetBase(Attributes.PhysicalDodge, 0f);
-        _store.SetBase(Attributes.MagicDodge, 0f);
-        _store.SetBase(Attributes.BlockOccupation, _blockOccupationBase);
-        _store.SetBase(Attributes.Attack, _attackBase);
-        _store.SetBase(Attributes.BaseAttackTime, _baseAttackTimeBase);
-        _store.SetBase(Attributes.AttackSpeed, 100f);
-        _store.SetBase(Attributes.AttackNum, _attackNumBase);
-        _store.SetBase(Attributes.AttackMinNum, _attackMinNumBase);
-        _store.SetBase(Attributes.MoveSpeed, data.MoveSpeed);
-        _store.SetBase(Attributes.HpRecover, 0f);
-        _store.SetBase(Attributes.PhysicalDamageRate, 1f);
-        _store.SetBase(Attributes.MagicDamageRate, 1f);
+        _store.SetBase("MaxHp", data.MaxHp);
+        _store.SetBase("Defense", data.Defense);
+        _store.SetBase("MagicResistance", data.MagicResistance);
+        _store.SetBase("PhysicalDodge", 0f);
+        _store.SetBase("MagicDodge", 0f);
+        _store.SetBase("BlockOccupation", _blockOccupationBase);
+        _store.SetBase("Attack", _attackBase);
+        _store.SetBase("BaseAttackTime", _baseAttackTimeBase);
+        _store.SetBase("AttackSpeed", 100f);
+        _store.SetBase("AttackNum", _attackNumBase);
+        _store.SetBase("AttackMinNum", _attackMinNumBase);
+        _store.SetBase("MoveSpeed", data.MoveSpeed);
+        _store.SetBase("HpRecover", 0f);
+        _store.SetBase("PhysicalDamageRate", 1f);
+        _store.SetBase("MagicDamageRate", 1f);
     }
 
     // === HP 自然恢复（原 Entity.FixedUpdate 中 current_hp_rate < 1 分支） ===
@@ -212,8 +212,8 @@ public class EntityStats
         };
         float finalDamage = damageType switch
         {
-            0 => Math.Max(damage * multiplyer * minRate, damage * multiplyer - (1 - defPenetrate) * (def - defPenetrate_value)) * Math.Max(0, _store.GetFinal(Attributes.PhysicalDamageRate)),
-            1 => Math.Max(damage * multiplyer * minRate, damage * multiplyer * (1 - (1 - mgrPenetrate) * (mgr - mgrPenetrate_value) / 100)) * Math.Max(0, _store.GetFinal(Attributes.MagicDamageRate)),
+            0 => Math.Max(damage * multiplyer * minRate, damage * multiplyer - (1 - defPenetrate) * (def - defPenetrate_value)) * Math.Max(0, _store.GetFinal("PhysicalDamageRate")),
+            1 => Math.Max(damage * multiplyer * minRate, damage * multiplyer * (1 - (1 - mgrPenetrate) * (mgr - mgrPenetrate_value) / 100)) * Math.Max(0, _store.GetFinal("MagicDamageRate")),
             2 => damage * multiplyer,
             3 => damage * multiplyer,
             _ => 0,

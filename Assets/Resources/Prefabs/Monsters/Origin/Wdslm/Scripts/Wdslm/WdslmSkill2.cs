@@ -8,7 +8,7 @@ public class WdslmSkill2 : Skill
     [SerializeField] private string _inciteDefectionAnimation;
     [SerializeField] private GameObject _skillEffect;
     private List<Entity> _privateTarget;
-    private Modifier[] _modifiers = new Modifier[2] { new Modifier(Attributes.Attack, ModifierOp.AddPercent, -0.45f), new Modifier(Attributes.MaxHp, ModifierOp.AddPercent, 6.5f) };
+    private Modifier[] _modifiers = new Modifier[2] { new Modifier("Attack", ModifierOp.AddPercent, -0.45f), new Modifier("MaxHp", ModifierOp.AddPercent, 6.5f) };
     private WdslmSkill3 _skill3;
     private AnimationOverrideHandle _animationOverride;
     public override void Initialize()

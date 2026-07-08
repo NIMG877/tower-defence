@@ -17,7 +17,7 @@ public class WitherTalent3 : Talent
             await UniTask.WaitForFixedUpdate();
         }
         _thisEntity.GetComponent<WitherTalent1>().HaveShield = true;
-        _thisEntity.buffController.CreateBuff(new Modifier[5] { new Modifier(Attributes.Defense, ModifierOp.AddFlat, _defUp), new Modifier(Attributes.MagicResistance, ModifierOp.AddFlat, _mgrUp), new Modifier(Attributes.Attack, ModifierOp.AddFlat, _atkUp), new Modifier(Attributes.AttackSpeed, ModifierOp.AddFlat, _atkspdUp), new Modifier(Attributes.MoveSpeed, ModifierOp.AddPercent, -_speedown) }, null, "witherShield", -5, true);
+        _thisEntity.buffController.CreateBuff(new Modifier[5] { new Modifier("Defense", ModifierOp.AddFlat, _defUp), new Modifier("MagicResistance", ModifierOp.AddFlat, _mgrUp), new Modifier("Attack", ModifierOp.AddFlat, _atkUp), new Modifier("AttackSpeed", ModifierOp.AddFlat, _atkspdUp), new Modifier("MoveSpeed", ModifierOp.AddPercent, -_speedown) }, null, "witherShield", -5, true);
         _talentEffect.SetActive(true);
     }
 }

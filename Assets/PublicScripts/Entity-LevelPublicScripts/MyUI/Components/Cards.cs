@@ -140,7 +140,7 @@ namespace MyUI
         private float rate = 0.5625f;
         private Dictionary<string, string> buffs = new Dictionary<string, string>()
         {
-            {Attributes.AttackMinNum,"��С������" }
+            {"AttackMinNum","��С������" }
         };
         public BuffCard(Vector2 skillCardAnchorPos, RectTransform parent, Color textColor, float width)
         {
