@@ -36,6 +36,10 @@ namespace AbilitySystem.Components
         // Empty string = skip write.
         private Func<string> _outputTargetKey;
         private Func<string> _outputBuffKey;
+        // aura 模式下 OnTrigger 可能被 OnTick 驱动（每物理帧），GetModifiers 若每次重跑会每帧分配+解析字符串。
+        // 配置 CSV 在 OnInit 后不变，故首次构建后缓存复用。
+        private Modifier[] _builtModifiers;
+        private bool _modifiersBuilt;
 
         public override void OnInit(AbilityContext ctx, ParamList p)
         {
@@ -51,14 +55,17 @@ namespace AbilitySystem.Components
             _inputTargetKey  = p.GetStringLazy("blackboardKey", "",           bb);
             _outputTargetKey = p.GetStringLazy("outputTarget",  "",           bb);
             _outputBuffKey   = p.GetStringLazy("outputBuff",    "",           bb);
+            _modifiersBuilt = false;
         }
 
         /// <summary>
-        /// 把三 CSV（attributes/ops/magnitudes）按下标对齐构造成 Modifier[]。
+        /// 把三 CSV（attributes/ops/magnitudes）按下标对齐构造成 Modifier[]，构建后缓存。
         /// 长度不一致取最短 + 一次性 warn（沿用 AttackEventValueModifier 容错模式）。
+        /// attrs/ops 经 GetStringArrayLazy 已 Trim，此处不再重复。
         /// </summary>
-        private Modifier[] BuildModifiers()
+        private Modifier[] GetModifiers()
         {
+            if (_modifiersBuilt) return _builtModifiers;
             string[] attrs = _attributes() ?? System.Array.Empty<string>();
             string[] ops   = _ops()        ?? System.Array.Empty<string>();
             float[]  mags  = _magnitudes() ?? System.Array.Empty<float>();
@@ -68,19 +75,20 @@ namespace AbilitySystem.Components
                 OneShotWarn.WarnOnce("apply-buff-csv-length",
                     $"ApplyBuff: attributes/ops/magnitudes 长度不一致 ({attrs.Length}/{ops.Length}/{mags.Length}); 取最短 {len}。");
             }
-            var result = new Modifier[len];
+            _builtModifiers = new Modifier[len];
             for (int i = 0; i < len; i++)
             {
-                ModifierOp op = (ModifierOp)System.Enum.Parse(typeof(ModifierOp), ops[i].Trim());
-                result[i] = new Modifier(attrs[i].Trim(), op, mags[i]);
+                ModifierOp op = (ModifierOp)System.Enum.Parse(typeof(ModifierOp), ops[i]);
+                _builtModifiers[i] = new Modifier(attrs[i], op, mags[i]);
             }
-            return result;
+            _modifiersBuilt = true;
+            return _builtModifiers;
         }
 
         public override void OnTrigger(AbilityContext ctx)
         {
             if (ctx.entity == null) return;
-            Modifier[] modifiers = BuildModifiers();
+            Modifier[] modifiers = GetModifiers();
             if (modifiers.Length == 0) return;
 
             List<Entity> targets = ResolveTargets(ctx);
@@ -140,7 +148,7 @@ namespace AbilitySystem.Components
                 return;
             }
 
-            Modifier[] modifiers = BuildModifiers();
+            Modifier[] modifiers = GetModifiers();
             if (modifiers.Length == 0)
             {
                 OneShotWarn.WarnOnce(
@@ -162,7 +170,7 @@ namespace AbilitySystem.Components
                 if (target == null || target.buffController == null || !desired.Add(target)) continue;
 
                 Buff tracked = FindTrackedBuff(target, oldTargets, oldBuffs);
-                if (tracked != null && target.buffController.Buffs.Contains(tracked))
+                if (tracked != null && target.buffController.ContainsBuff(tracked))
                 {
                     target.buffController.SetBuffValues(modifiers, tracked);
                     tracked.buff_time = _buffTime();
@@ -184,7 +192,7 @@ namespace AbilitySystem.Components
                 Entity target = oldTargets[i];
                 Buff buff = oldBuffs[i];
                 if (target == null || target.buffController == null || buff == null || retained.Contains(buff)) continue;
-                if (target.buffController.Buffs.Contains(buff)) target.buffController.DestroyBuff(buff);
+                if (target.buffController.ContainsBuff(buff)) target.buffController.DestroyBuff(buff);
             }
 
             ctx.sharedBlackboard.Remove(targetKey);
@@ -218,7 +226,7 @@ namespace AbilitySystem.Components
                     Entity target = targets[i];
                     Buff buff = buffs[i];
                     if (target != null && target.buffController != null && buff != null
-                        && target.buffController.Buffs.Contains(buff))
+                        && target.buffController.ContainsBuff(buff))
                         target.buffController.DestroyBuff(buff);
                 }
             }

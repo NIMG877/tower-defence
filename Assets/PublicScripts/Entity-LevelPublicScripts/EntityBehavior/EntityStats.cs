@@ -24,10 +24,12 @@ public class EntityStats
     private readonly Entity _entity;
     private AttributeStore _store;
 
-    // === 基础属性（来自 EntityData；原 _first） ===
-    private float _maxHpBase;
-    private float _defBase;
-    private float _magicResistanceBase;
+    // === 基础属性 ===
+    // AttackBase/BaseAttackTimeBase：下游 AttackBase 当"原始基准"读（与聚合值 XxxS 并列），故留字段+公开。
+    // TauntLevel：无 store 入口，字段是唯一存储。
+    // BlockOccupation/AttackNum/AttackMinNum：XxxS = _xxxBase + (int)GetFinal(同 attr)，字段参与聚合（见对应 property）。
+    // Dodge 两项：store base=0（modifier 存未命中概率），固有闪避留字段、在 PhysicalDodgeS/MagicDodgeS 合并。
+    // Defense/MagicResistance/MaxHp/MoveSpeed 的基础值直接经 SetBase 进 store，XxxS 全读 store，不再留字段。
     private float _physicalDodgeBase;
     private float _magicDodgeBase;
     private int _blockOccupationBase;
@@ -36,7 +38,6 @@ public class EntityStats
     private float _baseAttackTimeBase;
     private int _attackNumBase;
     private int _attackMinNumBase;
-    private float _moveSpeedBase;
 
     // === 状态 ===
     private float _currentHpRate;
@@ -59,16 +60,10 @@ public class EntityStats
         _store = store;
     }
 
-    // === 基础属性读（替代 Entity.DEF_1 等） ===
-    public float DefBase => _defBase;
-    public float MagicResistanceBase => _magicResistanceBase;
-    public float MaxHpBase => _maxHpBase;
-    public int BlockOccupationBase => _blockOccupationBase;
+    // === 基础属性读（仅暴露下游真正需要的原始基准值；其余经 store 聚合） ===
     public float AttackBase => _attackBase;
     public float BaseAttackTimeBase => _baseAttackTimeBase;
-    public int AttackNumBase => _attackNumBase;
-    public int AttackMinNumBase => _attackMinNumBase;
-    public float MoveSpeedBase => _moveSpeedBase;
+    public int TauntLevel => _tauntLevelBase;  // 嘲讽等级无战斗 buff，亦无 store 入口
 
     // === 计算属性（computed property：_store.GetFinal，O(1) 实时计算） ===
     // 流水线末段，无中间储存；store 置脏即影响下次读取，调用方不可能读到陈旧值。
@@ -78,7 +73,6 @@ public class EntityStats
     public float PhysicalDodgeS => 1 - (1 - _physicalDodgeBase) * _store.GetFinal(Attributes.PhysicalDodge);
     public float MagicDodgeS => 1 - (1 - _magicDodgeBase) * _store.GetFinal(Attributes.MagicDodge);
     public int BlockOccupationS => Math.Max(0, _blockOccupationBase + (int)_store.GetFinal(Attributes.BlockOccupation));
-    public int TauntLevel => _tauntLevelBase;  // 嘲讽等级无战斗 buff
     public float AttackS => Math.Max(0, _store.GetFinal(Attributes.Attack));
     public float BaseAttackTimeS => Math.Max(0.001f, _store.GetFinal(Attributes.BaseAttackTime) * 100 / Math.Max(1, _store.GetFinal(Attributes.AttackSpeed)));
     public int AttackNumS
@@ -131,46 +125,28 @@ public class EntityStats
     // 战斗过程 buff 通过 XxxS computed property 在访问时实时计算。
     public void AttributesCaculateFirst(EntityData data)
     {
-        // 1. 从 EntityData 读取原始值（局部变量，便于下一步插值）
-        float maxHp = data.MaxHp;
-        float def = data.Defense;
-        float magicResistance = data.MagicResistance;
-        float physicalDodge = data.PhysicalDodge;
-        float magicDodge = data.MagicDodge;
-        int blockOccupation = data.BlockOccupation;
-        int tauntLevel = data.TauntLevel;
-        float attack = data.Attack;
-        float baseAttackTime = data.BaseAttackTime;
-        int attackNum = data.AttackNum;
-        int attackMinNum = 0;  // EntityData 未暴露此字段，留 0 兼容（无 atkminn_delta_value 数据源时恒为 0）
-        float moveSpeed = data.MoveSpeed;
+        // [关卡环境"基础数值修改" buff]——尚未接入。设计上应作为永久 Modifier 组注入 store，
+        // 与战斗 buff 同机制（区别仅在生命周期），而非并入 SetBase（并入会抹掉"固有基础 vs 环境修正"的区分）。
+        // TODO(level-base-buffs): 关卡环境基础 buff 落地后，在此作为永久 group AddFlat/AddPercent 即可。
 
-        // 2. [关卡环境"基础数值修改" buff]——尚未接入。设计上应作为 AddFlat/AddPercent Modifier
-        //    注入 store（或直接并入 _xxxBase 的 SetBase 值），而非独立账本。
-        // TODO(level-base-buffs): 关卡环境基础 buff 落地后，在此累加进 SetBase 的入参即可。
-
-        // 3. 写入 _xxxBase（base-buff 系统就位后，这里存的就是"原始值 + 关卡环境 buff"的结果）
-        _maxHpBase = maxHp;
-        _defBase = def;
-        _magicResistanceBase = magicResistance;
-        _physicalDodgeBase = physicalDodge;
-        _magicDodgeBase = magicDodge;
-        _blockOccupationBase = blockOccupation;
-        _tauntLevelBase = tauntLevel;
-        _attackBase = attack;
-        _baseAttackTimeBase = baseAttackTime;
-        _attackNumBase = attackNum;
-        _attackMinNumBase = attackMinNum;
-        _moveSpeedBase = moveSpeed;
+        // 写入仍需字段的 base（XxxS 或下游会读原始基准）；Defense/MagicResistance/MaxHp/MoveSpeed 的基础值直接进 store。
+        _physicalDodgeBase = data.PhysicalDodge;
+        _magicDodgeBase = data.MagicDodge;
+        _blockOccupationBase = data.BlockOccupation;
+        _tauntLevelBase = data.TauntLevel;
+        _attackBase = data.Attack;
+        _baseAttackTimeBase = data.BaseAttackTime;
+        _attackNumBase = data.AttackNum;
+        _attackMinNumBase = 0;  // EntityData 未暴露此字段，留 0 兼容（无 atkminn_delta_value 数据源时恒为 0）
 
         // === 注入基础值到 AttributeStore ===
         // AttackSpeed base=100（"100 攻速=正常速度"，设计常量，非来自 EntityData）。
         // HpRecover base=0（纯增量属性）。Dodge/Rate 类属性 base 见下方说明：
         //   Dodge base=0：modifier 存未命中概率(1-旧值)，基础闪避在下游 _xxxDodgeBase 体现。
         //   DamageRate base=1：无减免 buff 时 Final=1，伤害不变。
-        _store.SetBase(Attributes.MaxHp, _maxHpBase);
-        _store.SetBase(Attributes.Defense, _defBase);
-        _store.SetBase(Attributes.MagicResistance, _magicResistanceBase);
+        _store.SetBase(Attributes.MaxHp, data.MaxHp);
+        _store.SetBase(Attributes.Defense, data.Defense);
+        _store.SetBase(Attributes.MagicResistance, data.MagicResistance);
         _store.SetBase(Attributes.PhysicalDodge, 0f);
         _store.SetBase(Attributes.MagicDodge, 0f);
         _store.SetBase(Attributes.BlockOccupation, _blockOccupationBase);
@@ -179,7 +155,7 @@ public class EntityStats
         _store.SetBase(Attributes.AttackSpeed, 100f);
         _store.SetBase(Attributes.AttackNum, _attackNumBase);
         _store.SetBase(Attributes.AttackMinNum, _attackMinNumBase);
-        _store.SetBase(Attributes.MoveSpeed, _moveSpeedBase);
+        _store.SetBase(Attributes.MoveSpeed, data.MoveSpeed);
         _store.SetBase(Attributes.HpRecover, 0f);
         _store.SetBase(Attributes.PhysicalDamageRate, 1f);
         _store.SetBase(Attributes.MagicDamageRate, 1f);
@@ -223,18 +199,21 @@ public class EntityStats
         if (damageType <= 2 && (_currentHpRate <= 0 || _hurtable > 0))
             return false;
         float minRate = 0.05f;
+        // Def/Mgr 在 damageC1 与 finalDamage 两个分支都要用，各取一次复用（避免重复 GetFinal 查表）。
+        float def = DefS;
+        float mgr = MagicResistanceS;
         float damageC1 = damageType switch
         {
-            0 => Math.Max(damage * minRate, damage - DefS),
-            1 => Math.Max(damage * minRate, damage * (1 - MagicResistanceS / 100)),
+            0 => Math.Max(damage * minRate, damage - def),
+            1 => Math.Max(damage * minRate, damage * (1 - mgr / 100)),
             2 => damage,
             3 => damage,
             _ => 0,
         };
         float finalDamage = damageType switch
         {
-            0 => Math.Max(damage * multiplyer * minRate, damage * multiplyer - (1 - defPenetrate) * (DefS - defPenetrate_value)) * Math.Max(0, _store.GetFinal(Attributes.PhysicalDamageRate)),
-            1 => Math.Max(damage * multiplyer * minRate, damage * multiplyer * (1 - (1 - mgrPenetrate) * (MagicResistanceS - mgrPenetrate_value) / 100)) * Math.Max(0, _store.GetFinal(Attributes.MagicDamageRate)),
+            0 => Math.Max(damage * multiplyer * minRate, damage * multiplyer - (1 - defPenetrate) * (def - defPenetrate_value)) * Math.Max(0, _store.GetFinal(Attributes.PhysicalDamageRate)),
+            1 => Math.Max(damage * multiplyer * minRate, damage * multiplyer * (1 - (1 - mgrPenetrate) * (mgr - mgrPenetrate_value) / 100)) * Math.Max(0, _store.GetFinal(Attributes.MagicDamageRate)),
             2 => damage * multiplyer,
             3 => damage * multiplyer,
             _ => 0,

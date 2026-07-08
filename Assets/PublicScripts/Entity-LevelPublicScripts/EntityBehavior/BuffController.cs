@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static PlasticGui.PlasticTableCell;
 [Serializable]
 public class Buff
 {
@@ -67,6 +66,12 @@ public class BuffController : MonoBehaviour, IPoolOperation
     }
 
     /// <summary>
+    /// 无分配成员判定（aura 同步等高频路径用，避免 .Buffs 的 new List + AddRange）。
+    /// </summary>
+    public bool ContainsBuff(Buff b)
+        => white_list_buffs.Contains(b) || normal_buffs.Contains(b);
+
+    /// <summary>
     /// 注入 AttributeStore。Entity 在 PreWarm 中调用。
     /// </summary>
     public void Bind(AttributeStore store)
@@ -94,51 +99,27 @@ public class BuffController : MonoBehaviour, IPoolOperation
     /// <returns>buff 实例</returns>
     public Buff CreateBuff(Modifier[] modifiers, GameObject buffEffect, string buffName, float buffTime, bool isWhiteList)
     {
-        Buff addBuff;
-        if (isWhiteList)
+        List<Buff> list = isWhiteList ? white_list_buffs : normal_buffs;
+        // 同名 buff 复用既有特效，否则实例化新特效。
+        foreach (Buff b in list)
         {
-            foreach (Buff b in white_list_buffs)
+            if (b.buff_name == buffName)
             {
-                if (b.buff_name == buffName)
-                {
-                    buffEffect = b.buff_effect;
-                    addBuff = new Buff(buffTime, buffName, _thisEntity, modifiers, buffEffect);
-                    SetBuffValues(modifiers, addBuff);
-                    white_list_buffs.Add(addBuff);
-                    return addBuff;
-                }
+                buffEffect = b.buff_effect;
+                Buff reuse = new Buff(buffTime, buffName, _thisEntity, modifiers, buffEffect);
+                SetBuffValues(modifiers, reuse);
+                list.Add(reuse);
+                return reuse;
             }
-            if (buffEffect)
-            {
-                buffEffect = Instantiate(buffEffect, _thisEntity.TempContainer.position, Quaternion.identity, _thisEntity.TempContainer);
-            }
-            addBuff = new Buff(buffTime, buffName, _thisEntity, modifiers, buffEffect);
-            SetBuffValues(modifiers, addBuff);
-            white_list_buffs.Add(addBuff);
-            return addBuff;
         }
-        else
+        if (buffEffect)
         {
-            foreach (Buff b in normal_buffs)
-            {
-                if (b.buff_name == buffName)
-                {
-                    buffEffect = b.buff_effect;
-                    addBuff = new Buff(buffTime, buffName, _thisEntity, modifiers, buffEffect);
-                    SetBuffValues(modifiers, addBuff);
-                    normal_buffs.Add(addBuff);
-                    return addBuff;
-                }
-            }
-            if (buffEffect)
-            {
-                buffEffect = Instantiate(buffEffect, _thisEntity.TempContainer.position, Quaternion.identity, _thisEntity.TempContainer);
-            }
-            addBuff = new Buff(buffTime, buffName, _thisEntity, modifiers, buffEffect);
-            SetBuffValues(modifiers, addBuff);
-            normal_buffs.Add(addBuff);
-            return addBuff;
+            buffEffect = Instantiate(buffEffect, _thisEntity.TempContainer.position, Quaternion.identity, _thisEntity.TempContainer);
         }
+        Buff addBuff = new Buff(buffTime, buffName, _thisEntity, modifiers, buffEffect);
+        SetBuffValues(modifiers, addBuff);
+        list.Add(addBuff);
+        return addBuff;
     }
     /// <summary>
     /// 销毁 buff，移除其所有 modifier（置脏）。
@@ -239,7 +220,7 @@ public class BuffController : MonoBehaviour, IPoolOperation
                     _thisEntity.entityAM.AddStateToBan(new[] { EntityState.Attack });
                     if (_thisEntity.entityAM.CurrentState == EntityState.Attack)
                     {
-                        print(_thisEntity.entityAM.TrySetState(EntityState.Idle, true));
+                        _thisEntity.entityAM.TrySetState(EntityState.Idle, true);
                     }
                 }
                 else if (_abnormalStateTime[2] < abnormalTime)
