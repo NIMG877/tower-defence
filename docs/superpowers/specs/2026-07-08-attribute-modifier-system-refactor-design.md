@@ -240,8 +240,8 @@ public static class Attributes
 | `mhp_delta_percent` | `MaxHp` | `AddPercent` | 原值 |
 | `phd_delta_rate` | `PhysicalDamageRate` | `MulFinal` | **`1+旧值`**（-0.995 → 0.005） |
 | `mgd_delta_rate` | `MagicDamageRate` | `MulFinal` | **`1+旧值`** |
-| `phdoge_delta_rate` | `PhysicalDodge` | `MulFinal` | 见下方 dodge 语义说明 |
-| `mgdoge_delta_rate` | `MagicDodge` | `MulFinal` | 见下方 dodge 语义说明 |
+| `phdoge_delta_rate` | `PhysicalDodge` | `MulFinal` | **`1-旧值`**（0.25 → 0.75，存未命中概率） |
+| `mgdoge_delta_rate` | `MagicDodge` | `MulFinal` | **`1-旧值`**（0.25 → 0.75，存未命中概率） |
 | `batkt_delta_value` | `BaseAttackTime` | `AddFlat` | 原值 |
 | `batkt_delta_percent` | `BaseAttackTime` | `AddPercent` | 原值 |
 | `atkspd_delta_value` | `AttackSpeed` | `AddFlat` | 原值（base=100） |
@@ -252,20 +252,17 @@ public static class Attributes
 | `mspeed_delta_value` | `MoveSpeed` | `AddFlat` | 原值 |
 | `mspeed_delta_percent` | `MoveSpeed` | `AddPercent` | 原值 |
 
-**关键换算**：仅 `phd`/`mgd` 两项 magnitude 换算成 `1+旧值`（新模型 `MulFinal` 的 magnitude 就是最终乘数本身）。其余 17 项原值不变。`phdoge`/`mgdoge` 见下方说明。
+**关键换算**：共 4 项 magnitude 换算——`phd`/`mgd` 换成 `1+旧值`（最终乘数本身），`phdoge`/`mgdoge` 换成 `1-旧值`（未命中概率）。其余 17 项原值不变。
 
-## 待澄清：dodge（phdoge/mgdoge）的 magnitude 存什么
+## dodge（phdoge/mgdoge）语义说明（存法 B，已确认）
 
-旧 dodge 公式：`DodgeS = 1 - (1 - base) * (1 - rate)`，`rate` 来自 `buffValue[phdoge_delta_rate]`。旧 `BuffResultStatistic` 对 dodge 的累加是 `value * (1 + buffValue[t])`（自参考乘法，已被判定为错误）。
+旧 dodge 公式：`DodgeS = 1 - (1 - base) * (1 - rate)`，`rate` 来自 `buffValue[phdoge_delta_rate]`。旧 `BuffResultStatistic` 对 dodge 的累加是 `value * (1 + buffValue[t])`（自参考乘法，错误）。
 
-新模型用 `MulFinal` 连乘。有两种存法，语义不同：
-
-- **存法 A（存 rate）**：magnitude = 0.25（原值不换算）。`MulFinal` 连乘 `P = 0.25 * 0.25 = 0.0625`。下游 `DodgeS = 1 - (1-base)*(1-0.0625)`。问题：连乘的是"rate"而非"未命中概率"，多个 dodge 叠加结果不符合独立概率标准式 `1-(1-base)(1-r1)(1-r2)`。
-- **存法 B（存 1-rate，推荐）**：magnitude 换算成 `1-旧值`（0.25 → 0.75）。`MulFinal` 连乘 `P = 0.75 * 0.75 = 0.5625`（未命中概率连乘）。下游 `DodgeS = 1 - (1-base)*P = 1 - (1-base)(1-r1)(1-r2)`——完美匹配业界独立概率标准式。
-
-存法 B 治本：dodge 的正确叠加本就是"未命中概率连乘"。换算方式与 `phd`/`mgd` 同性质（`1±旧值`）。但需在迁移时把所有 `phdoge`/`mgdoge` 配置数值换算成 `1-旧值`（当前仅 `spot_t1.asset` 的 `phdoge_delta_rate=0.25` → `0.75`）。
-
-**此条待用户最终确认存法。** 若选 A 则不换算但叠加语义非标准；若选 B 则换算且语义标准。
+新模型用存法 B：magnitude 存**未命中概率**（`1-旧值`，如 `0.25 → 0.75`）。`MulFinal` 连乘 `P = Π(1-rᵢ)` 即未命中概率连乘。下游：
+```
+DodgeS = 1 - (1 - base) * P = 1 - (1 - base)(1-r1)(1-r2)...
+```
+完美匹配业界独立概率标准式，治本。换算性质与 `phd`/`mgd` 同（都是 `1±旧值`）。当前配置仅 `spot_t1.asset` 的 `phdoge_delta_rate=0.25` → `0.75`。
 
 ## 特殊语义属性处理（在 `EntityStats`，非改 store 公式）
 
@@ -273,9 +270,7 @@ public static class Attributes
    ```
    BaseAttackTimeS = GetFinal("BaseAttackTime") * 100 / Mathf.Max(1, GetFinal("AttackSpeed"))
    ```
-2. **`PhysicalDodge` / `MagicDodge`**: store Final 的语义取决于 dodge 存法（见上方"待澄清"）。
-   - 存法 A（存 rate）：下游 `DodgeS = 1 - (1 - base) * (1 - Final)`
-   - 存法 B（存 1-rate）：下游 `DodgeS = 1 - (1 - base) * Final`
+2. **`PhysicalDodge` / `MagicDodge`**: store Final = 未命中概率连乘积（存法 B，magnitude 存 `1-旧值`）。下游 `DodgeS = 1 - (1 - base) * Final`。
 3. **`HpRecover`**: base=0，Final = Σ AddFlat。下游 `Mathf.Max(0, Final)`。
 
 ## `BuffController` 瘦身后形态
@@ -362,12 +357,11 @@ isWhiteList: false
 ## 风险点
 
 1. **中间态不可跑**：第 2-4 步之间 buff 不生效，需连续完成。
-2. **`phd`/`mgd` 数值换算易错**：`-0.995 → 0.005`，percent 类（如 `-0.45`）不动。手工逐个核对映射表。
-3. **dodge（phdoge/mgdoge）存法待定**：存法 A 不换算但叠加非标准，存法 B 换算 `1-旧值` 且语义标准。当前配置仅 `spot_t1` 的 `0.25`。需用户拍板后统一。
-4. **`AttackSpeed` base=100 注入点**：漏了会导致 `BaseAttackTimeS` 分母错乱。
-5. **`MulFinal` 空桶 → 1**：漏了会导致移除减免 buff 后伤害归零。
-6. **`MCEnvironmentalDevice` 读 `buff.buff_values[0]`**：迁移成 `buff.modifiers[i].magnitude`，核对索引对应。
-7. **`.asset` 手工改格式错误**：YAML 缩进/逗号错导致解析失败，改完逐个加载验证。
+2. **`phd`/`mgd`/`phdoge`/`mgdoge` 数值换算易错**：`phd`/`mgd` 用 `1+旧值`（-0.995→0.005），`phdoge`/`mgdoge` 用 `1-旧值`（0.25→0.75）。percent 类（如 `-0.45`）不动。手工逐个核对映射表。
+3. **`AttackSpeed` base=100 注入点**：漏了会导致 `BaseAttackTimeS` 分母错乱。
+4. **`MulFinal` 空桶 → 1**：漏了会导致移除减免 buff 后伤害归零。
+5. **`MCEnvironmentalDevice` 读 `buff.buff_values[0]`**：迁移成 `buff.modifiers[i].magnitude`，核对索引对应。
+6. **`.asset` 手工改格式错误**：YAML 缩进/逗号错导致解析失败，改完逐个加载验证。
 
 ## 不在本次范围
 
