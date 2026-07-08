@@ -16,6 +16,7 @@ public class Entity : MonoBehaviour, IPoolOperation
 
     // === 子系统持有 ===
     private EntityStats _stats;
+    private AttributeStore _attributeStore;
     private EntityVision _vision;
     private EntityMovement _movement;
     private EntityCombat _combat;
@@ -191,8 +192,10 @@ public class Entity : MonoBehaviour, IPoolOperation
         }
 
         // === 构造子系统，注入依赖 ===
+        _attributeStore = new AttributeStore();
         _stats = new EntityStats(this);
-        if (buffController != null) _stats.BindBuffController(buffController);
+        _stats.Bind(_attributeStore);
+        if (buffController != null) buffController.Bind(_attributeStore);
         _vision = new EntityVision(this);
         _movement = new EntityMovement(this);
         _combat = new EntityCombat(this);

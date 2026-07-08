@@ -5,23 +5,24 @@ using MyUI;
 /// 实体属性子系统（POCO）。
 /// 持有：
 ///   1. 战斗基准属性（_xxxBase：EntityData 原始值 + 关卡环境"基础数值修改" buff，整场战斗不变；储存字段）
-///   2. 含战斗过程 buff 的计算属性（XxxS：computed property，每次访问实时计算 _xxxBase + 战斗 buff）
+///   2. 含战斗过程 buff 的计算属性（XxxS：computed property，每次访问实时从 AttributeStore.GetFinal 取）
 ///   3. 状态（HP rate、participateIn、hurtable、selectable、isolate、dormant）
 ///
-/// 数据计算流水线（两类 buff 都走现成 BuffController.buffValue）：
-///   EntityData 原始值 → [+ 关卡环境基础 buff] → _xxxBase（字段）→ [+ 战斗过程 buff] → XxxS（property）
+/// 数据计算流水线（buff 数值走 AttributeStore，Modifier 入口在 BuffController）：
+///   EntityData 原始值 → [+ 关卡环境基础 buff] → _xxxBase（字段，注入 store.SetBase）
+///     → [+ 战斗过程 buff（store 聚合 Modifier）] → XxxS（property = _store.GetFinal）
 ///
 /// 设计要点：
 ///   - POCO，无 MonoBehaviour 依赖。构造接受 Entity 引用作为事件桥。
 ///   - 事件触发走 Entity 上的 internal RaiseOnXxx 桥方法——保留 Entity.OnBeforeHurt/OnAfterHurt/OnBeforeDieAnimation 公开事件 API。
-///   - BuffController 由 Entity 在 PreWarm 中通过 BindBuffController 显式注入（EntityStats 构造早于 BuffController 获取）。
+///   - AttributeStore 由 Entity 在 PreWarm 中构造并通过 Bind 注入（EntityStats 构造早于 store 创建）。
 ///   - AttributesCaculateFirst 在 PreWarm 时调用一次，整场战斗不再重算（除非重新进入关卡重建实体）。
-///   - XxxS 为 computed property，buff 变化时无需手动重算；移除后调用方不可能读到陈旧值。
+///   - XxxS 为 computed property，store 置脏即影响下次读取；调用方不可能读到陈旧值。
 /// </summary>
 public class EntityStats
 {
     private readonly Entity _entity;
-    private BuffController _buffController;
+    private AttributeStore _store;
 
     // === 基础属性（来自 EntityData；原 _first） ===
     private float _maxHpBase;
@@ -51,11 +52,11 @@ public class EntityStats
     }
 
     /// <summary>
-    /// 注入 BuffController。Entity 在 PreWarm 中、buffController 被获取后调用。
+    /// 注入 AttributeStore。Entity 在 PreWarm 中构造 store 后、AttributesCaculateFirst 之前调用。
     /// </summary>
-    public void BindBuffController(BuffController bc)
+    public void Bind(AttributeStore store)
     {
-        _buffController = bc;
+        _store = store;
     }
 
     // === 基础属性读（替代 Entity.DEF_1 等） ===
@@ -69,29 +70,29 @@ public class EntityStats
     public int AttackMinNumBase => _attackMinNumBase;
     public float MoveSpeedBase => _moveSpeedBase;
 
-    // === 计算属性（computed property：_xxxBase + 战斗过程 buff，O(1) 实时计算） ===
-    // 流水线末段，无中间储存；buff 变化时无需手动重算，调用方不可能读到陈旧值。
-    public float MaxHpS => Math.Max(0.001f, _maxHpBase + _buffController.buffValue[BuffType.mhp_delta_value] + _maxHpBase * _buffController.buffValue[BuffType.mhp_delta_percent]);
-    public float DefS => _defBase + Math.Max(0, _buffController.buffValue[BuffType.def_delta_value] + _defBase * _buffController.buffValue[BuffType.def_delta_percent]);
-    public float MagicResistanceS => Math.Max(0, _magicResistanceBase + _buffController.buffValue[BuffType.mgr_delta_value] + _magicResistanceBase * _buffController.buffValue[BuffType.mgr_delta_percent]);
-    public float PhysicalDodgeS => 1 - (1 - _physicalDodgeBase) * (1 - _buffController.buffValue[BuffType.phdoge_delta_rate]);
-    public float MagicDodgeS => 1 - (1 - _magicDodgeBase) * (1 - _buffController.buffValue[BuffType.mgdoge_delta_rate]);
-    public int BlockOccupationS => Math.Max(0, _blockOccupationBase + (int)_buffController.buffValue[BuffType.blo_delta_value]);
+    // === 计算属性（computed property：_store.GetFinal，O(1) 实时计算） ===
+    // 流水线末段，无中间储存；store 置脏即影响下次读取，调用方不可能读到陈旧值。
+    public float MaxHpS => Math.Max(0.001f, _store.GetFinal(Attributes.MaxHp));
+    public float DefS => Math.Max(0, _store.GetFinal(Attributes.Defense));
+    public float MagicResistanceS => Math.Max(0, _store.GetFinal(Attributes.MagicResistance));
+    public float PhysicalDodgeS => 1 - (1 - _physicalDodgeBase) * _store.GetFinal(Attributes.PhysicalDodge);
+    public float MagicDodgeS => 1 - (1 - _magicDodgeBase) * _store.GetFinal(Attributes.MagicDodge);
+    public int BlockOccupationS => Math.Max(0, _blockOccupationBase + (int)_store.GetFinal(Attributes.BlockOccupation));
     public int TauntLevel => _tauntLevelBase;  // 嘲讽等级无战斗 buff
-    public float AttackS => Math.Max(0, _attackBase + _buffController.buffValue[BuffType.atk_delta_value] + _attackBase * _buffController.buffValue[BuffType.atk_delta_percent]);
-    public float BaseAttackTimeS => Math.Max(0.001f, (_baseAttackTimeBase + _buffController.buffValue[BuffType.batkt_delta_value] + _baseAttackTimeBase * _buffController.buffValue[BuffType.batkt_delta_percent]) * 100 / Math.Max(1, 100 + _buffController.buffValue[BuffType.atkspd_delta_value]));
+    public float AttackS => Math.Max(0, _store.GetFinal(Attributes.Attack));
+    public float BaseAttackTimeS => Math.Max(0.001f, _store.GetFinal(Attributes.BaseAttackTime) * 100 / Math.Max(1, _store.GetFinal(Attributes.AttackSpeed)));
     public int AttackNumS
     {
         get
         {
             if (_attackNumBase >= 0)
-                return Math.Max(0, _attackNumBase + (int)_buffController.buffValue[BuffType.atkn_delta_value]);
+                return Math.Max(0, _attackNumBase + (int)_store.GetFinal(Attributes.AttackNum));
             else
                 return -1;
         }
     }
-    public int AttackMinNumS => Math.Max(0, _attackMinNumBase + (int)_buffController.buffValue[BuffType.atkminn_delta_value]);
-    public float MoveSpeedS => Math.Max(0.01f, _moveSpeedBase + _buffController.buffValue[BuffType.mspeed_delta_value] + _moveSpeedBase * _buffController.buffValue[BuffType.mspeed_delta_percent]);
+    public int AttackMinNumS => Math.Max(0, _attackMinNumBase + (int)_store.GetFinal(Attributes.AttackMinNum));
+    public float MoveSpeedS => Math.Max(0.01f, _store.GetFinal(Attributes.MoveSpeed));
 
     // === HP ===
     public float CurrentHp => _currentHpRate * MaxHpS;
@@ -100,7 +101,7 @@ public class EntityStats
         get => _currentHpRate;
         set => _currentHpRate = Math.Min(1, value);
     }
-    public float HpRecover => Math.Max(0, _buffController.buffValue[BuffType.hprecover_delta_value]);
+    public float HpRecover => Math.Max(0, _store.GetFinal(Attributes.HpRecover));
 
     // === 状态标志 ===
     public bool IsActive
@@ -144,10 +145,9 @@ public class EntityStats
         int attackMinNum = 0;  // EntityData 未暴露此字段，留 0 兼容（无 atkminn_delta_value 数据源时恒为 0）
         float moveSpeed = data.MoveSpeed;
 
-        // 2. [关卡环境"基础数值修改" buff]——使用现成 BuffController.buffValue，语法与 Second 阶段一致。
-        //    预期 BuffType 新增：mhp_base_delta_value / mhp_base_delta_percent / def_base_delta_value / ...
-        //    储存尚未实现，暂跳过。储存就位后，在此累加 buff value 即可。
-        // TODO(level-base-buffs): 接入 _buffController.buffValue[BuffType.xxx_base_delta_value] / xxx_base_delta_percent
+        // 2. [关卡环境"基础数值修改" buff]——尚未接入。设计上应作为 AddFlat/AddPercent Modifier
+        //    注入 store（或直接并入 _xxxBase 的 SetBase 值），而非独立账本。
+        // TODO(level-base-buffs): 关卡环境基础 buff 落地后，在此累加进 SetBase 的入参即可。
 
         // 3. 写入 _xxxBase（base-buff 系统就位后，这里存的就是"原始值 + 关卡环境 buff"的结果）
         _maxHpBase = maxHp;
@@ -162,6 +162,27 @@ public class EntityStats
         _attackNumBase = attackNum;
         _attackMinNumBase = attackMinNum;
         _moveSpeedBase = moveSpeed;
+
+        // === 注入基础值到 AttributeStore ===
+        // AttackSpeed base=100（"100 攻速=正常速度"，设计常量，非来自 EntityData）。
+        // HpRecover base=0（纯增量属性）。Dodge/Rate 类属性 base 见下方说明：
+        //   Dodge base=0：modifier 存未命中概率(1-旧值)，基础闪避在下游 _xxxDodgeBase 体现。
+        //   DamageRate base=1：无减免 buff 时 Final=1，伤害不变。
+        _store.SetBase(Attributes.MaxHp, _maxHpBase);
+        _store.SetBase(Attributes.Defense, _defBase);
+        _store.SetBase(Attributes.MagicResistance, _magicResistanceBase);
+        _store.SetBase(Attributes.PhysicalDodge, 0f);
+        _store.SetBase(Attributes.MagicDodge, 0f);
+        _store.SetBase(Attributes.BlockOccupation, _blockOccupationBase);
+        _store.SetBase(Attributes.Attack, _attackBase);
+        _store.SetBase(Attributes.BaseAttackTime, _baseAttackTimeBase);
+        _store.SetBase(Attributes.AttackSpeed, 100f);
+        _store.SetBase(Attributes.AttackNum, _attackNumBase);
+        _store.SetBase(Attributes.AttackMinNum, _attackMinNumBase);
+        _store.SetBase(Attributes.MoveSpeed, _moveSpeedBase);
+        _store.SetBase(Attributes.HpRecover, 0f);
+        _store.SetBase(Attributes.PhysicalDamageRate, 1f);
+        _store.SetBase(Attributes.MagicDamageRate, 1f);
     }
 
     // === HP 自然恢复（原 Entity.FixedUpdate 中 current_hp_rate < 1 分支） ===
@@ -212,8 +233,8 @@ public class EntityStats
         };
         float finalDamage = damageType switch
         {
-            0 => Math.Max(damage * multiplyer * minRate, damage * multiplyer - (1 - defPenetrate) * (DefS - defPenetrate_value)) * Math.Max(0, 1 + _buffController.buffValue[BuffType.phd_delta_rate]),
-            1 => Math.Max(damage * multiplyer * minRate, damage * multiplyer * (1 - (1 - mgrPenetrate) * (MagicResistanceS - mgrPenetrate_value) / 100)) * Math.Max(0, 1 + _buffController.buffValue[BuffType.mgd_delta_rate]),
+            0 => Math.Max(damage * multiplyer * minRate, damage * multiplyer - (1 - defPenetrate) * (DefS - defPenetrate_value)) * Math.Max(0, _store.GetFinal(Attributes.PhysicalDamageRate)),
+            1 => Math.Max(damage * multiplyer * minRate, damage * multiplyer * (1 - (1 - mgrPenetrate) * (MagicResistanceS - mgrPenetrate_value) / 100)) * Math.Max(0, _store.GetFinal(Attributes.MagicDamageRate)),
             2 => damage * multiplyer,
             3 => damage * multiplyer,
             _ => 0,

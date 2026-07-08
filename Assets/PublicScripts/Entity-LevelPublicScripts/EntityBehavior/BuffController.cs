@@ -3,110 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static PlasticGui.PlasticTableCell;
-
-public enum BuffType
-{
-    /// <summary>
-    /// �������仯��ֵ
-    /// </summary>
-    atk_delta_value,
-    /// <summary>
-    /// �������仯���ٷֱ�
-    /// </summary>
-    atk_delta_percent,
-    /// <summary>
-    /// �������仯��ֵ
-    /// </summary>
-    def_delta_value,
-    /// <summary>
-    /// �������仯���ٷֱ�
-    /// </summary>
-    def_delta_percent,
-    /// <summary>
-    /// �����仯��ֵ
-    /// </summary>
-    mgr_delta_value,
-    /// <summary>
-    /// �����仯���ٷֱ�
-    /// </summary>
-    mgr_delta_percent,
-    /// <summary>
-    /// ����������ޱ仯��ֵ
-    /// </summary>
-    mhp_delta_value,
-    /// <summary>
-    /// ����������ޱ仯���ٷֱ�
-    /// </summary>
-    mhp_delta_percent,
-    /// <summary>
-    /// ���������仯������
-    /// </summary>
-    phd_delta_rate,
-    /// <summary>
-    /// ���������仯������
-    /// </summary>
-    mgd_delta_rate,
-    /// <summary>
-    /// �������ܱ仯������
-    /// </summary>
-    phdoge_delta_rate,
-    /// <summary>
-    /// �������ܱ仯������
-    /// </summary>
-    mgdoge_delta_rate,
-    /// <summary>
-    /// ��������仯��ֵ
-    /// </summary>
-    batkt_delta_value,
-    /// <summary>
-    /// ��������仯���ٷֱ�
-    /// </summary>
-    batkt_delta_percent,
-    /// <summary>
-    /// �����ٶȱ仯��ֵ
-    /// </summary>
-    atkspd_delta_value,
-    /// <summary>
-    /// �赲���仯��ֵ
-    /// </summary>
-    blo_delta_value,
-    /// <summary>
-    /// ��󹥻������仯��ֵ
-    /// </summary>
-    atkn_delta_value,
-    /// <summary>
-    /// ��С���������仯��ֵ
-    /// </summary>
-    atkminn_delta_value,
-    /// <summary>
-    /// �����ظ��仯��ֵ
-    /// </summary>
-    hprecover_delta_value,
-    /// <summary>
-    /// �ƶ��ٶȱ仯��ֵ
-    /// </summary>
-    mspeed_delta_value,
-    /// <summary>
-    /// �ƶ��ٶȱ仯���ٷֱ�
-    /// </summary>
-    mspeed_delta_percent,
-}
 [Serializable]
 public class Buff
 {
-    public float[] buff_values;
+    public Modifier[] modifiers;       // 不可变快照，所有改动经 SetBuffValues 重建
     public float buff_time;
     public string buff_name;
     public Entity origin_entity;
-    public BuffType[] buff_types;
     public GameObject buff_effect;
-    public Buff(float buff_time, string buff_name, Entity origin_entity, BuffType[] buff_types, GameObject buff_effect)
+    public Buff(float buff_time, string buff_name, Entity origin_entity, Modifier[] modifiers, GameObject buff_effect)
     {
-        this.buff_values = new float[buff_types.Length];
+        this.modifiers = modifiers ?? System.Array.Empty<Modifier>();
         this.buff_time = buff_time;
         this.buff_name = buff_name;
         this.origin_entity = origin_entity;
-        this.buff_types = buff_types;
         this.buff_effect = buff_effect;
     }
 }
@@ -141,7 +51,7 @@ public class BuffController : MonoBehaviour, IPoolOperation
     private List<Buff> normal_buffs;
     private float[] _abnormalStateTime;
     private List<DOTData> _dotDatas;
-    public Dictionary<BuffType, float> buffValue;
+    private AttributeStore _store;
     public List<Buff> Buffs
     {
         get
@@ -153,6 +63,14 @@ public class BuffController : MonoBehaviour, IPoolOperation
         }
     }
 
+    /// <summary>
+    /// 注入 AttributeStore。Entity 在 PreWarm 中调用。
+    /// </summary>
+    public void Bind(AttributeStore store)
+    {
+        _store = store;
+    }
+
     private void FixedUpdate()
     {
         BuffUpdate();
@@ -161,18 +79,17 @@ public class BuffController : MonoBehaviour, IPoolOperation
     }
 
 
-    #region///buff����
+    #region///buff管理
     /// <summary>
-    /// buff����
+    /// 创建 buff。所有数值改动经 SetBuffValues 重建 modifier 快照并通知 store 置脏。
     /// </summary>
-    /// <param name="buffTypes">����,percent����дxʱ�ĺ���Ϊ100x%</param>
-    /// <param name="buffEffect">��Ч</param>
-    /// <param name="buffName">����</param>
-    /// <param name="buffValue">ֵ</param>
-    /// <param name="buffTime">ʱ�䣬С����-5Ϊ����</param>
-    /// <param name="isWhiteList">������</param>
-    /// <returns>buff����</returns>
-    public Buff CreateBuff(BuffType[] buffTypes, GameObject buffEffect, string buffName, float[] buffValue, float buffTime, bool isWhiteList)
+    /// <param name="modifiers">modifier 数组（不可变快照）</param>
+    /// <param name="buffEffect">特效</param>
+    /// <param name="buffName">名称（同名复用既有特效）</param>
+    /// <param name="buffTime">时间，小于-5为永久</param>
+    /// <param name="isWhiteList">白名单</param>
+    /// <returns>buff 实例</returns>
+    public Buff CreateBuff(Modifier[] modifiers, GameObject buffEffect, string buffName, float buffTime, bool isWhiteList)
     {
         Buff addBuff;
         if (isWhiteList)
@@ -182,8 +99,8 @@ public class BuffController : MonoBehaviour, IPoolOperation
                 if (b.buff_name == buffName)
                 {
                     buffEffect = b.buff_effect;
-                    addBuff = new Buff(buffTime, buffName, _thisEntity, buffTypes, buffEffect);
-                    SetBuffValues(buffValue, addBuff);
+                    addBuff = new Buff(buffTime, buffName, _thisEntity, modifiers, buffEffect);
+                    SetBuffValues(modifiers, addBuff);
                     white_list_buffs.Add(addBuff);
                     return addBuff;
                 }
@@ -192,8 +109,8 @@ public class BuffController : MonoBehaviour, IPoolOperation
             {
                 buffEffect = Instantiate(buffEffect, _thisEntity.TempContainer.position, Quaternion.identity, _thisEntity.TempContainer);
             }
-            addBuff = new Buff(buffTime, buffName, _thisEntity, buffTypes, buffEffect);
-            SetBuffValues(buffValue, addBuff);
+            addBuff = new Buff(buffTime, buffName, _thisEntity, modifiers, buffEffect);
+            SetBuffValues(modifiers, addBuff);
             white_list_buffs.Add(addBuff);
             return addBuff;
         }
@@ -204,8 +121,8 @@ public class BuffController : MonoBehaviour, IPoolOperation
                 if (b.buff_name == buffName)
                 {
                     buffEffect = b.buff_effect;
-                    addBuff = new Buff(buffTime, buffName, _thisEntity, buffTypes, buffEffect);
-                    SetBuffValues(buffValue, addBuff);
+                    addBuff = new Buff(buffTime, buffName, _thisEntity, modifiers, buffEffect);
+                    SetBuffValues(modifiers, addBuff);
                     normal_buffs.Add(addBuff);
                     return addBuff;
                 }
@@ -214,19 +131,19 @@ public class BuffController : MonoBehaviour, IPoolOperation
             {
                 buffEffect = Instantiate(buffEffect, _thisEntity.TempContainer.position, Quaternion.identity, _thisEntity.TempContainer);
             }
-            addBuff = new Buff(buffTime, buffName, _thisEntity, buffTypes, buffEffect);
-            SetBuffValues(buffValue, addBuff);
+            addBuff = new Buff(buffTime, buffName, _thisEntity, modifiers, buffEffect);
+            SetBuffValues(modifiers, addBuff);
             normal_buffs.Add(addBuff);
             return addBuff;
         }
     }
     /// <summary>
-    /// ����buff����
+    /// 销毁 buff，移除其所有 modifier（置脏）。
     /// </summary>
-    /// <param name="destroyBuff">��Ҫ���ٵ�buff����</param>
+    /// <param name="destroyBuff">要销毁的 buff 实例</param>
     public void DestroyBuff(Buff destroyBuff)
     {
-        SetBuffValues(new float[destroyBuff.buff_types.Length], destroyBuff);
+        if (destroyBuff.modifiers != null) _store.RemoveModifiers(destroyBuff.modifiers);
         white_list_buffs.Remove(destroyBuff);
         normal_buffs.Remove(destroyBuff);
         if (!(white_list_buffs.Contains(destroyBuff) || normal_buffs.Contains(destroyBuff)))
@@ -235,69 +152,18 @@ public class BuffController : MonoBehaviour, IPoolOperation
         }
     }
     /// <summary>
-    /// ��ȡbuff
+    /// 设置 Buff 的 modifier 数组（不可变快照替换）。
+    /// 所有 buff 数值改动（创建赋值、动态更新、销毁）统一经此入口：
+    /// 移除旧快照 → 替换为新快照 → 加入新快照（store 置脏）。
     /// </summary>
-    /// <param name="buffName">��Ҫ��ȡ��buff����</param>
-    /// <returns>��ȡ����buff����û�л�ȡ����Ϊnull</returns>
-    public Buff FetchBuff(string buffName)
+    /// <param name="newModifiers">新的 modifier 数组</param>
+    /// <param name="setTarget">目标 Buff</param>
+    public void SetBuffValues(Modifier[] newModifiers, Buff setTarget)
     {
-        foreach (Buff buff in normal_buffs)
-        {
-            if (buff.buff_name == buffName)
-            {
-                return buff;
-            }
-        }
-        foreach (Buff buff in white_list_buffs)
-        {
-            if (buff.buff_name == buffName)
-            {
-                return buff;
-            }
-        }
-        return null;
-    }
-    /// <summary>
-    /// ����Buff��ֵ
-    /// </summary>
-    /// <param name="newBuffValues">Ҫ���õ�Buff��ֵ�����ȱ�����ԭ��ֵ������ȣ�</param>
-    /// <param name="setTarget">��Ҫ���õ�Ŀ��Buff</param>
-    public void SetBuffValues(float[] newBuffValues, Buff setTarget)
-    {
-        for (int i = 0; i < newBuffValues.Length; i++)
-        {
-            if (newBuffValues[i] != setTarget.buff_values[i])
-                BuffResultStatistic(setTarget.buff_types[i], newBuffValues[i] - setTarget.buff_values[i]);
-        }
-        setTarget.buff_values = newBuffValues;
-    }
-    private void BuffResultStatistic(BuffType buffType, float value)
-    {
-        buffValue[buffType] += buffType switch
-        {
-            BuffType.atk_delta_value => value,
-            BuffType.atk_delta_percent => value,
-            BuffType.def_delta_value => value,
-            BuffType.def_delta_percent => value,
-            BuffType.mgr_delta_value => value,
-            BuffType.mgr_delta_percent => value,
-            BuffType.mhp_delta_value => value,
-            BuffType.mhp_delta_percent => value,
-            BuffType.phd_delta_rate => value * (1 + buffValue[buffType]),
-            BuffType.mgd_delta_rate => value * (1 + buffValue[buffType]),
-            BuffType.phdoge_delta_rate => value * (1 + buffValue[buffType]),
-            BuffType.mgdoge_delta_rate => value * (1 + buffValue[buffType]),
-            BuffType.batkt_delta_value => value,
-            BuffType.batkt_delta_percent => value,
-            BuffType.atkspd_delta_value => value,
-            BuffType.blo_delta_value => value,
-            BuffType.atkn_delta_value => value,
-            BuffType.atkminn_delta_value => value,
-            BuffType.hprecover_delta_value => value,
-            BuffType.mspeed_delta_value => value,
-            BuffType.mspeed_delta_percent => value,
-            _ => 0,
-        };
+        Modifier[] old = setTarget.modifiers;
+        if (old != null) _store.RemoveModifiers(old);
+        setTarget.modifiers = newModifiers ?? System.Array.Empty<Modifier>();
+        _store.AddModifiers(setTarget.modifiers);
     }
     private void BuffUpdate()
     {
@@ -325,12 +191,12 @@ public class BuffController : MonoBehaviour, IPoolOperation
         }
     }
     #endregion
-    #region///�쳣״̬
+    #region///异常状态
     /// <summary>
-    /// �����쳣״̬
+    /// 添加异常状态
     /// </summary>
-    /// <param name="abnormalTime">�����쳣״̬����ʱ��,ֵС�ڵ���-5��ʾ����ʱ������</param>
-    /// <param name="abnormalType">�����쳣״̬����:0-����,1-ʧ��,2-��е,3-�޵�</param>
+    /// <param name="abnormalTime">添加异常状态的时长,值小于等于-5表示无限时长持续</param>
+    /// <param name="abnormalType">添加异常状态类型:0-眩晕,1-失衡,2-沉默,3-无敌</param>
     public void AddAbnormalState(float abnormalTime, int abnormalType)
     {
         switch (abnormalType)
@@ -443,7 +309,7 @@ public class BuffController : MonoBehaviour, IPoolOperation
         }
     }
     #endregion
-    #region///DOT�˺�
+    #region///DOT伤害
     public void CreateDOT(Entity originEntity, GameObject dotEffect, string name, float duration, float frequency, float timer, float damage, int damageType, bool isDeadly)
     {
         int index = ContainDOT(name);
@@ -534,13 +400,8 @@ public class BuffController : MonoBehaviour, IPoolOperation
         white_list_buffs = new List<Buff>();
         normal_buffs = new List<Buff>();
         _thisEntity = this.transform.GetComponent<Entity>();
-        buffValue = new Dictionary<BuffType, float>();
         _abnormalStateTime = new float[4];
         _dotDatas = new List<DOTData>();
-        for (int i = 0; i < System.Enum.GetNames(typeof(BuffType)).Length; i++)
-        {
-            buffValue.Add((BuffType)i, 0);
-        }
     }
     public void Initialize()
     {
@@ -556,10 +417,7 @@ public class BuffController : MonoBehaviour, IPoolOperation
         {
             Destroy(normal_buffs[i].buff_effect);
         }
-        for (int i = 0; i < buffValue.Count; i++)
-        {
-            buffValue[(BuffType)i] = 0;
-        }
+        if (_store != null) _store.Clear();
         white_list_buffs.Clear();
         normal_buffs.Clear();
         for (int i = 0; i < _abnormalStateTime.Length; i++)
