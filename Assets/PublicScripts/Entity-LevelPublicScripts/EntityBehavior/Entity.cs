@@ -1,13 +1,5 @@
 using UnityEngine;
 
-public enum OrderLogic
-{
-    ResistFirst_Priority_Des,
-    Priority_Des,
-    Hprate_NoFull_Asc,
-    Defense_Des,
-}
-
 
 /// <summary>
 /// 实体协调者。持有 4 个 POCO 子系统（Stats/Vision/Movement/Combat）+ 阵营副作用 + 公开事件。

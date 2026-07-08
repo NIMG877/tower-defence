@@ -57,8 +57,8 @@ public class AttackBase : MonoBehaviour, IPoolOperation
 
 
 
-    public OrderLogic EntityOrderLogic;
-    public int DamageType;
+    [NonSerialized] public OrderLogic TargetPriority;
+    [NonSerialized] public int DamageType;
     [HideInInspector] public AttackEffectData _attackEffectData;
     [SerializeField] private AttackEffectData _attackEffectData0;
     public (int x, int y)[] AttackRangeS
@@ -134,6 +134,7 @@ public class AttackBase : MonoBehaviour, IPoolOperation
     {
         _attackTimer = 0;
         DamageType = _thisEntity.EntityData.DamageType;
+        TargetPriority = _thisEntity.EntityData.TargetPriority;
     }
     public virtual void PreWarm()
     {
@@ -276,7 +277,7 @@ public class AttackBase : MonoBehaviour, IPoolOperation
             tmpTarget.AddRange(_thisEntity.Vision.NearbyTurrets);
             samecomp = false;
         }
-        tmpTarget = _thisEntity.Combat.PriorityOrder(tmpTarget, EntityOrderLogic);
+        tmpTarget = _thisEntity.Combat.PriorityOrder(tmpTarget, TargetPriority);
         OnBeforeTargetSelect?.Invoke(tmpTarget, ref selectNum_Max, ref selectNum_Min, ref samecomp);
         if (tmpTarget.Count > 0 && selectNum_Max >= 0)//��AttackNum==-1ʱ������Ĭ��Ϊ��Χ��ȫ������
         {

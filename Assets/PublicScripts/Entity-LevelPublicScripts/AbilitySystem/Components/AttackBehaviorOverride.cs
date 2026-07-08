@@ -10,10 +10,10 @@ namespace AbilitySystem.Components
         private Func<bool> _toSelf;
         private Func<string> _blackboardKey;
         private Func<int> _damageType;
-        private Func<string> _orderLogic;
+        private Func<string> _targetPriority;
         private Func<string> _outputKey;
         private bool _hasDamageType;
-        private bool _hasOrderLogic;
+        private bool _hasTargetPriority;
 
         public override void OnInit(AbilityContext ctx, ParamList p)
         {
@@ -21,10 +21,10 @@ namespace AbilitySystem.Components
             _toSelf = p.GetBoolLazy("toSelf", true, bb);
             _blackboardKey = p.GetStringLazy("blackboardKey", "", bb);
             _damageType = p.GetIntLazy("damageType", 0, bb);
-            _orderLogic = p.GetStringLazy("orderLogic", "", bb);
+            _targetPriority = p.GetStringLazy("targetPriority", "", bb);
             _outputKey = p.GetStringLazy("outputKey", "", bb);
             _hasDamageType = p.HasKey("damageType");
-            _hasOrderLogic = p.HasKey("orderLogic");
+            _hasTargetPriority = p.HasKey("targetPriority");
         }
 
         public override void OnTrigger(AbilityContext ctx)
@@ -32,12 +32,12 @@ namespace AbilitySystem.Components
             List<Entity> targets = ResolveTargets(ctx);
             if (targets == null || targets.Count == 0) return;
 
-            bool applyOrderLogic = _hasOrderLogic;
-            OrderLogic parsedOrder = default;
-            if (applyOrderLogic && !Enum.TryParse(_orderLogic(), true, out parsedOrder))
+            bool applyTargetPriority = _hasTargetPriority;
+            OrderLogic parsedTargetPriority = default;
+            if (applyTargetPriority && !Enum.TryParse(_targetPriority(), true, out parsedTargetPriority))
             {
-                Debug.LogWarning($"AttackBehaviorOverride: unknown OrderLogic '{_orderLogic()}'; skipping order override");
-                applyOrderLogic = false;
+                Debug.LogWarning($"AttackBehaviorOverride: unknown OrderLogic '{_targetPriority()}'; skipping target priority override");
+                applyTargetPriority = false;
             }
 
             string outputKey = _outputKey();
@@ -56,10 +56,10 @@ namespace AbilitySystem.Components
                 snapshots?.Add(new AttackBehaviorSnapshot(
                     target,
                     target.AttackBase.DamageType,
-                    target.AttackBase.EntityOrderLogic));
+                    target.AttackBase.TargetPriority));
 
                 if (_hasDamageType) target.AttackBase.DamageType = _damageType();
-                if (applyOrderLogic) target.AttackBase.EntityOrderLogic = parsedOrder;
+                if (applyTargetPriority) target.AttackBase.TargetPriority = parsedTargetPriority;
             }
 
             if (snapshots != null)
@@ -84,13 +84,13 @@ namespace AbilitySystem.Components
     {
         public readonly Entity Target;
         public readonly int DamageType;
-        public readonly OrderLogic OrderLogic;
+        public readonly OrderLogic TargetPriority;
 
-        public AttackBehaviorSnapshot(Entity target, int damageType, OrderLogic orderLogic)
+        public AttackBehaviorSnapshot(Entity target, int damageType, OrderLogic targetPriority)
         {
             Target = target;
             DamageType = damageType;
-            OrderLogic = orderLogic;
+            TargetPriority = targetPriority;
         }
     }
 }

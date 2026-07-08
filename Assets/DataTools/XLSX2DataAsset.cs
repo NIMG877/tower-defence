@@ -231,6 +231,7 @@ public class XLSX2DataAsset
             BaseAttackTime = GetFloat(row, colMap, "BaseAttackTime", sharedStrings),
             AttackNum = GetInt(row, colMap, "AttackNum", sharedStrings),
             DamageType = GetInt(row, colMap, "DamageType", sharedStrings),
+            TargetPriority = (OrderLogic)GetInt(row, colMap, "TargetPriority", sharedStrings),
             MaxHp = GetFloat(row, colMap, "MaxHp", sharedStrings),
             Defense = GetFloat(row, colMap, "Defense", sharedStrings),
             MagicResistance = GetFloat(row, colMap, "MagicResistance", sharedStrings),

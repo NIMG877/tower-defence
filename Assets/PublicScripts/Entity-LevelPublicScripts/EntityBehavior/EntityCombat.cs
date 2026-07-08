@@ -38,13 +38,13 @@ public class EntityCombat
     }
 
     /// <summary>
-    /// 替代原 Entity.PriorityOrder。按 OrderLogic 对实体列表排序。
+    /// 替代原 Entity.PriorityOrder。按 OrderLogic（目标优先级）对实体列表排序。
     /// </summary>
-    public List<Entity> PriorityOrder(List<Entity> originList, OrderLogic orderLogic)
+    public List<Entity> PriorityOrder(List<Entity> originList, OrderLogic targetPriority)
     {
         List<Entity> entitiesList = new List<Entity>(originList);
         List<Entity> resistList = _entity.Movement.ResistList;
-        switch (orderLogic)
+        switch (targetPriority)
         {
             case OrderLogic.ResistFirst_Priority_Des:
                 for (int i = 0; i < resistList.Count; i++)

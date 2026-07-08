@@ -93,7 +93,7 @@ MonoBehaviour:
         value: 3
         fromBlackboard: 0
         type: 0
-      - key: orderLogic
+      - key: targetPriority
         value: Hprate_NoFull_Asc
         fromBlackboard: 0
         type: 3

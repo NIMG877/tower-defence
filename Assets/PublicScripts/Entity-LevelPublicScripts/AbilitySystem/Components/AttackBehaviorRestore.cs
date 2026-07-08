@@ -39,7 +39,7 @@ namespace AbilitySystem.Components
                 if (snapshot.Target != null && snapshot.Target.AttackBase != null)
                 {
                     snapshot.Target.AttackBase.DamageType = snapshot.DamageType;
-                    snapshot.Target.AttackBase.EntityOrderLogic = snapshot.OrderLogic;
+                    snapshot.Target.AttackBase.TargetPriority = snapshot.TargetPriority;
                 }
                 snapshots.RemoveAt(i);
             }

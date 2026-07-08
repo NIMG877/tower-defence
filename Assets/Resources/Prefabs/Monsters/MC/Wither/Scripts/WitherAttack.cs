@@ -13,8 +13,8 @@ public class WitherAttack : AttackBase
     }
     public override bool TryToAttack(Entity[] attackTargets, bool forceChange, bool canBeInterrupt)
     {
-        List<Entity> tmpTarget = _thisEntity.Combat.PriorityOrder(_thisEntity.Vision.NearbyTurrets, _thisEntity.AttackBase.EntityOrderLogic);
-        tmpTarget.AddRange(_thisEntity.Combat.PriorityOrder(_thisEntity.Vision.NearbyMonsters, _thisEntity.AttackBase.EntityOrderLogic));
+        List<Entity> tmpTarget = _thisEntity.Combat.PriorityOrder(_thisEntity.Vision.NearbyTurrets, _thisEntity.AttackBase.TargetPriority);
+        tmpTarget.AddRange(_thisEntity.Combat.PriorityOrder(_thisEntity.Vision.NearbyMonsters, _thisEntity.AttackBase.TargetPriority));
         tmpTarget.Remove(_thisEntity);
         if (tmpTarget.Count == 0)
             return false;

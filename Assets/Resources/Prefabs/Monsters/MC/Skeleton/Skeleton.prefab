@@ -683,8 +683,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62a03b516ab1ae5498c989285df1e562, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EntityOrderLogic: 0
-  DamageType: 0
   _attackEffectData:
     BulletData:
       BulletPrefab: {fileID: 7814424976800272869, guid: eaed7b69e4a80f2408db418c4c5e42b1, type: 3}

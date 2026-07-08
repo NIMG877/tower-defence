@@ -848,8 +848,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b203cb2ee83428f4eaa50261aee3846e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EntityOrderLogic: 1
-  DamageType: 0
   _attackEffectData:
     BulletData:
       BulletPrefab: {fileID: 1929037728802243661, guid: e8ee549ab76b7514a8f87d0980e814ad, type: 3}

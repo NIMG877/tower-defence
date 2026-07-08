@@ -49,7 +49,7 @@ MonoBehaviour:
   - componentType: AttackBehaviorOverride
     parameters:
       entries:
-      - key: orderLogic
+      - key: targetPriority
         value: Defense_Des
         fromBlackboard: 0
         type: 3

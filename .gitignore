@@ -70,6 +70,9 @@ consulo/
 *.bak
 *.swp
 
+# Office temporary lock files (Excel ~$*.xlsx etc.)
+~$*
+
 # Local tools and assistant state
 .superpowers/
 .codex/
