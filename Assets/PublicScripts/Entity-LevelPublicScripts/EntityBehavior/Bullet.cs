@@ -12,7 +12,7 @@ public struct BulletData
     public float BulletSpeed;
     public int BulletType;
     public bool AllowNoTarget;
-    [Header("��BulletType=1ʱ��дֵ����Ч")]
+    [Header("BulletType=1")]
     public float DevitationXRate;
     public float DevitationYValue;
 }
