@@ -7,17 +7,16 @@ public class ts1 : Skill
     Buff buff;
     public override bool SkillBegin()
     {
-        if ((buff == null || buff.buff_values[0] < 80) && base.SkillBegin())
+        if ((buff == null || buff.modifiers[0].magnitude < 80) && base.SkillBegin())
         {
             _thisEntity.TakeDamage(_thisEntity, 200, 1, 0, 0, 0, 0, 1, 2);
             if (buff == null)
             {
-                buff = _thisEntity.GetComponent<BuffController>().CreateBuff(new BuffType[2] { BuffType.atkspd_delta_value, BuffType.atk_delta_value }, null, "¹¥»÷ËÙ¶ÈÌáÉý", new float[2] { -95, -95 }, -5, false);
+                buff = _thisEntity.GetComponent<BuffController>().CreateBuff(new Modifier[2] { new Modifier(Attributes.AttackSpeed, ModifierOp.AddFlat, -95f), new Modifier(Attributes.Attack, ModifierOp.AddFlat, -95f) }, null, "ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½", new float[2] { -95, -95 }, -5, false);
             }
             else
             {
-                buff.buff_values[0] = 95;
-                buff.buff_values[1] = 95;
+                _thisEntity.GetComponent<BuffController>().SetBuffValues(new Modifier[2] { new Modifier(Attributes.AttackSpeed, ModifierOp.AddFlat, 95f), new Modifier(Attributes.Attack, ModifierOp.AddFlat, 95f) }, buff);
             }
             return true;
         }
@@ -26,7 +25,6 @@ public class ts1 : Skill
     public override void SkillEnd()
     {
         base.SkillEnd();
-        buff.buff_values[0] = 0;
-        buff.buff_values[1] = 0;
+        _thisEntity.GetComponent<BuffController>().SetBuffValues(new Modifier[2] { new Modifier(Attributes.AttackSpeed, ModifierOp.AddFlat, 0f), new Modifier(Attributes.Attack, ModifierOp.AddFlat, 0f) }, buff);
     }
 }

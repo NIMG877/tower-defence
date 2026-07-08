@@ -7,8 +7,7 @@ public class Skill1 : Skill
     public GameObject Skill1Effect;
     private Talent1 _talent1;
     private Buff _skill1Buff;
-    private BuffType[] _buffTypes = new BuffType[1] { BuffType.atkspd_delta_value };
-    private float[] _buffValues = new float[1] { 120 };
+    private Modifier[] _modifiers = new Modifier[1] { new Modifier(Attributes.AttackSpeed, ModifierOp.AddFlat, 120f) };
     public override void Initialize()
     {
         base.Initialize();
@@ -18,7 +17,7 @@ public class Skill1 : Skill
     {
         if (!base.SkillBegin())
             return false;
-        _skill1Buff = _thisEntity.buffController.CreateBuff(_buffTypes, Skill1Effect, "EyjafjallaSkill1", _buffValues, -5, false);
+        _skill1Buff = _thisEntity.buffController.CreateBuff(_modifiers, Skill1Effect, "EyjafjallaSkill1", -5, false);
         _talent1.Skill1Open();
         return true;
     }

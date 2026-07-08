@@ -160,7 +160,7 @@ namespace AbilitySystem
         }
 
         // 字符串数组版 Lazy,CSV/单值都吃,BB 容错 string[]/string。
-        // 带 parser 时把每个 token 解析成 T(典型:Enum.Parse 给 BuffType[]);
+        // 带 parser 时把每个 token 解析成 T(典型:Enum.Parse 给 ModifierOp[]);
         // 不带 parser 时 T 必须是 string,走 SplitStrings。
         public Func<T[]> GetStringArrayLazy<T>(string key, T[] defaultValue = null, Blackboard bb = null, Func<string, T> parser = null)
         {

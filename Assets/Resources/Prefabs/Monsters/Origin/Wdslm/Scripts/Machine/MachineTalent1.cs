@@ -25,7 +25,7 @@ public class MachineTalent1 : Talent
         _v = 0.001f;
         _thisMove = _thisEntity.MoveBase;
         _thisBuff = _thisEntity.buffController;
-        _moveBuff = _thisBuff.CreateBuff(new BuffType[1] { BuffType.mspeed_delta_percent }, null, "machine", new float[1] { _v - 1 }, -5, false);
+        _moveBuff = _thisBuff.CreateBuff(new Modifier[1] { new Modifier(Attributes.MoveSpeed, ModifierOp.AddPercent, _v - 1f) }, null, "machine", -5, false);
         (int iSize, int jSize) = MapDataManager.Manager.MapSize;
         _bestOrientation = new int[iSize, jSize];
     }
@@ -109,7 +109,7 @@ public class MachineTalent1 : Talent
             {
                 _v = maxV;
             }
-            _thisBuff.SetBuffValues(new float[1] { _v - 1 }, _moveBuff);
+            _thisBuff.SetBuffValues(new Modifier[1] { new Modifier(Attributes.MoveSpeed, ModifierOp.AddPercent, _v - 1f) }, _moveBuff);
             await UniTask.WaitForFixedUpdate(LevelResourceSharing.LevelCtk);
         }
     }

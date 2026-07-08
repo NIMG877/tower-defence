@@ -43,9 +43,10 @@ public class MCEnvironmentalDevice : MonoBehaviour, IManagerStartEnd
         private float _operationTimer;
         private Buff _hungryBuff;
 
-        private float[] _fullBuffValue = new float[2] { 0.15f, 30 };
-        private float[] _hungryBuffValue = new float[2] { -0.15f, -30 };
-        private float[] _normalBuffValue = new float[2] { 0, 0 };
+        // 0=Attack(AddPercent), 1=AttackSpeed(AddFlat)
+        private Modifier[] _fullBuffValue = new Modifier[2] { new Modifier(Attributes.Attack, ModifierOp.AddPercent, 0.15f), new Modifier(Attributes.AttackSpeed, ModifierOp.AddFlat, 30f) };
+        private Modifier[] _hungryBuffValue = new Modifier[2] { new Modifier(Attributes.Attack, ModifierOp.AddPercent, -0.15f), new Modifier(Attributes.AttackSpeed, ModifierOp.AddFlat, -30f) };
+        private Modifier[] _normalBuffValue = new Modifier[2] { new Modifier(Attributes.Attack, ModifierOp.AddPercent, 0f), new Modifier(Attributes.AttackSpeed, ModifierOp.AddFlat, 0f) };
 
         public EntityAndHungryMessage(Entity entity, float hungryValue, int type)
         {
@@ -53,7 +54,7 @@ public class MCEnvironmentalDevice : MonoBehaviour, IManagerStartEnd
             HungryValue = hungryValue;
             HungryState = type;
             _operationTimer = 1;
-            _hungryBuff = entity.buffController.CreateBuff(new BuffType[2] { BuffType.atk_delta_percent, BuffType.atkspd_delta_value }, null, "hungryBuff", _fullBuffValue, -5, true);
+            _hungryBuff = entity.buffController.CreateBuff(new Modifier[2] { new Modifier(Attributes.Attack, ModifierOp.AddPercent, 0.15f), new Modifier(Attributes.AttackSpeed, ModifierOp.AddFlat, 30f) }, null, "hungryBuff", -5, true);
         }
         public void Update()
         {
@@ -85,21 +86,21 @@ public class MCEnvironmentalDevice : MonoBehaviour, IManagerStartEnd
             }
             if (HungryValue > 100)
             {
-                if (_hungryBuff.buff_values[0] != _fullBuffValue[0])
+                if (_hungryBuff.modifiers[0].magnitude != _fullBuffValue[0].magnitude)
                 {
                     Entity.buffController.SetBuffValues(_fullBuffValue, _hungryBuff);
                 }
             }
             else if (HungryValue > 30)
             {
-                if (_hungryBuff.buff_values[0] != _normalBuffValue[0])
+                if (_hungryBuff.modifiers[0].magnitude != _normalBuffValue[0].magnitude)
                 {
                     Entity.buffController.SetBuffValues(_normalBuffValue, _hungryBuff);
                 }
             }
             else
             {
-                if (_hungryBuff.buff_values[0] != _hungryBuffValue[0])
+                if (_hungryBuff.modifiers[0].magnitude != _hungryBuffValue[0].magnitude)
                 {
                     Entity.buffController.SetBuffValues(_hungryBuffValue, _hungryBuff);
                 }

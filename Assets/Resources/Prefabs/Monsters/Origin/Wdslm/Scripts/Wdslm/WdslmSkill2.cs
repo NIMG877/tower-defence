@@ -8,8 +8,7 @@ public class WdslmSkill2 : Skill
     [SerializeField] private string _inciteDefectionAnimation;
     [SerializeField] private GameObject _skillEffect;
     private List<Entity> _privateTarget;
-    private BuffType[] _buffTypes = new BuffType[2] { BuffType.atk_delta_percent, BuffType.mhp_delta_percent };
-    private float[] _buffValues = new float[2] { -0.45f, 6.5f };
+    private Modifier[] _modifiers = new Modifier[2] { new Modifier(Attributes.Attack, ModifierOp.AddPercent, -0.45f), new Modifier(Attributes.MaxHp, ModifierOp.AddPercent, 6.5f) };
     private WdslmSkill3 _skill3;
     private AnimationOverrideHandle _animationOverride;
     public override void Initialize()
@@ -27,7 +26,7 @@ public class WdslmSkill2 : Skill
     private void InciteDefect(Entity entity)
     {
         entity.Camp = _thisEntity.Camp;
-        entity.buffController.CreateBuff(_buffTypes, null, "incite", _buffValues, -5, true);
+        entity.buffController.CreateBuff(_modifiers, null, "incite", -5, true);
         entity.buffController.AddAbnormalState(11, 2);
         entity.buffController.AddAbnormalState(11, 3);
         EntityManager.Manager.RemoveEntityFromStaticList(entity);
@@ -73,7 +72,7 @@ public class WdslmSkill2 : Skill
             float Tmgr = 5;
             float TmoveTime = 10;
             int damageType = entity.AttackBase.DamageType;
-            float damage = damageCalculate(entity.AttackBase.AttackDamageS * (1 + _buffValues[0]), Tdef, Tmgr, damageType);
+            float damage = damageCalculate(entity.AttackBase.AttackDamageS * (1 + _modifiers[0].magnitude), Tdef, Tmgr, damageType);
             float dps = damage / entity.AttackBase.BaseAttackTimeS;
             float R_damage = Mathf.Max(damageCalculate(TDamage_P, entity.Stats.DefS, 0, 0), damageCalculate(TDamage_M, 0, entity.Stats.MagicResistanceS, 1));
             float R_dps = R_damage / TATK_T;

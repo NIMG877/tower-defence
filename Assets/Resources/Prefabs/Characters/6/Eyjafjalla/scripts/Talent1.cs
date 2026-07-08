@@ -13,8 +13,7 @@ public class Talent1 : Talent
     private AnimationMachine am;
     private AttackBase ab;
     private List<Entity> _bubbles;
-    private BuffType[] _bubbleBuffs = new BuffType[2] { BuffType.phd_delta_rate, BuffType.mgd_delta_rate };
-    private float[] _bubbleValues = new float[2] { -0.995f, -0.995f };
+    private Modifier[] _bubbleModifiers = new Modifier[2] { new Modifier(Attributes.PhysicalDamageRate, ModifierOp.MulFinal, 0.005f), new Modifier(Attributes.MagicDamageRate, ModifierOp.MulFinal, 0.005f) };
     private Buff _lavaBubbleATKBuff;
     private float deltaPerBubble = 0.2f;
     private bool _skill1Open;
@@ -57,8 +56,8 @@ public class Talent1 : Talent
     {
         Entity bubble = EntityManager.Manager.SetMovableEntity(LavaBubbleID, pos, _thisEntity.Camp == 1 ? 2 : 1, 0);
         _bubbles.Add(bubble);
-        _thisEntity.buffController.SetBuffValues(new float[1] { _bubbles.Count * deltaPerBubble }, _lavaBubbleATKBuff);
-        bubble.buffController.CreateBuff(_bubbleBuffs, null, "lavaStrength", _bubbleValues, -5, false);
+        _thisEntity.buffController.SetBuffValues(new Modifier[1] { new Modifier(Attributes.Attack, ModifierOp.AddPercent, _bubbles.Count * deltaPerBubble) }, _lavaBubbleATKBuff);
+        bubble.buffController.CreateBuff(_bubbleModifiers, null, "lavaStrength", -5, false);
         bubble.OnBeforeDieAnimation += (() =>
         {
             _bubbles.Remove(bubble);
@@ -86,7 +85,7 @@ public class Talent1 : Talent
         {
             en[i].TakeDamage(_thisEntity, _thisEntity.AttackBase.AttackDamageS, 3.7f, 0, 0, 0, 0, 1, 1);
         }
-        _thisEntity.buffController.SetBuffValues(new float[1] { _bubbles.Count * deltaPerBubble }, _lavaBubbleATKBuff);
+        _thisEntity.buffController.SetBuffValues(new Modifier[1] { new Modifier(Attributes.Attack, ModifierOp.AddPercent, _bubbles.Count * deltaPerBubble) }, _lavaBubbleATKBuff);
         if (_bubbles.Count == 0)
         {
             ReleaseBubbleTarget();
@@ -98,7 +97,7 @@ public class Talent1 : Talent
         am = _thisEntity.entityAM;
         ab = _thisEntity.AttackBase;
         _bubbles = new List<Entity>();
-        _lavaBubbleATKBuff = _thisEntity.buffController.CreateBuff(new BuffType[1] { BuffType.atk_delta_percent }, null, "lavaBuff", new float[1] { 0 }, -5, true);
+        _lavaBubbleATKBuff = _thisEntity.buffController.CreateBuff(new Modifier[1] { new Modifier(Attributes.Attack, ModifierOp.AddPercent, 0f) }, null, "lavaBuff", -5, true);
         ab.OnAfterTakeDamage += ((Entity target, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType, bool isDeadly) =>
         {
             if (RandomHelper.Helper.RandomP(p))

@@ -40,7 +40,7 @@ public class HeadSeterTalent1 : Talent
                     AttackRemote = _set_d,
                 });
                 am.TrySetState(EntityState.Default, true);
-                _thisEntity.buffController.CreateBuff(new BuffType[1] { BuffType.mspeed_delta_percent }, null, "slowSpeed", new float[1] { -0.35f }, -5, false);
+                _thisEntity.buffController.CreateBuff(new Modifier[]{ new Modifier(Attributes.MoveSpeed, ModifierOp.AddPercent, -0.35f) }, null, "slowSpeed", -5, false);
                 _thisEntity.GetComponent<HeadSeterSkill1>().IsDie = true;
             }
         });

@@ -138,9 +138,9 @@ namespace MyUI
         public RectTransform BuffRT;
         private TextMeshProUGUI buffName, buffEffectName, buffEffectValue;
         private float rate = 0.5625f;
-        private Dictionary<BuffType, string> buffs = new Dictionary<BuffType, string>()
+        private Dictionary<string, string> buffs = new Dictionary<string, string>()
         {
-            {BuffType.atkminn_delta_value,"��С������" }
+            {Attributes.AttackMinNum,"��С������" }
         };
         public BuffCard(Vector2 skillCardAnchorPos, RectTransform parent, Color textColor, float width)
         {
@@ -158,15 +158,14 @@ namespace MyUI
         public void UpdateBuffCardMessage(Buff buff)
         {
             buffName.text = buff.buff_name;
-            float[] v = buff.buff_values;
-            BuffType[] t = buff.buff_types;
+            Modifier[] m = buff.modifiers;
             buffEffectName.text = null;
             buffEffectValue.text = null;
-            for (int i = 0; i < v.Length; i++)
+            for (int i = 0; i < m.Length; i++)
             {
-                buffEffectName.text += t[i].ToString();
-                buffEffectValue.text += v[i].ToString("0.000");
-                if (i < v.Length - 1)
+                buffEffectName.text += buffs.TryGetValue(m[i].attribute, out var dn) ? dn : m[i].attribute;
+                buffEffectValue.text += m[i].magnitude.ToString("0.000");
+                if (i < m.Length - 1)
                 {
                     buffEffectName.text += '\n';
                     buffEffectValue.text += '\n';
