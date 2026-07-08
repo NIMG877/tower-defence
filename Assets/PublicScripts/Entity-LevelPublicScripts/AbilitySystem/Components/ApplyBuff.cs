@@ -22,8 +22,9 @@ namespace AbilitySystem.Components
         private Func<float> _buffTime;
         private Func<bool> _toSelf;
         private Func<string> _inputTargetKey;            // blackboard key (optional)
-        private Func<BuffType[]> _types;
-        private Func<float[]> _values;
+        private Func<string[]> _attributes;
+        private Func<string[]> _ops;
+        private Func<float[]> _magnitudes;
         private Func<bool> _isWhiteList;
         private Func<string> _mode;
         // Output keys (optional). When both are set, OnTrigger appends this round's
@@ -39,8 +40,9 @@ namespace AbilitySystem.Components
         public override void OnInit(AbilityContext ctx, ParamList p)
         {
             var bb = ctx.sharedBlackboard;
-            _types  = p.GetStringArrayLazy("buffTypes",  null, bb, s => (BuffType)Enum.Parse(typeof(BuffType), s));
-            _values = p.GetFloatArrayLazy("buffValues", null, bb);
+            _attributes = p.GetStringArrayLazy<string>("attributes", null, bb);
+            _ops         = p.GetStringArrayLazy<string>("ops",        null, bb);
+            _magnitudes  = p.GetFloatArrayLazy ("magnitudes", null, bb);
             _buffId          = p.GetStringLazy("buffId",        "skill_buff", bb);
             _buffTime        = p.GetFloatLazy ("buffTime",      -10f,         bb);
             _toSelf          = p.GetBoolLazy  ("toSelf",        true,         bb);
@@ -51,10 +53,35 @@ namespace AbilitySystem.Components
             _outputBuffKey   = p.GetStringLazy("outputBuff",    "",           bb);
         }
 
+        /// <summary>
+        /// 把三 CSV（attributes/ops/magnitudes）按下标对齐构造成 Modifier[]。
+        /// 长度不一致取最短 + 一次性 warn（沿用 AttackEventValueModifier 容错模式）。
+        /// </summary>
+        private Modifier[] BuildModifiers()
+        {
+            string[] attrs = _attributes() ?? System.Array.Empty<string>();
+            string[] ops   = _ops()        ?? System.Array.Empty<string>();
+            float[]  mags  = _magnitudes() ?? System.Array.Empty<float>();
+            int len = System.Math.Min(System.Math.Min(attrs.Length, ops.Length), mags.Length);
+            if (attrs.Length != ops.Length || ops.Length != mags.Length)
+            {
+                OneShotWarn.WarnOnce("apply-buff-csv-length",
+                    $"ApplyBuff: attributes/ops/magnitudes 长度不一致 ({attrs.Length}/{ops.Length}/{mags.Length}); 取最短 {len}。");
+            }
+            var result = new Modifier[len];
+            for (int i = 0; i < len; i++)
+            {
+                ModifierOp op = (ModifierOp)System.Enum.Parse(typeof(ModifierOp), ops[i].Trim());
+                result[i] = new Modifier(attrs[i].Trim(), op, mags[i]);
+            }
+            return result;
+        }
+
         public override void OnTrigger(AbilityContext ctx)
         {
             if (ctx.entity == null) return;
-            if (_types().Length == 0) return;
+            Modifier[] modifiers = BuildModifiers();
+            if (modifiers.Length == 0) return;
 
             List<Entity> targets = ResolveTargets(ctx);
             if (targets == null) return;
@@ -87,7 +114,7 @@ namespace AbilitySystem.Components
             {
                 Entity t = targets[i];
                 if(t == null || t.buffController == null) continue;
-                Buff created = t.buffController.CreateBuff(_types(), null, _buffId(), _values(), _buffTime(), _isWhiteList());
+                Buff created = t.buffController.CreateBuff(modifiers, null, _buffId(), _buffTime(), _isWhiteList());
                 if (needWrite)
                 {
                     roundTargets.Add(t);
@@ -113,13 +140,12 @@ namespace AbilitySystem.Components
                 return;
             }
 
-            BuffType[] types = _types();
-            float[] values = _values();
-            if (types.Length != values.Length)
+            Modifier[] modifiers = BuildModifiers();
+            if (modifiers.Length == 0)
             {
                 OneShotWarn.WarnOnce(
-                    "apply-buff-aura-length",
-                    $"ApplyBuff: buffTypes/buffValues length mismatch ({types.Length}/{values.Length}); skipping aura sync.");
+                    "apply-buff-aura-empty",
+                    "ApplyBuff: aura 模式下 modifiers 为空，跳过同步。");
                 return;
             }
 
@@ -138,13 +164,13 @@ namespace AbilitySystem.Components
                 Buff tracked = FindTrackedBuff(target, oldTargets, oldBuffs);
                 if (tracked != null && target.buffController.Buffs.Contains(tracked))
                 {
-                    target.buffController.SetBuffValues(values, tracked);
+                    target.buffController.SetBuffValues(modifiers, tracked);
                     tracked.buff_time = _buffTime();
                 }
                 else
                 {
                     tracked = target.buffController.CreateBuff(
-                        types, null, _buffId(), values, _buffTime(), _isWhiteList());
+                        modifiers, null, _buffId(), _buffTime(), _isWhiteList());
                 }
 
                 nextTargets.Add(target);
