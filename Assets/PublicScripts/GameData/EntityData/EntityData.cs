@@ -31,9 +31,7 @@ public class EntityData
 
     // 角色属性（当 entity 是 "c" 类别时使用）
     public int    CharacterRarity;
-    public string CharacterInfluence;
     public int    CharacterJob;          // 0=先锋,1=近卫,...,9=_
-    public string CharacterSubJob;
 
     // 怪物属性（当 entity 是 "m" 类别时使用）
     public int    MonsterStatus;
