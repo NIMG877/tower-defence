@@ -25,51 +25,17 @@ public class EntityStats
     private AttributeStore _store;
 
     // === 基础属性 ===
-    // AttackBase/BaseAttackTimeBase：下游 AttackBase 当"原始基准"读（与聚合值 XxxS 并列），故留字段+公开。
-    // BlockOccupation/AttackNum/AttackMinNum：XxxS = _xxxBase + (int)GetFinal(同 attr)，字段参与聚合（见对应 property）。
-    // Dodge 两项：store base=0（modifier 存未命中概率），固有闪避留字段、在 PhysicalDodgeS/MagicDodgeS 合并。
-    // Defense/MagicResistance/MaxHp/MoveSpeed 的基础值直接经 SetBase 进 store，XxxS 全读 store，不再留字段。
-    // 全字段接入（2026-07-09）：EntityData 所有 int/float/bool/enum 均接 store。非 float 走强转——
-    // bool=0/1（AddFlat，读侧 >0），enum=(int)（AddFlat，读侧强转回枚举）。下游读方逐步从 data.X 迁到 XxxS。
+    // 读侧统一收口：所有数值属性经 store（GetFinal），XxxS 薄壳只做 clamp/强转/复合公式。
+    // base 一律 SetBase 进 store，不再用 _xxxBase 字段参与加法（避免 base 算两次）。
+    // 例外（仍留字段）：
+    //   _physicalDodgeBase/_magicDodgeBase：Dodge 固有闪避，参与薄壳 1-(1-固有)*Final（store base=1 是"未命中乘数"）。
+    //   _attackNumBase：仅用于 <0 哨兵判断（AttackNum<0 表示无限攻击次数），不参与加法。
+    //   _attackBase/_baseAttackTimeBase：下游 AttackBase 读原始基准，故留字段+公开。
     private float _physicalDodgeBase;
     private float _magicDodgeBase;
-    private int _blockOccupationBase;
-    private int _tauntLevelBase;
+    private int _attackNumBase;
     private float _attackBase;
     private float _baseAttackTimeBase;
-    private int _attackNumBase;
-    private int _attackMinNumBase;
-
-    // --- 全字段接入新增 base（仅供 XxxS 聚合，下游尚未迁移） ---
-    private int _defaultCampBase;
-    private int _characterRarityBase;
-    private int _characterJobBase;
-    private int _monsterStatusBase;
-    private int _monsterIsPrimaryBase;
-    private int _monsterCountOperatedBase;
-    private int _monsterLevelHpConsumeBase;
-    private int _damageTypeBase;
-    private int _targetPriorityBase;
-    private int _stunImmuneBase;
-    private int _silenceImmuneBase;
-    private int _sleepImmuneBase;
-    private int _frozenImmuneBase;
-    private int _levitateImmuneBase;
-    private int _disarmedCombatImmuneBase;
-    private int _fearedImmuneBase;
-    private int _isStaticBase;
-    private int _costBase;
-    private int _canCallBackBase;
-    private int _needsDirectionSelectionBase;
-    private int _canSetTypeBase;
-    private float _respawnTimeBase;
-    private int _respawnStrategyBase;
-    private int _canRespawnBase;
-    private float _respawnCostUpBase;
-    private int _maxOccupyCountBase;
-    private int _massLevelBase;
-    private int _moveMethodBase;
-    private float _visionRadiusBase;
 
     // === 状态 ===
     private float _currentHpRate;
@@ -95,65 +61,65 @@ public class EntityStats
     // === 基础属性读（仅暴露下游真正需要的原始基准值；其余经 store 聚合） ===
     public float AttackBase => _attackBase;
     public float BaseAttackTimeBase => _baseAttackTimeBase;
-    // TauntLevel：原"无 store 入口"，2026-07-09 全字段接入后改读 store（base + (int)GetFinal）。无 clamp（语义值）。
-    public int TauntLevel => _tauntLevelBase + (int)_store.GetFinal("TauntLevel");
+    // TauntLevel：纯读 store（base 已 SetBase，无 clamp，语义值）。
+    public int TauntLevel => (int)_store.GetFinal("TauntLevel");
 
     // === 计算属性（computed property：_store.GetFinal，O(1) 实时计算） ===
     // 流水线末段，无中间储存；store 置脏即影响下次读取，调用方不可能读到陈旧值。
+    // 薄壳只做 clamp/强转/复合公式，base+mod 全在 store 内。
     public float MaxHpS => Math.Max(0.001f, _store.GetFinal("MaxHp"));
     public float DefS => Math.Max(0, _store.GetFinal("Defense"));
     public float MagicResistanceS => Math.Max(0, _store.GetFinal("MagicResistance"));
     public float PhysicalDodgeS => 1 - (1 - _physicalDodgeBase) * _store.GetFinal("PhysicalDodge");
     public float MagicDodgeS => 1 - (1 - _magicDodgeBase) * _store.GetFinal("MagicDodge");
-    public int BlockOccupationS => Math.Max(0, _blockOccupationBase + (int)_store.GetFinal("BlockOccupation"));
+    public int BlockOccupationS => Math.Max(0, (int)_store.GetFinal("BlockOccupation"));
     public float AttackS => Math.Max(0, _store.GetFinal("Attack"));
     public float BaseAttackTimeS => Math.Max(0.001f, _store.GetFinal("BaseAttackTime") * 100 / Math.Max(1, _store.GetFinal("AttackSpeed")));
     public int AttackNumS
     {
         get
         {
+            // _attackNumBase 仅作 <0 哨兵（无限攻击次数），不参与加法；base+mod 全在 store。
             if (_attackNumBase >= 0)
-                return Math.Max(0, _attackNumBase + (int)_store.GetFinal("AttackNum"));
+                return Math.Max(0, (int)_store.GetFinal("AttackNum"));
             else
                 return -1;
         }
     }
-    public int AttackMinNumS => Math.Max(0, _attackMinNumBase + (int)_store.GetFinal("AttackMinNum"));
+    public int AttackMinNumS => Math.Max(0, (int)_store.GetFinal("AttackMinNum"));
     public float MoveSpeedS => Math.Max(0.01f, _store.GetFinal("MoveSpeed"));
 
     // === 全字段接入计算属性（下游读方逐步迁移到此） ===
-    // int：base + (int)GetFinal。float：直接 GetFinal（base 已 SetBase 进 store，故此处也走 base+mod）。
-    // bool：GetFinal > 0（base 0/1，modifier AddFlat 叠加）。
-    // enum：底层 int 累加后强转回枚举（TargetPriority→OrderLogic）。
-    public int DefaultCampS => _defaultCampBase + (int)_store.GetFinal("DefaultCamp");
-    public int CharacterRarityS => _characterRarityBase + (int)_store.GetFinal("CharacterRarity");
-    public int CharacterJobS => _characterJobBase + (int)_store.GetFinal("CharacterJob");
-    public int MonsterStatusS => _monsterStatusBase + (int)_store.GetFinal("MonsterStatus");
-    public bool MonsterIsPrimaryS => _monsterIsPrimaryBase + (int)_store.GetFinal("MonsterIsPrimary") > 0;
-    public bool MonsterCountOperatedS => _monsterCountOperatedBase + (int)_store.GetFinal("MonsterCountOperated") > 0;
-    public int MonsterLevelHpConsumeS => _monsterLevelHpConsumeBase + (int)_store.GetFinal("MonsterLevelHpConsume");
-    public int DamageTypeS => _damageTypeBase + (int)_store.GetFinal("DamageType");
-    public OrderLogic TargetPriorityS => (OrderLogic)(_targetPriorityBase + (int)_store.GetFinal("TargetPriority"));
-    public bool StunImmuneS => _stunImmuneBase + (int)_store.GetFinal("StunImmune") > 0;
-    public bool SilenceImmuneS => _silenceImmuneBase + (int)_store.GetFinal("SilenceImmune") > 0;
-    public bool SleepImmuneS => _sleepImmuneBase + (int)_store.GetFinal("SleepImmune") > 0;
-    public bool FrozenImmuneS => _frozenImmuneBase + (int)_store.GetFinal("FrozenImmune") > 0;
-    public bool LevitateImmuneS => _levitateImmuneBase + (int)_store.GetFinal("LevitateImmune") > 0;
-    public bool DisarmedCombatImmuneS => _disarmedCombatImmuneBase + (int)_store.GetFinal("DisarmedCombatImmune") > 0;
-    public bool FearedImmuneS => _fearedImmuneBase + (int)_store.GetFinal("FearedImmune") > 0;
-    public bool IsStaticS => _isStaticBase + (int)_store.GetFinal("IsStatic") > 0;
-    public int CostS => _costBase + (int)_store.GetFinal("Cost");
-    public bool CanCallBackS => _canCallBackBase + (int)_store.GetFinal("CanCallBack") > 0;
-    public bool NeedsDirectionSelectionS => _needsDirectionSelectionBase + (int)_store.GetFinal("NeedsDirectionSelection") > 0;
-    public int CanSetTypeS => _canSetTypeBase + (int)_store.GetFinal("CanSetType");
-    public float RespawnTimeS => _respawnTimeBase + _store.GetFinal("RespawnTime");
-    public int RespawnStrategyS => _respawnStrategyBase + (int)_store.GetFinal("RespawnStrategy");
-    public bool CanRespawnS => _canRespawnBase + (int)_store.GetFinal("CanRespawn") > 0;
-    public float RespawnCostUpS => _respawnCostUpBase + _store.GetFinal("RespawnCostUp");
-    public int MaxOccupyCountS => _maxOccupyCountBase + (int)_store.GetFinal("MaxOccupyCount");
-    public int MassLevelS => _massLevelBase + (int)_store.GetFinal("MassLevel");
-    public int MoveMethodS => _moveMethodBase + (int)_store.GetFinal("MoveMethod");
-    public float VisionRadiusS => _visionRadiusBase + _store.GetFinal("VisionRadius");
+    // base+mod 全在 store，薄壳只做强转（int/bool/enum）。bool 读 GetFinal>0，enum 强转回枚举。
+    public int DefaultCampS => (int)_store.GetFinal("DefaultCamp");
+    public int CharacterRarityS => (int)_store.GetFinal("CharacterRarity");
+    public int CharacterJobS => (int)_store.GetFinal("CharacterJob");
+    public int MonsterStatusS => (int)_store.GetFinal("MonsterStatus");
+    public bool MonsterIsPrimaryS => _store.GetFinal("MonsterIsPrimary") > 0;
+    public bool MonsterCountOperatedS => _store.GetFinal("MonsterCountOperated") > 0;
+    public int MonsterLevelHpConsumeS => (int)_store.GetFinal("MonsterLevelHpConsume");
+    public int DamageTypeS => (int)_store.GetFinal("DamageType");
+    public OrderLogic TargetPriorityS => (OrderLogic)(int)_store.GetFinal("TargetPriority");
+    public bool StunImmuneS => _store.GetFinal("StunImmune") > 0;
+    public bool SilenceImmuneS => _store.GetFinal("SilenceImmune") > 0;
+    public bool SleepImmuneS => _store.GetFinal("SleepImmune") > 0;
+    public bool FrozenImmuneS => _store.GetFinal("FrozenImmune") > 0;
+    public bool LevitateImmuneS => _store.GetFinal("LevitateImmune") > 0;
+    public bool DisarmedCombatImmuneS => _store.GetFinal("DisarmedCombatImmune") > 0;
+    public bool FearedImmuneS => _store.GetFinal("FearedImmune") > 0;
+    public bool IsStaticS => _store.GetFinal("IsStatic") > 0;
+    public int CostS => (int)_store.GetFinal("Cost");
+    public bool CanCallBackS => _store.GetFinal("CanCallBack") > 0;
+    public bool NeedsDirectionSelectionS => _store.GetFinal("NeedsDirectionSelection") > 0;
+    public int CanSetTypeS => (int)_store.GetFinal("CanSetType");
+    public float RespawnTimeS => _store.GetFinal("RespawnTime");
+    public int RespawnStrategyS => (int)_store.GetFinal("RespawnStrategy");
+    public bool CanRespawnS => _store.GetFinal("CanRespawn") > 0;
+    public float RespawnCostUpS => _store.GetFinal("RespawnCostUp");
+    public int MaxOccupyCountS => (int)_store.GetFinal("MaxOccupyCount");
+    public int MassLevelS => (int)_store.GetFinal("MassLevel");
+    public int MoveMethodS => (int)_store.GetFinal("MoveMethod");
+    public float VisionRadiusS => _store.GetFinal("VisionRadius");
 
     // === HP ===
     public float CurrentHp => _currentHpRate * MaxHpS;
@@ -196,99 +162,66 @@ public class EntityStats
         // 与战斗 buff 同机制（区别仅在生命周期），而非并入 SetBase（并入会抹掉"固有基础 vs 环境修正"的区分）。
         // TODO(level-base-buffs): 关卡环境基础 buff 落地后，在此作为永久 group AddFlat/AddPercent 即可。
 
-        // 写入仍需字段的 base（XxxS 或下游会读原始基准）；Defense/MagicResistance/MaxHp/MoveSpeed 的基础值直接进 store。
+        // 仍需字段的 base（Dodge 固有值参与薄壳复合公式；AttackNum 仅作 <0 哨兵；Attack/BaseAttackTime 下游读原始基准）。
         _physicalDodgeBase = data.PhysicalDodge;
         _magicDodgeBase = data.MagicDodge;
-        _blockOccupationBase = data.BlockOccupation;
-        _tauntLevelBase = data.TauntLevel;
+        _attackNumBase = data.AttackNum;
         _attackBase = data.Attack;
         _baseAttackTimeBase = data.BaseAttackTime;
-        _attackNumBase = data.AttackNum;
-        _attackMinNumBase = 0;  // EntityData 未暴露此字段，留 0 兼容（无 atkminn_delta_value 数据源时恒为 0）
-
-        // === 全字段接入新增 base（bool 存 0/1，enum 存 (int)） ===
-        _defaultCampBase = data.DefaultCamp;
-        _characterRarityBase = data.CharacterRarity;
-        _characterJobBase = data.CharacterJob;
-        _monsterStatusBase = data.MonsterStatus;
-        _monsterIsPrimaryBase = data.MonsterIsPrimary ? 1 : 0;
-        _monsterCountOperatedBase = data.MonsterCountOperated ? 1 : 0;
-        _monsterLevelHpConsumeBase = data.MonsterLevelHpConsume;
-        _damageTypeBase = data.DamageType;
-        _targetPriorityBase = (int)data.TargetPriority;
-        _stunImmuneBase = data.StunImmune ? 1 : 0;
-        _silenceImmuneBase = data.SilenceImmune ? 1 : 0;
-        _sleepImmuneBase = data.SleepImmune ? 1 : 0;
-        _frozenImmuneBase = data.FrozenImmune ? 1 : 0;
-        _levitateImmuneBase = data.LevitateImmune ? 1 : 0;
-        _disarmedCombatImmuneBase = data.DisarmedCombatImmune ? 1 : 0;
-        _fearedImmuneBase = data.FearedImmune ? 1 : 0;
-        _isStaticBase = data.IsStatic ? 1 : 0;
-        _costBase = data.Cost;
-        _canCallBackBase = data.CanCallBack ? 1 : 0;
-        _needsDirectionSelectionBase = data.NeedsDirectionSelection ? 1 : 0;
-        _canSetTypeBase = data.CanSetType;
-        _respawnTimeBase = data.RespawnTime;
-        _respawnStrategyBase = data.RespawnStrategy;
-        _canRespawnBase = data.CanRespawn ? 1 : 0;
-        _respawnCostUpBase = data.RespawnCostUp;
-        _maxOccupyCountBase = data.MaxOccupyCount;
-        _massLevelBase = data.MassLevel;
-        _moveMethodBase = data.MoveMethod;
-        _visionRadiusBase = data.VisionRadius;
 
         // === 注入基础值到 AttributeStore ===
+        // 所有数值属性的 base 一律进 store（含 bool 转 0/1、enum 转 (int)），XxxS 薄壳只读 GetFinal。
         // AttackSpeed base=100（"100 攻速=正常速度"，设计常量，非来自 EntityData）。
         // HpRecover base=0（纯增量属性）。Dodge/Rate 类属性 base 见下方说明：
-        //   Dodge ：modifier 存未命中概率(1-旧值)，基础闪避在下游 _xxxDodgeBase 体现。
+        //   Dodge base=1：Final 是"未命中乘数"（无 buff=1），薄壳 1-(1-固有)*Final 还原闪避。
         //   DamageRate base=1：无减免 buff 时 Final=1，伤害不变。
+        // AttackMinNum base=0：EntityData 未暴露此字段，留 0 兼容。
         _store.SetBase("MaxHp", data.MaxHp);
         _store.SetBase("Defense", data.Defense);
         _store.SetBase("MagicResistance", data.MagicResistance);
-        _store.SetBase("PhysicalDodge", 0f);
-        _store.SetBase("MagicDodge", 0f);
-        _store.SetBase("BlockOccupation", _blockOccupationBase);
-        _store.SetBase("Attack", _attackBase);
-        _store.SetBase("BaseAttackTime", _baseAttackTimeBase);
+        _store.SetBase("PhysicalDodge", 1f);
+        _store.SetBase("MagicDodge", 1f);
+        _store.SetBase("BlockOccupation", data.BlockOccupation);
+        _store.SetBase("Attack", data.Attack);
+        _store.SetBase("BaseAttackTime", data.BaseAttackTime);
         _store.SetBase("AttackSpeed", 100f);
-        _store.SetBase("AttackNum", _attackNumBase);
-        _store.SetBase("AttackMinNum", _attackMinNumBase);
+        _store.SetBase("AttackNum", data.AttackNum);
+        _store.SetBase("AttackMinNum", 0f);
         _store.SetBase("MoveSpeed", data.MoveSpeed);
         _store.SetBase("HpRecover", 0f);
         _store.SetBase("PhysicalDamageRate", 1f);
         _store.SetBase("MagicDamageRate", 1f);
-        // === 全字段接入：以下属性 base = 字段值（含 bool/enum 已转 0/1/int） ===
-        // TauntLevel base = data 值（非 0），modifier AddFlat 叠加。
-        _store.SetBase("TauntLevel", _tauntLevelBase);
-        _store.SetBase("DefaultCamp", _defaultCampBase);
-        _store.SetBase("CharacterRarity", _characterRarityBase);
-        _store.SetBase("CharacterJob", _characterJobBase);
-        _store.SetBase("MonsterStatus", _monsterStatusBase);
-        _store.SetBase("MonsterIsPrimary", _monsterIsPrimaryBase);
-        _store.SetBase("MonsterCountOperated", _monsterCountOperatedBase);
-        _store.SetBase("MonsterLevelHpConsume", _monsterLevelHpConsumeBase);
-        _store.SetBase("DamageType", _damageTypeBase);
-        _store.SetBase("TargetPriority", _targetPriorityBase);
-        _store.SetBase("StunImmune", _stunImmuneBase);
-        _store.SetBase("SilenceImmune", _silenceImmuneBase);
-        _store.SetBase("SleepImmune", _sleepImmuneBase);
-        _store.SetBase("FrozenImmune", _frozenImmuneBase);
-        _store.SetBase("LevitateImmune", _levitateImmuneBase);
-        _store.SetBase("DisarmedCombatImmune", _disarmedCombatImmuneBase);
-        _store.SetBase("FearedImmune", _fearedImmuneBase);
-        _store.SetBase("IsStatic", _isStaticBase);
-        _store.SetBase("Cost", _costBase);
-        _store.SetBase("CanCallBack", _canCallBackBase);
-        _store.SetBase("NeedsDirectionSelection", _needsDirectionSelectionBase);
-        _store.SetBase("CanSetType", _canSetTypeBase);
-        _store.SetBase("RespawnTime", _respawnTimeBase);
-        _store.SetBase("RespawnStrategy", _respawnStrategyBase);
-        _store.SetBase("CanRespawn", _canRespawnBase);
-        _store.SetBase("RespawnCostUp", _respawnCostUpBase);
-        _store.SetBase("MaxOccupyCount", _maxOccupyCountBase);
-        _store.SetBase("MassLevel", _massLevelBase);
-        _store.SetBase("MoveMethod", _moveMethodBase);
-        _store.SetBase("VisionRadius", _visionRadiusBase);
+        // === 全字段接入：以下 base = data 值（含 bool/enum 已转 0/1/int） ===
+        _store.SetBase("TauntLevel", data.TauntLevel);
+        _store.SetBase("DefaultCamp", data.DefaultCamp);
+        _store.SetBase("CharacterRarity", data.CharacterRarity);
+        _store.SetBase("CharacterJob", data.CharacterJob);
+        _store.SetBase("MonsterStatus", data.MonsterStatus);
+        _store.SetBase("MonsterIsPrimary", data.MonsterIsPrimary ? 1f : 0f);
+        _store.SetBase("MonsterCountOperated", data.MonsterCountOperated ? 1f : 0f);
+        _store.SetBase("MonsterLevelHpConsume", data.MonsterLevelHpConsume);
+        _store.SetBase("DamageType", data.DamageType);
+        _store.SetBase("TargetPriority", (int)data.TargetPriority);
+        _store.SetBase("StunImmune", data.StunImmune ? 1f : 0f);
+        _store.SetBase("SilenceImmune", data.SilenceImmune ? 1f : 0f);
+        _store.SetBase("SleepImmune", data.SleepImmune ? 1f : 0f);
+        _store.SetBase("FrozenImmune", data.FrozenImmune ? 1f : 0f);
+        _store.SetBase("LevitateImmune", data.LevitateImmune ? 1f : 0f);
+        _store.SetBase("DisarmedCombatImmune", data.DisarmedCombatImmune ? 1f : 0f);
+        _store.SetBase("FearedImmune", data.FearedImmune ? 1f : 0f);
+        _store.SetBase("IsStatic", data.IsStatic ? 1f : 0f);
+        _store.SetBase("Cost", data.Cost);
+        _store.SetBase("CanCallBack", data.CanCallBack ? 1f : 0f);
+        _store.SetBase("NeedsDirectionSelection", data.NeedsDirectionSelection ? 1f : 0f);
+        _store.SetBase("CanSetType", data.CanSetType);
+        _store.SetBase("RespawnTime", data.RespawnTime);
+        _store.SetBase("RespawnStrategy", data.RespawnStrategy);
+        _store.SetBase("CanRespawn", data.CanRespawn ? 1f : 0f);
+        _store.SetBase("RespawnCostUp", data.RespawnCostUp);
+        _store.SetBase("MaxOccupyCount", data.MaxOccupyCount);
+        _store.SetBase("MassLevel", data.MassLevel);
+        _store.SetBase("MoveMethod", data.MoveMethod);
+        _store.SetBase("VisionRadius", data.VisionRadius);
     }
 
     // === HP 自然恢复（原 Entity.FixedUpdate 中 current_hp_rate < 1 分支） ===
