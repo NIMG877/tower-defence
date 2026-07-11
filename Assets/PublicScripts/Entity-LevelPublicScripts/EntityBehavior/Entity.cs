@@ -130,10 +130,6 @@ public class Entity : MonoBehaviour, IPoolOperation
             AudioManager.Manager.PlayAudio("enemy_die", 1, false, false);
         }
     }
-    public void HPUpdate()
-    {
-        Stats.CheckDeath();
-    }
     /// <summary>
     /// 设置朝向
     /// </summary>
