@@ -355,11 +355,11 @@ public class BuffController : MonoBehaviour, IPoolOperation
                 {
                     if (_thisEntity.Stats.CurrentHp - 1 > _dotDatas[i].Damage)
                     {
-                        _thisEntity.TakeDamage(null, _dotDatas[i].Damage, 1, 0, 0, 0, 0, _dotDatas[i].DamageType, 2);
+                        _thisEntity.Stats.ApplyDamage(null, _dotDatas[i].Damage, 1, 0, 0, 0, 0, _dotDatas[i].DamageType, 2);
                     }
                     else if (_thisEntity.Stats.CurrentHp > 1)
                     {
-                        _thisEntity.TakeDamage(null, _thisEntity.Stats.CurrentHp - 1, 1, 0, 0, 0, 0, _dotDatas[i].DamageType, 2);
+                        _thisEntity.Stats.ApplyDamage(null, _thisEntity.Stats.CurrentHp - 1, 1, 0, 0, 0, 0, _dotDatas[i].DamageType, 2);
                     }
                     _dotDatas[i].Timer = _dotDatas[i].Frequency - Time.fixedDeltaTime;
                 }

@@ -310,7 +310,7 @@ public class EntityStats
         else
         {
             _currentHpRate = Math.Min(1, _currentHpRate + finalDamage / MaxHpS);
-            LevelMessagePanel.Panel.ShowText(_entity.EntityPosition, 1, (int)finalDamage);
+            LevelMessagePanel.Panel.ShowText(_entity.Movement.Position, 1, (int)finalDamage);
             return false;
         }
     }

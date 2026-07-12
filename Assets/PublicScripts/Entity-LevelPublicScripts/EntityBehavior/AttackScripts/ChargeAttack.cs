@@ -143,20 +143,20 @@ public class ChargeAttack : AttackBase
 
         for (int i = 0; i < consumedChargeCount; i++)
         {
-            new Bullet(onBeforeTakeDamage + OnBeforeChargeTakeDamage, onAfterTakeDamage + OnAfterChargeTakeDamage, null, _chargeEffectData.BulletData, _thisEntity, attackTarget, Vector2.zero, GetChargeSpawnPosition(i), AttackDamageS, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, 0);
+            new Bullet(onBeforeTakeDamage + OnBeforeChargeTakeDamage, onAfterTakeDamage + OnAfterChargeTakeDamage, null, _chargeEffectData.BulletData, _thisEntity, attackTarget, Vector2.zero, GetChargeSpawnPosition(i), _thisEntity.Stats.AttackS, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, 0);
         }
         RefreshChargeEffects();
 
         if (attackEffectData.BulletData.BulletPrefab == null)
         {
             onBeforeTakeDamage?.Invoke(attackTarget, ref multiplyer, ref defPenetrate, ref mgrPenetrate, ref defPenetrate_value, ref mgrPenetrate_value, ref damageType, 0);
-            bool isDeadly = attackTarget.TakeDamage(_thisEntity, AttackDamageS, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, 0);
+            bool isDeadly = attackTarget.Stats.ApplyDamage(_thisEntity, _thisEntity.Stats.AttackS, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, 0);
             onAfterTakeDamage?.Invoke(attackTarget, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, 0, isDeadly);
             return isDeadly;
         }
         else
         {
-            new Bullet(onBeforeTakeDamage, onAfterTakeDamage, null, attackEffectData.BulletData, _thisEntity, attackTarget, Vector2.zero, attackEffectData.BulletSpawnTransform.position, AttackDamageS, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, 0);
+            new Bullet(onBeforeTakeDamage, onAfterTakeDamage, null, attackEffectData.BulletData, _thisEntity, attackTarget, Vector2.zero, attackEffectData.BulletSpawnTransform.position, _thisEntity.Stats.AttackS, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, 0);
             return false;
         }
     }

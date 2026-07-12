@@ -72,8 +72,8 @@ public class WdslmSkill2 : Skill
             float Tmgr = 5;
             float TmoveTime = 10;
             int damageType = entity.AttackBase.DamageType;
-            float damage = damageCalculate(entity.AttackBase.AttackDamageS * (1 + _modifiers[0].magnitude), Tdef, Tmgr, damageType);
-            float dps = damage / entity.AttackBase.BaseAttackTimeS;
+            float damage = damageCalculate(entity.Stats.AttackS * (1 + _modifiers[0].magnitude), Tdef, Tmgr, damageType);
+            float dps = damage / entity.Stats.BaseAttackTimeS;
             float R_damage = Mathf.Max(damageCalculate(TDamage_P, entity.Stats.DefS, 0, 0), damageCalculate(TDamage_M, 0, entity.Stats.MagicResistanceS, 1));
             float R_dps = R_damage / TATK_T;
             float atkp = entity.Vision.Range.Length / (Thp * entity.Vision.Range.Length / dps + TmoveTime);
@@ -95,7 +95,7 @@ public class WdslmSkill2 : Skill
                 maxIndex = i;
         }
         _thisEntity.AttackBase.TryToAttack(new Entity[1] { _privateTarget[maxIndex] }, true, false);
-        Destroy(Instantiate(_skillEffect, _privateTarget[maxIndex].EntityPosition, Quaternion.identity, _privateTarget[maxIndex].transform), 5);
+        Destroy(Instantiate(_skillEffect, _privateTarget[maxIndex].Movement.Position, Quaternion.identity, _privateTarget[maxIndex].transform), 5);
         _skill3.SkilllRecoverForbid(false);
         SkilllRecoverForbid(true);
         _thisEntity.AttackBase.OnBeforeAttack += OnBeforeSkillAttack;

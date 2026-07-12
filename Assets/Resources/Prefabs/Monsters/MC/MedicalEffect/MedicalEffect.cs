@@ -79,7 +79,7 @@ public class MedicalEffect
                 mainModule = _medicalEffect_abhere_burst.GetComponent<ParticleSystem>().main;
                 mainModule.startColor = new ParticleSystem.MinMaxGradient(GetMedicalEffectColor(1));
                 Object.Destroy(Object.Instantiate(_medicalEffect_abhere_burst, targetEntity.transform.position, Quaternion.identity), 1.2f);
-                targetEntity.TakeDamage(originEntity, level * 200, 1, 0, 0, 0, 0, 3, 1);
+                targetEntity.Stats.ApplyDamage(originEntity, level * 200, 1, 0, 0, 0, 0, 3, 1);
                 break;
             case 2:
                 mainModule = _medicalEffect_abhere_stay.GetComponent<ParticleSystem>().main;
@@ -90,7 +90,7 @@ public class MedicalEffect
                 mainModule = _medicalEffect_abhere_burst.GetComponent<ParticleSystem>().main;
                 mainModule.startColor = new ParticleSystem.MinMaxGradient(GetMedicalEffectColor(3));
                 Object.Destroy(Object.Instantiate(_medicalEffect_abhere_burst, targetEntity.transform.position, Quaternion.identity), 1.2f);
-                targetEntity.TakeDamage(originEntity, level * 200, 1, 0, 0, 0, 0, 1, 1);
+                targetEntity.Stats.ApplyDamage(originEntity, level * 200, 1, 0, 0, 0, 0, 1, 1);
                 break;
             case 4:
                 break;

@@ -53,7 +53,7 @@ public class EntityVision
         get => _range;
         set => _range = MapDataManager.Manager.RangeCaculator(
             value,
-            ((int)(_entity.EntityPosition.x + 0.5), (int)(_entity.EntityPosition.y + 0.5)),
+            ((int)(_entity.Movement.Position.x + 0.5), (int)(_entity.Movement.Position.y + 0.5)),
             _orientation);
     }
     public float Radius => _radius;

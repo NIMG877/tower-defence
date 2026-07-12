@@ -52,13 +52,13 @@ public class WitherAttack : AttackBase
         if (attackEffectData.BulletData.BulletPrefab == null)
         {
             onBeforeTakeDamage?.Invoke(_thisEntity, ref multiplyer, ref defPenetrate, ref mgrPenetrate, ref defPenetrate_value, ref mgrPenetrate_value, ref damageType, 0);
-            bool isDeadly = attackTarget.TakeDamage(_thisEntity, AttackDamageS, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, 0);
+            bool isDeadly = attackTarget.Stats.ApplyDamage(_thisEntity, _thisEntity.Stats.AttackS, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, 0);
             onAfterTakeDamage?.Invoke(_thisEntity, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, 0, isDeadly);
             return isDeadly;
         }
         else
         {
-            new Bullet(onBeforeTakeDamage, onAfterTakeDamage, null, attackEffectData.BulletData, _thisEntity, attackTarget, Vector2.zero, _heads[_currentNum++].position, AttackDamageS, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, 0);
+            new Bullet(onBeforeTakeDamage, onAfterTakeDamage, null, attackEffectData.BulletData, _thisEntity, attackTarget, Vector2.zero, _heads[_currentNum++].position, _thisEntity.Stats.AttackS, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, 0);
             return false;
         }
     }

@@ -40,37 +40,37 @@ public class WitherTalent2 : Talent
             float eneityR = EntityManager.EntityR;
             for (int i = 0; i < targets.Count; i++)
             {
-                float r = Vector2.Distance(targets[i].EntityPosition, _thisEntity.Movement.Position);
+                float r = Vector2.Distance(targets[i].Movement.Position, _thisEntity.Movement.Position);
                 if (r <= eneityR)
                 {
-                    targets[i].TakeDamage(_thisEntity, _thisEntity.AttackBase.AttackDamageS, 5, 0, 0, 0, 0, 0, 1);
+                    targets[i].Stats.ApplyDamage(_thisEntity, _thisEntity.Stats.AttackS, 5, 0, 0, 0, 0, 0, 1);
                     if (targets[i].MoveBase)
                     {
-                        targets[i].MoveBase.TryToAddImpulse((targets[i].EntityPosition - _thisEntity.Movement.Position).normalized, 5);
+                        targets[i].MoveBase.TryToAddImpulse((targets[i].Movement.Position - _thisEntity.Movement.Position).normalized, 5);
                     }
                 }
                 else if (r <= 2 * eneityR)
                 {
-                    targets[i].TakeDamage(_thisEntity, _thisEntity.AttackBase.AttackDamageS, 4, 0, 0, 0, 0, 0, 1);
+                    targets[i].Stats.ApplyDamage(_thisEntity, _thisEntity.Stats.AttackS, 4, 0, 0, 0, 0, 0, 1);
                     if (targets[i].MoveBase)
                     {
-                        targets[i].MoveBase.TryToAddImpulse((targets[i].EntityPosition - _thisEntity.Movement.Position).normalized, 4);
+                        targets[i].MoveBase.TryToAddImpulse((targets[i].Movement.Position - _thisEntity.Movement.Position).normalized, 4);
                     }
                 }
                 else if (r <= 1.414 + eneityR)
                 {
-                    targets[i].TakeDamage(_thisEntity, _thisEntity.AttackBase.AttackDamageS, 3, 0, 0, 0, 0, 0, 1);
+                    targets[i].Stats.ApplyDamage(_thisEntity, _thisEntity.Stats.AttackS, 3, 0, 0, 0, 0, 0, 1);
                     if (targets[i].MoveBase)
                     {
-                        targets[i].MoveBase.TryToAddImpulse((targets[i].EntityPosition - _thisEntity.Movement.Position).normalized, 3);
+                        targets[i].MoveBase.TryToAddImpulse((targets[i].Movement.Position - _thisEntity.Movement.Position).normalized, 3);
                     }
                 }
                 else
                 {
-                    targets[i].TakeDamage(_thisEntity, _thisEntity.AttackBase.AttackDamageS, 2, 0, 0, 0, 0, 0, 1);
+                    targets[i].Stats.ApplyDamage(_thisEntity, _thisEntity.Stats.AttackS, 2, 0, 0, 0, 0, 0, 1);
                     if (targets[i].MoveBase)
                     {
-                        targets[i].MoveBase.TryToAddImpulse((targets[i].EntityPosition - _thisEntity.Movement.Position).normalized, 2);
+                        targets[i].MoveBase.TryToAddImpulse((targets[i].Movement.Position - _thisEntity.Movement.Position).normalized, 2);
                     }
                 }
             }

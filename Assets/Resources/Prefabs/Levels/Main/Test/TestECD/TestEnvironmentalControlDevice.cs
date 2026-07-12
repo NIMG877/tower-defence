@@ -104,7 +104,7 @@ public class TestEnvironmentalControlDevice : MonoBehaviour, IManagerStartEnd
             entities.AddRange(_entityManager.EntitySelector_Range(range, 2, false, 0.5f, false));
             for (int i = 0; i < entities.Count; i++)
             {
-                entities[i].TakeDamage(null, 3000, 1, 0, 0, 0, 0, 2, 0);
+                entities[i].Stats.ApplyDamage(null, 3000, 1, 0, 0, 0, 0, 2, 0);
             }
             _currentSp = 0;
         }

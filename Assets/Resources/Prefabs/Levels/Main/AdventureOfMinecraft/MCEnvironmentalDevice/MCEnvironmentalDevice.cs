@@ -67,7 +67,7 @@ public class MCEnvironmentalDevice : MonoBehaviour, IManagerStartEnd
                 {
                     if (Entity.Stats.CurrentHpRate < 1)
                     {
-                        Entity.TakeDamage(null, 200, 1, 0, 0, 0, 0, 3, 2);
+                        Entity.Stats.ApplyDamage(null, 200, 1, 0, 0, 0, 0, 3, 2);
                         HungryValue -= 2;
                     }
                 }
@@ -75,13 +75,13 @@ public class MCEnvironmentalDevice : MonoBehaviour, IManagerStartEnd
                 {
                     if (Entity.Stats.CurrentHpRate < 1)
                     {
-                        Entity.TakeDamage(null, 40, 1, 0, 0, 0, 0, 3, 2);
+                        Entity.Stats.ApplyDamage(null, 40, 1, 0, 0, 0, 0, 3, 2);
                         HungryValue -= 0.4f;
                     }
                 }
                 else if (HungryValue == 0)
                 {
-                    Entity.TakeDamage(null, 50, 1, 0, 0, 0, 0, 2, 2);
+                    Entity.Stats.ApplyDamage(null, 50, 1, 0, 0, 0, 0, 2, 2);
                 }
             }
             if (HungryValue > 100)

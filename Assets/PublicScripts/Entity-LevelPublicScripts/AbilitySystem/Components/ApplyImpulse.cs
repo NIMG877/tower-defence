@@ -31,7 +31,7 @@ namespace AbilitySystem.Components
                 Entity target = targets[i];
                 if (target == null || target.MoveBase == null || !seen.Add(target)) continue;
 
-                Vector2 direction = target.EntityPosition - origin.EntityPosition;
+                Vector2 direction = target.Movement.Position - origin.Movement.Position;
                 if (direction.sqrMagnitude <= 0f) continue;
                 target.MoveBase.TryToAddImpulse(direction.normalized, _strengthLevel());
             }

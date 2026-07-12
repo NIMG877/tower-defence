@@ -83,7 +83,7 @@ public class Talent1 : Talent
         List<Entity> en = EntityManager.Manager.EntitySelector_Radius((pos.x, pos.y), _thisEntity.Camp, false, 1.5f, false);
         for (int i = 0; i < en.Count; i++)
         {
-            en[i].TakeDamage(_thisEntity, _thisEntity.AttackBase.AttackDamageS, 3.7f, 0, 0, 0, 0, 1, 1);
+            en[i].Stats.ApplyDamage(_thisEntity, _thisEntity.Stats.AttackS, 3.7f, 0, 0, 0, 0, 1, 1);
         }
         _thisEntity.buffController.SetBuffValues(new Modifier[1] { new Modifier("Attack", ModifierOp.AddPercent, _bubbles.Count * deltaPerBubble) }, _lavaBubbleATKBuff);
         if (_bubbles.Count == 0)

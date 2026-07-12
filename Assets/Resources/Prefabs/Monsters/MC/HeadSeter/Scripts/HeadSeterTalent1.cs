@@ -24,7 +24,7 @@ public class HeadSeterTalent1 : Talent
         {
             if (_haveHead && !_isDie && isDeadly)
             {
-                _thisEntity.TakeDamage(_thisEntity, 1, 1, 0, 0, 0, 0, 3, 0);
+                _thisEntity.Stats.ApplyDamage(_thisEntity, 1, 1, 0, 0, 0, 0, 3, 0);
                 _isDie = true;
                 _thisEntity.Stats.AddHurtable(1);
                 _thisEntity.Stats.AddSelectable(1);

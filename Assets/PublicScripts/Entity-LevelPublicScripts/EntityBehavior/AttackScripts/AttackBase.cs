@@ -75,42 +75,6 @@ public class AttackBase : MonoBehaviour, IPoolOperation
             return _attackRadiusF;
         }
     }
-    public float AttackDamageF
-    {
-        get
-        {
-            return _thisEntity.Stats.AttackBase;
-        }
-    }
-    public float AttackDamageS
-    {
-        get
-        {
-            return _thisEntity.Stats.AttackS;
-        }
-    }
-    public float BaseAttackTimeS
-    {
-        get
-        {
-            return _thisEntity.Stats.BaseAttackTimeS;
-        }
-    }
-    public int AttackNumS
-    {
-        get
-        {
-            return _thisEntity.Stats.AttackNumS;
-        }
-    }
-    public int AttackMinNumS
-    {
-        get
-        {
-            return _thisEntity.Stats.AttackMinNumS;
-        }
-    }
-
     protected Entity _thisEntity;
     protected float _attackTimer;
     protected AnimationOverride PendingAnimationOverride { get; private set; }
@@ -159,9 +123,9 @@ public class AttackBase : MonoBehaviour, IPoolOperation
             return;
         if (_attackTimer > 0)
         {
-            _attackTimer -= Time.fixedDeltaTime * _thisEntity.Stats.BaseAttackTimeBase / BaseAttackTimeS;
+            _attackTimer -= Time.fixedDeltaTime * _thisEntity.Stats.BaseAttackTimeBase / _thisEntity.Stats.BaseAttackTimeS;
         }
-        else if (_thisEntity.entityAM.CurrentState != EntityState.Start && _thisEntity.entityAM.CurrentState != EntityState.Die && TryToAttack(AttackTargetSelect(AttackNumS, AttackMinNumS), false, true))
+        else if (_thisEntity.entityAM.CurrentState != EntityState.Start && _thisEntity.entityAM.CurrentState != EntityState.Die && TryToAttack(AttackTargetSelect(_thisEntity.Stats.AttackNumS, _thisEntity.Stats.AttackMinNumS), false, true))
         {
             _attackTimer = _thisEntity.Stats.BaseAttackTimeBase;
         }
@@ -169,7 +133,7 @@ public class AttackBase : MonoBehaviour, IPoolOperation
     public bool ForceResetAttack()
     {
         _attackTimer = _thisEntity.Stats.BaseAttackTimeBase;
-        return TryToAttack(AttackTargetSelect(AttackNumS, AttackMinNumS), true, true);
+        return TryToAttack(AttackTargetSelect(_thisEntity.Stats.AttackNumS, _thisEntity.Stats.AttackMinNumS), true, true);
     }
     public void ResetAttackEffectData()
     {
@@ -213,7 +177,7 @@ public class AttackBase : MonoBehaviour, IPoolOperation
             attackTargets = _thisEntity.Combat.EntityUpdate(attackTargets);
             if (attackTargets.Length == 0)
             {
-                attackTargets = AttackTargetSelect(AttackNumS, AttackMinNumS);
+                attackTargets = AttackTargetSelect(_thisEntity.Stats.AttackNumS, _thisEntity.Stats.AttackMinNumS);
                 if (attackTargets.Length == 0)
                 {
                     OnAttackInterrupt?.Invoke();

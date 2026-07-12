@@ -45,7 +45,7 @@ namespace AbilitySystem.Components
             {
                 Entity target = targets[i];
                 if (target == null) continue;
-                target.TakeDamage(
+                target.Stats.ApplyDamage(
                     ctx.entity,
                     damage,
                     _multiplier(),

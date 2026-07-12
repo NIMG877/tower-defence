@@ -36,7 +36,7 @@ public class WdslmSkill3 : Skill
     private async void SummonMachine()
     {
         await UniTask.WaitForSeconds(_thisEntity.entityAM.ResolveNamedAnimationDuration(_skillStart), false, PlayerLoopTiming.Update, LevelResourceSharing.LevelCtk);
-        _machine = EntityManager.Manager.SetMovableEntity(FlyMachineID, _thisEntity.EntityPosition, _thisEntity.Camp, _thisEntity.MoveBase.CurrentPathSerial);
+        _machine = EntityManager.Manager.SetMovableEntity(FlyMachineID, _thisEntity.Movement.Position, _thisEntity.Camp, _thisEntity.MoveBase.CurrentPathSerial);
         _machine.MoveBase.SetMoveParameters(_thisEntity.MoveBase.CurrentPathSerial, _thisEntity.MoveBase.CurrentSectionSerial, _thisEntity.MoveBase.CurrentPointSerial);
         _machine.buffController.AddAbnormalState(-10, 3);
         _machine.GetComponent<MachineTalent1>().ProjectEntity(TargetEntity, this);

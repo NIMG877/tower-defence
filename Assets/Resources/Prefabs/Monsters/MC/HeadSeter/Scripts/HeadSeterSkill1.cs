@@ -57,7 +57,7 @@ public class HeadSeterSkill1 : Skill
         int currentPathSerial = _thisEntity.MoveBase.CurrentPathSerial;
         int currentSectionSerial = _thisEntity.MoveBase.CurrentSectionSerial;
         int currentPointSerial = _thisEntity.MoveBase.CurrentPointSerial;
-        Vector2 pos = _thisEntity.EntityPosition;
+        Vector2 pos = _thisEntity.Movement.Position;
         float currentDis = 0;
 
         for (int i = currentPointSerial; i < moveParameters.Length; i++)
@@ -69,12 +69,12 @@ public class HeadSeterSkill1 : Skill
             }
             else
             {
-                _thisEntity.EntityPosition = moveParameters[i].targetPosition + (currentDis - dis) * (pos - moveParameters[i].targetPosition).normalized;
+                _thisEntity.Movement.Position = moveParameters[i].targetPosition + (currentDis - dis) * (pos - moveParameters[i].targetPosition).normalized;
                 _thisEntity.MoveBase.SetMoveParameters(currentPathSerial, currentSectionSerial, i);
                 return;
             }
         }
-        _thisEntity.EntityPosition = moveParameters[moveParameters.Length - 1].targetPosition;
+        _thisEntity.Movement.Position = moveParameters[moveParameters.Length - 1].targetPosition;
         _thisEntity.MoveBase.SetMoveParameters(currentPathSerial, currentSectionSerial, 0);
         return;
     }

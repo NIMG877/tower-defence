@@ -1250,7 +1250,7 @@ namespace MyUI
                     _operateArea.SetActive(true);
                 }
                 // 镜头横移：把 entity 横向对齐到 _operateArea 锚点，y 跟随实体世界位置
-                MoveCamera(entity.EntityPosition + _deltaX * Vector2.right, 0.1f);
+                MoveCamera(entity.Movement.Position + _deltaX * Vector2.right, 0.1f);
 
                 // 撤退按钮：仅当该 entity 配置为可撤退时启用；点击 → 池回收 + 50% 退款
                 bool canCallBack = entity.EntityData.CanCallBack;
@@ -1590,7 +1590,7 @@ namespace MyUI
                     Vector2Int[] range = _skillRangeComponentParams.GetVector2IntArrayLazy(
                         "range", null, entity.SkillRunner.sharedBlackboard)();
                     if (range == null || range.Length == 0) return null;
-                    Vector2 origin = entity.EntityPosition;
+                    Vector2 origin = entity.Movement.Position;
                     (int x, int y) tilePos = ((int)(origin.x + 0.5), (int)(origin.y + 0.5));
                     return MapDataManager.Manager.RangeCaculator(
                         ToTupleRange(range), tilePos, entity.Orientation);

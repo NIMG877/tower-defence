@@ -383,7 +383,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         AnimationReferenceAsset attack = (_attackAnimationIndex < length)
             ? Attack[_attackAnimationIndex]
             : Attack[length - 1];
-        float scale = attack.Animation.Duration / thisEntity.AttackBase.BaseAttackTimeS;
+        float scale = attack.Animation.Duration / thisEntity.Stats.BaseAttackTimeS;
         if (_currentAttackBegin == null && length == 1)
         {
             SetSpineAnimation(attack, false, 1);
@@ -396,7 +396,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         else
         {
             _attackPhase = AttackPhase.Begin;
-            float scaleB = _currentAttackBegin.Animation.Duration / thisEntity.AttackBase.BaseAttackTimeS;
+            float scaleB = _currentAttackBegin.Animation.Duration / thisEntity.Stats.BaseAttackTimeS;
             SetSpineAnimation(_currentAttackBegin, false, scaleB > 1 ? scaleB : 1);
             AddSpineAnimation(attack, false, scale, 0);
         }

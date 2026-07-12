@@ -59,14 +59,6 @@ public class Entity : MonoBehaviour, IPoolOperation
     }
 
     /// <summary>
-    /// 实体世界坐标。getter 直接读 transform.position；setter 委托到 Movement.SetPosition（隐含 FindSelfInBlocks）。
-    /// </summary>
-    public Vector2 EntityPosition
-    {
-        get { return Movement.Position; }
-        set { Movement.SetPosition(value); }
-    }
-
     public EntityPool thisEntityPool;
     [SerializeField] public Transform TempContainer;
     /// <summary>
@@ -139,15 +131,6 @@ public class Entity : MonoBehaviour, IPoolOperation
         _orientation = orientation;
         Vision.SetOrientation(orientation);
     }
-    /// <summary>
-    /// 造成伤害
-    /// </summary>
-    /// <returns>本次造成伤害是否为致命伤</returns>
-    public bool TakeDamage(Entity damageOrigin, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType)
-    {
-        return Stats.ApplyDamage(damageOrigin, damage, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, applyType);
-    }
-
     public virtual void PreWarm()
     {
         if (this.TryGetComponent(out AnimationMachine aM))

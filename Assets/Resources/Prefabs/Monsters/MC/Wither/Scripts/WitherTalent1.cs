@@ -24,12 +24,12 @@ public class WitherTalent1 : Talent
                 {
                     if (_thisEntity.Stats.CurrentHp < _thisEntity.Stats.MaxHpS / 2 - 2500)
                     {
-                        _thisEntity.TakeDamage(_thisEntity, 2500, 1, 0, 0, 0, 0, 3, 0);
+                        _thisEntity.Stats.ApplyDamage(_thisEntity, 2500, 1, 0, 0, 0, 0, 3, 0);
                     }
                 }
                 else
                 {
-                    _thisEntity.TakeDamage(_thisEntity, 5000, 1, 0, 0, 0, 0, 3, 0);
+                    _thisEntity.Stats.ApplyDamage(_thisEntity, 5000, 1, 0, 0, 0, 0, 3, 0);
                 }
             }
         });

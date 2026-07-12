@@ -29,7 +29,7 @@ public class WitchTalent : Talent
         {
             if (targets.Count > 0)
             {
-                Vector2 pos = targets[0].EntityPosition;
+                Vector2 pos = targets[0].Movement.Position;
                 _effectTargets = EntityManager.Manager.EntitySelector_Radius((pos.x, pos.y), _thisEntity.Camp, false, _r, false);
                 _pd = CaculateValue(_effectTargets);
             }
