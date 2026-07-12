@@ -43,7 +43,7 @@ public readonly struct Modifier
     ///   <c>MonsterLevelHpConsume</c>/<c>DamageType</c>/<c>Cost</c>/<c>CanSetType</c>/
     ///   <c>RespawnStrategy</c>/<c>MaxOccupyCount</c>/<c>MassLevel</c>/<c>MoveMethod</c>）：
     ///   用 <c>AddFlat</c>，magnitude 是整数增量，读侧 <c>(int)GetFinal</c> 截断（&lt;1 的小增会被吞）。</item>
-    /// <item><b>bool 属性</b>（<c>MonsterIsPrimary</c>/<c>MonsterCountOperated</c>/<c>StunImmune</c>…<c>FearedImmune</c>/
+    /// <item><b>bool 属性</b>（<c>MonsterIsPrimary</c>/<c>MonsterCountOperated</c>/
     ///   <c>IsStatic</c>/<c>CanCallBack</c>/<c>NeedsDirectionSelection</c>/<c>CanRespawn</c>）：
     ///   用 <c>AddFlat</c>，magnitude 是 0/1 或正负数；读侧 <c>GetFinal &gt; 0</c> 为 true。
     ///   设为 true：<c>+1</c>；设为 false：<c>-1</c>（或用负值覆盖）。</item>

@@ -56,15 +56,6 @@ public class EntityData
     public int   BlockOccupation;
     public int   TauntLevel;
 
-    // 免疫
-    public bool StunImmune;
-    public bool SilenceImmune;
-    public bool SleepImmune;
-    public bool FrozenImmune;
-    public bool LevitateImmune;
-    public bool DisarmedCombatImmune;
-    public bool FearedImmune;
-
     // 召唤
     public List<EntityID> CanSpawnEntityIds;
     public List<int>      CanSpawnEntityCounts;

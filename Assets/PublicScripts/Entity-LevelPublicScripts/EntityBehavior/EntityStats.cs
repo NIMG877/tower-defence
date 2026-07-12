@@ -100,13 +100,6 @@ public class EntityStats
     public int MonsterLevelHpConsumeS => (int)_store.GetFinal("MonsterLevelHpConsume");
     public int DamageTypeS => (int)_store.GetFinal("DamageType");
     public OrderLogic TargetPriorityS => (OrderLogic)(int)_store.GetFinal("TargetPriority");
-    public bool StunImmuneS => _store.GetFinal("StunImmune") > 0;
-    public bool SilenceImmuneS => _store.GetFinal("SilenceImmune") > 0;
-    public bool SleepImmuneS => _store.GetFinal("SleepImmune") > 0;
-    public bool FrozenImmuneS => _store.GetFinal("FrozenImmune") > 0;
-    public bool LevitateImmuneS => _store.GetFinal("LevitateImmune") > 0;
-    public bool DisarmedCombatImmuneS => _store.GetFinal("DisarmedCombatImmune") > 0;
-    public bool FearedImmuneS => _store.GetFinal("FearedImmune") > 0;
     public bool IsStaticS => _store.GetFinal("IsStatic") > 0;
     public int CostS => (int)_store.GetFinal("Cost");
     public bool CanCallBackS => _store.GetFinal("CanCallBack") > 0;
@@ -202,13 +195,6 @@ public class EntityStats
         _store.SetBase("MonsterLevelHpConsume", data.MonsterLevelHpConsume);
         _store.SetBase("DamageType", data.DamageType);
         _store.SetBase("TargetPriority", (int)data.TargetPriority);
-        _store.SetBase("StunImmune", data.StunImmune ? 1f : 0f);
-        _store.SetBase("SilenceImmune", data.SilenceImmune ? 1f : 0f);
-        _store.SetBase("SleepImmune", data.SleepImmune ? 1f : 0f);
-        _store.SetBase("FrozenImmune", data.FrozenImmune ? 1f : 0f);
-        _store.SetBase("LevitateImmune", data.LevitateImmune ? 1f : 0f);
-        _store.SetBase("DisarmedCombatImmune", data.DisarmedCombatImmune ? 1f : 0f);
-        _store.SetBase("FearedImmune", data.FearedImmune ? 1f : 0f);
         _store.SetBase("IsStatic", data.IsStatic ? 1f : 0f);
         _store.SetBase("Cost", data.Cost);
         _store.SetBase("CanCallBack", data.CanCallBack ? 1f : 0f);
