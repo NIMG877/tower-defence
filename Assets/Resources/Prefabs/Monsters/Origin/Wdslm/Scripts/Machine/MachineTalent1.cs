@@ -85,7 +85,6 @@ public class MachineTalent1 : Talent
                 {
                     entity.Vision.Range = entity.Vision.BaseRange;
                 }
-                ShowVision();
             }
             else
             {
@@ -169,9 +168,5 @@ public class MachineTalent1 : Talent
             _findGap = 5;
         }
         print(_thisMove.CurrentSectionSerial);
-    }
-    private void ShowVision()
-    {
-
     }
 }
