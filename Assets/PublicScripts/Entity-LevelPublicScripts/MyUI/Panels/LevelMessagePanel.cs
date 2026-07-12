@@ -244,7 +244,7 @@ namespace MyUI
             {
                 int cost = CalculateCost();
                 _costText.text = cost.ToString();
-                if (_respawnTimer <= 0 && cost <= LevelRescurceManager.Manager.CostMessage.currentCost && LevelRescurceManager.Manager.CanSetNumLeft - EntityData.MaxOccupyCount >= 0)
+                if (_respawnTimer <= 0 && cost <= LevelResourceManager.Manager.CostMessage.currentCost && LevelResourceManager.Manager.CanSetNumLeft - EntityData.MaxOccupyCount >= 0)
                 {
                     _isAffordable = true;
                     _photoImage.color = Color.white;
@@ -815,13 +815,13 @@ namespace MyUI
         }
         public void CostTextUpDate()
         {
-            _currentCost = LevelRescurceManager.Manager.CostMessage.currentCost;
+            _currentCost = LevelResourceManager.Manager.CostMessage.currentCost;
             _cost.text = _currentCost.ToString();
             RefreshAllPlaceDataAffordability();
         }
         public void CanSetNumUpDate()
         {
-            _isAffordableNum = LevelRescurceManager.Manager.CanSetNumLeft;
+            _isAffordableNum = LevelResourceManager.Manager.CanSetNumLeft;
             _isAffordableNumText.text = _isAffordableNum.ToString();
             RefreshAllPlaceDataAffordability();
         }
@@ -834,19 +834,19 @@ namespace MyUI
         }
         public void LevelHpLeftTextUpdate()
         {
-            _levelHpLeft.text = LevelRescurceManager.Manager.LevelHpLeft.ToString();
+            _levelHpLeft.text = LevelResourceManager.Manager.LevelHpLeft.ToString();
 
         }
         public void CurrentNumAndTotalNumUpdate()
         {
-            _currentNumAndTotalNum.text = LevelRescurceManager.Manager.CurrentOperateCount.ToString() + '/' + LevelRescurceManager.Manager.NeedOperateCount.ToString();
+            _currentNumAndTotalNum.text = LevelResourceManager.Manager.CurrentOperateCount.ToString() + '/' + LevelResourceManager.Manager.NeedOperateCount.ToString();
         }
         public void ReSelectOrSetStaticEntity()
         {
             if (_orientation != -1)
             {
                 int cost = EntityManager.Manager.SetStaticEntity(_selectedPlaceData.EntityId, _chooser.transform.position, 1, _orientation).GetComponent<InteractableStatic>().CurrentSetCost = _selectedPlaceData.CalculateCost();
-                LevelRescurceManager.Manager.ChangeCost(-cost);
+                LevelResourceManager.Manager.ChangeCost(-cost);
                 _selectedPlaceData.SelectorMove(false);
                 _selectedPlaceData.SetNum(1);
                 _chooser.color = new Color(1, 1, 0, 0.4f);
@@ -1265,7 +1265,7 @@ namespace MyUI
                     {
                         // 先退款再回收：CurrentSetCost 在 Return() 后仍可读（SetActive(false) 不销毁组件），
                         // 但语义上"先退一半费用再还池"更符合玩家认知。
-                        LevelRescurceManager.Manager.ChangeCost(
+                        LevelResourceManager.Manager.ChangeCost(
                             (int)(entity.GetComponent<InteractableStatic>().CurrentSetCost * 0.5f));
                         // 关键：设 IsActive = false 是给 Slider 自清理的信号。
                         // 死亡路径里 EntityStats.BeginDie 会把 _participateIn 置 false（IsActive 走 false 分支 → slider ReturnSlider）；
@@ -2036,8 +2036,8 @@ namespace MyUI
         {
             while (_costSliderRunning)
             {
-                var cm = LevelRescurceManager.Manager.CostMessage;
-                _isAffordableNum = LevelRescurceManager.Manager.CanSetNumLeft;
+                var cm = LevelResourceManager.Manager.CostMessage;
+                _isAffordableNum = LevelResourceManager.Manager.CanSetNumLeft;
                 _currentCost = cm.currentCost;
                 _cost.text = _currentCost.ToString();
                 _costSlider.fillAmount = cm.costTimer;

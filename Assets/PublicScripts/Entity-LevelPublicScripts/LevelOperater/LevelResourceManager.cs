@@ -5,19 +5,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LevelRescurceManager : IManagerStartEnd
+public class LevelResourceManager : IManagerStartEnd
 {
-    private static LevelRescurceManager _instance;
-    public static LevelRescurceManager Manager
+    private static LevelResourceManager _instance;
+    public static LevelResourceManager Manager
     {
         get
         {
             if (_instance == null)
-                _instance = new LevelRescurceManager();
+                _instance = new LevelResourceManager();
             return _instance;
         }
     }
-    private LevelRescurceManager() { }
+    private LevelResourceManager() { }
     private int _cost;
     private int _maxCost;
     private float _costRecoverSpeed;

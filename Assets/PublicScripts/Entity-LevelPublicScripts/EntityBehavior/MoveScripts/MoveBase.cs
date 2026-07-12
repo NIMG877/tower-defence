@@ -268,7 +268,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
         _thisEntity.Stats.IsActive = false;
         if (_levelHpComsume > 0)
         {
-            LevelRescurceManager.Manager.LevelHpLeft -= LevelHpConsume;
+            LevelResourceManager.Manager.LevelHpLeft -= LevelHpConsume;
             AudioManager.Manager.PlayAudio("alarm", 1, false, false);
         }
     }
@@ -301,7 +301,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
         _unBalancedMoveSpeed = Vector2.zero;
         if (_thisEntity.EntityData.MonsterCountOperated)
         {
-            LevelRescurceManager.Manager.CurrentOperateCount += 1;
+            LevelResourceManager.Manager.CurrentOperateCount += 1;
         }
     }
 }

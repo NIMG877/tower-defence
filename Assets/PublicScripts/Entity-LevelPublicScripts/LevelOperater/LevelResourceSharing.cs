@@ -48,12 +48,12 @@ public class LevelResourceSharing
         SlidersManager.Manager.Initialize();
         LevelActionManager.Manager.SetEntityPrefabTypesAndWaves(LD.Waves);
         LevelActionManager.Manager.Initialize();
-        LevelRescurceManager.Manager.CanSetNumLeft = LD.CanSetNum;
-        LevelRescurceManager.Manager.LevelHpLeft = LD.LevelHp;
-        LevelRescurceManager.Manager.NeedOperateCount = LevelActionManager.Manager.CountTotalNeedOperateNum();
-        LevelRescurceManager.Manager.CurrentOperateCount = 0;
-        LevelRescurceManager.Manager.SetCostMessage(LD.Cost0, LD.MaxCost, LD.CostRecoverSpeed);
-        LevelRescurceManager.Manager.Initialize();
+        LevelResourceManager.Manager.CanSetNumLeft = LD.CanSetNum;
+        LevelResourceManager.Manager.LevelHpLeft = LD.LevelHp;
+        LevelResourceManager.Manager.NeedOperateCount = LevelActionManager.Manager.CountTotalNeedOperateNum();
+        LevelResourceManager.Manager.CurrentOperateCount = 0;
+        LevelResourceManager.Manager.SetCostMessage(LD.Cost0, LD.MaxCost, LD.CostRecoverSpeed);
+        LevelResourceManager.Manager.Initialize();
         if (LD.EnvironmentalControlDevice != null)
         {
             EnvironmentalControlDevice = Object.Instantiate(LD.EnvironmentalControlDevice, LM);
@@ -74,7 +74,7 @@ public class LevelResourceSharing
         PathDataManager.Manager.ToStart();
         SlidersManager.Manager.ToStart();
         LevelActionManager.Manager.ToStart();
-        LevelRescurceManager.Manager.ToStart();
+        LevelResourceManager.Manager.ToStart();
         if (EnvironmentalControlDevice != null && EnvironmentalControlDevice.TryGetComponent(out IManagerStartEnd iManagerStartEnd))
         {
             iManagerStartEnd.ToStart();
@@ -89,7 +89,7 @@ public class LevelResourceSharing
         MapDataManager.Manager.ToEnd();
         PathDataManager.Manager.ToEnd();
         SlidersManager.Manager.ToEnd();
-        LevelRescurceManager.Manager.ToEnd();
+        LevelResourceManager.Manager.ToEnd();
         if (EnvironmentalControlDevice != null && EnvironmentalControlDevice.TryGetComponent(out IManagerStartEnd iManagerStartEnd))
         {
             iManagerStartEnd.ToEnd();

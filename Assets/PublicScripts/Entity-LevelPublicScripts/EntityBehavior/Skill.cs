@@ -32,7 +32,7 @@ public class Skill : MonoBehaviour, IPoolOperation
     public string SkillDescription { get { return _skillDescription; } }
     public int SpRecoverMode { get { return _spRecoverMode; } }
     public int SkillOpenMode { get { return _skillOpenMode; } }
-    public int SpComsumeMode { get { return _spConsumeMode; } }
+    public int SpConsumeMode { get { return _spConsumeMode; } }
     public int TotalSp { get { return _totalSp; } }
     public int InitialSp { get { return _initialSp; } }
     public bool CanCloseSkill { get { return _canCloseSkill; } }
