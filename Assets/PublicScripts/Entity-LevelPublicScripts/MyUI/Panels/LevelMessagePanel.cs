@@ -186,7 +186,7 @@ namespace MyUI
                     {
                         vector2.y = value;
                         _selectorRect.anchoredPosition = vector2;
-                    }, vector2.y, _selectorYAnchor + 10, 0.1f).SetUpdate(true);
+                    }, vector2.y, _selectorYAnchor + 10, 0.1f).SetUpdate(true).SetId("LevelMessagePanel");
                     //_selectorRoot.transform.DOMoveY(0.2f, 0.1f).SetRelative().SetUpdate(true);
                 }
                 else
@@ -196,7 +196,7 @@ namespace MyUI
                     {
                         vector2.y = value;
                         _selectorRect.anchoredPosition = vector2;
-                    }, vector2.y, _selectorYAnchor, 0.1f).SetUpdate(true);
+                    }, vector2.y, _selectorYAnchor, 0.1f).SetUpdate(true).SetId("LevelMessagePanel");
                 }
             }
             public void SetNum(int setNum)
@@ -753,10 +753,10 @@ namespace MyUI
             }
             textMeshProUGUI.gameObject.transform.position = entityPos + 1.2f * Vector2.up + 0.1f * Random.insideUnitCircle;
             textMeshProUGUI.gameObject.SetActive(true);
-            textMeshProUGUI.gameObject.transform.DOScale(1, 0.2f).SetUpdate(true).OnComplete(async () =>
+            textMeshProUGUI.gameObject.transform.DOScale(1, 0.2f).SetUpdate(true).SetId("LevelMessagePanel").OnComplete(async () =>
             {
                 await UniTask.WaitForSeconds(0.3f, true, PlayerLoopTiming.Update, LevelResourceSharing.LevelCtk);
-                textMeshProUGUI.gameObject.transform.DOScale(0, 0.2f).SetUpdate(true).OnComplete(() =>
+                textMeshProUGUI.gameObject.transform.DOScale(0, 0.2f).SetUpdate(true).SetId("LevelMessagePanel").OnComplete(() =>
                 {
                     textMeshProUGUI.gameObject.SetActive(false);
                     _textsInPool[textType].Add(textMeshProUGUI);
@@ -856,7 +856,7 @@ namespace MyUI
             }
             else
             {
-                _target.transform.DOMove(_chooser.transform.position, 0.2f).SetUpdate(true);
+                _target.transform.DOMove(_chooser.transform.position, 0.2f).SetUpdate(true).SetId("LevelMessagePanel");
             }
 
         }
@@ -902,8 +902,10 @@ namespace MyUI
         {
             base.OnExit();
             _costSliderRunning = false;
+            DOTween.Kill("LevelMessagePanel");
             UIStates_SwitchTo_Normal();
             _canSetBlockList.Clear();
+            _placeDataList.Clear();
             _selectedStaticEntityID = null;
             _selectedPlaceData = null;
             _selectedEntity = null;
@@ -916,6 +918,8 @@ namespace MyUI
             _is2X = false;
             _isSlow = false;
             SetTimeScale();
+            _costSliderRunning = false;
+            DOTween.Kill("LevelMessagePanel");
             _placeDataList.Clear();
         }
         #endregion
@@ -1793,7 +1797,7 @@ namespace MyUI
                 _camera.transform.position = new Vector3(tmp.x, tmp.y, _cameraOriginalPos.z);
                 _uiCamera.transform.position = new Vector3(tmp.x, tmp.y, _uiCameraOriginalPos.z);
                 SlidersManager.Manager.TakeOverSliderMove();
-            }, 0, 1, duration).SetUpdate(true);
+            }, 0, 1, duration).SetUpdate(true).SetId("LevelMessagePanel");
         }
         private void HideTargetOrEnterNextStage(StaticEntityPlaceData staticEntityPlaceData)
         {

@@ -82,6 +82,7 @@ public class LevelResourceSharing
     }
     public static void LevelEnd()
     {
+        Bullet.ReturnAllActive();
         LevelActionManager.Manager.ToEnd();
         EntityManager.Manager.ToEnd();
         EntityPoolManager.Manager.ToEnd();

@@ -1,6 +1,7 @@
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 using System;
+using System.Collections.Generic;
 
 [Serializable]
 public struct BulletData
@@ -18,6 +19,8 @@ public struct BulletData
 }
 public class Bullet
 {
+    private static readonly List<Bullet> _activeBullets = new List<Bullet>();
+
     private GameObject _bulletObject;
     private GameObject _bulletTrailObject;
     private GameObject _bulletSpawnEffect;
@@ -38,6 +41,7 @@ public class Bullet
     private int _applyType;
     private int _bulletType;
     private bool _allowNoEntityTarget;
+    private bool _destroyed;
     private BulletData _bulletData;
     private event AttackBase.OperationsBeforeTakeDamage _onBeforeTakeDamage;
     private event AttackBase.OperationsAfterTakeDamage _onAfterTakeDamage;
@@ -79,6 +83,7 @@ public class Bullet
             EffectManager.Manager.CreateEffect(bulletData.BulletSpawnEffect, bulletSpawnPosition, Quaternion.Euler(0, originEntity.entityAM.CurrentDirection.left ? 180 : 0, 0), LevelResourceSharing.LM, 1, true);
         }
         BulletFly();
+        _activeBullets.Add(this);
     }
     async private void BulletFly()
     {
@@ -95,7 +100,7 @@ public class Bullet
         }
         float rateSpeed = _bulletSpeed / distance;
         float rate = 0;
-        while (true)
+        while (!_destroyed)
         {
             if (!_allowNoEntityTarget && (_targetEntity == null || !_targetEntity.Stats.IsActive))
             {
@@ -148,6 +153,8 @@ public class Bullet
     }
     private void DestroyBullet()
     {
+        if (_destroyed) return;
+        _destroyed = true;
         EffectManager.Manager.ReturnEffect(_bulletData.BulletPrefab, _bulletObject);
         _onBulletDestroy?.Invoke(_bulletObject.transform.position);
         if (_bulletDestroyEffect)
@@ -157,6 +164,19 @@ public class Bullet
         if (_bulletTrailObject)
         {
             EffectManager.Manager.SetEffectAutoReturn(_bulletData.BulletTrailPrefab, _bulletTrailObject);
+        }
+        _activeBullets.Remove(this);
+    }
+
+    /// <summary>退出关卡时主动回收所有飞行中的子弹，不依赖 async cancel 路径。</summary>
+    public static void ReturnAllActive()
+    {
+        // DestroyBullet 会修改 _activeBullets，遍历副本避免迭代异常
+        var snapshot = _activeBullets.ToArray();
+        _activeBullets.Clear();
+        foreach (var b in snapshot)
+        {
+            b.DestroyBullet();
         }
     }
 }
