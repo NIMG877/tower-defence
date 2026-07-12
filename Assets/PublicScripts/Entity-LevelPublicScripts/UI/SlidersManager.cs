@@ -44,6 +44,7 @@ public class SlidersManager : IManagerStartEnd
     }
     public void ToEnd()
     {
+        _sliderCountShow = 0;
         for (int i = 0; i < _allTypeSliderShow.Count; i++)
         {
             for (int j = _allTypeSliderShow[i].Count - 1; j >= 0; j--)
@@ -52,7 +53,7 @@ public class SlidersManager : IManagerStartEnd
             }
         }
     }
-    private async void SliderUpdate()
+    private async UniTaskVoid SliderUpdate()
     {
         while (_sliderCountShow > 0)
         {
@@ -90,10 +91,10 @@ public class SlidersManager : IManagerStartEnd
         return _allTypeSlider.Count - 1;
     }
     /// <summary>
-    /// ·ÅÖÃUIÌõ
+    /// ï¿½ï¿½ï¿½ï¿½UIï¿½ï¿½
     /// </summary>
-    /// <param name="hostEntity">Ä¿±êÊµÌå</param>
-    /// <param name="type">ÌõÀàÐÍ£º0-µÐÈËHP£¬1-½ÇÉ«HP£¬2-BOSSHP£¬3-µÐÈËSP£¬4-½ÇÉ«SP£¬5-MOVEELEMENT£¬6-STATICELEMENT</param>
+    /// <param name="hostEntity">Ä¿ï¿½ï¿½Êµï¿½ï¿½</param>
+    /// <param name="type">ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½0-ï¿½ï¿½ï¿½ï¿½HPï¿½ï¿½1-ï¿½ï¿½É«HPï¿½ï¿½2-BOSSHPï¿½ï¿½3-ï¿½ï¿½ï¿½ï¿½SPï¿½ï¿½4-ï¿½ï¿½É«SPï¿½ï¿½5-MOVEELEMENTï¿½ï¿½6-STATICELEMENT</param>
     public void SetSlider<T>(Entity hostEntity, float smoothSpeed, int type, int positionLayer, bool hideWhenFull, bool moveSlider) where T : SliderControllerBasic, new()
     {
         if (_allTypeSliderPool[type].Count > 0)
@@ -113,7 +114,7 @@ public class SlidersManager : IManagerStartEnd
         _sliderCountShow++;
         if (_sliderCountShow == 1)
         {
-            SliderUpdate();
+            SliderUpdate().Forget();
         }
     }
     public void ReturnSlider(SliderControllerBasic sliderControllerBasic, int type)

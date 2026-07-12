@@ -125,8 +125,9 @@ public class MCEnvironmentalDevice : MonoBehaviour, IManagerStartEnd
     }
     public void ToEnd()
     {
+        _entityAndHungryMessages.Clear();
     }
-    public async void EntityAndHungryMessageUpdate()
+    public async UniTaskVoid EntityAndHungryMessageUpdate()
     {
         while (_entityAndHungryMessages.Count > 0)
         {
@@ -169,7 +170,7 @@ public class MCEnvironmentalDevice : MonoBehaviour, IManagerStartEnd
                 _entityAndHungryMessages.Add(thisMessage);
                 if (_entityAndHungryMessages.Count == 1)
                 {
-                    EntityAndHungryMessageUpdate();
+                    EntityAndHungryMessageUpdate().Forget();
                 }
             }
         };

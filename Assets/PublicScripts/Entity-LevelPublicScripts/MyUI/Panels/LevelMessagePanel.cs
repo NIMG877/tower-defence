@@ -378,6 +378,7 @@ namespace MyUI
 
         // ===== Time Control Flags =====
         private bool _isPause, _is2X, _isSlow;
+        private bool _costSliderRunning;
 
         // ===== Skill State & Colors =====
         private int _currentShow;
@@ -890,7 +891,8 @@ namespace MyUI
             _blockDatas = MapDataManager.Manager.Tiles;
             (_iSize, _jSize) = MapDataManager.Manager.MapSize;
             _rangeImgCollection.SetActive(false);
-            CostSliderAndCanSetNumUpdate();
+            _costSliderRunning = true;
+            CostSliderAndCanSetNumUpdate().Forget();
             _cameraOriginalPos = _camera.transform.position;
             _uiCamera = LevelResourceSharing.UICamera;
             _uiCameraOriginalPos = _uiCamera.transform.position;
@@ -899,6 +901,7 @@ namespace MyUI
         public override void OnExit()
         {
             base.OnExit();
+            _costSliderRunning = false;
             UIStates_SwitchTo_Normal();
             _canSetBlockList.Clear();
             _selectedStaticEntityID = null;
@@ -2029,9 +2032,9 @@ namespace MyUI
             _rangeSelfTile.sizeDelta = new Vector2(l * (1 - gap), l * (1 - gap));
             _rangeSelfTile.anchoredPosition = new Vector2(-l * centerX, -l * centerY);
         }
-        private async void CostSliderAndCanSetNumUpdate()
+        private async UniTaskVoid CostSliderAndCanSetNumUpdate()
         {
-            while (true)
+            while (_costSliderRunning)
             {
                 var cm = LevelRescurceManager.Manager.CostMessage;
                 _isAffordableNum = LevelRescurceManager.Manager.CanSetNumLeft;

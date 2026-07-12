@@ -38,7 +38,7 @@ public class LevelActionManager : IManagerStartEnd
 
 
 
-    private async void WaveProcess(LevelActions.Wave wave, CancellationToken cancellationToken)
+    private async UniTaskVoid WaveProcess(LevelActions.Wave wave, CancellationToken cancellationToken)
     {
         _holdingWaveWhileExistWaveEntities = true;
         var scheduled = LevelActionScheduler.CollectAndSortActions(wave);
@@ -53,10 +53,10 @@ public class LevelActionManager : IManagerStartEnd
             float wait = dueTime - Time.time;
             if (wait > 0f)
                 await UniTask.WaitForSeconds(wait, false, PlayerLoopTiming.Update, cancellationToken);
-            ActionProcess(entry.Action, LevelResourceSharing.LevelCtk);
+            ActionProcess(entry.Action, LevelResourceSharing.LevelCtk).Forget();
         }
     }
-    private async void ActionProcess(LevelActions.Action action, CancellationToken cancellationToken)
+    private async UniTaskVoid ActionProcess(LevelActions.Action action, CancellationToken cancellationToken)
     {
         for (int i = 0; i < action.GapsFromLastRepeat.Length; i++)
         {
@@ -70,7 +70,7 @@ public class LevelActionManager : IManagerStartEnd
         TryAdvanceWave();
         //_cancellationTokenSources.Remove(cancellationToken);
     }
-    private async void PathPrinterMove(TrailRenderer pathPrinter, int pathSerial, int sectionSerial, int pointSerial, int moveMethod, CancellationToken cancellationToken)
+    private async UniTaskVoid PathPrinterMove(TrailRenderer pathPrinter, int pathSerial, int sectionSerial, int pointSerial, int moveMethod, CancellationToken cancellationToken)
     {
         await UniTask.WaitForFixedUpdate(cancellationToken);
         MoveParameters[] currentSection = PathDataManager.Manager.GetSection(pathSerial, sectionSerial, moveMethod).Item2;
@@ -191,7 +191,7 @@ public class LevelActionManager : IManagerStartEnd
         if (_currentIndex < _waves.Length - 1)
         {
             _currentIndex++;
-            WaveProcess(_waves[_currentIndex], LevelResourceSharing.LevelCtk);
+            WaveProcess(_waves[_currentIndex], LevelResourceSharing.LevelCtk).Forget();
         }
         else
         {
@@ -245,7 +245,7 @@ public class LevelActionManager : IManagerStartEnd
         printerReceive.Add(printer);
         printer.transform.position = destination;
         printer.gameObject.SetActive(true);
-        PathPrinterMove(printer, pathSerial, sectionSerial, pointSerial, moveMethod, LevelResourceSharing.LevelCtk);
+        PathPrinterMove(printer, pathSerial, sectionSerial, pointSerial, moveMethod, LevelResourceSharing.LevelCtk).Forget();
     }
     public void ReturnPathPrinter(TrailRenderer pathPrinter, int moveMethod)
     {
@@ -320,7 +320,7 @@ public class LevelActionManager : IManagerStartEnd
     }
     public void ToStart()
     {
-        WaveProcess(_waves[_currentIndex], LevelResourceSharing.LevelCtk);
+        WaveProcess(_waves[_currentIndex], LevelResourceSharing.LevelCtk).Forget();
     }
     public void ToEnd()
     {

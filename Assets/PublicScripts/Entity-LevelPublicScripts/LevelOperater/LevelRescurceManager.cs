@@ -110,9 +110,9 @@ public class LevelRescurceManager : IManagerStartEnd
             LevelMessagePanel.Panel.CostTextUpDate();
     }
 
-    private async void CostRecover()
+    private async UniTaskVoid CostRecover()
     {
-        while (true)
+        while (_start)
         {
             if (_cost < _maxCost)
             {
@@ -137,8 +137,8 @@ public class LevelRescurceManager : IManagerStartEnd
 
     public void ToStart()
     {
-        CostRecover();
         _start = true;
+        CostRecover().Forget();
     }
 
     public void ToEnd()
