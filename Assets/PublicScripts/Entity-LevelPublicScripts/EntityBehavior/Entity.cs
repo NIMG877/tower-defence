@@ -220,6 +220,7 @@ public class Entity : MonoBehaviour, IPoolOperation
         OnBeforeDieAnimation = null;
         EntityManager.Manager.RemoveEntityFromList(this, Camp);
         EntityManager.Manager.RemoveEntityFromBlock(Movement.InBlocks, this, Camp);
+        Movement.ClearInBlocks();
         Destroy(TempContainer.gameObject);
         TempContainer = null;
         if (Camp == 2)

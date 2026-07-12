@@ -76,6 +76,13 @@ public class EntityMovement
         _inBlocks = new (int i, int j)[4];
     }
 
+    // === 还池时清空格位记录，防止跨关卡复用时旧坐标索引到新关卡的 block 数组越界 ===
+    public void ClearInBlocks()
+    {
+        for (int i = 0; i < _inBlocks.Length; i++)
+            _inBlocks[i] = (-1, -1);
+    }
+
     // === 格位刷新（替代原 Entity.FindSelfInBlocks） ===
     public void FindSelfInBlocks(Vector2 point)
     {
