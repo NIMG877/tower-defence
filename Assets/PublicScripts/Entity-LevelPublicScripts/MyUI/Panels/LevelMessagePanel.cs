@@ -1276,7 +1276,7 @@ namespace MyUI
                 }
 
                 // 技能按钮与技能范围预览（新 AbilitySystem 数据源：EntityAbilityRunner / AbilityRuntime / SPConfig）
-                var runner = entity.SkillRunner;
+                var runner = entity.AbilityRunner;
                 if (runner != null && runner.Skills != null && runner.Skills.Count > 0)
                 {
                     _selectAbilityRuntime = runner.Skills[0];
@@ -1585,10 +1585,10 @@ namespace MyUI
                     var entity = _selectedEntity;
                     // 原始 range 是设计师写的"模板范围",需结合 entity 的位置 / 朝向
                     // 喂给 MapDataManager.RangeCaculator,语义与 SetStaticEntity 落盘时对齐。
-                    // 与 AttackRangeOverride.OnTrigger 行为一致:ctx=SkillRunner.sharedBlackboard
+                    // 与 AttackRangeOverride.OnTrigger 行为一致:ctx=AbilityRunner.sharedBlackboard
                     // 让 fromBlackboard=true 的设计能读到运行时 BB。
                     Vector2Int[] range = _skillRangeComponentParams.GetVector2IntArrayLazy(
-                        "range", null, entity.SkillRunner.sharedBlackboard)();
+                        "range", null, entity.AbilityRunner.sharedBlackboard)();
                     if (range == null || range.Length == 0) return null;
                     Vector2 origin = entity.Movement.Position;
                     (int x, int y) tilePos = ((int)(origin.x + 0.5), (int)(origin.y + 0.5));
@@ -1848,7 +1848,7 @@ namespace MyUI
                     AbilitySystem.AbilityRuntime abilityRuntime = null;
                     if (entity != null)
                     {
-                        var skillRunner = entity.SkillRunner;
+                        var skillRunner = entity.AbilityRunner;
                         if (skillRunner != null && skillRunner.Skills != null && skillRunner.Skills.Count > 0)
                         {
                             abilityRuntime = skillRunner.Skills[0];
@@ -1876,7 +1876,7 @@ namespace MyUI
                 case 2:
                     // Talent: live entity 优先（运行时实际挂载的 AbilityRuntime 缓存视图），回退到 entityData.Talents（数据层模板）
                     AbilitySystem.AbilityConfig[] ts;
-                    var talentRunner = entity != null ? entity.SkillRunner : null;
+                    var talentRunner = entity != null ? entity.AbilityRunner : null;
                     if (talentRunner != null)
                     {
                         var runtimes = talentRunner.Talents;

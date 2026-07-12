@@ -102,11 +102,11 @@ namespace AbilitySystem.Components
         private static void Deliver(Entity recipient, Entity sender, Entity target, string queueKey)
         {
             if (recipient == null || recipient.Stats == null || !recipient.Stats.IsActive
-                || target == null || string.IsNullOrEmpty(queueKey) || recipient.SkillRunner == null)
+                || target == null || string.IsNullOrEmpty(queueKey) || recipient.AbilityRunner == null)
                 return;
             if (CanCurrentlySee(recipient, target)) return;
 
-            Blackboard bb = recipient.SkillRunner.sharedBlackboard;
+            Blackboard bb = recipient.AbilityRunner.sharedBlackboard;
             var queue = bb.Get<List<SharedAttackRequest>>(queueKey, null) ?? new List<SharedAttackRequest>();
             queue.Add(new SharedAttackRequest(sender, target));
             bb.Set(queueKey, queue);
@@ -123,11 +123,11 @@ namespace AbilitySystem.Components
 
         private static bool HasAbility(Entity entity, string abilityId)
         {
-            if (entity?.SkillRunner == null) return false;
+            if (entity?.AbilityRunner == null) return false;
             if (string.IsNullOrEmpty(abilityId)) return true;
-            return ContainsAbility(entity.SkillRunner.Skills, abilityId)
-                || ContainsAbility(entity.SkillRunner.Talents, abilityId)
-                || ContainsAbility(entity.SkillRunner.ExtraAbilities, abilityId);
+            return ContainsAbility(entity.AbilityRunner.Skills, abilityId)
+                || ContainsAbility(entity.AbilityRunner.Talents, abilityId)
+                || ContainsAbility(entity.AbilityRunner.ExtraAbilities, abilityId);
         }
 
         private static bool ContainsAbility(IReadOnlyList<AbilityRuntime> abilities, string abilityId)

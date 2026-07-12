@@ -18,7 +18,7 @@ public class SpSliderController : SliderControllerBasic
         int positionLayer, bool hideWhenFull, bool moveSlider)
     {
         base.SetHostEntity(hostEntity, smoothSpeed, type, positionLayer, hideWhenFull, moveSlider);
-        _skillRunner = hostEntity.SkillRunner;
+        _skillRunner = hostEntity.AbilityRunner;
     }
 
     protected override void SetRateOperations()
