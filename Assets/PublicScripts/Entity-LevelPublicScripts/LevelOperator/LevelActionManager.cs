@@ -68,7 +68,6 @@ public class LevelActionManager : IManagerStartEnd
         }
         _actionProcessNum--;
         TryAdvanceWave();
-        //_cancellationTokenSources.Remove(cancellationToken);
     }
     private async UniTaskVoid PathPrinterMove(TrailRenderer pathPrinter, int pathSerial, int sectionSerial, int pointSerial, int moveMethod, CancellationToken cancellationToken)
     {
@@ -94,10 +93,6 @@ public class LevelActionManager : IManagerStartEnd
                         pathPrinter.transform.position = currentSection[pointSerial].targetPosition;
                         if (currentSection[pointSerial].whetherToEnterPortal)
                         {
-                            //pathPrinter.enabled = false;
-                            //pathPrinter.transform.position = currentSection[pointSerial + 1].targetPosition;
-                            //pathPrinter.enabled = true;
-                            ////Debug.Log("arrive portal" +$"{currentSection[pointSerial + 1].targetPosition},{pathSerial},{sectionSerial},{pointSerial + 1}");
                             SetPathPrinter(currentSection[pointSerial + 1].targetPosition, pathSerial, sectionSerial, pointSerial + 1, moveMethod);
                             await UniTask.WaitForSeconds(printerLifeTime, false, PlayerLoopTiming.Update, cancellationToken);
                             ReturnPathPrinter(pathPrinter, moveMethod);

@@ -36,16 +36,16 @@ namespace MyUI
                 {
                     return t;
                 }
-                Debug.LogWarning($"Î´ÔÚ×ÓÎïÌå {child.name} ÖÐ·¢ÏÖ×é¼þ{typeof(T)}");
+                Debug.LogWarning($"Î´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ {child.name} ï¿½Ð·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½{typeof(T)}");
                 return null;
             }
-            Debug.LogWarning($"Î´ÕÒµ½Â·¾¶ {path} ¶ÔÓ¦µÄ×ÓÎïÌå");
+            Debug.LogWarning($"Î´ï¿½Òµï¿½Â·ï¿½ï¿½ {path} ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
             return null;
 
         }
 
         /// <summary>
-        /// UI½øÈëÊ±µÄ²Ù×÷£¨³õÊ¼»¯µÈ£©
+        /// UIï¿½ï¿½ï¿½ï¿½Ê±ï¿½Ä²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½È£ï¿½
         /// </summary>
         public virtual void OnEnter()
         {
@@ -54,35 +54,32 @@ namespace MyUI
             DOTween.To((value) =>
             {
                 UIGroup.alpha = value;
-                //UIObject.transform.localScale = (float)(1.2 - 0.2 * value) * Vector3.one;
             }, 0, 1, 0.2f).SetUpdate(true);
         }
         /// <summary>
-        /// UIÔÝÍ£Ê±µÄ²Ù×÷
+        /// UIï¿½ï¿½Í£Ê±ï¿½Ä²ï¿½ï¿½ï¿½
         /// </summary>
         public virtual void OnPause()
         {
 
         }
         /// <summary>
-        /// UI¼ÌÐøÖ´ÐÐµÄ²Ù×÷
+        /// UIï¿½ï¿½ï¿½ï¿½Ö´ï¿½ÐµÄ²ï¿½ï¿½ï¿½
         /// </summary>
         public virtual void OnResume()
         {
             UIObject.SetActive(true);
         }
         /// <summary>
-        /// UIÍË³öÊ±µÄ²Ù×÷
+        /// UIï¿½Ë³ï¿½Ê±ï¿½Ä²ï¿½ï¿½ï¿½
         /// </summary>
         public virtual void OnExit()
         {
             DOTween.To((value) =>
             {
                 UIGroup.alpha = value;
-                //UIObject.transform.localScale = (float)(1.2 - 0.2 * value) * Vector3.one;
             }, 1, 0, 0.2f).SetUpdate(true).OnComplete(() =>
             {
-                //UIObject.transform.localScale = Vector3.one;
                 UIObject.SetActive(false);
             });
         }

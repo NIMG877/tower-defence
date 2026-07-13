@@ -148,8 +148,6 @@ public class MCEnvironmentalDevice : MonoBehaviour, IManagerStartEnd
     public void ToStart()
     {
         GameObject beef = Resources.Load<GameObject>("Prefabs/Levels/Main/AdventureOfMinecraft/Devices/Meats/Beef");
-        // EntityPoolManager.Manager.CreateOrExpandEntityPool(new GameObject[1] { beef }, new int[1] { 5 });
-        // LevelMessagePanel.Panel.AddStaticEntityPrefabToSelector(new GameObject[1] { beef }, new int[1] { 5 });
         EntityManager.Manager.OnAfterSetEntity += (Entity setEntity) =>
         {
             if (setEntity.Camp == 1 && setEntity.TryGetComponent(out InteractableStatic staticEntity) && setEntity.EntityData.CharacterJob != 8)

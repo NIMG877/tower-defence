@@ -61,7 +61,6 @@ public static class MapPathFinder
                 path.Insert(0, new MoveParameters(startPoint, false));
                 path[path.Count - 1].targetPosition = endPoint;
                 return CorrectTmpPositions(graph, path.ToArray(), entityR);
-                //return path.ToArray();
             }
             FindNewFrontier(tiles, graph, iSize, jSize, peeked, endPoint, heap, ref heapCount);
         }

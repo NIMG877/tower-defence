@@ -187,7 +187,6 @@ namespace MyUI
                         vector2.y = value;
                         _selectorRect.anchoredPosition = vector2;
                     }, vector2.y, _selectorYAnchor + 10, 0.1f).SetUpdate(true).SetId("LevelMessagePanel");
-                    //_selectorRoot.transform.DOMoveY(0.2f, 0.1f).SetRelative().SetUpdate(true);
                 }
                 else
                 {

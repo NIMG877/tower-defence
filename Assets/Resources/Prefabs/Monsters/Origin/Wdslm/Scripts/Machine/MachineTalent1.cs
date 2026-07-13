@@ -8,7 +8,6 @@ using static UnityEngine.EventSystems.EventTrigger;
 public class MachineTalent1 : Talent
 {
     [SerializeField] private Transform _projectionRoot;
-    // private Skill[] _targetAbilities;
     private MoveBase _thisMove;
     private BuffController _thisBuff;
     private Buff _moveBuff;
@@ -36,13 +35,6 @@ public class MachineTalent1 : Talent
         {
             //ɾ���ƶ�ģ��
         }
-        // List<Skill> targetAbilities = new List<Skill>(entity.abilities);
-        // for (int i = targetAbilities.Count - 1; i >= 0; i--)
-        // {
-        //     if (targetAbilities[i].SkillOpenMode < 3)
-        //         targetAbilities.RemoveAt(i);
-        // }
-        // _targetAbilities = targetAbilities.ToArray();
         Destroy(entity.TempContainer.Find("shadow(Clone)").gameObject);
         EntityPassiveUpdate(entity, wdlsmSkill3);
         MoveSpeedAD();
@@ -56,13 +48,6 @@ public class MachineTalent1 : Talent
                 skill.SkillEnd();
                 return;
             }
-            // for (int i = 0; i < _targetAbilities.Length; i++)
-            // {
-            //     if (_targetAbilities[i].SkillCanBegin())
-            //     {
-            //         _targetAbilities[i].SkillBegin();
-            //     }
-            // }
             if (_findGap <= 0)
             {
                 _findGap = 100000000;

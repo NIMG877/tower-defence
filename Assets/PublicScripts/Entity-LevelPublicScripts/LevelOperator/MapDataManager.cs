@@ -393,15 +393,6 @@ public class MapDataManager : IManagerStartEnd
                 }
             }
         }
-        //Debug.Log($"-----------��ǰ��{(current.plotPos)}��cost{current.cost}������{current.plotPosCameFrom}---------------");
-        //for (int i = 0; i < iSize; i++)
-        //{
-        //    for (int j = 0; j < jSize; j++)
-        //    {
-        //        Debug.Log($"��{(j,i)}��cost{graph[i, j].cost}������{graph[i, j].plotPosCameFrom}");
-        //    }
-        //}
-        //return null;
         if (isReach)
         {
             while (current.plotPosCameFrom.x != current.plotPos.x || current.plotPosCameFrom.y != current.plotPos.y)
