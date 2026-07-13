@@ -118,11 +118,11 @@ public class EffectManager : IManagerStartEnd
             TrailRenderer[] trailRenderers = newEffect.GetComponents<TrailRenderer>();
             for (int i = 0; i < particleSystems.Length; i++)
             {
-                // µ÷Õû²¥·ÅËÙ¶È
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
                 ParticleSystem.MainModule mainModule = particleSystems[i].main;
-                mainModule.simulationSpeed = timeScale;  // ÉèÖÃ²¥·ÅËÙ¶È
+                mainModule.simulationSpeed = timeScale;  // ï¿½ï¿½ï¿½Ã²ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
 
-                // ÖØÐÂ¿ªÊ¼Á£×ÓÏµÍ³
+                // ï¿½ï¿½ï¿½Â¿ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ÏµÍ³
                 particleSystems[i].Play();
             }
             for (int i = 0; i < trailRenderers.Length; i++)
@@ -225,7 +225,6 @@ public class EffectManager : IManagerStartEnd
 
     public void ToEnd()
     {
-        Debug.Log("end");
         for (int i = 0; i < _effectPool.Count; i++)
         {
             _effectPool[i].ReturnAllEffect();

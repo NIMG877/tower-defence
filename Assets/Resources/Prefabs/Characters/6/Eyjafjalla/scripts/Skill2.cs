@@ -16,7 +16,6 @@ public class Skill2 : Skill
     {
         for (int i = 0; i < _targetPos.Count; i++)
         {
-            print(_targetPos[i]);
             new Bullet(null, null, _onBulletDestroy, _skill2AttackEffectData.BulletData, _thisEntity, null, _targetPos[i], _skill2AttackEffectData.BulletSpawnTransform.position, 0, 1, 0, 0, 0, 0, 0, 0);
         }
         _thisAB.OnAttackSuccessfully -= OperationsOnAttackSuccessfully;

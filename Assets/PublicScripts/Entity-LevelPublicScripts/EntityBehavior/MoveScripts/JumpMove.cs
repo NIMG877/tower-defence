@@ -15,7 +15,6 @@ public class JumpMove : MoveBase
         {
             _initialFind = true;
             FindPath();
-            print("Find");
         }
         if (_forceUnmoveTime <= 0 && _jumpGapTimer <= 0)
         {

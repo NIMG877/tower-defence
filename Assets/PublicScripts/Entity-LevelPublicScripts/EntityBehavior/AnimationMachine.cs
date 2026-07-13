@@ -352,7 +352,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
     private void FinishComboWindow()
     {
-        Debug.Log($"{thisEntity} enter attack end-wait stage");
         _attackAnimationIndex = 0;
         _attackPhase = AttackPhase.End;
         if (_currentAttackEnd)
@@ -450,7 +449,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         }
         else if (e.Data == event_start)
         {
-            Debug.Log("Start!");
         }
         else
         {

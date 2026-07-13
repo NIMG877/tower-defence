@@ -25,9 +25,7 @@ MonoBehaviour:
     WholeImage: {fileID: 21300000, guid: f7a72dbb186dd914ea71c0bb3d6810ae, type: 3}
     DefaultCamp: 1
     CharacterRarity: 6
-    CharacterInfluence: "\u83B1\u5854\u5C3C\u4E9A"
     CharacterJob: 4
-    CharacterSubJob: "\u4E2D\u575A\u672F\u5E08"
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -49,6 +47,7 @@ MonoBehaviour:
     BaseAttackTime: 1.6
     AttackNum: 1
     DamageType: 1
+    TargetPriority: 0
     MaxHp: 1743
     Defense: 122
     MagicResistance: 20
@@ -56,13 +55,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 1
     TauntLevel: 0
-    StunImmune: 0
-    SilenceImmune: 0
-    SleepImmune: 0
-    FrozenImmune: 0
-    LevitateImmune: 0
-    DisarmedCombatImmune: 0
-    FearedImmune: 0
     CanSpawnEntityIds:
     - ID_C: t
       ID_N: 1
@@ -95,9 +87,7 @@ MonoBehaviour:
     WholeImage: {fileID: 21300000, guid: 4e299dd21cbf6f745aaa074ef3cf4acc, type: 3}
     DefaultCamp: 1
     CharacterRarity: 6
-    CharacterInfluence: "\u83B1\u5854\u5C3C\u4E9A"
     CharacterJob: 4
-    CharacterSubJob: "\u79D8\u672F\u5E08"
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -119,6 +109,7 @@ MonoBehaviour:
     BaseAttackTime: 3
     AttackNum: 1
     DamageType: 1
+    TargetPriority: 0
     MaxHp: 1678
     Defense: 135
     MagicResistance: 20
@@ -126,13 +117,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 1
     TauntLevel: 0
-    StunImmune: 0
-    SilenceImmune: 0
-    SleepImmune: 0
-    FrozenImmune: 0
-    LevitateImmune: 0
-    DisarmedCombatImmune: 0
-    FearedImmune: 0
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
@@ -166,9 +150,7 @@ MonoBehaviour:
     WholeImage: {fileID: 21300000, guid: c05242870001c9c43b382fb1549465b1, type: 3}
     DefaultCamp: 1
     CharacterRarity: 3
-    CharacterInfluence: "\u884C\u52A8\u9884\u5907\u7EC4A1"
     CharacterJob: 3
-    CharacterSubJob: "\u901F\u5C04\u624B"
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -192,6 +174,7 @@ MonoBehaviour:
     BaseAttackTime: 1
     AttackNum: 1
     DamageType: 0
+    TargetPriority: 0
     MaxHp: 1060
     Defense: 126
     MagicResistance: 0
@@ -199,13 +182,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 1
     TauntLevel: 0
-    StunImmune: 0
-    SilenceImmune: 0
-    SleepImmune: 0
-    FrozenImmune: 0
-    LevitateImmune: 0
-    DisarmedCombatImmune: 0
-    FearedImmune: 0
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
@@ -238,9 +214,7 @@ MonoBehaviour:
     WholeImage: {fileID: 21300000, guid: 9ccc9ea8f5f14474590df597900fcd5c, type: 3}
     DefaultCamp: 1
     CharacterRarity: 3
-    CharacterInfluence: "\u884C\u52A8\u9884\u5907\u7EC4A4"
     CharacterJob: 4
-    CharacterSubJob: "\u4E2D\u575A\u672F\u58EB"
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -262,6 +236,7 @@ MonoBehaviour:
     BaseAttackTime: 1.6
     AttackNum: 1
     DamageType: 1
+    TargetPriority: 0
     MaxHp: 1100
     Defense: 90
     MagicResistance: 15
@@ -269,13 +244,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 1
     TauntLevel: 0
-    StunImmune: 0
-    SilenceImmune: 0
-    SleepImmune: 0
-    FrozenImmune: 0
-    LevitateImmune: 0
-    DisarmedCombatImmune: 0
-    FearedImmune: 0
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
@@ -308,9 +276,7 @@ MonoBehaviour:
     WholeImage: {fileID: 21300000, guid: e16cc4dd6f27a7e4f971d941c87dca44, type: 3}
     DefaultCamp: 1
     CharacterRarity: 3
-    CharacterInfluence: "\u884C\u52A8\u9884\u5907\u7EC4A6"
     CharacterJob: 2
-    CharacterSubJob: "\u5B88\u62A4\u8005"
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -323,6 +289,7 @@ MonoBehaviour:
     BaseAttackTime: 1.2
     AttackNum: 1
     DamageType: 0
+    TargetPriority: 0
     MaxHp: 1833
     Defense: 496
     MagicResistance: 10
@@ -330,13 +297,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 3
     TauntLevel: 0
-    StunImmune: 0
-    SilenceImmune: 0
-    SleepImmune: 0
-    FrozenImmune: 0
-    LevitateImmune: 0
-    DisarmedCombatImmune: 0
-    FearedImmune: 0
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
@@ -369,9 +329,7 @@ MonoBehaviour:
     WholeImage: {fileID: 21300000, guid: 60c735c3f749e5d47a3f8cb6bca5207d, type: 3}
     DefaultCamp: 1
     CharacterRarity: 3
-    CharacterInfluence: "\u884C\u52A8\u9884\u5907\u7EC4A4"
     CharacterJob: 1
-    CharacterSubJob: "\u65E0\u754F\u8005"
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -385,6 +343,7 @@ MonoBehaviour:
     BaseAttackTime: 1.5
     AttackNum: 1
     DamageType: 0
+    TargetPriority: 0
     MaxHp: 2745
     Defense: 155
     MagicResistance: 0
@@ -392,13 +351,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 1
     TauntLevel: 0
-    StunImmune: 0
-    SilenceImmune: 0
-    SleepImmune: 0
-    FrozenImmune: 0
-    LevitateImmune: 0
-    DisarmedCombatImmune: 0
-    FearedImmune: 0
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
@@ -431,9 +383,7 @@ MonoBehaviour:
     WholeImage: {fileID: 21300000, guid: 41a80ba1d61e984489e33d9bc1f24b04, type: 3}
     DefaultCamp: 1
     CharacterRarity: 3
-    CharacterInfluence: "\u7F57\u5FB7\u5C9B"
     CharacterJob: 5
-    CharacterSubJob: "\u533B\u5E08"
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -457,6 +407,7 @@ MonoBehaviour:
     BaseAttackTime: 2.85
     AttackNum: 1
     DamageType: 3
+    TargetPriority: 2
     MaxHp: 1220
     Defense: 110
     MagicResistance: 0
@@ -464,13 +415,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 1
     TauntLevel: 0
-    StunImmune: 0
-    SilenceImmune: 0
-    SleepImmune: 0
-    FrozenImmune: 0
-    LevitateImmune: 0
-    DisarmedCombatImmune: 0
-    FearedImmune: 0
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
@@ -503,9 +447,7 @@ MonoBehaviour:
     WholeImage: {fileID: 0}
     DefaultCamp: 2
     CharacterRarity: 0
-    CharacterInfluence: 
     CharacterJob: 9
-    CharacterSubJob: 
     MonsterStatus: 0
     MonsterLabel: "\u4EA1\u7075\u751F\u7269"
     MonsterIsPrimary: 1
@@ -517,6 +459,7 @@ MonoBehaviour:
     BaseAttackTime: 2
     AttackNum: 1
     DamageType: 0
+    TargetPriority: 0
     MaxHp: 5500
     Defense: 265
     MagicResistance: 0
@@ -524,13 +467,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 1
     TauntLevel: 0
-    StunImmune: 0
-    SilenceImmune: 0
-    SleepImmune: 0
-    FrozenImmune: 0
-    LevitateImmune: 0
-    DisarmedCombatImmune: 0
-    FearedImmune: 0
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 0
@@ -562,9 +498,7 @@ MonoBehaviour:
     WholeImage: {fileID: 0}
     DefaultCamp: 2
     CharacterRarity: 0
-    CharacterInfluence: 
     CharacterJob: 9
-    CharacterSubJob: 
     MonsterStatus: 0
     MonsterLabel: "\u4EA1\u7075\u751F\u7269"
     MonsterIsPrimary: 1
@@ -576,6 +510,7 @@ MonoBehaviour:
     BaseAttackTime: 5
     AttackNum: 1
     DamageType: 0
+    TargetPriority: 0
     MaxHp: 4590
     Defense: 185
     MagicResistance: 0
@@ -583,13 +518,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 1
     TauntLevel: 0
-    StunImmune: 0
-    SilenceImmune: 0
-    SleepImmune: 0
-    FrozenImmune: 0
-    LevitateImmune: 0
-    DisarmedCombatImmune: 0
-    FearedImmune: 0
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 0
@@ -621,9 +549,7 @@ MonoBehaviour:
     WholeImage: {fileID: 0}
     DefaultCamp: 2
     CharacterRarity: 0
-    CharacterInfluence: 
     CharacterJob: 9
-    CharacterSubJob: 
     MonsterStatus: 1
     MonsterLabel: 
     MonsterIsPrimary: 1
@@ -635,6 +561,7 @@ MonoBehaviour:
     BaseAttackTime: 3
     AttackNum: 1
     DamageType: 0
+    TargetPriority: 0
     MaxHp: 12000
     Defense: 325
     MagicResistance: 10
@@ -642,13 +569,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 1
     TauntLevel: 0
-    StunImmune: 0
-    SilenceImmune: 0
-    SleepImmune: 0
-    FrozenImmune: 0
-    LevitateImmune: 0
-    DisarmedCombatImmune: 0
-    FearedImmune: 0
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 0
@@ -680,9 +600,7 @@ MonoBehaviour:
     WholeImage: {fileID: 0}
     DefaultCamp: 2
     CharacterRarity: 0
-    CharacterInfluence: 
     CharacterJob: 9
-    CharacterSubJob: 
     MonsterStatus: 1
     MonsterLabel: "\u96F7\u51FB\u5F02\u53D8\u4F53"
     MonsterIsPrimary: 1
@@ -694,6 +612,7 @@ MonoBehaviour:
     BaseAttackTime: 5
     AttackNum: 1
     DamageType: 1
+    TargetPriority: 0
     MaxHp: 12500
     Defense: 375
     MagicResistance: 50
@@ -701,13 +620,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 1
     TauntLevel: 0
-    StunImmune: 0
-    SilenceImmune: 0
-    SleepImmune: 0
-    FrozenImmune: 0
-    LevitateImmune: 0
-    DisarmedCombatImmune: 0
-    FearedImmune: 0
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 0
@@ -738,9 +650,7 @@ MonoBehaviour:
     WholeImage: {fileID: 0}
     DefaultCamp: 2
     CharacterRarity: 0
-    CharacterInfluence: 
     CharacterJob: 9
-    CharacterSubJob: 
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 1
@@ -752,6 +662,7 @@ MonoBehaviour:
     BaseAttackTime: 2
     AttackNum: 1
     DamageType: 0
+    TargetPriority: 0
     MaxHp: 1235
     Defense: 65
     MagicResistance: 5
@@ -759,13 +670,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 1
     TauntLevel: 0
-    StunImmune: 0
-    SilenceImmune: 0
-    SleepImmune: 0
-    FrozenImmune: 0
-    LevitateImmune: 0
-    DisarmedCombatImmune: 0
-    FearedImmune: 0
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 0
@@ -796,9 +700,7 @@ MonoBehaviour:
     WholeImage: {fileID: 0}
     DefaultCamp: 2
     CharacterRarity: 0
-    CharacterInfluence: 
     CharacterJob: 9
-    CharacterSubJob: 
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 1
@@ -810,6 +712,7 @@ MonoBehaviour:
     BaseAttackTime: 4
     AttackNum: 1
     DamageType: 0
+    TargetPriority: 0
     MaxHp: 3600
     Defense: 150
     MagicResistance: 5
@@ -817,13 +720,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 1
     TauntLevel: 0
-    StunImmune: 0
-    SilenceImmune: 0
-    SleepImmune: 0
-    FrozenImmune: 0
-    LevitateImmune: 0
-    DisarmedCombatImmune: 0
-    FearedImmune: 0
     CanSpawnEntityIds:
     - ID_C: m
       ID_N: 6
@@ -856,9 +752,7 @@ MonoBehaviour:
     WholeImage: {fileID: 0}
     DefaultCamp: 2
     CharacterRarity: 0
-    CharacterInfluence: 
     CharacterJob: 9
-    CharacterSubJob: 
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 1
@@ -870,6 +764,7 @@ MonoBehaviour:
     BaseAttackTime: 5
     AttackNum: 1
     DamageType: 0
+    TargetPriority: 0
     MaxHp: 6900
     Defense: 235
     MagicResistance: 5
@@ -877,13 +772,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 1
     TauntLevel: 0
-    StunImmune: 0
-    SilenceImmune: 0
-    SleepImmune: 0
-    FrozenImmune: 0
-    LevitateImmune: 0
-    DisarmedCombatImmune: 0
-    FearedImmune: 0
     CanSpawnEntityIds:
     - ID_C: m
       ID_N: 7
@@ -916,9 +804,7 @@ MonoBehaviour:
     WholeImage: {fileID: 0}
     DefaultCamp: 2
     CharacterRarity: 0
-    CharacterInfluence: 
     CharacterJob: 9
-    CharacterSubJob: 
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -930,6 +816,7 @@ MonoBehaviour:
     BaseAttackTime: 3
     AttackNum: 1
     DamageType: 1
+    TargetPriority: 0
     MaxHp: 5000
     Defense: 500
     MagicResistance: 50
@@ -937,13 +824,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 1
     TauntLevel: 0
-    StunImmune: 0
-    SilenceImmune: 0
-    SleepImmune: 0
-    FrozenImmune: 0
-    LevitateImmune: 0
-    DisarmedCombatImmune: 0
-    FearedImmune: 0
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 0
@@ -974,9 +854,7 @@ MonoBehaviour:
     WholeImage: {fileID: 0}
     DefaultCamp: 2
     CharacterRarity: 0
-    CharacterInfluence: 
     CharacterJob: 9
-    CharacterSubJob: 
     MonsterStatus: 0
     MonsterLabel: "\u6CD5\u672F\u9020\u7269"
     MonsterIsPrimary: 0
@@ -988,6 +866,7 @@ MonoBehaviour:
     BaseAttackTime: 2
     AttackNum: 0
     DamageType: 0
+    TargetPriority: 0
     MaxHp: 100
     Defense: 0
     MagicResistance: 0
@@ -995,13 +874,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 0
     TauntLevel: 0
-    StunImmune: 0
-    SilenceImmune: 0
-    SleepImmune: 0
-    FrozenImmune: 0
-    LevitateImmune: 0
-    DisarmedCombatImmune: 0
-    FearedImmune: 0
     CanSpawnEntityIds:
     - ID_C: m
       ID_N: 11
@@ -1034,9 +906,7 @@ MonoBehaviour:
     WholeImage: {fileID: 0}
     DefaultCamp: 2
     CharacterRarity: 0
-    CharacterInfluence: 
     CharacterJob: 9
-    CharacterSubJob: 
     MonsterStatus: 2
     MonsterLabel: "\u4EA1\u7075\u751F\u7269"
     MonsterIsPrimary: 1
@@ -1048,6 +918,7 @@ MonoBehaviour:
     BaseAttackTime: 5
     AttackNum: 3
     DamageType: 1
+    TargetPriority: 0
     MaxHp: 32500
     Defense: 700
     MagicResistance: 50
@@ -1055,13 +926,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 1
     TauntLevel: 0
-    StunImmune: 1
-    SilenceImmune: 1
-    SleepImmune: 1
-    FrozenImmune: 1
-    LevitateImmune: 1
-    DisarmedCombatImmune: 1
-    FearedImmune: 1
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 0
@@ -1092,9 +956,7 @@ MonoBehaviour:
     WholeImage: {fileID: 0}
     DefaultCamp: 2
     CharacterRarity: 0
-    CharacterInfluence: 
     CharacterJob: 9
-    CharacterSubJob: 
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -1106,6 +968,7 @@ MonoBehaviour:
     BaseAttackTime: -1
     AttackNum: 0
     DamageType: 1
+    TargetPriority: 0
     MaxHp: 100
     Defense: 0
     MagicResistance: 0
@@ -1113,13 +976,6 @@ MonoBehaviour:
     MagicDodge: 0
     BlockOccupation: 0
     TauntLevel: 0
-    StunImmune: 0
-    SilenceImmune: 0
-    SleepImmune: 0
-    FrozenImmune: 0
-    LevitateImmune: 0
-    DisarmedCombatImmune: 0
-    FearedImmune: 0
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 0

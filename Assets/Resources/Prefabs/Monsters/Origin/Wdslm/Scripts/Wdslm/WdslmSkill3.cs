@@ -45,7 +45,6 @@ public class WdslmSkill3 : Skill
     public override void SkillEnd()
     {
         base.SkillEnd();
-        print("skillend");
         _machine.Die();
         if (TargetEntity.Stats.IsActive)
             TargetEntity.Die();

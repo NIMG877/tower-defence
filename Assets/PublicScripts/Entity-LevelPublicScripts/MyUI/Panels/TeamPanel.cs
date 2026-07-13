@@ -50,7 +50,6 @@ namespace MyUI
         {
             base.OnResume();
             _teamFrame.UpdateCharacterTab();
-            Debug.Log("re");
         }
     }
 }

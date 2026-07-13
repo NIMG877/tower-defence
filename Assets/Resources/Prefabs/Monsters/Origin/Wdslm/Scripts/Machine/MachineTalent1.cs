@@ -167,6 +167,5 @@ public class MachineTalent1 : Talent
             _thisMove.AddTempTarget(null, new Vector2(maxXY.x, maxXY.y), 5);
             _findGap = 5;
         }
-        print(_thisMove.CurrentSectionSerial);
     }
 }

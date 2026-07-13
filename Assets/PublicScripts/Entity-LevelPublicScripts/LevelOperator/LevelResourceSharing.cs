@@ -97,7 +97,6 @@ public class LevelResourceSharing
             Object.Destroy(EnvironmentalControlDevice);
         }
         EnvironmentalControlDevice = null;
-        Debug.Log(_levelCts);
         _levelCts.Cancel();
         _levelCts = null;
         LevelCtk = default;

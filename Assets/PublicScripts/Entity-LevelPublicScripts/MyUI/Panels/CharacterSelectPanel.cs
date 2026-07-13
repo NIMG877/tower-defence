@@ -142,7 +142,6 @@ namespace MyUI
                             _selectedCharacters.RemoveAt(index_s);
                             _selectedCharacterSkill.RemoveAt(index_s);
                             UpdateCharacterMessage(EntityID.Null);
-                            Debug.Log(_selectedCharacters.Count);
                         }
                         else
                         {
@@ -269,8 +268,6 @@ namespace MyUI
         }
         private void UpDateSelectCharacter()
         {
-            Debug.Log(_selectedCharacters.Count);
-            Debug.Log(_selectIndex);
             //����ĳ��˳������
             if (_selectIndex >= 0)
             {

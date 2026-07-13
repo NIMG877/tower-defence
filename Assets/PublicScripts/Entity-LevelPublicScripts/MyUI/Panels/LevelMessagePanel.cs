@@ -234,7 +234,6 @@ namespace MyUI
                     }
                     catch (System.OperationCanceledException)
                     {
-                        Debug.Log("RespawnTiming Canceled");
                         return;
                     }
                 }

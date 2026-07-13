@@ -223,7 +223,6 @@ public class Skill : MonoBehaviour, IPoolOperation
             case 1:
                 _thisEntity.AttackBase.OnAttackSuccessfully += new AttackBase.OperationsOnAttackSuccessfully(() =>
                 {
-                    Debug.Log("add");
                     SpRecover(1, false);
                 });
                 break;

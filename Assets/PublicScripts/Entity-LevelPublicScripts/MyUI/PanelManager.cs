@@ -75,7 +75,6 @@ namespace MyUI
                     return;
                 }
             }
-            Debug.Log($"不存在名为{popToPanel.UIType.Name}的UIPanel");
             stackPanel.Clear();
             stackPanelCount = 0;
         }
