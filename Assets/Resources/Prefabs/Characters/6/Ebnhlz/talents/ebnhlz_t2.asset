@@ -27,72 +27,82 @@ MonoBehaviour:
     openMode: 0
     recoverForbidDuringAbility: 0
     canManualClose: 0
-  components:
-  - componentType: EntitySelector
-    parameters:
-      entries:
-      - key: subjectMode
-        value: eventTarget
-        fromBlackboard: 0
-        type: 3
-      - key: selectionMode
-        value: radius
-        fromBlackboard: 0
-        type: 3
-      - key: campRelation
-        value: same
-        fromBlackboard: 0
-        type: 3
-      - key: radius
-        value: 1.1
-        fromBlackboard: 0
-        type: 1
-      - key: force
-        value: True
-        fromBlackboard: 0
-        type: 2
-      - key: excludeSubjects
-        value: True
-        fromBlackboard: 0
-        type: 2
-      - key: outputEntitiesKey
-        value: ebnhlz_t2_nearby_enemies
-        fromBlackboard: 0
-        type: 3
-      - key: outputCountKey
-        value: ebnhlz_t2_nearby_enemy_count
-        fromBlackboard: 0
-        type: 3
-    triggers:
+  rules:
+  - triggers:
     - triggerEvent: 9
       groups: []
-  - componentType: ApplyDamage
-    parameters:
-      entries:
-      - key: targetMode
-        value: eventTarget
-        fromBlackboard: 0
-        type: 3
-      - key: baseValueMode
-        value: attack
-        fromBlackboard: 0
-        type: 3
-      - key: multiplier
-        value: 0.15
-        fromBlackboard: 0
-        type: 1
-      - key: damageType
-        value: 1
-        fromBlackboard: 0
-        type: 0
-      - key: applyType
-        value: 2
-        fromBlackboard: 0
-        type: 0
-    triggers:
+    reentry: 0
+    steps:
+    - op: select_targets
+      args:
+        entries:
+        - key: subjectMode
+          value: eventTarget
+          fromBlackboard: 0
+          type: 3
+        - key: selectionMode
+          value: radius
+          fromBlackboard: 0
+          type: 3
+        - key: campRelation
+          value: same
+          fromBlackboard: 0
+          type: 3
+        - key: radius
+          value: 1.1
+          fromBlackboard: 0
+          type: 1
+        - key: force
+          value: True
+          fromBlackboard: 0
+          type: 2
+        - key: excludeSubjects
+          value: True
+          fromBlackboard: 0
+          type: 2
+        - key: outputEntitiesKey
+          value: ebnhlz_t2_nearby_enemies
+          fromBlackboard: 0
+          type: 3
+        - key: outputCountKey
+          value: ebnhlz_t2_nearby_enemy_count
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+  - triggers:
     - triggerEvent: 9
       groups:
       - units:
         - op: 6
           leftKey: ebnhlz_t2_nearby_enemy_count
           rightValue: 0
+    reentry: 0
+    steps:
+    - op: apply_damage
+      args:
+        entries:
+        - key: targetMode
+          value: eventTarget
+          fromBlackboard: 0
+          type: 3
+        - key: baseValueMode
+          value: attack
+          fromBlackboard: 0
+          type: 3
+        - key: multiplier
+          value: 0.15
+          fromBlackboard: 0
+          type: 1
+        - key: damageType
+          value: 1
+          fromBlackboard: 0
+          type: 0
+        - key: applyType
+          value: 2
+          fromBlackboard: 0
+          type: 0
+      condition: []
+      steps: []
+      elseSteps: []

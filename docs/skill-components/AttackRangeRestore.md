@@ -3,7 +3,8 @@
 Restores the selected entity's attack range by assigning
 `EntityVision.BaseRange` back to `EntityVision.Range`.
 
-**Registered as:** `AttackRangeRestore`
+**Canonical op:** `attack_range_restore`
+**Component registration:** `AttackRangeRestore`
 
 ## Parameters
 

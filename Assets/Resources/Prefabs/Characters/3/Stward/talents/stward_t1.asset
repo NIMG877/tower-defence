@@ -27,36 +27,46 @@ MonoBehaviour:
     openMode: 0
     recoverForbidDuringAbility: 0
     canManualClose: 0
-  components:
-  - componentType: ApplyBuff
-    parameters:
-      entries:
-      - key: attributes
-        value: Attack
-        fromBlackboard: 0
-        type: 3
-      - key: ops
-        value: AddPercent
-        fromBlackboard: 0
-        type: 3
-      - key: magnitudes
-        value: 0.06
-        fromBlackboard: 0
-        type: 3
-      - key: buffId
-        value: stward_t1
-        fromBlackboard: 0
-        type: 3
-    triggers:
+  rules:
+  - triggers:
     - triggerEvent: 2
       groups: []
-  - componentType: AttackBehaviorOverride
-    parameters:
-      entries:
-      - key: targetPriority
-        value: Defense_Des
-        fromBlackboard: 0
-        type: 3
-    triggers:
+    reentry: 0
+    steps:
+    - op: apply_buff
+      args:
+        entries:
+        - key: attributes
+          value: Attack
+          fromBlackboard: 0
+          type: 3
+        - key: ops
+          value: AddPercent
+          fromBlackboard: 0
+          type: 3
+        - key: magnitudes
+          value: 0.06
+          fromBlackboard: 0
+          type: 3
+        - key: buffId
+          value: stward_t1
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+  - triggers:
     - triggerEvent: 2
       groups: []
+    reentry: 0
+    steps:
+    - op: attack_behavior_override
+      args:
+        entries:
+        - key: targetPriority
+          value: Defense_Des
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []

@@ -1,11 +1,11 @@
 ---
 name: td-create-ability-component
-description: Create new reusable AbilitySystem component classes in this TD Unity project from a component contract describing requirements, parameters, and expected effects. Use only when existing components cannot compose the behavior and no reasonable extension of an existing component preserves its responsibility. Analyze the owning subsystem, choose useful but restrained generality, create only new component source/meta files, add its docs/skill-components documentation, and update docs/skill-components/README.md. Never modify existing runtime components or other project code; exit and ask the user when new files alone cannot implement the behavior.
+description: Create a new reusable AbilitySystem step operation in this TD Unity project from an approved operation contract. Use when registered operations cannot compose a behavior and no focused extension of a component-backed operation fits. Select a native AbilityStepOp POCO for per-activation, yielding, cancellable, or sequence-scoped behavior; use AbilityComponentBase only for component lifecycle behavior. Create only new source/meta/test/documentation files and update the relevant operation index. Never modify existing runtime code or ability assets.
 ---
 
-# Create TD Ability Component
+# Create TD Ability Operation
 
-Create a reusable atomic component without changing existing runtime code.
+Create one reusable atomic operation without changing existing runtime code.
 Read [references/component-workflow.md](references/component-workflow.md)
 before starting.
 
@@ -13,46 +13,65 @@ before starting.
 
 Allowed changes:
 
-- new component `.cs` file(s) under
+- new native op `.cs` file(s) under
+  `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/StepOps/`; or
+- new component-backed op `.cs` file(s) under
   `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/`;
 - corresponding new Unity `.meta` file(s);
-- one new `docs/skill-components/<Component>.md`;
-- updating `docs/skill-components/README.md` to index the component.
+- focused new test files and their `.meta` files;
+- one operation document under `docs/ability-ops/` or
+  `docs/skill-components/`, matching the selected implementation form;
+- updating `docs/ability-steps.md` and, for component-backed operations,
+  `docs/skill-components/README.md` to index the operation.
 
 Forbidden changes:
 
-- modifying any existing component;
+- modifying an existing operation or component;
 - modifying events, enums, runners, Blackboard, factories, APIs, entity
   systems, assets, prefabs, or other runtime code;
 - configuring the calling ability asset.
 
-If the behavior cannot be implemented using only new component files and
-existing public APIs, stop immediately. Explain the required existing-code
-change and ask the user to expand the task. Do not work around the boundary.
+If the behavior cannot be implemented through a new attributed operation and
+current public APIs, stop. Explain the required existing-code change and ask
+the user to expand the task.
+
+## Implementation Form
+
+Use a native `AbilityStepOp` when execution starts as the sequence reaches the
+step. This is the default for operations that yield, return `Failed`, require
+`OnCancel`, own mutable state per activation, or interact with nested steps.
+
+Use an `AbilityComponentBase` implementation only when its responsibility
+requires the component lifecycle: one instance bound to the configured step,
+ability initialization, immediate `OnTrigger`, ability-wide `OnTick`, and
+ability teardown. Confirm that shared component state is safe for the intended
+`reentry` policies.
 
 ## Generality Rule
 
-Generalize around the real subsystem ownership boundary, not around one
-ability name.
+Generalize around the owning subsystem boundary, not around one ability name.
 
 Example: if the request changes `AttackBase.DamageType`, inspect nearby
 `AttackBase` behavior and consider whether a restrained component that can
 change selected attack behavior fields, such as `DamageType` and
 `EntityOrderLogic`, is appropriate.
 
-Do not force unrelated fields into one component, expose arbitrary reflection,
+Do not force unrelated fields into one operation, expose arbitrary reflection,
 or build a highly generic framework. Prefer a small explicit parameter set
 that serves several plausible abilities and remains easy to document.
 
 ## Required Input
 
-Require a component contract containing:
+Require an operation contract containing:
 
+- canonical snake_case `op` name;
 - atomic requirement;
-- parameters and defaults;
+- arguments and defaults;
 - target selection;
 - expected effect;
-- trigger/lifecycle expectations;
+- `Completed`/`Running`/`Failed` behavior;
+- cancellation and teardown behavior;
+- nested sequence fields, if any;
 - Blackboard inputs/outputs, if any.
 
 Ask for missing information when it changes the public contract. Discover
@@ -60,9 +79,10 @@ implementation details from the project.
 
 ## Completion
 
-Create the component, document every parameter and lifecycle behavior, update
-the README index, and verify that every registered concrete component has a
-document and README entry.
+Create the operation, document every argument and lifecycle behavior, update
+the relevant index, and verify registration, cancellation, nested execution,
+and any Blackboard contract.
 
-Return a concise handoff contract for the ability creator: registered name,
-parameters, recommended triggers, Blackboard keys/types, and ordering notes.
+Return a concise handoff contract containing the canonical op, implementation
+form, arguments, execution status, cancellation behavior, Blackboard keys and
+types, step placement, and verification.

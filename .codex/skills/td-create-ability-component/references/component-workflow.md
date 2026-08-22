@@ -1,82 +1,133 @@
-# Ability Component Creation Workflow
+# Ability Operation Creation Workflow
 
 ## 1. Confirm The Contract
 
 Restate:
 
+- canonical snake_case `op` name;
 - one atomic responsibility;
 - intended targets;
-- parameters/defaults;
+- arguments/defaults;
 - expected state change or event effect;
-- whether restoration/removal is required;
+- `Completed`/`Running`/`Failed` behavior;
+- cancellation and teardown behavior;
+- nested `steps`/`elseSteps` usage, if any;
 - Blackboard data shape;
-- expected trigger timing.
+- expected rule and step placement.
 
 If the request combines independent responsibilities, consider separate small
-components. If a restore operation needs an exact runtime snapshot, create a
-paired override/restore component only when both can be implemented entirely
-as new files.
+operations. Pair apply/remove or override/restore operations when exact runtime
+records are required and both can be implemented entirely as new files.
 
-## 2. Inspect Before Designing
+## 2. Select The Implementation Form
+
+Choose a native `AbilityStepOp` when any of these apply:
+
+- the operation owns state for one step activation;
+- `OnTick` can return `Running`;
+- cancellation must clean up active work;
+- failure must terminate the owning sequence;
+- the operation executes nested `steps` or `elseSteps`;
+- parallel rule runs require independent operation instances.
+
+Choose a component-backed operation only when the behavior belongs to
+`AbilityComponentBase` lifecycle semantics:
+
+- one component instance is bound to the configured step;
+- `OnInit` runs during ability runtime construction;
+- `OnTrigger` runs when the step is reached and completes the step immediately;
+- component `OnTick` runs while the ability is active, independently of the
+  sequence cursor;
+- `OnTeardown` runs with the ability lifecycle.
+
+Do not use a component-backed operation to simulate a yielding sequence step.
+
+## 3. Inspect Before Designing
 
 Read:
 
-1. `docs/skill-components/README.md` to avoid duplicating an existing component.
-2. Detailed docs for nearby components.
-3. Relevant component implementations for local patterns.
-4. The owning subsystem and its existing public API.
-5. `AbilityComponentBase`, `AbilityContext`, `ParamList`, Blackboard, and
-   registration behavior as needed.
+1. `docs/ability-steps.md` and its canonical operation table.
+2. `docs/skill-components/README.md` for component-backed operations.
+3. Detailed docs and implementations for nearby operations.
+4. `AbilityStepOp`, `AbilityStepOpRegistry`, `AbilityContext`, `StepConfig`,
+   `ParamList`, and Blackboard.
+5. `AbilityComponentBase` and component registration only when the
+   component-backed form is selected.
+6. The owning subsystem and its public API.
 
 Prefer:
 
-- `[RegisterComponent("<Name>")]`;
-- lazy parameter getters initialized in `OnInit`;
+- `[RegisterAbilityStepOp("snake_case_name")]` for native operations;
+- `[RegisterComponent("PascalCaseName")]` for component-backed operations;
+- unique canonical names verified through `AbilityStepOpRegistry`;
+- lazy argument getters initialized in `OnInit`;
 - `ctx.sharedBlackboard` for runtime handoffs;
-- existing target conventions (`toSelf`, Blackboard entity/list key);
+- documented target conventions such as self, event target, or Blackboard
+  entity/list keys;
 - explicit records/snapshots for exact removal/restoration;
 - defensive no-op behavior for missing targets or optional data.
 
-## 3. Choose Restrained Generality
+## 4. Choose Restrained Generality
 
 Use this test:
 
 1. What subsystem owns the requested value or action?
 2. Which closely related fields/actions form one coherent operation?
-3. Would at least one other plausible ability reuse the component?
+3. Would at least one other plausible ability reuse the operation?
 4. Can the API remain explicit and understandable?
 
 Generalize when all answers support it. Otherwise implement the narrower
-atomic component.
+atomic operation.
 
 Avoid:
 
 - ability-specific class or parameter names;
 - arbitrary field names plus reflection;
-- mixing buffs, animations, targeting, and damage into one component;
+- mixing buffs, animations, targeting, and damage into one operation;
 - speculative options unsupported by current requirements.
 
-## 4. Enforce New-Files-Only Feasibility
+## 5. Enforce New-Files-Only Feasibility
 
-Before editing, confirm the component can work through existing public APIs.
+Before editing, confirm the operation can work through current public APIs and
+attribute-based registration.
 
 Exit and ask the user when implementation requires any existing-code change,
 including:
 
 - adding or changing a TriggerEvent/AbilityEvent;
 - exposing a private/internal operation;
-- changing runner dispatch or SP behavior;
+- changing sequence execution, runner dispatch, registry, or SP behavior;
 - extending ParamList/Blackboard;
 - changing an enum or data schema;
-- modifying another component;
+- modifying another operation or component;
 - changing an ability asset, prefab, or entity script.
 
-The only existing file this workflow may edit is
-`docs/skill-components/README.md`.
+The only existing files this workflow may edit are the relevant documentation
+indexes named in the skill scope.
 
-## 5. Implement
+## 6. Implement
 
-Create new source files under:
+For a native operation, create source files under:
+
+`Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/StepOps/`
+
+Follow these rules:
+
+- use namespace `AbilitySystem`;
+- inherit `AbilityStepOp`;
+- register one unique canonical snake_case name with
+  `[RegisterAbilityStepOp("op_name")]`;
+- resolve `ctx.step.args`, conditions, and nested sequences in `OnInit` or when
+  execution reaches the relevant phase;
+- return `Completed`, `Running`, or `Failed` according to the documented
+  contract;
+- make `OnCancel` stop active work and make `OnTeardown` release resources;
+- keep mutable execution state on the operation instance, never on
+  `StepConfig` or `ParamList`;
+- make every registry factory activation independent and safe for `Parallel`
+  reentry.
+
+For a component-backed operation, create source files under:
 
 `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/`
 
@@ -84,43 +135,52 @@ Follow project patterns:
 
 - namespace `AbilitySystem.Components`;
 - inherit `AbilityComponentBase`;
-- register with a unique component name;
+- register with a unique PascalCase component name;
+- verify the adapter's canonical snake_case op name;
 - initialize lazy getters in `OnInit`;
 - perform the atomic action in `OnTrigger`;
-- use `OnTick`/`OnTeardown` only when the contract truly requires them;
+- use `OnTick`/`OnTeardown` only when component lifecycle semantics require
+  them;
 - support self or Blackboard targets when useful and consistent;
-- do not mutate parameter-presence flags during triggers;
+- do not mutate argument-presence flags during triggers;
 - accumulate and consume Blackboard records safely when repeated triggers are
   valid.
 
 Create each `.meta` file with a unique GUID.
 
-## 6. Document
+## 7. Document
 
-Create `docs/skill-components/<Component>.md` containing:
+For a native operation, create `docs/ability-ops/<op>.md` and link it from the
+canonical operation table in `docs/ability-steps.md`.
 
-- responsibility and registered name;
+For a component-backed operation, create
+`docs/skill-components/<Component>.md` and link it from both
+`docs/skill-components/README.md` and the canonical operation table.
+
+Document:
+
+- responsibility, canonical op, and implementation form;
 - target behavior;
-- complete parameter table with types/defaults;
+- complete argument table with types/defaults and Blackboard capability;
 - Blackboard input/output types and consumption semantics;
-- lifecycle and recommended triggers;
-- ordering notes, limitations, and a concise example when helpful.
+- `Completed`/`Running`/`Failed`, cancellation, and teardown behavior;
+- nested sequence fields and condition sampling, if any;
+- rule/step placement, reentry safety, limitations, and a concise example.
 
-Update `docs/skill-components/README.md` in the appropriate category. Correct
-nearby factual errors only when directly necessary to describe the new
-component; do not broadly rewrite documentation.
-
-## 7. Verify
+## 8. Verify
 
 Verify:
 
-- unique registration name;
+- unique canonical name and alias set;
 - all new `.cs` files have `.meta`;
-- component compiles when included by the generated project;
+- source compiles when included by the generated project;
+- native factories create a fresh operation object for every activation;
+- `Running`, `Failed`, cancellation, and teardown paths match the contract;
+- component-backed operations resolve to the expected snake_case op;
+- nested sequences are recursively covered when present;
 - no existing runtime/code/asset files changed;
-- every concrete registered component has a matching documentation file;
-- every component document is linked from README;
-- docs match actual parameter names and behavior.
+- operation documentation is linked from the relevant indexes;
+- docs match actual argument names and behavior.
 
 Run an appropriate build if the generated `.csproj` includes the new files.
 If it does not, do not modify the `.csproj`; report that Unity must regenerate
@@ -131,11 +191,14 @@ it before compile verification.
 Return:
 
 ```text
-Registered component:
+Canonical op:
+Implementation form:
 Atomic responsibility:
-Parameters/defaults:
-Recommended trigger(s):
+Arguments/defaults:
+Execution status and yielding:
+Cancellation/teardown:
 Blackboard keys/types:
-Ordering requirements:
+Rule/step placement:
+Reentry safety:
 Verification:
 ```

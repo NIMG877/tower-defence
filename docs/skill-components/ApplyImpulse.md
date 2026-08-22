@@ -3,7 +3,8 @@
 Applies an outward movement impulse from the ability owner to each resolved
 target through `MoveBase.TryToAddImpulse`.
 
-**Registered as:** `ApplyImpulse`
+**Canonical op:** `apply_impulse`
+**Component registration:** `ApplyImpulse`
 
 ## Parameters
 
@@ -17,8 +18,9 @@ Targets are deduplicated. Targets without `MoveBase` and targets located
 exactly at the ability owner's position are skipped. `MoveBase` decides
 whether the target's mass permits the configured impulse.
 
-## Recommended trigger and ordering
+## Rule trigger and step placement
 
-Use after an `EntitySelector` that writes the configured Blackboard list.
-For an explosion, give `ApplyDamage` and `ApplyImpulse` the same target list
-and trigger conditions.
+Place `select_targets` before `apply_impulse` when the operation reads a
+Blackboard target list. For an explosion, put `apply_damage` and
+`apply_impulse` after the selector in the same rule so both consume the same
+list.

@@ -2,7 +2,8 @@
 
 Applies one direct damage instance to each resolved target.
 
-**Registered as:** `ApplyDamage`
+**Canonical op:** `apply_damage`
+**Component registration:** `ApplyDamage`
 
 ## Parameters
 
@@ -25,8 +26,8 @@ Direct damage does not invoke the attacker's `AttackBase.OnAfterTakeDamage`,
 so using this component on `OnAfterTakeDamage` does not recursively trigger
 itself.
 
-## Recommended triggers
+## Rule trigger and step placement
 
 Use after an upstream selector/condition when damage depends on a query result.
-Component order matters when both components handle the same event: place the
-Blackboard writer before this component.
+Place the Blackboard writer or `select_targets` before `apply_damage` in the
+same rule's `steps[]`.

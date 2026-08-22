@@ -3,7 +3,8 @@
 Replaces animation slots using names from the target entity's
 `AnimationResources` Named Resources.
 
-**Registered as:** `ApplyAnimationOverride`  
+**Canonical op:** `apply_animation_override`
+**Component registration:** `ApplyAnimationOverride`
 **Pair with:** `RemoveAnimationOverride` for persistent overrides.
 
 ## Modes

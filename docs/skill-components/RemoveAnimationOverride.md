@@ -3,7 +3,8 @@
 Removes persistent animation overrides previously created by
 `ApplyAnimationOverride`.
 
-**Registered as:** `RemoveAnimationOverride`
+**Canonical op:** `remove_animation_override`
+**Component registration:** `RemoveAnimationOverride`
 
 ## Parameters
 

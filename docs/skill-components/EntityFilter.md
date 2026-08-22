@@ -4,7 +4,8 @@ Filters the candidate list produced by `AttackBase.AttackTargetSelect`.
 Conditions are organized as OR groups containing AND conditions, matching the
 shape of `ConditionConfig.groups`.
 
-**Registered as:** `EntityFilter`
+**Canonical op:** `filter_targets`
+**Component registration:** `EntityFilter`
 
 ## Parameters
 
@@ -49,9 +50,9 @@ warning.
 - On `OnAbilityEnd`, remove all subscriptions created by this component.
 - On teardown, remove subscriptions defensively.
 
-For a temporary skill, trigger on both `OnAbilityBegin` and `OnAbilityEnd`.
-Place `ForceResetAttack` after this component on both events when the filtered
-target set must take effect immediately.
+For a temporary skill, use one rule with `OnAbilityBegin` and `OnAbilityEnd`
+trigger entries and one `filter_targets` step. Put `force_reset_attack` after
+it when the filtered target set must take effect immediately on both events.
 
 ## Example
 

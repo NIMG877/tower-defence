@@ -3,7 +3,8 @@
 Consumes shared attack requests from the owning entity's Blackboard and
 performs interruptible extra attacks against their exact targets.
 
-**Registered as:** `SharedTargetExtraAttack`
+**Canonical op:** `shared_target_extra_attack`
+**Component registration:** `SharedTargetExtraAttack`
 
 ## Parameters
 
@@ -17,8 +18,9 @@ performs interruptible extra attacks against their exact targets.
 
 ## Triggers and lifecycle
 
-Configure the same component instance for `OnTick`, `OnAttackSuccessfully`,
-and `OnAttackInterrupt`.
+Use one rule with `OnTick`, `OnAttackSuccessfully`, and `OnAttackInterrupt`
+trigger entries and one `shared_target_extra_attack` step. The rule binds one
+component instance for queue and active-request state.
 
 - `OnTick`: removes invalid queue-front targets, applies the abnormal state,
   and attempts the first exact-target attack unless the entity is in `Start`

@@ -7,7 +7,7 @@ to the per-Entity shared Blackboard at `outputKey`. Three modes are
 - **`probability`** (default): `input` is a single float in `[0, 1]`.
   Rolls `RandomHelper.Helper.RandomP(p)` and writes `"True"` or
   `"False"` (matches `bool.TryParse`). Use as a probability gate:
-  downstream components read `BB[outputKey]` in their `ConditionConfig`.
+  a following `branch` or another operation reads `BB[outputKey]`.
 - **`value`**: `input` is a 2-float CSV `min,max`. Uniform float in
   `[min, max]` is rolled and written as `float.ToString("R")`
   (round-trippable; `ConditionEvaluator`'s numeric compare can
@@ -20,7 +20,8 @@ read as a string regardless of mode (for `value` and `list` this is
 obviously needed; for `probability` the designer must store the float
 as a string-parseable value in BB — e.g. `"0.6"`, not `0.6`).
 
-**Registered as:** `RandomRoll`
+**Canonical op:** `random_roll`
+**Component registration:** `RandomRoll`
 **Class:** `AbilitySystem.Components.RandomRoll`
 **File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/RandomRoll.cs`
 
@@ -69,20 +70,13 @@ as a string-parseable value in BB — e.g. `"0.6"`, not `0.6`).
 **Probability gate** — fire downstream only 60% of the time:
 
 ```
-Component A: RandomRoll   (mode=probability, input=0.6, outputKey=rolled_ok)
-Component B: ApplyBuff    (triggers=[...], conditions: BB["rolled_ok"]=="True")
+rule.steps:
+  - random_roll  (mode=probability, input=0.6, outputKey=rolled_ok)
+  - branch       (condition: BB["rolled_ok"]=="True")
+      steps:
+        - apply_buff
 ```
 
-`RandomRoll` MUST appear before `ApplyBuff` in the ability's
-`components[]` array, because dispatch iterates the
-`componentsByTrigger` bucket in build order and the BB write must
-happen before the BB read. The README and `docs/skill-components/`
-do not currently enforce this ordering — designers must keep it in
-mind.
-
-## Changelog
-
-- 2026-06-12: initial implementation. Uses `RandomHelper.Helper`
-  (shared 200-entry array). Supports the three modes the spec calls
-  for; extensibility to weighted random or non-uniform distributions
-  is a follow-up.
+Put `random_roll` before the step that reads `rolled_ok`. Steps in one
+rule execute in declaration order, so the Blackboard write is visible to
+the following `branch` (or any later component-backed step) immediately.

@@ -5,15 +5,15 @@ Generic field-rewriter for `DamageEventBase` events (`BeforeAttackEvent`,
 Three parallel CSVs parameterise the rewrite: each triple at the same
 index is `(field, value, method)` and is applied in order.
 
-The original `AttackMultiplierBoost` (`multiplyer *= N`) and `SetAttackCombo`
-(`cumbo = N`) were folded into this component as two-line CSV configs:
+Common configurations:
 
-| Old component | Equivalent CSV |
+| Purpose | CSV arguments |
 |---|---|
-| `AttackMultiplierBoost { multiplier = 1.5 }` | `fields=multiplyer` `values=1.5` `methods=mult` |
-| `SetAttackCombo { cumbo = 3 }` | `fields=cumbo` `values=3` `methods=set` |
+| Multiply damage by `1.5` | `fields=multiplyer` `values=1.5` `methods=mult` |
+| Set combo count to `3` | `fields=cumbo` `values=3` `methods=set` |
 
-**Registered as:** `AttackEventValueModifier`
+**Canonical op:** `attack_event_value_modifier`
+**Component registration:** `AttackEventValueModifier`
 **Class:** `AbilitySystem.Components.AttackEventValueModifier`
 **File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/AttackEventValueModifier.cs`
 
@@ -34,7 +34,7 @@ shortest length is applied.
 
 ## Field whitelist
 
-Field names use the historical spellings from the event classes
+Field names use the spellings declared by the event classes
 (`multiplyer` not `multiplier`; `cumbo` not `combo`).
 
 | Name | Type | Source event |
@@ -44,7 +44,7 @@ Field names use the historical spellings from the event classes
 | `mgrPenetrate` | float | `DamageEventBase` |
 | `defPenetrate_value` | float | `DamageEventBase` |
 | `mgrPenetrate_value` | float | `DamageEventBase` |
-| `damageType` | int | `DamageEventBase` (3 = true damage, see project convention in README) |
+| `damageType` | int | `DamageEventBase` (`3` = healing; see project convention in README) |
 | `applyType` | int | `DamageEventBase` |
 | `cumbo` | int | `BeforeAttackEvent` only — silently skipped on the other three |
 
@@ -56,7 +56,7 @@ int fields use the int-parsed value to keep designer intent exact.
 
 ## Lenient matching
 
-All four methods are accepted on every field. The component does not
+All four methods are accepted on every field. The operation does not
 validate semantic soundness — e.g. `mult` on `damageType` is a valid
 config even though it makes no gameplay sense. Designer is responsible
 for choosing sensible combinations.
@@ -66,9 +66,3 @@ for choosing sensible combinations.
 - **Unknown field name** → `LogWarning`, that entry is skipped.
 - **Unknown method** → `LogWarning`, that entry is skipped (field left unchanged).
 - **Event is not a `DamageEventBase`** → `LogError`, the whole trigger is skipped.
-
-## Changelog
-
-- 2026-06-12: migrated to `ParamList.GetStringLazy`; closure re-runs
-  `SplitCsv` and float/int double-parse on every call (was pre-parsed
-  in `OnInit` previously).

@@ -17,6 +17,11 @@ namespace AbilitySystem
         // Filled by AbilityRuntime.MakeContext (the runtime passes itself as 'ability').
         public AbilityRuntime ability;
         public AbilityComponentBase component;
+        // Filled while a rule sequence is executing. Component adapters can
+        // continue to use component/currentEvent; new POCO ops read step args
+        // and may inspect their owning execution when needed.
+        public StepConfig step;
+        public AbilityStepExecution stepExecution;
         public AbilityEvent currentEvent;
         // The only blackboard. Per-Entity, set by EntityAbilityRunner via MakeContext
         // (passed in as a parameter). Components read this directly; there is no
@@ -34,6 +39,7 @@ namespace AbilitySystem
         public static void Init()
         {
             ComponentAutoRegistry.EnsureRegistered();
+            AbilityStepAutoRegistry.EnsureRegistered();
         }
     }
 }

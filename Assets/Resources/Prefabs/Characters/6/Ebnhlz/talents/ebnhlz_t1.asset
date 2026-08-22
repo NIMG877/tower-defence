@@ -27,50 +27,65 @@ MonoBehaviour:
     openMode: 0
     recoverForbidDuringAbility: 0
     canManualClose: 0
-  components:
-  - componentType: WriteBlackboard
-    parameters:
-      entries:
-      - key: key
-        value: ebnhlz_t1_charge_damage_multiplier
-        fromBlackboard: 0
-        type: 3
-      - key: value
-        value: 1.43
-        fromBlackboard: 0
-        type: 1
-      - key: method
-        value: set
-        fromBlackboard: 0
-        type: 3
-    triggers:
+  rules:
+  - triggers:
     - triggerEvent: 2
       groups: []
-  - componentType: ChargeAttackDamageModifier
-    parameters:
-      entries:
-      - key: multiplier
-        value: ebnhlz_t1_charge_damage_multiplier
-        fromBlackboard: 1
-        type: 1
-    triggers:
+    reentry: 0
+    steps:
+    - op: write_blackboard
+      args:
+        entries:
+        - key: key
+          value: ebnhlz_t1_charge_damage_multiplier
+          fromBlackboard: 0
+          type: 3
+        - key: value
+          value: 1.43
+          fromBlackboard: 0
+          type: 1
+        - key: method
+          value: set
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+  - triggers:
     - triggerEvent: 2
       groups: []
-  - componentType: ChargeAttackReservePool
-    parameters:
-      entries:
-      - key: capacity
-        value: 1
-        fromBlackboard: 0
-        type: 0
-      - key: minMonsterStatus
-        value: 1
-        fromBlackboard: 0
-        type: 0
-      - key: maxMonsterStatus
-        value: 2
-        fromBlackboard: 0
-        type: 0
-    triggers:
+    reentry: 0
+    steps:
+    - op: charge_attack_damage_modifier
+      args:
+        entries:
+        - key: multiplier
+          value: ebnhlz_t1_charge_damage_multiplier
+          fromBlackboard: 1
+          type: 1
+      condition: []
+      steps: []
+      elseSteps: []
+  - triggers:
     - triggerEvent: 2
       groups: []
+    reentry: 0
+    steps:
+    - op: charge_attack_reserve_pool
+      args:
+        entries:
+        - key: capacity
+          value: 1
+          fromBlackboard: 0
+          type: 0
+        - key: minMonsterStatus
+          value: 1
+          fromBlackboard: 0
+          type: 0
+        - key: maxMonsterStatus
+          value: 2
+          fromBlackboard: 0
+          type: 0
+      condition: []
+      steps: []
+      elseSteps: []

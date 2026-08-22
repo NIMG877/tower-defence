@@ -27,26 +27,31 @@ MonoBehaviour:
     openMode: 1
     recoverForbidDuringAbility: 1
     canManualClose: 0
-  components:
-  - componentType: AttackEventValueModifier
-    parameters:
-      entries:
-      - key: fields
-        value: cumbo,multiplyer
-        fromBlackboard: 0
-        type: 3
-      - key: methods
-        value: set,mult
-        fromBlackboard: 0
-        type: 3
-      - key: values
-        value: 2,1.4
-        fromBlackboard: 0
-        type: 3
-    triggers:
+  rules:
+  - triggers:
     - triggerEvent: 6
       groups:
       - units:
         - op: 0
           leftKey: 
           rightValue: 
+    reentry: 0
+    steps:
+    - op: attack_event_value_modifier
+      args:
+        entries:
+        - key: fields
+          value: cumbo,multiplyer
+          fromBlackboard: 0
+          type: 3
+        - key: methods
+          value: set,mult
+          fromBlackboard: 0
+          type: 3
+        - key: values
+          value: 2,1.4
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []

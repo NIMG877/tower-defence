@@ -523,6 +523,53 @@ namespace AbilitySystem
         public List<ConditionGroup> groups = new List<ConditionGroup>();
     }
 
+    /// <summary>
+    /// Controls what happens when the same rule is triggered while one of its
+    /// asynchronous step sequences is still running.
+    /// </summary>
+    public enum RuleReentry
+    {
+        IgnoreWhileRunning,
+        Restart,
+        Parallel,
+    }
+
+    /// <summary>
+    /// One operation in an ability rule. <c>op</c> is resolved by the runtime
+    /// registry; <c>args</c> keeps the existing Unity-safe parameter encoding.
+    /// Composite operations use <c>condition</c>, <c>steps</c>, and
+    /// <c>elseSteps</c> as needed.
+    /// </summary>
+    [Serializable]
+    public class StepConfig
+    {
+        [StepOpRef]
+        public string op;
+        public ParamList args = new ParamList();
+        public List<ConditionGroup> condition = new List<ConditionGroup>();
+        // Managed-reference boundaries are required for this self-recursive
+        // shape. Without them Unity expands StepConfig's type tree recursively
+        // and hits its serialization depth limit even when child arrays are empty.
+        public StepConfig[] steps = Array.Empty<StepConfig>();
+        public StepConfig[] elseSteps = Array.Empty<StepConfig>();
+    }
+
+    /// <summary>
+    /// An event/condition rule whose steps execute in array order.
+    /// </summary>
+    [Serializable]
+    public class AbilityRuleConfig
+    {
+        public ConditionConfig[] triggers = Array.Empty<ConditionConfig>();
+        public RuleReentry reentry = RuleReentry.IgnoreWhileRunning;
+        public StepConfig[] steps = Array.Empty<StepConfig>();
+    }
+
+    /// <summary>
+    /// Legacy one-component rule shape. Kept solely so pre-upgrade assets can
+    /// be read and projected to <see cref="AbilityRuleConfig"/> without loss.
+    /// New authoring uses <see cref="StepConfig"/>.
+    /// </summary>
     [Serializable]
     public class ComponentConfig
     {

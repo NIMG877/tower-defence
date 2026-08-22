@@ -2,7 +2,8 @@
 
 Removes abnormal states recorded by `ApplyAbnormalState`.
 
-**Registered as:** `DestroyAbnormalState`
+**Canonical op:** `destroy_abnormal_state`
+**Component registration:** `DestroyAbnormalState`
 
 ## Parameters
 

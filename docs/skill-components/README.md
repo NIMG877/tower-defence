@@ -1,16 +1,21 @@
 # Skill Components
 
-Parameter reference for all concrete `AbilityComponentBase` implementations
-in the project. One file per component; this README is the index.
+Parameter reference for the component-backed ability step operations in the
+project. One file per implementation; this README is the index.
 
-When you need to look up what a `key:` row in a `ComponentConfig.parameters`
-asset means, click the component name in the list below.
+When you need to look up what a `key:` row in `rules[].steps[].args` means,
+click the component name in the list below. For rule sequencing, primitive
+operations, reentry, and lifecycle semantics, see [Ability Steps](../ability-steps.md).
 
 ## Storage
 
-All component parameters live in the `ComponentConfig.parameters.entries[]`
-array (a `ParamList`). Each entry is a `(key, type, value, fromBlackboard)`
-quadruple:
+An `AbilityConfig` stores `rules[]`. Each rule owns its event/condition
+`triggers[]`, its `reentry` policy, and an ordered `steps[]` sequence. A step's
+operation name is stored in `op`; its ordinary parameters live in
+`args.entries[]` (a `ParamList`). Composite operations can additionally use
+`condition`, nested `steps`, and `elseSteps`.
+
+Each parameter entry is a `(key, type, value, fromBlackboard)` quadruple:
 
 - **key** — the parameter name (must match what the component's `OnInit`
   reads via `p.GetXxxLazy(key, defaultValue, ctx.sharedBlackboard)`).
@@ -21,7 +26,7 @@ quadruple:
 - **fromBlackboard** (bool, default `false`) — when `true`, the runtime
   treats `value` as a BlackBoard key name, not a literal. The typed
   getter re-reads the BlackBoard on every invocation, so the same config
-  can yield different results across `OnTrigger` calls. See
+  can yield different results across step executions. See
   `WriteBlackboard` and the `paramlist-lazy-blackboard-getter` memory
   for the full mechanic.
 
@@ -44,9 +49,9 @@ The last 4 have no typed `GetXxxLazy` and currently are only consumed by
 
 ## CSV form
 
-Some components accept CSV strings for parallel-array params. The storage
-type is still `String`; the component splits on `,` and trims whitespace
-inside its closure (per the lazy migration):
+Some component-backed operations accept CSV strings for parallel-array params.
+The storage type is `String`; the component splits on `,` and trims whitespace
+inside its lazy getter:
 
 | Convention | Format | Example | Used by |
 |---|---|---|---|
@@ -66,11 +71,14 @@ range 0–3:
 | `2` | Siege |
 | `3` | Healing; attack target selection switches to same-camp entities |
 
-The literal `3` appears in some legacy code; the meaning is project-
-wide, not per-component. Search the codebase for `damageType` for
-callers.
+The literal `3` has project-wide meaning, not per-operation meaning. Search the
+codebase for `damageType` when checking callers.
 
-## Components
+## Component-backed operations
+
+Assets use canonical snake_case operation names. PascalCase component type
+names are compatibility aliases; they are not listed by `RegisteredOps` and
+are not authoring names.
 
 ### Buffs
 
@@ -97,10 +105,9 @@ callers.
 
 ### Combat
 
-- [AttackEventValueModifier](AttackEventValueModifier.md) — generic
-  CSV-driven rewriter for `DamageEventBase` event fields
-  (`multiplyer`, `damageType`, `cumbo`, etc.). Supersedes the
-  removed `AttackMultiplierBoost` and `SetAttackCombo`.
+- [AttackEventValueModifier](AttackEventValueModifier.md) — generic CSV-driven
+  rewriter for `DamageEventBase` event fields (`multiplyer`, `damageType`,
+  `cumbo`, etc.).
 - [ApplyDamage](ApplyDamage.md) - applies direct attack-based or fixed-value
   damage to the event target, self, or a Blackboard entity list.
 - [ApplyImpulse](ApplyImpulse.md) - applies an outward movement impulse to the
@@ -161,16 +168,16 @@ callers.
 ## Conditional triggers
 
 `OnTick` is dispatched once per physics tick to active abilities. It is useful
-for components that must re-evaluate changing Blackboard inputs, such as an
-`EntitySelector` followed by `ApplyBuff` in `mode=aura`.
+for rules that must re-evaluate changing Blackboard inputs, such as a
+`select_targets` step followed by `apply_buff` in `mode=aura`.
 
-Every `ComponentConfig` has a `triggers[]` array of `ConditionConfig`
-entries. Each entry declares a `triggerEvent` plus a condition
-expression. At dispatch time, an entry's expression is evaluated
-against the entity's shared blackboard (a per-entity key/value
-store that components read and write); if it passes, `OnTrigger`
-runs on the bound component. Failing entries are skipped (the
-`ConditionEvaluator` logs at most one warning per unknown op, ever).
+Every `AbilityRuleConfig` has a `triggers[]` array of `ConditionConfig`
+entries. Each entry declares a `triggerEvent` plus a condition expression. At
+dispatch time, an entry's expression is evaluated against the entity's shared
+Blackboard (a per-entity key/value store that operations read and write). If it
+passes, the rule's ordered `steps[]` sequence is started according to its
+`reentry` policy. Failing entries are skipped. The `ConditionEvaluator` logs at
+most one warning per unknown condition operator, ever.
 
 ### Expression shape
 
@@ -192,8 +199,8 @@ ConditionUnit    { op, leftKey, rightValue }
    +- a single comparison: op(leftKey, rightValue)
 ```
 
-An empty `groups` list is treated as "always passes" (unconditional
-trigger), equivalent to the legacy `op: 0` (None) short-circuit.
+An empty `groups` list is treated as "always passes" (an unconditional
+trigger), equivalent to a condition unit with `op: None`.
 
 ### Operator semantics (from `ConditionEvaluator.cs`)
 
@@ -205,21 +212,20 @@ The trimmed `ConditionOp` whitelist (per commit `54c3465`):
 | `Equal`, `NotEqual` | string `==` / `!=` on the key's value |
 | `Greater` / `GreaterOrEqual` / `Less` / `LessOrEqual` | `float.TryParse` on both sides, falls back to ordinal string compare if either is unparseable |
 
-Any `ConditionOp` value outside the live whitelist is logged once
-(across the application lifetime) as a warning and treated as
-"passes" (i.e., the trigger fires unconditionally — the legacy
-default).
+Any `ConditionOp` value outside the live whitelist is logged once across the
+application lifetime and treated as "passes", so the rule trigger is
+unconditional.
 
 ### Two coexisting expression forms
 
 Designers have two ways to express multi-condition triggers; the
 choice is a data-authoring concern, not a dispatch concern:
 
-1. **Nested AND/OR** inside one `ConditionConfig.groups[]` (the new
-   shape). Use this when the goal is "fire at most once per event
+1. **Nested AND/OR** inside one `ConditionConfig.groups[]`. Use this when the
+   goal is "fire at most once per event
    if any matching condition is true".
 
 2. **Repeated `triggers[]` entries** with the same `triggerEvent`
-   (the pre-existing pattern). Use this when the goal is "fire once
-   per passing entry". The runtime does not dedup these — each
-   passing entry produces one `OnTrigger` call.
+   request one start per passing entry. The selected `reentry` policy decides
+   whether an already running sequence ignores, restarts, or runs alongside
+   that request.

@@ -3,7 +3,8 @@
 Selects entities relative to one or more subjects, merges and deduplicates the
 results, then overwrites optional Blackboard entity-list and count outputs.
 
-**Registered as:** `EntitySelector`
+**Canonical op:** `select_targets`
+**Component registration:** `EntitySelector`
 
 ## Parameters
 
@@ -42,7 +43,7 @@ makes the component suitable for per-event condition checks.
 The count is stored as a numeric string because `ConditionEvaluator` reads
 Blackboard operands as strings and parses numeric comparisons from them.
 
-## Recommended triggers
+## Rule triggers
 
 Use any event appropriate to the selection. For per-hit checks, use
 `OnAfterTakeDamage` or `OnBeforeTakeDamage` with `subjectMode=eventTarget`.

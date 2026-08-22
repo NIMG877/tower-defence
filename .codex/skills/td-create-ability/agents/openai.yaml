@@ -1,4 +1,4 @@
 interface:
   display_name: "TD Create Ability"
-  short_description: "Create project AbilityConfig assets from requirements"
-  default_prompt: "Use $td-create-ability to implement an ability asset from my requirements."
+  short_description: "Compose AbilityConfig rules and ordered steps"
+  default_prompt: "Use $td-create-ability to compose an AbilityConfig asset with rules, ordered steps, and verified operations."

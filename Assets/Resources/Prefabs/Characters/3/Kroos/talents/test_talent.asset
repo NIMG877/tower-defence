@@ -27,48 +27,58 @@ MonoBehaviour:
     openMode: 0
     recoverForbidDuringAbility: 0
     canManualClose: 0
-  components:
-  - componentType: EntityFilter
-    parameters:
-      entries:
-      - key: toSelf
-        value: True
-        fromBlackboard: 0
-        type: 2
-      - key: fields
-        value: CurrentHpRate,MonsterStatus
-        fromBlackboard: 0
-        type: 3
-      - key: ops
-        value: Less,GreaterOrEqual
-        fromBlackboard: 0
-        type: 3
-      - key: values
-        value: 0.3,1
-        fromBlackboard: 0
-        type: 3
-      - key: groups
-        value: "0,1"
-        fromBlackboard: 0
-        type: 3
-    triggers:
+  rules:
+  - triggers:
     - triggerEvent: 2
       groups: []
-  - componentType: AttackEventValueModifier
-    parameters:
-      entries:
-      - key: fields
-        value: multiplyer
-        fromBlackboard: 0
-        type: 3
-      - key: values
-        value: "3"
-        fromBlackboard: 0
-        type: 3
-      - key: methods
-        value: mult
-        fromBlackboard: 0
-        type: 3
-    triggers:
+    reentry: 0
+    steps:
+    - op: filter_targets
+      args:
+        entries:
+        - key: toSelf
+          value: True
+          fromBlackboard: 0
+          type: 2
+        - key: fields
+          value: CurrentHpRate,MonsterStatus
+          fromBlackboard: 0
+          type: 3
+        - key: ops
+          value: Less,GreaterOrEqual
+          fromBlackboard: 0
+          type: 3
+        - key: values
+          value: 0.3,1
+          fromBlackboard: 0
+          type: 3
+        - key: groups
+          value: "0,1"
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+  - triggers:
     - triggerEvent: 6
       groups: []
+    reentry: 0
+    steps:
+    - op: attack_event_value_modifier
+      args:
+        entries:
+        - key: fields
+          value: multiplyer
+          fromBlackboard: 0
+          type: 3
+        - key: values
+          value: "3"
+          fromBlackboard: 0
+          type: 3
+        - key: methods
+          value: mult
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []

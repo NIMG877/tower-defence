@@ -27,78 +27,103 @@ MonoBehaviour:
     openMode: 1
     recoverForbidDuringAbility: 1
     canManualClose: 0
-  components:
-  - componentType: WriteBlackboard
-    parameters:
-      entries:
-      - key: key
-        value: test_multiplyer
-        fromBlackboard: 0
-        type: 3
-      - key: value
-        value: 1
-        fromBlackboard: 0
-        type: 1
-      - key: method
-        value: set
-        fromBlackboard: 0
-        type: 3
-    triggers:
+  rules:
+  - triggers:
     - triggerEvent: 1
       groups: []
-  - componentType: AttackEventValueModifier
-    parameters:
-      entries:
-      - key: fields
-        value: multiplyer
-        fromBlackboard: 0
-        type: 3
-      - key: values
-        value: test_multiplyer
-        fromBlackboard: 1
-        type: 1
-      - key: methods
-        value: mult
-        fromBlackboard: 0
-        type: 3
-    triggers:
+    reentry: 0
+    steps:
+    - op: write_blackboard
+      args:
+        entries:
+        - key: key
+          value: test_multiplyer
+          fromBlackboard: 0
+          type: 3
+        - key: value
+          value: 1
+          fromBlackboard: 0
+          type: 1
+        - key: method
+          value: set
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+  - triggers:
     - triggerEvent: 6
       groups: []
-  - componentType: WriteBlackboard
-    parameters:
-      entries:
-      - key: key
-        value: test_multiplyer
-        fromBlackboard: 0
-        type: 3
-      - key: value
-        value: 1.1
-        fromBlackboard: 0
-        type: 1
-      - key: method
-        value: mult
-        fromBlackboard: 0
-        type: 3
-    triggers:
+    reentry: 0
+    steps:
+    - op: attack_event_value_modifier
+      args:
+        entries:
+        - key: fields
+          value: multiplyer
+          fromBlackboard: 0
+          type: 3
+        - key: values
+          value: test_multiplyer
+          fromBlackboard: 1
+          type: 1
+        - key: methods
+          value: mult
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+  - triggers:
     - triggerEvent: 6
       groups: []
-  - componentType: AttackRangeOverride
-    parameters:
-      entries:
-      - key: range
-        value: '[[0,0],[1,3],[-1,3]]'
-        fromBlackboard: 0
-        type: 3
-    triggers:
+    reentry: 0
+    steps:
+    - op: write_blackboard
+      args:
+        entries:
+        - key: key
+          value: test_multiplyer
+          fromBlackboard: 0
+          type: 3
+        - key: value
+          value: 1.1
+          fromBlackboard: 0
+          type: 1
+        - key: method
+          value: mult
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+  - triggers:
     - triggerEvent: 2
       groups: []
-  - componentType: AttackRangeRestore
-    parameters:
-      entries:
-      - key: range
-        value: '[[0,0]]'
-        fromBlackboard: 0
-        type: 3
-    triggers:
+    reentry: 0
+    steps:
+    - op: attack_range_override
+      args:
+        entries:
+        - key: range
+          value: '[[0,0],[1,3],[-1,3]]'
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+  - triggers:
     - triggerEvent: 3
       groups: []
+    reentry: 0
+    steps:
+    - op: attack_range_restore
+      args:
+        entries:
+        - key: range
+          value: '[[0,0]]'
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []

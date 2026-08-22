@@ -4,7 +4,8 @@ Multiplies damage dealt by stored ChargeAttack energy. It subscribes to
 `ChargeAttack.OnBeforeChargeTakeDamage`, so the multiplier affects each stored
 energy projectile but not the normal attack projectile.
 
-**Registered as:** `ChargeAttackDamageModifier`
+**Canonical op:** `charge_attack_damage_modifier`
+**Component registration:** `ChargeAttackDamageModifier`
 
 ## Parameters
 
@@ -22,6 +23,7 @@ energy projectile but not the normal attack projectile.
   component instance.
 - On teardown, unsubscribe defensively.
 
-For a persistent talent, trigger only on `OnAbilityBegin`. For a temporary
-skill, configure the same component for both `OnAbilityBegin` and
-`OnAbilityEnd`.
+For a persistent talent, use an `OnAbilityBegin` rule. For a temporary skill,
+use one rule with `OnAbilityBegin` and `OnAbilityEnd` trigger entries and one
+`charge_attack_damage_modifier` step; the bound component instance then owns
+both subscription and removal.

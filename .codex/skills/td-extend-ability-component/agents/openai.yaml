@@ -1,4 +1,4 @@
 interface:
-  display_name: "TD Extend Ability Component"
-  short_description: "Assess and extend existing ability components"
-  default_prompt: "Use $td-extend-ability-component to assess this ability-component gap and implement a reasonable extension after approval."
+  display_name: "TD Extend Component-Backed Op"
+  short_description: "Assess and extend a component-backed ability op"
+  default_prompt: "Use $td-extend-ability-component to assess this component-backed op gap and implement an approved focused extension."

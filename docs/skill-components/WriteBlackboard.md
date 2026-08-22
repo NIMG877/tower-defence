@@ -12,7 +12,8 @@ Writes a value to the per-Entity shared Blackboard. Two modes:
   bool/string/Vector2Int log a warning and skip. Math semantics for each
   method mirror `AttackEventValueModifier`.
 
-**Registered as:** `WriteBlackboard`
+**Canonical op:** `write_blackboard`
+**Component registration:** `WriteBlackboard`
 **Class:** `AbilitySystem.Components.WriteBlackboard`
 **File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/WriteBlackboard.cs`
 
@@ -35,8 +36,8 @@ re-evaluates the source on every call.
 
 ## Context sources
 
-`source=value` preserves the original behavior. `source=event` and
-`source=entity` read the current trigger context instead of `value`.
+`source=value` reads the configured `value`. `source=event` and
+`source=entity` read the current trigger context.
 
 Supported event paths:
 
@@ -54,7 +55,7 @@ Supported entity paths:
 - `camp`, `currentHp`, `currentHpRate`, `maxHp`, `attack`, `monsterStatus`
 
 Entity-valued paths (`event.target`, `event.origin`, and `entity.self`) write
-`List<Entity>` so they can feed components such as `ApplyBuff`. Unsupported
+`List<Entity>` so they can feed operations such as `apply_buff`. Unsupported
 paths emit a one-shot warning and skip the write.
 
 ### Value type
@@ -72,7 +73,7 @@ underlying API is `ParamList.GetValueLazy`, which dispatches to:
 | `Vector2Int` | `x,y` parse, store as `Vector2Int` |
 | `AnimationRef` / `Prefab` / `EntityId` / `Color` | store the raw string as-is (no typed parser exists; designer responsibility) |
 
-`value` can also have `fromBlackboard=true` — the component reads the
+`value` can also have `fromBlackboard=true` — the operation reads the
 configured key from BlackBoard at apply time and uses whatever is stored.
 
 ## Modify-mode semantics
@@ -91,11 +92,3 @@ Non-numeric existing types log a warning and skip. `div` by zero is
 **not** guarded — matches `AttackEventValueModifier` behavior (int throws
 `DivideByZeroException` caught by the try/catch; float/double produce
 `±Infinity` / `NaN`, stored as-is).
-
-## Changelog
-
-- 2026-06-15: added `event` and `entity` context sources plus optional string
-  conversion for conditional-trigger handoffs.
-- 2026-06-12: initial implementation. `GetValueLazy` (returns
-  `Func<object>`) was added to `ParamList` to support type-dispatched
-  reads driven by `ParamEntry.type`.

@@ -27,102 +27,117 @@ MonoBehaviour:
     openMode: 0
     recoverForbidDuringAbility: 0
     canManualClose: 0
-  components:
-  - componentType: EntitySelector
-    parameters:
-      entries:
-      - key: subjectMode
-        value: self
-        fromBlackboard: 0
-        type: 3
-      - key: selectionMode
-        value: radius
-        fromBlackboard: 0
-        type: 3
-      - key: campRelation
-        value: same
-        fromBlackboard: 0
-        type: 3
-      - key: radius
-        value: 2
-        fromBlackboard: 0
-        type: 1
-      - key: force
-        value: True
-        fromBlackboard: 0
-        type: 2
-      - key: excludeSubjects
-        value: True
-        fromBlackboard: 0
-        type: 2
-      - key: outputEntitiesKey
-        value: skeleton_t1_recipients
-        fromBlackboard: 0
-        type: 3
-    triggers:
+  rules:
+  - triggers:
     - triggerEvent: 6
       groups: []
-  - componentType: ShareAttackTarget
-    parameters:
-      entries:
-      - key: blackboardKey
-        value: skeleton_t1_recipients
-        fromBlackboard: 0
-        type: 3
-      - key: receiverAbilityId
-        value: skeleton_t1
-        fromBlackboard: 0
-        type: 3
-      - key: queueKey
-        value: skeleton_t1_shared_requests
-        fromBlackboard: 0
-        type: 3
-      - key: activeSourceKey
-        value: skeleton_t1_active_source
-        fromBlackboard: 0
-        type: 3
-      - key: bulletPrefabResource
-        value: Prefabs/Monsters/MC/Skeleton/Bullets/communiteBullet
-        fromBlackboard: 0
-        type: 3
-      - key: bulletTrailResource
-        value: Prefabs/Monsters/MC/Skeleton/Bullets/communicateTrail
-        fromBlackboard: 0
-        type: 3
-      - key: bulletSpeed
-        value: 3
-        fromBlackboard: 0
-        type: 1
-    triggers:
+    reentry: 0
+    steps:
+    - op: select_targets
+      args:
+        entries:
+        - key: subjectMode
+          value: self
+          fromBlackboard: 0
+          type: 3
+        - key: selectionMode
+          value: radius
+          fromBlackboard: 0
+          type: 3
+        - key: campRelation
+          value: same
+          fromBlackboard: 0
+          type: 3
+        - key: radius
+          value: 2
+          fromBlackboard: 0
+          type: 1
+        - key: force
+          value: True
+          fromBlackboard: 0
+          type: 2
+        - key: excludeSubjects
+          value: True
+          fromBlackboard: 0
+          type: 2
+        - key: outputEntitiesKey
+          value: skeleton_t1_recipients
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+  - triggers:
     - triggerEvent: 6
       groups: []
-  - componentType: SharedTargetExtraAttack
-    parameters:
-      entries:
-      - key: queueKey
-        value: skeleton_t1_shared_requests
-        fromBlackboard: 0
-        type: 3
-      - key: activeSourceKey
-        value: skeleton_t1_active_source
-        fromBlackboard: 0
-        type: 3
-      - key: attackAnimation
-        value: ExtraAttack
-        fromBlackboard: 0
-        type: 3
-      - key: abnormalType
-        value: 0
-        fromBlackboard: 0
-        type: 0
-      - key: abnormalTime
-        value: -10
-        fromBlackboard: 0
-        type: 1
-    triggers:
+    reentry: 0
+    steps:
+    - op: share_attack_target
+      args:
+        entries:
+        - key: blackboardKey
+          value: skeleton_t1_recipients
+          fromBlackboard: 0
+          type: 3
+        - key: receiverAbilityId
+          value: skeleton_t1
+          fromBlackboard: 0
+          type: 3
+        - key: queueKey
+          value: skeleton_t1_shared_requests
+          fromBlackboard: 0
+          type: 3
+        - key: activeSourceKey
+          value: skeleton_t1_active_source
+          fromBlackboard: 0
+          type: 3
+        - key: bulletPrefabResource
+          value: Prefabs/Monsters/MC/Skeleton/Bullets/communiteBullet
+          fromBlackboard: 0
+          type: 3
+        - key: bulletTrailResource
+          value: Prefabs/Monsters/MC/Skeleton/Bullets/communicateTrail
+          fromBlackboard: 0
+          type: 3
+        - key: bulletSpeed
+          value: 3
+          fromBlackboard: 0
+          type: 1
+      condition: []
+      steps: []
+      elseSteps: []
+  - triggers:
     - triggerEvent: 16
       groups: []
     - triggerEvent: 10
       groups: []
     - triggerEvent: 11
       groups: []
+    reentry: 0
+    steps:
+    - op: shared_target_extra_attack
+      args:
+        entries:
+        - key: queueKey
+          value: skeleton_t1_shared_requests
+          fromBlackboard: 0
+          type: 3
+        - key: activeSourceKey
+          value: skeleton_t1_active_source
+          fromBlackboard: 0
+          type: 3
+        - key: attackAnimation
+          value: ExtraAttack
+          fromBlackboard: 0
+          type: 3
+        - key: abnormalType
+          value: 0
+          fromBlackboard: 0
+          type: 0
+        - key: abnormalTime
+          value: -10
+          fromBlackboard: 0
+          type: 1
+      condition: []
+      steps: []
+      elseSteps: []

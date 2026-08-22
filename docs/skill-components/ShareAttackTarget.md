@@ -3,7 +3,8 @@
 Relays the current `BeforeAttackEvent` target to selected allied entities,
 optionally using a communication projectile before enqueueing the request.
 
-**Registered as:** `ShareAttackTarget`
+**Canonical op:** `share_attack_target`
+**Component registration:** `ShareAttackTarget`
 
 ## Parameters
 
@@ -19,11 +20,12 @@ optionally using a communication projectile before enqueueing the request.
 
 ## Behavior
 
-Configure an `EntitySelector` before this component on `OnBeforeAttack`.
+Use an `OnBeforeAttack` rule with `select_targets` before
+`share_attack_target`.
 Recipients are deduplicated; self, the active shared-request sender, and
 entities without `receiverAbilityId` are skipped. When the projectile arrives,
 the `(sender, attack target)` request is appended only if the recipient does
 not currently see that enemy.
 
-The communication projectile mirrors the legacy behavior and deals zero final
-damage (`damage=1`, `multiplier=0`) before delivering its callback.
+The communication projectile deals zero final damage (`damage=1`,
+`multiplier=0`) before delivering its callback.

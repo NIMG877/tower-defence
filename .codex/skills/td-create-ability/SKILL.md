@@ -1,13 +1,14 @@
 ---
 name: td-create-ability
-description: Create or complete AbilityConfig .asset files in this TD Unity project from natural-language ability requirements. Use when the user names an ability asset and describes SP rules, effects, targeting, animation overrides, ranges, timing, or lifecycle behavior. Decompose the ability into atomic behaviors, select documented ability components, compose triggers and Blackboard handoffs, fill the asset, and verify it. When current components cannot compose an atomic behavior, hand the gap to $td-extend-ability-component for extension assessment before proposing a new component.
+description: Create or complete AbilityConfig .asset files in this TD Unity project from natural-language ability requirements. Use when the user names an ability asset and describes SP behavior, effects, targeting, timing, animation, ranges, conditions, or lifecycle behavior. Decompose the behavior into event-driven rules, compose ordered steps with canonical operations and Blackboard handoffs, choose a reentry policy, fill the asset, and verify nested sequences and operation arguments. Route an uncovered behavior through $td-extend-ability-component or $td-create-ability-component with user approval.
 ---
 
 # Create TD Ability
 
-Create an ability by composing existing components. Treat the asset as data.
-Do not add or modify runtime code unless the user explicitly approves either
-an existing-component extension or a new-component handoff.
+Create an `AbilityConfig` as data made of `rules[]`. Each rule owns
+`triggers[]`, `reentry`, and an ordered `steps[]` sequence. Do not add or
+modify runtime code without the approval required by the operation-gap
+workflow.
 
 Read [references/ability-workflow.md](references/ability-workflow.md) before
 starting.
@@ -16,57 +17,59 @@ starting.
 
 Require:
 
-- target `.asset` file or an unambiguous asset name;
-- ability behavior and effects;
-- enough SP/lifecycle information to determine activation and duration.
+- a target `.asset` file or unambiguous asset name;
+- the ability's behavior, effects, and targets;
+- enough SP and lifecycle information to determine activation and duration.
 
-Ask a concise question when missing information changes behavior materially.
-Examples: unknown target, missing trigger timing, unclear duration, ambiguous
-replacement slot/resource, or whether a persistent effect must be restored.
-Do not ask for values that can be discovered from the project or safely
-derived from the description.
+Ask a concise question only when missing information materially changes the
+behavior. Discover enum values, Named Resources, nearby asset conventions, and
+implementation details from the project.
 
-## Component Discovery
+## Required References
 
-Always read `docs/skill-components/README.md` first to obtain the component
-overview. Then read only the detailed component documents relevant to the
-atomic behaviors. This progressive disclosure order is mandatory.
+Read these in order:
 
-If documentation and code disagree, inspect the component implementation and
-report the discrepancy. Use current code behavior.
+1. `docs/ability-steps.md` for the rule, sequence, reentry, lifecycle, and
+   operation-registry contract;
+2. `docs/skill-components/README.md` for component-backed operations;
+3. only the detailed operation documents needed by the requested behavior.
 
-## Component Gap
+Inspect runtime code when documentation is incomplete or inconsistent. Treat
+current code behavior as authoritative and report documentation discrepancies.
 
-When no existing component can implement an atomic behavior:
+## Operation Coverage
+
+Map every atomic behavior to `SPConfig` or one or more registered operations.
+Use primitive operations such as `delay`, `wait_until`, `branch`, `loop`, and
+`spawn_entity` when their documented contracts fit. Use component-backed
+operations through their canonical snake_case names.
+
+When registered operations cannot express an atomic behavior:
 
 1. Stop before editing runtime code.
-2. Explain the missing atomic behavior and why existing components fail.
-3. Invoke `$td-extend-ability-component` with the atomic requirement, why
-   current composition fails, relevant component candidates, required
-   behavior, targets, triggers/lifecycle, and Blackboard handoffs.
-4. Let that skill assess whether a reasonable extension exists, report the
-   extension plan, obtain user approval, and implement an approved extension.
-5. Resume ability composition after a successful extension handoff.
-6. If the extension skill reports that no reasonable extension exists,
-   propose a new component contract:
-   responsibility, parameters, targets, trigger/lifecycle behavior,
+2. If the capability belongs within an existing component-backed operation's
+   responsibility, invoke `$td-extend-ability-component` with the gap contract.
+3. If no focused extension fits, define a reusable operation contract covering
+   its canonical name, arguments, targets, execution status, cancellation,
    Blackboard inputs/outputs, and expected effect.
-7. Ask the user for approval to create it. Only after approval, invoke
-   `$td-create-ability-component`, then resume this workflow.
+4. Obtain user approval, then invoke `$td-create-ability-component` with that
+   operation contract.
+5. Resume asset composition after the approved implementation is verified.
 
-Do not silently weaken or omit an effect to avoid the handoff.
+Do not weaken or omit an effect to avoid the handoff.
 
 ## Completion
 
-Fill the requested asset, preserve unrelated serialized fields, verify enum
-values and Named Resources from current project files, and validate the final
-component order and lifecycle symmetry.
+Preserve unrelated serialized fields. Verify:
 
-Summarize:
+- rule triggers and `reentry` policies;
+- step order and every nested `steps`/`elseSteps` sequence;
+- canonical operation names and `args` key/type/value/fromBlackboard fields;
+- synchronous-prefix requirements for event mutation;
+- Blackboard producer/consumer key and type symmetry;
+- cancellation, teardown, and persistent-effect cleanup;
+- Named Resources and serialized enum values from current project files.
 
-- atomic behavior decomposition;
-- selected components and trigger timing;
-- Blackboard handoffs;
-- any existing component extended;
-- any new component created;
-- verification performed and remaining manual checks.
+Summarize the rule decomposition, selected operations, Blackboard handoffs,
+runtime extensions or operations created, verification performed, and any
+remaining Unity PlayMode checks.

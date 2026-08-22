@@ -1,7 +1,11 @@
 # Ability System — Unified Skill / Talent / ExtraAbility Design
 
+> **Document status:** architecture history for Skill, Talent, and ExtraAbility
+> unification. Ability asset authoring and runtime sequence semantics are
+> defined by [`Ability Steps`](../../ability-steps.md).
+
 **Date:** 2026-06-11
-**Status:** Draft (post-brainstorming, pending user review)
+**Status:** Historical architecture reference
 **Scope:** Generalize the existing Skill system to host three semantic kinds (Skill / Talent / ExtraAbility) under one runtime, one dispatcher, and one component model. Add a runtime Add/Remove API for ExtraAbility.
 
 ---

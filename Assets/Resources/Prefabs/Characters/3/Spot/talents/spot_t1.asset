@@ -27,78 +27,93 @@ MonoBehaviour:
     openMode: 0
     recoverForbidDuringAbility: 0
     canManualClose: 0
-  components:
-  - componentType: WriteBlackboard
-    parameters:
-      entries:
-      - key: key
-        value: spot_t1_damage_type
-        fromBlackboard: 0
-        type: 3
-      - key: source
-        value: event
-        fromBlackboard: 0
-        type: 3
-      - key: path
-        value: damageType
-        fromBlackboard: 0
-        type: 3
-      - key: asString
-        value: True
-        fromBlackboard: 0
-        type: 2
-    triggers:
+  rules:
+  - triggers:
     - triggerEvent: 9
       groups: []
-  - componentType: WriteBlackboard
-    parameters:
-      entries:
-      - key: key
-        value: spot_t1_targets
-        fromBlackboard: 0
-        type: 3
-      - key: source
-        value: event
-        fromBlackboard: 0
-        type: 3
-      - key: path
-        value: target
-        fromBlackboard: 0
-        type: 3
-    triggers:
+    reentry: 0
+    steps:
+    - op: write_blackboard
+      args:
+        entries:
+        - key: key
+          value: spot_t1_damage_type
+          fromBlackboard: 0
+          type: 3
+        - key: source
+          value: event
+          fromBlackboard: 0
+          type: 3
+        - key: path
+          value: damageType
+          fromBlackboard: 0
+          type: 3
+        - key: asString
+          value: True
+          fromBlackboard: 0
+          type: 2
+      condition: []
+      steps: []
+      elseSteps: []
+  - triggers:
     - triggerEvent: 9
       groups: []
-  - componentType: ApplyBuff
-    parameters:
-      entries:
-      - key: attributes
-        value: PhysicalDodge
-        fromBlackboard: 0
-        type: 3
-      - key: ops
-        value: MulFinal
-        fromBlackboard: 0
-        type: 3
-      - key: magnitudes
-        value: 0.75
-        fromBlackboard: 0
-        type: 3
-      - key: buffId
-        value: spot_t1_smoke
-        fromBlackboard: 0
-        type: 3
-      - key: buffTime
-        value: 3
-        fromBlackboard: 0
-        type: 1
-      - key: blackboardKey
-        value: spot_t1_targets
-        fromBlackboard: 0
-        type: 3
-    triggers:
+    reentry: 0
+    steps:
+    - op: write_blackboard
+      args:
+        entries:
+        - key: key
+          value: spot_t1_targets
+          fromBlackboard: 0
+          type: 3
+        - key: source
+          value: event
+          fromBlackboard: 0
+          type: 3
+        - key: path
+          value: target
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+  - triggers:
     - triggerEvent: 9
       groups:
       - units:
         - op: 1
           leftKey: spot_t1_damage_type
           rightValue: 3
+    reentry: 0
+    steps:
+    - op: apply_buff
+      args:
+        entries:
+        - key: attributes
+          value: PhysicalDodge
+          fromBlackboard: 0
+          type: 3
+        - key: ops
+          value: MulFinal
+          fromBlackboard: 0
+          type: 3
+        - key: magnitudes
+          value: 0.75
+          fromBlackboard: 0
+          type: 3
+        - key: buffId
+          value: spot_t1_smoke
+          fromBlackboard: 0
+          type: 3
+        - key: buffTime
+          value: 3
+          fromBlackboard: 0
+          type: 1
+        - key: blackboardKey
+          value: spot_t1_targets
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []

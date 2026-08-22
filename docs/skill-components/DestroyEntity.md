@@ -2,7 +2,8 @@
 
 Ends the lifecycle of one or more active entities by calling `Entity.Die()`.
 
-**Registered as:** `DestroyEntity`
+**Canonical op:** `destroy_entity`
+**Component registration:** `DestroyEntity`
 
 ## Parameters
 

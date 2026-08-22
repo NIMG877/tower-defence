@@ -3,7 +3,8 @@
 Restores attack `DamageType` and `OrderLogic` from snapshots written by
 `AttackBehaviorOverride`.
 
-**Registered as:** `AttackBehaviorRestore`
+**Canonical op:** `attack_behavior_restore`
+**Component registration:** `AttackBehaviorRestore`
 
 ## Parameters
 

@@ -1,4 +1,4 @@
 interface:
-  display_name: "TD Create Ability Component"
-  short_description: "Create new reusable ability-system components"
-  default_prompt: "Use $td-create-ability-component to create a reusable ability component from this specification."
+  display_name: "TD Create Ability Operation"
+  short_description: "Create a reusable registered ability step op"
+  default_prompt: "Use $td-create-ability-component to create a reusable registered ability step operation from this contract."

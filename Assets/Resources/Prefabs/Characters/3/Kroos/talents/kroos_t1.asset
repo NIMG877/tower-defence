@@ -28,40 +28,50 @@ MonoBehaviour:
     recoverForbidDuringAbility: 0
     canManualClose: 0
     abilityAttackRange: []
-  components:
-  - componentType: RandomRoll
-    parameters:
-      entries:
-      - key: input
-        value: 0.2
-        fromBlackboard: 0
-        type: 1
-      - key: outputKey
-        value: t1_trigger
-        fromBlackboard: 0
-        type: 3
-    triggers:
+  rules:
+  - triggers:
     - triggerEvent: 6
       groups: []
-  - componentType: AttackEventValueModifier
-    parameters:
-      entries:
-      - key: fields
-        value: multiplyer
-        fromBlackboard: 0
-        type: 3
-      - key: values
-        value: 1.5
-        fromBlackboard: 0
-        type: 1
-      - key: methods
-        value: mult
-        fromBlackboard: 0
-        type: 3
-    triggers:
+    reentry: 0
+    steps:
+    - op: random_roll
+      args:
+        entries:
+        - key: input
+          value: 0.2
+          fromBlackboard: 0
+          type: 1
+        - key: outputKey
+          value: t1_trigger
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+  - triggers:
     - triggerEvent: 6
       groups:
       - units:
         - op: 1
           leftKey: t1_trigger
           rightValue: true
+    reentry: 0
+    steps:
+    - op: attack_event_value_modifier
+      args:
+        entries:
+        - key: fields
+          value: multiplyer
+          fromBlackboard: 0
+          type: 3
+        - key: values
+          value: 1.5
+          fromBlackboard: 0
+          type: 1
+        - key: methods
+          value: mult
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []

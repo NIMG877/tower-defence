@@ -3,7 +3,8 @@
 Applies one or more abnormal states to self or to entities supplied through
 Blackboard. Its `normal` and `aura` modes mirror `ApplyBuff`.
 
-**Registered as:** `ApplyAbnormalState`
+**Canonical op:** `apply_abnormal_state`
+**Component registration:** `ApplyAbnormalState`
 
 ## Parameters
 
@@ -29,8 +30,9 @@ removes recorded states from entities no longer present, and overwrites the
 output records. Aura records are removed during teardown.
 
 Pair normal-mode output with `DestroyAbnormalState` for explicit restoration,
-typically on `OnAbilityEnd`. Configure aura synchronization on `OnTick` after
-the component that writes its target list.
+typically through a separate `OnAbilityEnd` rule. For aura synchronization,
+use an `OnTick` rule and place `apply_abnormal_state` after the step that writes
+its target list.
 
 ## Limitation
 

@@ -2,7 +2,8 @@
 
 Replaces the selected entity's `EntityVision.Range`.
 
-**Registered as:** `AttackRangeOverride`  
+**Canonical op:** `attack_range_override`
+**Component registration:** `AttackRangeOverride`
 **Pair with:** `AttackRangeRestore`.
 
 ## Parameters

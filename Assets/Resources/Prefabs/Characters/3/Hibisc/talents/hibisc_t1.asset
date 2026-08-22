@@ -27,52 +27,62 @@ MonoBehaviour:
     openMode: 0
     recoverForbidDuringAbility: 0
     canManualClose: 0
-  components:
-  - componentType: ApplyBuff
-    parameters:
-      entries:
-      - key: attributes
-        value: Attack
-        fromBlackboard: 0
-        type: 3
-      - key: ops
-        value: AddPercent
-        fromBlackboard: 0
-        type: 3
-      - key: magnitudes
-        value: 0.08
-        fromBlackboard: 0
-        type: 3
-      - key: buffId
-        value: hibisc_t1
-        fromBlackboard: 0
-        type: 3
-      - key: buffTime
-        value: -10
-        fromBlackboard: 0
-        type: 1
-      - key: outputTarget
-        value: hibisc_t1_buff_targets
-        fromBlackboard: 0
-        type: 3
-      - key: outputBuff
-        value: hibisc_t1_buffs
-        fromBlackboard: 0
-        type: 3
-    triggers:
+  rules:
+  - triggers:
     - triggerEvent: 2
       groups: []
-  - componentType: DestroyBuff
-    parameters:
-      entries:
-      - key: inputTarget
-        value: hibisc_t1_buff_targets
-        fromBlackboard: 0
-        type: 3
-      - key: inputBuff
-        value: hibisc_t1_buffs
-        fromBlackboard: 0
-        type: 3
-    triggers:
+    reentry: 0
+    steps:
+    - op: apply_buff
+      args:
+        entries:
+        - key: attributes
+          value: Attack
+          fromBlackboard: 0
+          type: 3
+        - key: ops
+          value: AddPercent
+          fromBlackboard: 0
+          type: 3
+        - key: magnitudes
+          value: 0.08
+          fromBlackboard: 0
+          type: 3
+        - key: buffId
+          value: hibisc_t1
+          fromBlackboard: 0
+          type: 3
+        - key: buffTime
+          value: -10
+          fromBlackboard: 0
+          type: 1
+        - key: outputTarget
+          value: hibisc_t1_buff_targets
+          fromBlackboard: 0
+          type: 3
+        - key: outputBuff
+          value: hibisc_t1_buffs
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+  - triggers:
     - triggerEvent: 3
       groups: []
+    reentry: 0
+    steps:
+    - op: destroy_buff
+      args:
+        entries:
+        - key: inputTarget
+          value: hibisc_t1_buff_targets
+          fromBlackboard: 0
+          type: 3
+        - key: inputBuff
+          value: hibisc_t1_buffs
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []

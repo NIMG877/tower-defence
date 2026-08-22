@@ -84,6 +84,7 @@ public class EntityAbilityRunner
     public void PreWarm()
     {
         ComponentAutoRegistry.EnsureRegistered();
+        AbilityStepAutoRegistry.EnsureRegistered();
         var data = _entity != null ? _entity.EntityData : null;
         if (data == null) return;
 
@@ -114,6 +115,12 @@ public class EntityAbilityRunner
         for (int i = 0; i < _abilities.Count; i++)
         {
             _abilities[i].spEngine?.Reset();
+        }
+
+        // Cancel work from a previous lifetime before clearing the shared BB.
+        for (int i = 0; i < _abilities.Count; i++)
+        {
+            _abilities[i].CancelStepExecutions();
         }
 
         // 3) 清空 per-Entity 共享黑板
@@ -152,6 +159,8 @@ public class EntityAbilityRunner
         for (int i = 0; i < _abilities.Count; i++)
         {
             var a = _abilities[i];
+            // AbilityEnd may have started a new asynchronous sequence.
+            a.CancelStepExecutions();
             for (int c = 0; c < a.components.Count; c++)
             {
                 var ctx = a.MakeContext(a.components[c], null, sharedBlackboard, _entity);
@@ -177,22 +186,46 @@ public class EntityAbilityRunner
     /// </summary>
     public void Tick(float dt)
     {
-        // 1) per-ability SP tick
-        for (int i = 0; i < _abilities.Count; i++)
+        // Snapshot every execution across every ability before advancing any of
+        // them. Work triggered by an earlier execution starts with dt=0 and is
+        // deliberately absent from this FixedUpdate's snapshot.
+        AbilityRuntime[] abilitySnapshot = _abilities.ToArray();
+        var executionSnapshot = new List<AbilityStepExecution>();
+        for (int i = 0; i < abilitySnapshot.Length; i++)
         {
-            _abilities[i].spEngine?.OnTick(dt, 1f);
+            abilitySnapshot[i].AppendStepExecutionSnapshot(executionSnapshot);
+        }
+        for (int i = 0; i < executionSnapshot.Count; i++)
+        {
+            executionSnapshot[i].Tick(dt);
+        }
+        for (int i = 0; i < abilitySnapshot.Length; i++)
+        {
+            abilitySnapshot[i].PruneCompletedStepExecutions();
+        }
+
+        // 1) per-ability SP tick
+        for (int i = 0; i < abilitySnapshot.Length; i++)
+        {
+            AbilityRuntime ability = abilitySnapshot[i];
+            if (!_abilities.Contains(ability)) continue;
+            ability.spEngine?.OnTick(dt, 1f);
         }
         // 2) per-component tick
-        for (int i = 0; i < _abilities.Count; i++)
+        for (int i = 0; i < abilitySnapshot.Length; i++)
         {
-            var a = _abilities[i];
+            var a = abilitySnapshot[i];
+            if (!_abilities.Contains(a)) continue;
             if (!a.isActive) continue;
             DispatchToAbility(a, new TickEvent { deltaTime = dt });
+            // An OnTick rule may synchronously remove this ability.
+            if (!_abilities.Contains(a)) continue;
             for (int c = 0; c < a.components.Count; c++)
             {
                 var comp = a.components[c];
                 var ctx = a.MakeContext(comp, null, sharedBlackboard, _entity);
                 comp.OnTick(ctx, dt);
+                if (!_abilities.Contains(a)) break;
             }
         }
     }
@@ -245,6 +278,7 @@ public class EntityAbilityRunner
         }
         DispatchToAbility(a, new AbilityRemovedEvent { ability = a });
         a.SetActive(false);
+        a.CancelStepExecutions();
         for (int c = 0; c < a.components.Count; c++)
         {
             var ctx = a.MakeContext(a.components[c], null, sharedBlackboard, _entity);
@@ -280,47 +314,7 @@ public class EntityAbilityRunner
         var runtime = new AbilityRuntime { config = cfg };
         runtime.runtimeId = GenerateRuntimeId(cfg, kind);
 
-        if (cfg.components != null)
-        {
-            for (int i = 0; i < cfg.components.Length; i++)
-            {
-                ComponentConfig ccfg = cfg.components[i];
-                if (ccfg == null || string.IsNullOrEmpty(ccfg.componentType)) continue;
-                AbilityComponentBase inst = ComponentFactory.Create(ccfg.componentType);
-                if (inst == null)
-                {
-                    Debug.LogError($"[EntityAbilityRunner] Unknown component type: {ccfg.componentType} in ability {cfg.abilityId}");
-                    continue;
-                }
-                AbilityContext ctx = runtime.MakeContext(inst, null, sharedBlackboard, _entity);
-                runtime.components.Add(inst);
-                runtime.componentParams.Add(ccfg.parameters);
-
-                int triggerCount = 0;
-                if (ccfg.triggers != null)
-                {
-                    for (int tIdx = 0; tIdx < ccfg.triggers.Length; tIdx++)
-                    {
-                        var trig = ccfg.triggers[tIdx];
-                        if (trig == null) continue;
-                        var te = trig.triggerEvent;
-                        if (!runtime.componentsByTrigger.TryGetValue(te, out var list))
-                        {
-                            list = new List<(AbilityComponentBase, List<ConditionGroup>)>();
-                            runtime.componentsByTrigger[te] = list;
-                        }
-                        list.Add((inst, trig.groups));
-                        triggerCount++;
-                    }
-                }
-                if (triggerCount == 0)
-                {
-                    Debug.LogWarning(
-                        $"[AbilityRuntime] Component {ccfg.componentType} in ability {cfg.abilityId} "
-                        + "declares no triggers — it will never receive OnTrigger.");
-                }
-            }
-        }
+        runtime.BuildRules(cfg.GetRules());
 
         // SPEngine + 钩到 SetActive
         runtime.spEngine = new SPEngine(cfg.sp);
@@ -480,7 +474,7 @@ public class EntityAbilityRunner
                              || evt is AbilityAddedEvent
                              || evt is AbilityRemovedEvent;
         if (!a.isActive && !bypassActiveGate) return;
-        if (!a.componentsByTrigger.TryGetValue(evt.TriggerEvent, out var list)) return;
+        if (!a.rulesByTrigger.TryGetValue(evt.TriggerEvent, out var list)) return;
 
         var evalCtx = new ConditionEvalContext
         {
@@ -491,10 +485,9 @@ public class EntityAbilityRunner
 
         for (int i = 0; i < list.Count; i++)
         {
-            var (comp, groups) = list[i];
+            var (rule, groups) = list[i];
             if (!ConditionEvaluator.Evaluate(groups, evalCtx)) continue;
-            var ctx = a.MakeContext(comp, evt, sharedBlackboard, _entity);
-            comp.OnTrigger(ctx);
+            rule.Trigger(evt, sharedBlackboard, _entity);
         }
     }
 }

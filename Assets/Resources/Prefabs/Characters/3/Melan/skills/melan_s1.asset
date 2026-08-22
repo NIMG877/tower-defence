@@ -27,48 +27,58 @@ MonoBehaviour:
     openMode: 3
     recoverForbidDuringAbility: 1
     canManualClose: 0
-  components:
-  - componentType: ApplyBuff
-    parameters:
-      entries:
-      - key: attributes
-        value: Attack
-        fromBlackboard: 0
-        type: 3
-      - key: ops
-        value: AddPercent
-        fromBlackboard: 0
-        type: 3
-      - key: magnitudes
-        value: 0.5
-        fromBlackboard: 0
-        type: 3
-      - key: buffId
-        value: melan_s1
-        fromBlackboard: 0
-        type: 3
-      - key: outputBuff
-        value: melan_s1_outputBuff
-        fromBlackboard: 0
-        type: 3
-      - key: outputTarget
-        value: melan_s1_outputTarget
-        fromBlackboard: 0
-        type: 3
-    triggers:
+  rules:
+  - triggers:
     - triggerEvent: 2
       groups: []
-  - componentType: DestroyBuff
-    parameters:
-      entries:
-      - key: inputTarget
-        value: melan_s1_outputTarget
-        fromBlackboard: 0
-        type: 3
-      - key: inputBuff
-        value: melan_s1_outputBuff
-        fromBlackboard: 0
-        type: 3
-    triggers:
+    reentry: 0
+    steps:
+    - op: apply_buff
+      args:
+        entries:
+        - key: attributes
+          value: Attack
+          fromBlackboard: 0
+          type: 3
+        - key: ops
+          value: AddPercent
+          fromBlackboard: 0
+          type: 3
+        - key: magnitudes
+          value: 0.5
+          fromBlackboard: 0
+          type: 3
+        - key: buffId
+          value: melan_s1
+          fromBlackboard: 0
+          type: 3
+        - key: outputBuff
+          value: melan_s1_outputBuff
+          fromBlackboard: 0
+          type: 3
+        - key: outputTarget
+          value: melan_s1_outputTarget
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+  - triggers:
     - triggerEvent: 3
       groups: []
+    reentry: 0
+    steps:
+    - op: destroy_buff
+      args:
+        entries:
+        - key: inputTarget
+          value: melan_s1_outputTarget
+          fromBlackboard: 0
+          type: 3
+        - key: inputBuff
+          value: melan_s1_outputBuff
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []

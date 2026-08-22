@@ -1,7 +1,11 @@
 # Skill Stages & Sub-Components — Deferred Design Spec
 
+> **Document status:** deferred design archive. Ability sequencing, branching,
+> and looping use [`rules[].steps[]`](../../ability-steps.md).
+> `ComponentConfig.subComponents` is not part of the active data model.
+
 **Date**: 2026-06-08
-**Status**: Deferred (not implemented)
+**Status**: Archived deferred design
 **Parent design**: [2026-06-07-skill-talent-refactor-design.md](2026-06-07-skill-talent-refactor-design.md)
 **Scope**: Reserved design for two `ComponentConfig` features that were stubbed in the original refactor and **removed on 2026-06-08** because they were dead code (no runtime consumed them). This spec records the data model + runtime design for when they are re-introduced.
 
@@ -336,7 +340,8 @@ This is by design — composition is what makes the two features multiply useful
 
 ## References
 
-- Current (post-2026-06-08) data model: [ComponentConfig.cs](../../Assets/PublicScripts/GameData/SkillSystem/ComponentConfig.cs)
-- Current dispatch loop: [SkillRunner.cs](../../Assets/PublicScripts/Entity-LevelPublicScripts/SkillSystem/SkillRunner.cs)
-- Original refactor that stubbed these: [2026-06-07-skill-talent-refactor-design.md](2026-06-07-skill-talent-refactor-design.md)
-- Active window dispatch (related, already implemented): [2026-06-07-skill-runtime-active-window-design.md](2026-06-07-skill-runtime-active-window-design.md)
+- Ability authoring and runtime semantics: [Ability Steps](../../ability-steps.md)
+- Rule and step data types: [ComponentConfig.cs](../../../Assets/PublicScripts/GameData/AbilitySystem/ComponentConfig.cs)
+- Sequence runtime and operation registry: [AbilityStepRuntime.cs](../../../Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/AbilityStepRuntime.cs)
+- Parent architecture record: [2026-06-07-skill-talent-refactor-design.md](2026-06-07-skill-talent-refactor-design.md)
+- Active-window architecture record: [2026-06-07-skill-runtime-active-window-design.md](2026-06-07-skill-runtime-active-window-design.md)

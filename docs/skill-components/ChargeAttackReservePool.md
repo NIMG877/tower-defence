@@ -5,7 +5,8 @@ pool remains unchanged; extra pools fill only after the default pool is full.
 When attacking, each pool is consumed only if its target rule accepts the
 current target. Ineligible pool charges remain stored.
 
-**Registered as:** `ChargeAttackReservePool`
+**Canonical op:** `charge_attack_reserve_pool`
+**Component registration:** `ChargeAttackReservePool`
 
 ## Parameters
 
@@ -27,9 +28,10 @@ rejected.
 - On `OnAbilityEnd`, remove all pools registered by this component instance.
 - On teardown, remove them defensively.
 
-For a persistent talent, trigger only on `OnAbilityBegin`. For a temporary
-skill, configure the same component for both `OnAbilityBegin` and
-`OnAbilityEnd`.
+For a persistent talent, use an `OnAbilityBegin` rule. For a temporary skill,
+use one rule with `OnAbilityBegin` and `OnAbilityEnd` trigger entries and one
+`charge_attack_reserve_pool` step; the bound component instance then removes
+the pools it registered.
 
 ## Visual Limitation
 

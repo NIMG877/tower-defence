@@ -4,7 +4,8 @@ Controls a cancellable charge sequence and publishes its current phase to the
 shared Blackboard. It does not select entities, apply abnormal states, play
 animations, deal damage, or destroy entities.
 
-**Registered as:** `ChargeStateController`
+**Canonical op:** `charge_state_controller`
+**Component registration:** `ChargeStateController`
 
 ## Parameters
 
@@ -34,11 +35,11 @@ The phases are `idle`, `charging`, `backout`, `attack`, `detonate`, and
 Both outputs are strings so they can be read directly by `ConditionEvaluator`.
 The component removes its output keys during teardown.
 
-## Recommended trigger and ordering
+## Rule trigger and step placement
 
-Trigger on `OnTick`. Place the `EntitySelector` that writes `targetCountKey`
-before this component. Place phase-conditioned animation, abnormal-state,
-selection, damage, impulse, and destruction components after it.
+Use an `OnTick` rule. Place `select_targets` before `charge_state_controller`
+so `targetCountKey` is current, then place phase-conditioned animation,
+abnormal-state, selection, damage, impulse, and destruction steps after it.
 
 For one-shot phase actions, require both `phaseKey=<phase>` and
 `phaseEnteredKey=True` in the same condition group.

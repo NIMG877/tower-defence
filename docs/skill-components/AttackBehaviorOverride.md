@@ -3,7 +3,8 @@
 Overrides an entity's attack `DamageType` and/or target `OrderLogic` (target priority). It can
 save the previous values for exact restoration by `AttackBehaviorRestore`.
 
-**Registered as:** `AttackBehaviorOverride`
+**Canonical op:** `attack_behavior_override`
+**Component registration:** `AttackBehaviorOverride`
 
 ## Parameters
 

@@ -1,6 +1,6 @@
 # DestroyBuff
 
-Destroys buffs that a prior component (typically `ApplyBuff`) wrote to the
+Destroys buffs that a prior step (typically `apply_buff`) wrote to the
 per-Entity shared blackboard. Reads two parallel lists from
 `ctx.sharedBlackboard` at the configured keys:
 
@@ -9,16 +9,16 @@ per-Entity shared blackboard. Reads two parallel lists from
 
 The two lists are walked in parallel — index `i` in each list is the pair.
 
-**Registered as:** `DestroyBuff`
+**Canonical op:** `destroy_buff`
+**Component registration:** `DestroyBuff`
 **Class:** `AbilitySystem.Components.DestroyBuff`
 **File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/DestroyBuff.cs`
 
 ## Gating
 
-Both input keys MUST be set; if either is empty the component is a no-op
-(silently returns). This mirrors the `needWrite` gate in `ApplyBuff` so the
-two components are symmetric: `ApplyBuff` writes pairs only when both output
-keys are set; `DestroyBuff` reads pairs only when both input keys are set.
+Both input keys MUST be set; if either is empty the operation is a no-op.
+`apply_buff` writes pairs only when both output keys are set;
+`destroy_buff` reads pairs only when both input keys are set.
 
 After consuming, both blackboard keys are removed. This matches `ApplyBuff`'s
 "this round" semantics: the lists are a per-round handoff, and leaving them
@@ -38,10 +38,5 @@ re-evaluates the source on every call.
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `inputTarget` | String | `""` | BlackBoard key to read `List<Entity>` from. Empty = component is a no-op. |
-| `inputBuff` | String | `""` | BlackBoard key to read `List<Buff>` from. Empty = component is a no-op. |
-
-## Changelog
-
-- 2026-06-12: migrated to `ParamList.GetStringLazy`; both keys are
-  re-read on every call (was cached in fields previously).
+| `inputTarget` | String | `""` | BlackBoard key to read `List<Entity>` from. Empty = operation is a no-op. |
+| `inputBuff` | String | `""` | BlackBoard key to read `List<Buff>` from. Empty = operation is a no-op. |
