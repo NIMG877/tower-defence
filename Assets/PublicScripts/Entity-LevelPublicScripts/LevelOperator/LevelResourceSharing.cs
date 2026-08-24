@@ -1,5 +1,6 @@
 
 using System.Threading;
+using AbilitySystem;
 using Codice.CM.Client.Differences.Merge;
 using UnityEngine;
 
@@ -48,6 +49,7 @@ public class LevelResourceSharing
         SlidersManager.Manager.Initialize();
         LevelActionManager.Manager.SetEntityPrefabTypesAndWaves(LD.Waves);
         LevelActionManager.Manager.Initialize();
+        DetachedStepScheduler.Manager.Initialize();
         LevelResourceManager.Manager.CanSetNumLeft = LD.CanSetNum;
         LevelResourceManager.Manager.LevelHpLeft = LD.LevelHp;
         LevelResourceManager.Manager.NeedOperateCount = LevelActionManager.Manager.CountTotalNeedOperateNum();
@@ -74,6 +76,7 @@ public class LevelResourceSharing
         PathDataManager.Manager.ToStart();
         SlidersManager.Manager.ToStart();
         LevelActionManager.Manager.ToStart();
+        DetachedStepScheduler.Manager.ToStart();
         LevelResourceManager.Manager.ToStart();
         if (EnvironmentalControlDevice != null && EnvironmentalControlDevice.TryGetComponent(out IManagerStartEnd iManagerStartEnd))
         {
@@ -84,6 +87,7 @@ public class LevelResourceSharing
     {
         Bullet.ReturnAllActive();
         LevelActionManager.Manager.ToEnd();
+        DetachedStepScheduler.Manager.ToEnd();
         EntityManager.Manager.ToEnd();
         EntityPoolManager.Manager.ToEnd();
         EffectManager.Manager.ToEnd();

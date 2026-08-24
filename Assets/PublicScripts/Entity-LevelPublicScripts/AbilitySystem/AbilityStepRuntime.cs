@@ -435,7 +435,12 @@ namespace AbilitySystem
 
             Vector2 position = ResolvePosition(ctx, args);
             int camp = args.GetIntLazy("camp", -1, ctx.sharedBlackboard)();
-            if (camp < 0) camp = ctx.entity != null ? ctx.entity.Camp : 1;
+            if (camp < 0)
+            {
+                DetachedExecutionSnapshot snapshot = ctx.stepExecution?.DetachedSnapshot;
+                camp = snapshot != null ? snapshot.camp
+                    : ctx.entity != null ? ctx.entity.Camp : 1;
+            }
 
             EntityPool pool = EntityPoolManager.Manager.FetchEntityPool(id);
             if (pool == null)
@@ -506,7 +511,10 @@ namespace AbilitySystem
                     position = args.GetVector2IntLazy("position", default, ctx.sharedBlackboard)();
                     break;
                 default:
-                    position = ctx.entity != null ? ctx.entity.Movement.Position : Vector2.zero;
+                    // Detached executions resolve "self" from the fork-time
+                    // snapshot; the host may be recycled by now.
+                    Vector2? snap = ctx.stepExecution?.DetachedSnapshot?.position;
+                    position = snap ?? (ctx.entity != null ? ctx.entity.Movement.Position : Vector2.zero);
                     break;
             }
             Vector2Int offset = args.GetVector2IntLazy("offset", default, ctx.sharedBlackboard)();
@@ -580,6 +588,27 @@ namespace AbilitySystem
         }
     }
 
+    /// <summary>
+    /// Entity data captured when a detached execution forks. The host may be
+    /// dead or pool-recycled by the time later steps run, so host-object reads
+    /// inside detached rules resolve from this snapshot instead.
+    /// </summary>
+    public sealed class DetachedExecutionSnapshot
+    {
+        public Vector2 position;
+        public int camp;
+
+        public static DetachedExecutionSnapshot From(Entity entity)
+        {
+            if (entity == null) return null;
+            return new DetachedExecutionSnapshot
+            {
+                position = entity.Movement.Position,
+                camp = entity.Camp,
+            };
+        }
+    }
+
     public sealed class AbilityRuleRuntime
     {
         private readonly AbilityRuntime _ability;
@@ -602,6 +631,24 @@ namespace AbilitySystem
         public void Trigger(AbilityEvent evt, Blackboard sharedBlackboard, Entity entity)
         {
             if (_isCancelling || _ability.isCancellingStepExecutions) return;
+            if (Config.detached)
+            {
+                // Detached executions leave the host lifetime: the scheduler owns
+                // them, so host death/teardown/pool-recycle never cancels them.
+                // The blackboard is cloned and entity data snapshotted here;
+                // later steps never observe the recycled host.
+                var detachedExecution = new AbilityStepExecution(
+                    _ability,
+                    this,
+                    _steps,
+                    evt,
+                    sharedBlackboard != null ? sharedBlackboard.Clone() : new Blackboard(),
+                    null,
+                    DetachedExecutionSnapshot.From(entity));
+                DetachedStepScheduler.Manager.Add(detachedExecution);
+                detachedExecution.Tick(0f);
+                return;
+            }
             RemoveCompleted();
             switch (Config.reentry)
             {
@@ -703,19 +750,26 @@ namespace AbilitySystem
         public bool WasCancelled { get; private set; }
         public bool Failed { get; private set; }
 
+        /// <summary>Fork-time entity data for detached executions; null while
+        /// the execution still belongs to its host. spawn_entity resolves
+        /// "self" position/camp from here before touching any host object.</summary>
+        public DetachedExecutionSnapshot DetachedSnapshot { get; }
+
         internal AbilityStepExecution(
             AbilityRuntime ability,
             AbilityRuleRuntime rule,
             AbilityCompiledStep[] rootSteps,
             AbilityEvent evt,
             Blackboard blackboard,
-            Entity entity)
+            Entity entity,
+            DetachedExecutionSnapshot detachedSnapshot = null)
         {
             _ability = ability;
             _rule = rule;
             _event = evt;
             _blackboard = blackboard ?? new Blackboard();
             _entity = entity;
+            DetachedSnapshot = detachedSnapshot;
             PushSequence(rootSteps, null);
         }
 

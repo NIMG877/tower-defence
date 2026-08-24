@@ -168,6 +168,67 @@ namespace AbilitySystem.Tests
             Assert.That(rule.IsRunning, Is.False);
         }
 
+        [TearDown]
+        public void ResetDetachedScheduler()
+        {
+            DetachedStepScheduler.Manager.ToEnd();
+        }
+
+        [Test]
+        public void DetachedRule_ExecutionSurvivesHostTeardownAndTicksViaScheduler()
+        {
+            AbilityRuleRuntime rule = BuildDetachedRule(out AbilityRuntime runtime,
+                Record("before"),
+                Step("delay", Arg("seconds", "0.3", ParamValueType.Float)),
+                Record("after"));
+
+            rule.Trigger(null, new Blackboard(), null);
+            CollectionAssert.AreEqual(new[] { "before" }, Trace);
+            // Detached executions are not part of the host running set.
+            Assert.That(rule.IsRunning, Is.False);
+
+            // Host death / pool recycle paths must not touch the scheduler's work.
+            runtime.CancelStepExecutions();
+            rule.CancelAll();
+            DetachedStepScheduler.Manager.TickAll(0.1f);
+            CollectionAssert.AreEqual(new[] { "before" }, Trace);
+
+            DetachedStepScheduler.Manager.TickAll(0.2f);
+            CollectionAssert.AreEqual(new[] { "before", "after" }, Trace);
+        }
+
+        [Test]
+        public void DetachedRule_BlackboardIsSnapshottedAtFork()
+        {
+            var blackboard = new Blackboard();
+            blackboard.Set("ready", "no");
+            StepConfig wait = Step("wait_until");
+            wait.condition = EqualCondition("ready", "yes");
+            AbilityRuleRuntime rule = BuildDetachedRule(out _, Record("before"), wait, Record("after"));
+
+            rule.Trigger(null, blackboard, null);
+            CollectionAssert.AreEqual(new[] { "before" }, Trace);
+
+            // Host writes after the fork never reach the detached execution.
+            blackboard.Set("ready", "yes");
+            blackboard.Clear();
+            DetachedStepScheduler.Manager.TickAll(1f);
+            CollectionAssert.AreEqual(new[] { "before" }, Trace);
+        }
+
+        [Test]
+        public void DetachedRule_ToEndCancelsPendingExecutions()
+        {
+            AbilityRuleRuntime rule = BuildDetachedRule(out _,
+                Step("delay", Arg("seconds", "0.3", ParamValueType.Float)),
+                Record("after"));
+
+            rule.Trigger(null, new Blackboard(), null);
+            DetachedStepScheduler.Manager.ToEnd();
+            DetachedStepScheduler.Manager.TickAll(1f);
+            CollectionAssert.IsEmpty(Trace);
+        }
+
         [TestCase("yes", "then")]
         [TestCase("no", "else")]
         public void Branch_RunsOnlySelectedNestedSequence(string value, string expected)
@@ -357,6 +418,27 @@ namespace AbilitySystem.Tests
 
         private static StepConfig Record(string value) =>
             Step(RecordOp, Arg("value", value));
+
+        private static AbilityRuleRuntime BuildDetachedRule(
+            out AbilityRuntime runtime,
+            params StepConfig[] steps)
+        {
+            runtime = new AbilityRuntime();
+            runtime.BuildRules(new[]
+            {
+                new AbilityRuleConfig
+                {
+                    reentry = RuleReentry.IgnoreWhileRunning,
+                    detached = true,
+                    triggers = new[]
+                    {
+                        new ConditionConfig { triggerEvent = TriggerEvent.OnInitialize },
+                    },
+                    steps = steps,
+                },
+            });
+            return runtime.ruleRuntimes[0];
+        }
 
         private static StepConfig Step(string op, params ParamEntry[] args) =>
             new StepConfig

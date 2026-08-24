@@ -563,6 +563,15 @@ namespace AbilitySystem
         public ConditionConfig[] triggers = Array.Empty<ConditionConfig>();
         public RuleReentry reentry = RuleReentry.IgnoreWhileRunning;
         public StepConfig[] steps = Array.Empty<StepConfig>();
+        // Detached rules fork their executions to the level-scoped scheduler at
+        // trigger time: the sequence keeps advancing after the host dies or
+        // returns to the pool. The blackboard is cloned and entity data is
+        // snapshotted at fork, so later steps never observe the recycled host
+        // (spawn "self" resolves to the fork-time position/camp). Ops that need
+        // a live host entity have no detached semantics and must not be used.
+        // Reentry is effectively Parallel: detached executions are not counted
+        // in the host rule's running set.
+        public bool detached;
     }
 
     /// <summary>
