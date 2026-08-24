@@ -939,7 +939,7 @@ MonoBehaviour:
         DurationTime: 0
         Contents: []
     - Name: Track 1
-      Locked: 1
+      Locked: 0
       Actions:
       - CommandType: 0
         TriggerTime: 3

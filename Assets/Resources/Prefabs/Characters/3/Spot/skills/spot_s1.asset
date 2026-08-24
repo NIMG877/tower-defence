@@ -63,11 +63,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 2
-      groups: []
-    reentry: 0
-    steps:
     - op: attack_range_override
       args:
         entries:
@@ -78,11 +73,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 2
-      groups: []
-    reentry: 0
-    steps:
     - op: apply_animation_override
       args:
         entries:
@@ -105,11 +95,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 2
-      groups: []
-    reentry: 0
-    steps:
     - op: attack_behavior_override
       args:
         entries:
@@ -128,11 +113,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 2
-      groups: []
-    reentry: 0
-    steps:
     - op: force_reset_attack
       args:
         entries: []
@@ -158,22 +138,12 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 3
-      groups: []
-    reentry: 0
-    steps:
     - op: attack_range_restore
       args:
         entries: []
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 3
-      groups: []
-    reentry: 0
-    steps:
     - op: remove_animation_override
       args:
         entries:
@@ -184,11 +154,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 3
-      groups: []
-    reentry: 0
-    steps:
     - op: attack_behavior_restore
       args:
         entries:
@@ -199,11 +164,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 3
-      groups: []
-    reentry: 0
-    steps:
     - op: force_reset_attack
       args:
         entries: []

@@ -35,9 +35,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 16, groups: []}]
-    reentry: 0
-    steps:
     - op: charge_state_controller
       args:
         entries:
@@ -58,9 +55,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: charging}, {op: 1, leftKey: creeper_t1_phase_entered, rightValue: True}]}]}]
-    reentry: 0
-    steps:
     - op: apply_animation_override
       args: {entries: [{key: slots, value: Idle, fromBlackboard: 0, type: 3}, {key: resources, value: ChargeLoop, fromBlackboard: 0, type: 3}]}
       condition: []
@@ -100,105 +94,66 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
-    reentry: 0
-    steps:
     - op: apply_damage
       args: {entries: [{key: targetMode, value: blackboard, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: creeper_t1_bucket_1, fromBlackboard: 0, type: 3}, {key: multiplier, value: 3, fromBlackboard: 0, type: 1}, {key: applyType, value: 1, fromBlackboard: 0, type: 0}]}
       condition: []
       steps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
-    reentry: 0
-    steps:
     - op: apply_impulse
       args: {entries: [{key: targetMode, value: blackboard, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: creeper_t1_bucket_1, fromBlackboard: 0, type: 3}, {key: strengthLevel, value: 5, fromBlackboard: 0, type: 0}]}
       condition: []
       steps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
-    reentry: 0
-    steps:
     - op: select_targets
       args: {entries: [{key: selectionMode, value: ring, fromBlackboard: 0, type: 3}, {key: campRelation, value: both, fromBlackboard: 0, type: 3}, {key: minRadius, value: 0.25, fromBlackboard: 0, type: 1}, {key: radius, value: 0.5, fromBlackboard: 0, type: 1}, {key: outputEntitiesKey, value: creeper_t1_bucket_2, fromBlackboard: 0, type: 3}]}
       condition: []
       steps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
-    reentry: 0
-    steps:
     - op: apply_damage
       args: {entries: [{key: targetMode, value: blackboard, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: creeper_t1_bucket_2, fromBlackboard: 0, type: 3}, {key: multiplier, value: 2, fromBlackboard: 0, type: 1}, {key: applyType, value: 1, fromBlackboard: 0, type: 0}]}
       condition: []
       steps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
-    reentry: 0
-    steps:
     - op: apply_impulse
       args: {entries: [{key: targetMode, value: blackboard, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: creeper_t1_bucket_2, fromBlackboard: 0, type: 3}, {key: strengthLevel, value: 4, fromBlackboard: 0, type: 0}]}
       condition: []
       steps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
-    reentry: 0
-    steps:
     - op: select_targets
       args: {entries: [{key: selectionMode, value: ring, fromBlackboard: 0, type: 3}, {key: campRelation, value: both, fromBlackboard: 0, type: 3}, {key: minRadius, value: 0.5, fromBlackboard: 0, type: 1}, {key: radius, value: 1.664, fromBlackboard: 0, type: 1}, {key: outputEntitiesKey, value: creeper_t1_bucket_3, fromBlackboard: 0, type: 3}]}
       condition: []
       steps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
-    reentry: 0
-    steps:
     - op: apply_damage
       args: {entries: [{key: targetMode, value: blackboard, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: creeper_t1_bucket_3, fromBlackboard: 0, type: 3}, {key: multiplier, value: 1, fromBlackboard: 0, type: 1}, {key: applyType, value: 1, fromBlackboard: 0, type: 0}]}
       condition: []
       steps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
-    reentry: 0
-    steps:
     - op: apply_impulse
       args: {entries: [{key: targetMode, value: blackboard, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: creeper_t1_bucket_3, fromBlackboard: 0, type: 3}, {key: strengthLevel, value: 3, fromBlackboard: 0, type: 0}]}
       condition: []
       steps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
-    reentry: 0
-    steps:
     - op: select_targets
       args: {entries: [{key: selectionMode, value: ring, fromBlackboard: 0, type: 3}, {key: campRelation, value: both, fromBlackboard: 0, type: 3}, {key: minRadius, value: 1.664, fromBlackboard: 0, type: 1}, {key: radius, value: 2.915, fromBlackboard: 0, type: 1}, {key: outputEntitiesKey, value: creeper_t1_bucket_4, fromBlackboard: 0, type: 3}]}
       condition: []
       steps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
-    reentry: 0
-    steps:
     - op: apply_damage
       args: {entries: [{key: targetMode, value: blackboard, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: creeper_t1_bucket_4, fromBlackboard: 0, type: 3}, {key: multiplier, value: 0.5, fromBlackboard: 0, type: 1}, {key: applyType, value: 1, fromBlackboard: 0, type: 0}]}
       condition: []
       steps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
-    reentry: 0
-    steps:
     - op: apply_impulse
       args: {entries: [{key: targetMode, value: blackboard, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: creeper_t1_bucket_4, fromBlackboard: 0, type: 3}, {key: strengthLevel, value: 2, fromBlackboard: 0, type: 0}]}
       condition: []
       steps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
-    reentry: 0
-    steps:
     - op: apply_animation_override
       args: {entries: [{key: mode, value: override, fromBlackboard: 0, type: 3}, {key: slots, value: Die, fromBlackboard: 0, type: 3}, {key: resources, value: Die2, fromBlackboard: 0, type: 3}]}
       condition: []
       steps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 16, groups: [{units: [{op: 1, leftKey: creeper_t1_phase, rightValue: detonate}]}]}]
-    reentry: 0
-    steps:
     - op: destroy_entity
       args: {entries: []}
       condition: []

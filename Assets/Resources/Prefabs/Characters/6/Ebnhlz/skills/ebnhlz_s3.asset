@@ -63,11 +63,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 2
-      groups: []
-    reentry: 0
-    steps:
     - op: apply_animation_override
       args:
         entries:
@@ -90,11 +85,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 2
-      groups: []
-    reentry: 0
-    steps:
     - op: write_blackboard
       args:
         entries:
@@ -110,6 +100,12 @@ MonoBehaviour:
           value: mult
           fromBlackboard: 0
           type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: force_reset_attack
+      args:
+        entries: []
       condition: []
       steps: []
       elseSteps: []
@@ -143,17 +139,6 @@ MonoBehaviour:
       steps: []
       elseSteps: []
   - triggers:
-    - triggerEvent: 2
-      groups: []
-    reentry: 0
-    steps:
-    - op: force_reset_attack
-      args:
-        entries: []
-      condition: []
-      steps: []
-      elseSteps: []
-  - triggers:
     - triggerEvent: 3
       groups: []
     reentry: 0
@@ -172,11 +157,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 3
-      groups: []
-    reentry: 0
-    steps:
     - op: remove_animation_override
       args:
         entries:
@@ -187,11 +167,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 3
-      groups: []
-    reentry: 0
-    steps:
     - op: write_blackboard
       args:
         entries:
@@ -210,11 +185,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 3
-      groups: []
-    reentry: 0
-    steps:
     - op: force_reset_attack
       args:
         entries: []

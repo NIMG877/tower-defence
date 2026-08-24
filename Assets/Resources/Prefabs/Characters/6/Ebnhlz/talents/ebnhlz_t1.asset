@@ -51,11 +51,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 2
-      groups: []
-    reentry: 0
-    steps:
     - op: charge_attack_damage_modifier
       args:
         entries:
@@ -66,11 +61,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 2
-      groups: []
-    reentry: 0
-    steps:
     - op: charge_attack_reserve_pool
       args:
         entries:

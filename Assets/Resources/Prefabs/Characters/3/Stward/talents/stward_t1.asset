@@ -55,11 +55,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 2
-      groups: []
-    reentry: 0
-    steps:
     - op: attack_behavior_override
       args:
         entries:

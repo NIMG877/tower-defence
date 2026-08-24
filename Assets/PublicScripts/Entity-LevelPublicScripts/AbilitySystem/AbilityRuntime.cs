@@ -23,12 +23,6 @@ namespace AbilitySystem
             rulesByTrigger
             = new Dictionary<TriggerEvent, List<(AbilityRuleRuntime, List<ConditionGroup>)>>();
 
-        // Trigger 分桶:BuildAbilityRuntime 一次性填充,key 是 TriggerEvent,value 是
-        // (component, condition groups) 对的列表。
-        public Dictionary<TriggerEvent, List<(AbilityComponentBase comp, List<ConditionGroup> groups)>>
-            componentsByTrigger
-            = new Dictionary<TriggerEvent, List<(AbilityComponentBase, List<ConditionGroup>)>>();
-
         public bool isInitialized;
         internal bool isCancellingStepExecutions;
 
@@ -69,7 +63,6 @@ namespace AbilitySystem
             CancelStepExecutions();
             ruleRuntimes.Clear();
             rulesByTrigger.Clear();
-            componentsByTrigger.Clear();
             components.Clear();
             componentParams.Clear();
 

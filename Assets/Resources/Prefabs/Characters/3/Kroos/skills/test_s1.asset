@@ -74,11 +74,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 6
-      groups: []
-    reentry: 0
-    steps:
     - op: write_blackboard
       args:
         entries:

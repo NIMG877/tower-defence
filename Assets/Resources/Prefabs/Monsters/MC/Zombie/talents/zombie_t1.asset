@@ -59,11 +59,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 2
-      groups: []
-    reentry: 0
-    steps:
     - op: apply_abnormal_state
       args:
         entries:
@@ -86,11 +81,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 2
-      groups: []
-    reentry: 0
-    steps:
     - op: apply_buff
       args:
         entries:
@@ -129,11 +119,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 2
-      groups: []
-    reentry: 0
-    steps:
     - op: apply_animation_override
       args:
         entries:
@@ -156,11 +141,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 2
-      groups: []
-    reentry: 0
-    steps:
     - op: apply_animation_override
       args:
         entries:
@@ -226,11 +206,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 16
-      groups: []
-    reentry: 0
-    steps:
     - op: apply_buff
       args:
         entries:
@@ -296,11 +271,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 3
-      groups: []
-    reentry: 0
-    steps:
     - op: destroy_buff
       args:
         entries:
@@ -315,11 +285,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 3
-      groups: []
-    reentry: 0
-    steps:
     - op: destroy_abnormal_state
       args:
         entries:
@@ -334,11 +299,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 3
-      groups: []
-    reentry: 0
-    steps:
     - op: remove_animation_override
       args:
         entries:
@@ -349,11 +309,6 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-  - triggers:
-    - triggerEvent: 3
-      groups: []
-    reentry: 0
-    steps:
     - op: destroy_entity
       args:
         entries: []
