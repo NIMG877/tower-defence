@@ -45,22 +45,10 @@ MonoBehaviour:
       - op: spawn_entity
         args:
           entries:
-          - key: entityId
-            value: inherit
-            fromBlackboard: 0
-            type: 3
-          - key: snapToGrid
-            value: True
-            fromBlackboard: 0
-            type: 2
-          - key: randomOffsetX
+          - key: spawnIndex
             value: 0
             fromBlackboard: 0
-            type: 1
-          - key: randomOffsetY
-            value: 0
-            fromBlackboard: 0
-            type: 1
+            type: 0
         condition: []
         steps: []
         elseSteps: []

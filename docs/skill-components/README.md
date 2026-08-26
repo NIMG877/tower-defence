@@ -95,6 +95,8 @@ are not authoring names.
 
 ### Entity lifecycle
 
+- [SpawnEntity](SpawnEntity.md) — spawns an entity from the host's
+  `CanSpawnEntityIds` registry; `spawnIndex` picks the entry.
 - [DestroyEntity](DestroyEntity.md) - calls `Entity.Die()` for self or a
   Blackboard entity list.
 

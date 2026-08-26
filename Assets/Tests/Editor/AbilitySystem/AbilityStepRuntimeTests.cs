@@ -231,12 +231,12 @@ namespace AbilitySystem.Tests
         }
 
         [Test]
-        public void DetachedSnapshot_FirstHostSpawnId_ResolvesFirstCanSpawnEntry()
+        public void DetachedSnapshot_HostSpawnIds_ReturnsCanSpawnListAsIs()
         {
-            // entityId:inherit resolves the host's first registered spawn id;
-            // a host without the entry yields EntityID.Null so spawn_entity
-            // reports a config error instead of guessing.
-            Assert.That(DetachedExecutionSnapshot.FirstHostSpawnId(null), Is.EqualTo(EntityID.Null));
+            // spawn_entity resolves its target from this list (spawnIndex
+            // picks the entry); a host without the registry yields null so
+            // spawn_entity reports a config error instead of guessing.
+            Assert.That(DetachedExecutionSnapshot.HostSpawnIds(null), Is.Null);
 
             GameObject go = new GameObject("snapshot_host");
             try
@@ -244,13 +244,11 @@ namespace AbilitySystem.Tests
                 Entity entity = go.AddComponent<Entity>();
                 // EntityData alone drives the lookup; subsystems stay unbuilt.
                 entity.EntityData = new EntityData { CanSpawnEntityIds = null };
-                Assert.That(DetachedExecutionSnapshot.FirstHostSpawnId(entity),
-                    Is.EqualTo(EntityID.Null));
+                Assert.That(DetachedExecutionSnapshot.HostSpawnIds(entity), Is.Null);
 
-                entity.EntityData.CanSpawnEntityIds =
-                    new List<EntityID> { new EntityID("m", 6), new EntityID("m", 7) };
-                Assert.That(DetachedExecutionSnapshot.FirstHostSpawnId(entity),
-                    Is.EqualTo(new EntityID("m", 6)));
+                var ids = new List<EntityID> { new EntityID("m", 6), new EntityID("m", 7) };
+                entity.EntityData.CanSpawnEntityIds = ids;
+                Assert.That(DetachedExecutionSnapshot.HostSpawnIds(entity), Is.SameAs(ids));
             }
             finally
             {

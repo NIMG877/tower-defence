@@ -24,7 +24,6 @@ namespace AbilitySystem
     {
         Running,
         Completed,
-        Failed,
     }
 
     /// <summary>
@@ -411,174 +410,6 @@ namespace AbilitySystem
             AbilityStepStatus.Completed;
     }
 
-    [RegisterAbilityStepOp("spawn_entity")]
-    public sealed class SpawnEntityAbilityStepOp : AbilityStepOp
-    {
-        private AbilityStepStatus _status;
-
-        public override void OnInit(AbilityContext ctx)
-        {
-            _status = Spawn(ctx) ? AbilityStepStatus.Completed : AbilityStepStatus.Failed;
-        }
-
-        public override AbilityStepStatus OnTick(AbilityContext ctx, float deltaTime) => _status;
-
-        private static bool Spawn(AbilityContext ctx)
-        {
-            ParamList args = ctx.step?.args ?? new ParamList();
-            EntityID id = ResolveEntityId(ctx, args);
-            if (id.IsNull)
-            {
-                Debug.LogError("[spawn_entity] Missing/invalid entityId or entityCategory/entityNumber.");
-                return false;
-            }
-
-            Vector2 position = ResolvePosition(ctx, args);
-            int camp = args.GetIntLazy("camp", -1, ctx.sharedBlackboard)();
-            if (camp < 0)
-            {
-                DetachedExecutionSnapshot snapshot = ctx.stepExecution?.DetachedSnapshot;
-                camp = snapshot != null ? snapshot.camp
-                    : ctx.entity != null ? ctx.entity.Camp : 1;
-            }
-
-            EntityPool pool = EntityPoolManager.Manager.FetchEntityPool(id);
-            if (pool == null)
-            {
-                Debug.LogError($"[spawn_entity] Entity pool '{id}' is not available.");
-                return false;
-            }
-
-            string placement = NormalizeToken(
-                args.GetStringLazy("placement", "auto", ctx.sharedBlackboard)());
-            bool isStatic = placement == "static" ||
-                            (placement == "auto" && pool.EntityData != null && pool.EntityData.IsStatic);
-            Entity spawned = isStatic
-                ? EntityManager.Manager.SetStaticEntity(
-                    id,
-                    position,
-                    camp,
-                    args.GetIntLazy("orientation", 0, ctx.sharedBlackboard)())
-                : EntityManager.Manager.SetMovableEntity(
-                    id,
-                    position,
-                    camp,
-                    ResolvePathSerial(ctx, args));
-
-            string outputKey = args.GetStringLazy("outputKey", "", ctx.sharedBlackboard)();
-            if (spawned != null && !string.IsNullOrEmpty(outputKey))
-                ctx.sharedBlackboard?.Set(outputKey, spawned);
-            return spawned != null;
-        }
-
-        private static EntityID ResolveEntityId(AbilityContext ctx, ParamList args)
-        {
-            string raw = args.GetStringLazy("entityId", "", ctx.sharedBlackboard)();
-            if (NormalizeToken(raw) == "inherit")
-            {
-                // Detached executions only ever read the fork-time snapshot;
-                // the live host may be a recycled different entity by now.
-                EntityID inherited = ctx.stepExecution?.DetachedSnapshot != null
-                    ? ctx.stepExecution.DetachedSnapshot.spawnEntityId
-                    : DetachedExecutionSnapshot.FirstHostSpawnId(ctx.entity);
-                if (inherited.IsNull)
-                    Debug.LogError("[spawn_entity] entityId 'inherit' found no CanSpawnEntityIds entry on the host entity data.");
-                return inherited;
-            }
-            if (!string.IsNullOrWhiteSpace(raw))
-            {
-                int separator = raw.LastIndexOf('-');
-                if (separator <= 0) separator = raw.LastIndexOf(':');
-                if (separator > 0 && separator < raw.Length - 1 &&
-                    int.TryParse(raw.Substring(separator + 1), out int number))
-                    return new EntityID(raw.Substring(0, separator), number);
-            }
-
-            string category = args.GetStringLazy("entityCategory", "", ctx.sharedBlackboard)();
-            int entityNumber = args.GetIntLazy("entityNumber", 0, ctx.sharedBlackboard)();
-            return string.IsNullOrWhiteSpace(category)
-                ? EntityID.Null
-                : new EntityID(category, entityNumber);
-        }
-
-        private static Vector2 ResolvePosition(AbilityContext ctx, ParamList args)
-        {
-            string mode = NormalizeToken(
-                args.GetStringLazy("positionMode", "self", ctx.sharedBlackboard)());
-            Vector2 position;
-            switch (mode)
-            {
-                case "eventtarget":
-                    Entity eventTarget = ResolveEventEntity(ctx.currentEvent);
-                    position = eventTarget != null
-                        ? eventTarget.Movement.Position
-                        : ctx.entity != null ? ctx.entity.Movement.Position : Vector2.zero;
-                    break;
-                case "blackboard":
-                    string key = args.GetStringLazy("positionKey", "", ctx.sharedBlackboard)();
-                    position = ReadBlackboardPosition(ctx.sharedBlackboard, key);
-                    break;
-                case "fixed":
-                    position = args.GetVector2IntLazy("position", default, ctx.sharedBlackboard)();
-                    break;
-                default:
-                    // Detached executions resolve "self" from the fork-time
-                    // snapshot; the host may be recycled by now.
-                    Vector2? snap = ctx.stepExecution?.DetachedSnapshot?.position;
-                    position = snap ?? (ctx.entity != null ? ctx.entity.Movement.Position : Vector2.zero);
-                    break;
-            }
-            // Legacy split-talent placement: snap the base to its cell, then
-            // scatter inside it. snapToGrid applies before offsets so `offset`
-            // stays cell-relative.
-            if (args.GetBoolLazy("snapToGrid", false, ctx.sharedBlackboard)())
-                position = new Vector2((int)(position.x + 0.5f), (int)(position.y + 0.5f));
-            Vector2Int offset = args.GetVector2IntLazy("offset", default, ctx.sharedBlackboard)();
-            position += (Vector2)offset;
-            // Per-activation scatter half-extents; negative values clamp to
-            // zero like `delay` clamps negative durations. Re-rolled on every
-            // activation, so each loop iteration scatters independently.
-            float scatterX = args.GetFloatLazy("randomOffsetX", 0f, ctx.sharedBlackboard)();
-            float scatterY = args.GetFloatLazy("randomOffsetY", 0f, ctx.sharedBlackboard)();
-            if (scatterX > 0f) position.x += UnityEngine.Random.Range(-scatterX, scatterX);
-            if (scatterY > 0f) position.y += UnityEngine.Random.Range(-scatterY, scatterY);
-            return position;
-        }
-
-        /// <summary>pathSerial 缺省继承宿主当前路径（脱离执行读 fork 快照），
-        /// 显式传入时字面量优先——镜像 camp 的"负值/缺省选默认"语义。</summary>
-        private static int ResolvePathSerial(AbilityContext ctx, ParamList args)
-        {
-            if (args.HasKey("pathSerial"))
-                return args.GetIntLazy("pathSerial", 0, ctx.sharedBlackboard)();
-            DetachedExecutionSnapshot snapshot = ctx.stepExecution?.DetachedSnapshot;
-            if (snapshot != null) return snapshot.pathSerial;
-            return ctx.entity != null && ctx.entity.MoveBase != null
-                ? ctx.entity.MoveBase.CurrentPathSerial
-                : 0;
-        }
-
-        private static Entity ResolveEventEntity(AbilityEvent evt)
-        {
-            if (evt is DamageEventBase damage) return damage.target;
-            if (evt is HurtEventBase hurt) return hurt.origin;
-            return null;
-        }
-
-        private static Vector2 ReadBlackboardPosition(Blackboard blackboard, string key)
-        {
-            if (blackboard == null || string.IsNullOrEmpty(key)) return Vector2.zero;
-            object value = blackboard.Get<object>(key, null);
-            if (value is Vector2 vector) return vector;
-            if (value is Vector2Int vectorInt) return vectorInt;
-            if (value is Entity entity && entity != null) return entity.Movement.Position;
-            return Vector2.zero;
-        }
-
-        private static string NormalizeToken(string value) =>
-            (value ?? string.Empty).Trim().ToLowerInvariant();
-    }
-
     internal sealed class AbilityCompiledStep
     {
         public StepConfig Config;
@@ -635,7 +466,7 @@ namespace AbilitySystem
         public Vector2 position;
         public int camp;
         public int pathSerial;
-        public EntityID spawnEntityId;
+        public List<EntityID> spawnEntityIds;
 
         public static DetachedExecutionSnapshot From(Entity entity)
         {
@@ -645,19 +476,18 @@ namespace AbilitySystem
                 position = entity.Movement.Position,
                 camp = entity.Camp,
                 pathSerial = entity.MoveBase != null ? entity.MoveBase.CurrentPathSerial : 0,
-                spawnEntityId = FirstHostSpawnId(entity),
+                spawnEntityIds = HostSpawnIds(entity),
             };
         }
 
-        /// <summary>宿主数据里登记的第一个可生成实体（CanSpawnEntityIds[0]）；
-        /// 未登记返回 EntityID.Null，由消费方决定报错语义。public 供 EditMode
-        /// 测试直接断言（测试 asmdef 无 InternalsVisibleTo）。</summary>
-        public static EntityID FirstHostSpawnId(Entity entity)
+        /// <summary>宿主数据里登记的可生成实体列表（CanSpawnEntityIds 原引用，
+        /// 运行时数据资产不突变，引用安全）；未登记返回 null，由消费方决定报错
+        /// 语义。public 供 EditMode 测试直接断言（测试 asmdef 无 InternalsVisibleTo）。</summary>
+        public static List<EntityID> HostSpawnIds(Entity entity)
         {
-            List<EntityID> ids = entity != null && entity.EntityData != null
+            return entity != null && entity.EntityData != null
                 ? entity.EntityData.CanSpawnEntityIds
                 : null;
-            return ids != null && ids.Count > 0 ? ids[0] : EntityID.Null;
         }
     }
 
@@ -800,7 +630,6 @@ namespace AbilitySystem
         public AbilityEvent TriggerEvent => _event;
         public bool IsComplete { get; private set; }
         public bool WasCancelled { get; private set; }
-        public bool Failed { get; private set; }
 
         /// <summary>Fork-time entity data for detached executions; null while
         /// the execution still belongs to its host. spawn_entity resolves
@@ -839,7 +668,7 @@ namespace AbilitySystem
                     Mathf.Max(0f, deltaTime));
                 if (IsComplete || !ReferenceEquals(_activeOp, tickingOp)) return;
                 if (activeStatus == AbilityStepStatus.Running) return;
-                FinishActive(activeStatus);
+                FinishActive();
                 if (IsComplete) return;
             }
 
@@ -865,7 +694,7 @@ namespace AbilitySystem
                 AbilityStepOp completedOp = _activeOp;
                 AbilityCompiledStep completedStep = _activeStep;
                 AbilityContext completedContext = _activeContext;
-                FinishActive(status);
+                FinishActive();
                 if (IsComplete) return;
 
                 if (completedOp is BranchAbilityStepOp branch)
@@ -922,19 +751,12 @@ namespace AbilitySystem
             return ctx;
         }
 
-        private void FinishActive(AbilityStepStatus status)
+        private void FinishActive()
         {
             AbilityStepOp op = _activeOp;
             AbilityContext context = _activeContext;
             ClearActive();
             op.OnTeardown(context);
-            if (IsComplete) return;
-            if (status == AbilityStepStatus.Failed)
-            {
-                Failed = true;
-                _frames.Clear();
-                IsComplete = true;
-            }
         }
 
         private void ClearActive()
