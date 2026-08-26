@@ -43,6 +43,20 @@ makes the component suitable for per-event condition checks.
 The count is stored as a numeric string because `ConditionEvaluator` reads
 Blackboard operands as strings and parses numeric comparisons from them.
 
+## Detached executions (ctx.entity == null)
+
+`subjectMode=self` mirrors `spawn_entity`'s `positionMode=self` convention:
+with no live entity, the subject degrades to the fork snapshot's
+`(position, camp)` captured at trigger time. Only pure-position selections
+(`radius`, `ring`) are usable; `subject`, `vision`, and `range` need a live
+entity and log an error in detached executions. Null entries inside a
+`subjectMode=blackboard` list are skipped.
+
+Typical shape: a summon's posthumous rule (`OnBeforeDieAnimation`, detached)
+selects around its death position after a `delay` — the entity may be
+pool-recycled by then, which is exactly why the anchor comes from the
+snapshot.
+
 ## Rule triggers
 
 Use any event appropriate to the selection. For per-hit checks, use

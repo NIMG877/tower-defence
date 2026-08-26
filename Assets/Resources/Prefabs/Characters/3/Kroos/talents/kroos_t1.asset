@@ -54,7 +54,7 @@ MonoBehaviour:
       - units:
         - op: 1
           leftKey: t1_trigger
-          rightValue: true
+          rightValue: True
     reentry: 0
     steps:
     - op: attack_event_value_modifier

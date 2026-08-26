@@ -55,9 +55,8 @@ inside its lazy getter:
 
 | Convention | Format | Example | Used by |
 |---|---|---|---|
-| `BuffTypeCsv` | `BuffType` enum names, comma-separated | `AtkSpeed,Bleed` | `ApplyBuff` |
-| `FloatCsv` | Plain floats, comma-separated | `0.5,1.0,-0.25` | `ApplyBuff`, `AttackEventValueModifier` |
-| `StringCsv` | Plain strings, comma-separated | `multiplyer,cumbo` | `AttackEventValueModifier` |
+| `FloatCsv` | Plain floats, comma-separated | `0.5,1.0,-0.25` | `ApplyBuff`, `UpdateBuff`, `AttackEventValueModifier` |
+| `StringCsv` | Plain strings, comma-separated | `multiplyer,cumbo`, `Attack,AttackSpeed` | `AttackEventValueModifier`, `ApplyBuff`/`UpdateBuff` attributes & ops |
 
 ## DamageType encoding (convention)
 
@@ -87,6 +86,9 @@ are not authoring names.
   output for chained consumption.
 - [DestroyBuff](DestroyBuff.md) — destroys buffs from a BlackBoard
   pair that `ApplyBuff` wrote.
+- [UpdateBuff](UpdateBuff.md) — re-values standing buffs in place
+  (`SetBuffValues`) from the same BlackBoard pair; magnitudes may be
+  Blackboard-sourced, rebuilt per trigger.
 
 - [ApplyAbnormalState](ApplyAbnormalState.md) - applies or aura-synchronizes
   abnormal states and optionally writes target/state pairs.
@@ -97,8 +99,12 @@ are not authoring names.
 
 - [SpawnEntity](SpawnEntity.md) — spawns an entity from the host's
   `CanSpawnEntityIds` registry; `spawnIndex` picks the entry.
+  `appendToListKey` maintains a summon roster in the Blackboard.
 - [DestroyEntity](DestroyEntity.md) - calls `Entity.Die()` for self or a
   Blackboard entity list.
+- [WatchSummonDeath](WatchSummonDeath.md) — bridges deaths of entities in
+  a Blackboard list into host-side `OnSummonDeath` events (with a position
+  snapshot payload).
 
 ### State flow
 
@@ -126,6 +132,9 @@ are not authoring names.
   target, vision, radius, ring, or range and writes the result/count to Blackboard.
 - [EntityFilter](EntityFilter.md) - filters attack target candidates with
   configurable OR groups of AND conditions.
+- [InjectAttackTargets](InjectAttackTargets.md) - injects a Blackboard
+  entity list to the front of target candidates (per-unit highest
+  targeting priority, vision ignored).
 
 ### Charge attacks
 
@@ -213,6 +222,11 @@ The trimmed `ConditionOp` whitelist (per commit `54c3465`):
 | `None` | always passes (unit-level) |
 | `Equal`, `NotEqual` | string `==` / `!=` on the key's value |
 | `Greater` / `GreaterOrEqual` / `Less` / `LessOrEqual` | `float.TryParse` on both sides, falls back to ordinal string compare if either is unparseable |
+
+The Blackboard is an object store; condition keys are read as objects and
+stringified (invariant culture) before comparison, so a numeric counter
+maintained by `write_blackboard` `add` compares fine against `"0"`. A
+missing key reads as `""` — `NotEqual` against any non-empty value passes.
 
 Any `ConditionOp` value outside the live whitelist is logged once across the
 application lifetime and treated as "passes", so the rule trigger is

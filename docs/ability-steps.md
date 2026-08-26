@@ -102,7 +102,7 @@ must not interfere.
 
 ## Canonical operations
 
-`RegisteredOps` exposes canonical names only. The 25 component-backed
+`RegisteredOps` exposes canonical names only. The 28 component-backed
 operations use snake_case. PascalCase component names are lookup aliases.
 
 | Canonical `op` | Backing implementation / reference |
@@ -125,12 +125,15 @@ operations use snake_case. PascalCase component names are lookup aliases.
 | `destroy_entity` | [DestroyEntity](skill-components/DestroyEntity.md) |
 | `filter_targets` | [EntityFilter](skill-components/EntityFilter.md) |
 | `force_reset_attack` | [ForceResetAttack](skill-components/ForceResetAttack.md) |
+| `inject_attack_targets` | [InjectAttackTargets](skill-components/InjectAttackTargets.md) |
 | `random_roll` | [RandomRoll](skill-components/RandomRoll.md) |
 | `remove_animation_override` | [RemoveAnimationOverride](skill-components/RemoveAnimationOverride.md) |
 | `select_targets` | [EntitySelector](skill-components/EntitySelector.md) |
 | `share_attack_target` | [ShareAttackTarget](skill-components/ShareAttackTarget.md) |
 | `shared_target_extra_attack` | [SharedTargetExtraAttack](skill-components/SharedTargetExtraAttack.md) |
 | `spawn_entity` | [SpawnEntity](skill-components/SpawnEntity.md) |
+| `update_buff` | [UpdateBuff](skill-components/UpdateBuff.md) |
+| `watch_summon_death` | [WatchSummonDeath](skill-components/WatchSummonDeath.md) |
 | `write_blackboard` | [WriteBlackboard](skill-components/WriteBlackboard.md) |
 | `delay` | Yielding primitive; see below. |
 | `wait_until` | Yielding condition primitive; see below. |

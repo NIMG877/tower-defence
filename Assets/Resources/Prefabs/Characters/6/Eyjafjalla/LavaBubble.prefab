@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8986177455173299421}
-  - component: {fileID: -1321257011317040044}
   - component: {fileID: -6362633736774080786}
   m_Layer: 0
   m_Name: LavaBubble
@@ -34,52 +33,6 @@ Transform:
   - {fileID: 4727859330019957540}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-1321257011317040044
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4113559412623234849}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 464e5370c78639e4db5946b6303ec0b5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entity_name: "\u7194\u5CA9\u6CE1\u6CE1"
-  description: "\u7194\u5CA9\uFF1F\u6CE1\u6CE1\uFF01"
-  entity_head_img: {fileID: 0}
-  entity_halfBody_img: {fileID: 0}
-  entity_hole_img: {fileID: 0}
-  atk_range: []
-  atk_radius: 1.5
-  max_hp: 100
-  atk: 0
-  base_attack_time: -1
-  def: 0
-  magic_resistance: 0
-  phDoge: 0
-  mgDoge: 0
-  block_occupation: 0
-  attack_num: 0
-  taunt_level: -1
-  damageType: 1
-  SkillSelect: 0
-  skills: []
-  talents: []
-  can_spawn_entity_datas: []
-  characterRarity: 0
-  characterInfluence: 
-  characterClass: 0
-  monsterId: 0
-  monsterStatus: 0
-  monsterLabel: 0
-  isPrimary: 0
-  countOperated: 0
-  _levelHpComsume: 0
-  _moveSpeed: 1
-  _massLevel: 1
-  _moveMethod: 0
 --- !u!114 &-6362633736774080786
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -92,24 +45,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98c15169cca6fd54088c6e3b3c07ff80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  o_default: {fileID: 11400000, guid: de8d23b6fe6950e4f869c9530aa5e5e8, type: 2}
-  o_idle: {fileID: 11400000, guid: 40b1930cb0c000942b5832dd4af9d29b, type: 2}
-  o_move: {fileID: 11400000, guid: 40b1930cb0c000942b5832dd4af9d29b, type: 2}
-  o_attack_begin: {fileID: 0}
-  o_attack_end: {fileID: 0}
-  o_start: {fileID: 11400000, guid: 65b53f33d5dad564bbecce06aaf146c1, type: 2}
-  o_die: {fileID: 11400000, guid: 5a3764b2cd666cd46ab889f8ea83f70d, type: 2}
-  o_attack_remote: []
-  o_attack_close: []
-  Default: {fileID: 0}
-  Idle: {fileID: 0}
-  Move: {fileID: 0}
-  Attack_Begin: {fileID: 0}
-  Attack_End: {fileID: 0}
-  Start: {fileID: 0}
-  Die: {fileID: 0}
-  Attack_Remote: []
-  Attack_Close: []
 --- !u!1 &7496238143874463761
 GameObject:
   m_ObjectHideFlags: 0

@@ -11,7 +11,6 @@ public class Skill2 : Skill
     [SerializeField] private AttackBase.AttackEffectData _skill2AttackEffectData;
     private List<Vector2> _targetPos;
     private event OperationsOnBulletDestroy _onBulletDestroy;
-    private Talent1 _talent1;
     private void OperationsOnAttackSuccessfully()
     {
         for (int i = 0; i < _targetPos.Count; i++)
@@ -22,13 +21,14 @@ public class Skill2 : Skill
     }
     private void OnBulletDestroy(Vector2 pos)
     {
-        _talent1.Skill2SetBubble(pos);
+        // Talent1 已迁移为 eyjafjalla_t1 资产；"子弹落点生成泡泡"与技能2期间暂停
+        // 优先索敌待 Skill2 本身迁移为资产后由 spawn_entity / inject_attack_targets
+        // 步骤恢复——旧脚本无法触发 ability 步骤，先留空。
     }
     public override bool SkillBegin()
     {
         if (!base.SkillBegin())
             return false;
-        _talent1.Skill2Open();
         _thisAB.TryToAttackWithAnimation(new Entity[0] { }, true, false, new AnimationOverride
         {
             AttackRemote = _skill2Attack,
@@ -41,7 +41,6 @@ public class Skill2 : Skill
     public override void SkillEnd()
     {
         base.SkillEnd();
-        _talent1.Skill2End();
     }
 
     public override void Initialize()
@@ -51,6 +50,5 @@ public class Skill2 : Skill
         _onBulletDestroy += OnBulletDestroy;
         _thisAB = _thisEntity.AttackBase;
         _thisAM = _thisEntity.entityAM;
-        _talent1 = _thisEntity.GetComponent<Talent1>();
     }
 }

@@ -19,7 +19,10 @@ source is locked to the host's `EntityData.CanSpawnEntityIds` registry;
 | `placement` | String | `auto` | `static`, `move`, or `auto` (pool data decides). Any other value logs an error and skips. |
 | `orientation` | Int | `0` | Static-entity orientation. |
 | `pathSerial` | Int | host's current path | Movable-entity path serial; absent inherits the host's `CurrentPathSerial`. |
-| `outputKey` | String | `""` | If set, stores the spawned `Entity` in the shared Blackboard. |
+| `outputKey` | String | `""` | If set, stores the spawned `Entity` in the shared Blackboard. Single-entity overwrite — the last spawn wins. |
+| `appendToListKey` | String | `""` | If set, appends the spawned `Entity` to the `List<Entity>` at this Blackboard key (get-or-create, then write back preserving the list instance). Use this to maintain a "summon roster"; pairing with `watch_summon_death` on the same key gives the roster death events. |
+| `passStat` | String | `""` | Host stat path written into the spawned entity's Blackboard at `passStatKey` (spawn-time snapshot). Uses the `write_blackboard` `source=entity` path vocabulary (`attack`, `maxhp`, `currenthp`, ...). |
+| `passStatKey` | String | `""` | Blackboard key on the **spawned** entity receiving the `passStat` value. |
 
 All parameters are BB-capable. `eventTarget` resolves damage-event targets and
 hurt-event origins; without a usable event target it falls back to self.
@@ -34,4 +37,25 @@ In detached executions the registry, the camp default, the `self` position,
 and the `pathSerial` default all resolve from the fork-time snapshot; the live
 host is never consulted (it may be pool-recycled). Lazy getters bind at
 `OnTrigger` against the executing context's Blackboard (the fork-time clone
-for detached rules), not the host board captured at `OnInit`.
+for detached rules), not the host board captured at `OnInit`. A detached
+spawn has no summoner entity, so nothing is written to `summoner@spawn_entity`.
+
+## Summoner data pass-through
+
+Every spawn unconditionally writes the summoner `Entity` (`ctx.entity`) into
+the spawned entity's own Blackboard at the fixed protocol key
+**`summoner@spawn_entity`** — right after the spawn call returns (the board
+exists — pool checkout synchronously builds the runner, and the board is only
+cleared at the next checkout). The `@组件名` suffix keeps the key from
+colliding with designer-chosen keys. Consumers read the fixed key rather than
+configuring their own; today that is `apply_damage`'s
+`attackerMode=summoner` (damage attribution to the summoner).
+
+This is the channel for "the summon outlives its summoner" data: the summon's
+detached rules read the fork clone of that board, so the summoner reference
+survives both the summon's death and the host's death. The reference stays
+valid as data — recycled entities keep their `EntityData` — but re-checkouts
+reuse instances, so treat a summoner reference older than one recycle window
+as attribution-only, never as a live stat source. `passStat`+`passStatKey`
+(optional, designer-keyed) snapshot host stats onto the same board for the
+same lifetime reasons.

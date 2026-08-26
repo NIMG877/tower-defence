@@ -557,7 +557,6 @@ GameObject:
   - component: {fileID: 6893803144390001881}
   - component: {fileID: -8233499676567559834}
   - component: {fileID: 3974420059893658530}
-  - component: {fileID: 8664396919217117899}
   - component: {fileID: 6801070449023557628}
   - component: {fileID: 3246993999235739132}
   m_Layer: 0
@@ -595,26 +594,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98c15169cca6fd54088c6e3b3c07ff80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  o_default: {fileID: 11400000, guid: 1726eaea1dca7e84e901aa2c008e165c, type: 2}
-  o_idle: {fileID: 11400000, guid: 8d27196d7f54c7e45b5c91f4f14d7a4c, type: 2}
-  o_move: {fileID: 0}
-  o_attack_begin: {fileID: 0}
-  o_attack_end: {fileID: 0}
-  o_start: {fileID: 11400000, guid: c7fbbeeff890b22479379f45a751075a, type: 2}
-  o_die: {fileID: 11400000, guid: 2d5c55980c816b3408e036a43067f01e, type: 2}
-  o_attack_remote:
-  - {fileID: 11400000, guid: d1816a03dee300043b210a7c2399c291, type: 2}
-  o_attack_close:
-  - {fileID: 11400000, guid: d1816a03dee300043b210a7c2399c291, type: 2}
-  Default: {fileID: 0}
-  Idle: {fileID: 0}
-  Move: {fileID: 0}
-  Attack_Begin: {fileID: 0}
-  Attack_End: {fileID: 0}
-  Start: {fileID: 0}
-  Die: {fileID: 0}
-  Attack_Remote: []
-  Attack_Close: []
 --- !u!114 &3974420059893658530
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -653,29 +632,6 @@ MonoBehaviour:
       DevitationYValue: 0.9
     BulletSpawnTransform: {fileID: 2679485638432126119}
     AttackEffect: {fileID: 1929037728802243661, guid: 387d3a01d5cd7fe4bb854b4bca0a122e, type: 3}
---- !u!114 &8664396919217117899
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4310881110139641480}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 67f5cc56cd38ed94c8d9f846fe6d3ca8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _talentName: 
-  _talentDescription: 
-  LavaBubbleID:
-    ID_C: 
-    ID_N: 0
-  BubbleExplodeEffect: {fileID: 519481326241669108, guid: 64dd7f7158db2dc40aa5b57d5053dc15, type: 3}
-  p: 0.2
-  _attackBegin: {fileID: 11400000, guid: 85fe9428b4f979d42b6c8973891f7aef, type: 2}
-  _attackEnd: {fileID: 11400000, guid: d13b4959f66095340947354ad803d5cf, type: 2}
-  _attack:
-  - {fileID: 11400000, guid: 32d5d36ac643a2e47a21c42df25814f0, type: 2}
 --- !u!114 &6801070449023557628
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -727,8 +683,7 @@ MonoBehaviour:
   _recoverForbidDuringSkill: 0
   _canCloseSkill: 0
   _skillAttackRange: []
-  _skill2Attack:
-  - {fileID: 11400000, guid: b3afebf46149d1c4aabcae6baa7f86d6, type: 2}
+  _skill2Attack: 
   _skill2AttackEffectData:
     BulletData:
       BulletPrefab: {fileID: 2407971600655478370, guid: d359abca4200f394dbbec29fddff4aab, type: 3}

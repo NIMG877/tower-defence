@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace AbilitySystem.Components
 {
@@ -44,8 +45,9 @@ namespace AbilitySystem.Components
 
             for (int i = 0; i < subjects.Count; i++)
             {
+                // null 只可能是 self+脱离执行的快照主体占位（见 ResolveSubjects），
+                // 其余分支已在各自分支内滤掉 null。
                 Entity subject = subjects[i];
-                if (subject == null) continue;
 
                 List<Entity> selected = SelectForSubject(ctx, subject);
                 for (int j = 0; j < selected.Count; j++)
@@ -78,14 +80,24 @@ namespace AbilitySystem.Components
                 case "blackboard":
                 case "blackboardentities":
                     string key = _subjectBlackboardKey();
-                    return string.IsNullOrEmpty(key)
-                        ? new List<Entity>()
-                        : ctx.sharedBlackboard.Get<List<Entity>>(key, null) ?? new List<Entity>();
+                    if (string.IsNullOrEmpty(key)) return new List<Entity>();
+                    var source = ctx.sharedBlackboard.Get<List<Entity>>(key, null);
+                    var live = new List<Entity>();
+                    if (source != null)
+                        for (int i = 0; i < source.Count; i++)
+                            if (source[i] != null) live.Add(source[i]);
+                    return live;
                 case "eventtarget":
                     Entity eventTarget = GetEventTarget(ctx.currentEvent);
                     return eventTarget == null ? new List<Entity>() : new List<Entity> { eventTarget };
                 default:
-                    return ctx.entity == null ? new List<Entity>() : new List<Entity> { ctx.entity };
+                    // self：脱离执行没有活实体（ctx.entity==null），镜像 SpawnEntity
+                    // positionMode=self 的 fork 快照约定——主体退化为快照的
+                    // (position, camp)，以 null 占位下传，仅纯位置选择可用。
+                    if (ctx.entity != null) return new List<Entity> { ctx.entity };
+                    return ctx.stepExecution?.DetachedSnapshot != null
+                        ? new List<Entity> { null }
+                        : new List<Entity>();
             }
         }
 
@@ -94,19 +106,56 @@ namespace AbilitySystem.Components
             switch (Normalize(_selectionMode()))
             {
                 case "subject":
+                    if (subject == null)
+                    {
+                        Debug.LogError("[EntitySelector] selectionMode 'subject' requires a live entity; unavailable in detached executions.");
+                        return new List<Entity>();
+                    }
                     return new List<Entity> { subject };
                 case "eventtarget":
                     Entity eventTarget = GetEventTarget(ctx.currentEvent);
                     return eventTarget == null ? new List<Entity>() : new List<Entity> { eventTarget };
                 case "vision":
+                    if (subject == null)
+                    {
+                        Debug.LogError("[EntitySelector] selectionMode 'vision' requires a live entity; unavailable in detached executions.");
+                        return new List<Entity>();
+                    }
                     return SelectVision(subject);
                 case "range":
+                    if (subject == null)
+                    {
+                        Debug.LogError("[EntitySelector] selectionMode 'range' requires a live entity; unavailable in detached executions.");
+                        return new List<Entity>();
+                    }
                     return SelectRange(subject);
                 case "ring":
-                    return SelectRing(subject);
+                    return SelectRing(ctx, subject);
                 default:
-                    return SelectRadius(subject);
+                    return SelectRadius(ctx, subject);
             }
+        }
+
+        /// <summary>选择主体的锚点（位置/阵营）。活实体读现场坐标；脱离执行的
+        /// 快照主体读 fork 时的 (position, camp)——延迟后实体可能已被池回收。</summary>
+        private bool TryResolveAnchor(AbilityContext ctx, Entity subject, out Vector2 position, out int camp)
+        {
+            if (subject != null)
+            {
+                position = subject.transform.position;
+                camp = subject.Camp;
+                return true;
+            }
+            DetachedExecutionSnapshot snapshot = ctx.stepExecution?.DetachedSnapshot;
+            if (snapshot != null)
+            {
+                position = snapshot.position;
+                camp = snapshot.camp;
+                return true;
+            }
+            position = default;
+            camp = default;
+            return false;
         }
 
         private List<Entity> SelectVision(Entity subject)
@@ -138,27 +187,27 @@ namespace AbilitySystem.Components
             return results;
         }
 
-        private List<Entity> SelectRadius(Entity subject)
+        private List<Entity> SelectRadius(AbilityContext ctx, Entity subject)
         {
             var results = new List<Entity>();
-            if (EntityManager.Manager == null) return results;
+            if (EntityManager.Manager == null
+                || !TryResolveAnchor(ctx, subject, out Vector2 position, out int camp)) return results;
 
-            var position = subject.transform.position;
             AddByRelation(
                 results,
                 sameCamp => EntityManager.Manager.EntitySelector_Radius(
-                    (position.x, position.y), subject.Camp, sameCamp, _radius(), _force()));
+                    (position.x, position.y), camp, sameCamp, _radius(), _force()));
             return results;
         }
 
-        private List<Entity> SelectRing(Entity subject)
+        private List<Entity> SelectRing(AbilityContext ctx, Entity subject)
         {
-            List<Entity> results = SelectRadius(subject);
+            List<Entity> results = SelectRadius(ctx, subject);
             float minRadius = Math.Max(0f, _minRadius());
-            if (minRadius <= 0f) return results;
+            if (minRadius <= 0f || results.Count == 0) return results;
+            if (!TryResolveAnchor(ctx, subject, out Vector2 center, out _)) return results;
 
             float minRadiusSquared = minRadius * minRadius;
-            var center = subject.transform.position;
             results.RemoveAll(entity =>
             {
                 var position = entity.transform.position;

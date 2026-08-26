@@ -479,6 +479,9 @@ namespace AbilitySystem
         OnAttackAnimBegin,OnBeforeDieAnimation,
         // 通用物理帧事件。追加在末尾以保持既有 asset 的枚举序号稳定。
         OnTick,
+        // 召唤物相关事件（WatchSummonDeath 桥接到宿主 runner 上派发）。
+        // 同样追加在末尾以保持既有 asset 的枚举序号稳定。
+        OnSummonDeath,
     }
 
     public enum AbilityKind

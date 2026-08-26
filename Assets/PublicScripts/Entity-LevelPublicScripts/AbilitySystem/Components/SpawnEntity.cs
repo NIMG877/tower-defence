@@ -7,7 +7,9 @@ namespace AbilitySystem.Components
     /// <summary>
     /// 通过 <c>EntityPoolManager</c>/<c>EntityManager</c> 生成实体。召唤目标只能
     /// 取自宿主 <c>EntityData.CanSpawnEntityIds</c> 注册表，<c>spawnIndex</c> 挑
-    /// 第几项；全部参数支持 <c>fromBlackboard</c>。
+    /// 第几项；全部参数支持 <c>fromBlackboard</c>。生成时无条件把召唤者引用写入
+    /// 生成物黑板的固定协议 key <see cref="SummonerKey"/>；宿主数值经
+    /// <c>passStat</c>+<c>passStatKey</c> 落板（见 <see cref="PassSummonerData"/>）。
     ///
     /// <para>lazy getter 在 <c>OnTrigger</c> 时按执行上下文黑板绑定（而非在
     /// <c>OnInit</c> 绑宿主黑板）：脱离执行跑在 fork 时克隆的黑板上，宿主板届时
@@ -20,6 +22,11 @@ namespace AbilitySystem.Components
     [RegisterComponent("SpawnEntity")]
     public class SpawnEntity : AbilityComponentBase
     {
+        /// <summary>召唤者引用在生成物黑板上的固定协议 key（`@组件名` 后缀防撞名）。
+        /// 生产方：本组件每次生成写入；消费方：<see cref="ApplyDamage"/> 的
+        /// attackerMode=summoner 读它做伤害归属。</summary>
+        internal const string SummonerKey = "summoner@spawn_entity";
+
         private ParamList _args;
 
         public override void OnInit(AbilityContext ctx, ParamList p)
@@ -79,6 +86,44 @@ namespace AbilitySystem.Components
             string outputKey = _args.GetStringLazy("outputKey", "", ctx.sharedBlackboard)();
             if (spawned != null && !string.IsNullOrEmpty(outputKey))
                 ctx.sharedBlackboard?.Set(outputKey, spawned);
+
+            // 追加进黑板实体列表（get-or-create 后 Add 再写回，保持实例稳定——
+            // WatchSummonDeath 等订阅方按列表差量同步，实例更换会破坏差量判断）。
+            // outputKey 是单实体覆盖写，维护"召唤物清单"类状态用本参数。
+            string appendKey = _args.GetStringLazy("appendToListKey", "", ctx.sharedBlackboard)();
+            if (spawned != null && !string.IsNullOrEmpty(appendKey) && ctx.sharedBlackboard != null)
+            {
+                List<Entity> list = ctx.sharedBlackboard.Get<List<Entity>>(appendKey, null) ?? new List<Entity>();
+                list.Add(spawned);
+                ctx.sharedBlackboard.Set(appendKey, list);
+            }
+
+            PassSummonerData(ctx, spawned);
+        }
+
+        /// <summary>召唤者引用与宿主数值随生成写入生成物黑板。召唤物的规则只能读
+        /// 自己的黑板（脱离执行读 fork 克隆），宿主引用/数值必须在生成时就落到
+        /// 生成物板上——典型消费：召唤物死亡后爆炸，伤害归属与攻击基值取宿主。
+        /// 召唤者无条件写固定协议 key <see cref="SummonerKey"/>（脱离执行生成没有
+        /// 活着的召唤者，跳过）；宿主数值按需经 passStat 写，路径用
+        /// <see cref="WriteBlackboard.ResolveEntityValue"/> 的词汇表（"attack" 等）。</summary>
+        private void PassSummonerData(AbilityContext ctx, Entity spawned)
+        {
+            if (spawned == null || ctx.entity == null) return;
+
+            Blackboard spawnedBoard = spawned.AbilityRunner?.sharedBlackboard;
+            if (spawnedBoard == null)
+            {
+                Debug.LogWarning($"[SpawnEntity] spawned entity '{spawned.EntityData.ID}' has no shared blackboard; summoner data not recorded.");
+                return;
+            }
+
+            spawnedBoard.Set(SummonerKey, ctx.entity);
+
+            string passStatKey = _args.GetStringLazy("passStatKey", "", ctx.sharedBlackboard)();
+            string passStat = _args.GetStringLazy("passStat", "", ctx.sharedBlackboard)();
+            if (!string.IsNullOrEmpty(passStatKey) && !string.IsNullOrEmpty(passStat))
+                spawnedBoard.Set(passStatKey, WriteBlackboard.ResolveEntityValue(ctx.entity, NormalizeToken(passStat)));
         }
 
         /// <summary>召唤目标只能取自宿主 EntityData.CanSpawnEntityIds 注册表，

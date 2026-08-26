@@ -58,9 +58,9 @@ namespace AbilitySystem
             switch (unit.op)
             {
                 case ConditionOp.Equal:
-                    return ctx.sharedBlackboard.Get<string>(unit.leftKey) == unit.rightValue;
+                    return ReadAsString(ctx.sharedBlackboard, unit.leftKey) == unit.rightValue;
                 case ConditionOp.NotEqual:
-                    return ctx.sharedBlackboard.Get<string>(unit.leftKey) != unit.rightValue;
+                    return ReadAsString(ctx.sharedBlackboard, unit.leftKey) != unit.rightValue;
                 case ConditionOp.Greater:
                     return CompareNumeric(ctx, unit.leftKey, unit.rightValue) >  0;
                 case ConditionOp.GreaterOrEqual:
@@ -76,10 +76,23 @@ namespace AbilitySystem
 
         private static int CompareNumeric(ConditionEvalContext ctx, string leftKey, string rightValueStr)
         {
-            var left = ctx.sharedBlackboard.Get<string>(leftKey, "");
+            var left = ReadAsString(ctx.sharedBlackboard, leftKey);
             if (float.TryParse(left, out var l) && float.TryParse(rightValueStr, out var r))
                 return l.CompareTo(r);
             return string.Compare(left, rightValueStr, System.StringComparison.Ordinal);
+        }
+
+        // 黑板是 object 存储：条件键可能是数字计数（write_blackboard add 维护），
+        // 也可能是字符串标志（random_roll 的 "True"/"False"）。统一按 object 读出
+        // 后转字符串比较；此前 Get<string> 是硬转型，数字键会在条件求值处抛
+        // InvalidCastException。缺键返回 ""，与既有 "缺失 = 不等" 语义一致。
+        private static string ReadAsString(Blackboard bb, string key)
+        {
+            object v = bb.Get<object>(key, null);
+            if (v == null) return "";
+            return v is System.IFormattable formattable
+                ? formattable.ToString(null, System.Globalization.CultureInfo.InvariantCulture)
+                : v.ToString();
         }
 
         // One-shot warning per unknown op value across the application

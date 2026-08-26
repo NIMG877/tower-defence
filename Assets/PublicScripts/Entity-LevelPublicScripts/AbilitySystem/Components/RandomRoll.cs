@@ -57,7 +57,7 @@ namespace AbilitySystem.Components
                 if (!float.TryParse(input, out var p)) return;
                 // RandomP(p) 对 p>1 恒真、p<0 恒假,边界无需 clamp。
                 bool passed = RandomHelper.Helper.RandomP(p);
-                ctx.sharedBlackboard.Set(key, passed ? "true" : "false");
+                ctx.sharedBlackboard.Set(key, passed ? "True" : "False");
                 return;
             }
             if (modeStr == "value")

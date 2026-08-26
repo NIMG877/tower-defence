@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace AbilitySystem
 {
     public class PreWarmEvent : AbilityEvent
@@ -80,6 +82,14 @@ namespace AbilitySystem
     public class BeforeDieAnimationEvent : AbilityEvent
     {
         public override TriggerEvent TriggerEvent => AbilitySystem.TriggerEvent.OnBeforeDieAnimation;
+    }
+    // 召唤物死亡，由宿主侧 WatchSummonDeath 桥接派发。target=死亡实体，
+    // position=死亡时刻位置快照（延迟后实体可能已被池回收，勿再读实体现场）。
+    public class SummonDeathEvent : AbilityEvent
+    {
+        public override TriggerEvent TriggerEvent => AbilitySystem.TriggerEvent.OnSummonDeath;
+        public Entity target;
+        public Vector2 position;
     }
     public class TickEvent : AbilityEvent
     {

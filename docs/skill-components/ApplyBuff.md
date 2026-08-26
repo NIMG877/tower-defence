@@ -54,8 +54,9 @@ each `Func<T>` re-evaluates the source on every call.
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `mode` | String | `normal` | `normal` for one-shot application; `aura` for target-list synchronization. |
-| `buffTypes` | BuffTypeCsv | `""` | Buff types to apply, comma-separated `BuffType` enum names (e.g. `AtkSpeed,Bleed`). Empty = trigger is a no-op. |
-| `buffValues` | FloatCsv | `""` | Per-BuffType value, same order as `buffTypes` (e.g. `0.5,1.0`). |
+| `attributes` | StringCsv | `""` | Attribute names, comma-separated (e.g. `Attack`). Empty = trigger is a no-op. |
+| `ops` | StringCsv | `""` | `ModifierOp` enum names, same order as `attributes` (e.g. `AddPercent`). |
+| `magnitudes` | FloatCsv | `""` | Per-modifier magnitudes, same order as `attributes`. |
 | `buffId` | String | `skill_buff` | Id passed to `BuffController.CreateBuff`. In normal mode, repeated triggers may create additional records with the same id; aura mode updates its tracked record instead. |
 | `buffTime` | Float | `-10` | Duration in seconds. **Negative = permanent** (project convention: `-10` = permanent). |
 | `toSelf` | Bool | `True` | `true` = apply to `ctx.entity`; `false` = apply to the target carried by the current event. Ignored when `blackboardKey` is set. |
@@ -63,6 +64,13 @@ each `Func<T>` re-evaluates the source on every call.
 | `blackboardKey` | String | `""` | If set, read `List<Entity>` from this blackboard key and apply to each. Empty = single-target mode. |
 | `outputTarget` | String | `""` | If set (with `outputBuff`), append this round's target list to the blackboard at this key. |
 | `outputBuff` | String | `""` | If set (with `outputTarget`), append this round's buff list to the blackboard at this key. |
+
+The three CSVs are index-aligned into `Modifier[]`; mismatched lengths take
+the shortest and warn once. The built modifiers are **cached after first
+build** (aura mode re-runs every tick) — `magnitudes` with
+`fromBlackboard=true` will therefore freeze at the first-read value here.
+For dynamic re-valuing of a standing buff use `update_buff`, which rebuilds
+modifiers on every trigger.
 
 In `aura` mode the two output keys are required and represent the current
 tracked pairs. In `normal` mode they append one set of records per execution.

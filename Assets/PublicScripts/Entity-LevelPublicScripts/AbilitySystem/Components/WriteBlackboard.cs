@@ -135,7 +135,8 @@ namespace AbilitySystem.Components
             return null;
         }
 
-        private static object ResolveEntityValue(Entity entity, string path)
+        // internal：SpawnEntity 的 passStat 复用同一套实体路径词汇表（"attack" 等）。
+        internal static object ResolveEntityValue(Entity entity, string path)
         {
             if (entity == null) return null;
 
