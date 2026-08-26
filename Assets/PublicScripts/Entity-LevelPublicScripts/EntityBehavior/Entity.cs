@@ -1,5 +1,43 @@
 using UnityEngine;
 
+public enum DamageResolutionKind
+{
+    Damage,
+    Healing,
+    Dodged,
+}
+
+public readonly struct DamageResolution
+{
+    public Entity Target { get; }
+    public Entity Origin { get; }
+    public float Amount { get; }
+    public int DamageType { get; }
+    public int ApplyType { get; }
+    public DamageResolutionKind Kind { get; }
+    public bool IsCritical { get; }
+    public bool IsDeadly { get; }
+
+    public DamageResolution(
+        Entity target,
+        Entity origin,
+        float amount,
+        int damageType,
+        int applyType,
+        DamageResolutionKind kind,
+        bool isCritical = false,
+        bool isDeadly = false)
+    {
+        Target = target;
+        Origin = origin;
+        Amount = amount;
+        DamageType = damageType;
+        ApplyType = applyType;
+        Kind = kind;
+        IsCritical = isCritical;
+        IsDeadly = isDeadly;
+    }
+}
 
 /// <summary>
 /// 实体协调者。持有 4 个 POCO 子系统（Stats/Vision/Movement/Combat）+ 阵营副作用 + 公开事件。
@@ -79,6 +117,8 @@ public class Entity : MonoBehaviour, IPoolOperation
     public delegate void OperationsAfterHurt(Entity origin, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType, bool isDeadly);
     /// <summary>在受到伤害之后调用。</summary>
     public event OperationsAfterHurt OnAfterHurt;
+    public delegate void OperationsDamageResolved(DamageResolution resolution);
+    public event OperationsDamageResolved OnDamageResolved;
     public delegate void OperationsBeforeDieAnimation();
     /// <summary>在播放死亡动画之前调用。</summary>
     public event OperationsBeforeDieAnimation OnBeforeDieAnimation;
@@ -89,6 +129,8 @@ public class Entity : MonoBehaviour, IPoolOperation
     { OnBeforeHurt?.Invoke(origin, ref damage, ref multiplyer, ref defPenetrate, ref mgrPenetrate, ref defPenetrate_value, ref mgrPenetrate_value, ref damageType, applyType); }
     internal void RaiseOnAfterHurt(Entity origin, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType, bool isDeadly)
     { OnAfterHurt?.Invoke(origin, damage, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, applyType, isDeadly); }
+    internal void RaiseDamageResolved(DamageResolution resolution)
+    { OnDamageResolved?.Invoke(resolution); }
     internal void RaiseOnBeforeDieAnimation()
     { OnBeforeDieAnimation?.Invoke(); }
 
@@ -217,6 +259,7 @@ public class Entity : MonoBehaviour, IPoolOperation
         //清空事件注册
         OnBeforeHurt = null;
         OnAfterHurt = null;
+        OnDamageResolved = null;
         OnBeforeDieAnimation = null;
         EntityManager.Manager.RemoveEntityFromList(this, Camp);
         EntityManager.Manager.RemoveEntityFromBlock(Movement.InBlocks, this, Camp);

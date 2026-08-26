@@ -1,5 +1,4 @@
 using System;
-using MyUI;
 
 /// <summary>
 /// 实体属性子系统（POCO）。
@@ -267,36 +266,50 @@ public class EntityStats
             3 => damage * multiplyer,
             _ => 0,
         };
-        //记录伤害
-        LevelMessagePanel.Panel.AcceptDamageMessage(_entity, damageOrigin, finalDamage, damageType);
-        //显示伤害
+        int resolutionDamageType = damageType;
         if (damageType <= 2)
         {
             //判断闪避
             if ((damageType == 0 && RandomHelper.Helper.RandomP(PhysicalDodgeS)) || (damageType == 1 && RandomHelper.Helper.RandomP(MagicDodgeS)))
             {
-                LevelMessagePanel.Panel.ShowText(_entity.transform.position, 5, 0);
+                _entity.RaiseDamageResolved(new DamageResolution(
+                    _entity,
+                    damageOrigin,
+                    0,
+                    resolutionDamageType,
+                    applyType,
+                    DamageResolutionKind.Dodged));
                 return false;
             }
             _entity.RaiseOnBeforeHurt(damageOrigin, ref finalDamage, ref multiplyer, ref defPenetrate, ref mgrPenetrate, ref defPenetrate_value, ref mgrPenetrate_value, ref damageType, applyType);
-            if (finalDamage >= 1.5f * damageC1)
-            {
-                LevelMessagePanel.Panel.ShowText(_entity.transform.position, 0, (int)finalDamage);
-            }
+            bool isCritical = finalDamage >= 1.5f * damageC1;
             _currentHpRate -= finalDamage / MaxHpS;
-            if (_currentHpRate <= 0)
-            {
+            bool isDeadly = _currentHpRate <= 0;
+            if (isDeadly)
                 _currentHpRate = 0;
-                _entity.RaiseOnAfterHurt(damageOrigin, finalDamage, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, applyType, true);
-                return true;
-            }
-            _entity.RaiseOnAfterHurt(damageOrigin, finalDamage, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, applyType, false);
-            return false;
+
+            _entity.RaiseDamageResolved(new DamageResolution(
+                _entity,
+                damageOrigin,
+                finalDamage,
+                resolutionDamageType,
+                applyType,
+                DamageResolutionKind.Damage,
+                isCritical,
+                isDeadly));
+            _entity.RaiseOnAfterHurt(damageOrigin, finalDamage, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, applyType, isDeadly);
+            return isDeadly;
         }
         else
         {
             _currentHpRate = Math.Min(1, _currentHpRate + finalDamage / MaxHpS);
-            LevelMessagePanel.Panel.ShowText(_entity.Movement.Position, 1, (int)finalDamage);
+            _entity.RaiseDamageResolved(new DamageResolution(
+                _entity,
+                damageOrigin,
+                finalDamage,
+                resolutionDamageType,
+                applyType,
+                DamageResolutionKind.Healing));
             return false;
         }
     }

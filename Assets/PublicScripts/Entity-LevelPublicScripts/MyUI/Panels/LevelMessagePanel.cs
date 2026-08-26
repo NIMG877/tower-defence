@@ -373,6 +373,7 @@ namespace MyUI
         // ===== Damage Stats =====
         private string[] _characterChineseName;
         private DamageStatisticData[] _damageStatisticDatas;
+        private readonly HashSet<Entity> _damageMessageEntities = new HashSet<Entity>();
 
         // ===== Time Control Flags =====
         private bool _isPause, _is2X, _isSlow;
@@ -861,6 +862,8 @@ namespace MyUI
         public override void OnEnter()
         {
             base.OnEnter();
+            EntityManager.Manager.OnAfterSetEntity -= RegisterDamageMessageEntity;
+            EntityManager.Manager.OnAfterSetEntity += RegisterDamageMessageEntity;
             var team1Members = SaveSystem.GetTeamMembers("Team1");
             EntityID[] characters = new EntityID[team1Members.Count];
             for (int i = 0; i < characters.Length; i++) characters[i] = team1Members[i];
@@ -899,6 +902,13 @@ namespace MyUI
         public override void OnExit()
         {
             base.OnExit();
+            EntityManager.Manager.OnAfterSetEntity -= RegisterDamageMessageEntity;
+            foreach (Entity entity in _damageMessageEntities)
+            {
+                if (entity != null)
+                    entity.OnDamageResolved -= HandleDamageResolved;
+            }
+            _damageMessageEntities.Clear();
             _costSliderRunning = false;
             DOTween.Kill("LevelMessagePanel");
             UIStates_SwitchTo_Normal();
@@ -919,6 +929,42 @@ namespace MyUI
             _costSliderRunning = false;
             DOTween.Kill("LevelMessagePanel");
             _placeDataList.Clear();
+        }
+        #endregion
+
+        #region Damage Messages
+        private void RegisterDamageMessageEntity(Entity entity)
+        {
+            if (entity == null)
+                return;
+
+            // Dormancy clears entity events, so pooled entities must be registered on every checkout.
+            entity.OnDamageResolved -= HandleDamageResolved;
+            entity.OnDamageResolved += HandleDamageResolved;
+            _damageMessageEntities.Add(entity);
+        }
+
+        private void HandleDamageResolved(DamageResolution resolution)
+        {
+            Entity target = resolution.Target;
+            if (target == null)
+                return;
+
+            switch (resolution.Kind)
+            {
+                case DamageResolutionKind.Dodged:
+                    ShowText(target.transform.position, 5, 0);
+                    break;
+                case DamageResolutionKind.Damage:
+                    AcceptDamageMessage(target, resolution.Origin, resolution.Amount, resolution.DamageType);
+                    if (resolution.IsCritical)
+                        ShowText(target.transform.position, 0, (int)resolution.Amount);
+                    break;
+                case DamageResolutionKind.Healing:
+                    AcceptDamageMessage(target, resolution.Origin, resolution.Amount, resolution.DamageType);
+                    ShowText(target.Movement.Position, 1, (int)resolution.Amount);
+                    break;
+            }
         }
         #endregion
 
@@ -2051,4 +2097,3 @@ namespace MyUI
         #endregion
     }
 }
-

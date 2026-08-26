@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace AbilitySystem.Tests
 {
@@ -227,6 +228,34 @@ namespace AbilitySystem.Tests
             DetachedStepScheduler.Manager.ToEnd();
             DetachedStepScheduler.Manager.TickAll(1f);
             CollectionAssert.IsEmpty(Trace);
+        }
+
+        [Test]
+        public void DetachedSnapshot_FirstHostSpawnId_ResolvesFirstCanSpawnEntry()
+        {
+            // entityId:inherit resolves the host's first registered spawn id;
+            // a host without the entry yields EntityID.Null so spawn_entity
+            // reports a config error instead of guessing.
+            Assert.That(DetachedExecutionSnapshot.FirstHostSpawnId(null), Is.EqualTo(EntityID.Null));
+
+            GameObject go = new GameObject("snapshot_host");
+            try
+            {
+                Entity entity = go.AddComponent<Entity>();
+                // EntityData alone drives the lookup; subsystems stay unbuilt.
+                entity.EntityData = new EntityData { CanSpawnEntityIds = null };
+                Assert.That(DetachedExecutionSnapshot.FirstHostSpawnId(entity),
+                    Is.EqualTo(EntityID.Null));
+
+                entity.EntityData.CanSpawnEntityIds =
+                    new List<EntityID> { new EntityID("m", 6), new EntityID("m", 7) };
+                Assert.That(DetachedExecutionSnapshot.FirstHostSpawnId(entity),
+                    Is.EqualTo(new EntityID("m", 6)));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(go);
+            }
         }
 
         [TestCase("yes", "then")]

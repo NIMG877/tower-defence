@@ -29,7 +29,7 @@ MonoBehaviour:
       Charge: []
       ChargeEnd: {fileID: 0}
   _movement:
-    Move: {fileID: 0}
+    Move: {fileID: 11400000, guid: abf6fd3b6cc990f45a216cfa8663345d, type: 2}
     Jump:
       Begin: {fileID: 11400000, guid: 5fed8220524b97f4f8104172cbf61e74, type: 2}
       Loop: {fileID: 11400000, guid: abf6fd3b6cc990f45a216cfa8663345d, type: 2}

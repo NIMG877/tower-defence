@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: slime_t1
   m_EditorClassIdentifier: 
-  abilityId: 
-  abilityName: 
-  description: 
+  abilityId: slime_t1
+  abilityName: "\u5206\u88C2"
+  description: "\u53F2\u83B1\u59C6\u88AB\u51FB\u5012\u540E\uFF0C\u4F1A\u5728\u5012\u4E0B\u4F4D\u7F6E\u9644\u8FD1\u6BCF\u96940.5\u79D2\u5206\u88C2\u751F\u62104\u4E2A\u4E0B\u4E00\u7EA7\u53F2\u83B1\u59C6\uFF0C\u5E76\u7EE7\u627F\u5012\u4E0B\u65F6\u7684\u8DEF\u5F84\u3002"
   icon: {fileID: 0}
-  Kind: 0
+  Kind: 1
   sp:
     totalSp: 0
     initialSp: 0
@@ -27,5 +27,53 @@ MonoBehaviour:
     openMode: 0
     recoverForbidDuringAbility: 0
     canManualClose: 0
-  rules: []
+  rules:
+  - triggers:
+    - triggerEvent: 15
+      groups: []
+    reentry: 0
+    steps:
+    - op: loop
+      args:
+        entries:
+        - key: count
+          value: 4
+          fromBlackboard: 0
+          type: 0
+      condition: []
+      steps:
+      - op: spawn_entity
+        args:
+          entries:
+          - key: entityId
+            value: inherit
+            fromBlackboard: 0
+            type: 3
+          - key: snapToGrid
+            value: True
+            fromBlackboard: 0
+            type: 2
+          - key: randomOffsetX
+            value: 0
+            fromBlackboard: 0
+            type: 1
+          - key: randomOffsetY
+            value: 0
+            fromBlackboard: 0
+            type: 1
+        condition: []
+        steps: []
+        elseSteps: []
+      - op: delay
+        args:
+          entries:
+          - key: seconds
+            value: 0.5
+            fromBlackboard: 0
+            type: 1
+        condition: []
+        steps: []
+        elseSteps: []
+      elseSteps: []
+    detached: 1
   legacyComponents: []

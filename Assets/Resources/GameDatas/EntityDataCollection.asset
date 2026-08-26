@@ -505,7 +505,7 @@ MonoBehaviour:
     MonsterCountOperated: 1
     MonsterLevelHpConsume: 1
     VisionRange: []
-    VisionRadius: 3
+    VisionRadius: 2.828
     Attack: 395
     BaseAttackTime: 5
     AttackNum: 1
@@ -585,8 +585,7 @@ MonoBehaviour:
     MassLevel: 1
     MoveMethod: 0
     Skills: []
-    Talents:
-    - {fileID: 11400000, guid: 7686315d8385e1748857a2dc52d6d713, type: 2}
+    Talents: []
     AnimationResources: {fileID: 11400000, guid: d0c65e57c85fd7f4a859cc396ef72414, type: 2}
   - ID:
       ID_C: m
@@ -687,7 +686,7 @@ MonoBehaviour:
     MoveMethod: 0
     Skills: []
     Talents: []
-    AnimationResources: {fileID: 0}
+    AnimationResources: {fileID: 11400000, guid: 41fad29e61964b74e92cdc4ffbdd84d9, type: 2}
   - ID:
       ID_C: m
       ID_N: 7
@@ -738,8 +737,9 @@ MonoBehaviour:
     MassLevel: 1
     MoveMethod: 0
     Skills: []
-    Talents: []
-    AnimationResources: {fileID: 0}
+    Talents:
+    - {fileID: 11400000, guid: 077e0c77018767047a76426b30fa15b9, type: 2}
+    AnimationResources: {fileID: 11400000, guid: 41fad29e61964b74e92cdc4ffbdd84d9, type: 2}
   - ID:
       ID_C: m
       ID_N: 8
@@ -790,8 +790,9 @@ MonoBehaviour:
     MassLevel: 1
     MoveMethod: 0
     Skills: []
-    Talents: []
-    AnimationResources: {fileID: 0}
+    Talents:
+    - {fileID: 11400000, guid: 077e0c77018767047a76426b30fa15b9, type: 2}
+    AnimationResources: {fileID: 11400000, guid: 41fad29e61964b74e92cdc4ffbdd84d9, type: 2}
   - ID:
       ID_C: m
       ID_N: 9

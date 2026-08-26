@@ -133,7 +133,6 @@ GameObject:
   - component: {fileID: 6918839178590651092}
   - component: {fileID: -2194638516088659704}
   - component: {fileID: 840365125945758641}
-  - component: {fileID: 975574703158545639}
   m_Layer: 0
   m_Name: Slime_Large
   m_TagString: Untagged
@@ -268,22 +267,3 @@ MonoBehaviour:
   _jumpBegin: {fileID: 11400000, guid: 5fed8220524b97f4f8104172cbf61e74, type: 2}
   _jumpEnd: {fileID: 11400000, guid: a2f4922fc909bbe4a8d2959e5e0436f3, type: 2}
   _jump: {fileID: 11400000, guid: abf6fd3b6cc990f45a216cfa8663345d, type: 2}
---- !u!114 &975574703158545639
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5752354500556713093}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c6effc8314018fc489b2a55d8bdfe104, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _talentName: "\u5206\u88C2"
-  _talentDescription: "\u53F2\u83B1\u59C6L\u88AB\u51FB\u5012\u540E\u4F1A\u5206\u88C2\u6210\u56DB\u4E2A\u53F2\u83B1\u59C6M"
-  spawnEntityID:
-    ID_C: 
-    ID_N: 0
-  spawnNum: 4
-  spawnGap: 0.5

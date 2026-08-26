@@ -202,23 +202,33 @@ sequence.
 
 | Argument | Type | Default | Meaning |
 |---|---|---:|---|
-| `entityId` | `String`, BB-capable | empty | Combined id in `category-number` or `category:number` form. |
+| `entityId` | `String`, BB-capable | empty | Combined id in `category-number` or `category:number` form; the literal `inherit` takes the host's first `CanSpawnEntityIds` entry (see below). |
 | `entityCategory` | `String`, BB-capable | empty | Category used when `entityId` is absent. |
 | `entityNumber` | `Int`, BB-capable | `0` | Number paired with `entityCategory`. |
 | `positionMode` | `String`, BB-capable | `self` | `self`, `eventTarget`, `blackboard`, or `fixed`. |
 | `positionKey` | `String`, BB-capable | empty | BB key for `positionMode=blackboard`; accepts `Vector2`, `Vector2Int`, or `Entity`. |
 | `position` | `Vector2Int`, BB-capable | `(0,0)` | Position for `positionMode=fixed`. |
+| `snapToGrid` | `Bool`, BB-capable | `False` | Round the resolved base position to its cell via `(int)(x+0.5)` before offsets. |
 | `offset` | `Vector2Int`, BB-capable | `(0,0)` | Added after resolving the base position. |
+| `randomOffsetX` | `Float`, BB-capable | `0` | Per-axis scatter half-extent added last; re-rolled on every activation, so each loop iteration scatters independently. Negative clamps to zero. |
+| `randomOffsetY` | `Float`, BB-capable | `0` | Y half-extent; same semantics as `randomOffsetX`. |
 | `camp` | `Int`, BB-capable | source camp, otherwise `1` | Spawned entity camp; negative selects the default. |
 | `placement` | `String`, BB-capable | `auto` | `static`, `auto` (pool data decides), or another value for movable. |
 | `orientation` | `Int`, BB-capable | `0` | Static-entity orientation. |
-| `pathSerial` | `Int`, BB-capable | `0` | Movable-entity path serial. |
+| `pathSerial` | `Int`, BB-capable | host's current path | Movable-entity path serial; absent inherits the host's `CurrentPathSerial`. |
 | `outputKey` | `String`, BB-capable | empty | If set, stores the spawned `Entity` in the shared Blackboard. |
 
 `eventTarget` resolves damage-event targets and hurt-event origins; without a
 usable event target it falls back to self. An unreadable Blackboard position
 falls back to `(0,0)`. Asset data should use this operation instead of directly
 instantiating scene objects.
+
+`entityId: inherit` reads `EntityData.CanSpawnEntityIds[0]` — the per-entity
+"what does this entity split into" registry — so one shared asset serves every
+tier of a split/chain family. A host without such an entry logs an error and
+the step returns `Failed`. In detached executions `inherit`, the camp default,
+the `self` position, and the `pathSerial` default all resolve from the
+fork-time snapshot; the live host is never consulted (it may be recycled).
 
 ## Operation lifecycle
 

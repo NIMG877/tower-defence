@@ -426,7 +426,7 @@ namespace AbilitySystem
         private static bool Spawn(AbilityContext ctx)
         {
             ParamList args = ctx.step?.args ?? new ParamList();
-            EntityID id = ResolveEntityId(args, ctx.sharedBlackboard);
+            EntityID id = ResolveEntityId(ctx, args);
             if (id.IsNull)
             {
                 Debug.LogError("[spawn_entity] Missing/invalid entityId or entityCategory/entityNumber.");
@@ -463,7 +463,7 @@ namespace AbilitySystem
                     id,
                     position,
                     camp,
-                    args.GetIntLazy("pathSerial", 0, ctx.sharedBlackboard)());
+                    ResolvePathSerial(ctx, args));
 
             string outputKey = args.GetStringLazy("outputKey", "", ctx.sharedBlackboard)();
             if (spawned != null && !string.IsNullOrEmpty(outputKey))
@@ -471,9 +471,20 @@ namespace AbilitySystem
             return spawned != null;
         }
 
-        private static EntityID ResolveEntityId(ParamList args, Blackboard blackboard)
+        private static EntityID ResolveEntityId(AbilityContext ctx, ParamList args)
         {
-            string raw = args.GetStringLazy("entityId", "", blackboard)();
+            string raw = args.GetStringLazy("entityId", "", ctx.sharedBlackboard)();
+            if (NormalizeToken(raw) == "inherit")
+            {
+                // Detached executions only ever read the fork-time snapshot;
+                // the live host may be a recycled different entity by now.
+                EntityID inherited = ctx.stepExecution?.DetachedSnapshot != null
+                    ? ctx.stepExecution.DetachedSnapshot.spawnEntityId
+                    : DetachedExecutionSnapshot.FirstHostSpawnId(ctx.entity);
+                if (inherited.IsNull)
+                    Debug.LogError("[spawn_entity] entityId 'inherit' found no CanSpawnEntityIds entry on the host entity data.");
+                return inherited;
+            }
             if (!string.IsNullOrWhiteSpace(raw))
             {
                 int separator = raw.LastIndexOf('-');
@@ -483,8 +494,8 @@ namespace AbilitySystem
                     return new EntityID(raw.Substring(0, separator), number);
             }
 
-            string category = args.GetStringLazy("entityCategory", "", blackboard)();
-            int entityNumber = args.GetIntLazy("entityNumber", 0, blackboard)();
+            string category = args.GetStringLazy("entityCategory", "", ctx.sharedBlackboard)();
+            int entityNumber = args.GetIntLazy("entityNumber", 0, ctx.sharedBlackboard)();
             return string.IsNullOrWhiteSpace(category)
                 ? EntityID.Null
                 : new EntityID(category, entityNumber);
@@ -517,8 +528,34 @@ namespace AbilitySystem
                     position = snap ?? (ctx.entity != null ? ctx.entity.Movement.Position : Vector2.zero);
                     break;
             }
+            // Legacy split-talent placement: snap the base to its cell, then
+            // scatter inside it. snapToGrid applies before offsets so `offset`
+            // stays cell-relative.
+            if (args.GetBoolLazy("snapToGrid", false, ctx.sharedBlackboard)())
+                position = new Vector2((int)(position.x + 0.5f), (int)(position.y + 0.5f));
             Vector2Int offset = args.GetVector2IntLazy("offset", default, ctx.sharedBlackboard)();
-            return position + (Vector2)offset;
+            position += (Vector2)offset;
+            // Per-activation scatter half-extents; negative values clamp to
+            // zero like `delay` clamps negative durations. Re-rolled on every
+            // activation, so each loop iteration scatters independently.
+            float scatterX = args.GetFloatLazy("randomOffsetX", 0f, ctx.sharedBlackboard)();
+            float scatterY = args.GetFloatLazy("randomOffsetY", 0f, ctx.sharedBlackboard)();
+            if (scatterX > 0f) position.x += UnityEngine.Random.Range(-scatterX, scatterX);
+            if (scatterY > 0f) position.y += UnityEngine.Random.Range(-scatterY, scatterY);
+            return position;
+        }
+
+        /// <summary>pathSerial 缺省继承宿主当前路径（脱离执行读 fork 快照），
+        /// 显式传入时字面量优先——镜像 camp 的"负值/缺省选默认"语义。</summary>
+        private static int ResolvePathSerial(AbilityContext ctx, ParamList args)
+        {
+            if (args.HasKey("pathSerial"))
+                return args.GetIntLazy("pathSerial", 0, ctx.sharedBlackboard)();
+            DetachedExecutionSnapshot snapshot = ctx.stepExecution?.DetachedSnapshot;
+            if (snapshot != null) return snapshot.pathSerial;
+            return ctx.entity != null && ctx.entity.MoveBase != null
+                ? ctx.entity.MoveBase.CurrentPathSerial
+                : 0;
         }
 
         private static Entity ResolveEventEntity(AbilityEvent evt)
@@ -597,6 +634,8 @@ namespace AbilitySystem
     {
         public Vector2 position;
         public int camp;
+        public int pathSerial;
+        public EntityID spawnEntityId;
 
         public static DetachedExecutionSnapshot From(Entity entity)
         {
@@ -605,7 +644,20 @@ namespace AbilitySystem
             {
                 position = entity.Movement.Position,
                 camp = entity.Camp,
+                pathSerial = entity.MoveBase != null ? entity.MoveBase.CurrentPathSerial : 0,
+                spawnEntityId = FirstHostSpawnId(entity),
             };
+        }
+
+        /// <summary>宿主数据里登记的第一个可生成实体（CanSpawnEntityIds[0]）；
+        /// 未登记返回 EntityID.Null，由消费方决定报错语义。public 供 EditMode
+        /// 测试直接断言（测试 asmdef 无 InternalsVisibleTo）。</summary>
+        public static EntityID FirstHostSpawnId(Entity entity)
+        {
+            List<EntityID> ids = entity != null && entity.EntityData != null
+                ? entity.EntityData.CanSpawnEntityIds
+                : null;
+            return ids != null && ids.Count > 0 ? ids[0] : EntityID.Null;
         }
     }
 
