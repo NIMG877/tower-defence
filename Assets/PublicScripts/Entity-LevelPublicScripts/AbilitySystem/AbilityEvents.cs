@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace AbilitySystem
@@ -50,6 +51,18 @@ namespace AbilitySystem
     public class AttackInterruptEvent : AbilityEvent
     {
         public override TriggerEvent TriggerEvent => AbilitySystem.TriggerEvent.OnAttackInterrupt;
+    }
+
+    // 索敌候选确定后、数量裁剪前派发（AttackBase.AttackTargetSelect 内经
+    // EntityAbilityRunner 桥接）。targets 为候选列表本体（引用，订阅方可直接
+    // 增删；桥接同步挂到 BlackboardKeys.AttackCandidates）；三个标量派发后回写。
+    public class BeforeTargetSelectEvent : AbilityEvent
+    {
+        public override TriggerEvent TriggerEvent => AbilitySystem.TriggerEvent.OnBeforeTargetSelect;
+        public List<Entity> targets;
+        public int selectMaxNum;
+        public int selectMinNum;
+        public bool sameComp;
     }
 
     // Shared fields for events that carry an incoming-damage payload (origin + damage + multipliers + types).
