@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9caadfbafeeff1541807bbb2cbedeed1, type: 3}
+  m_Name: popka
+  m_EditorClassIdentifier: 
+  _defaults:
+    Default: {fileID: 11400000, guid: e3c0b253851268a4a9d8e2849fab2f47, type: 2}
+    Idle: {fileID: 11400000, guid: 58440792d9e30ac4ea3a72246386a5ae, type: 2}
+    Start: {fileID: 11400000, guid: 9ed92cbf40313e6428603f7d84cc6918, type: 2}
+    Die: {fileID: 11400000, guid: 3668c856a35f82d4caa632cf177c9770, type: 2}
+  _attack:
+    AttackBegin: {fileID: 0}
+    AttackRemote:
+    - {fileID: 11400000, guid: 307fbd5ca9f3a804fa0f7688b7e0e889, type: 2}
+    AttackClose:
+    - {fileID: 11400000, guid: 307fbd5ca9f3a804fa0f7688b7e0e889, type: 2}
+    AttackEnd: {fileID: 0}
+    Charge:
+      ChargeBegin: {fileID: 0}
+      Charge: []
+      ChargeEnd: {fileID: 0}
+  _movement:
+    Move: {fileID: 0}
+    Jump:
+      Begin: {fileID: 0}
+      Loop: {fileID: 0}
+      End: {fileID: 0}
+  _animations: []
+  _animationGroups: []

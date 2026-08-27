@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9caadfbafeeff1541807bbb2cbedeed1, type: 3}
+  m_Name: catap
+  m_EditorClassIdentifier: 
+  _defaults:
+    Default: {fileID: 11400000, guid: 7284e48f71c2e014980e1d7b58f41f19, type: 2}
+    Idle: {fileID: 11400000, guid: 3f870d705cf36b048a7f0f65b6a780a4, type: 2}
+    Start: {fileID: 11400000, guid: 0ff249b039bcb74418ebe1b682b680bf, type: 2}
+    Die: {fileID: 11400000, guid: 9b25ce95ece854d43846862289c387f7, type: 2}
+  _attack:
+    AttackBegin: {fileID: 0}
+    AttackRemote:
+    - {fileID: 11400000, guid: 127d72abdf6c8d44b8b1bf6895fc527d, type: 2}
+    AttackClose:
+    - {fileID: 11400000, guid: 127d72abdf6c8d44b8b1bf6895fc527d, type: 2}
+    AttackEnd: {fileID: 0}
+    Charge:
+      ChargeBegin: {fileID: 0}
+      Charge: []
+      ChargeEnd: {fileID: 0}
+  _movement:
+    Move: {fileID: 0}
+    Jump:
+      Begin: {fileID: 0}
+      Loop: {fileID: 0}
+      End: {fileID: 0}
+  _animations: []
+  _animationGroups: []

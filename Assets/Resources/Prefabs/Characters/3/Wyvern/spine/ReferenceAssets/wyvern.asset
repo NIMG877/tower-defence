@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9caadfbafeeff1541807bbb2cbedeed1, type: 3}
+  m_Name: wyvern
+  m_EditorClassIdentifier: 
+  _defaults:
+    Default: {fileID: 11400000, guid: fa5b8906434811d42a48b24ad6cf6146, type: 2}
+    Idle: {fileID: 11400000, guid: 54c9dd1458177ba4dad160e22d887c69, type: 2}
+    Start: {fileID: 11400000, guid: 93caa0a9732d92c4d9d51c508a6c2621, type: 2}
+    Die: {fileID: 11400000, guid: 46ec8ffc8c1ea97449b34c6e74fb0b89, type: 2}
+  _attack:
+    AttackBegin: {fileID: 0}
+    AttackRemote:
+    - {fileID: 11400000, guid: 0d9386a1a01299c4ebe411da518fdc67, type: 2}
+    AttackClose:
+    - {fileID: 11400000, guid: 0d9386a1a01299c4ebe411da518fdc67, type: 2}
+    AttackEnd: {fileID: 0}
+    Charge:
+      ChargeBegin: {fileID: 0}
+      Charge: []
+      ChargeEnd: {fileID: 0}
+  _movement:
+    Move: {fileID: 0}
+    Jump:
+      Begin: {fileID: 0}
+      Loop: {fileID: 0}
+      End: {fileID: 0}
+  _animations: []
+  _animationGroups: []

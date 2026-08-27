@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9caadfbafeeff1541807bbb2cbedeed1, type: 3}
+  m_Name: ansel
+  m_EditorClassIdentifier: 
+  _defaults:
+    Default: {fileID: 11400000, guid: 7d7b8d40109b56f42bb60867a8f0fb4b, type: 2}
+    Idle: {fileID: 11400000, guid: b132699ca4c3dc24aabc9bab7d337174, type: 2}
+    Start: {fileID: 11400000, guid: 3a558fd3d14fb21418fae8ce94623089, type: 2}
+    Die: {fileID: 11400000, guid: 1d0143965303f8a4a82a8b99d0c2919a, type: 2}
+  _attack:
+    AttackBegin: {fileID: 0}
+    AttackRemote:
+    - {fileID: 11400000, guid: f4aa963f048100d4282b7fafff3b06f5, type: 2}
+    AttackClose:
+    - {fileID: 11400000, guid: f4aa963f048100d4282b7fafff3b06f5, type: 2}
+    AttackEnd: {fileID: 0}
+    Charge:
+      ChargeBegin: {fileID: 0}
+      Charge: []
+      ChargeEnd: {fileID: 0}
+  _movement:
+    Move: {fileID: 0}
+    Jump:
+      Begin: {fileID: 0}
+      Loop: {fileID: 0}
+      End: {fileID: 0}
+  _animations: []
+  _animationGroups: []
