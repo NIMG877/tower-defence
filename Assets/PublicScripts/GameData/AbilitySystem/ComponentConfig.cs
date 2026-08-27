@@ -483,8 +483,7 @@ namespace AbilitySystem
         // 同样追加在末尾以保持既有 asset 的枚举序号稳定。
         OnSummonDeath,
         // 索敌候选确定后、数量裁剪前派发（EntityAbilityRunner 桥接
-        // AttackBase.OnBeforeTargetSelect）。候选列表同步挂到黑板保留键
-        // BlackboardKeys.AttackCandidates，派发窗口结束即摘除。
+        // AttackBase.OnBeforeTargetSelect）。
         OnBeforeTargetSelect,
     }
 

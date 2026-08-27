@@ -139,6 +139,20 @@ namespace AbilitySystem.Components
                 }
             }
 
+            if (evt is BeforeTargetSelectEvent selectEvent)
+            {
+                switch (path)
+                {
+                    // 副本快照：黑板不与攻击系统的 live 候选列表共享引用（沿用
+                    // ToEntityList 的"只提取数据、不交出事件内部可变状态"约定）。
+                    // 筛选后经 override_attack_targets 提交回 live 列表。
+                    case "targets": return new List<Entity>(selectEvent.targets);
+                    case "selectmaxnum": return selectEvent.selectMaxNum;
+                    case "selectminnum": return selectEvent.selectMinNum;
+                    case "samecomp": return selectEvent.sameComp;
+                }
+            }
+
             if (path == "isdeadly")
             {
                 if (evt is AfterAttackEvent afterAttack) return afterAttack.isDeadly;

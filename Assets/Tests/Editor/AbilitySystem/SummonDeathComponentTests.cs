@@ -13,12 +13,12 @@ namespace AbilitySystem.Tests
         {
             Assert.That(AbilityStepOpRegistry.IsRegistered("watch_summon_death"), Is.True);
             Assert.That(AbilityStepOpRegistry.IsRegistered("update_buff"), Is.True);
-            Assert.That(AbilityStepOpRegistry.IsRegistered("inject_attack_targets"), Is.True);
+            Assert.That(AbilityStepOpRegistry.IsRegistered("override_attack_targets"), Is.True);
 
             // PascalCase 组件名是兼容别名：可解析，但不出现在 RegisteredOps。
             Assert.That(AbilityStepOpRegistry.ResolveCanonical("WatchSummonDeath"), Is.EqualTo("watch_summon_death"));
             Assert.That(AbilityStepOpRegistry.ResolveCanonical("UpdateBuff"), Is.EqualTo("update_buff"));
-            Assert.That(AbilityStepOpRegistry.ResolveCanonical("InjectAttackTargets"), Is.EqualTo("inject_attack_targets"));
+            Assert.That(AbilityStepOpRegistry.ResolveCanonical("OverrideAttackTargets"), Is.EqualTo("override_attack_targets"));
             Assert.That(AbilityStepOpRegistry.RegisteredOps, Does.Contain("watch_summon_death"));
             Assert.That(AbilityStepOpRegistry.RegisteredOps, Does.Not.Contain("WatchSummonDeath"));
         }

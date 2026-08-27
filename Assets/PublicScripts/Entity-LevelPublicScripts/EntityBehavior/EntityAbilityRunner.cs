@@ -441,14 +441,10 @@ public class EntityAbilityRunner
             selectMinNum = selectMinNum,
             sameComp = sameComp,
         };
-        // 候选列表挂到保留键（同一 List 引用），派发窗口内组件按普通黑板键读写；
-        // 窗口结束即摘除，窗口外读取走"键缺失"告警路径暴露配线错误。
-        sharedBlackboard.Set(BlackboardKeys.AttackCandidates, targets);
         DispatchEvent(evt);
         selectMaxNum = evt.selectMaxNum;
         selectMinNum = evt.selectMinNum;
         sameComp = evt.sameComp;
-        sharedBlackboard.Remove(BlackboardKeys.AttackCandidates);
     }
 
     private void OnBeforeHurt(Entity origin, ref float damage, ref float multiplyer, ref float defPenetrate, ref float mgrPenetrate, ref float defPenetrate_value, ref float mgrPenetrate_value, ref int damageType, int applyType)
