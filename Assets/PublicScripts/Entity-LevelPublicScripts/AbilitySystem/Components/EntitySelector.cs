@@ -90,14 +90,17 @@ namespace AbilitySystem.Components
                 case "eventtarget":
                     Entity eventTarget = GetEventTarget(ctx.currentEvent);
                     return eventTarget == null ? new List<Entity>() : new List<Entity> { eventTarget };
-                default:
-                    // self：脱离执行没有活实体（ctx.entity==null），镜像 SpawnEntity
+                case "self":
+                    // 脱离执行没有活实体（ctx.entity==null），镜像 SpawnEntity
                     // positionMode=self 的 fork 快照约定——主体退化为快照的
                     // (position, camp)，以 null 占位下传，仅纯位置选择可用。
                     if (ctx.entity != null) return new List<Entity> { ctx.entity };
                     return ctx.stepExecution?.DetachedSnapshot != null
                         ? new List<Entity> { null }
                         : new List<Entity>();
+                default:
+                    Debug.LogError($"[EntitySelector] Unknown subjectMode '{_subjectMode()}' (expected self/eventTarget/blackboard).");
+                    return new List<Entity>();
             }
         }
 
@@ -105,16 +108,6 @@ namespace AbilitySystem.Components
         {
             switch (Normalize(_selectionMode()))
             {
-                case "subject":
-                    if (subject == null)
-                    {
-                        Debug.LogError("[EntitySelector] selectionMode 'subject' requires a live entity; unavailable in detached executions.");
-                        return new List<Entity>();
-                    }
-                    return new List<Entity> { subject };
-                case "eventtarget":
-                    Entity eventTarget = GetEventTarget(ctx.currentEvent);
-                    return eventTarget == null ? new List<Entity>() : new List<Entity> { eventTarget };
                 case "vision":
                     if (subject == null)
                     {
@@ -131,8 +124,13 @@ namespace AbilitySystem.Components
                     return SelectRange(subject);
                 case "ring":
                     return SelectRing(ctx, subject);
-                default:
+                case "all":
+                    return SelectAll(ctx, subject);
+                case "radius":
                     return SelectRadius(ctx, subject);
+                default:
+                    Debug.LogError($"[EntitySelector] Unknown selectionMode '{_selectionMode()}' (expected radius/ring/range/vision/all).");
+                    return new List<Entity>();
             }
         }
 
@@ -163,15 +161,9 @@ namespace AbilitySystem.Components
             var results = new List<Entity>();
             if (subject.Vision == null) return results;
 
-            string relation = Normalize(_campRelation());
-            if (relation == "same" || relation == "both")
-            {
-                AddUnique(results, subject.Camp == 1 ? subject.Vision.NearbyTurrets : subject.Vision.NearbyMonsters);
-            }
-            if (relation == "opposing" || relation == "both")
-            {
-                AddUnique(results, subject.Camp == 1 ? subject.Vision.NearbyMonsters : subject.Vision.NearbyTurrets);
-            }
+            AddByRelation(
+                results,
+                sameCamp => subject.Camp == 1 ? subject.Vision.NearbyTurrets : subject.Vision.NearbyMonsters);
             return results;
         }
 
@@ -197,6 +189,19 @@ namespace AbilitySystem.Components
                 results,
                 sameCamp => EntityManager.Manager.EntitySelector_Radius(
                     (position.x, position.y), camp, sameCamp, _radius(), _force()));
+            return results;
+        }
+
+        private List<Entity> SelectAll(AbilityContext ctx, Entity subject)
+        {
+            var results = new List<Entity>();
+            if (EntityManager.Manager == null
+                || !TryResolveAnchor(ctx, subject, out Vector2 position, out int camp)) return results;
+
+            AddByRelation(
+                results,
+                sameCamp => EntityManager.Manager.EntitySelector_Radius(
+                    (position.x, position.y), camp, sameCamp, -1f, _force()));
             return results;
         }
 

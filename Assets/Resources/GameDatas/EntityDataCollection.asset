@@ -72,7 +72,8 @@ MonoBehaviour:
     MoveSpeed: 0
     MassLevel: 0
     MoveMethod: 0
-    Skills: []
+    Skills:
+    - {fileID: 11400000, guid: 93f5c9daf73c4fe6a794f651d1fb582d, type: 2}
     Talents:
     - {fileID: 11400000, guid: 9e0242c321b458831a624b77b4797a62, type: 2}
     AnimationResources: {fileID: 11400000, guid: b7639e8dd39688e47a11dea72ef2238e, type: 2}
@@ -971,7 +972,7 @@ MonoBehaviour:
     AttackNum: 0
     DamageType: 1
     TargetPriority: 0
-    MaxHp: 1
+    MaxHp: 100
     Defense: 0
     MagicResistance: 0
     PhysicalDodge: 0

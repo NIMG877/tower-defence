@@ -30,14 +30,19 @@ re-evaluates the source on every call.
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `source` | String | `value` | Value source: `value`, `event`, or `entity`. |
-| `path` | String | `""` | Context field used by `source=event` or `source=entity`. |
+| `source` | String | `value` | Value source: `value`, `event`, `entity`, or `listCount`. |
+| `path` | String | `""` | Context field used by `source=event` / `entity`; BlackBoard entity-list key used by `source=listCount`. |
+| `scale` | Float | `1` | Multiplier applied by `source=listCount` (writes `count × scale` as float). Setting it with another source warns once and is ignored. |
 | `asString` | Bool | `False` | Convert non-entity-list context values to invariant strings before writing. Useful for `ConditionEvaluator`. |
 
 ## Context sources
 
 `source=value` reads the configured `value`. `source=event` and
-`source=entity` read the current trigger context.
+`source=entity` read the current trigger context. `source=listCount` reads
+the `List<Entity>` stored at the `path` BlackBoard key and resolves to
+`count × scale` (float) — the standard bridge from an entity list produced by
+`select_targets` to a derived numeric seed (e.g. per-stack magnitudes). A
+missing list at `path` emits a one-shot warning and skips the write.
 
 Supported event paths:
 

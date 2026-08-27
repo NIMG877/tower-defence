@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   abilityId: eyjafjalla_t1
   abilityName: "熔岩泡泡"
-  description: "攻击命中后有概率在目标位置生成熔岩泡泡；存在泡泡时优先攻击泡泡；每个存活泡泡使自身攻击力+20%（技能1期间触发概率提升至3倍）。泡泡的爆炸由其自身天赋lavabubble_t1负责（伤害基值为生成时快照的自身攻击力，含该泡泡计入的层数，归属召唤者）。"
+  description: "攻击命中后有概率在目标位置生成熔岩泡泡；每个存活泡泡使自身攻击力+20%（技能1期间触发概率提升至3倍）。部署时统计场上现存泡泡并恢复列表与增层（select_targets all + filter_targets IdC/IdN + listCount×0.2）。泡泡的爆炸由其自身天赋lavabubble_t1负责（伤害基值为生成时快照的自身攻击力，含该泡泡计入的层数，归属召唤者）。注（待运行时扩展）：存在泡泡时优先攻击泡泡并切换本次攻击动画（OnBeforeAttack 在伤害帧才触发，时机过晚；正确决策点在索敌返回→TryToAttack 之间）。"
   icon: {fileID: 0}
   Kind: 1
   sp: {totalSp: 0, initialSp: 0, chargeNum: 1, abilityAmount: 0, recoverMode: 0, consumeMode: 5, openMode: 0, recoverForbidDuringAbility: 0, canManualClose: 0}
@@ -22,18 +22,18 @@ MonoBehaviour:
   - triggers: [{triggerEvent: 1, groups: []}]
     reentry: 0
     steps:
-    - op: write_blackboard
-      args: {entries: [{key: key, value: eyjafjalla_t1_bubble_count, fromBlackboard: 0, type: 3}, {key: value, value: 0, fromBlackboard: 0, type: 0}, {key: method, value: set, fromBlackboard: 0, type: 3}]}
+    - op: select_targets
+      args: {entries: [{key: selectionMode, value: all, fromBlackboard: 0, type: 3}, {key: campRelation, value: opposing, fromBlackboard: 0, type: 3}, {key: outputEntitiesKey, value: eyjafjalla_t1_bubbles, fromBlackboard: 0, type: 3}]}
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: filter_targets
+      args: {entries: [{key: mode, value: list, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: eyjafjalla_t1_bubbles, fromBlackboard: 0, type: 3}, {key: fields, value: 'IdC,IdN', fromBlackboard: 0, type: 3}, {key: ops, value: 'Equal,Equal', fromBlackboard: 0, type: 3}, {key: values, value: 't,1', fromBlackboard: 0, type: 3}, {key: groups, value: '0,0', fromBlackboard: 0, type: 3}]}
       condition: []
       steps: []
       elseSteps: []
     - op: write_blackboard
-      args: {entries: [{key: key, value: eyjafjalla_t1_atk_pct, fromBlackboard: 0, type: 3}, {key: value, value: 0, fromBlackboard: 0, type: 1}, {key: method, value: set, fromBlackboard: 0, type: 3}]}
-      condition: []
-      steps: []
-      elseSteps: []
-    - op: write_blackboard
-      args: {entries: [{key: key, value: eyjafjalla_t1_engaged, fromBlackboard: 0, type: 3}, {key: value, value: False, fromBlackboard: 0, type: 3}, {key: method, value: set, fromBlackboard: 0, type: 3}]}
+      args: {entries: [{key: key, value: eyjafjalla_t1_atk_pct, fromBlackboard: 0, type: 3}, {key: source, value: listCount, fromBlackboard: 0, type: 3}, {key: path, value: eyjafjalla_t1_bubbles, fromBlackboard: 0, type: 3}, {key: scale, value: 0.2, fromBlackboard: 0, type: 1}]}
       condition: []
       steps: []
       elseSteps: []
@@ -60,11 +60,6 @@ MonoBehaviour:
       condition: [{units: [{op: 1, leftKey: eyjafjalla_t1_roll, rightValue: True}]}]
       steps:
       - op: write_blackboard
-        args: {entries: [{key: key, value: eyjafjalla_t1_bubble_count, fromBlackboard: 0, type: 3}, {key: value, value: 1, fromBlackboard: 0, type: 0}, {key: method, value: add, fromBlackboard: 0, type: 3}]}
-        condition: []
-        steps: []
-        elseSteps: []
-      - op: write_blackboard
         args: {entries: [{key: key, value: eyjafjalla_t1_atk_pct, fromBlackboard: 0, type: 3}, {key: value, value: 0.2, fromBlackboard: 0, type: 1}, {key: method, value: add, fromBlackboard: 0, type: 3}]}
         condition: []
         steps: []
@@ -79,40 +74,10 @@ MonoBehaviour:
         condition: []
         steps: []
         elseSteps: []
-      - op: branch
-        args: {entries: []}
-        condition: [{units: [{op: 2, leftKey: eyjafjalla_t1_engaged, rightValue: True}, {op: 2, leftKey: eyjafjalla_t1_skill1, rightValue: True}]}]
-        steps:
-        - op: apply_animation_override
-          args: {entries: [{key: mode, value: override, fromBlackboard: 0, type: 3}, {key: slots, value: 'AttackBegin,AttackEnd,AttackRemote,AttackClose', fromBlackboard: 0, type: 3}, {key: resources, value: 'Talent_Begin,Talent_End,Talent_Attack,Talent_Attack', fromBlackboard: 0, type: 3}, {key: outputKey, value: eyjafjalla_t1_anim_overrides, fromBlackboard: 0, type: 3}]}
-          condition: []
-          steps: []
-          elseSteps: []
-        - op: inject_attack_targets
-          args: {entries: [{key: toggle, value: on, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: eyjafjalla_t1_bubbles, fromBlackboard: 0, type: 3}]}
-          condition: []
-          steps: []
-          elseSteps: []
-        - op: force_reset_attack
-          args: {entries: []}
-          condition: []
-          steps: []
-          elseSteps: []
-        - op: write_blackboard
-          args: {entries: [{key: key, value: eyjafjalla_t1_engaged, fromBlackboard: 0, type: 3}, {key: value, value: True, fromBlackboard: 0, type: 3}, {key: method, value: set, fromBlackboard: 0, type: 3}]}
-          condition: []
-          steps: []
-          elseSteps: []
-        elseSteps: []
       elseSteps: []
   - triggers: [{triggerEvent: 17, groups: []}]
     reentry: 2
     steps:
-    - op: write_blackboard
-      args: {entries: [{key: key, value: eyjafjalla_t1_bubble_count, fromBlackboard: 0, type: 3}, {key: value, value: -1, fromBlackboard: 0, type: 0}, {key: method, value: add, fromBlackboard: 0, type: 3}]}
-      condition: []
-      steps: []
-      elseSteps: []
     - op: write_blackboard
       args: {entries: [{key: key, value: eyjafjalla_t1_atk_pct, fromBlackboard: 0, type: 3}, {key: value, value: -0.2, fromBlackboard: 0, type: 1}, {key: method, value: add, fromBlackboard: 0, type: 3}]}
       condition: []
@@ -122,26 +87,6 @@ MonoBehaviour:
       args: {entries: [{key: inputTarget, value: eyjafjalla_t1_buff_targets, fromBlackboard: 0, type: 3}, {key: inputBuff, value: eyjafjalla_t1_buff_buffs, fromBlackboard: 0, type: 3}, {key: attributes, value: Attack, fromBlackboard: 0, type: 3}, {key: ops, value: AddPercent, fromBlackboard: 0, type: 3}, {key: magnitudes, value: eyjafjalla_t1_atk_pct, fromBlackboard: 1, type: 3}]}
       condition: []
       steps: []
-      elseSteps: []
-    - op: branch
-      args: {entries: []}
-      condition: [{units: [{op: 1, leftKey: eyjafjalla_t1_bubble_count, rightValue: 0}, {op: 1, leftKey: eyjafjalla_t1_engaged, rightValue: True}]}]
-      steps:
-      - op: inject_attack_targets
-        args: {entries: [{key: toggle, value: off, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: eyjafjalla_t1_bubbles, fromBlackboard: 0, type: 3}]}
-        condition: []
-        steps: []
-        elseSteps: []
-      - op: remove_animation_override
-        args: {entries: [{key: inputKey, value: eyjafjalla_t1_anim_overrides, fromBlackboard: 0, type: 3}]}
-        condition: []
-        steps: []
-        elseSteps: []
-      - op: write_blackboard
-        args: {entries: [{key: key, value: eyjafjalla_t1_engaged, fromBlackboard: 0, type: 3}, {key: value, value: False, fromBlackboard: 0, type: 3}, {key: method, value: set, fromBlackboard: 0, type: 3}]}
-        condition: []
-        steps: []
-        elseSteps: []
       elseSteps: []
   - triggers: [{triggerEvent: 1, groups: []}]
     reentry: 0

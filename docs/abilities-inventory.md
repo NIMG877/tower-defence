@@ -151,7 +151,7 @@
 ### 目标选择类
 | 组件 | 职责 | 关键参数 | BB读写 | Tick/Teardown |
 |---|---|---|---|---|
-| **EntitySelector** | self/blackboard/eventTarget 为中心，radius/ring/range/vision/subject/eventTarget 模式选实体，same/opposing/both 阵营过滤 | subjectMode,selectionMode,campRelation,radius,minRadius,squareLength,force,excludeSubjects | 读 subjectBlackboardKey；写 outputEntitiesKey/outputCountKey | 无 |
+| **EntitySelector** | self/blackboard/eventTarget 为中心，radius/ring/range/vision/all 模式选实体，same/opposing/both 阵营过滤 | subjectMode,selectionMode,campRelation,radius,minRadius,squareLength,force,excludeSubjects | 读 subjectBlackboardKey；写 outputEntitiesKey/outputCountKey | 无 |
 | **EntityFilter** | 订阅 OnBeforeTargetSelect，OR组AND条件过滤候选(monsterStatus/camp/currentHp/currentHpRate/maxHp 字段) | fields,ops,values,groups | 读 blackboardKey | Teardown/AbilityEnd 取消订阅 |
 
 ### 攻击行为覆盖类

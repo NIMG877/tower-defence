@@ -557,7 +557,6 @@ GameObject:
   - component: {fileID: 6893803144390001881}
   - component: {fileID: -8233499676567559834}
   - component: {fileID: 3974420059893658530}
-  - component: {fileID: 6801070449023557628}
   - component: {fileID: 3246993999235739132}
   m_Layer: 0
   m_Name: Eyjafjalla
@@ -632,32 +631,6 @@ MonoBehaviour:
       DevitationYValue: 0.9
     BulletSpawnTransform: {fileID: 2679485638432126119}
     AttackEffect: {fileID: 1929037728802243661, guid: 387d3a01d5cd7fe4bb854b4bca0a122e, type: 3}
---- !u!114 &6801070449023557628
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4310881110139641480}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2cb75a43e7bae2d4c9844ca34f02d833, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _skillName: "\u4E8C\u91CD\u548F\u5531"
-  _skillImg: {fileID: 21300000, guid: 4635b170785529c44a88013a54a3c807, type: 3}
-  _skillDescription: 123
-  _spRecoverMode: 0
-  _spConsumeMode: 0
-  _skillOpenMode: 3
-  _chargeNum: 0
-  _totalSp: 15
-  _initialSp: 13
-  _skillAmount: 30
-  _recoverForbidDuringSkill: 1
-  _canCloseSkill: 0
-  _skillAttackRange: []
-  Skill1Effect: {fileID: 519481326241669108, guid: c540ca1d91a18854da01bb3be280d321, type: 3}
 --- !u!114 &3246993999235739132
 MonoBehaviour:
   m_ObjectHideFlags: 0

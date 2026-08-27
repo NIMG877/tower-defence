@@ -11,7 +11,10 @@ namespace AbilitySystem.Components
     /// <para><b>"set"</b> (default): writes the value as-is to the configured key. The
     /// value's runtime type is determined by ParamEntry.type (Int/Float/Bool/String/
     /// Vector2Int, plus the 4 Unity asset types which fall through to string). Both
-    /// key and value support fromBlackboard=true.</para>
+    /// key and value support fromBlackboard=true. Alternative value sources via
+    /// <c>source</c>: <c>event</c>/<c>entity</c> paths, or <c>listCount</c> which
+    /// writes <c>list.Count × scale</c> (float) of the Blackboard List&lt;Entity&gt;
+    /// at <c>path</c>.</para>
     ///
     /// <para><b>"add" / "mult" / "div"</b>: reads the existing value at the key, applies
     /// the operation with the configured value, and writes the result back. Only
@@ -26,6 +29,7 @@ namespace AbilitySystem.Components
         private Func<string>  _method;
         private Func<string> _source;
         private Func<string> _path;
+        private Func<float> _scale;
         private Func<bool> _asString;
 
         public override void OnInit(AbilityContext ctx, ParamList p)
@@ -36,6 +40,7 @@ namespace AbilitySystem.Components
             _method = p.GetStringLazy("method", "set", bb);
             _source = p.GetStringLazy("source", "value", bb);
             _path = p.GetStringLazy("path", "", bb);
+            _scale = p.GetFloatLazy("scale", 1f, bb);
             _asString = p.GetBoolLazy("asString", false, bb);
         }
 
@@ -75,9 +80,19 @@ namespace AbilitySystem.Components
                 case "entity":
                     value = ResolveEntityValue(ctx.entity, Normalize(_path()));
                     break;
+                case "listcount":
+                    value = ResolveListCount(ctx, Normalize(_path()), _scale());
+                    break;
                 default:
                     value = _value();
                     break;
+            }
+
+            // scale 只对 listCount 有意义；配在其它源上属笔误，一次性告警（不静默吞掉）。
+            if (Normalize(_source()) != "listcount" && Math.Abs(_scale() - 1f) > 1e-6f)
+            {
+                OneShotWarn.WarnOnce("write-bb-scale-source",
+                    $"WriteBlackboard: scale only applies to source 'listCount' (got '{_source()}'); ignoring scale.");
             }
 
             if (!_asString() || value == null || value is List<Entity>) return value;
@@ -133,6 +148,22 @@ namespace AbilitySystem.Components
 
             WarnUnknownContextPath("event", path);
             return null;
+        }
+
+        /// <summary>listCount 取值源：读 path 指向的黑板 List&lt;Entity&gt;，返回 count×scale
+        /// （float；scale 默认 1）。列表缺失属配线错误，一次性告警并返回 null（写入随之跳过）。</summary>
+        private static object ResolveListCount(AbilityContext ctx, string path, float scale)
+        {
+            if (ctx.sharedBlackboard == null || string.IsNullOrEmpty(path)) return null;
+            List<Entity> list = ctx.sharedBlackboard.Get<List<Entity>>(path, null);
+            if (list == null)
+            {
+                OneShotWarn.WarnOnce(
+                    "write-bb-list-count:" + path,
+                    $"WriteBlackboard: source 'listCount' found no entity list at '{path}'; skipping.");
+                return null;
+            }
+            return list.Count * scale;
         }
 
         // internal：SpawnEntity 的 passStat 复用同一套实体路径词汇表（"attack" 等）。

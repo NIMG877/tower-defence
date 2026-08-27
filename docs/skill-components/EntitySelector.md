@@ -10,10 +10,10 @@ results, then overwrites optional Blackboard entity-list and count outputs.
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `subjectMode` | String | `self` | Subject source: `self`, `eventTarget`, or `blackboard`. |
+| `subjectMode` | String | `self` | Subject source: `self`, `eventTarget`, or `blackboard` (alias `blackboardEntities`). Any other value logs an error and selects nothing. |
 | `subjectBlackboardKey` | String | `""` | Input `List<Entity>` key used by `subjectMode=blackboard`. |
-| `selectionMode` | String | `radius` | Selection method: `subject`, `eventTarget`, `vision`, `radius`, `ring`, or `range`. |
-| `campRelation` | String | `opposing` | Select entities of the `same`, `opposing`, or `both` camp relative to each subject. Used by `vision`, `radius`, `ring`, and `range`. |
+| `selectionMode` | String | `radius` | Selection method: `vision`, `radius`, `ring`, `range`, or `all`. Any other value logs an error and selects nothing. |
+| `campRelation` | String | `opposing` | Select entities of the `same`, `opposing`, or `both` camp relative to each subject. Used by `vision`, `radius`, `ring`, `range`, and `all`. |
 | `radius` | Float | `1` | Radius passed to `EntitySelector_Radius`. |
 | `minRadius` | Float | `0` | Inner radius used only by `selectionMode=ring`; negative values are treated as `0`. |
 | `squareLength` | Float | `1` | Square half-length passed to `EntitySelector_Range`. |
@@ -34,6 +34,15 @@ With the default `minRadius=0`, an entity exactly at the subject's center is
 excluded.
 When `minRadius` is greater than a non-negative `radius`, the result is empty.
 
+`all` returns every on-field entity of the `campRelation` camp (selectability
+rules apply unless `force=true`). It routes through `EntitySelector_Radius`
+with `radius<0` (the existing whole-field convention — no distance test), so
+no new EntityManager API exists for it. The subject serves only as the camp
+anchor, so `all` also works in detached executions via the snapshot camp.
+Typical use: "re-collect every entity of a kind currently on the field" at
+OnInitialize, paired with a `filter_targets` (mode `list`) step that narrows
+the result by identity.
+
 ## Blackboard behavior
 
 Every trigger creates a fresh result. Existing values at configured output
@@ -48,7 +57,7 @@ Blackboard operands as strings and parses numeric comparisons from them.
 `subjectMode=self` mirrors `spawn_entity`'s `positionMode=self` convention:
 with no live entity, the subject degrades to the fork snapshot's
 `(position, camp)` captured at trigger time. Only pure-position selections
-(`radius`, `ring`) are usable; `subject`, `vision`, and `range` need a live
+(`radius`, `ring`) are usable; `vision` and `range` need a live
 entity and log an error in detached executions. Null entries inside a
 `subjectMode=blackboard` list are skipped.
 
