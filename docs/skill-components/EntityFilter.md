@@ -1,10 +1,12 @@
 # EntityFilter
 
-Filters entity lists with OR groups containing AND conditions, matching the
-shape of `ConditionConfig.groups`. Two operating modes: the default
-`attackCandidates` subscribes to entities' `AttackBase.OnBeforeTargetSelect`
-and filters the candidate list produced by `AttackBase.AttackTargetSelect`;
-`list` filters the Blackboard `List<Entity>` at `blackboardKey` in place.
+Filters the entity list at a Blackboard key in place with OR groups containing
+AND conditions, matching the shape of `ConditionConfig.groups`. The component
+is attack-system-agnostic: any `List<Entity>` key works. Two typical sources:
+
+- a list written by `select_targets`' `outputEntitiesKey` (chained filtering);
+- the reserved `attackCandidates` key during `BeforeTargetSelectEvent`
+  dispatch (attack preference — see "Attack preference wiring" below).
 
 **Canonical op:** `filter_targets`
 **Component registration:** `EntityFilter`
@@ -13,9 +15,7 @@ and filters the candidate list produced by `AttackBase.AttackTargetSelect`;
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `mode` | String | `attackCandidates` | `attackCandidates` (subscribe to target selection) or `list` (filter a Blackboard list in place). |
-| `toSelf` | Bool | `True` | `attackCandidates` mode: filter target selection for `ctx.entity`. If false, read entities from `blackboardKey`. |
-| `blackboardKey` | String | `""` | `attackCandidates` + `toSelf=false`: input `List<Entity>` whose entities get the subscription. `list` mode: the `List<Entity>` key to filter in place. |
+| `blackboardKey` | String | `""` | The `List<Entity>` key to filter in place. For attack preference use the reserved key `attackCandidates`. |
 | `fields` | StringCsv | `""` | Entity fields, one per condition. |
 | `ops` | StringCsv | `""` | Comparison operations, one per condition. |
 | `values` | StringCsv | `""` | Comparison values, one per condition. Numeric fields parse their value as float (invariant culture); string fields compare literally. |
@@ -24,6 +24,25 @@ and filters the candidate list produced by `AttackBase.AttackTargetSelect`;
 All four condition arrays are parallel. Only entries up to the shortest array
 length are evaluated. With no complete conditions, the list is left
 unchanged.
+
+## Attack preference wiring
+
+Timing comes from the event system, data from the blackboard — the component
+itself is stateless:
+
+```text
+triggers = OnBeforeTargetSelect
+steps    = filter_targets { blackboardKey = attackCandidates, fields = ..., ... }
+```
+
+`attackCandidates` exists only during the synchronous dispatch window of
+`BeforeTargetSelectEvent` (the runner bridge sets it before dispatch and
+removes it after). Reading it outside that window warns once and skips — a
+wiring error is exposed, not masked. Skill scoping comes free from the
+dispatch-side `isActive` gate: an inactive skill's rules never receive the
+event, so a temporary skill needs a single trigger (no subscribe/unsubscribe
+pair). Pair with `force_reset_attack` after engaging when the filtered target
+set must take effect immediately.
 
 ## Supported fields
 
@@ -51,31 +70,15 @@ entity (LavaBubble).
 
 Unknown fields or operations make that condition fail and emit a one-shot
 warning. A numeric field whose value does not parse as a number (invariant
-culture) fails the same way.
-
-## Lifecycle
-
-`attackCandidates` mode:
-
-- On a non-`OnAbilityEnd` trigger, subscribe to selected entities'
-  `AttackBase.OnBeforeTargetSelect`.
-- On `OnAbilityEnd`, remove all subscriptions created by this component.
-- On teardown, remove subscriptions defensively.
-
-For a temporary skill, use one rule with `OnAbilityBegin` and `OnAbilityEnd`
-trigger entries and one `filter_targets` step. Put `force_reset_attack` after
-it when the filtered target set must take effect immediately on both events.
-
-`list` mode is stateless: each trigger filters the Blackboard list at
-`blackboardKey` synchronously (typical chain: `select_targets`
-`outputEntitiesKey` → `filter_targets` mode `list`). A missing key or a
-non-list value at the key warns once and skips.
+culture) fails the same way. A missing key or a non-list value at the key
+warns once and skips.
 
 ## Example
 
 Accept elite or leader monsters:
 
 ```text
+blackboardKey = attackCandidates
 fields = MonsterStatus,MonsterStatus
 ops    = GreaterOrEqual,LessOrEqual
 values = 1,2
@@ -85,7 +88,6 @@ groups = 0,0
 Keep only `t/1` entities (e.g. LavaBubbles) in a selected list:
 
 ```text
-mode         = list
 blackboardKey = my_bubbles
 fields = IdC,IdN
 ops    = Equal,Equal

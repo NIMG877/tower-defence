@@ -152,7 +152,7 @@
 | 组件 | 职责 | 关键参数 | BB读写 | Tick/Teardown |
 |---|---|---|---|---|
 | **EntitySelector** | self/blackboard/eventTarget 为中心，radius/ring/range/vision/all 模式选实体，same/opposing/both 阵营过滤 | subjectMode,selectionMode,campRelation,radius,minRadius,squareLength,force,excludeSubjects | 读 subjectBlackboardKey；写 outputEntitiesKey/outputCountKey | 无 |
-| **EntityFilter** | 订阅 OnBeforeTargetSelect，OR组AND条件过滤候选(monsterStatus/camp/currentHp/currentHpRate/maxHp 字段) | fields,ops,values,groups | 读 blackboardKey | Teardown/AbilityEnd 取消订阅 |
+| **EntityFilter** | 原地过滤黑板 List&lt;Entity&gt;（OR组AND条件；attackCandidates 保留键即攻击偏好） | blackboardKey,fields,ops,values,groups | 读 blackboardKey | 无（纯触发操作） |
 
 ### 攻击行为覆盖类
 | 组件 | 职责 | 关键参数 | BB读写 | Tick/Teardown |
@@ -196,14 +196,13 @@
 | kross_s1 | 二连射 | Skill | 4SP每攻击 | AttackEventValueModifier(6,cumbo=2,mult1.4) | 每攻连射2发140% |
 | test_s1 | 测试技能 | Skill | 3SP自动 | WriteBB(1,set mult=1)/AttackEventValMod(6,mult 读BB)/WriteBB(6,mult×1.1递增)/AttackRangeOverride(2)/Restore(3) | 黑板驱动递增倍率+范围扩 |
 | kroos_t1 | 要害瞄准初级 | Talent | 被动 | RandomRoll(6,0.2概率)/AttackEventValMod(6,mult1.5 条件=t1_trigger=true) | 20%概率150%伤害 |
-| test_talent | 圣光审判 | Talent | 被动 | EntityFilter(2,残血或精英)/AttackEventValMod(6,mult3) | 只打残血/精英且×3 |
 | melan_s1 | 攻击力强化α | Skill | 40SP手动 | ApplyBuff(2,Atk+50%) / DestroyBuff(3) | 同 hibisc_s1 |
 | melan_t1 | 攻击提升 | Skill* | 被动 | ApplyBuff(2,Atk+8%) | 常驻攻+8%(无Destroy) |
 | spot_s1 | 次级治疗模式 | Skill | 40SP手动 | ApplyBuff(2,Atk+45%/攻间隔+1.3)/AttackRangeOverride(2,3×3)/ApplyAnimOverride(2)/AttackBehaviorOverride(2,治疗/血量最低)/ForceReset(2) + 结束5个Restore | 完整形态切换为群疗者 |
 | spot_t1 | 烟雾加装 | Skill* | 被动 | WriteBB(9,提伤害类型/目标)/ApplyBuff(9,物闪75% 3秒,条件=物伤) | 治疗友方后给物闪 |
 | stward_s1 | 强力击α | Skill | 4SP每攻击 | AttackEventValMod(6,mult1.9) | 190%伤害 |
 | stward_t1 | 铠甲突破 | Skill* | 被动 | ApplyBuff(2,Atk+6%)/AttackBehaviorOverride(2,防御最高,无Restore) | 常驻攻+6%+永久优先高防 |
-| ebnhlz_s3 | 寂静之声 | Skill | 20SP手动可关 | ApplyBuff(2,攻速+80/攻+65%)/ApplyAnimOverride(2)/WriteBB(2,mult×1.4)/EntityFilter(2&3,仅精英1-2)/ForceReset(2) + 结束Restore+WriteBB(div还原) | 形态切换+跨天赋联动 |
+| ebnhlz_s3 | 寂静之声 | Skill | 20SP手动可关 | ApplyBuff(2,攻速+80/攻+65%)/ApplyAnimOverride(2)/WriteBB(2,mult×1.4)/EntityFilter(18,仅精英1-2)/ForceReset(2) + 结束Restore+WriteBB(div还原) | 形态切换+跨天赋联动 |
 | ebnhlz_t1 | 强弱法 | Skill* | 被动 | WriteBB(2,set倍率1.43)/ChargeAttackDamageModifier(2,读BB)/ChargeAttackReservePool(2,1份仅精英) | 蓄力伤×1.43+额外精英蓄力 |
 | ebnhlz_t2 | 倚音 | Talent | 被动 | EntitySelector(9,半径1.1同阵营计数)/ApplyDamage(9,15%法术,条件=计数0) | 孤立目标额外15%法伤 |
 
@@ -286,7 +285,7 @@
 | **复活** | 无旧实现但常见需求 | 无（DestroyEntity 只有反向） | 🟡 中 |
 | **能力间编排(ability互调/信号)** | Eyjafjalla(Skill1→Talent1)、Wdslm(2↔3)、Wither(2→3) | 仅 Blackboard 变量(无显式信号通道) | 🟠 高 |
 | **跨实体方法调用/公共字段共享** | HeadSeter→WitherPedestal.AddHead、Wither1↔3(HaveShield) | 无（违架构铁律） | 🟠 高 |
-| **目标列表注入(插到最前)** | EyjafjallaTalent1(气泡优先) | EntityFilter(只能剔除不能插入) | 🟡 中 |
+| **目标列表注入(插到最前)** | EyjafjallaTalent1(气泡优先) | InjectAttackTargets 已实现(事件触发接线,资产待落地) | 🟢 低 |
 | **计数器式状态推进** | WitherPedestal(集齐3) | ChargeStateController(部分覆盖) | 🟡 中 |
 | **持续物理循环(加减速/跟随)** | MachineTalent1 | 无（硬编码AI） | 🟡 中(难数据驱动化) |
 | **阵营叛变/策反** | WdslmSkill2 | 无 | 🟡 中(特化) |
