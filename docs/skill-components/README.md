@@ -131,11 +131,11 @@ are not authoring names.
 - [EntitySelector](EntitySelector.md) - selects entities by subject, event
   target, vision, radius, ring, or range and writes the result/count to Blackboard.
 - [EntityFilter](EntityFilter.md) - filters the entity list at a Blackboard
-  key in place with configurable OR groups of AND conditions (the reserved
-  `attackCandidates` key covers attack preference).
-- [InjectAttackTargets](InjectAttackTargets.md) - injects a Blackboard
-  entity list to the front of target candidates (per-unit highest
-  targeting priority, vision ignored).
+  key in place with configurable OR groups of AND conditions (attack
+  preference = snapshot + filter + commit pipeline).
+- [OverrideAttackTargets](OverrideAttackTargets.md) - replaces the live
+  target-candidate list with a Blackboard entity list during
+  `OnBeforeTargetSelect` (the commit step of the attack-preference pipeline).
 
 ### Charge attacks
 

@@ -5,7 +5,7 @@ AND conditions, matching the shape of `ConditionConfig.groups`. The component
 is attack-system-agnostic: any `List<Entity>` key works. Two typical sources:
 
 - a list written by `select_targets`' `outputEntitiesKey` (chained filtering);
-- the reserved `attackCandidates` key during `BeforeTargetSelectEvent`
+- the `attackCandidates` working copy during `BeforeTargetSelectEvent`
   dispatch (attack preference — see "Attack preference wiring" below).
 
 **Canonical op:** `filter_targets`
@@ -15,7 +15,7 @@ is attack-system-agnostic: any `List<Entity>` key works. Two typical sources:
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `blackboardKey` | String | `""` | The `List<Entity>` key to filter in place. For attack preference use the reserved key `attackCandidates`. |
+| `blackboardKey` | String | `""` | The `List<Entity>` key to filter in place. For attack preference use the conventional key `attackCandidates`. |
 | `fields` | StringCsv | `""` | Entity fields, one per condition. |
 | `ops` | StringCsv | `""` | Comparison operations, one per condition. |
 | `values` | StringCsv | `""` | Comparison values, one per condition. Numeric fields parse their value as float (invariant culture); string fields compare literally. |
@@ -27,22 +27,28 @@ unchanged.
 
 ## Attack preference wiring
 
-Timing comes from the event system, data from the blackboard — the component
-itself is stateless:
+Attack preference is a three-step pipeline. Timing comes from the event
+system, data from the blackboard, and the only mutation of the live candidate
+list happens in the final commit step:
 
 ```text
 triggers = OnBeforeTargetSelect
-steps    = filter_targets { blackboardKey = attackCandidates, fields = ..., ... }
+steps    = write_blackboard       { key = attackCandidates, source = event, path = targets }   # snapshot copy
+           filter_targets         { blackboardKey = attackCandidates, fields = ..., ... }      # filter the copy
+           override_attack_targets{ blackboardKey = attackCandidates }                         # commit back to live
 ```
 
-`attackCandidates` exists only during the synchronous dispatch window of
-`BeforeTargetSelectEvent` (the runner bridge sets it before dispatch and
-removes it after). Reading it outside that window warns once and skips — a
-wiring error is exposed, not masked. Skill scoping comes free from the
-dispatch-side `isActive` gate: an inactive skill's rules never receive the
-event, so a temporary skill needs a single trigger (no subscribe/unsubscribe
-pair). Pair with `force_reset_attack` after engaging when the filtered target
-set must take effect immediately.
+`write_blackboard` extracts a **copy** of the event's candidate list, so the
+blackboard never aliases the attack system's live list; `filter_targets`
+removes non-matching entities from that copy; `override_attack_targets`
+clears and refills the live list from the result. Omitting the first step
+leaves `attackCandidates` holding a stale snapshot from an earlier selection —
+skipping either end of the pipeline warns once and skips, exposing the wiring
+error. Skill scoping comes free from the dispatch-side `isActive` gate: an
+inactive skill's rules never receive the event, so a temporary skill needs a
+single trigger (no subscribe/unsubscribe pair). Pair with
+`force_reset_attack` after engaging when the filtered target set must take
+effect immediately.
 
 ## Supported fields
 

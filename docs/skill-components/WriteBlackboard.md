@@ -51,8 +51,16 @@ Supported event paths:
   `applyType`
 - Hurt events: `origin`, `damage`, the same multiplier/penetration/type
   fields, and `isDeadly`
+- Before-target-select events: `targets`, `selectMaxNum`, `selectMinNum`,
+  `sameComp`
 - Specific events: `isDeadly` on after-attack/after-damage events and `cumbo`
   on before-attack events
+
+`event.targets` writes a **copy** of the live candidate list — the Blackboard
+never shares a reference with the attack system (same "extract data, never
+hand out mutable event state" rule as the other list-valued paths). That copy
+is the snapshot step of the attack-preference pipeline; see
+[OverrideAttackTargets](OverrideAttackTargets.md) for the commit step.
 
 Supported entity paths:
 

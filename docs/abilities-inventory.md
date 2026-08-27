@@ -152,7 +152,7 @@
 | 组件 | 职责 | 关键参数 | BB读写 | Tick/Teardown |
 |---|---|---|---|---|
 | **EntitySelector** | self/blackboard/eventTarget 为中心，radius/ring/range/vision/all 模式选实体，same/opposing/both 阵营过滤 | subjectMode,selectionMode,campRelation,radius,minRadius,squareLength,force,excludeSubjects | 读 subjectBlackboardKey；写 outputEntitiesKey/outputCountKey | 无 |
-| **EntityFilter** | 原地过滤黑板 List&lt;Entity&gt;（OR组AND条件；attackCandidates 保留键即攻击偏好） | blackboardKey,fields,ops,values,groups | 读 blackboardKey | 无（纯触发操作） |
+| **EntityFilter** | 原地过滤黑板 List&lt;Entity&gt;（OR组AND条件；攻击偏好=write快照+filter+override提交流水线中的筛步） | blackboardKey,fields,ops,values,groups | 读 blackboardKey | 无（纯触发操作） |
 
 ### 攻击行为覆盖类
 | 组件 | 职责 | 关键参数 | BB读写 | Tick/Teardown |
@@ -202,7 +202,7 @@
 | spot_t1 | 烟雾加装 | Skill* | 被动 | WriteBB(9,提伤害类型/目标)/ApplyBuff(9,物闪75% 3秒,条件=物伤) | 治疗友方后给物闪 |
 | stward_s1 | 强力击α | Skill | 4SP每攻击 | AttackEventValMod(6,mult1.9) | 190%伤害 |
 | stward_t1 | 铠甲突破 | Skill* | 被动 | ApplyBuff(2,Atk+6%)/AttackBehaviorOverride(2,防御最高,无Restore) | 常驻攻+6%+永久优先高防 |
-| ebnhlz_s3 | 寂静之声 | Skill | 20SP手动可关 | ApplyBuff(2,攻速+80/攻+65%)/ApplyAnimOverride(2)/WriteBB(2,mult×1.4)/EntityFilter(18,仅精英1-2)/ForceReset(2) + 结束Restore+WriteBB(div还原) | 形态切换+跨天赋联动 |
+| ebnhlz_s3 | 寂静之声 | Skill | 20SP手动可关 | ApplyBuff(2,攻速+80/攻+65%)/ApplyAnimOverride(2)/WriteBB(2,mult×1.4)/WriteBB(18,候选快照)+EntityFilter(18,仅精英1-2)+OverrideAttackTargets(18,提交)/ForceReset(2) + 结束Restore+WriteBB(div还原) | 形态切换+跨天赋联动 |
 | ebnhlz_t1 | 强弱法 | Skill* | 被动 | WriteBB(2,set倍率1.43)/ChargeAttackDamageModifier(2,读BB)/ChargeAttackReservePool(2,1份仅精英) | 蓄力伤×1.43+额外精英蓄力 |
 | ebnhlz_t2 | 倚音 | Talent | 被动 | EntitySelector(9,半径1.1同阵营计数)/ApplyDamage(9,15%法术,条件=计数0) | 孤立目标额外15%法伤 |
 
@@ -262,7 +262,7 @@
 - **Buff**：施加(ApplyBuff normal/aura)、销毁(DestroyBuff)
 - **异常状态**：施加(ApplyAbnormalState normal/aura)、销毁(DestroyAbnormalState)、额外攻击期自带(SharedTargetExtraAttack)
 - **动画**：覆盖(ApplyAnimationOverride once/override)、撤销(RemoveAnimationOverride)、充能阶段(ChargeStateController)
-- **目标选择**：实体选择(EntitySelector)、目标过滤(EntityFilter)
+- **目标选择**：实体选择(EntitySelector)、目标过滤(EntityFilter)、候选覆盖(OverrideAttackTargets)
 - **攻击行为覆盖**：行为(AttackBehaviorOverride/Restore)、范围(AttackRangeOverride/Restore)、强制重置(ForceResetAttack)
 - **充能**：状态机(ChargeStateController)、储备池(ChargeAttackReservePool)、伤修(ChargeAttackDamageModifier)
 - **实体生命周期**：销毁(DestroyEntity)
@@ -285,7 +285,7 @@
 | **复活** | 无旧实现但常见需求 | 无（DestroyEntity 只有反向） | 🟡 中 |
 | **能力间编排(ability互调/信号)** | Eyjafjalla(Skill1→Talent1)、Wdslm(2↔3)、Wither(2→3) | 仅 Blackboard 变量(无显式信号通道) | 🟠 高 |
 | **跨实体方法调用/公共字段共享** | HeadSeter→WitherPedestal.AddHead、Wither1↔3(HaveShield) | 无（违架构铁律） | 🟠 高 |
-| **目标列表注入(插到最前)** | EyjafjallaTalent1(气泡优先) | InjectAttackTargets 已实现(事件触发接线,资产待落地) | 🟢 低 |
+| **目标列表覆盖** | EyjafjallaTalent1(气泡优先,改用覆盖语义) | OverrideAttackTargets 已实现(write快照→filter→override提交流水线,资产待落地) | 🟢 低 |
 | **计数器式状态推进** | WitherPedestal(集齐3) | ChargeStateController(部分覆盖) | 🟡 中 |
 | **持续物理循环(加减速/跟随)** | MachineTalent1 | 无（硬编码AI） | 🟡 中(难数据驱动化) |
 | **阵营叛变/策反** | WdslmSkill2 | 无 | 🟡 中(特化) |
