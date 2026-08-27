@@ -207,7 +207,7 @@ namespace MyUI
                 _labelText.text = monsterData.MonsterLabel;
                 _nameText.text = monsterData.ChineseName;
                 _idText.text = $"{monsterData.ID.ID_C}-{monsterData.ID.ID_N}";
-                _massText.text = "���� " + monsterData.MassLevel.ToString();
+                _massText.text = "重量 " + monsterData.MassLevel.ToString();
                 _descriptionText.text = monsterData.Description;
                 _headImg.sprite = monsterData.HeadImage;
                 if (monsterData.MonsterStatus == 0)
@@ -254,10 +254,10 @@ namespace MyUI
                 }
                 if (talents != null && talents.Count > 0)
                 {
-                    _talentDescription.text = "�� " + talents[0].description;
+                    _talentDescription.text = "● " + talents[0].description;
                     for (int i = 1; i < talents.Count; i++)
                     {
-                        _talentDescription.text += "\n�� " + talents[i].description;
+                        _talentDescription.text += "\n● " + talents[i].description;
                     }
                     float talentDesHeight = _talentDescription.preferredHeight;
                     _talentDescription.rectTransform.sizeDelta = new Vector2(_talentDescription.rectTransform.sizeDelta.x, talentDesHeight);
