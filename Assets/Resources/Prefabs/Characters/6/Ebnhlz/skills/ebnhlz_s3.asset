@@ -110,15 +110,17 @@ MonoBehaviour:
       steps: []
       elseSteps: []
   - triggers:
-    - triggerEvent: 2
-      groups: []
-    - triggerEvent: 3
+    - triggerEvent: 18
       groups: []
     reentry: 0
     steps:
     - op: filter_targets
       args:
         entries:
+        - key: blackboardKey
+          value: attackCandidates
+          fromBlackboard: 0
+          type: 3
         - key: fields
           value: MonsterStatus,MonsterStatus
           fromBlackboard: 0

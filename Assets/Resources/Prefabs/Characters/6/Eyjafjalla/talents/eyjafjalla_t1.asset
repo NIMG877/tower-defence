@@ -28,7 +28,7 @@ MonoBehaviour:
       steps: []
       elseSteps: []
     - op: filter_targets
-      args: {entries: [{key: mode, value: list, fromBlackboard: 0, type: 3}, {key: blackboardKey, value: eyjafjalla_t1_bubbles, fromBlackboard: 0, type: 3}, {key: fields, value: 'IdC,IdN', fromBlackboard: 0, type: 3}, {key: ops, value: 'Equal,Equal', fromBlackboard: 0, type: 3}, {key: values, value: 't,1', fromBlackboard: 0, type: 3}, {key: groups, value: '0,0', fromBlackboard: 0, type: 3}]}
+      args: {entries: [{key: blackboardKey, value: eyjafjalla_t1_bubbles, fromBlackboard: 0, type: 3}, {key: fields, value: 'IdC,IdN', fromBlackboard: 0, type: 3}, {key: ops, value: 'Equal,Equal', fromBlackboard: 0, type: 3}, {key: values, value: 't,1', fromBlackboard: 0, type: 3}, {key: groups, value: '0,0', fromBlackboard: 0, type: 3}]}
       condition: []
       steps: []
       elseSteps: []
