@@ -5,29 +5,26 @@ using System.Globalization;
 namespace AbilitySystem.Components
 {
     /// <summary>
-    /// Filters entity lists with OR groups of AND conditions. Two modes:
-    /// "attackCandidates" (default) subscribes to the entities' AttackBase.OnBeforeTargetSelect
-    /// and filters the candidate list produced by AttackBase.AttackTargetSelect;
-    /// "list" filters the Blackboard List&lt;Entity&gt; at blackboardKey in place.
+    /// Filters the entity list at a blackboard key in place with OR groups of AND
+    /// conditions. Attack-system-agnostic: any List&lt;Entity&gt; key works. Typical
+    /// sources: a list written by select_targets' outputEntitiesKey (chained
+    /// filtering), or the reserved attackCandidates key during
+    /// BeforeTargetSelectEvent dispatch (attack preference — timing comes from a
+    /// rule triggered on OnBeforeTargetSelect, the list from the blackboard).
     /// </summary>
     [RegisterComponent("EntityFilter")]
     public class EntityFilter : AbilityComponentBase
     {
-        private Func<bool> _toSelf;
         private Func<string> _blackboardKey;
-        private Func<string> _mode;
         private Func<string[]> _fields;
         private Func<string[]> _ops;
         private Func<string[]> _values;
         private Func<int[]> _groups;
-        private readonly List<AttackBase> _subscribedAttacks = new List<AttackBase>();
 
         public override void OnInit(AbilityContext ctx, ParamList p)
         {
             Blackboard bb = ctx.sharedBlackboard;
-            _toSelf = p.GetBoolLazy("toSelf", true, bb);
             _blackboardKey = p.GetStringLazy("blackboardKey", "", bb);
-            _mode = p.GetStringLazy("mode", "attackCandidates", bb);
             _fields = p.GetStringArrayLazy<string>("fields", null, bb);
             _ops = p.GetStringArrayLazy<string>("ops", null, bb);
             _values = p.GetStringArrayLazy<string>("values", null, bb);
@@ -36,50 +33,11 @@ namespace AbilitySystem.Components
 
         public override void OnTrigger(AbilityContext ctx)
         {
-            if (Normalize(_mode()) == "list")
-            {
-                FilterBlackboardList(ctx);
-                return;
-            }
-
-            if (ctx.currentEvent is AbilityEndEvent)
-            {
-                UnsubscribeAll();
-                return;
-            }
-
-            List<Entity> targets = ResolveTargets(ctx);
-            if (targets == null) return;
-
-            for (int i = 0; i < targets.Count; i++)
-            {
-                AttackBase attack = targets[i]?.AttackBase;
-                if (attack == null || _subscribedAttacks.Contains(attack)) continue;
-                attack.OnBeforeTargetSelect += FilterTargets;
-                _subscribedAttacks.Add(attack);
-            }
-        }
-
-        public override void OnTeardown(AbilityContext ctx)
-        {
-            UnsubscribeAll();
-        }
-
-        private void FilterTargets(List<Entity> targets, ref int selectMaxNum, ref int selectMinNum, ref bool sameCamp)
-        {
-            RemoveNonMatching(targets);
-        }
-
-        /// <summary>list 模式：对黑板上的 List&lt;Entity&gt; 原地过滤（典型用法是接在
-        /// select_targets 的 outputEntitiesKey 之后做链式筛选）。键缺失/存的不是列表
-        /// 属资产配线错误，一次性告警后跳过。</summary>
-        private void FilterBlackboardList(AbilityContext ctx)
-        {
             string key = _blackboardKey();
             if (string.IsNullOrEmpty(key))
             {
-                OneShotWarn.WarnOnce("entity-filter-list-key",
-                    "EntityFilter: mode 'list' requires blackboardKey; skipping.");
+                OneShotWarn.WarnOnce("entity-filter-key",
+                    "EntityFilter: blackboardKey is required; skipping.");
                 return;
             }
             if (ctx.sharedBlackboard == null) return;
@@ -87,7 +45,7 @@ namespace AbilitySystem.Components
             List<Entity> targets = ctx.sharedBlackboard.Get<List<Entity>>(key, null);
             if (targets == null)
             {
-                OneShotWarn.WarnOnce("entity-filter-list:" + key,
+                OneShotWarn.WarnOnce("entity-filter:" + key,
                     $"EntityFilter: blackboard key '{key}' holds no entity list; skipping.");
                 return;
             }
@@ -254,24 +212,6 @@ namespace AbilitySystem.Components
                     value = 0;
                     return false;
             }
-        }
-
-        private void UnsubscribeAll()
-        {
-            for (int i = 0; i < _subscribedAttacks.Count; i++)
-            {
-                AttackBase attack = _subscribedAttacks[i];
-                if (attack != null) attack.OnBeforeTargetSelect -= FilterTargets;
-            }
-            _subscribedAttacks.Clear();
-        }
-
-        private List<Entity> ResolveTargets(AbilityContext ctx)
-        {
-            if (_toSelf()) return ctx.entity != null ? new List<Entity> { ctx.entity } : null;
-            string key = _blackboardKey();
-            if (string.IsNullOrEmpty(key) || ctx.sharedBlackboard == null) return null;
-            return ctx.sharedBlackboard.Get<List<Entity>>(key, null);
         }
 
         private static string Normalize(string value)
