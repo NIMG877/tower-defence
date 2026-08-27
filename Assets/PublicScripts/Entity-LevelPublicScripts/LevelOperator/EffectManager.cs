@@ -33,7 +33,7 @@ public class EffectManager : IManagerStartEnd
             _effectInstanceNotAutoDelete = new List<GameObject>();
             _effectsInPool = new List<GameObject>();
         }
-        async private void UpdateAutoDelete()
+        private async UniTaskVoid UpdateAutoDelete()
         {
             int gap = 0;
             while (_effectAutoDelete.Count > 0)
@@ -41,7 +41,8 @@ public class EffectManager : IManagerStartEnd
                 if (gap < 3)
                 {
                     gap++;
-                    await UniTask.WaitForFixedUpdate(LevelResourceSharing.LevelCtk);
+                    if (await UniTask.WaitForFixedUpdate(LevelResourceSharing.LevelCtk).SuppressCancellationThrow())
+                        return;
                 }
                 else
                 {
@@ -96,7 +97,7 @@ public class EffectManager : IManagerStartEnd
                 _effectAutoMessages.Add((particleSystems, trailRenderers, particleSets));
                 if (_effectAutoDelete.Count == 1)
                 {
-                    UpdateAutoDelete();
+                    UpdateAutoDelete().Forget();
                 }
             }
         }
