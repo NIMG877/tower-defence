@@ -145,7 +145,7 @@ namespace AbilitySystem.Components
                 {
                     // 副本快照：黑板不与攻击系统的 live 候选列表共享引用（沿用
                     // ToEntityList 的"只提取数据、不交出事件内部可变状态"约定）。
-                    // 筛选后经 override_attack_targets 提交回 live 列表。
+                    // 筛选后经 attack_candidate_override 提交回 live 列表。
                     case "targets": return new List<Entity>(selectEvent.targets);
                     case "selectmaxnum": return selectEvent.selectMaxNum;
                     case "selectminnum": return selectEvent.selectMinNum;

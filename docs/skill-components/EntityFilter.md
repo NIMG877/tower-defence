@@ -33,14 +33,14 @@ list happens in the final commit step:
 
 ```text
 triggers = OnBeforeTargetSelect
-steps    = write_blackboard       { key = attackCandidates, source = event, path = targets }   # snapshot copy
-           filter_targets         { blackboardKey = attackCandidates, fields = ..., ... }      # filter the copy
-           override_attack_targets{ blackboardKey = attackCandidates }                         # commit back to live
+steps    = write_blackboard      { key = attackCandidates, source = event, path = targets }  # snapshot copy
+           filter_targets        { blackboardKey = attackCandidates, fields = ..., ... }     # filter the copy
+           attack_candidate_override { blackboardKey = attackCandidates }                   # commit back to live
 ```
 
 `write_blackboard` extracts a **copy** of the event's candidate list, so the
 blackboard never aliases the attack system's live list; `filter_targets`
-removes non-matching entities from that copy; `override_attack_targets`
+removes non-matching entities from that copy; `attack_candidate_override`
 clears and refills the live list from the result. Omitting the first step
 leaves `attackCandidates` holding a stale snapshot from an earlier selection —
 skipping either end of the pipeline warns once and skips, exposing the wiring

@@ -133,7 +133,7 @@ are not authoring names.
 - [EntityFilter](EntityFilter.md) - filters the entity list at a Blackboard
   key in place with configurable OR groups of AND conditions (attack
   preference = snapshot + filter + commit pipeline).
-- [OverrideAttackTargets](OverrideAttackTargets.md) - replaces the live
+- [AttackCandidateOverride](AttackCandidateOverride.md) - replaces the live
   target-candidate list with a Blackboard entity list during
   `OnBeforeTargetSelect` (the commit step of the attack-preference pipeline).
 

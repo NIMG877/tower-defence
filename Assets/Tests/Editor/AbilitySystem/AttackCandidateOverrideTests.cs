@@ -5,9 +5,9 @@ using NUnit.Framework;
 namespace AbilitySystem.Tests
 {
     /// <summary>攻击候选三步流水线（write_blackboard 副本快照 → filter →
-    /// override_attack_targets 提交）的 EditMode 契约测试。列表元素用 null 占位：
+    /// attack_candidate_override 提交）的 EditMode 契约测试。列表元素用 null 占位：
     /// 两个组件都只搬运 Entity 引用、不触碰 Entity 成员，无需场景装配。</summary>
-    public class OverrideAttackTargetsTests
+    public class AttackCandidateOverrideTests
     {
         [Test]
         public void WriteBlackboard_EventTargets_WritesCopyNotReference()
@@ -57,7 +57,7 @@ namespace AbilitySystem.Tests
             bb.Set("src", src);
             var ctx = new AbilityContext { currentEvent = evt, sharedBlackboard = bb };
 
-            var comp = new OverrideAttackTargets();
+            var comp = new AttackCandidateOverride();
             comp.OnInit(ctx, Params(("blackboardKey", "src")));
             comp.OnTrigger(ctx);
 
@@ -76,7 +76,7 @@ namespace AbilitySystem.Tests
             bb.Set("src", new List<Entity>());
             var ctx = new AbilityContext { currentEvent = evt, sharedBlackboard = bb };
 
-            var comp = new OverrideAttackTargets();
+            var comp = new AttackCandidateOverride();
             comp.OnInit(ctx, Params(("blackboardKey", "src")));
             comp.OnTrigger(ctx);
 
@@ -92,7 +92,7 @@ namespace AbilitySystem.Tests
             bb.Set("src", new List<Entity> { null });
             var ctx = new AbilityContext { currentEvent = evt, sharedBlackboard = bb };
 
-            var comp = new OverrideAttackTargets();
+            var comp = new AttackCandidateOverride();
             comp.OnInit(ctx, Params(("blackboardKey", "src")));
             comp.OnTrigger(ctx);
 
@@ -107,7 +107,7 @@ namespace AbilitySystem.Tests
             var bb = new Blackboard();
             var ctx = new AbilityContext { currentEvent = evt, sharedBlackboard = bb };
 
-            var comp = new OverrideAttackTargets();
+            var comp = new AttackCandidateOverride();
             comp.OnInit(ctx, Params(("blackboardKey", "no_such_key")));
             comp.OnTrigger(ctx);
 

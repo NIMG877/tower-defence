@@ -1,4 +1,4 @@
-# OverrideAttackTargets
+# AttackCandidateOverride
 
 Replaces the **entire** live attack-candidate list with a Blackboard entity
 list: the event's candidate list is cleared, then refilled from the source
@@ -8,10 +8,10 @@ writeback is needed). Overriding with an empty list is legitimate semantics
 selection yields no targets). Per-unit by construction: each entity's
 `OnBeforeTargetSelect` is bridged to its own runner.
 
-**Canonical op:** `override_attack_targets`
-**Component registration:** `OverrideAttackTargets`
-**Class:** `AbilitySystem.Components.OverrideAttackTargets`
-**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/OverrideAttackTargets.cs`
+**Canonical op:** `attack_candidate_override`
+**Component registration:** `AttackCandidateOverride`
+**Class:** `AbilitySystem.Components.AttackCandidateOverride`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/AttackCandidateOverride.cs`
 
 ## Parameters
 
@@ -27,9 +27,9 @@ touches the live candidate list:
 
 ```text
 triggers = OnBeforeTargetSelect
-steps    = write_blackboard        { key = attackCandidates, source = event, path = targets }  # snapshot copy
-           filter_targets          { blackboardKey = attackCandidates, fields = ..., ... }     # filter the copy
-           override_attack_targets { blackboardKey = attackCandidates }                        # commit to live
+steps    = write_blackboard      { key = attackCandidates, source = event, path = targets }  # snapshot copy
+           filter_targets        { blackboardKey = attackCandidates, fields = ..., ... }     # filter the copy
+           attack_candidate_override { blackboardKey = attackCandidates }                   # commit to live
 ```
 
 `write_blackboard`'s `event.targets` path writes a copy, so the pipeline is

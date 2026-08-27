@@ -13,8 +13,8 @@ namespace AbilitySystem.Components
     /// filter_targets（在副本上筛）→ 本组件（把筛后副本覆盖回 live 候选）。
     /// 本组件是流水线里唯一触碰 live 列表的步骤。</para>
     /// </summary>
-    [RegisterComponent("OverrideAttackTargets")]
-    public class OverrideAttackTargets : AbilityComponentBase
+    [RegisterComponent("AttackCandidateOverride")]
+    public class AttackCandidateOverride : AbilityComponentBase
     {
         private Func<string> _blackboardKey;
 
@@ -29,8 +29,8 @@ namespace AbilitySystem.Components
 
             if (!(ctx.currentEvent is BeforeTargetSelectEvent evt))
             {
-                OneShotWarn.WarnOnce("override-attack-targets-event",
-                    "OverrideAttackTargets: current event is not BeforeTargetSelectEvent " +
+                OneShotWarn.WarnOnce("attack-candidate-override-event",
+                    "AttackCandidateOverride: current event is not BeforeTargetSelectEvent " +
                     "(rule must trigger on OnBeforeTargetSelect); skipping.");
                 return;
             }
@@ -38,16 +38,16 @@ namespace AbilitySystem.Components
             string key = _blackboardKey();
             if (string.IsNullOrEmpty(key))
             {
-                OneShotWarn.WarnOnce("override-attack-targets-key",
-                    "OverrideAttackTargets: blackboardKey is required; skipping.");
+                OneShotWarn.WarnOnce("attack-candidate-override-key",
+                    "AttackCandidateOverride: blackboardKey is required; skipping.");
                 return;
             }
 
             List<Entity> source = ctx.sharedBlackboard.Get<List<Entity>>(key, null);
             if (source == null)
             {
-                OneShotWarn.WarnOnce("override-attack-targets:" + key,
-                    $"OverrideAttackTargets: blackboard key '{key}' holds no entity list; skipping.");
+                OneShotWarn.WarnOnce("attack-candidate-override:" + key,
+                    $"AttackCandidateOverride: blackboard key '{key}' holds no entity list; skipping.");
                 return;
             }
 

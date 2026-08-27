@@ -60,7 +60,7 @@ Supported event paths:
 never shares a reference with the attack system (same "extract data, never
 hand out mutable event state" rule as the other list-valued paths). That copy
 is the snapshot step of the attack-preference pipeline; see
-[OverrideAttackTargets](OverrideAttackTargets.md) for the commit step.
+[AttackCandidateOverride](AttackCandidateOverride.md) for the commit step.
 
 Supported entity paths:
 

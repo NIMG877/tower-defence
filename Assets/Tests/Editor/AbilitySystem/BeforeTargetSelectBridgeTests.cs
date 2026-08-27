@@ -4,8 +4,8 @@ namespace AbilitySystem.Tests
 {
     /// <summary>索敌候选桥接的契约测试：事件映射、枚举末尾追加序号稳定。
     /// 桥接只派发事件与回写标量，不写黑板（候选列表改经
-    /// write_blackboard/override_attack_targets 组件流水线，见
-    /// OverrideAttackTargetsTests）。桥接本体依赖 Entity/AttackBase
+    /// write_blackboard/attack_candidate_override 组件流水线，见
+    /// AttackCandidateOverrideTests）。桥接本体依赖 Entity/AttackBase
     /// （MonoBehaviour + 场景装配），与既有组件同样不做 EditMode 单测，由
     /// PlayMode 验证。</summary>
     public class BeforeTargetSelectBridgeTests

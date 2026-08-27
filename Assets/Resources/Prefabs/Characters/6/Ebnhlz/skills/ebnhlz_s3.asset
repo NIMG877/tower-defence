@@ -158,7 +158,7 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-    - op: override_attack_targets
+    - op: attack_candidate_override
       args:
         entries:
         - key: blackboardKey
