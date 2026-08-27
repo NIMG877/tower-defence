@@ -85,6 +85,8 @@ OnBeforeTargetSelect(targets, ref max, ref min, ref sameComp) 触发时：
 
 `OnTrigger` 新形态：读 `attackCandidates` 键的列表（缺失 = 触发时机配错，OneShotWarn + 跳过）→ 读源 `blackboardKey` 列表 → 去重后插到最前。插入逻辑本体不变。
 
+目标键 `attackCandidates` 为**硬编码保留键**（桥接与组件两侧共用一个常量，如 `BlackboardKeys.AttackCandidates`），不做参数——本组件的用途就是攻击候选注入，泛化为通用列表拼接的需求出现时再扩展。
+
 ### 4.6 拼接形态（原 attackCandidates 功能）
 
 ```
