@@ -14,10 +14,6 @@ namespace AbilitySystem.Components
         private Func<string[]> _resources;
         private Func<string> _outputKey;
         private Func<int> _priority;
-        private Func<string> _state;
-        private Func<bool> _forceChange;
-        private Func<string> _moveBranch;
-        private Func<string> _attackBranch;
 
         public override void OnInit(AbilityContext ctx, ParamList p)
         {
@@ -29,10 +25,6 @@ namespace AbilitySystem.Components
             _resources = p.GetStringArrayLazy<string>("resources", null, bb);
             _outputKey = p.GetStringLazy("outputKey", "", bb);
             _priority = p.GetIntLazy("priority", 0, bb);
-            _state = p.GetStringLazy("state", nameof(EntityState.Idle), bb);
-            _forceChange = p.GetBoolLazy("forceChange", true, bb);
-            _moveBranch = p.GetStringLazy("moveBranch", nameof(MoveAnimationBranch.Normal), bb);
-            _attackBranch = p.GetStringLazy("attackBranch", nameof(AttackAnimationBranch.Normal), bb);
         }
 
         public override void OnTrigger(AbilityContext ctx)
@@ -46,45 +38,22 @@ namespace AbilitySystem.Components
             string mode = _mode();
             if (string.Equals(mode, "once", StringComparison.OrdinalIgnoreCase))
             {
-                ApplyOnce(targets, animations);
+                Register(ctx, targets, animations, true);
                 return;
             }
             if (string.Equals(mode, "override", StringComparison.OrdinalIgnoreCase))
             {
-                ApplyPersistent(ctx, targets, animations);
+                Register(ctx, targets, animations, false);
                 return;
             }
 
             Debug.LogWarning($"ApplyAnimationOverride: unknown mode '{mode}'; expected 'once' or 'override'");
         }
 
-        private void ApplyOnce(List<Entity> targets, AnimationOverride animations)
-        {
-            if (!TryParseEnum(_state(), EntityState.Idle, out EntityState state)) return;
-            TryParseEnum(_moveBranch(), MoveAnimationBranch.Normal, out MoveAnimationBranch moveBranch);
-            TryParseEnum(_attackBranch(), AttackAnimationBranch.Normal, out AttackAnimationBranch attackBranch);
-
-            for (int i = 0; i < targets.Count; i++)
-            {
-                AnimationMachine machine = targets[i] != null ? targets[i].entityAM : null;
-                if (machine == null) continue;
-
-                if (state == EntityState.Attack)
-                {
-                    machine.TrySetAttackState(_forceChange(), null, attackBranch, animations);
-                }
-                else if (state == EntityState.Move)
-                {
-                    machine.TrySetMoveState(_forceChange(), moveBranch, animations);
-                }
-                else
-                {
-                    machine.TrySetState(state, _forceChange(), animations);
-                }
-            }
-        }
-
-        private void ApplyPersistent(AbilityContext ctx, List<Entity> targets, AnimationOverride animations)
+        // once registers a one-shot entry: no state transition, each covered slot
+        // is consumed the next time the machine naturally plays it. override
+        // registers a persistent entry. Both record revocable handles to outputKey.
+        private void Register(AbilityContext ctx, List<Entity> targets, AnimationOverride animations, bool oneShot)
         {
             string outputKey = _outputKey();
             List<AnimationOverrideRecord> records = null;
@@ -98,7 +67,9 @@ namespace AbilitySystem.Components
             {
                 Entity target = targets[i];
                 if (target == null || target.entityAM == null) continue;
-                AnimationOverrideHandle handle = target.entityAM.AddOverride(this, animations, _priority());
+                AnimationOverrideHandle handle = oneShot
+                    ? target.entityAM.AddOneShotOverride(this, animations, _priority())
+                    : target.entityAM.AddOverride(this, animations, _priority());
                 records?.Add(new AnimationOverrideRecord(target, handle));
             }
 
@@ -170,14 +141,6 @@ namespace AbilitySystem.Components
                 default: return false;
             }
             return true;
-        }
-
-        private static bool TryParseEnum<T>(string raw, T fallback, out T value) where T : struct
-        {
-            if (Enum.TryParse(raw, true, out value)) return true;
-            value = fallback;
-            Debug.LogWarning($"ApplyAnimationOverride: unknown {typeof(T).Name} '{raw}'; using '{fallback}'");
-            return false;
         }
     }
 

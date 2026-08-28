@@ -159,10 +159,12 @@ are not authoring names.
 
 ### Animation
 
-- [ApplyAnimationOverride](ApplyAnimationOverride.md) - performs a one-time
-  animation replacement or adds a persistent Named Resource override.
-- [RemoveAnimationOverride](RemoveAnimationOverride.md) - removes persistent
-  animation overrides using records stored in the Blackboard.
+- [ApplyAnimationOverride](ApplyAnimationOverride.md) - registers a one-shot
+  override consumed as the machine next plays each covered slot, or adds a
+  persistent Named Resource override.
+- [RemoveAnimationOverride](RemoveAnimationOverride.md) - removes animation
+  overrides (persistent or still-pending one-shot) using records stored in the
+  Blackboard.
 
 ### Random
 

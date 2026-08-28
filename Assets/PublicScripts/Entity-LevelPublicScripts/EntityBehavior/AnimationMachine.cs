@@ -57,6 +57,31 @@ public sealed class AnimationOverride
         }
         return this;
     }
+
+    /// <summary>
+    /// Slots this override affects: every slot with a non-empty resource, plus
+    /// cleared slots. One-shot entries seed their pending-consumption set from this.
+    /// </summary>
+    public HashSet<AnimationSlot> GetCoveredSlots()
+    {
+        var covered = new HashSet<AnimationSlot>(ClearedSlots);
+        if (!string.IsNullOrEmpty(Default)) covered.Add(AnimationSlot.Default);
+        if (!string.IsNullOrEmpty(Idle)) covered.Add(AnimationSlot.Idle);
+        if (!string.IsNullOrEmpty(Move)) covered.Add(AnimationSlot.Move);
+        if (!string.IsNullOrEmpty(JumpBegin)) covered.Add(AnimationSlot.JumpBegin);
+        if (!string.IsNullOrEmpty(JumpLoop)) covered.Add(AnimationSlot.JumpLoop);
+        if (!string.IsNullOrEmpty(JumpEnd)) covered.Add(AnimationSlot.JumpEnd);
+        if (!string.IsNullOrEmpty(Start)) covered.Add(AnimationSlot.Start);
+        if (!string.IsNullOrEmpty(Die)) covered.Add(AnimationSlot.Die);
+        if (!string.IsNullOrEmpty(AttackBegin)) covered.Add(AnimationSlot.AttackBegin);
+        if (!string.IsNullOrEmpty(AttackEnd)) covered.Add(AnimationSlot.AttackEnd);
+        if (!string.IsNullOrEmpty(AttackRemote)) covered.Add(AnimationSlot.AttackRemote);
+        if (!string.IsNullOrEmpty(AttackClose)) covered.Add(AnimationSlot.AttackClose);
+        if (!string.IsNullOrEmpty(ChargeBegin)) covered.Add(AnimationSlot.ChargeBegin);
+        if (!string.IsNullOrEmpty(Charge)) covered.Add(AnimationSlot.Charge);
+        if (!string.IsNullOrEmpty(ChargeEnd)) covered.Add(AnimationSlot.ChargeEnd);
+        return covered;
+    }
 }
 
 public enum MoveAnimationBranch
@@ -220,6 +245,54 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     }
 
     /// <summary>
+    /// Registers a one-shot override: it layers into animation resolution like a
+    /// persistent override (priority order), and is consumed whole the first
+    /// time the machine plays any of its covered slots. No state transition is
+    /// performed — the override waits for the machine's natural flow.
+    /// </summary>
+    public AnimationOverrideHandle AddOneShotOverride(object owner, AnimationOverride animations, int priority = 0)
+    {
+        var handle = new AnimationOverrideHandle { Id = ++_nextOverrideId, Machine = this };
+        _overrides.Add(new OverrideEntry(handle.Id, owner, animations, priority, animations.GetCoveredSlots()));
+        RegisterMixes(animations);
+        return handle;
+    }
+
+    // One-shot consumption: called wherever a slot's animation is actually
+    // played. The whole entry goes on its FIRST use — covering slots that may
+    // never play (e.g. AttackClose on a ranged attacker) must not make the
+    // entry immortal. Removal only affects the next ResolveAnimations; the
+    // already-resolved active set keeps playing the override through the
+    // current animation cycle.
+    private void ConsumeOneShots(params AnimationSlot[] slots)
+    {
+        for (int i = _overrides.Count - 1; i >= 0; i--)
+        {
+            HashSet<AnimationSlot> covered = _overrides[i].CoveredSlots;
+            if (covered == null) continue;
+            for (int s = 0; s < slots.Length; s++)
+            {
+                if (covered.Contains(slots[s]))
+                {
+                    _overrides.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    private static AnimationSlot MoveBranchSlot(MoveAnimationBranch branch)
+    {
+        switch (branch)
+        {
+            case MoveAnimationBranch.JumpBegin: return AnimationSlot.JumpBegin;
+            case MoveAnimationBranch.JumpLoop: return AnimationSlot.JumpLoop;
+            case MoveAnimationBranch.JumpEnd: return AnimationSlot.JumpEnd;
+            default: return AnimationSlot.Move;
+        }
+    }
+
+    /// <summary>
     /// Adds states to the transition ban list.
     /// </summary>
     /// <param name="statesToBan">States to ban (see <see cref="EntityState"/>)</param>
@@ -357,26 +430,35 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         if (_currentAttackEnd)
         {
             skeleton.state.SetAnimation(0, _currentAttackEnd, false);
+            ConsumeOneShots(_attackBranch == AttackAnimationBranch.Charge
+                ? AnimationSlot.ChargeEnd
+                : AnimationSlot.AttackEnd);
         }
         else
         {
             skeleton.state.SetAnimation(0, _activeAnimations.Idle, false);
+            ConsumeOneShots(AnimationSlot.Idle);
         }
     }
 
     private void PlayAttackAnimation(bool continueCombo)
     {
+        AnimationSlot beginSlot, groupSlot;
         if (_attackBranch == AttackAnimationBranch.Charge)
         {
             _currentAttackBegin = _activeAnimations.ChargeBegin;
             Attack = _activeAnimations.Charge;
             _currentAttackEnd = _activeAnimations.ChargeEnd;
+            beginSlot = AnimationSlot.ChargeBegin;
+            groupSlot = AnimationSlot.Charge;
         }
         else
         {
             _currentAttackBegin = _activeAnimations.AttackBegin;
             Attack = (thisEntity.Movement.ResistList.Count == 0) ? _activeAnimations.AttackRemote : _activeAnimations.AttackClose;
             _currentAttackEnd = _activeAnimations.AttackEnd;
+            beginSlot = AnimationSlot.AttackBegin;
+            groupSlot = (thisEntity.Movement.ResistList.Count == 0) ? AnimationSlot.AttackRemote : AnimationSlot.AttackClose;
         }
         int length = Attack.Length;
         AnimationReferenceAsset attack = (_attackAnimationIndex < length)
@@ -386,11 +468,13 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         if (_currentAttackBegin == null && length == 1)
         {
             SetSpineAnimation(attack, false, 1);
+            ConsumeOneShots(groupSlot);
         }
         else if (continueCombo || _currentAttackBegin == null)
         {
             _attackPhase = AttackPhase.Active;
             SetSpineAnimation(attack, false, scale);
+            ConsumeOneShots(groupSlot);
         }
         else
         {
@@ -398,6 +482,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
             float scaleB = _currentAttackBegin.Animation.Duration / thisEntity.Stats.BaseAttackTimeS;
             SetSpineAnimation(_currentAttackBegin, false, scaleB > 1 ? scaleB : 1);
             AddSpineAnimation(attack, false, scale, 0);
+            ConsumeOneShots(beginSlot, groupSlot);
         }
         // Keep this after assigning the Spine track; currentState updates on Spine Start.
         OnAttackAnimationBegin?.Invoke();
@@ -419,12 +504,15 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         {
             case EntityState.Default:
                 SetSpineAnimation(_activeAnimations.Default, false, 1);
+                ConsumeOneShots(AnimationSlot.Default);
                 break;
             case EntityState.Idle:
                 SetSpineAnimation(_activeAnimations.Idle, true, 1);
+                ConsumeOneShots(AnimationSlot.Idle);
                 break;
             case EntityState.Move:
                 SetSpineAnimation(_activeAnimations.GetMove(moveBranch), true, 1);
+                ConsumeOneShots(MoveBranchSlot(moveBranch));
                 break;
             case EntityState.Attack:
                 PlayAttackAnimation(continueCombo);
@@ -432,9 +520,11 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
             case EntityState.Start:
                 SetSpineAnimation(_activeAnimations.Start, false, 1);
                 AddSpineAnimation(_activeAnimations.Idle, true, 1, 0);
+                ConsumeOneShots(AnimationSlot.Start, AnimationSlot.Idle);
                 break;
             case EntityState.Die:
                 SetSpineAnimation(_activeAnimations.Die, false, 1);
+                ConsumeOneShots(AnimationSlot.Die);
                 break;
             default: break;
         }
@@ -477,11 +567,13 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 if (_currentAttackEnd == null && Attack.Length == 1)
                 {
                     AddSpineAnimation(_activeAnimations.Idle, true, 1, 0);
+                    ConsumeOneShots(AnimationSlot.Idle);
                 }
                 break;
             case AnimKind.AttackEndAnim:
                 _attackPhase = AttackPhase.End;
                 AddSpineAnimation(_activeAnimations.Idle, true, 1, 0);
+                ConsumeOneShots(AnimationSlot.Idle);
                 break;
             case AnimKind.StartAnim:
                 currentState = EntityState.Start;
@@ -542,13 +634,18 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         public readonly object Owner;
         public readonly AnimationOverride Animations;
         public readonly int Priority;
+        // Slots a one-shot entry covers (null = persistent entry). The entry is
+        // consumed whole the first time any covered slot is played.
+        public readonly HashSet<AnimationSlot> CoveredSlots;
 
-        public OverrideEntry(int id, object owner, AnimationOverride animations, int priority)
+        public OverrideEntry(int id, object owner, AnimationOverride animations, int priority,
+            HashSet<AnimationSlot> coveredSlots = null)
         {
             Id = id;
             Owner = owner;
             Animations = animations;
             Priority = priority;
+            CoveredSlots = coveredSlots;
         }
     }
 

@@ -145,7 +145,7 @@
 ### 动画类
 | 组件 | 职责 | 关键参数 | BB读写 | Tick/Teardown |
 |---|---|---|---|---|
-| **ApplyAnimationOverride** | once 一次性状态切换 / override 持久注册(带优先级) | mode(once/override),slots,resources,priority,state,forceChange,moveBranch,attackBranch | 读 blackboardKey；写 outputKey(List<AnimationOverrideRecord> 仅override) | 无 |
+| **ApplyAnimationOverride** | once 注册待用一次性覆盖(槽位播过一次即消费,不切状态) / override 持久注册(带优先级) | mode(once/override),slots,resources,priority | 读 blackboardKey；写 outputKey(List<AnimationOverrideRecord> 两模式均写) | 无 |
 | **RemoveAnimationOverride** | 消费 AnimationOverrideRecord 列表撤销持久覆盖 | inputKey,blackboardKey | 读 inputKey/blackboardKey | 无 |
 
 ### 目标选择类

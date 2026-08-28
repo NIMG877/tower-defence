@@ -1,7 +1,8 @@
 # RemoveAnimationOverride
 
-Removes persistent animation overrides previously created by
-`ApplyAnimationOverride`.
+Removes animation overrides previously created by `ApplyAnimationOverride` —
+persistent entries, and one-shot entries still waiting to be consumed
+(e.g. revoking a pending one-shot when its target dies early).
 
 **Canonical op:** `remove_animation_override`
 **Component registration:** `RemoveAnimationOverride`
