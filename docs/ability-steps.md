@@ -126,6 +126,7 @@ operations use snake_case. PascalCase component names are lookup aliases.
 | `filter_targets` | [EntityFilter](skill-components/EntityFilter.md) |
 | `force_reset_attack` | [ForceResetAttack](skill-components/ForceResetAttack.md) |
 | `attack_candidate_override` | [AttackCandidateOverride](skill-components/AttackCandidateOverride.md) |
+| `prepend_entities` | [PrependEntities](skill-components/PrependEntities.md) |
 | `random_roll` | [RandomRoll](skill-components/RandomRoll.md) |
 | `remove_animation_override` | [RemoveAnimationOverride](skill-components/RemoveAnimationOverride.md) |
 | `select_targets` | [EntitySelector](skill-components/EntitySelector.md) |

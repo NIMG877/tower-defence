@@ -153,6 +153,7 @@
 |---|---|---|---|---|
 | **EntitySelector** | self/blackboard/eventTarget 为中心，radius/ring/range/vision/all 模式选实体，same/opposing/both 阵营过滤 | subjectMode,selectionMode,campRelation,radius,minRadius,squareLength,force,excludeSubjects | 读 subjectBlackboardKey；写 outputEntitiesKey/outputCountKey | 无 |
 | **EntityFilter** | 原地过滤黑板 List&lt;Entity&gt;（OR组AND条件；攻击偏好=write快照+filter+AttackCandidateOverride提交流水线中的筛步） | blackboardKey,fields,ops,values,groups | 读 blackboardKey | 无（纯触发操作） |
+| **PrependEntities** | 源列表去重前插到目标列表最前（原地保对象；去重=提权到最前，目标原重复项移除；攻击偏好=write快照+prepend+AttackCandidateOverride提交流水线中的前插步） | blackboardKey,sourceKey | 读 sourceKey/blackboardKey | 无（纯触发操作） |
 
 ### 攻击行为覆盖类
 | 组件 | 职责 | 关键参数 | BB读写 | Tick/Teardown |
@@ -262,7 +263,7 @@
 - **Buff**：施加(ApplyBuff normal/aura)、销毁(DestroyBuff)
 - **异常状态**：施加(ApplyAbnormalState normal/aura)、销毁(DestroyAbnormalState)、额外攻击期自带(SharedTargetExtraAttack)
 - **动画**：覆盖(ApplyAnimationOverride once/override)、撤销(RemoveAnimationOverride)、充能阶段(ChargeStateController)
-- **目标选择**：实体选择(EntitySelector)、目标过滤(EntityFilter)、候选覆盖(AttackCandidateOverride)
+- **目标选择**：实体选择(EntitySelector)、目标过滤(EntityFilter)、候选前插(PrependEntities)、候选覆盖(AttackCandidateOverride)
 - **攻击行为覆盖**：行为(AttackBehaviorOverride/Restore)、范围(AttackRangeOverride/Restore)、强制重置(ForceResetAttack)
 - **充能**：状态机(ChargeStateController)、储备池(ChargeAttackReservePool)、伤修(ChargeAttackDamageModifier)
 - **实体生命周期**：销毁(DestroyEntity)
@@ -285,7 +286,7 @@
 | **复活** | 无旧实现但常见需求 | 无（DestroyEntity 只有反向） | 🟡 中 |
 | **能力间编排(ability互调/信号)** | Eyjafjalla(Skill1→Talent1)、Wdslm(2↔3)、Wither(2→3) | 仅 Blackboard 变量(无显式信号通道) | 🟠 高 |
 | **跨实体方法调用/公共字段共享** | HeadSeter→WitherPedestal.AddHead、Wither1↔3(HaveShield) | 无（违架构铁律） | 🟠 高 |
-| **目标列表覆盖** | EyjafjallaTalent1(气泡优先,改用覆盖语义) | AttackCandidateOverride 已实现(write快照→filter→提交流水线,资产待落地) | 🟢 低 |
+| **目标列表覆盖** | EyjafjallaTalent1(气泡优先,改用覆盖语义) | AttackCandidateOverride+PrependEntities 已实现且资产已落地(write快照→prepend泡泡→提交流水线,2026-08-28)；配套 once 动画受 OnBeforeTargetSelect 时机缺陷制约(见 spec 2026-08-28 §5) | 🟢 低 |
 | **计数器式状态推进** | WitherPedestal(集齐3) | ChargeStateController(部分覆盖) | 🟡 中 |
 | **持续物理循环(加减速/跟随)** | MachineTalent1 | 无（硬编码AI） | 🟡 中(难数据驱动化) |
 | **阵营叛变/策反** | WdslmSkill2 | 无 | 🟡 中(特化) |

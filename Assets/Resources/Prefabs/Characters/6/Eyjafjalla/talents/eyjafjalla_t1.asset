@@ -1,5 +1,5 @@
 %YAML 1.1
-%TAG !u! tag: unity3d.com,2011:
+%TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11,89 +11,430 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: eyjafjalla_t1
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   abilityId: eyjafjalla_t1
-  abilityName: "熔岩泡泡"
-  description: "攻击命中后有概率在目标位置生成熔岩泡泡；每个存活泡泡使自身攻击力+20%（技能1期间触发概率提升至3倍）。部署时统计场上现存泡泡并恢复列表与增层（select_targets all + filter_targets IdC/IdN + listCount×0.2）。泡泡的爆炸由其自身天赋lavabubble_t1负责（伤害基值为生成时快照的自身攻击力，含该泡泡计入的层数，归属召唤者）。注（待运行时扩展）：存在泡泡时优先攻击泡泡并切换本次攻击动画（OnBeforeAttack 在伤害帧才触发，时机过晚；正确决策点在索敌返回→TryToAttack 之间）。"
+  abilityName: "\u7194\u5CA9\u6CE1\u6CE1"
+  description: "\u653B\u51FB\u547D\u4E2D\u540E\u6709\u6982\u7387\u5728\u76EE\u6807\u4F4D\u7F6E\u751F\u6210\u7194\u5CA9\u6CE1\u6CE1\uFF1B\u6BCF\u4E2A\u5B58\u6D3B\u6CE1\u6CE1\u4F7F\u81EA\u8EAB\u653B\u51FB\u529B+20%\uFF08\u6280\u80FD1\u671F\u95F4\u89E6\u53D1\u6982\u7387\u63D0\u5347\u81F33\u500D\uFF09\u3002\u90E8\u7F72\u65F6\u7EDF\u8BA1\u573A\u4E0A\u73B0\u5B58\u6CE1\u6CE1\u5E76\u6062\u590D\u5217\u8868\u4E0E\u589E\u5C42\uFF08select_targets
+    all + filter_targets IdC/IdN + listCount\xD70.2\uFF09\u3002\u6CE1\u6CE1\u7684\u7206\u70B8\u7531\u5176\u81EA\u8EAB\u5929\u8D4Blavabubble_t1\u8D1F\u8D23\uFF08\u4F24\u5BB3\u57FA\u503C\u4E3A\u751F\u6210\u65F6\u5FEB\u7167\u7684\u81EA\u8EAB\u653B\u51FB\u529B\uFF0C\u542B\u8BE5\u6CE1\u6CE1\u8BA1\u5165\u7684\u5C42\u6570\uFF0C\u5F52\u5C5E\u53EC\u5524\u8005\uFF09\u3002\u5B58\u5728\u6CE1\u6CE1\u65F6\u4F18\u5148\u653B\u51FB\u6CE1\u6CE1\u5E76\u5207\u6362\u672C\u6B21\u653B\u51FB\u52A8\u753B\uFF1AOnBeforeTargetSelect
+    \u7A97\u53E3\u5185 write\u5019\u9009\u526F\u672C\u2192prepend\u6CE1\u6CE1\u5217\u8868\uFF08\u53BB\u91CD\u63D0\u6743\u5230\u6700\u524D\uFF09\u2192override\u63D0\u4EA4\u2192once\u52A8\u753B\u8986\u76D6\uFF08Talent_Begin/Talent_Attack/Talent_End
+    \u4E09\u6BB5\uFF09\u3002\u6CE8\uFF1Aonce \u6A21\u5F0F\u5728 OnBeforeTargetSelect
+    \u65F6\u673A\u6709\u7CFB\u7EDF\u7F3A\u9677\uFF08\u62A2\u5148\u8FDB\u5165\u653B\u51FB\u6001\u4F7F
+    TryToAttack \u5931\u8D25\u3001\u51B7\u5374\u4E0D\u91CD\u7F6E\u3001\u5FAA\u73AF\u89E6\u53D1\uFF09\uFF0C\u5F85\u8FD0\u884C\u671F\u4FEE\u590D\u3002"
   icon: {fileID: 0}
   Kind: 1
-  sp: {totalSp: 0, initialSp: 0, chargeNum: 1, abilityAmount: 0, recoverMode: 0, consumeMode: 5, openMode: 0, recoverForbidDuringAbility: 0, canManualClose: 0}
+  sp:
+    totalSp: 0
+    initialSp: 0
+    chargeNum: 1
+    abilityAmount: 0
+    recoverMode: 0
+    consumeMode: 5
+    openMode: 0
+    recoverForbidDuringAbility: 0
+    canManualClose: 0
   rules:
-  - triggers: [{triggerEvent: 1, groups: []}]
+  - triggers:
+    - triggerEvent: 1
+      groups: []
     reentry: 0
     steps:
     - op: select_targets
-      args: {entries: [{key: selectionMode, value: all, fromBlackboard: 0, type: 3}, {key: campRelation, value: opposing, fromBlackboard: 0, type: 3}, {key: outputEntitiesKey, value: eyjafjalla_t1_bubbles, fromBlackboard: 0, type: 3}]}
+      args:
+        entries:
+        - key: selectionMode
+          value: all
+          fromBlackboard: 0
+          type: 3
+        - key: campRelation
+          value: opposing
+          fromBlackboard: 0
+          type: 3
+        - key: outputEntitiesKey
+          value: eyjafjalla_t1_bubbles
+          fromBlackboard: 0
+          type: 3
       condition: []
       steps: []
       elseSteps: []
     - op: filter_targets
-      args: {entries: [{key: blackboardKey, value: eyjafjalla_t1_bubbles, fromBlackboard: 0, type: 3}, {key: fields, value: 'IdC,IdN', fromBlackboard: 0, type: 3}, {key: ops, value: 'Equal,Equal', fromBlackboard: 0, type: 3}, {key: values, value: 't,1', fromBlackboard: 0, type: 3}, {key: groups, value: '0,0', fromBlackboard: 0, type: 3}]}
+      args:
+        entries:
+        - key: blackboardKey
+          value: eyjafjalla_t1_bubbles
+          fromBlackboard: 0
+          type: 3
+        - key: fields
+          value: IdC,IdN
+          fromBlackboard: 0
+          type: 3
+        - key: ops
+          value: Equal,Equal
+          fromBlackboard: 0
+          type: 3
+        - key: values
+          value: t,1
+          fromBlackboard: 0
+          type: 3
+        - key: groups
+          value: 0,0
+          fromBlackboard: 0
+          type: 3
       condition: []
       steps: []
       elseSteps: []
     - op: write_blackboard
-      args: {entries: [{key: key, value: eyjafjalla_t1_atk_pct, fromBlackboard: 0, type: 3}, {key: source, value: listCount, fromBlackboard: 0, type: 3}, {key: path, value: eyjafjalla_t1_bubbles, fromBlackboard: 0, type: 3}, {key: scale, value: 0.2, fromBlackboard: 0, type: 1}]}
+      args:
+        entries:
+        - key: key
+          value: eyjafjalla_t1_atk_pct
+          fromBlackboard: 0
+          type: 3
+        - key: source
+          value: listCount
+          fromBlackboard: 0
+          type: 3
+        - key: path
+          value: eyjafjalla_t1_bubbles
+          fromBlackboard: 0
+          type: 3
+        - key: scale
+          value: 0.2
+          fromBlackboard: 0
+          type: 1
       condition: []
       steps: []
       elseSteps: []
     - op: write_blackboard
-      args: {entries: [{key: key, value: eyjafjalla_t1_roll_p, fromBlackboard: 0, type: 3}, {key: value, value: '0.2', fromBlackboard: 0, type: 3}, {key: method, value: set, fromBlackboard: 0, type: 3}]}
+      args:
+        entries:
+        - key: key
+          value: eyjafjalla_t1_roll_p
+          fromBlackboard: 0
+          type: 3
+        - key: value
+          value: 0.2
+          fromBlackboard: 0
+          type: 3
+        - key: method
+          value: set
+          fromBlackboard: 0
+          type: 3
       condition: []
       steps: []
       elseSteps: []
     - op: apply_buff
-      args: {entries: [{key: attributes, value: Attack, fromBlackboard: 0, type: 3}, {key: ops, value: AddPercent, fromBlackboard: 0, type: 3}, {key: magnitudes, value: 0, fromBlackboard: 0, type: 1}, {key: buffId, value: lavaBuff, fromBlackboard: 0, type: 3}, {key: buffTime, value: -5, fromBlackboard: 0, type: 1}, {key: isWhiteList, value: true, fromBlackboard: 0, type: 2}, {key: outputTarget, value: eyjafjalla_t1_buff_targets, fromBlackboard: 0, type: 3}, {key: outputBuff, value: eyjafjalla_t1_buff_buffs, fromBlackboard: 0, type: 3}]}
+      args:
+        entries:
+        - key: attributes
+          value: Attack
+          fromBlackboard: 0
+          type: 3
+        - key: ops
+          value: AddPercent
+          fromBlackboard: 0
+          type: 3
+        - key: magnitudes
+          value: 0
+          fromBlackboard: 0
+          type: 1
+        - key: buffId
+          value: lavaBuff
+          fromBlackboard: 0
+          type: 3
+        - key: buffTime
+          value: -5
+          fromBlackboard: 0
+          type: 1
+        - key: isWhiteList
+          value: true
+          fromBlackboard: 0
+          type: 2
+        - key: outputTarget
+          value: eyjafjalla_t1_buff_targets
+          fromBlackboard: 0
+          type: 3
+        - key: outputBuff
+          value: eyjafjalla_t1_buff_buffs
+          fromBlackboard: 0
+          type: 3
       condition: []
       steps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 9, groups: []}]
+    detached: 0
+  - triggers:
+    - triggerEvent: 9
+      groups: []
     reentry: 2
     steps:
     - op: random_roll
-      args: {entries: [{key: mode, value: probability, fromBlackboard: 0, type: 3}, {key: input, value: eyjafjalla_t1_roll_p, fromBlackboard: 1, type: 3}, {key: outputKey, value: eyjafjalla_t1_roll, fromBlackboard: 0, type: 3}]}
+      args:
+        entries:
+        - key: mode
+          value: probability
+          fromBlackboard: 0
+          type: 3
+        - key: input
+          value: eyjafjalla_t1_roll_p
+          fromBlackboard: 1
+          type: 3
+        - key: outputKey
+          value: eyjafjalla_t1_roll
+          fromBlackboard: 0
+          type: 3
       condition: []
       steps: []
       elseSteps: []
     - op: branch
-      args: {entries: []}
-      condition: [{units: [{op: 1, leftKey: eyjafjalla_t1_roll, rightValue: True}]}]
+      args:
+        entries: []
+      condition:
+      - units:
+        - op: 1
+          leftKey: eyjafjalla_t1_roll
+          rightValue: True
       steps:
       - op: write_blackboard
-        args: {entries: [{key: key, value: eyjafjalla_t1_atk_pct, fromBlackboard: 0, type: 3}, {key: value, value: 0.2, fromBlackboard: 0, type: 1}, {key: method, value: add, fromBlackboard: 0, type: 3}]}
+        args:
+          entries:
+          - key: key
+            value: eyjafjalla_t1_atk_pct
+            fromBlackboard: 0
+            type: 3
+          - key: value
+            value: 0.2
+            fromBlackboard: 0
+            type: 1
+          - key: method
+            value: add
+            fromBlackboard: 0
+            type: 3
         condition: []
         steps: []
         elseSteps: []
       - op: update_buff
-        args: {entries: [{key: inputTarget, value: eyjafjalla_t1_buff_targets, fromBlackboard: 0, type: 3}, {key: inputBuff, value: eyjafjalla_t1_buff_buffs, fromBlackboard: 0, type: 3}, {key: attributes, value: Attack, fromBlackboard: 0, type: 3}, {key: ops, value: AddPercent, fromBlackboard: 0, type: 3}, {key: magnitudes, value: eyjafjalla_t1_atk_pct, fromBlackboard: 1, type: 3}]}
+        args:
+          entries:
+          - key: inputTarget
+            value: eyjafjalla_t1_buff_targets
+            fromBlackboard: 0
+            type: 3
+          - key: inputBuff
+            value: eyjafjalla_t1_buff_buffs
+            fromBlackboard: 0
+            type: 3
+          - key: attributes
+            value: Attack
+            fromBlackboard: 0
+            type: 3
+          - key: ops
+            value: AddPercent
+            fromBlackboard: 0
+            type: 3
+          - key: magnitudes
+            value: eyjafjalla_t1_atk_pct
+            fromBlackboard: 1
+            type: 3
         condition: []
         steps: []
         elseSteps: []
       - op: spawn_entity
-        args: {entries: [{key: spawnIndex, value: 0, fromBlackboard: 0, type: 0}, {key: positionMode, value: eventTarget, fromBlackboard: 0, type: 3}, {key: camp, value: 2, fromBlackboard: 0, type: 0}, {key: pathSerial, value: 0, fromBlackboard: 0, type: 0}, {key: appendToListKey, value: eyjafjalla_t1_bubbles, fromBlackboard: 0, type: 3}, {key: passStat, value: attack, fromBlackboard: 0, type: 3}, {key: passStatKey, value: lavabubble_atk_snapshot, fromBlackboard: 0, type: 3}]}
+        args:
+          entries:
+          - key: spawnIndex
+            value: 0
+            fromBlackboard: 0
+            type: 0
+          - key: positionMode
+            value: eventTarget
+            fromBlackboard: 0
+            type: 3
+          - key: camp
+            value: 2
+            fromBlackboard: 0
+            type: 0
+          - key: pathSerial
+            value: 0
+            fromBlackboard: 0
+            type: 0
+          - key: appendToListKey
+            value: eyjafjalla_t1_bubbles
+            fromBlackboard: 0
+            type: 3
+          - key: passStat
+            value: attack
+            fromBlackboard: 0
+            type: 3
+          - key: passStatKey
+            value: lavabubble_atk_snapshot
+            fromBlackboard: 0
+            type: 3
         condition: []
         steps: []
         elseSteps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 17, groups: []}]
+    detached: 0
+  - triggers:
+    - triggerEvent: 17
+      groups: []
     reentry: 2
     steps:
     - op: write_blackboard
-      args: {entries: [{key: key, value: eyjafjalla_t1_atk_pct, fromBlackboard: 0, type: 3}, {key: value, value: -0.2, fromBlackboard: 0, type: 1}, {key: method, value: add, fromBlackboard: 0, type: 3}]}
+      args:
+        entries:
+        - key: key
+          value: eyjafjalla_t1_atk_pct
+          fromBlackboard: 0
+          type: 3
+        - key: value
+          value: -0.2
+          fromBlackboard: 0
+          type: 1
+        - key: method
+          value: add
+          fromBlackboard: 0
+          type: 3
       condition: []
       steps: []
       elseSteps: []
     - op: update_buff
-      args: {entries: [{key: inputTarget, value: eyjafjalla_t1_buff_targets, fromBlackboard: 0, type: 3}, {key: inputBuff, value: eyjafjalla_t1_buff_buffs, fromBlackboard: 0, type: 3}, {key: attributes, value: Attack, fromBlackboard: 0, type: 3}, {key: ops, value: AddPercent, fromBlackboard: 0, type: 3}, {key: magnitudes, value: eyjafjalla_t1_atk_pct, fromBlackboard: 1, type: 3}]}
+      args:
+        entries:
+        - key: inputTarget
+          value: eyjafjalla_t1_buff_targets
+          fromBlackboard: 0
+          type: 3
+        - key: inputBuff
+          value: eyjafjalla_t1_buff_buffs
+          fromBlackboard: 0
+          type: 3
+        - key: attributes
+          value: Attack
+          fromBlackboard: 0
+          type: 3
+        - key: ops
+          value: AddPercent
+          fromBlackboard: 0
+          type: 3
+        - key: magnitudes
+          value: eyjafjalla_t1_atk_pct
+          fromBlackboard: 1
+          type: 3
       condition: []
       steps: []
       elseSteps: []
-  - triggers: [{triggerEvent: 1, groups: []}]
+    detached: 0
+  - triggers:
+    - triggerEvent: 1
+      groups: []
     reentry: 0
     steps:
     - op: watch_summon_death
-      args: {entries: [{key: blackboardKey, value: eyjafjalla_t1_bubbles, fromBlackboard: 0, type: 3}]}
+      args:
+        entries:
+        - key: blackboardKey
+          value: eyjafjalla_t1_bubbles
+          fromBlackboard: 0
+          type: 3
       condition: []
       steps: []
       elseSteps: []
+    detached: 0
+  - triggers:
+    - triggerEvent: 18
+      groups: []
+    reentry: 0
+    steps:
+    - op: write_blackboard
+      args:
+        entries:
+        - key: key
+          value: eyjafjalla_t1_bubble_count
+          fromBlackboard: 0
+          type: 3
+        - key: source
+          value: listCount
+          fromBlackboard: 0
+          type: 3
+        - key: path
+          value: eyjafjalla_t1_bubbles
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: branch
+      args:
+        entries: []
+      condition:
+      - units:
+        - op: 3
+          leftKey: eyjafjalla_t1_bubble_count
+          rightValue: 0
+      steps:
+      - op: write_blackboard
+        args:
+          entries:
+          - key: key
+            value: eyjafjalla_t1_candidates
+            fromBlackboard: 0
+            type: 3
+          - key: source
+            value: event
+            fromBlackboard: 0
+            type: 3
+          - key: path
+            value: targets
+            fromBlackboard: 0
+            type: 3
+        condition: []
+        steps: []
+        elseSteps: []
+      - op: prepend_entities
+        args:
+          entries:
+          - key: blackboardKey
+            value: eyjafjalla_t1_candidates
+            fromBlackboard: 0
+            type: 3
+          - key: sourceKey
+            value: eyjafjalla_t1_bubbles
+            fromBlackboard: 0
+            type: 3
+        condition: []
+        steps: []
+        elseSteps: []
+      - op: attack_candidate_override
+        args:
+          entries:
+          - key: blackboardKey
+            value: eyjafjalla_t1_candidates
+            fromBlackboard: 0
+            type: 3
+        condition: []
+        steps: []
+        elseSteps: []
+      - op: apply_animation_override
+        args:
+          entries:
+          - key: mode
+            value: once
+            fromBlackboard: 0
+            type: 3
+          - key: state
+            value: Attack
+            fromBlackboard: 0
+            type: 3
+          - key: slots
+            value: AttackBegin,AttackRemote,AttackClose,AttackEnd
+            fromBlackboard: 0
+            type: 3
+          - key: resources
+            value: Talent_Begin,Talent_Attack,Talent_Attack,Talent_End
+            fromBlackboard: 0
+            type: 3
+        condition: []
+        steps: []
+        elseSteps: []
+      elseSteps: []
+    detached: 0
   legacyComponents: []

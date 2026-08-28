@@ -32,7 +32,7 @@ eyjafjalla_t1 资产 description 中挂起的「缺口②」：存在泡泡时�
 ### 语义与边界
 
 - 目标键缺失/非列表、源键缺失/非列表：OneShotWarn + 跳过（配线错误暴露，与 EntityFilter/AttackCandidateOverride 同口径）。
-- 去重：源中已存在于目标的实体不重复插入（视界内泡泡本就在候选里，前插≈提权到最前）。
+- 去重是"提权"语义：源实体按源顺序整体排到最前，目标里原有的重复项从原位移除（视界内泡泡本就在候选里——效果是提权到最前，而非重复计入或保留在后面）。
 - 源列表中的 null 实体跳过（与 EntitySelector subjectMode=blackboard 同口径）；目标列表中的 null 不动。
 - 源为空列表：无操作（合法状态）。
 
