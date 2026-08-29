@@ -7,8 +7,7 @@ public class NormalAttack : AttackBase
             if (_thisEntity.entityAM.TrySetAttackState(
                 forceChange,
                 () => { AttackByAnimation(attackTargets, canBeInterrupt); },
-                AttackAnimationBranch.Normal,
-                PendingAnimationOverride))
+                AttackAnimationBranch.Normal))
             {
                 base.TryToAttack(attackTargets, forceChange, canBeInterrupt);
                 return true;

@@ -557,7 +557,6 @@ GameObject:
   - component: {fileID: 6893803144390001881}
   - component: {fileID: -8233499676567559834}
   - component: {fileID: 3974420059893658530}
-  - component: {fileID: 3246993999235739132}
   m_Layer: 0
   m_Name: Eyjafjalla
   m_TagString: Untagged
@@ -631,34 +630,8 @@ MonoBehaviour:
       DevitationYValue: 0.9
     BulletSpawnTransform: {fileID: 2679485638432126119}
     AttackEffect: {fileID: 1929037728802243661, guid: 387d3a01d5cd7fe4bb854b4bca0a122e, type: 3}
---- !u!114 &3246993999235739132
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4310881110139641480}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2d20fabe8749dd64aab763f1f112cc2e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _skillName: skill2
-  _skillImg: {fileID: 0}
-  _skillDescription: 123
-  _spRecoverMode: 0
-  _spConsumeMode: 1
-  _skillOpenMode: 3
-  _chargeNum: 3
-  _totalSp: 6
-  _initialSp: 5
-  _skillAmount: 1
-  _recoverForbidDuringSkill: 0
-  _canCloseSkill: 0
-  _skillAttackRange: []
-  _skill2Attack: 
-  _skill2AttackEffectData:
-    BulletData:
+  _extraEffectDatas:
+  - BulletData:
       BulletPrefab: {fileID: 2407971600655478370, guid: d359abca4200f394dbbec29fddff4aab, type: 3}
       BulletTrailPrefab: {fileID: 2407971600655478370, guid: 7df6c9ca687b7c542adb5be9e2088a0a, type: 3}
       BulletSpawnEffect: {fileID: 519481326241669108, guid: 4f9b2f1ccb2317f4a8ed2c9820c63ff5, type: 3}

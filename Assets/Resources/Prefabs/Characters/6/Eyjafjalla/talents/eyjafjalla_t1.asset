@@ -431,4 +431,88 @@ MonoBehaviour:
         elseSteps: []
       elseSteps: []
     detached: 0
+  - triggers:
+    - triggerEvent: 19
+      groups: []
+    reentry: 2
+    steps:
+    - op: write_blackboard
+      args:
+        entries:
+        - key: key
+          value: eyjafjalla_t1_atk_pct
+          fromBlackboard: 0
+          type: 3
+        - key: value
+          value: 0.2
+          fromBlackboard: 0
+          type: 1
+        - key: method
+          value: add
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: update_buff
+      args:
+        entries:
+        - key: inputTarget
+          value: eyjafjalla_t1_buff_targets
+          fromBlackboard: 0
+          type: 3
+        - key: inputBuff
+          value: eyjafjalla_t1_buff_buffs
+          fromBlackboard: 0
+          type: 3
+        - key: attributes
+          value: Attack
+          fromBlackboard: 0
+          type: 3
+        - key: ops
+          value: AddPercent
+          fromBlackboard: 0
+          type: 3
+        - key: magnitudes
+          value: eyjafjalla_t1_atk_pct
+          fromBlackboard: 1
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: spawn_entity
+      args:
+        entries:
+        - key: spawnIndex
+          value: 0
+          fromBlackboard: 0
+          type: 0
+        - key: positionMode
+          value: event
+          fromBlackboard: 0
+          type: 3
+        - key: camp
+          value: 2
+          fromBlackboard: 0
+          type: 0
+        - key: pathSerial
+          value: 0
+          fromBlackboard: 0
+          type: 0
+        - key: appendToListKey
+          value: eyjafjalla_t1_bubbles
+          fromBlackboard: 0
+          type: 3
+        - key: passStat
+          value: attack
+          fromBlackboard: 0
+          type: 3
+        - key: passStatKey
+          value: lavabubble_atk_snapshot
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
   legacyComponents: []

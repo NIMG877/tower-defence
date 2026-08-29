@@ -32,3 +32,11 @@ component instance for queue and active-request state.
 
 The underlying abnormal-state API has no source handle, so removing the state
 can also remove the same type applied by another system.
+
+## Animation
+
+Each extra attack applies `attackAnimation` as a machine one-shot override
+(`AnimationMachine.AddOneShotOverride` covering `AttackClose`/`AttackRemote`)
+registered immediately before `TryToAttack`; the attack's own state
+resolution consumes it. If the attack fails to start, the entry is revoked on
+the spot so the next natural attack does not play the shared animation.

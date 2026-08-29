@@ -77,7 +77,7 @@ namespace AbilitySystem.Components
 
             SharedAttackRequest request = queue[0];
             string animation = _attackAnimation();
-            var once = new AnimationOverride
+            var animations = new AnimationOverride
             {
                 AttackClose = animation,
                 AttackRemote = animation,
@@ -85,10 +85,11 @@ namespace AbilitySystem.Components
 
             _isExtraAttack = true;
             ctx.sharedBlackboard.Set(_activeSourceKey(), request.Sender);
-            bool started = ctx.entity.AttackBase.TryToAttackWithAnimation(
-                new[] { request.Target }, false, true, once);
-            if (!started)
+            AnimationOverrideHandle handle = ctx.entity.entityAM.AddOneShotOverride(this, animations);
+            if (!ctx.entity.AttackBase.TryToAttack(new[] { request.Target }, false, true))
             {
+                // 攻击未启动则当场撤销待用条目，否则下一次自然攻击会播到协作动画。
+                ctx.entity.entityAM.RemoveOverride(handle);
                 _isExtraAttack = false;
                 ctx.sharedBlackboard.Remove(_activeSourceKey());
             }

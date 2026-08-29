@@ -120,6 +120,9 @@ are not authoring names.
   damage to the event target, self, or a Blackboard entity list.
 - [ApplyImpulse](ApplyImpulse.md) - applies an outward movement impulse to the
   event target, self, or a Blackboard entity list.
+- [FireBullets](FireBullets.md) — fires one harmless carrier bullet per
+  Blackboard point; each landing dispatches `OnBulletLanded` with the actual
+  landing position.
 
 - [ShareAttackTarget](ShareAttackTarget.md) - relays a current attack target
   to selected allied ability users, optionally through a communication bullet.
@@ -133,9 +136,15 @@ are not authoring names.
 - [EntityFilter](EntityFilter.md) - filters the entity list at a Blackboard
   key in place with configurable OR groups of AND conditions (attack
   preference = snapshot + filter + commit pipeline).
+- [PrependEntities](PrependEntities.md) — deduplicates and prepends a source
+  entity list to the front of a Blackboard list in place (the promote step of
+  the attack-preference pipeline).
 - [AttackCandidateOverride](AttackCandidateOverride.md) - replaces the live
   target-candidate list with a Blackboard entity list during
   `OnBeforeTargetSelect` (the commit step of the attack-preference pipeline).
+- [SelectLandingPoints](SelectLandingPoints.md) — picks `count` points among
+  the host's attack-range cells maximizing enemy coverage, then pairwise
+  spacing.
 
 ### Charge attacks
 
@@ -152,6 +161,8 @@ are not authoring names.
   written by `AttackBehaviorOverride`.
 - [ForceResetAttack](ForceResetAttack.md) - immediately reselects targets and
   attempts a forced attack using the current behavior.
+- [ForceAttack](ForceAttack.md) — immediately performs an empty-target forced
+  attack (animation + event beats, no targets, no damage).
 - [AttackRangeOverride](AttackRangeOverride.md) - temporarily replaces an
   entity's attack range.
 - [AttackRangeRestore](AttackRangeRestore.md) - restores the entity's base

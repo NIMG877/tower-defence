@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   abilityId: lavabubble_t1
   abilityName: "熔岩爆裂"
-  description: "泡泡被击破后延迟0.37秒爆炸，以死亡位置为中心对半径1.5内敌方单位造成370%攻击力（生成时快照，含当时全部泡泡层数）的法术伤害，伤害归属召唤者。"
+  description: "生成时获得99%物理与法术伤害减免（岩壳）；受到来自召唤者的伤害时立刻破碎（走正常死亡流程触发爆炸）。泡泡被击破后延迟0.37秒爆炸，以死亡位置为中心对半径1.5内敌方单位造成370%攻击力（生成时快照，含当时全部泡泡层数）的法术伤害，伤害归属召唤者。"
   icon: {fileID: 0}
   Kind: 1
   sp: {totalSp: 0, initialSp: 0, chargeNum: 1, abilityAmount: 0, recoverMode: 0, consumeMode: 5, openMode: 0, recoverForbidDuringAbility: 0, canManualClose: 0}
@@ -38,4 +38,36 @@ MonoBehaviour:
       steps: []
       elseSteps: []
     detached: 1
+  - triggers: [{triggerEvent: 1, groups: []}]
+    reentry: 0
+    steps:
+    - op: apply_buff
+      args: {entries: [{key: attributes, value: 'PhysicalDamageRate,MagicDamageRate', fromBlackboard: 0, type: 3}, {key: ops, value: 'MulFinal,MulFinal', fromBlackboard: 0, type: 3}, {key: magnitudes, value: '0.01,0.01', fromBlackboard: 0, type: 1}, {key: buffId, value: lavaShell, fromBlackboard: 0, type: 3}, {key: buffTime, value: -5, fromBlackboard: 0, type: 1}, {key: isWhiteList, value: true, fromBlackboard: 0, type: 2}]}
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
+  - triggers: [{triggerEvent: 13, groups: []}]
+    reentry: 0
+    steps:
+    - op: write_blackboard
+      args: {entries: [{key: key, value: lavabubble_t1_hurt_origin, fromBlackboard: 0, type: 3}, {key: source, value: event, fromBlackboard: 0, type: 3}, {key: path, value: origin, fromBlackboard: 0, type: 3}]}
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: branch
+      args: {entries: []}
+      condition:
+      - units:
+        - op: 7
+          leftKey: lavabubble_t1_hurt_origin
+          rightKey: summoner@spawn_entity
+      steps:
+      - op: destroy_entity
+        args: {entries: []}
+        condition: []
+        steps: []
+        elseSteps: []
+      elseSteps: []
+    detached: 0
   legacyComponents: []

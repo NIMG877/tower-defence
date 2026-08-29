@@ -52,6 +52,15 @@ When an event is dispatched, every matching trigger entry is evaluated against
 the entity's shared Blackboard. Every passing entry requests a start of its
 owning rule.
 
+Condition-unit ops: `Equal`/`NotEqual`/`Greater`/`GreaterOrEqual`/`Less`/
+`LessOrEqual` compare the left blackboard key against the `rightValue`
+literal (numeric when both sides parse, else ordinal string; a missing key
+reads as `""` = unequal). `KeyEqual`/`KeyNotEqual` compare **two blackboard
+keys** (`op(leftKey, rightKey)`) for identity: a singleton `List<Entity>` is
+unwrapped (WriteBlackboard `path=origin` vs the bare-Entity
+`summoner@spawn_entity` protocol), entities compare by reference, other
+types by boxed `Equals`, and a missing key on either side is unequal.
+
 Steps run in array order. An operation either completes immediately or remains
 running. Immediate operations advance to the next step in the same call. A
 running operation pauses only its sequence; the runner advances it on later
@@ -102,7 +111,7 @@ must not interfere.
 
 ## Canonical operations
 
-`RegisteredOps` exposes canonical names only. The 28 component-backed
+`RegisteredOps` exposes canonical names only. The 32 component-backed
 operations use snake_case. PascalCase component names are lookup aliases.
 
 | Canonical `op` | Backing implementation / reference |
@@ -124,12 +133,15 @@ operations use snake_case. PascalCase component names are lookup aliases.
 | `destroy_buff` | [DestroyBuff](skill-components/DestroyBuff.md) |
 | `destroy_entity` | [DestroyEntity](skill-components/DestroyEntity.md) |
 | `filter_targets` | [EntityFilter](skill-components/EntityFilter.md) |
+| `fire_bullets` | [FireBullets](skill-components/FireBullets.md) |
+| `force_attack` | [ForceAttack](skill-components/ForceAttack.md) |
 | `force_reset_attack` | [ForceResetAttack](skill-components/ForceResetAttack.md) |
 | `attack_candidate_override` | [AttackCandidateOverride](skill-components/AttackCandidateOverride.md) |
 | `prepend_entities` | [PrependEntities](skill-components/PrependEntities.md) |
 | `random_roll` | [RandomRoll](skill-components/RandomRoll.md) |
 | `remove_animation_override` | [RemoveAnimationOverride](skill-components/RemoveAnimationOverride.md) |
 | `select_targets` | [EntitySelector](skill-components/EntitySelector.md) |
+| `select_landing_points` | [SelectLandingPoints](skill-components/SelectLandingPoints.md) |
 | `share_attack_target` | [ShareAttackTarget](skill-components/ShareAttackTarget.md) |
 | `shared_target_extra_attack` | [SharedTargetExtraAttack](skill-components/SharedTargetExtraAttack.md) |
 | `spawn_entity` | [SpawnEntity](skill-components/SpawnEntity.md) |

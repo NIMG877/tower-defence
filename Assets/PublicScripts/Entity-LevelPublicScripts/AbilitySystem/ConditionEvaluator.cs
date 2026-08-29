@@ -69,9 +69,41 @@ namespace AbilitySystem
                     return CompareNumeric(ctx, unit.leftKey, unit.rightValue) <  0;
                 case ConditionOp.LessOrEqual:
                     return CompareNumeric(ctx, unit.leftKey, unit.rightValue) <= 0;
+                case ConditionOp.KeyEqual:
+                    return KeyEquals(ctx, unit.leftKey, unit.rightKey);
+                case ConditionOp.KeyNotEqual:
+                    return !KeyEquals(ctx, unit.leftKey, unit.rightKey);
                 default:
                     return WarnUnknownOpAndPass(unit.op);
             }
+        }
+
+        // 键对键同一性比较：op(leftKey, rightKey)，两侧都从黑板按 object 读出。
+        // 生产形态不对称：SpawnEntity 召唤者协议存裸 Entity，而 WriteBlackboard
+        // path=origin 存 List<Entity>（ToEntityList 单元素）——单元素列表解包后
+        // 比较，多元素列表不与单实体相等。缺键（null）任一侧 = 不等（沿用
+        // "缺失 = 不等"）；实体即引用相等（池化实体跨次取出仍是同一实例）。
+        // rightKey 留空是配线笔误（KeyEqual 没配右侧），报错并判否——这与
+        // 运行期缺数据不同，后者静默按不等处理。
+        private static bool KeyEquals(ConditionEvalContext ctx, string leftKey, string rightKey)
+        {
+            if (string.IsNullOrEmpty(rightKey))
+            {
+                UnityEngine.Debug.LogError(
+                    $"ConditionEvaluator: KeyEqual/KeyNotEqual requires rightKey (leftKey='{leftKey}').");
+                return false;
+            }
+            object left = UnwrapSingletonEntityList(ctx.sharedBlackboard.Get<object>(leftKey, null));
+            object right = UnwrapSingletonEntityList(ctx.sharedBlackboard.Get<object>(rightKey, null));
+            if (left == null || right == null) return false;
+            return left.Equals(right);
+        }
+
+        private static object UnwrapSingletonEntityList(object v)
+        {
+            if (v is List<Entity> list)
+                return list.Count == 1 ? list[0] : (list.Count == 0 ? null : v);
+            return v;
         }
 
         private static int CompareNumeric(ConditionEvalContext ctx, string leftKey, string rightValueStr)

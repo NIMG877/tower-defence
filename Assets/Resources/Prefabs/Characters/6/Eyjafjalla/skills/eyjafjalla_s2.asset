@@ -1,0 +1,103 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
+  m_Name: eyjafjalla_s2
+  m_EditorClassIdentifier:
+  abilityId: eyjafjalla_s2
+  abilityName: 火山
+  description: 施法时播放专属动画，向攻击范围内4个最优落点发射火山弹（爆炸覆盖敌人数最多、落点间距最大），落地各生成一个熔岩泡泡（继承天赋一的叠层与爆炸）
+  icon: {fileID: 21300000, guid: 4635b170785529c44a88013a54a3c807, type: 3}
+  Kind: 0
+  sp:
+    totalSp: 6
+    initialSp: 5
+    chargeNum: 3
+    abilityAmount: 1
+    recoverMode: 0
+    consumeMode: 1
+    openMode: 3
+    recoverForbidDuringAbility: 0
+    canManualClose: 0
+  rules:
+  - triggers:
+    - triggerEvent: 2
+      groups: []
+    reentry: 0
+    steps:
+    - op: select_landing_points
+      args:
+        entries:
+        - key: count
+          value: 4
+          fromBlackboard: 0
+          type: 0
+        - key: offset
+          value: 0.24
+          fromBlackboard: 0
+          type: 1
+        - key: excludeKey
+          value: eyjafjalla_t1_bubbles
+          fromBlackboard: 0
+          type: 3
+        - key: outputKey
+          value: eyjafjalla_s2_points
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: apply_animation_override
+      args:
+        entries:
+        - key: mode
+          value: once
+          fromBlackboard: 0
+          type: 3
+        - key: slots
+          value: AttackRemote,AttackClose
+          fromBlackboard: 0
+          type: 3
+        - key: resources
+          value: Skill2,Skill2
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: force_attack
+      args:
+        entries: []
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
+  - triggers:
+    - triggerEvent: 3
+      groups: []
+    reentry: 0
+    steps:
+    - op: fire_bullets
+      args:
+        entries:
+        - key: pointsKey
+          value: eyjafjalla_s2_points
+          fromBlackboard: 0
+          type: 3
+        - key: effectDataIndex
+          value: 0
+          fromBlackboard: 0
+          type: 0
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
+  legacyComponents: []

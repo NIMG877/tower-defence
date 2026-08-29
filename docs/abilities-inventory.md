@@ -119,7 +119,7 @@
 
 ---
 
-## 第二部分：24 个新 AbilitySystem 组件
+## 第二部分：32 个新 AbilitySystem 组件
 
 > 全部 POCO，继承 `AbilityComponentBase`，`[RegisterComponent("Name")]` 反射注册，`OnInit` 取 `Func<T>` 懒参数，`OnTrigger` 执行，`OnTick`/`OnTeardown` 按需。组件间只通过 `ctx.sharedBlackboard` 通信。trigger 事件见 `AbilityEvents.cs`（1=PreWarm,2=AbilityBegin,3=AbilityEnd,6=BeforeAttack,9=AfterTakeDamage,10=AttackSuccessfully,11=AttackInterrupt,16=Tick 等）。
 
@@ -129,12 +129,14 @@
 | **ApplyDamage** | 对目标 Stats.ApplyDamage，attack/fixed 基础值+倍率+穿透+伤害类型+施加类型 | targetMode,baseValueMode,baseValue,multiplier,defPenetrate,mgrPenetrate,damageType,applyType | 读 blackboardKey(List<Entity>) | 无 |
 | **AttackEventValueModifier** | 通用 DamageEventBase 字段改写器(fields/values/methods 三 CSV 平行，mult/add/set/div) | fields,values,methods | 改 currentEvent 字段 | 无 |
 | **ChargeAttackDamageModifier** | 订阅 ChargeAttack.OnBeforeChargeTakeDamage 乘倍率 | multiplier | 读 blackboardKey | Teardown 取消订阅 |
+| **ApplyImpulse** | 按攻击者→目标方向施加冲量（MoveBase.TryToAddImpulse，strengthLevel 分级） | targetMode,blackboardKey,strengthLevel | 读 blackboardKey | 无 |
 
 ### Buff 类
 | 组件 | 职责 | 关键参数 | BB读写 | Tick/Teardown |
 |---|---|---|---|---|
 | **ApplyBuff** | 创建 buff(normal一次性/aura持续同步)，attributes/ops/magnitudes 三 CSV 构造 Modifier[] | attributes,ops,magnitudes,buffId,buffTime,mode(normal/aura),isWhiteList | 读 blackboardKey；写 outputTarget/outputBuff 平行累积 | Teardown(aura) 销毁记录 |
 | **DestroyBuff** | 消费 ApplyBuff 写的 (target,buff) 对，销毁 buff，清空 key | inputTarget,inputBuff | 读 inputTarget/inputBuff | 无 |
+| **UpdateBuff** | 消费 (target,buff) 对原地重值（SetBuffValues），attributes/ops/magnitudes 重建，幅度可 BB 懒取 | inputTarget,inputBuff,attributes,ops,magnitudes | 读 inputTarget/inputBuff | 无 |
 
 ### 异常状态类
 | 组件 | 职责 | 关键参数 | BB读写 | Tick/Teardown |
@@ -154,6 +156,8 @@
 | **EntitySelector** | self/blackboard/eventTarget 为中心，radius/ring/range/vision/all 模式选实体，same/opposing/both 阵营过滤 | subjectMode,selectionMode,campRelation,radius,minRadius,squareLength,force,excludeSubjects | 读 subjectBlackboardKey；写 outputEntitiesKey/outputCountKey | 无 |
 | **EntityFilter** | 原地过滤黑板 List&lt;Entity&gt;（OR组AND条件；攻击偏好=write快照+filter+AttackCandidateOverride提交流水线中的筛步） | blackboardKey,fields,ops,values,groups | 读 blackboardKey | 无（纯触发操作） |
 | **PrependEntities** | 源列表去重前插到目标列表最前（原地保对象；去重=提权到最前，目标原重复项移除；攻击偏好=write快照+prepend+AttackCandidateOverride提交流水线中的前插步） | blackboardKey,sourceKey | 读 sourceKey/blackboardKey | 无（纯触发操作） |
+| **AttackCandidateOverride** | 用黑板实体列表整表覆盖 live 攻击候选（Clear+AddRange；攻击偏好流水线=write快照→filter/prepend→override提交，唯一触碰 live 列表的步骤） | blackboardKey | 读 blackboardKey | 无（须触发于 OnBeforeTargetSelect） |
+| **SelectLandingPoints** | 载弹落点随机流水：范围内敌群（剔 excludeKey 名单）随机取原位 → 不足补射程格（地面层先于高台层、层内不重复，±offset 偏移）→ 用尽后敌人↔格点交替重复 | count,offset,excludeKey,outputKey | 读 Vision/地图 highland；写 outputKey(List&lt;Vector2&gt;) | 无 |
 
 ### 攻击行为覆盖类
 | 组件 | 职责 | 关键参数 | BB读写 | Tick/Teardown |
@@ -163,6 +167,7 @@
 | **AttackRangeOverride** | 替换 Vision.Range 格点数组 | range,targetEntity | 读 targetEntity | 无 |
 | **AttackRangeRestore** | 恢复 Vision.BaseRange | targetEntity | 读 targetEntity | 无 |
 | **ForceResetAttack** | 调 AttackBase.ForceResetAttack 立即重选目标+攻击 | toSelf,blackboardKey | 读 blackboardKey | 无 |
+| **ForceAttack** | 立即强制**空目标**攻击（TryToAttack(∅,强制,不可打断)：播动画+发攻击事件拍，不选目标不造直接伤害；配 apply_animation_override once 同帧消费技能动画） | toSelf,blackboardKey | 读 blackboardKey | 无 |
 
 ### 充能类
 | 组件 | 职责 | 关键参数 | BB读写 | Tick/Teardown |
@@ -174,6 +179,13 @@
 | 组件 | 职责 | 关键参数 | BB读写 | Tick/Teardown |
 |---|---|---|---|---|
 | **DestroyEntity** | 调 Entity.Die()(仅 IsActive，去重) | toSelf,blackboardKey | 读 blackboardKey | 无 |
+| **SpawnEntity** | 经 EntityPoolManager 生成实体（spawnIndex 锁定 CanSpawnEntityIds 注册表；positionMode self/eventTarget/fixed/event；passStat 快照宿主属性；appendToListKey 花名册） | spawnIndex,positionMode,position,offset,camp,placement,orientation,pathSerial,outputKey,appendToListKey,passStat,passStatKey | 读各 BB 懒参；写 outputKey/appendToListKey/子实体 summoner@spawn_entity 与 passStatKey | 无 |
+| **WatchSummonDeath** | 订阅黑板花名册内实体的死亡，桥接为宿主 OnSummonDeath 事件（带位置快照） | blackboardKey | 读 blackboardKey | Teardown 取消全部订阅 |
+
+### 子弹类
+| 组件 | 职责 | 关键参数 | BB读写 | Tick/Teardown |
+|---|---|---|---|---|
+| **FireBullets** | 按黑板 List&lt;Vector2&gt; 逐点发视觉载弹（0 伤、无实体目标）；子弹击毁时经宿主 runner 派发 OnBulletLanded（位置=实际落点含抛物线偏差）；子弹配置取 AttackBase._extraEffectDatas[index] | pointsKey,effectDataIndex | 读 pointsKey | 无 |
 
 ### 黑板/随机/通信类
 | 组件 | 职责 | 关键参数 | BB读写 | Tick/Teardown |
@@ -185,9 +197,9 @@
 
 ---
 
-## 第三部分：18 个 AbilityConfig .asset 实际用法
+## 第三部分：AbilityConfig .asset 实际用法
 
-> 已迁到新系统的配置。trigger 枚举：1=PreWarm,2=AbilityBegin,3=AbilityEnd,6=BeforeAttack,9=AfterTakeDamage,16=Tick。
+> 已迁到新系统的配置。trigger 枚举：1=PreWarm,2=AbilityBegin,3=AbilityEnd,6=BeforeAttack,9=AfterTakeDamage,16=Tick,17=SummonDeath,18=BeforeTargetSelect,19=BulletLanded。
 
 ### 角色（Characters/3 与 6）
 | asset | 名 | Kind | SP要点 | 组件组合 | 效果 |
@@ -206,6 +218,10 @@
 | ebnhlz_s3 | 寂静之声 | Skill | 20SP手动可关 | ApplyBuff(2,攻速+80/攻+65%)/ApplyAnimOverride(2)/WriteBB(2,mult×1.4)/WriteBB(18,候选快照)+EntityFilter(18,仅精英1-2)+AttackCandidateOverride(18,提交)/ForceReset(2) + 结束Restore+WriteBB(div还原) | 形态切换+跨天赋联动 |
 | ebnhlz_t1 | 强弱法 | Skill* | 被动 | WriteBB(2,set倍率1.43)/ChargeAttackDamageModifier(2,读BB)/ChargeAttackReservePool(2,1份仅精英) | 蓄力伤×1.43+额外精英蓄力 |
 | ebnhlz_t2 | 倚音 | Talent | 被动 | EntitySelector(9,半径1.1同阵营计数)/ApplyDamage(9,15%法术,条件=计数0) | 孤立目标额外15%法伤 |
+| eyjafjalla_t1 | 熔岩气泡 | Talent | 被动 | PreWarm(1)自身攻buff+WatchSummonDeath(花名册)；受击(9)RandomRoll+Branch→SpawnEntity(eventTarget)生气泡→写atk_pct(add 0.2/个)→UpdateBuff；气泡死亡(17)重值攻buff；索敌(18)WriteBB快照→PrependEntities→AttackCandidateOverride提交+once动画；**载弹落点(19)记账三步→SpawnEntity(positionMode=event)**（S2 弹落点生气泡，归 t1 因瞬发技能落地时已非激活） | 受击概率生成熔岩气泡；气泡数提升自身攻击；S2 落点与受击两路生成；优先攻击气泡（爆炸由气泡实体自身资产 lavabubble_t1 负责） |
+| eyjafjalla_s1 | 二重咏唱 | Skill | 15SP持续30s | WriteBB(2,set t1_roll_p=0.6)→ApplyBuff(2,AttackSpeed+120)/结束(3)WriteBB(set 0.2)+DestroyBuff | 攻速+120；天赋触发概率×3（黑板桥接取代旧跨技能直调） |
+| eyjafjalla_s2 | 火山 | Skill | 6SP 3充能每充1攻 | 开场(2)SelectLandingPoints(4点,敌群优先剔泡泡,±0.24偏移)→ApplyAnimOverride(once,Skill2)→ForceAttack；结束(3)FireBullets(实际弹道数据取 _extraEffectDatas[0])。落点泡泡规则住 t1（trigger 19，瞬发技能发弹后即非激活） | 强制播 Skill2 动画，4 发载弹落点各生成 1 气泡（落点=子弹实际落点），伤害走气泡链 |
+| lavabubble_t1 | 熔岩爆裂 | Talent（住气泡实体自身） | 被动 | 爆炸(15,detached)Delay0.37→SelectTargets(r1.5同阵营)→ApplyDamage(attacker=summoner,快照atk×3.7法术)；**岩壳(1)ApplyBuff(物/法伤承受率 MulFinal 0.01 永久)**；**破壳(13)WriteBB(event origin)→Branch(KeyEqual vs summoner@spawn_entity)→DestroyEntity(toSelf)** | 生成即得99%物理/法术伤害减免（池回收 Dormancy 清 store，不跨代叠加）；受召唤者伤害立刻破碎走正常死亡链→爆炸（兄弟气泡连锁，旧版同） |
 
 ### 怪物（MC）
 | asset | 名 | Kind | SP要点 | 组件组合 | 效果 |
@@ -258,15 +274,16 @@
 23. **粒子/拖尾替换**（克隆子弹粒子到 TempContainer 替换 BulletData）
 24. **医学效果硬编码**（MedicalEffect.TakeEffect_Single/Radius，绕过 AttributeStore）
 
-### 新系统（24 组件）覆盖的原子功能类别
-- **伤害**：直接伤害(ApplyDamage)、事件改写(AttackEventValueModifier)、充能伤倍(ChargeAttackDamageModifier)
-- **Buff**：施加(ApplyBuff normal/aura)、销毁(DestroyBuff)
+### 新系统（32 组件）覆盖的原子功能类别
+- **伤害**：直接伤害(ApplyDamage)、事件改写(AttackEventValueModifier)、充能伤倍(ChargeAttackDamageModifier)、冲量(ApplyImpulse)
+- **Buff**：施加(ApplyBuff normal/aura)、销毁(DestroyBuff)、原地重值(UpdateBuff)
 - **异常状态**：施加(ApplyAbnormalState normal/aura)、销毁(DestroyAbnormalState)、额外攻击期自带(SharedTargetExtraAttack)
 - **动画**：覆盖(ApplyAnimationOverride once/override)、撤销(RemoveAnimationOverride)、充能阶段(ChargeStateController)
-- **目标选择**：实体选择(EntitySelector)、目标过滤(EntityFilter)、候选前插(PrependEntities)、候选覆盖(AttackCandidateOverride)
-- **攻击行为覆盖**：行为(AttackBehaviorOverride/Restore)、范围(AttackRangeOverride/Restore)、强制重置(ForceResetAttack)
+- **目标选择**：实体选择(EntitySelector)、目标过滤(EntityFilter)、候选前插(PrependEntities)、候选覆盖(AttackCandidateOverride)、落点选择(SelectLandingPoints)
+- **攻击行为覆盖**：行为(AttackBehaviorOverride/Restore)、范围(AttackRangeOverride/Restore)、强制重置(ForceResetAttack)、强制空目标攻击(ForceAttack)
 - **充能**：状态机(ChargeStateController)、储备池(ChargeAttackReservePool)、伤修(ChargeAttackDamageModifier)
-- **实体生命周期**：销毁(DestroyEntity)
+- **实体生命周期**：生成(SpawnEntity)、死亡桥接(WatchSummonDeath)、销毁(DestroyEntity)
+- **子弹**：视觉载弹+落点事件(FireBullets，配 AttackBase._extraEffectDatas)
 - **黑板**：通用写(WriteBlackboard set/add/mult/div)
 - **随机**：摇骰(RandomRoll probability/value/list)
 - **通信**：目标共享(ShareAttackTarget)、共享额外攻击(SharedTargetExtraAttack)
@@ -275,10 +292,10 @@
 
 | 缺口 | 旧系统代表 | 现有组件最近候选 | 严重度 |
 |---|---|---|---|
-| **生成实体/召唤+继承属性** | SlimeTalent1、EyjafjallaTalent1、WdslmSkill3、MachineTalent1 | 无（DestroyEntity 只有反向） | 🔴 最高 |
+| **生成实体/召唤+继承属性** | SlimeTalent1、EyjafjallaTalent1、WdslmSkill3、MachineTalent1 | SpawnEntity 已实现（positionMode 含 event、passStat 快照、appendToListKey 花名册），Eyjafjalla T1/S2 已用 | 🟢 低（间隔生成配合 delay 原语即可） |
 | **延迟/多段延时序列** | SlimeTalent1、EyjafjallaTalent1(Explode)、WitherTalent2、WdslmSkill3、creeper(已用ChargeStateController绕) | ChargeStateController(专用，不可复用通用) | 🔴 最高 |
 | **流程型编排(step/delay 原语)** | 所有跨时间多段逻辑 | 无（trigger 驱动撑不起，见 ability-migration-trigger-limit） | 🔴 最高 |
-| **子弹/飞行物(通用可配置)** | EyjafjallaSkill2、WitchTalent | 无（ShareAttackTarget 内部硬编码 new Bullet） | 🟠 高 |
+| **子弹/飞行物(通用可配置)** | EyjafjallaSkill2、WitchTalent | FireBullets（载弹）+OnBulletLanded(19)+AttackBase._extraEffectDatas（弹道配置按索引）；EyjafjallaS2 已迁 | 🟢 低（WitchTalent 的克隆粒子替换仍见"粒子/拖尾动态替换"行） |
 | **治疗(走伤害管道外)** | WitchSkill、WitchTalent、spot_s1(用damageType3绕) | ApplyDamage(damageType=3 取巧) | 🟠 高 |
 | **位移/传送/闪现/沿路径位移** | HeadSeterSkill1(FlashMove) | ApplyImpulse(只有击退方向) | 🟠 高 |
 | **范围瞬时AOE一体化** | WitherTalent2、Eyjafjalla(Explode) | 需 EntitySelector+ApplyDamage 三段链 | 🟡 中 |

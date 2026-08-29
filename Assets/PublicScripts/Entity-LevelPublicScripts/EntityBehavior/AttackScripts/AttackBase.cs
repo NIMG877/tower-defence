@@ -61,6 +61,11 @@ public class AttackBase : MonoBehaviour, IPoolOperation
     [NonSerialized] public int DamageType;
     [HideInInspector] public AttackEffectData _attackEffectData;
     [SerializeField] private AttackEffectData _attackEffectData0;
+    // 技能/资产步骤共用的额外攻击特效配置（含 BulletData 与出生骨骼）。
+    // ParamList 纯 string 装不下 GameObject 引用——带引用的弹幕配置登记在
+    // 攻击组件上，资产经 FireBullets.effectDataIndex 引用（与 SpawnEntity
+    // 的 spawnIndex→CanSpawnEntityIds 登记处模式同构）。
+    public List<AttackEffectData> _extraEffectDatas = new List<AttackEffectData>();
     public (int x, int y)[] AttackRangeS
     {
         get
@@ -77,7 +82,6 @@ public class AttackBase : MonoBehaviour, IPoolOperation
     }
     protected Entity _thisEntity;
     protected float _attackTimer;
-    protected AnimationOverride PendingAnimationOverride { get; private set; }
 
     private (int x, int y)[] _attackRangeF;
     private float _attackRadiusF;
@@ -143,6 +147,17 @@ public class AttackBase : MonoBehaviour, IPoolOperation
     {
         _attackEffectData = attackEffectData;
     }
+    public bool TryGetExtraEffectData(int index, out AttackEffectData data)
+    {
+        if (index < 0 || index >= _extraEffectDatas.Count)
+        {
+            Debug.LogError($"[AttackBase] Extra effect data index {index} out of range ({_extraEffectDatas.Count} entries on {name}).");
+            data = default;
+            return false;
+        }
+        data = _extraEffectDatas[index];
+        return true;
+    }
     public virtual bool TryToAttack(Entity[] attackTargets, bool forceChange, bool canBeInterrupt)
     {
         if (attackTargets.Length > 0)
@@ -157,18 +172,6 @@ public class AttackBase : MonoBehaviour, IPoolOperation
             _thisEntity.entityAM.SetDirection(centerPos);
         }
         return false;
-    }
-    public bool TryToAttackWithAnimation(Entity[] attackTargets, bool forceChange, bool canBeInterrupt, AnimationOverride once)
-    {
-        PendingAnimationOverride = once;
-        try
-        {
-            return TryToAttack(attackTargets, forceChange, canBeInterrupt);
-        }
-        finally
-        {
-            PendingAnimationOverride = null;
-        }
     }
     protected async void AttackByAnimation(Entity[] attackTargets, bool canInterrupt)
     {

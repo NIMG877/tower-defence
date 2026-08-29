@@ -170,9 +170,19 @@ namespace AbilitySystem.Components
                 case "fixed":
                     position = args.GetVector2IntLazy("position", default, ctx.sharedBlackboard)();
                     break;
+                case "event":
+                    Vector2? eventPosition = ResolveEventPosition(ctx.currentEvent);
+                    if (!eventPosition.HasValue)
+                    {
+                        position = default; // 走不到消费方；仅为满足 out 明确赋值。
+                        Debug.LogError($"[SpawnEntity] positionMode 'event' requires an event carrying a position (BulletLanded/SummonDeath); current event is '{ctx.currentEvent?.GetType().Name ?? "none"}'.");
+                        return false;
+                    }
+                    position = eventPosition.Value;
+                    break;
                 default:
                     position = default; // 走不到消费方；仅为满足 out 明确赋值。
-                    Debug.LogError($"[SpawnEntity] Unknown positionMode '{mode}' (expected self/eventTarget/fixed).");
+                    Debug.LogError($"[SpawnEntity] Unknown positionMode '{mode}' (expected self/eventTarget/fixed/event).");
                     return false;
             }
             position += (Vector2)args.GetVector2IntLazy("offset", default, ctx.sharedBlackboard)();
@@ -196,6 +206,16 @@ namespace AbilitySystem.Components
         {
             if (evt is DamageEventBase damage) return damage.target;
             if (evt is HurtEventBase hurt) return hurt.origin;
+            return null;
+        }
+
+        /// <summary>提取事件携带的位置（子弹实际落点/召唤物死亡快照）。不携带
+        /// 位置的事件返回 null——positionMode=event 的调用方把它当配线错误报出。
+        /// public 供 EditMode 测试直接断言（测试 asmdef 无 InternalsVisibleTo）。</summary>
+        public static Vector2? ResolveEventPosition(AbilityEvent evt)
+        {
+            if (evt is BulletLandedEvent landed) return landed.position;
+            if (evt is SummonDeathEvent death) return death.position;
             return null;
         }
 

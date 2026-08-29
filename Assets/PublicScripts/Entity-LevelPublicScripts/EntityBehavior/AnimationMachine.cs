@@ -215,7 +215,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
     public float ResolveAnimationDuration(AnimationSlot slot)
     {
-        AnimationReferenceAsset animation = ResolveAnimations(null).GetSingle(slot);
+        AnimationReferenceAsset animation = ResolveAnimations().GetSingle(slot);
         return animation != null ? animation.Animation.Duration : 0;
     }
 
@@ -326,7 +326,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     public bool TrySetState(
         EntityState state,
         bool forceChange,
-        AnimationOverride once = null,
         MoveAnimationBranch moveBranch = MoveAnimationBranch.Normal)
     {
         bool canContinueCombo = state == EntityState.Attack &&
@@ -334,12 +333,12 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
             _attackPhase == AttackPhase.ComboWindow;
         if (!forceChange && (state > currentState || canContinueCombo) && !states_ban.Contains(state))
         {
-            SetState(state, once, moveBranch);
+            SetState(state, moveBranch);
             return true;
         }
         else if (forceChange && currentState != EntityState.Die && !states_ban.Contains(state))
         {
-            SetState(state, once, moveBranch);
+            SetState(state, moveBranch);
             return true;
         }
         else
@@ -348,16 +347,16 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         }
     }
 
-    public bool TrySetMoveState(bool forceChange, MoveAnimationBranch branch = MoveAnimationBranch.Normal, AnimationOverride once = null)
+    public bool TrySetMoveState(bool forceChange, MoveAnimationBranch branch = MoveAnimationBranch.Normal)
     {
-        return TrySetState(EntityState.Move, forceChange, once, branch);
+        return TrySetState(EntityState.Move, forceChange, branch);
     }
 
-    public bool TrySetAttackState(bool forceChange, Action attackAction, AttackAnimationBranch branch = AttackAnimationBranch.Normal, AnimationOverride once = null)
+    public bool TrySetAttackState(bool forceChange, Action attackAction, AttackAnimationBranch branch = AttackAnimationBranch.Normal)
     {
         AttackAnimationBranch previousBranch = _attackBranch;
         _attackBranch = branch;
-        if (!TrySetState(EntityState.Attack, forceChange, once))
+        if (!TrySetState(EntityState.Attack, forceChange))
         {
             _attackBranch = previousBranch;
             return false;
@@ -490,12 +489,10 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
     private void SetState(
         EntityState setState,
-        AnimationOverride once = null,
         MoveAnimationBranch moveBranch = MoveAnimationBranch.Normal)
     {
         bool continueCombo = setState == EntityState.Attack && _attackPhase == AttackPhase.ComboWindow;
-        RegisterMixes(once);
-        _activeAnimations = ResolveAnimations(once);
+        _activeAnimations = ResolveAnimations();
         if (setState != EntityState.Attack)
         {
             _attackPhase = AttackPhase.None;
@@ -838,7 +835,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         }
     }
 
-    private AnimationSet ResolveAnimations(AnimationOverride once)
+    private AnimationSet ResolveAnimations()
     {
         AnimationSet resolved = _baseAnimations.Copy();
         _overrides.Sort((left, right) =>
@@ -850,7 +847,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         {
             resolved.Apply(entry.Animations, _animationResources);
         }
-        resolved.Apply(once, _animationResources);
         return resolved;
     }
 
@@ -903,7 +899,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         }
 
         _baseAnimations = AnimationSet.From(_animationResources);
-        _activeAnimations = ResolveAnimations(null);
+        _activeAnimations = ResolveAnimations();
         event_attack = skeleton.Skeleton.Data.FindEvent("OnAttack");
         event_start = skeleton.Skeleton.Data.FindEvent("OnStart");
         skeleton.AnimationState.Event += HandleAnimationStateEvent;

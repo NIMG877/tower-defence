@@ -12,7 +12,7 @@ source is locked to the host's `EntityData.CanSpawnEntityIds` registry;
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `spawnIndex` | Int | `0` | Index into the host's `CanSpawnEntityIds`. Out of range (or an empty registry) logs an error and skips this spawn. |
-| `positionMode` | String | `self` | `self`, `eventTarget`, or `fixed`. Any other value logs an error and skips. (No `blackboard` mode — read positions from the Blackboard via `fromBlackboard` on the parameters instead.) |
+| `positionMode` | String | `self` | `self`, `eventTarget`, `fixed`, or `event`. Any other value logs an error and skips. (No `blackboard` mode — read positions from the Blackboard via `fromBlackboard` on the parameters instead.) |
 | `position` | Vector2Int | `(0,0)` | Position for `positionMode=fixed`. |
 | `offset` | Vector2Int | `(0,0)` | Added after resolving the base position. (Random scatter is not built in — compose `RandomRoll` + Blackboard-fed `position`/`offset` instead.) |
 | `camp` | Int | source camp, otherwise `1` | Spawned entity camp; negative selects the default. |
@@ -26,6 +26,10 @@ source is locked to the host's `EntityData.CanSpawnEntityIds` registry;
 
 All parameters are BB-capable. `eventTarget` resolves damage-event targets and
 hurt-event origins; without a usable event target it falls back to self.
+`event` reads the position carried by the current event (`BulletLandedEvent`
+actual landing point, `SummonDeathEvent` death snapshot) — use it for
+"spawn at the bullet's real landing point" flows; a current event that
+carries no position logs an error and skips.
 
 Configuration errors (missing registry entry, out-of-range `spawnIndex`,
 unknown `positionMode`/`placement` token, missing entity pool) only log an
