@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u8FD9\u662F\u5929\u8D4B\u540D\u79F0"
+  m_text: "\u5929\u8D4B\u540D\u79F0"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: e06da54c7663721409d7bca81c4993a8, type: 2}
   m_sharedMaterial: {fileID: -4925700049451157138, guid: e06da54c7663721409d7bca81c4993a8, type: 2}
@@ -145,7 +145,6 @@ GameObject:
   - component: {fileID: 4614649753844917602}
   - component: {fileID: 8871289602308106723}
   - component: {fileID: 5412351379938982151}
-  - component: {fileID: 1183688430972580240}
   - component: {fileID: 1271711614558303647}
   m_Layer: 5
   m_Name: talentName
@@ -169,10 +168,10 @@ RectTransform:
   - {fileID: 5381981516474418236}
   m_Father: {fileID: 7517464445773038707}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0}
-  m_SizeDelta: {x: 0, y: 15}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &8871289602308106723
 MonoBehaviour:
@@ -221,7 +220,7 @@ MonoBehaviour:
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 4
+  m_ChildAlignment: 3
   m_Spacing: 0
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
@@ -230,20 +229,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &1183688430972580240
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7255634739379997290}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_HorizontalFit: 2
-  m_VerticalFit: 0
 --- !u!222 &1271711614558303647
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -262,6 +247,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7517464445773038707}
   - component: {fileID: 8437980922825038582}
+  - component: {fileID: 6229910826044665030}
   m_Layer: 5
   m_Name: talentCard
   m_TagString: Untagged
@@ -288,7 +274,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 160, y: 5}
+  m_SizeDelta: {x: 214, y: 62.52}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &8437980922825038582
 CanvasRenderer:
@@ -298,6 +284,32 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7498255108757057484}
   m_CullTransparentMesh: 1
+--- !u!114 &6229910826044665030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7498255108757057484}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &7943438747437095914
 GameObject:
   m_ObjectHideFlags: 0
@@ -330,10 +342,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 7517464445773038707}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: -17}
-  m_SizeDelta: {x: 160, y: 35.64}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &7548785387244882429
 CanvasRenderer:
@@ -363,7 +375,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u8FD9\u662F\u5929\u8D4B\u63CF\u8FF0\u8FD9\u662F\u5929\u8D4B\u63CF\u8FF0\u8FD9\u662F\u5929\u8D4B\u63CF\u8FF0\u8FD9\u662F\u5929\u8D4B\u63CF\u8FF0\u8FD9\u662F\u5929\u8D4B\u63CF\u8FF0\u8FD9\u662F\u5929\u8D4B\u63CF\u8FF0\u8FD9\u662F\u5929\u8D4B\u63CF\u8FF0\u8FD9\u662F\u5929\u8D4B\u63CF\u8FF0\n"
+  m_text: "\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0\u5929\u8D4B\u63CF\u8FF0"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: e06da54c7663721409d7bca81c4993a8, type: 2}
   m_sharedMaterial: {fileID: -4925700049451157138, guid: e06da54c7663721409d7bca81c4993a8, type: 2}
@@ -426,7 +438,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 3, y: 0, z: 3, w: 0}
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0

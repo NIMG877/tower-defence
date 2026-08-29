@@ -73,8 +73,8 @@ MonoBehaviour:
     MassLevel: 0
     MoveMethod: 0
     Skills:
-    - {fileID: 11400000, guid: 93f5c9daf73c4fe6a794f651d1fb582d, type: 2}
     - {fileID: 11400000, guid: 27803cc15c4d451fa333120153dea722, type: 2}
+    - {fileID: 11400000, guid: 93f5c9daf73c4fe6a794f651d1fb582d, type: 2}
     Talents:
     - {fileID: 11400000, guid: 9e0242c321b458831a624b77b4797a62, type: 2}
     AnimationResources: {fileID: 11400000, guid: b7639e8dd39688e47a11dea72ef2238e, type: 2}
@@ -979,7 +979,7 @@ MonoBehaviour:
     PhysicalDodge: 0
     MagicDodge: 0
     BlockOccupation: 0
-    TauntLevel: 0
+    TauntLevel: -1
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 0

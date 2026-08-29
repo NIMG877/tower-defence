@@ -75,7 +75,7 @@ namespace MyUI
         {
             _frame = GetComponentInChildrenByPath<Transform>("container/characters/frame");
             RectTransform sp = GetComponentInChildrenByPath<RectTransform>("container/characters/frame/selectmark");
-            _skillSelectRT = GetComponentInChildrenByPath<RectTransform>("container/characterMessage/skillArea/content/skillSelectMark");
+            _skillSelectRT = GetComponentInChildrenByPath<RectTransform>("container/characterMessage/skillArea/view/content/skillSelectMark");
             _englishName = GetComponentInChildrenByPath<TextMeshProUGUI>("container/characterMessage/messageArea/englishName");
             _name = GetComponentInChildrenByPath<TextMeshProUGUI>("container/characterMessage/messageArea/name");
             _hpText = GetComponentInChildrenByPath<TextMeshProUGUI>("container/characterMessage/messageArea/hpText");
@@ -168,7 +168,7 @@ namespace MyUI
                 });
             }
 
-            _content = GetComponentInChildrenByPath<RectTransform>("container/characterMessage/skillArea/content");
+            _content = GetComponentInChildrenByPath<RectTransform>("container/characterMessage/skillArea/view/content");
             _skillContent = GetComponentInChildrenByPath<ScrollRect>("container/characterMessage/skillArea");
             _skillArea = _skillContent.GetComponent<RectTransform>();
             _noneSkillInfo = new GameObject[3] { _content.GetChild(0).gameObject, _content.GetChild(1).gameObject, _content.GetChild(2).gameObject };
@@ -176,7 +176,7 @@ namespace MyUI
             _skillSelectorActions = new UnityAction[3];
             for (int i = 2; i >= 0; i--)
             {
-                _abilitySelectorCards[i] = new AbilityCard(Vector2.zero, _content, Color.black, _content.rect.width - 6);
+                _abilitySelectorCards[i] = new AbilityCard(_content, Color.black);
                 Image ii = _abilitySelectorCards[i].AbilityRT.gameObject.AddComponent<Image>();
                 ii.color = new Color(1, 1, 1, 0);
                 Button bi = _abilitySelectorCards[i].AbilityRT.gameObject.AddComponent<Button>();
@@ -185,7 +185,7 @@ namespace MyUI
                 _abilitySelectorCards[i].AbilityRT.SetAsFirstSibling();
             }
             _talentArea = GetComponentInChildrenByPath<RectTransform>("container/characterMessage/talentArea");
-            _talentContent = GetComponentInChildrenByPath<RectTransform>("container/characterMessage/talentArea/content");
+            _talentContent = GetComponentInChildrenByPath<RectTransform>("container/characterMessage/talentArea/view/content");
             _talentCardList = new List<TalentCard>();
         }
         private void SwitchToSkill_Talent(bool isSkill)
@@ -199,8 +199,8 @@ namespace MyUI
                 _talentImage.color = _black1;
                 _talentText.color = _white1;
                 _skillArea.gameObject.SetActive(true);
-                LayoutRebuilder.ForceRebuildLayoutImmediate(_content);
                 _talentArea.gameObject.SetActive(false);
+                LayoutRebuilder.ForceRebuildLayoutImmediate(_content);
             }
             else
             {
@@ -346,9 +346,7 @@ namespace MyUI
                     int index = i;
                     _skillSelectorActions[i] = () =>
                     {
-                        _skillSelectRT.SetParent(_abilitySelectorCards[index].AbilityRT);
-                        _skillSelectRT.offsetMax = Vector2.zero;
-                        _skillSelectRT.offsetMin = Vector2.zero;
+                        _skillSelectRT.SetParent(_abilitySelectorCards[index].AbilityRT, false);
                         _skillSelectRT.gameObject.SetActive(true);
                         _selectedCharacterSkill[characterIndex] = index;
                         CharacterCardManager.cardManager.ResetCardForbidNullSkill(characterId);
@@ -363,9 +361,7 @@ namespace MyUI
                     _noneSkillInfo[i].SetActive(true);
                 }
                 int skillSelect = _selectedCharacterSkill[characterIndex];
-                _skillSelectRT.SetParent(_abilitySelectorCards[skillSelect].AbilityRT);
-                _skillSelectRT.offsetMax = Vector2.zero;
-                _skillSelectRT.offsetMin = Vector2.zero;
+                _skillSelectRT.SetParent(_abilitySelectorCards[skillSelect].AbilityRT, false);
                 _skillSelectRT.gameObject.SetActive(true);
                 _skillContent.vertical = _skillArea.rect.height < _content.rect.height;
             }
@@ -392,7 +388,7 @@ namespace MyUI
                 }
                 for (int i = _talentCardList.Count; i < talents.Count; i++)
                 {
-                    TalentCard card = new TalentCard(new Vector2(0, 0), _talentContent, Color.black, 210);
+                    TalentCard card = new TalentCard(_talentContent, Color.black);
                     card.UpdateTalentCardMessage(talents[i]);
                     _talentCardList.Add(card);
                 }

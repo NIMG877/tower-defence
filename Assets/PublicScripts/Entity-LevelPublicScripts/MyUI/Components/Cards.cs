@@ -13,19 +13,16 @@ namespace MyUI
         public RectTransform AbilityRT;
         private Image skillImage, spRecoverModeImage, skillOpenModeImage, skillAmountImage;
         private TextMeshProUGUI abilityNameText, sp0Text, totalSpText, spRecoverModeText, skillOpenModeText, skillAmountText, description;
-        public AbilityCard(Vector2 skillCardAnchorPos, RectTransform parent, Color textColor, float outerWidth)
+        public AbilityCard(RectTransform parent, Color textColor)
         {
             RectTransform skillCard = Resources.Load<RectTransform>("Prefabs/UI/MyUIs/Components/skillCard");
             AbilityRT = Object.Instantiate(skillCard.gameObject, parent).GetComponent<RectTransform>();
-            AbilityRT.sizeDelta = new Vector2(outerWidth, 0);
-            AbilityRT.Find("content1").GetComponent<RectTransform>().sizeDelta = new Vector2(outerWidth - 50, 0);
             abilityNameText = AbilityRT.Find("content1/skillName").GetComponent<TextMeshProUGUI>();
             Transform skillImgArea = AbilityRT.Find("skillImgArea");
             skillImage = skillImgArea.Find("skillImg").GetComponent<Image>();
             sp0Text = skillImage.transform.Find("sp0/text").GetComponent<TextMeshProUGUI>();
             totalSpText = skillImage.transform.Find("totalSp/text").GetComponent<TextMeshProUGUI>();
             description = AbilityRT.Find("content1/description").GetComponent<TextMeshProUGUI>();
-            description.rectTransform.sizeDelta = new Vector2(outerWidth - 50, 0);
             Transform content2 = AbilityRT.Find("content1/content2");
             spRecoverModeImage = content2.Find("spRecoverMode").GetComponent<Image>();
             spRecoverModeText = spRecoverModeImage.GetComponentInChildren<TextMeshProUGUI>();
@@ -92,13 +89,11 @@ namespace MyUI
     {
         public RectTransform TalentRT;
         private TextMeshProUGUI talentName, description;
-        public TalentCard(Vector2 skillCardAnchorPos, RectTransform parent, Color textColor, float width)
+        public TalentCard(RectTransform parent, Color textColor)
         {
             RectTransform talentCard = Resources.Load<RectTransform>("Prefabs/UI/MyUIs/Components/talentCard");
             TalentRT = Object.Instantiate(talentCard.gameObject, parent).GetComponent<RectTransform>();
-            TalentRT.sizeDelta = new Vector2(width, 0);
             description = TalentRT.Find("description").GetComponent<TextMeshProUGUI>();
-            description.GetComponent<RectTransform>().sizeDelta = new Vector2(width, 0);
             talentName = TalentRT.Find("talentName/name").GetComponent<TextMeshProUGUI>();
             description.color = textColor;
         }
@@ -106,8 +101,6 @@ namespace MyUI
         {
             talentName.text = talent.abilityName;
             description.text = talent.description;
-            description.rectTransform.sizeDelta = new Vector2(description.rectTransform.rect.width, description.preferredHeight);
-            TalentRT.sizeDelta = new Vector2(TalentRT.rect.width, 17 + description.preferredHeight);
         }
     }
     public class SubpCard
@@ -115,16 +108,13 @@ namespace MyUI
         public RectTransform SubpRT;
         private TextMeshProUGUI subpName, description;
         private Image subpImage;
-        public SubpCard(Vector2 skillCardAnchorPos, RectTransform parent, Color textColor, float width)
+        public SubpCard(RectTransform parent, Color textColor)
         {
             RectTransform subpCard = Resources.Load<RectTransform>("Prefabs/UI/MyUIs/Components/subpCard");
             SubpRT = Object.Instantiate(subpCard.gameObject, parent).GetComponent<RectTransform>();
-            SubpRT.sizeDelta = new Vector2(width, 0);
             subpImage = SubpRT.Find("logo").GetComponent<Image>();
             subpName = SubpRT.Find("content/subpName").GetComponent<TextMeshProUGUI>();
             description = SubpRT.Find("content/description").GetComponent<TextMeshProUGUI>();
-            SubpRT.Find("content").GetComponent<RectTransform>().sizeDelta = new Vector2(width - 50, 0);
-            description.rectTransform.sizeDelta = new Vector2(width - 50, 0);
             subpName.color = textColor;
             description.color = textColor;
         }
@@ -136,44 +126,33 @@ namespace MyUI
     public class BuffCard
     {
         public RectTransform BuffRT;
-        private TextMeshProUGUI buffName, buffEffectName, buffEffectValue;
-        private float rate = 0.5625f;
+        private TextMeshProUGUI buffName, buffDetail;
         private Dictionary<string, string> buffs = new Dictionary<string, string>()
         {
             {"AttackMinNum","��С������" }
         };
-        public BuffCard(Vector2 skillCardAnchorPos, RectTransform parent, Color textColor, float width)
+        public BuffCard(RectTransform parent, Color textColor)
         {
             RectTransform buffCard = Resources.Load<RectTransform>("Prefabs/UI/MyUIs/Components/buffCard");
             BuffRT = Object.Instantiate(buffCard.gameObject, parent).GetComponent<RectTransform>();
-            BuffRT.sizeDelta = new Vector2(width, 0);
             buffName = BuffRT.Find("buffName/name").GetComponent<TextMeshProUGUI>();
-            buffEffectName = BuffRT.Find("buffEffectName").GetComponent<TextMeshProUGUI>();
-            buffEffectValue = BuffRT.Find("buffEffectValue").GetComponent<TextMeshProUGUI>();
-            buffEffectName.rectTransform.sizeDelta = new Vector2(width * rate, 0);
-            buffEffectValue.rectTransform.sizeDelta = new Vector2(width * (1 - rate), 0);
-            buffEffectName.color = textColor;
-            buffEffectValue.color = textColor;
+            buffDetail = BuffRT.Find("buffDetail").GetComponent<TextMeshProUGUI>();
         }
         public void UpdateBuffCardMessage(Buff buff)
         {
             buffName.text = buff.buff_name;
             Modifier[] m = buff.modifiers;
-            buffEffectName.text = null;
-            buffEffectValue.text = null;
+            buffDetail.text = null;
             for (int i = 0; i < m.Length; i++)
             {
-                buffEffectName.text += buffs.TryGetValue(m[i].attribute, out var dn) ? dn : m[i].attribute;
-                buffEffectValue.text += m[i].magnitude.ToString("0.000");
+                string effectName=buffs.TryGetValue(m[i].attribute, out var dn) ? dn : m[i].attribute;
+                string effectvalue = m[i].magnitude.ToString("0.000");
+                buffDetail.text += $"{effectName}: {effectvalue}";
                 if (i < m.Length - 1)
                 {
-                    buffEffectName.text += '\n';
-                    buffEffectValue.text += '\n';
+                    buffDetail.text += '\n';
                 }
             }
-            buffEffectName.rectTransform.sizeDelta = new Vector2(buffEffectName.rectTransform.rect.width, buffEffectName.preferredHeight);
-            buffEffectValue.rectTransform.sizeDelta = new Vector2(buffEffectValue.rectTransform.rect.width, buffEffectValue.preferredHeight);
-            BuffRT.sizeDelta = new Vector2(BuffRT.rect.width, 17 + buffEffectName.preferredHeight);
         }
     }
 }

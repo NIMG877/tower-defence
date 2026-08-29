@@ -1522,34 +1522,6 @@ MonoBehaviour:
         Content: 
         DurationTime: 0
         Contents: []
-    - Name: timer
-      Locked: 0
-      Actions:
-      - CommandType: 0
-        TriggerTime: 0
-        OnBeforeAction:
-          m_PersistentCalls:
-            m_Calls: []
-        EntityPrefabID:
-          ID_C: m
-          ID_N: 1
-        Camp: 2
-        OnActionRepeat:
-          m_PersistentCalls:
-            m_Calls: []
-        PathSerial: 14
-        GapsFromLastRepeat:
-        - 0
-        ModifyAttributes: 0
-        ModifyLevelHpConsume: 0
-        ModifyPrimary: 0
-        ModifyCountOperate: 0
-        Destination: {x: 0, y: 0}
-        Orientation: 0
-        HeadImage: {fileID: 0}
-        Content: 
-        DurationTime: 0
-        Contents: []
   Paths:
   - Name: skeleton_s
     CheckPoints:

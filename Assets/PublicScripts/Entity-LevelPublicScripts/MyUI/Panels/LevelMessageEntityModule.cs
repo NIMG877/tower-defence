@@ -138,14 +138,12 @@ namespace MyUI
             _hpSliderSize = _hpSlider.rect.size;
 
             _skillTalentRect = LevelMessageViewLookup.Get<RectTransform>(
-                root, "leftMessageArea/skillTalent/content/content");
+                root, "leftMessageArea/skillTalent/content/view/content");
             _skillTalentRectParent = LevelMessageViewLookup.Get<RectTransform>(
                 root, "leftMessageArea/skillTalent/content");
             _detailsScrollRect = _skillTalentRectParent.GetComponent<ScrollRect>();
-            _abilityCard = new AbilityCard(
-                Vector2.zero, _skillTalentRect, Color.white, _skillTalentRect.rect.width);
-            _subpCard = new SubpCard(
-                Vector2.zero, _skillTalentRect, Color.white, _skillTalentRect.rect.width);
+            _abilityCard = new AbilityCard(_skillTalentRect, Color.white);
+            _subpCard = new SubpCard(_skillTalentRect, Color.white);
             _subpCard.SubpRT.gameObject.SetActive(false);
             _skillTalentSwitchButtons = BindDetailsTabs(root);
 
@@ -761,11 +759,7 @@ namespace MyUI
             {
                 if (i >= _talentCards.Count)
                 {
-                    _talentCards.Add(new TalentCard(
-                        Vector2.zero,
-                        _skillTalentRect,
-                        Color.white,
-                        _skillTalentRect.rect.width));
+                    _talentCards.Add(new TalentCard(_skillTalentRect, Color.white));
                 }
                 _talentCards[i].TalentRT.gameObject.SetActive(true);
                 _talentCards[i].UpdateTalentCardMessage(talents[i]);
@@ -784,11 +778,7 @@ namespace MyUI
             {
                 if (i >= _buffCards.Count)
                 {
-                    _buffCards.Add(new BuffCard(
-                        Vector2.zero,
-                        _skillTalentRect,
-                        Color.white,
-                        _skillTalentRect.rect.width));
+                    _buffCards.Add(new BuffCard(_skillTalentRect, Color.white));
                 }
                 _buffCards[i].BuffRT.gameObject.SetActive(true);
                 _buffCards[i].UpdateBuffCardMessage(buffs[i]);
