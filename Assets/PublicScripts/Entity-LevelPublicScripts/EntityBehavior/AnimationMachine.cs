@@ -466,7 +466,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         float scale = attack.Animation.Duration / thisEntity.Stats.BaseAttackTimeS;
         if (_currentAttackBegin == null && length == 1)
         {
-            SetSpineAnimation(attack, false, 1);
+            SetSpineAnimation(attack, false, scale > 1 ? scale : 1);
             ConsumeOneShots(groupSlot);
         }
         else if (continueCombo || _currentAttackBegin == null)
