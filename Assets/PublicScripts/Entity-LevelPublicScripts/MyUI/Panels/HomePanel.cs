@@ -27,6 +27,13 @@ namespace MyUI
             handBook.onClick.AddListener(() => PanelManager.Push(MonsterHandbookPanel.Panel));
             Button editor = GetComponentInChildrenByPath<Button>("RightNaveBar/editor");
             editor.onClick.AddListener(() => PanelManager.Push(MapEditorPanel.Panel));
+            Button team = GetComponentInChildrenByPath<Button>("RightNaveBar/team");
+            team.onClick.AddListener(() =>
+            {
+                TeamPanel teamPanel = TeamPanel.Panel;
+                teamPanel.SetTeamManagementMode();
+                PanelManager.Push(teamPanel);
+            });
         }
     }
 }

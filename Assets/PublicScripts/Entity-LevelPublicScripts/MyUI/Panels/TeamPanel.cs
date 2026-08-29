@@ -20,13 +20,14 @@ namespace MyUI
             }
         }
         private TeamFrame _teamFrame;
+        private Button _startButton;
         private TeamPanel() : base(new UIType("Prefabs/UI/MyUIs/TeamPanel"))
         {
-            Button enterB = GetComponentInChildrenByPath<Button>("start");
-            if (enterB != null)
+            _startButton = GetComponentInChildrenByPath<Button>("start");
+            if (_startButton != null)
             {
-                enterB.transform.SetAsLastSibling();
-                enterB.onClick.AddListener(() => EnterBattle());
+                _startButton.transform.SetAsLastSibling();
+                _startButton.onClick.AddListener(() => EnterBattle());
             }
             _teamFrame = new TeamFrame(new Vector2(-50.2938f, -20), UIObject.GetComponent<RectTransform>(), GetComponentInChildrenByPath<Button>("delete"), GetComponentInChildrenByPath<Button>("fastadd"));
             _teamFrame.TeamName = "Team1";
@@ -34,6 +35,19 @@ namespace MyUI
         public void SetLevelData(LevelData levelData)
         {
             _levelData = levelData;
+            SetStartButtonVisible(levelData != null);
+        }
+        public void SetTeamManagementMode()
+        {
+            _levelData = null;
+            SetStartButtonVisible(false);
+        }
+        private void SetStartButtonVisible(bool visible)
+        {
+            if (_startButton != null)
+            {
+                _startButton.gameObject.SetActive(visible);
+            }
         }
         private void EnterBattle()
         {

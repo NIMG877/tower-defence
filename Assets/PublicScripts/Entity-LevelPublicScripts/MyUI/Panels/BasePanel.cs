@@ -50,6 +50,7 @@ namespace MyUI
         public virtual void OnEnter()
         {
             UIGroup.alpha = 0;
+            UIObject.transform.SetAsLastSibling();
             UIObject.SetActive(true);
             DOTween.To((value) =>
             {
@@ -68,6 +69,7 @@ namespace MyUI
         /// </summary>
         public virtual void OnResume()
         {
+            UIObject.transform.SetAsLastSibling();
             UIObject.SetActive(true);
         }
         /// <summary>
@@ -85,4 +87,3 @@ namespace MyUI
         }
     }
 }
-
