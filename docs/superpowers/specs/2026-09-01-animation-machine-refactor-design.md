@@ -66,9 +66,9 @@ Default=0 < Idle=1 < Move=2 < Attack=3 < Start=4 < Cast=5 < Die=6
 - 强制：当前 != Die 且目标未被 ban → 允许。
 - 收敛进唯一可测方法 `CanTransition(from, to, force)`。
 
-### 4.3 AttackPhase（None/Begin/Active/ComboWindow/End）
+### 4.3 AttackPhase（None/Active/ComboWindow/End）
 
-归逻辑侧：连击判定、连击 index、0.05s ComboWindow 计时（状态机内计时，Entity 的 FixedUpdate 驱动 tick）。动画层只上报"攻击主动段播完"。
+归逻辑侧：连击判定、连击 index、0.05s ComboWindow 计时（状态机内计时，Entity 的 FixedUpdate 驱动 tick）。动画层只上报"攻击主动段播完"。旧实现的 Begin（前摇段）从未被任何判定读取，属表现细节，留在动画层编排里，逻辑侧不建模。
 
 ### 4.4 API
 
@@ -81,9 +81,9 @@ EntityState CurrentState { get; }                            // 即时生效
 AttackPhase CurrentAttackPhase { get; }
 
 // 动画层→状态机的时机上报
-void NotifyAttackActiveCompleted();                         // 主动段播完 → ComboWindow / 推进连击 index
-void NotifyAttackEndCompleted();                            // End 段播完 → 结束攻击，回 Idle
-void NotifyStateAnimationCompleted(EntityState state);      // Start/Cast 播完 → 回 Idle
+void NotifyAttackActiveCompleted(int groupLength);          // 主动段播完 → ComboWindow / 推进连击 index
+void NotifyAttackEndCompleted();                            // End 段播完（或单发无 End 主动段播完）→ 回 Idle
+void NotifyStartAnimationCompleted();                       // Start 播完 → 回 Idle（Cast 为粘性演出态，不走此通道）
 
 // 事件
 event Action<EntityState, EntityState> StateChanged;
@@ -96,7 +96,7 @@ event Action DieAnimationCompleted;                          // Entity 订阅，
 
 只做三件事：
 
-1. **播放**：订阅 `StateChanged` → 按状态播对应槽（Move 分支、攻击 Begin→Active→End 序列编排与接续排队、Start/Cast 播完回 Idle、Die）。攻击动画按 `Stats.BaseAttackTimeS` 缩放的行为原样保留。
+1. **播放**：订阅 `StateChanged` → 按状态播对应槽（Move 分支、攻击 Begin→Active→End 序列编排与接续排队、Start 播完回 Idle、Cast 粘性保持末帧、Die）。攻击动画按 `Stats.BaseAttackTimeS` 缩放的行为原样保留。
 2. **覆盖系统**：`AddOverride / AddOneShotOverride / RemoveOverride(s)` 签名不变，内部字典化；one-shot 消费时机不变（真正播放槽位时消费整个条目）。
 3. **时机上报**：Spine `OnAttack` → 触发状态机一次性攻击回调；TrackEntry 播完 → `NotifyAttackActiveCompleted / NotifyStateAnimationCompleted / DieAnimationCompleted`。
 
@@ -140,15 +140,17 @@ new AnimationOverride { [AnimationSlot.Idle] = "skillLoop", [AnimationSlot.Cast]
 
 ## 7. Cast 状态与遗留技能重对齐
 
-**Cast 语义**：技能演出态；播 Cast 槽动画（不循环），播完自动回 Idle；优先级介于 Start 与 Die 之间（死亡可打断演出，演出优先于普攻）。
+**Cast 语义**：技能演出态；播 Cast 槽动画（不循环），播完**保持末帧（粘性）**，不自动回 Idle——钻地潜伏等演出依赖末帧保持；转出由技能显式 `TrySetState(Idle/Default, true)` 负责。优先级介于 Start 与 Die 之间（死亡可打断演出，演出优先于普攻）。
 
 | 技能 | 现状（Die 后门/正常覆盖） | 重对齐为 |
 |---|---|---|
-| HeadSeterSkill1（钻地） | `override Start` + `TrySetState(Die)` ×2 | 两阶段各覆盖 Cast 槽 + `TrySetState(Cast)`；不可选中 buff 对不变 |
-| WitherTalent2（凋灵复活） | Idle 覆盖（正常）；终局 `override Start` + `Die` | 复活循环照旧；终局 = Cast 播 `_start2` → 播完爆炸 → 真 `Die()` 走正规死亡链 |
+| HeadSeterSkill1（钻地） | `override Start` + `TrySetState(Die)` ×2 | 两阶段各覆盖 Cast 槽 + `TrySetState(Cast)`（粘性保持潜伏姿态）；钻出动画播完显式回 Idle 恢复行走；不可选中 buff 对不变 |
+| WitherTalent2（凋灵复活） | Idle 覆盖（正常）；终局 `override Start` + `Die` | 复活循环照旧；终局 = Cast 播 `_start2` → 播完爆炸 → HpCheck 狂暴 + 显式回 Idle（**存活**，恢复正常行为） |
 | WdslmSkill2（策反） | `override Attack*`（正常） | 仅索引化语法，行为不变 |
-| WdslmSkill3（变身） | `override Start/Idle` + `Die` ×2 | 开局 Cast 播 `_skillStart` → Idle 循环 `_skillLoop`；结束 Cast 播 `_skillEnd` → 显式退场（本体未入数据管线，编译级验证） |
+| WdslmSkill3（变身） | `override Start/Idle` + `Die` ×2 | 开局 Cast 播 `_skillStart` → 落地后显式回 Idle 循环 `_skillLoop`；结束 Cast 播 `_skillEnd` → 播完显式退场（本体未入数据管线，编译级验证） |
 | HeadSeterTalent1 / WitchSkill / BeefSkill | 正常覆盖 API | 仅索引化语法，行为不变 |
+
+**旧后门机制（考古结论）**：`SetState(Die)` 播的是 SO 的 Die 槽资产（非覆盖的 Start）；覆盖 Start 的作用是劫持 `ClassifyAnimation`（判定顺序 Start 在 Die 前）把播放中的动画分类成 Start → Die-complete 分支不触发 → 不淡出不回池。三个旧技能的终局意图（恢复行走/复活存活/显式退场）在旧机制下并无通路——属意图明确、机制残缺的遗留代码，故按意图重写。
 
 ## 8. 调用方迁移映射（22 文件）
 
