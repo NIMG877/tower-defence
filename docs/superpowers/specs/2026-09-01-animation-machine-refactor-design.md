@@ -81,8 +81,9 @@ EntityState CurrentState { get; }                            // 即时生效
 AttackPhase CurrentAttackPhase { get; }
 
 // 动画层→状态机的时机上报
-void NotifyAttackActiveCompleted();                         // → ComboWindow / 推进连击 index
-void NotifyStateAnimationCompleted(EntityState state);      // Start/Cast/AttackEnd 播完 → 回 Idle
+void NotifyAttackActiveCompleted();                         // 主动段播完 → ComboWindow / 推进连击 index
+void NotifyAttackEndCompleted();                            // End 段播完 → 结束攻击，回 Idle
+void NotifyStateAnimationCompleted(EntityState state);      // Start/Cast 播完 → 回 Idle
 
 // 事件
 event Action<EntityState, EntityState> StateChanged;
