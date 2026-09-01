@@ -73,8 +73,8 @@ MonoBehaviour:
     MassLevel: 0
     MoveMethod: 0
     Skills:
-    - {fileID: 11400000, guid: 27803cc15c4d451fa333120153dea722, type: 2}
     - {fileID: 11400000, guid: 93f5c9daf73c4fe6a794f651d1fb582d, type: 2}
+    - {fileID: 11400000, guid: 27803cc15c4d451fa333120153dea722, type: 2}
     Talents:
     - {fileID: 11400000, guid: 9e0242c321b458831a624b77b4797a62, type: 2}
     AnimationResources: {fileID: 11400000, guid: b7639e8dd39688e47a11dea72ef2238e, type: 2}
@@ -439,6 +439,708 @@ MonoBehaviour:
     - {fileID: 11400000, guid: bfb4d0f2a2b00134585e846bdb20816e, type: 2}
     AnimationResources: {fileID: 11400000, guid: db1cfe2d343af164e8ae810c8e47b817, type: 2}
   - ID:
+      ID_C: c
+      ID_N: 8
+    ChineseName: "\u5B89\u5FB7\u5207\u5C14"
+    EnglishName: Adnachiel
+    Description: "\u2014\u2014"
+    Prefab: {fileID: 1995325550543481829, guid: b317bcd53b3bbdf7e548dd6a37d92392, type: 3}
+    HeadImage: {fileID: 21300000, guid: cc21eb99331b6024898e2ccc3eae1166, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: f5d11b53f57c9594daa3dff20d2ec0eb, type: 3}
+    WholeImage: {fileID: 21300000, guid: f5d11b53f57c9594daa3dff20d2ec0eb, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 3
+    CharacterJob: 3
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    - {x: 0, y: 2}
+    - {x: 0, y: 3}
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    - {x: 1, y: 2}
+    - {x: 1, y: 3}
+    - {x: -1, y: 0}
+    - {x: -1, y: 1}
+    - {x: -1, y: 2}
+    - {x: -1, y: 3}
+    VisionRadius: 0
+    Attack: 100
+    BaseAttackTime: 1
+    AttackNum: 1
+    DamageType: 0
+    TargetPriority: 0
+    MaxHp: 1000
+    Defense: 100
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 10
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 1
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: 802d3238926950c5a3b4e76658c824d1, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: cf32d747c72608173d632ba8569ac138, type: 2}
+    AnimationResources: {fileID: 11400000, guid: 61fcd16c983e26bd1ecae25433ca2f27, type: 2}
+  - ID:
+      ID_C: c
+      ID_N: 9
+    ChineseName: "\u5B89\u8D5B\u5C14"
+    EnglishName: Ansel
+    Description: "\u2014\u2014"
+    Prefab: {fileID: 817258652922341733, guid: d49ec92097941c4e75d320f41da28536, type: 3}
+    HeadImage: {fileID: 21300000, guid: 4d4460d5ad19d084299b3a27df97445f, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: 4374493c8dd37e3468e9e8e3d4512f45, type: 3}
+    WholeImage: {fileID: 21300000, guid: a9870cc73c9f83942bd3b2cc647b0fae, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 3
+    CharacterJob: 5
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    - {x: 0, y: 2}
+    - {x: 0, y: 3}
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    - {x: 1, y: 2}
+    - {x: 1, y: 3}
+    - {x: -1, y: 0}
+    - {x: -1, y: 1}
+    - {x: -1, y: 2}
+    - {x: -1, y: 3}
+    VisionRadius: 0
+    Attack: 100
+    BaseAttackTime: 1
+    AttackNum: 1
+    DamageType: 3
+    TargetPriority: 2
+    MaxHp: 1000
+    Defense: 100
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 10
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 1
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: fc5172ff29cdb433edeacd84c49aff8e, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: 569b440f470e1452c6db02ba28fec422, type: 2}
+    AnimationResources: {fileID: 11400000, guid: 2e344e728f8e9548b42638c373fcd9ee, type: 2}
+  - ID:
+      ID_C: c
+      ID_N: 10
+    ChineseName: "\u5361\u7F07"
+    EnglishName: Cardigan
+    Description: "\u2014\u2014"
+    Prefab: {fileID: 767659650353838837, guid: 8e45cd5b6057ffd27c51d12df1f3f5bb, type: 3}
+    HeadImage: {fileID: 21300000, guid: 5ea3567f7f5aef44eac6dc5901a372b9, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: 6f09ff9bea3577c43bd2f4d98206e1b4, type: 3}
+    WholeImage: {fileID: 21300000, guid: acd52bf2960ca0e44894a16be25151d4, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 3
+    CharacterJob: 2
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    VisionRadius: 0
+    Attack: 100
+    BaseAttackTime: 1
+    AttackNum: 1
+    DamageType: 0
+    TargetPriority: 0
+    MaxHp: 1000
+    Defense: 100
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 3
+    TauntLevel: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 10
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 0
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: b7e7ce38d7c67a514c68053dd81394fe, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: 2080220f003a371b0d986fe5103c5e87, type: 2}
+    AnimationResources: {fileID: 11400000, guid: 5733979cd0846c0bf2d32b9a6ea6a2a2, type: 2}
+  - ID:
+      ID_C: c
+      ID_N: 11
+    ChineseName: "\u7C73\u683C\u9C81"
+    EnglishName: Beagle
+    Description: "\u2014\u2014"
+    Prefab: {fileID: 208107203719422279, guid: 96e200ccb0b949e9ac06d1ded48cbaa8, type: 3}
+    HeadImage: {fileID: 21300000, guid: d3d37e69f0c17b843816971dd24bfbbe, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: 6d59848dfec1f8d4bb337eb449232dd4, type: 3}
+    WholeImage: {fileID: 21300000, guid: 426c0ab3be5cf0b48b6f59ce37099799, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 3
+    CharacterJob: 2
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    VisionRadius: 0
+    Attack: 100
+    BaseAttackTime: 1
+    AttackNum: 1
+    DamageType: 0
+    TargetPriority: 0
+    MaxHp: 1000
+    Defense: 100
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 3
+    TauntLevel: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 10
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 0
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: 7237b039858f5fb651fd60167bf54491, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: 7d5bdc5e01de8eef3e6903288fb3a90d, type: 2}
+    AnimationResources: {fileID: 11400000, guid: 418a80f87e0f7abfe5561c0f4059d4ba, type: 2}
+  - ID:
+      ID_C: c
+      ID_N: 12
+    ChineseName: "\u7A7A\u7206"
+    EnglishName: Catapult
+    Description: "\u2014\u2014"
+    Prefab: {fileID: 1955471323136557353, guid: 9fc7c7c11e1259f30fbb809e05139122, type: 3}
+    HeadImage: {fileID: 21300000, guid: ac93862d32b0a5b48aa31d6d9c46330e, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: e1621cc31cc74aa4590ec2fa9e508e73, type: 3}
+    WholeImage: {fileID: 21300000, guid: 6c479cbd6d6b3c9469868127d237fd9d, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 3
+    CharacterJob: 3
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    - {x: 0, y: 2}
+    - {x: 0, y: 3}
+    - {x: 0, y: 4}
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    - {x: 1, y: 2}
+    - {x: 1, y: 3}
+    - {x: 1, y: 4}
+    - {x: -1, y: 0}
+    - {x: -1, y: 1}
+    - {x: -1, y: 2}
+    - {x: -1, y: 3}
+    - {x: -1, y: 4}
+    VisionRadius: 0
+    Attack: 100
+    BaseAttackTime: 1
+    AttackNum: 1
+    DamageType: 0
+    TargetPriority: 0
+    MaxHp: 1000
+    Defense: 100
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 10
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 1
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: 0d05cea8182bc26568791952e22bc21f, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: 202d0ed21b2dc32fa52d2a01357f6cdc, type: 2}
+    AnimationResources: {fileID: 11400000, guid: e83e428a539fef1c91d4f9fbf2934c8d, type: 2}
+  - ID:
+      ID_C: c
+      ID_N: 13
+    ChineseName: "\u7FCE\u7FBD"
+    EnglishName: Plume
+    Description: "\u2014\u2014"
+    Prefab: {fileID: 550387364411560841, guid: ec3c4b86d971e09405055c91a5e3520b, type: 3}
+    HeadImage: {fileID: 21300000, guid: 0d0e4c6215cda9446a70a9cbc05c904f, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: f53ce45e49f2d5c46986cc0c75cf0369, type: 3}
+    WholeImage: {fileID: 21300000, guid: d8408aa571be96d4a85ac28d6c5233c9, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 3
+    CharacterJob: 0
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    VisionRadius: 0
+    Attack: 100
+    BaseAttackTime: 1
+    AttackNum: 1
+    DamageType: 0
+    TargetPriority: 0
+    MaxHp: 1000
+    Defense: 100
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 10
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 0
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: e1cc824780e343898db97eec10380024, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: d01de30b38ef799f5b2519cd52c07f6a, type: 2}
+    AnimationResources: {fileID: 11400000, guid: 5651bf8b3b7a2c6097f39ca549d40460, type: 2}
+  - ID:
+      ID_C: c
+      ID_N: 14
+    ChineseName: "\u82AC"
+    EnglishName: Fang
+    Description: "\u2014\u2014"
+    Prefab: {fileID: 5848661306790279927, guid: 707e02d5e7d996ab04e5e5386bc9985d, type: 3}
+    HeadImage: {fileID: 21300000, guid: 0259237bb14183242bd586beb621db38, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: 25c7c8d51c5fcf34f9ad57884ab3c542, type: 3}
+    WholeImage: {fileID: 21300000, guid: 366216e30db2a0b4692dd542a0c77fb1, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 3
+    CharacterJob: 0
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    VisionRadius: 0
+    Attack: 100
+    BaseAttackTime: 1
+    AttackNum: 1
+    DamageType: 0
+    TargetPriority: 0
+    MaxHp: 1000
+    Defense: 100
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 2
+    TauntLevel: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 10
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 0
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: 4f352449a34652c2f4183671809a5787, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: bebab288b1b7caf17ddde33a53d602ff, type: 2}
+    AnimationResources: {fileID: 11400000, guid: 4e03ab10cd9a9aaf6af65016d7e6d637, type: 2}
+  - ID:
+      ID_C: c
+      ID_N: 15
+    ChineseName: "\u708E\u7194"
+    EnglishName: Lava
+    Description: "\u2014\u2014"
+    Prefab: {fileID: 5832932088585686875, guid: 77c5b0d503861922bd0c3bccc4f12d4a, type: 3}
+    HeadImage: {fileID: 21300000, guid: 6055a87cd253cba4c83ad83be1852bc5, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: e3934a4b92c3c2947b830e73dbb8751d, type: 3}
+    WholeImage: {fileID: 21300000, guid: 80044e07201cb864e810ec24af536b76, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 3
+    CharacterJob: 4
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    - {x: 0, y: 2}
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    - {x: 1, y: 2}
+    - {x: -1, y: 0}
+    - {x: -1, y: 1}
+    - {x: -1, y: 2}
+    VisionRadius: 0
+    Attack: 100
+    BaseAttackTime: 1
+    AttackNum: 1
+    DamageType: 1
+    TargetPriority: 0
+    MaxHp: 1000
+    Defense: 100
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 10
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 1
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: e317ea6fdd012cb488b754192c498dc1, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: 0545be457cb2ad72b86bad611de9ecd4, type: 2}
+    AnimationResources: {fileID: 11400000, guid: 3d373dcce35e3804d6c6a5acb83cf5ad, type: 2}
+  - ID:
+      ID_C: c
+      ID_N: 16
+    ChineseName: "\u6708\u89C1\u591C"
+    EnglishName: Midnight
+    Description: "\u2014\u2014"
+    Prefab: {fileID: 2838064144220338387, guid: d761521a0415b69b049cfbc188df5d09, type: 3}
+    HeadImage: {fileID: 21300000, guid: 9553dd055faac1240b78ba4fa9d59b33, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: 9ce48895bd1d56a4cab837dc6b8ec4eb, type: 3}
+    WholeImage: {fileID: 21300000, guid: 952db3dec8710a3409d375c19ec973ea, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 3
+    CharacterJob: 1
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    - {x: 0, y: 2}
+    - {x: 0, y: 3}
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    - {x: -1, y: 0}
+    - {x: -1, y: 1}
+    VisionRadius: 0
+    Attack: 100
+    BaseAttackTime: 1
+    AttackNum: 1
+    DamageType: 0
+    TargetPriority: 0
+    MaxHp: 1000
+    Defense: 100
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 2
+    TauntLevel: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 10
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 0
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: 8ffc8ab18e54b03a389e7d9e8018cb14, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: 494b62c971df1086b499a2a01a40e49c, type: 2}
+    AnimationResources: {fileID: 11400000, guid: 74d9837242b1848a53a436d3840b5c36, type: 2}
+  - ID:
+      ID_C: c
+      ID_N: 17
+    ChineseName: "\u6893\u5170"
+    EnglishName: Orchid
+    Description: "\u2014\u2014"
+    Prefab: {fileID: 6310612441759419693, guid: 7a7c9b51fff855493830580df05b76ef, type: 3}
+    HeadImage: {fileID: 21300000, guid: 403ee3cbf37f7a544851ec4749dcd75f, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: 971634f5982b15a4694cf002e114b820, type: 3}
+    WholeImage: {fileID: 21300000, guid: ff78c88030417474b8829bcb400eee5e, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 3
+    CharacterJob: 6
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: -1}
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    - {x: 0, y: 2}
+    - {x: 1, y: -1}
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    - {x: 1, y: 2}
+    - {x: -1, y: -1}
+    - {x: -1, y: 0}
+    - {x: -1, y: 1}
+    - {x: -1, y: 2}
+    VisionRadius: 0
+    Attack: 100
+    BaseAttackTime: 1
+    AttackNum: 1
+    DamageType: 1
+    TargetPriority: 0
+    MaxHp: 1000
+    Defense: 100
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 1
+    TauntLevel: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 10
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 1
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: 7777b6db17d94c450c09a3722b6626f8, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: 9089c9f14579348a5f90198a3351c9d9, type: 2}
+    AnimationResources: {fileID: 11400000, guid: 9d53af842f6abec9cc0587e96859fd2b, type: 2}
+  - ID:
+      ID_C: c
+      ID_N: 18
+    ChineseName: "\u6CE1\u666E\u5361"
+    EnglishName: Popukar
+    Description: "\u2014\u2014"
+    Prefab: {fileID: 3774173466804191989, guid: ef987ca8a4702cf6c5d10e7294eb8e8c, type: 3}
+    HeadImage: {fileID: 21300000, guid: 00d29bc723611e84a8ff64ea066dc622, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: 40fff1f2e31407047bafe50fe8cdb280, type: 3}
+    WholeImage: {fileID: 21300000, guid: d0c069c8acb69ad4c993663ee903ac17, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 3
+    CharacterJob: 1
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    VisionRadius: 0
+    Attack: 100
+    BaseAttackTime: 1
+    AttackNum: 1
+    DamageType: 0
+    TargetPriority: 0
+    MaxHp: 1000
+    Defense: 100
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 2
+    TauntLevel: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 10
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 0
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: 96fa2797c4069d20105f3fd0dcce3cea, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: 73602c53083fd764d24d664b24b61141, type: 2}
+    AnimationResources: {fileID: 11400000, guid: 0f56ee53baaab0d736350c383814c89c, type: 2}
+  - ID:
+      ID_C: c
+      ID_N: 19
+    ChineseName: "\u9999\u8349"
+    EnglishName: Vanilla
+    Description: "\u2014\u2014"
+    Prefab: {fileID: 646420366196041897, guid: 089ad7a778c8c5df90d15e6c3bb9e2f9, type: 3}
+    HeadImage: {fileID: 21300000, guid: 9d27b9624552ab64da6417abfe72b33b, type: 3}
+    HalfBodyImage: {fileID: 21300000, guid: 3f5ad0472d4314f45ba3bf52d2b7de58, type: 3}
+    WholeImage: {fileID: 21300000, guid: 48fc690fb8293414db9e05f0e77ea8cd, type: 3}
+    DefaultCamp: 1
+    CharacterRarity: 3
+    CharacterJob: 0
+    MonsterStatus: 0
+    MonsterLabel: 
+    MonsterIsPrimary: 0
+    MonsterCountOperated: 0
+    MonsterLevelHpConsume: 0
+    VisionRange:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    VisionRadius: 0
+    Attack: 100
+    BaseAttackTime: 1
+    AttackNum: 1
+    DamageType: 0
+    TargetPriority: 0
+    MaxHp: 1000
+    Defense: 100
+    MagicResistance: 0
+    PhysicalDodge: 0
+    MagicDodge: 0
+    BlockOccupation: 2
+    TauntLevel: 0
+    CanSpawnEntityIds: []
+    CanSpawnEntityCounts: 
+    IsStatic: 1
+    Cost: 10
+    CanCallBack: 1
+    NeedsDirectionSelection: 1
+    CanSetType: 0
+    RespawnTime: 70
+    RespawnStrategy: 1
+    CanRespawn: 1
+    RespawnCostUp: 50
+    MaxOccupyCount: 1
+    MoveSpeed: 0
+    MassLevel: 0
+    MoveMethod: 0
+    Skills:
+    - {fileID: 11400000, guid: b27b68f8ff1ab6e7404cd918e799dbd4, type: 2}
+    Talents:
+    - {fileID: 11400000, guid: 246740e16521e37066196ec41443c858, type: 2}
+    AnimationResources: {fileID: 11400000, guid: 542d904948985515ec3fc04a9ecb0acb, type: 2}
+  - ID:
       ID_C: m
       ID_N: 1
     ChineseName: "\u50F5\u5C38"
@@ -588,7 +1290,8 @@ MonoBehaviour:
     MassLevel: 1
     MoveMethod: 0
     Skills: []
-    Talents: []
+    Talents:
+    - {fileID: 11400000, guid: 7686315d8385e1748857a2dc52d6d713, type: 2}
     AnimationResources: {fileID: 11400000, guid: d0c65e57c85fd7f4a859cc396ef72414, type: 2}
   - ID:
       ID_C: m
@@ -979,7 +1682,7 @@ MonoBehaviour:
     PhysicalDodge: 0
     MagicDodge: 0
     BlockOccupation: 0
-    TauntLevel: -1
+    TauntLevel: 0
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 0

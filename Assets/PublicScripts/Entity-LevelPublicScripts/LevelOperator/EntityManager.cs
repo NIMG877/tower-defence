@@ -58,14 +58,15 @@ public class EntityManager : IManagerStartEnd
     /// <param name="destination">Placement position; snapped to the grid cell center.</param>
     /// <param name="camp">Entity camp.</param>
     /// <param name="orientation">Facing when placed: 0-up, 1-right, 2-down, 3-left.</param>
+    /// <param name="skillIndex">Index of the skill in EntityData.Skills to bring into battle (player deployment); 0 for callers without skill selection.</param>
     /// <returns>The placed entity, or null when no pool exists for the id.</returns>
-    public Entity SetStaticEntity(EntityID prefab_id, Vector2 destination, int camp, int orientation)
+    public Entity SetStaticEntity(EntityID prefab_id, Vector2 destination, int camp, int orientation, int skillIndex = 0)
     {
         EntityPool entityPool = _poolManager.FetchEntityPool(prefab_id);
         destination.Set((int)(destination.x + 0.5), (int)(destination.y + 0.5));
         if (entityPool != null)
         {
-            Entity staticEntity = entityPool.CallOut(destination, camp);
+            Entity staticEntity = entityPool.CallOut(destination, camp, skillIndex);
             AddEntityToStaticList(staticEntity);
             staticEntity.SetOrientation(orientation);
             Object.Instantiate(_shadowImg, destination, Quaternion.identity, staticEntity.TempContainer).transform.localScale *= EntityR / 0.5f;

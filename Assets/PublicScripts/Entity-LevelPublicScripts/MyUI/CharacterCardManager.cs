@@ -71,7 +71,15 @@ public class CharacterCardManager
         _cardsForbidNull = new Dictionary<EntityID, CharacterCardElements>();
         _cardForbidNullPrefab = Resources.Load<Button>("Prefabs/UI/MyUIs/Components/characterCard");
     }
-    public void SetCharacterCardAllowNull(Button card, EntityID characterID)
+    private Sprite GetSkillSprite(EntityData data, int skillIndex)
+    {
+        var abilities = data.Skills;
+        return abilities != null && abilities.Count > 0 && abilities[skillIndex].icon != null
+            ? abilities[skillIndex].icon
+            : _noneSkill;
+    }
+
+    public void SetCharacterCardAllowNull(Button card, EntityID characterID, int skillIndex = 0)
     {
         GameObject nullshow = card.transform.Find("nullShow").GetComponent<Transform>().gameObject;
         Image bkNull = card.transform.Find("nullShow/bknull").GetComponent<Image>();
@@ -115,15 +123,7 @@ public class CharacterCardManager
             lh.sprite = _lh[index];
             uh.sprite = _uh[index];
             classImg.sprite = _class[characterData.CharacterJob];
-            var abilities = characterData.Skills;
-            if (abilities != null && abilities.Count > 0 && abilities[0].icon != null)
-            {
-                skillImg.sprite = abilities[0].icon;
-            }
-            else
-            {
-                skillImg.sprite = _noneSkill;
-            }
+            skillImg.sprite = GetSkillSprite(characterData, skillIndex);
             name.text = _characterOwn[characterID].ChineseName;
             card.targetGraphic = photo;
         }
@@ -144,6 +144,7 @@ public class CharacterCardManager
                 card.Uh.sprite = _uh[index];
                 card.ClassImg.sprite = _class[_characterOwn[characterId].CharacterJob];
                 card.Name.text = _characterOwn[characterId].ChineseName;
+                card.SkillImg.sprite = GetSkillSprite(_characterOwn[characterId], 0);
                 _cardsForbidNull.Add(characterId, card);
                 return card.CharacterButton;
             }
@@ -161,8 +162,10 @@ public class CharacterCardManager
     {
         return _cardsForbidNull[characterId].CharacterButton;
     }
-    public void ResetCardForbidNullSkill(EntityID characterId)
+    /// <summary>更新选人面板缓存卡上的技能图标为该干员当前选择的技能。</summary>
+    public void ResetCardForbidNullSkill(EntityID characterId, int skillIndex)
     {
+        _cardsForbidNull[characterId].SkillImg.sprite = GetSkillSprite(_characterOwn[characterId], skillIndex);
     }
     public EntityData GetCharacterAttribute(EntityID characterId)
     {

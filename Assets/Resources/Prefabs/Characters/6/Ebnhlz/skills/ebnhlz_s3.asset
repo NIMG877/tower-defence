@@ -15,7 +15,7 @@ MonoBehaviour:
   abilityId: ebnhlz_s3
   abilityName: "\u5BC2\u9759\u4E4B\u58F0"
   description: "\u653B\u51FB\u901F\u5EA6+80\uFF0C\u653B\u51FB\u529B+65%\uFF0C\u53EA\u4EE5\u7CBE\u82F1\u6216\u9886\u8896\u654C\u4EBA\u4E3A\u653B\u51FB\u76EE\u6807\uFF0C\u7B2C\u4E00\u5929\u8D4B\u7684\u4F24\u5BB3\u52A0\u6210\u63D0\u5347\u81F3\u539F\u672C\u7684140%"
-  icon: {fileID: 21300000, guid: 4635b170785529c44a88013a54a3c807, type: 3}
+  icon: {fileID: 21300000, guid: 5d11c0b5f82fbe44ea9cb6e88f5d79b7, type: 3}
   Kind: 0
   sp:
     totalSp: 20
@@ -109,6 +109,7 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
+    detached: 0
   - triggers:
     - triggerEvent: 18
       groups: []
@@ -168,6 +169,7 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
+    detached: 0
   - triggers:
     - triggerEvent: 3
       groups: []
@@ -221,4 +223,5 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
+    detached: 0
   legacyComponents: []

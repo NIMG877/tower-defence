@@ -90,7 +90,9 @@ public class EntityAbilityRunner
 
         // Talents 在前,Skills 在后(语义优先 + 保持"天赋在技能前"的传统顺序)
         PreWarmList(data.Talents, AbilityKind.Talent);
-        PreWarmList(data.Skills, AbilityKind.Skill);
+        // 只构建选中的技能(全量构建时未选中的技能也永远无人触发,白占 runtime)
+        if (data.Skills != null && data.Skills.Count > 0 && data.Skills[_entity.SelectedSkillIndex] != null)
+            BuildAbilityRuntime(data.Skills[_entity.SelectedSkillIndex], AbilityKind.Skill);
 
         DispatchEvent(new PreWarmEvent());
     }
@@ -104,6 +106,26 @@ public class EntityAbilityRunner
             if (cfg == null) continue;
             BuildAbilityRuntime(cfg, kind);
         }
+    }
+
+    /// <summary>
+    /// 重建生效技能:拆掉已构建的全部 Skill runtime,按 <c>_entity.SelectedSkillIndex</c> 重新构建。
+    /// 仅可在实体休眠期调用(由 <see cref="Entity.SetSelectedSkill"/> 在 CallOut 取出后、Initialize 前触发):
+    /// 此时旧 runtime 已 OnTeardown 或从未初始化,直接 Unwire + 移除即可。
+    /// </summary>
+    public void RebuildSelectedSkill()
+    {
+        for (int i = _abilities.Count - 1; i >= 0; i--)
+        {
+            var a = _abilities[i];
+            if (a.Kind != AbilityKind.Skill) continue;
+            UnwireRuntime(a);
+            _abilities.RemoveAt(i);
+        }
+        var data = _entity.EntityData;
+        if (data.Skills != null && data.Skills.Count > 0 && data.Skills[_entity.SelectedSkillIndex] != null)
+            BuildAbilityRuntime(data.Skills[_entity.SelectedSkillIndex], AbilityKind.Skill);
+        InvalidateAbilitiesCache();
     }
 
     public void OnInitialize()

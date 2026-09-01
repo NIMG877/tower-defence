@@ -15,7 +15,7 @@ MonoBehaviour:
   abilityId: stward_s1
   abilityName: "\u5F3A\u529B\u51FB\xB7\u03B1\u578B"
   description: "\u9020\u6210\u76F8\u5F53\u4E8E\u653B\u51FB\u529B190%\u7684\u4F24\u5BB3"
-  icon: {fileID: 21300000, guid: 4635b170785529c44a88013a54a3c807, type: 3}
+  icon: {fileID: 21300000, guid: 37ecf93a5bc6b0343a91ae784904d4b7, type: 3}
   Kind: 0
   sp:
     totalSp: 4
@@ -51,3 +51,5 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
+    detached: 0
+  legacyComponents: []

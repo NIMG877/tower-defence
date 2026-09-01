@@ -15,7 +15,7 @@ MonoBehaviour:
   abilityId: 
   abilityName: 
   description: 
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 70061e7879891c643b2227f32bee2acd, type: 3}
   Kind: 0
   sp:
     totalSp: 0
@@ -28,3 +28,4 @@ MonoBehaviour:
     recoverForbidDuringAbility: 0
     canManualClose: 0
   rules: []
+  legacyComponents: []

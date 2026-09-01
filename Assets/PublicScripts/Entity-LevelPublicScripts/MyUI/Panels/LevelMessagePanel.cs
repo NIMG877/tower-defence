@@ -209,20 +209,23 @@ namespace MyUI
         {
             base.OnEnter();
 
-            var teamMembers = SaveSystem.GetTeamMembers("Team1");
+            var teamMembers = SaveSystem.GetTeamMembers(SaveSystem.CurrentTeamName);
+            var teamSkillSelects = SaveSystem.GetTeamSkillSelects(SaveSystem.CurrentTeamName);
             var characters = new EntityID[teamMembers.Count];
             var numbers = new int[teamMembers.Count];
+            var skillIndices = new int[teamMembers.Count];
             for (int i = 0; i < characters.Length; i++)
             {
                 characters[i] = teamMembers[i];
                 numbers[i] = 1;
+                skillIndices[i] = teamSkillSelects[i];
             }
 
             _selection.Clear();
             _currentState = LevelMessageUIState.Normal;
             _combat.OnEnter(characters);
             _entity.OnEnter();
-            _deployment.OnEnter(characters, numbers);
+            _deployment.OnEnter(characters, numbers, skillIndices);
             _hud.OnEnter();
             ApplyStateView(LevelMessageUIState.Normal);
             StartUpdateLoop();

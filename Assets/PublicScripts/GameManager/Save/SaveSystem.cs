@@ -36,6 +36,9 @@ public static class SaveSystem
     public static void Load()
     {
         _cache = TryRead(MainPath) ?? TryRead(BackupPath) ?? CreateDefault();
+        // 旧档没有 currentTeam 字段（JsonUtility 反序列化为 null）——迁移为第一支队伍
+        if (string.IsNullOrEmpty(_cache.currentTeam))
+            _cache.currentTeam = _cache.teams[0].teamName;
     }
 
     /// <summary>把当前 _cache 落盘。私有——外部不应直接调，统一走 Set* API。</summary>
@@ -83,7 +86,8 @@ public static class SaveSystem
             save.charactersOwn.Add(c.ID);
         // 4 支空队伍
         for (int i = 1; i <= 4; i++)
-            save.teams.Add(new TeamSave { teamName = "Team" + i });
+            save.teams.Add(new TeamSave { teamName = "编队" + i });
+        save.currentTeam = save.teams[0].teamName;
         return save;
     }
 
@@ -130,6 +134,61 @@ public static class SaveSystem
             int skill = (skillSelects != null && i < skillSelects.Count) ? skillSelects[i] : 0;
             team.Members.Add(new MemberEntry(members[i], skill));
         }
+        Save();
+    }
+
+    // ===== 编队管理（TeamPanel 的 teamswitch） =====
+
+    /// <summary>全部编队名（按存档顺序，与编队下拉选项一一对应）。</summary>
+    public static IReadOnlyList<string> GetTeamNames()
+    {
+        var names = new string[Current.teams.Count];
+        for (int i = 0; i < names.Length; i++) names[i] = Current.teams[i].teamName;
+        return names;
+    }
+
+    /// <summary>当前选中的编队名。出战时读取。</summary>
+    public static string CurrentTeamName => Current.currentTeam;
+
+    /// <summary>切换当前选中编队（自动 Save）。</summary>
+    public static void SetCurrentTeam(string teamName)
+    {
+        Current.currentTeam = teamName;
+        Save();
+    }
+
+    /// <summary>新增一支空编队，自动命名"编队N"（取首个未占用编号），自动 Save，返回新编队名。</summary>
+    public static string AddTeam()
+    {
+        int n = 1;
+        while (Current.teams.Exists(t => t.teamName == "编队" + n)) n++;
+        string name = "编队" + n;
+        Current.teams.Add(new TeamSave { teamName = name });
+        Save();
+        return name;
+    }
+
+    /// <summary>
+    /// 编队改名（自动 Save）。调用方保证 newName 非空且不与其他编队重名；
+    /// 若改的是当前编队，<see cref="PlayerSave.currentTeam"/> 同步更新。
+    /// </summary>
+    public static void RenameTeam(string oldName, string newName)
+    {
+        GetTeam(oldName).teamName = newName;
+        if (Current.currentTeam == oldName) Current.currentTeam = newName;
+        Save();
+    }
+
+    /// <summary>
+    /// 删除编队（自动 Save）。调用方保证该编队存在且不是最后一支；
+    /// 若删除的是当前编队，currentTeam 切到相邻一支（优先前一支，被删的是第一支则取原第二支）。
+    /// </summary>
+    public static void DeleteTeam(string teamName)
+    {
+        int index = Current.teams.FindIndex(t => t.teamName == teamName);
+        Current.teams.RemoveAt(index);
+        if (Current.currentTeam == teamName)
+            Current.currentTeam = Current.teams[Mathf.Clamp(index - 1, 0, Current.teams.Count - 1)].teamName;
         Save();
     }
 }

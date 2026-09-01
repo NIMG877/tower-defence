@@ -110,6 +110,22 @@ public class Entity : MonoBehaviour, IPoolOperation
     /// </summary>
     public int Orientation => _orientation;
 
+    /// <summary>
+    /// 生效技能在 <see cref="EntityData"/>.Skills 中的索引（部署期实例状态，同 Camp/Orientation）。
+    /// 池化实体跨关卡复用，每次 CallOut 由部署方重新断言；变更须在休眠期走 <see cref="SetSelectedSkill"/>。
+    /// </summary>
+    public int SelectedSkillIndex;
+    /// <summary>
+    /// 设置生效技能。索引变化时重建技能 runtime（拆旧建新）；仅可在实体休眠期
+    /// （CallOut 取出后、Initialize 前）调用，避免拆到运行中的能力。
+    /// </summary>
+    public void SetSelectedSkill(int index)
+    {
+        if (index == SelectedSkillIndex) return;
+        SelectedSkillIndex = index;
+        _skillRunner.RebuildSelectedSkill();
+    }
+
     #region//委托事件
     public delegate void OperationsBeforeHurt(Entity origin, ref float damage, ref float multiplyer, ref float defPenetrate, ref float mgrPenetrate, ref float defPenetrate_value, ref float mgrPenetrate_value, ref int damageType, int applyType);
     /// <summary>在受到伤害之前调用。</summary>

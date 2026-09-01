@@ -23,7 +23,7 @@ public class EntityPool
             inp_entities.Add(CreateNewEntity());
         }
     }
-    private Entity CreateNewEntity()
+    private Entity CreateNewEntity(int skillIndex = 0)
     {
         GameObject gameObject = UnityEngine.Object.Instantiate(EntityData.Prefab, entity_pool);
         gameObject.SetActive(false);
@@ -33,6 +33,7 @@ public class EntityPool
         Entity newEntity = gameObject.AddComponent<Entity>();
         newEntity.thisEntityPool = this;
         newEntity.EntityData = EntityData;
+        newEntity.SelectedSkillIndex = skillIndex;
         IPoolOperation[] poolOperations = newEntity.GetComponents<IPoolOperation>();
         for (int j = poolOperations.Length - 1; j >= 0; j--)
         {
@@ -53,13 +54,13 @@ public class EntityPool
             inp_entities.Add(CreateNewEntity());
         }
     }
-    public Entity CallOut(Vector2 destination, int camp)
+    public Entity CallOut(Vector2 destination, int camp, int skillIndex = 0)
     {
         Entity outEntity;
         IPoolOperation[] poolOperations;
         if (inp_entities.Count == 0)
         {
-            outEntity = CreateNewEntity();
+            outEntity = CreateNewEntity(skillIndex);
         }
         else
         {
@@ -68,6 +69,8 @@ public class EntityPool
         }
         poolOperations = outEntity.GetComponents<IPoolOperation>();
         outEntity.Camp = camp;
+        // 池化实体跨关卡复用,每次部署重新断言生效技能(不同则休眠期重建)
+        outEntity.SetSelectedSkill(skillIndex);
         outEntity.Movement.SetPosition(destination);
         outEntity.gameObject.SetActive(true);
         for (int i = poolOperations.Length - 1; i >= 0; i--)

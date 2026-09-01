@@ -30,6 +30,8 @@ namespace MyUI
         private int _remainingCount;
 
         public EntityID EntityId { get; private set; }
+        /// <summary>该干员本次战斗携带的技能在 EntityData.Skills 中的索引（来自编队存档）。</summary>
+        public int SkillIndex { get; private set; }
         public EntityData EntityData { get; private set; }
         public EntityStats EntityStats { get; private set; }
         public EntityVision EntityVision { get; private set; }
@@ -50,9 +52,10 @@ namespace MyUI
             _trigger = _photoImage.GetComponent<EventTrigger>();
         }
 
-        public void Initialize(EntityID staticId, int number)
+        public void Initialize(EntityID staticId, int number, int skillIndex)
         {
             EntityId = staticId;
+            SkillIndex = skillIndex;
             EntityData = GameDataService.EntityRepository.Get(staticId);
 
             EntityPool pool = EntityPoolManager.Manager.FetchEntityPool(staticId);
@@ -263,7 +266,7 @@ namespace MyUI
             BindChooserEvents();
         }
 
-        public void OnEnter(EntityID[] ids, int[] numbers)
+        public void OnEnter(EntityID[] ids, int[] numbers, int[] skillIndices = null)
         {
             (_mapRows, _mapColumns) = MapDataManager.Manager.MapSize;
             _inChooser = false;
@@ -275,7 +278,7 @@ namespace MyUI
             SetOrientationArrow(-1);
             _canSetDirty = true;
             _cachedCanSetType = int.MinValue;
-            InitializeSelectors(ids, numbers);
+            InitializeSelectors(ids, numbers, skillIndices);
         }
 
         public void OnExit()
@@ -300,7 +303,7 @@ namespace MyUI
             _context.SelectedPlaceData?.SelectorMove(true);
         }
 
-        public void InitializeSelectors(EntityID[] idList, int[] numbers)
+        public void InitializeSelectors(EntityID[] idList, int[] numbers, int[] skillIndices = null)
         {
             ValidateSelectorInput(idList, numbers);
             _placeDataList.Clear();
@@ -316,7 +319,7 @@ namespace MyUI
                     _selectorObjects.Add(Object.Instantiate(_selectorSample, _content));
 
                 var placeData = new LevelMessagePlaceData(this, _selectorObjects[i]);
-                placeData.Initialize(idList[i], numbers[i]);
+                placeData.Initialize(idList[i], numbers[i], skillIndices != null ? skillIndices[i] : 0);
                 _placeDataList.Add(placeData);
             }
             for (int i = idList.Length; i < existingSelectors; i++)
@@ -324,7 +327,7 @@ namespace MyUI
             MarkCanSetDirty();
         }
 
-        public void AddSelectors(EntityID[] idList, int[] numbers)
+        public void AddSelectors(EntityID[] idList, int[] numbers, int[] skillIndices = null)
         {
             ValidateSelectorInput(idList, numbers);
             for (int i = 0; i < idList.Length; i++)
@@ -350,7 +353,7 @@ namespace MyUI
                     _selectorObjects.Add(Object.Instantiate(_selectorSample, _content));
 
                 var placeData = new LevelMessagePlaceData(this, _selectorObjects[selectorIndex]);
-                placeData.Initialize(idList[i], numbers[i]);
+                placeData.Initialize(idList[i], numbers[i], skillIndices != null ? skillIndices[i] : 0);
                 _placeDataList.Add(placeData);
             }
             MarkCanSetDirty();
@@ -370,7 +373,7 @@ namespace MyUI
                 MarkCanSetDirty();
                 return;
             }
-            AddSelectors(new[] { entity.EntityData.ID }, new[] { 1 });
+            AddSelectors(new[] { entity.EntityData.ID }, new[] { 1 }, new[] { entity.SelectedSkillIndex });
         }
 
         public void Tick(float deltaTime)
@@ -526,7 +529,8 @@ namespace MyUI
                     _context.SelectedPlaceData.EntityId,
                     _chooser.transform.position,
                     1,
-                    _context.Orientation);
+                    _context.Orientation,
+                    _context.SelectedPlaceData.SkillIndex);
                 int cost = _context.SelectedPlaceData.CalculateCost();
                 entity.GetComponent<InteractableStatic>().CurrentSetCost = cost;
                 LevelResourceManager.Manager.ChangeCost(-cost);

@@ -70,6 +70,7 @@ namespace MyUI
 
         private TextMeshProUGUI _englishName, _name, _hpText, _atkText, _phdText, _mgrText, _reStartText, _costText, _occupyText, _atkBTText;
         private GameObject _nullMask;
+        private AttackRangeTiles _attackRangeTiles;
 
         private CharacterSelectPanel() : base(new UIType("Prefabs/UI/MyUIs/CharacterSelectPanel"))
         {
@@ -87,6 +88,11 @@ namespace MyUI
             _occupyText = GetComponentInChildrenByPath<TextMeshProUGUI>("container/characterMessage/messageArea/occupyText");
             _atkBTText = GetComponentInChildrenByPath<TextMeshProUGUI>("container/characterMessage/messageArea/atkBTText");
             _nullMask = GetComponentInChildrenByPath<Transform>("container/characterMessage/messageArea/nullMask").gameObject;
+            _attackRangeTiles = new AttackRangeTiles(
+                GetComponentInChildrenByPath<RectTransform>("container/characterMessage/messageArea/attackRange"),
+                GetComponentInChildrenByPath<RectTransform>("container/characterMessage/messageArea/attackRange/self"),
+                GetComponentInChildrenByPath<RectTransform>("container/characterMessage/messageArea/attackRange/range"),
+                leftAlign: true);
             _skillImage = GetComponentInChildrenByPath<Image>("container/characterMessage/skillTalentSwitch/skill");
             _skillText = GetComponentInChildrenByPath<TextMeshProUGUI>("container/characterMessage/skillTalentSwitch/skill/text");
             _talentImage = GetComponentInChildrenByPath<Image>("container/characterMessage/skillTalentSwitch/talent");
@@ -124,6 +130,10 @@ namespace MyUI
                 }
                 SaveSystem.SetTeamMembers(_teamName, _selectedCharacters, _selectedCharacterSkill);
                 PanelManager.Pop(1);
+            });
+            GetComponentInChildrenByPath<Button>("clear").onClick.AddListener(() =>
+            {
+                ClearSelection();
             });
 
 
@@ -165,6 +175,7 @@ namespace MyUI
                         }
                     }
                     UpDateSelectMask();
+                    RefreshMemberSkillIcons();
                 });
             }
 
@@ -266,6 +277,46 @@ namespace MyUI
                 }
             }
         }
+        /// <summary>
+        /// 刷新全部角色卡的技能图标:队伍内成员显示其选择的技能,不在队伍的回到默认技能 0。
+        /// 覆盖加入/移除/替换成员时选择被重置为 0 的情形。
+        /// </summary>
+        private void RefreshMemberSkillIcons()
+        {
+            HashSet<EntityID> inTeam = new HashSet<EntityID>();
+            for (int i = 0; i < _selectedCharacters.Count; i++)
+            {
+                if (_selectedCharacters[i].ID_C == null) continue;
+                inTeam.Add(_selectedCharacters[i]);
+                CharacterCardManager.cardManager.ResetCardForbidNullSkill(_selectedCharacters[i], _selectedCharacterSkill[i]);
+            }
+            EntityID[] allCharacters = SaveSystem.Current.charactersOwn.ToArray();
+            for (int i = 0; i < allCharacters.Length; i++)
+            {
+                if (!inTeam.Contains(allCharacters[i]))
+                    CharacterCardManager.cardManager.ResetCardForbidNullSkill(allCharacters[i], 0);
+            }
+        }
+        /// <summary>
+        /// 清空当前选择：自由编队模式清空全部成员；槽位模式只把当前槽位置空（技能选择重置为 0）。
+        /// 只改面板本地副本，不写存档，点 done 才保存。
+        /// </summary>
+        private void ClearSelection()
+        {
+            if (_selectIndex >= 0)
+            {
+                _selectedCharacters[_selectIndex] = EntityID.Null;
+                _selectedCharacterSkill[_selectIndex] = 0;
+            }
+            else
+            {
+                _selectedCharacters.Clear();
+                _selectedCharacterSkill.Clear();
+            }
+            UpDateSelectMask();
+            RefreshMemberSkillIcons();
+            UpdateCharacterMessage(EntityID.Null);
+        }
         private void UpDateSelectCharacter()
         {
             //����ĳ��˳������
@@ -308,6 +359,7 @@ namespace MyUI
                 _skillContent.vertical = false;
                 _skillContent.content.anchoredPosition = Vector2.zero;
                 _nullMask.SetActive(true);
+                _attackRangeTiles.Clear();
                 _skillSelectRT.gameObject.SetActive(false);
                 for (int i = 0; i < _talentCardList.Count; i++)
                 {
@@ -326,6 +378,7 @@ namespace MyUI
             _costText.text = entityData.Cost.ToString();
             _occupyText.text = entityData.BlockOccupation.ToString();
             _atkBTText.text = entityData.BaseAttackTime.ToString();
+            _attackRangeTiles.Show(entityData.VisionRange);
             _nullMask.SetActive(false);
             int characterIndex = _selectedCharacters.IndexOf(characterId);
             var abilities = entityData.Skills;
@@ -349,7 +402,7 @@ namespace MyUI
                         _skillSelectRT.SetParent(_abilitySelectorCards[index].AbilityRT, false);
                         _skillSelectRT.gameObject.SetActive(true);
                         _selectedCharacterSkill[characterIndex] = index;
-                        CharacterCardManager.cardManager.ResetCardForbidNullSkill(characterId);
+                        CharacterCardManager.cardManager.ResetCardForbidNullSkill(characterId, index);
                     };
                     _abilitySelectorCards[i].UpdateAbilityCardMessage(abilities[i]);
                     _abilitySelectorCards[i].AbilityRT.gameObject.SetActive(true);
@@ -400,6 +453,7 @@ namespace MyUI
             base.OnEnter();
             UpDateSelectCharacter();
             UpDateSelectMask();
+            RefreshMemberSkillIcons();
             if (_selectIndex >= 0)
             {
                 UpdateCharacterMessage(_selectedCharacters[_selectIndex]);

@@ -602,7 +602,7 @@ MonoBehaviour:
   Waves:
   - Tracks:
     - Name: Track 0
-      Locked: 1
+      Locked: 0
       Actions:
       - CommandType: 0
         TriggerTime: 0
@@ -860,7 +860,7 @@ MonoBehaviour:
         DurationTime: 0
         Contents: []
     - Name: zombies
-      Locked: 1
+      Locked: 0
       Actions:
       - CommandType: 2
         TriggerTime: 15
@@ -940,7 +940,7 @@ MonoBehaviour:
         DurationTime: 0
         Contents: []
     - Name: creepers
-      Locked: 1
+      Locked: 0
       Actions:
       - CommandType: 0
         TriggerTime: 41
@@ -969,7 +969,7 @@ MonoBehaviour:
         DurationTime: 0
         Contents: []
     - Name: skeletons
-      Locked: 1
+      Locked: 0
       Actions:
       - CommandType: 2
         TriggerTime: 31
@@ -1125,7 +1125,7 @@ MonoBehaviour:
         DurationTime: 0
         Contents: []
     - Name: Track 4
-      Locked: 0
+      Locked: 1
       Actions:
       - CommandType: 0
         TriggerTime: 1

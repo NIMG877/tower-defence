@@ -28,3 +28,4 @@ MonoBehaviour:
     recoverForbidDuringAbility: 0
     canManualClose: 0
   rules: []
+  legacyComponents: []

@@ -36,9 +36,7 @@ namespace MyUI
         // Details panel.
         private readonly GameObject _leftMessage;
         private readonly Image _class;
-        private readonly RectTransform _rangeSelfTile;
-        private readonly RectTransform _rangeArea;
-        private readonly List<RectTransform> _rangeTiles;
+        private readonly AttackRangeTiles _attackRangeTiles;
         private readonly TextMeshProUGUI _name;
         private readonly TextMeshProUGUI _statsText;
         private readonly RectTransform _hpSlider;
@@ -117,15 +115,13 @@ namespace MyUI
 
             _leftMessage = LevelMessageViewLookup.Get<Transform>(root, "leftMessageArea").gameObject;
             _class = LevelMessageViewLookup.Get<Image>(root, "leftMessageArea/class");
-            _rangeSelfTile = LevelMessageViewLookup.Get<RectTransform>(
-                root, "leftMessageArea/attributes/atkRange/area/self");
-            _rangeArea = LevelMessageViewLookup.Get<RectTransform>(
-                root, "leftMessageArea/attributes/atkRange/area");
-            _rangeTiles = new List<RectTransform>
-            {
+            _attackRangeTiles = new AttackRangeTiles(
                 LevelMessageViewLookup.Get<RectTransform>(
-                    root, "leftMessageArea/attributes/atkRange/area/range"),
-            };
+                    root, "leftMessageArea/attributes/atkRange/area"),
+                LevelMessageViewLookup.Get<RectTransform>(
+                    root, "leftMessageArea/attributes/atkRange/area/self"),
+                LevelMessageViewLookup.Get<RectTransform>(
+                    root, "leftMessageArea/attributes/atkRange/area/range"));
             _name = LevelMessageViewLookup.Get<TextMeshProUGUI>(root, "leftMessageArea/name");
             _statsText = LevelMessageViewLookup.Get<TextMeshProUGUI>(
                 root, "leftMessageArea/attributes/admb");
@@ -207,7 +203,7 @@ namespace MyUI
 
             EntityData entityData = GetCurrentEntityData();
             SwitchDetailsPage(_currentDetailsPage, entityData, _context.SelectedEntity);
-            ShowAttackRangeAttributes(entityData.VisionRange);
+            _attackRangeTiles.Show(entityData.VisionRange);
             _name.text = entityData.ChineseName;
             _class.sprite = _professionsLighten[entityData.CharacterJob];
             UpdateLeftMessage();
@@ -718,7 +714,8 @@ namespace MyUI
             }
             else if (entityData.Skills != null && entityData.Skills.Count > 0)
             {
-                config = entityData.Skills[0];
+                // 部署前预览:entityData 来自 SelectedPlaceData,显示该干员本次携带(编队选择)的技能
+                config = entityData.Skills[_context.SelectedPlaceData.SkillIndex];
             }
 
             _abilityCard.AbilityRT.gameObject.SetActive(config != null);
@@ -785,52 +782,6 @@ namespace MyUI
             }
             for (int i = buffCount; i < _buffCards.Count; i++)
                 _buffCards[i].BuffRT.gameObject.SetActive(false);
-        }
-
-        private void ShowAttackRangeAttributes(List<Vector2Int> baseRange)
-        {
-            if (baseRange == null || baseRange.Count == 0)
-                return;
-
-            int maxX = int.MinValue;
-            int maxY = int.MinValue;
-            int minX = int.MaxValue;
-            int minY = int.MaxValue;
-            var range = new (int x, int y)[baseRange.Count];
-            for (int i = 0; i < range.Length; i++)
-            {
-                range[i] = (baseRange[i].y, -baseRange[i].x);
-                maxX = Mathf.Max(maxX, range[i].x);
-                maxY = Mathf.Max(maxY, range[i].y);
-                minX = Mathf.Min(minX, range[i].x);
-                minY = Mathf.Min(minY, range[i].y);
-            }
-
-            float tileWidth = _rangeArea.rect.width / (maxX - minX + 1);
-            float tileHeight = _rangeArea.rect.height / (maxY - minY + 1);
-            float tileSize = Mathf.Min(15, tileWidth, tileHeight);
-            float centerX = (minX + maxX) / 2f;
-            float centerY = (minY + maxY) / 2f;
-            while (_rangeTiles.Count < range.Length)
-            {
-                _rangeTiles.Add(Object.Instantiate(
-                    _rangeTiles[0].gameObject,
-                    _rangeArea).GetComponent<RectTransform>());
-            }
-            for (int i = range.Length; i < _rangeTiles.Count; i++)
-                _rangeTiles[i].gameObject.SetActive(false);
-            for (int i = 0; i < range.Length; i++)
-            {
-                _rangeTiles[i].sizeDelta = Vector2.one * tileSize * 0.95f;
-                _rangeTiles[i].anchoredPosition = new Vector2(
-                    tileSize * (range[i].x - centerX),
-                    tileSize * (range[i].y - centerY));
-                _rangeTiles[i].gameObject.SetActive(true);
-            }
-            _rangeSelfTile.sizeDelta = Vector2.one * tileSize * 0.95f;
-            _rangeSelfTile.anchoredPosition = new Vector2(
-                -tileSize * centerX,
-                -tileSize * centerY);
         }
     }
 }

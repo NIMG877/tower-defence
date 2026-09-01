@@ -16,8 +16,11 @@ public class PlayerSave
     /// <summary>玩家拥有的角色 ID 列表</summary>
     public List<EntityID> charactersOwn = new List<EntityID>();
 
-    /// <summary>用户可编辑的队伍（Team1 ~ Team4）</summary>
+    /// <summary>用户可编辑的队伍（默认"编队1" ~ "编队4"，可新增）</summary>
     public List<TeamSave> teams = new List<TeamSave>();
+
+    /// <summary>当前选中的编队名。始终对应 teams 中某支队伍的 teamName，出战时读取。</summary>
+    public string currentTeam;
 }
 
 /// <summary>队伍成员条目（角色 ID + 该角色的技能选择索引）。</summary>
