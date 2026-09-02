@@ -26,10 +26,13 @@ public class WdslmSkill3 : Skill
         _thisEntity.buffController.AddAbnormalState(-10, 0);
         _thisEntity.entityAM.AddOverride(this, new AnimationOverride
         {
-            [AnimationSlot.Start] = _skillStart,
             [AnimationSlot.Idle] = _skillLoop,
         });
-        _thisEntity.StateMachine.TrySetState(EntityState.Die, true);
+        _thisEntity.entityAM.AddOneShotOverride(this, new AnimationOverride
+        {
+            [AnimationSlot.Cast] = _skillStart,
+        });
+        _thisEntity.StateMachine.TrySetState(EntityState.Cast, true);
         SummonMachine();
         return true;
     }
@@ -40,6 +43,7 @@ public class WdslmSkill3 : Skill
         _machine.MoveBase.SetMoveParameters(_thisEntity.MoveBase.CurrentPathSerial, _thisEntity.MoveBase.CurrentSectionSerial, _thisEntity.MoveBase.CurrentPointSerial);
         _machine.buffController.AddAbnormalState(-10, 3);
         _machine.GetComponent<MachineTalent1>().ProjectEntity(TargetEntity, this);
+        _thisEntity.StateMachine.TrySetState(EntityState.Idle, true);
     }
 
     public override void SkillEnd()
@@ -50,12 +54,23 @@ public class WdslmSkill3 : Skill
             TargetEntity.Die();
         TargetEntity = null;
         _thisEntity.entityAM.RemoveOverrides(this);
-        _thisEntity.entityAM.AddOverride(this, new AnimationOverride { [AnimationSlot.Start] = _skillEnd });
-        _thisEntity.StateMachine.TrySetState(EntityState.Die, true);
+        _thisEntity.entityAM.AddOneShotOverride(this, new AnimationOverride
+        {
+            [AnimationSlot.Cast] = _skillEnd,
+        });
+        _thisEntity.StateMachine.TrySetState(EntityState.Cast, true);
+        RetireAfterSkillEnd();
         _thisEntity.buffController.TryRemoveAbnormalState(0);
         _thisEntity.buffController.TryRemoveAbnormalState(2);
         _thisEntity.buffController.TryRemoveAbnormalState(3);
         _skill2.SkilllRecoverForbid(false);
         SkilllRecoverForbid(true);
+    }
+
+    // 结束演出播完后显式退场（Default+淡出+回池，原借 Die 淡出链的效果）
+    private async void RetireAfterSkillEnd()
+    {
+        await UniTask.WaitForSeconds(_thisEntity.entityAM.ResolveNamedAnimationDuration(_skillEnd), false, PlayerLoopTiming.Update, LevelResourceSharing.LevelCtk);
+        _thisEntity.ArriveEnd();
     }
 }

@@ -30,11 +30,13 @@ public class WitherTalent2 : Talent
             _thisEntity.Stats.CurrentHpRate = value;
         }, 0.001f, 1, _recoverTime).OnComplete(async () =>
         {
-            _thisEntity.StateMachine.TrySetState(EntityState.Die, true);
+            // 终局演出：Cast 播 _start2，播完接爆炸，随后 HpCheck 狂暴 + 显式回 Idle（存活，恢复正常行为）
             _thisEntity.entityAM.RemoveOverrides(this);
+            _thisEntity.entityAM.AddOneShotOverride(this, new AnimationOverride { [AnimationSlot.Cast] = _start2 });
+            _thisEntity.StateMachine.TrySetState(EntityState.Cast, true);
             _boomEffect.SetActive(true);
             _recoverEffect.SetActive(false);
-            await UniTask.WaitForSeconds(_thisEntity.entityAM.ResolveNamedAnimationDuration(_start2) * 0.7f);
+            await UniTask.WaitForSeconds(_thisEntity.entityAM.ResolveNamedAnimationDuration(_start2) * 0.7f, false, PlayerLoopTiming.Update, LevelResourceSharing.LevelCtk);
             List<Entity> targets = EntityManager.Manager.EntitySelector_Radius((_thisEntity.Movement.Position.x, _thisEntity.Movement.Position.y), 2, false, _boomRadius, false);
             targets.AddRange(EntityManager.Manager.EntitySelector_Radius((_thisEntity.Movement.Position.x, _thisEntity.Movement.Position.y), 1, false, _boomRadius, false));
             float eneityR = EntityManager.EntityR;
@@ -74,12 +76,13 @@ public class WitherTalent2 : Talent
                     }
                 }
             }
-            await UniTask.WaitForSeconds(_thisEntity.entityAM.ResolveNamedAnimationDuration(_start2) * 0.3f);
+            await UniTask.WaitForSeconds(_thisEntity.entityAM.ResolveNamedAnimationDuration(_start2) * 0.3f, false, PlayerLoopTiming.Update, LevelResourceSharing.LevelCtk);
             _boomEffect.SetActive(false);
             _thisEntity.buffController.TryRemoveAbnormalState(3);
             _thisEntity.buffController.TryRemoveAbnormalState(0);
             _thisEntity.buffController.TryRemoveAbnormalState(2);
             _thisEntity.GetComponent<WitherTalent3>().HpCheck();
+            _thisEntity.StateMachine.TrySetState(EntityState.Idle, true);
         });
     }
 }
