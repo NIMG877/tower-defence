@@ -102,9 +102,9 @@ public class MoveBase : MonoBehaviour, IPoolOperation
                     if (targetPos.x != -100)
                     {
                         _thisEntity.Movement.ResistList.Add(entitiesAround[i]);
-                        if (_thisAM.CurrentState == EntityState.Move)
+                        if (_thisEntity.StateMachine.CurrentState == EntityState.Move)
                         {
-                            _thisAM.TrySetState(EntityState.Idle, true);
+                            _thisEntity.StateMachine.TrySetState(EntityState.Idle, true);
                         }
                         _thisEntity.Movement.Position = targetPos;
                         return;
@@ -236,11 +236,12 @@ public class MoveBase : MonoBehaviour, IPoolOperation
                 ArriveEnd();
                 return;
             }
-            if (_thisAM.CurrentState != EntityState.Move && _thisEntity.Movement.ResistList.Count == 0)
+            if (_thisEntity.StateMachine.CurrentState != EntityState.Move && _thisEntity.Movement.ResistList.Count == 0)
             {
-                _thisAM.TrySetState(EntityState.Move, false);
+                _thisAM.SetMoveBranch(MoveAnimationBranch.Normal);
+                _thisEntity.StateMachine.TrySetState(EntityState.Move, false);
             }
-            if (_thisAM.CurrentState == EntityState.Move)
+            if (_thisEntity.StateMachine.CurrentState == EntityState.Move)
             {
                 MovePosition();
                 if (_currentPointSerial == _currentSection.Length)
@@ -251,7 +252,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
                     OperationsOnReachSectionEnd?.Invoke();
                     if (_forceUnmoveTime > 0)
                     {
-                        _thisAM.TrySetState(EntityState.Idle, true);
+                        _thisEntity.StateMachine.TrySetState(EntityState.Idle, true);
                     }
                 }
             }

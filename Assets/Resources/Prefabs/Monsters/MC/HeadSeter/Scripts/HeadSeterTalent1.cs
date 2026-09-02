@@ -39,7 +39,7 @@ public class HeadSeterTalent1 : Talent
                     [AnimationSlot.AttackClose] = _set_d,
                     [AnimationSlot.AttackRemote] = _set_d,
                 });
-                am.TrySetState(EntityState.Default, true);
+                _thisEntity.StateMachine.TrySetState(EntityState.Default, true);
                 _thisEntity.buffController.CreateBuff(new Modifier[]{ new Modifier("MoveSpeed", ModifierOp.AddPercent, -0.35f) }, null, "slowSpeed", -5, false);
                 _thisEntity.GetComponent<HeadSeterSkill1>().IsDie = true;
             }

@@ -72,7 +72,7 @@ namespace AbilitySystem.Components
             
             ApplyAbnormal(ctx.entity);
             if (_isExtraAttack || ctx.entity.entityAM == null
-                || ctx.entity.entityAM.CurrentState == EntityState.Start)
+                || ctx.entity.StateMachine.CurrentState == EntityState.Start)
                 return;
 
             SharedAttackRequest request = queue[0];

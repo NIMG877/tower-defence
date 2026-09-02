@@ -20,7 +20,7 @@ public class HeadSeterSkill1 : Skill
     }
     public override bool SkillBegin()
     {
-        if (_thisEntity.entityAM.CurrentState >= EntityState.Attack || _thisEntity.Movement.ResistList.Count == 0 || !base.SkillBegin())
+        if (_thisEntity.StateMachine.CurrentState >= EntityState.Attack || _thisEntity.Movement.ResistList.Count == 0 || !base.SkillBegin())
             return false;
         if (!IsDie)
         {
@@ -30,7 +30,7 @@ public class HeadSeterSkill1 : Skill
         {
             am.AddOverride(this, new AnimationOverride { [AnimationSlot.Start] = _begin_d });
         }
-        am.TrySetState(EntityState.Die, false);
+        _thisEntity.StateMachine.TrySetState(EntityState.Die, false);
         _thisEntity.buffController.AddAbnormalState(-10, 0);
         _thisEntity.buffController.AddAbnormalState(-10, 3);
         return true;
@@ -46,7 +46,7 @@ public class HeadSeterSkill1 : Skill
         {
             am.AddOverride(this, new AnimationOverride { [AnimationSlot.Start] = _end_d });
         }
-        am.TrySetState(EntityState.Die, false);
+        _thisEntity.StateMachine.TrySetState(EntityState.Die, false);
         _thisEntity.buffController.TryRemoveAbnormalState(0);
         _thisEntity.buffController.TryRemoveAbnormalState(3);
         FlashMove(_moveDis);

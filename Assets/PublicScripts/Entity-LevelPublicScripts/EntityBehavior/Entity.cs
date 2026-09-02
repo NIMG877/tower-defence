@@ -40,8 +40,8 @@ public readonly struct DamageResolution
 }
 
 /// <summary>
-/// 实体协调者。持有 4 个 POCO 子系统（Stats/Vision/Movement/Combat）+ 阵营副作用 + 公开事件。
-/// 数据访问统一走子系统入口：<see cref="Stats"/> / <see cref="Vision"/> / <see cref="Movement"/> / <see cref="Combat"/>。
+/// 实体协调者。持有 5 个 POCO 子系统（Stats/Vision/Movement/Combat/StateMachine）+ 阵营副作用 + 公开事件。
+/// 数据访问统一走子系统入口：<see cref="Stats"/> / <see cref="Vision"/> / <see cref="Movement"/> / <see cref="Combat"/> / <see cref="StateMachine"/>。
 /// </summary>
 public class Entity : MonoBehaviour, IPoolOperation
 {
@@ -61,6 +61,7 @@ public class Entity : MonoBehaviour, IPoolOperation
     private EntityMovement _movement;
     private EntityCombat _combat;
     private EntityAbilityRunner _skillRunner;
+    private readonly EntityStateMachine _stateMachine = new EntityStateMachine();
 
     private int _camp;
 
@@ -74,6 +75,8 @@ public class Entity : MonoBehaviour, IPoolOperation
     public EntityCombat Combat { get { return _combat; } }
     /// <summary>Ability 子系统：AbilityRuntime 列表 + 事件桥 + SP/组件 tick。</summary>
     public EntityAbilityRunner AbilityRunner { get { return _skillRunner; } }
+    /// <summary>逻辑状态子系统：EntityState/AttackPhase/转换规则/ban 表（唯一状态真相源）。</summary>
+    public EntityStateMachine StateMachine { get { return _stateMachine; } }
 
     public string NAME { get { return EntityData.ChineseName; } }
 
@@ -159,13 +162,14 @@ public class Entity : MonoBehaviour, IPoolOperation
         Stats.RecoverTick();
         Stats.CheckDeath();
         Vision.Refresh();
+        _stateMachine.Tick(Time.fixedDeltaTime);
         if (_skillRunner != null) _skillRunner.Tick(Time.fixedDeltaTime);
     }
 
     public void Die()
     {
         Stats.BeginDie();
-        entityAM.TrySetState(EntityState.Die, false);
+        _stateMachine.TrySetState(EntityState.Die, false);
         if (Camp == 1)
         {
             if (EntityData.ID.ID_C == "t")
@@ -185,7 +189,7 @@ public class Entity : MonoBehaviour, IPoolOperation
     /// <summary>到达终点退场：转 Default + 淡出 + 回池（原 MoveBase.ArriveEnd 的表现部分上收）。</summary>
     public void ArriveEnd()
     {
-        entityAM.TrySetState(EntityState.Default, true);
+        _stateMachine.TrySetState(EntityState.Default, true);
         visuals.FadeOut(0.2f, () => thisEntityPool.Return(this));
     }
     /// <summary>
@@ -247,6 +251,7 @@ public class Entity : MonoBehaviour, IPoolOperation
         _movement = new EntityMovement(this);
         _combat = new EntityCombat(this);
         _skillRunner = new EntityAbilityRunner(this);
+        _stateMachine.DieAnimationCompleted += () => visuals.FadeOut(0.2f, () => thisEntityPool.Return(this));
 
         _vision.InitializeFromData(EntityData);
         Stats.AttributesCaculateFirst(EntityData);
@@ -257,7 +262,7 @@ public class Entity : MonoBehaviour, IPoolOperation
 
     public virtual void Initialize()
     {
-        entityAM.TrySetState(EntityState.Start, false);
+        _stateMachine.TrySetState(EntityState.Start, false);
         Stats.ResetState();
         TempContainer = new GameObject("TempContainer").transform;
         TempContainer.position = this.transform.position;
@@ -279,6 +284,7 @@ public class Entity : MonoBehaviour, IPoolOperation
 
     public virtual void Dormancy()
     {
+        _stateMachine.ResetForPool();
         Movement.ResistList.Clear();
         Vision.ClearLists();
 

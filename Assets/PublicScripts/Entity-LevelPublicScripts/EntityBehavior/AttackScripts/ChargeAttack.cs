@@ -77,10 +77,10 @@ public class ChargeAttack : AttackBase
     {
         if (attackTargets.Length > 0)
         {
-            if (_thisEntity.entityAM.TrySetAttackState(
+            _thisEntity.entityAM.SetAttackBranch(AttackAnimationBranch.Normal);
+            if (_thisEntity.StateMachine.TrySetAttackState(
                 forceChange,
-                () => { AttackByAnimation(attackTargets, canBeInterrupt); },
-                AttackAnimationBranch.Normal))
+                () => { AttackByAnimation(attackTargets, canBeInterrupt); }))
             {
                 base.TryToAttack(attackTargets, forceChange, canBeInterrupt);
                 return true;
@@ -88,13 +88,14 @@ public class ChargeAttack : AttackBase
         }
         else if (CanStoreCharge())
         {
-            if (_thisEntity.entityAM.TrySetAttackState(
+            _thisEntity.entityAM.SetAttackBranch(AttackAnimationBranch.Charge);
+            if (_thisEntity.StateMachine.TrySetAttackState(
                 forceChange,
-                () => { SpawnChargeEffect(); },
-                AttackAnimationBranch.Charge))
+                () => { SpawnChargeEffect(); }))
             {
                 return true;
             }
+            _thisEntity.entityAM.SetAttackBranch(AttackAnimationBranch.Normal);
         }
         return false;
     }

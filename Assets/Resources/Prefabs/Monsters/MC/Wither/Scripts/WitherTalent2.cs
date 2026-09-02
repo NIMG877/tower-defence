@@ -23,14 +23,14 @@ public class WitherTalent2 : Talent
     {
         await UniTask.WaitForSeconds(_thisEntity.entityAM.ResolveAnimationDuration(AnimationSlot.Start) * 0.9f);
         _recoverEffect.SetActive(true);
-        _thisEntity.entityAM.TrySetState(EntityState.Idle, true);
+        _thisEntity.StateMachine.TrySetState(EntityState.Idle, true);
         _thisEntity.entityAM.AddOverride(this, new AnimationOverride { [AnimationSlot.Start] = _start2 });
         DOTween.To((value) =>
         {
             _thisEntity.Stats.CurrentHpRate = value;
         }, 0.001f, 1, _recoverTime).OnComplete(async () =>
         {
-            _thisEntity.entityAM.TrySetState(EntityState.Die, true);
+            _thisEntity.StateMachine.TrySetState(EntityState.Die, true);
             _thisEntity.entityAM.RemoveOverrides(this);
             _boomEffect.SetActive(true);
             _recoverEffect.SetActive(false);

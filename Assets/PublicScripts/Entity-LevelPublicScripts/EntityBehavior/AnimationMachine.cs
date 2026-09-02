@@ -1,9 +1,8 @@
-using System.Collections.Generic;
-using UnityEngine;
-using Spine.Unity;
-using Spine;
-using DG.Tweening;
 using System;
+using System.Collections.Generic;
+using Spine;
+using Spine.Unity;
+using UnityEngine;
 
 public enum MoveAnimationBranch
 {
@@ -25,27 +24,33 @@ public sealed class AnimationOverrideHandle
     internal AnimationMachine Machine;
 }
 
+/// <summary>
+/// 动画表现层：订阅 EntityStateMachine 的状态/相位事件，解析槽位（含覆盖优先级）并驱动 Spine。
+/// 不持有逻辑状态；动画时机（OnAttack 帧、各段播完）经 Notify* 上报回状态机。
+/// 攻击序列编排（前摇→主动段→后摇→Idle）与 TimeScale 缩放逻辑自旧实现原样搬运。
+/// </summary>
 public class AnimationMachine : MonoBehaviour, IPoolOperation
 {
-    private EntityState currentState;
-    private HashSet<EntityState> states_ban;
     private SkeletonAnimation skeleton;
     private Entity thisEntity;
+    private EntityStateMachine _sm;
     private EventData event_attack;
-    private EventData event_start;
-    private Action _attackAction;
-    private int _attackAnimationIndex;
-    private float _attackStaticWaitTime;
-    private AnimationReferenceAsset[] Attack;
-    private AnimationReferenceAsset _currentAttackBegin;
-    private AnimationReferenceAsset _currentAttackEnd;
-    private AttackPhase _attackPhase;
-    private AttackAnimationBranch _attackBranch;
     private AnimationResources _animationResources;
     private AnimationSet _baseAnimations;
     private AnimationSet _activeAnimations;
     private readonly List<OverrideEntry> _overrides = new List<OverrideEntry>();
     private int _nextOverrideId;
+    private MoveAnimationBranch _moveBranch;
+    private AttackAnimationBranch _attackBranch;
+
+    // 当前攻击编排段（Animation 对象身份判定哪段播完——与旧实现同判据；跨段同资产的配置歧义与旧实现一致）
+    private AnimationReferenceAsset[] _attackGroup;
+    private AnimationReferenceAsset _currentAttackBegin;
+    private AnimationReferenceAsset _currentAttackEnd;
+    private Spine.Animation _activeAttackAnim;
+    private Spine.Animation _endAnim;
+    private Spine.Animation _dieAnim;
+    private Spine.Animation _startAnim;
 
     public delegate void OperationsOnAttackAnimationBegin();
 
@@ -57,28 +62,21 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     public event OperationsOnAttackAnimationBegin OnAttackAnimationBegin;
 
     /// <summary>
-    /// Current state. Returns the <see cref="EntityState"/> enum value directly —
-    /// no second int remapping.
-    /// Attack sub-phases are tracked privately and are not exposed as entity states.
+    /// Move 分支（走/跳三段）为纯表现分支：逻辑方先设分支再 TrySetState(Move)，
+    /// 分支在转换失败时无害残留（下一次设置覆盖）。
     /// </summary>
-    public EntityState CurrentState
+    public void SetMoveBranch(MoveAnimationBranch branch)
     {
-        get { return currentState; }
+        _moveBranch = branch;
     }
 
-    private void FixedUpdate()
+    /// <summary>
+    /// Attack 分支（普攻/蓄力）：每个 TrySetAttackState 调用点先设分支；
+    /// 蓄力转换失败时调用方须回设 Normal。
+    /// </summary>
+    public void SetAttackBranch(AttackAnimationBranch branch)
     {
-        if (_attackPhase == AttackPhase.ComboWindow)
-        {
-            if (_attackStaticWaitTime > 0)
-            {
-                _attackStaticWaitTime -= Time.fixedDeltaTime;
-            }
-            else
-            {
-                FinishComboWindow();
-            }
-        }
+        _attackBranch = branch;
     }
 
     public float ResolveAnimationDuration(AnimationSlot slot)
@@ -158,324 +156,49 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         }
     }
 
-    /// <summary>
-    /// Adds states to the transition ban list.
-    /// </summary>
-    /// <param name="statesToBan">States to ban (see <see cref="EntityState"/>)</param>
-    public void AddStateToBan(EntityState[] statesToBan)
+    public void PreWarm()
     {
-        foreach (EntityState state in statesToBan)
+        if (!this.transform.GetChild(0).TryGetComponent(out SkeletonAnimation skeletonAnimation))
         {
-            states_ban.Add(state);
+            Debug.LogError("SkeletonAnimation not found on child 0");
+            return;
         }
-    }
 
-    /// <summary>
-    /// Removes states from the transition ban list.
-    /// </summary>
-    /// <param name="statesfromBan">States to unban</param>
-    public void RemoveStateFromBan(EntityState[] statesfromBan)
-    {
-        foreach (var state in statesfromBan)
+        skeleton = skeletonAnimation;
+        thisEntity = this.GetComponent<Entity>();
+        _sm = thisEntity.StateMachine;
+        _animationResources = thisEntity.EntityData.AnimationResources;
+        if (_animationResources == null)
         {
-            states_ban.Remove(state);
+            Debug.LogError($"AnimationResources is not configured for entity '{thisEntity.EntityData.ID}'.", this);
+            return;
         }
-    }
 
-    /// <summary>
-    /// Attempts to transition to the given state.
-    /// State declaration order defines transition priority.
-    /// </summary>
-    /// <param name="state">Target state</param>
-    /// <param name="forceChange">If true, ignores priority; if false, only forward transitions are allowed</param>
-    /// <returns>True if the transition succeeded</returns>
-    public bool TrySetState(
-        EntityState state,
-        bool forceChange,
-        MoveAnimationBranch moveBranch = MoveAnimationBranch.Normal)
-    {
-        bool canContinueCombo = state == EntityState.Attack &&
-            currentState == EntityState.Attack &&
-            _attackPhase == AttackPhase.ComboWindow;
-        if (!forceChange && (state > currentState || canContinueCombo) && !states_ban.Contains(state))
-        {
-            SetState(state, moveBranch);
-            return true;
-        }
-        else if (forceChange && currentState != EntityState.Die && !states_ban.Contains(state))
-        {
-            SetState(state, moveBranch);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    public bool TrySetMoveState(bool forceChange, MoveAnimationBranch branch = MoveAnimationBranch.Normal)
-    {
-        return TrySetState(EntityState.Move, forceChange, branch);
-    }
-
-    public bool TrySetAttackState(bool forceChange, Action attackAction, AttackAnimationBranch branch = AttackAnimationBranch.Normal)
-    {
-        AttackAnimationBranch previousBranch = _attackBranch;
-        _attackBranch = branch;
-        if (!TrySetState(EntityState.Attack, forceChange))
-        {
-            _attackBranch = previousBranch;
-            return false;
-        }
-        _attackAction = attackAction;
-        return true;
-    }
-
-    private void AddSpineAnimation(AnimationReferenceAsset animation, bool loop, float timeScale, float delay)
-    {
-        skeleton.state.AddAnimation(0, animation, loop, delay).TimeScale = timeScale;
-    }
-
-    private void SetSpineAnimation(AnimationReferenceAsset animation, bool loop, float timeScale)
-    {
-        skeleton.state.SetAnimation(0, animation, loop).TimeScale = timeScale;
-    }
-
-    private void FinishComboWindow()
-    {
-        _attackAnimationIndex = 0;
-        _attackPhase = AttackPhase.End;
-        if (_currentAttackEnd)
-        {
-            skeleton.state.SetAnimation(0, _currentAttackEnd, false);
-            ConsumeOneShots(_attackBranch == AttackAnimationBranch.Charge
-                ? AnimationSlot.ChargeEnd
-                : AnimationSlot.AttackEnd);
-        }
-        else
-        {
-            skeleton.state.SetAnimation(0, _activeAnimations.GetSingle(AnimationSlot.Idle), false);
-            ConsumeOneShots(AnimationSlot.Idle);
-        }
-    }
-
-    private void PlayAttackAnimation(bool continueCombo)
-    {
-        AnimationSlot beginSlot, groupSlot;
-        if (_attackBranch == AttackAnimationBranch.Charge)
-        {
-            _currentAttackBegin = _activeAnimations.GetSingle(AnimationSlot.ChargeBegin);
-            Attack = _activeAnimations.GetGroup(AnimationSlot.Charge);
-            _currentAttackEnd = _activeAnimations.GetSingle(AnimationSlot.ChargeEnd);
-            beginSlot = AnimationSlot.ChargeBegin;
-            groupSlot = AnimationSlot.Charge;
-        }
-        else
-        {
-            _currentAttackBegin = _activeAnimations.GetSingle(AnimationSlot.AttackBegin);
-            Attack = (thisEntity.Movement.ResistList.Count == 0) ? _activeAnimations.GetGroup(AnimationSlot.AttackRemote) : _activeAnimations.GetGroup(AnimationSlot.AttackClose);
-            _currentAttackEnd = _activeAnimations.GetSingle(AnimationSlot.AttackEnd);
-            beginSlot = AnimationSlot.AttackBegin;
-            groupSlot = (thisEntity.Movement.ResistList.Count == 0) ? AnimationSlot.AttackRemote : AnimationSlot.AttackClose;
-        }
-        int length = Attack.Length;
-        AnimationReferenceAsset attack = (_attackAnimationIndex < length)
-            ? Attack[_attackAnimationIndex]
-            : Attack[length - 1];
-        float scale = attack.Animation.Duration / thisEntity.Stats.BaseAttackTimeS;
-        if (_currentAttackBegin == null && length == 1)
-        {
-            SetSpineAnimation(attack, false, scale > 1 ? scale : 1);
-            ConsumeOneShots(groupSlot);
-        }
-        else if (continueCombo || _currentAttackBegin == null)
-        {
-            _attackPhase = AttackPhase.Active;
-            SetSpineAnimation(attack, false, scale);
-            ConsumeOneShots(groupSlot);
-        }
-        else
-        {
-            _attackPhase = AttackPhase.Begin;
-            float scaleB = _currentAttackBegin.Animation.Duration / thisEntity.Stats.BaseAttackTimeS;
-            SetSpineAnimation(_currentAttackBegin, false, scaleB > 1 ? scaleB : 1);
-            AddSpineAnimation(attack, false, scale, 0);
-            ConsumeOneShots(beginSlot, groupSlot);
-        }
-        // Keep this after assigning the Spine track; currentState updates on Spine Start.
-        OnAttackAnimationBegin?.Invoke();
-    }
-
-    private void SetState(
-        EntityState setState,
-        MoveAnimationBranch moveBranch = MoveAnimationBranch.Normal)
-    {
-        bool continueCombo = setState == EntityState.Attack && _attackPhase == AttackPhase.ComboWindow;
+        _baseAnimations = AnimationSet.From(_animationResources);
         _activeAnimations = ResolveAnimations();
-        if (setState != EntityState.Attack)
-        {
-            _attackPhase = AttackPhase.None;
-        }
-        switch (setState)
-        {
-            case EntityState.Default:
-                SetSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Default), false, 1);
-                ConsumeOneShots(AnimationSlot.Default);
-                break;
-            case EntityState.Idle:
-                SetSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Idle), true, 1);
-                ConsumeOneShots(AnimationSlot.Idle);
-                break;
-            case EntityState.Move:
-                SetSpineAnimation(_activeAnimations.GetSingle(AnimationSet.MoveBranchSlot(moveBranch)), true, 1);
-                ConsumeOneShots(AnimationSet.MoveBranchSlot(moveBranch));
-                break;
-            case EntityState.Attack:
-                PlayAttackAnimation(continueCombo);
-                break;
-            case EntityState.Start:
-                SetSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Start), false, 1);
-                AddSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Idle), true, 1, 0);
-                ConsumeOneShots(AnimationSlot.Start, AnimationSlot.Idle);
-                break;
-            case EntityState.Die:
-                SetSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Die), false, 1);
-                ConsumeOneShots(AnimationSlot.Die);
-                break;
-            default: break;
-        }
+        event_attack = skeleton.Skeleton.Data.FindEvent("OnAttack");
+        skeleton.AnimationState.Event += HandleAnimationStateEvent;
+        skeleton.AnimationState.Complete += HandleAnimationStateComplete;
+        skeleton.AnimationState.Data.DefaultMix = 0.1f;
+        RegisterMixes(_baseAnimations);
+        _sm.StateChanged += OnStateChanged;
+        _sm.AttackStarted += OnAttackStarted;
+        _sm.AttackPhaseChanged += OnAttackPhaseChanged;
     }
 
-    private void HandleAnimationStateEvent(Spine.TrackEntry trackEntry, Spine.Event e)
+    public void Initialize()
     {
-        if (e.Data == event_attack)
-        {
-            _attackAction?.Invoke();
-            _attackAction = null;
-        }
-        else if (e.Data == event_start)
-        {
-        }
-        else
-        {
-            Debug.LogWarning($"Unregistered animation event: {e.Data.Name}");
-        }
+        // 仅复位分支：Initialize 逆序晚于 Entity.Initialize 的 Start 播放，
+        // 此处若清播完追踪字段会抹掉刚记录的 _startAnim（追踪字段在 OnStateChanged(Default) 清）
+        _moveBranch = MoveAnimationBranch.Normal;
+        _attackBranch = AttackAnimationBranch.Normal;
     }
 
-    private void HandleAnimationStateStart(Spine.TrackEntry trackEntry)
+    public void Dormancy()
     {
-        AnimKind kind = ClassifyAnimation(trackEntry);
-        switch (kind)
-        {
-            case AnimKind.DefaultAnim:
-                currentState = EntityState.Default;
-                break;
-            case AnimKind.IdleAnim:
-                currentState = EntityState.Idle;
-                _attackPhase = AttackPhase.None;
-                break;
-            case AnimKind.MoveAnim:
-                currentState = EntityState.Move;
-                break;
-            case AnimKind.AttackAnim:
-                currentState = EntityState.Attack;
-                _attackPhase = AttackPhase.Active;
-                if (_currentAttackEnd == null && Attack.Length == 1)
-                {
-                    AddSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Idle), true, 1, 0);
-                    ConsumeOneShots(AnimationSlot.Idle);
-                }
-                break;
-            case AnimKind.AttackEndAnim:
-                _attackPhase = AttackPhase.End;
-                AddSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Idle), true, 1, 0);
-                ConsumeOneShots(AnimationSlot.Idle);
-                break;
-            case AnimKind.StartAnim:
-                currentState = EntityState.Start;
-                break;
-            case AnimKind.DieAnim:
-                currentState = EntityState.Die;
-                // FadeOut is deferred to HandleAnimationStateComplete so the
-                // death animation plays at full opacity, then fades + returns
-                // to pool only after Spine signals the Die track has finished.
-                break;
-        }
-    }
-
-    // Identifies which logical animation just started, preserving the original
-    // if-else evaluation order exactly.
-    private AnimKind ClassifyAnimation(Spine.TrackEntry entry)
-    {
-        if (_activeAnimations.GetSingle(AnimationSlot.Default) && entry.Animation == _activeAnimations.GetSingle(AnimationSlot.Default).Animation) return AnimKind.DefaultAnim;
-        if (_activeAnimations.GetSingle(AnimationSlot.Idle) && entry.Animation == _activeAnimations.GetSingle(AnimationSlot.Idle).Animation) return AnimKind.IdleAnim;
-        if (IsMoveAnimation(entry.Animation)) return AnimKind.MoveAnim;
-        if (Attack != null)
-        {
-            bool inRange = _attackAnimationIndex < Attack.Length;
-            bool matchesInRange = inRange && entry.Animation == Attack[_attackAnimationIndex].Animation;
-            bool matchesLast = !inRange && entry.Animation == Attack[Attack.Length - 1].Animation;
-            if (matchesInRange || matchesLast) return AnimKind.AttackAnim;
-        }
-        if (_currentAttackEnd && entry.Animation == _currentAttackEnd.Animation) return AnimKind.AttackEndAnim;
-        if (_activeAnimations.GetSingle(AnimationSlot.Start) && entry.Animation == _activeAnimations.GetSingle(AnimationSlot.Start).Animation) return AnimKind.StartAnim;
-        if (_activeAnimations.GetSingle(AnimationSlot.Die) && entry.Animation == _activeAnimations.GetSingle(AnimationSlot.Die).Animation) return AnimKind.DieAnim;
-        return AnimKind.None;
-    }
-
-    private bool IsMoveAnimation(Spine.Animation animation)
-    {
-        return Matches(_activeAnimations.GetSingle(AnimationSlot.Move), animation)
-            || Matches(_activeAnimations.GetSingle(AnimationSlot.JumpBegin), animation)
-            || Matches(_activeAnimations.GetSingle(AnimationSlot.JumpLoop), animation)
-            || Matches(_activeAnimations.GetSingle(AnimationSlot.JumpEnd), animation);
-    }
-
-    private static bool Matches(AnimationReferenceAsset reference, Spine.Animation animation)
-    {
-        return reference != null && reference.Animation == animation;
-    }
-
-    private enum AnimKind
-    {
-        None,
-        DefaultAnim,
-        IdleAnim,
-        MoveAnim,
-        AttackAnim,
-        AttackEndAnim,
-        StartAnim,
-        DieAnim
-    }
-
-    private enum AttackPhase
-    {
-        None,
-        Begin,
-        Active,
-        ComboWindow,
-        End,
-    }
-
-    private sealed class OverrideEntry
-    {
-        public readonly int Id;
-        public readonly object Owner;
-        public readonly AnimationOverride Animations;
-        public readonly int Priority;
-        // Slots a one-shot entry covers (null = persistent entry). The entry is
-        // consumed whole the first time any covered slot is played.
-        public readonly HashSet<AnimationSlot> CoveredSlots;
-
-        public OverrideEntry(int id, object owner, AnimationOverride animations, int priority,
-            HashSet<AnimationSlot> coveredSlots = null)
-        {
-            Id = id;
-            Owner = owner;
-            Animations = animations;
-            Priority = priority;
-            CoveredSlots = coveredSlots;
-        }
+        OnAttackAnimationBegin = null;
+        _overrides.Clear();
+        Initialize();
     }
 
     private AnimationSet ResolveAnimations()
@@ -493,55 +216,184 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         return resolved;
     }
 
-    private void HandleAnimationStateComplete(Spine.TrackEntry trackEntry)
+    // ===== 状态机事件 → 播放 =====
+
+    private void OnStateChanged(EntityState previous, EntityState next)
     {
-        if ((_currentAttackEnd || (Attack != null && Attack.Length > 1)) && currentState == EntityState.Attack && _attackPhase == AttackPhase.Active && trackEntry.Animation == Attack[_attackAnimationIndex].Animation)
+        _activeAnimations = ResolveAnimations();
+        switch (next)
         {
-            _attackPhase = AttackPhase.ComboWindow;
-            _attackStaticWaitTime = 0.05f;
-            if (Attack.Length > 1)
-            {
-                _attackAnimationIndex = (_attackAnimationIndex + 1) % Attack.Length;
-            }
-            return;
-        }
-        // Die animation finished → kick off the fade-out. The tween's OnComplete
-        // returns the entity to the pool. currentState guard keeps Dormancy-reset
-        // (which replaces the Die track with Default) from re-triggering fade-out.
-        if (_activeAnimations.GetSingle(AnimationSlot.Die) != null && currentState == EntityState.Die && trackEntry.Animation == _activeAnimations.GetSingle(AnimationSlot.Die).Animation)
-        {
-            thisEntity.visuals.FadeOut(0.2f, () => thisEntity.thisEntityPool.Return(thisEntity));
-            return;
+            case EntityState.Default:
+                // 回池复位态：清攻击编排与播完追踪字段（Initialize 里不清，见其注释）
+                _attackGroup = null;
+                _currentAttackBegin = null;
+                _currentAttackEnd = null;
+                _activeAttackAnim = null;
+                _endAnim = null;
+                _dieAnim = null;
+                _startAnim = null;
+                SetSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Default), false, 1);
+                ConsumeOneShots(AnimationSlot.Default);
+                break;
+            case EntityState.Idle:
+                SetSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Idle), true, 1);
+                ConsumeOneShots(AnimationSlot.Idle);
+                break;
+            case EntityState.Move:
+                AnimationSlot moveSlot = AnimationSet.MoveBranchSlot(_moveBranch);
+                SetSpineAnimation(_activeAnimations.GetSingle(moveSlot), true, 1);
+                ConsumeOneShots(moveSlot);
+                break;
+            case EntityState.Start:
+                _startAnim = PlaySingle(AnimationSlot.Start, false, 1);
+                ConsumeOneShots(AnimationSlot.Start);
+                break;
+            case EntityState.Cast:
+                // 粘性演出态：不循环播放，播完保持末帧；转出由技能显式 TrySetState 负责
+                PlaySingle(AnimationSlot.Cast, false, 1);
+                ConsumeOneShots(AnimationSlot.Cast);
+                break;
+            case EntityState.Die:
+                _dieAnim = PlaySingle(AnimationSlot.Die, false, 1);
+                ConsumeOneShots(AnimationSlot.Die);
+                break;
+            case EntityState.Attack:
+                break; // 攻击编排由 OnAttackStarted 负责
         }
     }
 
-    public void PreWarm()
+    private Spine.Animation PlaySingle(AnimationSlot slot, bool loop, float timeScale)
     {
-        if (!this.transform.GetChild(0).TryGetComponent(out SkeletonAnimation skeletonAnimation))
+        AnimationReferenceAsset animation = _activeAnimations.GetSingle(slot);
+        SetSpineAnimation(animation, loop, timeScale);
+        return animation != null ? animation.Animation : null;
+    }
+
+    private void OnAttackStarted(bool continueCombo)
+    {
+        bool charge = _attackBranch == AttackAnimationBranch.Charge;
+        AnimationSlot beginSlot, groupSlot;
+        if (charge)
         {
-            Debug.LogError("SkeletonAnimation not found on child 0");
+            _currentAttackBegin = _activeAnimations.GetSingle(AnimationSlot.ChargeBegin);
+            _currentAttackEnd = _activeAnimations.GetSingle(AnimationSlot.ChargeEnd);
+            _attackGroup = _activeAnimations.GetGroup(AnimationSlot.Charge);
+            beginSlot = AnimationSlot.ChargeBegin;
+            groupSlot = AnimationSlot.Charge;
+        }
+        else
+        {
+            _currentAttackBegin = _activeAnimations.GetSingle(AnimationSlot.AttackBegin);
+            _currentAttackEnd = _activeAnimations.GetSingle(AnimationSlot.AttackEnd);
+            bool ranged = thisEntity.Movement.ResistList.Count == 0;
+            _attackGroup = _activeAnimations.GetGroup(ranged ? AnimationSlot.AttackRemote : AnimationSlot.AttackClose);
+            beginSlot = AnimationSlot.AttackBegin;
+            groupSlot = ranged ? AnimationSlot.AttackRemote : AnimationSlot.AttackClose;
+        }
+        int length = _attackGroup.Length;
+        AnimationReferenceAsset attack = (_sm.AttackComboIndex < length)
+            ? _attackGroup[_sm.AttackComboIndex]
+            : _attackGroup[length - 1];
+        float scale = attack.Animation.Duration / thisEntity.Stats.BaseAttackTimeS;
+        _endAnim = null;
+        if (_currentAttackBegin == null && length == 1)
+        {
+            _activeAttackAnim = attack.Animation;
+            SetSpineAnimation(attack, false, scale > 1 ? scale : 1);
+            ConsumeOneShots(groupSlot);
+        }
+        else if (continueCombo || _currentAttackBegin == null)
+        {
+            _activeAttackAnim = attack.Animation;
+            SetSpineAnimation(attack, false, scale);
+            ConsumeOneShots(groupSlot);
+        }
+        else
+        {
+            float scaleB = _currentAttackBegin.Animation.Duration / thisEntity.Stats.BaseAttackTimeS;
+            SetSpineAnimation(_currentAttackBegin, false, scaleB > 1 ? scaleB : 1);
+            AddSpineAnimation(attack, false, scale, 0);
+            _activeAttackAnim = attack.Animation;
+            ConsumeOneShots(beginSlot, groupSlot);
+        }
+        // Fire after tracks are queued (旧实现在轨道排定后触发).
+        OnAttackAnimationBegin?.Invoke();
+    }
+
+    private void OnAttackPhaseChanged(AttackPhase phase)
+    {
+        if (phase != AttackPhase.End) return;
+        if (_currentAttackEnd != null)
+        {
+            _endAnim = _currentAttackEnd.Animation;
+            skeleton.state.SetAnimation(0, _currentAttackEnd, false);
+            ConsumeOneShots(_attackBranch == AttackAnimationBranch.Charge
+                ? AnimationSlot.ChargeEnd
+                : AnimationSlot.AttackEnd);
+        }
+        else
+        {
+            // 无后摇资产：攻击就此收尾，直接请求回 Idle
+            _sm.NotifyAttackEndCompleted();
+        }
+    }
+
+    // ===== Spine 时机 → 状态机上报 =====
+
+    private void HandleAnimationStateEvent(Spine.TrackEntry trackEntry, Spine.Event e)
+    {
+        if (e.Data == event_attack)
+        {
+            _sm.NotifyAttackFrame();
+        }
+        else
+        {
+            Debug.LogWarning($"Unregistered animation event: {e.Data.Name}");
+        }
+    }
+
+    private void HandleAnimationStateComplete(Spine.TrackEntry trackEntry)
+    {
+        if (_activeAttackAnim != null && trackEntry.Animation == _activeAttackAnim)
+        {
+            // 与旧实现同判据：有后摇或多段组才开连击窗口；单发无后摇直接收尾
+            if (_currentAttackEnd != null || _attackGroup.Length > 1)
+            {
+                _sm.NotifyAttackActiveCompleted(_attackGroup.Length);
+            }
+            else
+            {
+                _sm.NotifyAttackEndCompleted();
+            }
             return;
         }
-
-        skeleton = skeletonAnimation;
-        states_ban = new HashSet<EntityState>();
-        thisEntity = this.GetComponent<Entity>();
-        _animationResources = thisEntity.EntityData.AnimationResources;
-        if (_animationResources == null)
+        if (_endAnim != null && trackEntry.Animation == _endAnim)
         {
-            Debug.LogError($"AnimationResources is not configured for entity '{thisEntity.EntityData.ID}'.", this);
+            _sm.NotifyAttackEndCompleted();
             return;
         }
+        if (_dieAnim != null && trackEntry.Animation == _dieAnim)
+        {
+            _sm.NotifyDieAnimationCompleted();
+            return;
+        }
+        if (_startAnim != null && trackEntry.Animation == _startAnim)
+        {
+            _sm.NotifyStartAnimationCompleted();
+        }
+        // Cast 播完不上报：粘性演出态，末帧保持，转出由技能负责
+    }
 
-        _baseAnimations = AnimationSet.From(_animationResources);
-        _activeAnimations = ResolveAnimations();
-        event_attack = skeleton.Skeleton.Data.FindEvent("OnAttack");
-        event_start = skeleton.Skeleton.Data.FindEvent("OnStart");
-        skeleton.AnimationState.Event += HandleAnimationStateEvent;
-        skeleton.AnimationState.Start += HandleAnimationStateStart;
-        skeleton.AnimationState.Complete += HandleAnimationStateComplete;
-        skeleton.AnimationState.Data.DefaultMix = 0.1f;
-        RegisterMixes(_baseAnimations);
+    // ===== Spine 基础操作 =====
+
+    private void AddSpineAnimation(AnimationReferenceAsset animation, bool loop, float timeScale, float delay)
+    {
+        skeleton.state.AddAnimation(0, animation, loop, delay).TimeScale = timeScale;
+    }
+
+    private void SetSpineAnimation(AnimationReferenceAsset animation, bool loop, float timeScale)
+    {
+        skeleton.state.SetAnimation(0, animation, loop).TimeScale = timeScale;
     }
 
     // 从任何动画切入 Start（部署）一律零混合（旧 SetMixToStart 语义）。
@@ -571,7 +423,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         RegisterMixes(resolved);
     }
 
-    // Helper: zero mix time from a single animation to Start.
     private void SetMixToStart(AnimationReferenceAsset animation)
     {
         if (animation != null && _baseAnimations.GetSingle(AnimationSlot.Start) != null)
@@ -580,26 +431,24 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         }
     }
 
-    public void Initialize()
+    private sealed class OverrideEntry
     {
-        _attackAnimationIndex = 0;
-        _attackPhase = AttackPhase.None;
-        _attackBranch = AttackAnimationBranch.Normal;
-        _currentAttackBegin = null;
-        _currentAttackEnd = null;
-    }
+        public readonly int Id;
+        public readonly object Owner;
+        public readonly AnimationOverride Animations;
+        public readonly int Priority;
+        // Slots a one-shot entry covers (null = persistent entry). The entry is
+        // consumed whole the first time any covered slot is played.
+        public readonly HashSet<AnimationSlot> CoveredSlots;
 
-    public void Dormancy()
-    {
-        OnAttackAnimationBegin = null;
-        // _attackAction may still be set if Dormancy fires between
-        // TrySetAttackState and the OnAttack Spine event (e.g. a death
-        // that pre-empts an in-flight attack). Null it so pool reuse
-        // doesn't re-fire a stale callback on the next deploy.
-        _attackAction = null;
-        _attackPhase = AttackPhase.None;
-        states_ban.Clear();
-        _overrides.Clear();
-        SetState(EntityState.Default);
+        public OverrideEntry(int id, object owner, AnimationOverride animations, int priority,
+            HashSet<AnimationSlot> coveredSlots = null)
+        {
+            Id = id;
+            Owner = owner;
+            Animations = animations;
+            Priority = priority;
+            CoveredSlots = coveredSlots;
+        }
     }
 }

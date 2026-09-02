@@ -129,7 +129,7 @@ public class AttackBase : MonoBehaviour, IPoolOperation
         {
             _attackTimer -= Time.fixedDeltaTime * _thisEntity.Stats.BaseAttackTimeBase / _thisEntity.Stats.BaseAttackTimeS;
         }
-        else if (_thisEntity.entityAM.CurrentState != EntityState.Start && _thisEntity.entityAM.CurrentState != EntityState.Die && TryToAttack(AttackTargetSelect(_thisEntity.Stats.AttackNumS, _thisEntity.Stats.AttackMinNumS), false, true))
+        else if (_thisEntity.StateMachine.CurrentState != EntityState.Start && _thisEntity.StateMachine.CurrentState != EntityState.Cast && _thisEntity.StateMachine.CurrentState != EntityState.Die && TryToAttack(AttackTargetSelect(_thisEntity.Stats.AttackNumS, _thisEntity.Stats.AttackMinNumS), false, true))
         {
             _attackTimer = _thisEntity.Stats.BaseAttackTimeBase;
         }
@@ -184,7 +184,7 @@ public class AttackBase : MonoBehaviour, IPoolOperation
                 if (attackTargets.Length == 0)
                 {
                     OnAttackInterrupt?.Invoke();
-                    _thisEntity.entityAM.TrySetState(EntityState.Idle, true);
+                    _thisEntity.StateMachine.TrySetState(EntityState.Idle, true);
                     _attackTimer = 0;
                     return;
                 }
