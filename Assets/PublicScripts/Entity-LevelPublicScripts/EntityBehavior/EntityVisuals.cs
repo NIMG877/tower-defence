@@ -14,6 +14,8 @@ public class EntityVisuals : MonoBehaviour, IPoolOperation
 
     private Entity _entity;
     private SkeletonAnimation _skeleton;
+    // 单槽：新补间直接覆盖旧引用（不 Kill）——被顶掉的旧补间会自然播完，
+    // 其颜色写入会被随后的补间覆盖，与拆分前行为一致；Dormancy 只保证杀掉最新的一个。
     private Tween _tween;
     // Snapshotted g-channel at the moment FlashRed starts; the tween body
     // reads this each frame instead of capturing a closure.
@@ -38,7 +40,7 @@ public class EntityVisuals : MonoBehaviour, IPoolOperation
         _tween = null;
     }
 
-    public void FadeIn(float duration)
+    private void FadeIn(float duration)
     {
         _tween = DOTween.To(FadeAlpha, 0, 1, duration);
     }
@@ -48,7 +50,7 @@ public class EntityVisuals : MonoBehaviour, IPoolOperation
         _tween = DOTween.To(FadeAlpha, 1, 0, duration).OnComplete(() => onComplete?.Invoke());
     }
 
-    public void FlashRed(float duration)
+    private void FlashRed(float duration)
     {
         _flashRedBaselineG = _skeleton.skeleton.GetColor().g;
         _tween = DOTween.To(ApplyFlashRed, 0, 2, duration);

@@ -20,10 +20,10 @@
   退出码 0=全部通过；2=有失败（读 `Temp/results.xml` 定位）；其他=运行错误（读 log）。若报 project 已被占用：请用户关闭 Unity 编辑器后重试，或请用户在 Test Runner 里手动跑。
 - **提交信息**：中文、沿用仓库风格，结尾加 `Co-Authored-By: Claude Code <noreply@anthropic.com>`。
 - **行为等价基准**：`Assets/PublicScripts/Entity-LevelPublicScripts/EntityBehavior/AnimationMachine.cs` 的当前实现（refactor 起点 HEAD=1405cb3）。攻击编排的缩放/夹紧/时序逻辑只换宿主不"优化"。
-- **组件顺序事实**（池装配决定，`EntityPoolManager.CreateNewEntity` 逆序 PreWarm / `CallOut` 正序 Initialize / `Return` 正序 Dormancy）：
-  - PreWarm 逆序：Facing → Visuals → Entity → BuffController → prefab 组件（AM 最后）。AM.PreWarm 可安全读 `GetComponent<Entity>().StateMachine`（SM 是 readonly 字段初始化器，随 AddComponent 即构造）。
-  - Initialize 正序：AM 最先（分支复位）→ 技能 → BuffController → Entity（SM→Start）→ Visuals（FadeIn+订阅）→ Facing。
-  - Dormancy 正序：AM 最先（清 overrides）→ … → Entity.Dormancy 最后（SM.ResetForPool→StateChanged(Default)→AM 播 Default，此时 overrides 已清=播基础资产，等价旧 AM.Dormancy 内 SetState(Default)）。
+- **组件顺序事实**（池装配决定；组件在 GO 上的顺序 = prefab 组件（含 AM/移动/攻击/技能）→ BuffController → Entity → Visuals → Facing）：
+  - PreWarm **逆序**（CreateNewEntity）：Facing → Visuals → Entity → BuffController → prefab 组件（AM 最后）。AM.PreWarm 可安全读 `GetComponent<Entity>().StateMachine`（SM 是 readonly 字段初始化器，随 AddComponent 即构造）。
+  - Initialize **逆序**（CallOut）：Facing → Visuals（FadeIn+订阅）→ Entity（SM→Start；AM 经 StateChanged 事件播 Start）→ BuffController → 技能 → prefab 组件（AM **最后**，只做分支复位）。**推论：AM.Initialize 不得清 `_startAnim/_dieAnim` 等播完追踪字段——Start 在它之前已播出；追踪字段改在 OnStateChanged(Default)（回池复位态）清。**
+  - Dormancy **正序**（Return，先 SetActive(false) 再循环）：AM 最先（清 overrides+OnAttackAnimationBegin=null+分支复位）→ 技能 → BuffController → Entity（SM.ResetForPool→StateChanged(Default)→AM 播 Default，此时 overrides 已清=播基础资产，等价旧 AM.Dormancy 内 SetState(Default)）→ Visuals（杀补间）→ Facing。Entity.Dormancy 之后的 Visuals/Facing Dormancy 均无害。
 - **旧 Die 后门机制（考古结论，源码已证实）**：旧技能用 `AddOverride(Start=x)+TrySetState(Die)`——`SetState(Die)` 播的是 **SO 的 Die 槽资产**（非覆盖的 Start）；覆盖 Start 的作用是劫持 `ClassifyAnimation`（其判定顺序 Start 在 Die 之前）把播放中的动画分类成 StartAnim → `currentState=Start` → Die-complete 分支（要求 `currentState==Die`）不触发 → 不淡出不回池。该链路依赖 SO 配置与分类顺序的隐式耦合；且三个旧技能的终局意图（钻出后恢复行走/复活后存活/变身后显式退场）在旧机制下并无通路——属意图明确、机制残缺的遗留代码。本计划按意图重写（用户已批准"边缘重对齐"）。
 - **Cast 语义（关键设计决策）**：**粘性**——Cast 槽动画播完保持末帧、不自动回 Idle（钻地潜伏等演出依赖末帧保持）；转出由技能显式 `TrySetState(Idle/Default, true)` 负责。Start 仍自动回 Idle（旧 `SetState(Start)` 排队 Idle 的行为，AnimationMachine.cs:517-521）。
 - 已知的有意差异（spec 批准的"边缘重对齐"）：① ComboWindow 无 End 资产时回到循环 Idle（原为非循环）；② EntityVisuals.Dormancy 会 Kill 未完成的 tween（防双回池）；③ Die 后门技能按意图重写（见 Task 5）。
@@ -1597,15 +1597,10 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
     public void Initialize()
     {
+        // 仅复位分支：Initialize 逆序晚于 Entity.Initialize 的 Start 播放，
+        // 此处若清播完追踪字段会抹掉刚记录的 _startAnim（追踪字段在 OnStateChanged(Default) 清）
         _moveBranch = MoveAnimationBranch.Normal;
         _attackBranch = AttackAnimationBranch.Normal;
-        _attackGroup = null;
-        _currentAttackBegin = null;
-        _currentAttackEnd = null;
-        _activeAttackAnim = null;
-        _endAnim = null;
-        _dieAnim = null;
-        _startAnim = null;
     }
 
     public void Dormancy()
@@ -1638,6 +1633,14 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         switch (next)
         {
             case EntityState.Default:
+                // 回池复位态：清攻击编排与播完追踪字段（Initialize 里不清，见其注释）
+                _attackGroup = null;
+                _currentAttackBegin = null;
+                _currentAttackEnd = null;
+                _activeAttackAnim = null;
+                _endAnim = null;
+                _dieAnim = null;
+                _startAnim = null;
                 SetSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Default), false, 1);
                 ConsumeOneShots(AnimationSlot.Default);
                 break;
