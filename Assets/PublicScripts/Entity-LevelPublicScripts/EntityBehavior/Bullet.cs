@@ -80,7 +80,7 @@ public class Bullet
         }
         if (bulletData.BulletSpawnEffect)
         {
-            EffectManager.Manager.CreateEffect(bulletData.BulletSpawnEffect, bulletSpawnPosition, Quaternion.Euler(0, originEntity.entityAM.CurrentDirection.left ? 180 : 0, 0), LevelResourceSharing.LM, 1, true);
+            EffectManager.Manager.CreateEffect(bulletData.BulletSpawnEffect, bulletSpawnPosition, Quaternion.Euler(0, originEntity.facing.CurrentDirection.left ? 180 : 0, 0), LevelResourceSharing.LM, 1, true);
         }
         BulletFly();
         _activeBullets.Add(this);

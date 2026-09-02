@@ -169,7 +169,7 @@ public class AttackBase : MonoBehaviour, IPoolOperation
                 centerPos += attackTargets[i].transform.position;
             }
             centerPos /= i;
-            _thisEntity.entityAM.SetDirection(centerPos);
+            _thisEntity.facing.SetDirection(centerPos);
         }
         return false;
     }

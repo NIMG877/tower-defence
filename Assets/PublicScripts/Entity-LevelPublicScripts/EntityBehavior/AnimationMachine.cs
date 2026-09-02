@@ -33,7 +33,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     private Entity thisEntity;
     private EventData event_attack;
     private EventData event_start;
-    private (bool left, bool up) _direction;
     private Action _attackAction;
     private int _attackAnimationIndex;
     private float _attackStaticWaitTime;
@@ -67,8 +66,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         get { return currentState; }
     }
 
-    public (bool left, bool up) CurrentDirection { get { return _direction; } }
-
     private void FixedUpdate()
     {
         if (_attackPhase == AttackPhase.ComboWindow)
@@ -82,56 +79,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 FinishComboWindow();
             }
         }
-    }
-
-    /// <summary>
-    /// Tints the entity sprite.
-    /// </summary>
-    /// <param name="effect">Which tint effect to play</param>
-    /// <param name="duration">Tween duration in seconds</param>
-    private void SetColor(ColorEffect effect, float duration)
-    {
-        switch (effect)
-        {
-            case ColorEffect.FadeIn:
-                DOTween.To(FadeAlpha, 0, 1, duration);
-                break;
-            case ColorEffect.FadeOut:
-                DOTween.To(FadeAlpha, 1, 0, duration).OnComplete(() =>
-                {
-                    thisEntity.thisEntityPool.Return(thisEntity);
-                });
-                break;
-            case ColorEffect.FlashRed:
-                _flashRedBaselineG = skeleton.skeleton.GetColor().g;
-                DOTween.To(ApplyFlashRed, 0, 2, duration);
-                break;
-        }
-    }
-
-    // Snapshotted g-channel at the moment FlashRed starts; the tween body
-    // reads this each frame instead of capturing a closure.
-    private float _flashRedBaselineG;
-
-    // FlashRed tween body: a 0→2 ramp mapped to a red→white→red pulse that
-    // returns to the baseline green channel captured at tween start.
-    private void ApplyFlashRed(float value)
-    {
-        if (value < 1)
-        {
-            value = Math.Max(-value + _flashRedBaselineG, 0);
-        }
-        else
-        {
-            value = value - 1;
-        }
-        skeleton.skeleton.SetColor(new Color(1, value, value));
-    }
-
-    // Applies a greyscale-with-double-alpha curve used by fade-in / fade-out.
-    private void FadeAlpha(float value)
-    {
-        skeleton.skeleton.SetColor(new Color(value, value, value, Math.Min(value * 2, 1)));
     }
 
     public float ResolveAnimationDuration(AnimationSlot slot)
@@ -282,53 +229,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         }
         _attackAction = attackAction;
         return true;
-    }
-
-    /// <summary>
-    /// Sets the entity facing direction based on a world-space target.
-    /// </summary>
-    /// <param name="target">World-space target position</param>
-    public void SetDirection(Vector2 target)
-    {
-        // Note: the trailing `return;` on the !left branch is intentional and preserved.
-        // Removing it would change rotation behavior for that branch.
-        void SetDirectionBase()
-        {
-            float ry = skeleton.transform.rotation.y;
-            if (_direction.left)
-            {
-                if (ry != 1) skeleton.transform.Rotate(new Vector3(0, (1 - ry) * 180, 0));
-            }
-            else
-            {
-                if (ry != 0) skeleton.transform.Rotate(new Vector3(0, -ry * 180, 0)); return;
-            }
-        }
-        float dx = target.x - transform.position.x;
-        float dy = target.y - transform.position.y;
-        if (dy > 0)
-        {
-            _direction.up = true;
-        }
-        else if (dy < 0)
-        {
-            _direction.up = false;
-        }
-        if (dx > 0)
-        {
-            _direction.left = false;
-            SetDirectionBase();
-        }
-        else if (dx < 0)
-        {
-            _direction.left = true;
-            SetDirectionBase();
-        }
-    }
-
-    public void ArriveEnd()
-    {
-        SetColor(ColorEffect.FadeOut, 0.2f);
     }
 
     private void AddSpineAnimation(AnimationReferenceAsset animation, bool loop, float timeScale, float delay)
@@ -593,13 +493,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         return resolved;
     }
 
-    private enum ColorEffect
-    {
-        FadeIn,
-        FadeOut,
-        FlashRed,
-    }
-
     private void HandleAnimationStateComplete(Spine.TrackEntry trackEntry)
     {
         if ((_currentAttackEnd || (Attack != null && Attack.Length > 1)) && currentState == EntityState.Attack && _attackPhase == AttackPhase.Active && trackEntry.Animation == Attack[_attackAnimationIndex].Animation)
@@ -617,7 +510,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         // (which replaces the Die track with Default) from re-triggering fade-out.
         if (_activeAnimations.GetSingle(AnimationSlot.Die) != null && currentState == EntityState.Die && trackEntry.Animation == _activeAnimations.GetSingle(AnimationSlot.Die).Animation)
         {
-            SetColor(ColorEffect.FadeOut, 0.2f);
+            thisEntity.visuals.FadeOut(0.2f, () => thisEntity.thisEntityPool.Return(thisEntity));
             return;
         }
     }
@@ -632,7 +525,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
         skeleton = skeletonAnimation;
         states_ban = new HashSet<EntityState>();
-        _direction = (false, false);
         thisEntity = this.GetComponent<Entity>();
         _animationResources = thisEntity.EntityData.AnimationResources;
         if (_animationResources == null)
@@ -690,24 +582,11 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
     public void Initialize()
     {
-        SetColor(ColorEffect.FadeIn, 0.2f);
-        thisEntity.OnAfterHurt += HandleAfterHurt;
         _attackAnimationIndex = 0;
         _attackPhase = AttackPhase.None;
         _attackBranch = AttackAnimationBranch.Normal;
         _currentAttackBegin = null;
         _currentAttackEnd = null;
-    }
-
-    // Method group (cached, no per-checkout closure) subscribed to OnAfterHurt
-    // in Initialize. Entity.Dormancy() nulls the event, so no -=/manual cleanup
-    // is required here.
-    private void HandleAfterHurt(Entity origin, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType, bool isDeadly)
-    {
-        if (applyType != 2)
-        {
-            SetColor(ColorEffect.FlashRed, 0.2f);
-        }
     }
 
     public void Dormancy()

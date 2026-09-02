@@ -10,7 +10,7 @@ public class NormalMove : MoveBase
         for (; _currentPointSerial < _currentSection.Length; _currentPointSerial++)
         {
             float d = Vector2.Distance(_currentSection[_currentPointSerial].targetPosition, this.transform.position);
-            _thisAM.SetDirection(_currentSection[_currentPointSerial].targetPosition);
+            _thisEntity.facing.SetDirection(_currentSection[_currentPointSerial].targetPosition);
             if (deltas < d)
             {
                 _thisEntity.Movement.Position += (_currentSection[_currentPointSerial].targetPosition - _thisEntity.Movement.Position).normalized * deltas;

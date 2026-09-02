@@ -263,8 +263,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
     }
     protected virtual void ArriveEnd()
     {
-        _thisAM.TrySetState(EntityState.Default, true);
-        _thisAM.ArriveEnd();
+        _thisEntity.ArriveEnd();
         _thisEntity.Stats.IsActive = false;
         if (_levelHpComsume > 0)
         {

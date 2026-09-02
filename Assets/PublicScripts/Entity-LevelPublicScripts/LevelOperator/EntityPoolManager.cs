@@ -31,6 +31,8 @@ public class EntityPool
             gameObject.AddComponent<InteractableStatic>();
         gameObject.AddComponent<BuffController>();
         Entity newEntity = gameObject.AddComponent<Entity>();
+        gameObject.AddComponent<EntityVisuals>();
+        gameObject.AddComponent<EntityFacing>();
         newEntity.thisEntityPool = this;
         newEntity.EntityData = EntityData;
         newEntity.SelectedSkillIndex = skillIndex;

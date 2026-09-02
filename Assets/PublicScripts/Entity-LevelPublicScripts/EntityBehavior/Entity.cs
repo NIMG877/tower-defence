@@ -47,6 +47,8 @@ public class Entity : MonoBehaviour, IPoolOperation
 {
     public EntityData EntityData;
     public AnimationMachine entityAM;
+    [HideInInspector] public EntityVisuals visuals;
+    [HideInInspector] public EntityFacing facing;
     [HideInInspector] public BuffController buffController;
     [HideInInspector] public AttackBase AttackBase;
     [HideInInspector] public MoveBase MoveBase;
@@ -180,6 +182,12 @@ public class Entity : MonoBehaviour, IPoolOperation
             AudioManager.Manager.PlayAudio("enemy_die", 1, false, false);
         }
     }
+    /// <summary>到达终点退场：转 Default + 淡出 + 回池（原 MoveBase.ArriveEnd 的表现部分上收）。</summary>
+    public void ArriveEnd()
+    {
+        entityAM.TrySetState(EntityState.Default, true);
+        visuals.FadeOut(0.2f, () => thisEntityPool.Return(this));
+    }
     /// <summary>
     /// 设置朝向
     /// </summary>
@@ -199,6 +207,8 @@ public class Entity : MonoBehaviour, IPoolOperation
         {
             Debug.LogWarning("未绑定动画状态机");
         }
+        visuals = GetComponent<EntityVisuals>();
+        facing = GetComponent<EntityFacing>();
         if (this.TryGetComponent(out BuffController bF))
         {
             buffController = bF;
