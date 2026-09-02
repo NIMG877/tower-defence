@@ -5,85 +5,6 @@ using Spine;
 using DG.Tweening;
 using System;
 
-/// <summary>
-/// 动画资源槽位。
-/// 用于解析动画资源，以及在 <see cref="AnimationOverride"/> 中显式清空某个覆盖槽。
-/// 注：与 <see cref="EntityState"/> 的语义不重合——本枚举标识动画资源槽位，
-///     EntityState 标识逻辑动画状态。
-/// </summary>
-public enum AnimationSlot
-{
-    Default,
-    Idle,
-    Move,
-    JumpBegin,
-    JumpLoop,
-    JumpEnd,
-    Start,
-    Die,
-    AttackRemote,
-    AttackClose,
-    AttackBegin,
-    AttackEnd,
-    ChargeBegin,
-    Charge,
-    ChargeEnd,
-}
-
-public sealed class AnimationOverride
-{
-    public string Default;
-    public string Idle;
-    public string Move;
-    public string JumpBegin;
-    public string JumpLoop;
-    public string JumpEnd;
-    public string Start;
-    public string Die;
-    public string AttackBegin;
-    public string AttackEnd;
-    public string AttackRemote;
-    public string AttackClose;
-    public string ChargeBegin;
-    public string Charge;
-    public string ChargeEnd;
-    internal readonly HashSet<AnimationSlot> ClearedSlots = new HashSet<AnimationSlot>();
-
-    public AnimationOverride Clear(params AnimationSlot[] slots)
-    {
-        foreach (AnimationSlot slot in slots)
-        {
-            ClearedSlots.Add(slot);
-        }
-        return this;
-    }
-
-    /// <summary>
-    /// Slots this override affects: every slot with a non-empty resource, plus
-    /// cleared slots. One-shot entries seed their pending-consumption set from this.
-    /// </summary>
-    public HashSet<AnimationSlot> GetCoveredSlots()
-    {
-        var covered = new HashSet<AnimationSlot>(ClearedSlots);
-        if (!string.IsNullOrEmpty(Default)) covered.Add(AnimationSlot.Default);
-        if (!string.IsNullOrEmpty(Idle)) covered.Add(AnimationSlot.Idle);
-        if (!string.IsNullOrEmpty(Move)) covered.Add(AnimationSlot.Move);
-        if (!string.IsNullOrEmpty(JumpBegin)) covered.Add(AnimationSlot.JumpBegin);
-        if (!string.IsNullOrEmpty(JumpLoop)) covered.Add(AnimationSlot.JumpLoop);
-        if (!string.IsNullOrEmpty(JumpEnd)) covered.Add(AnimationSlot.JumpEnd);
-        if (!string.IsNullOrEmpty(Start)) covered.Add(AnimationSlot.Start);
-        if (!string.IsNullOrEmpty(Die)) covered.Add(AnimationSlot.Die);
-        if (!string.IsNullOrEmpty(AttackBegin)) covered.Add(AnimationSlot.AttackBegin);
-        if (!string.IsNullOrEmpty(AttackEnd)) covered.Add(AnimationSlot.AttackEnd);
-        if (!string.IsNullOrEmpty(AttackRemote)) covered.Add(AnimationSlot.AttackRemote);
-        if (!string.IsNullOrEmpty(AttackClose)) covered.Add(AnimationSlot.AttackClose);
-        if (!string.IsNullOrEmpty(ChargeBegin)) covered.Add(AnimationSlot.ChargeBegin);
-        if (!string.IsNullOrEmpty(Charge)) covered.Add(AnimationSlot.Charge);
-        if (!string.IsNullOrEmpty(ChargeEnd)) covered.Add(AnimationSlot.ChargeEnd);
-        return covered;
-    }
-}
-
 public enum MoveAnimationBranch
 {
     Normal,
@@ -215,7 +136,16 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
     public float ResolveAnimationDuration(AnimationSlot slot)
     {
-        AnimationReferenceAsset animation = ResolveAnimations().GetSingle(slot);
+        AnimationReferenceAsset animation;
+        if (AnimationSet.IsGroup(slot))
+        {
+            AnimationReferenceAsset[] group = ResolveAnimations().GetGroup(slot);
+            animation = (group != null && group.Length > 0) ? group[0] : null;
+        }
+        else
+        {
+            animation = ResolveAnimations().GetSingle(slot);
+        }
         return animation != null ? animation.Animation.Duration : 0;
     }
 
@@ -278,17 +208,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                     break;
                 }
             }
-        }
-    }
-
-    private static AnimationSlot MoveBranchSlot(MoveAnimationBranch branch)
-    {
-        switch (branch)
-        {
-            case MoveAnimationBranch.JumpBegin: return AnimationSlot.JumpBegin;
-            case MoveAnimationBranch.JumpLoop: return AnimationSlot.JumpLoop;
-            case MoveAnimationBranch.JumpEnd: return AnimationSlot.JumpEnd;
-            default: return AnimationSlot.Move;
         }
     }
 
@@ -435,7 +354,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         }
         else
         {
-            skeleton.state.SetAnimation(0, _activeAnimations.Idle, false);
+            skeleton.state.SetAnimation(0, _activeAnimations.GetSingle(AnimationSlot.Idle), false);
             ConsumeOneShots(AnimationSlot.Idle);
         }
     }
@@ -445,17 +364,17 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         AnimationSlot beginSlot, groupSlot;
         if (_attackBranch == AttackAnimationBranch.Charge)
         {
-            _currentAttackBegin = _activeAnimations.ChargeBegin;
-            Attack = _activeAnimations.Charge;
-            _currentAttackEnd = _activeAnimations.ChargeEnd;
+            _currentAttackBegin = _activeAnimations.GetSingle(AnimationSlot.ChargeBegin);
+            Attack = _activeAnimations.GetGroup(AnimationSlot.Charge);
+            _currentAttackEnd = _activeAnimations.GetSingle(AnimationSlot.ChargeEnd);
             beginSlot = AnimationSlot.ChargeBegin;
             groupSlot = AnimationSlot.Charge;
         }
         else
         {
-            _currentAttackBegin = _activeAnimations.AttackBegin;
-            Attack = (thisEntity.Movement.ResistList.Count == 0) ? _activeAnimations.AttackRemote : _activeAnimations.AttackClose;
-            _currentAttackEnd = _activeAnimations.AttackEnd;
+            _currentAttackBegin = _activeAnimations.GetSingle(AnimationSlot.AttackBegin);
+            Attack = (thisEntity.Movement.ResistList.Count == 0) ? _activeAnimations.GetGroup(AnimationSlot.AttackRemote) : _activeAnimations.GetGroup(AnimationSlot.AttackClose);
+            _currentAttackEnd = _activeAnimations.GetSingle(AnimationSlot.AttackEnd);
             beginSlot = AnimationSlot.AttackBegin;
             groupSlot = (thisEntity.Movement.ResistList.Count == 0) ? AnimationSlot.AttackRemote : AnimationSlot.AttackClose;
         }
@@ -500,27 +419,27 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         switch (setState)
         {
             case EntityState.Default:
-                SetSpineAnimation(_activeAnimations.Default, false, 1);
+                SetSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Default), false, 1);
                 ConsumeOneShots(AnimationSlot.Default);
                 break;
             case EntityState.Idle:
-                SetSpineAnimation(_activeAnimations.Idle, true, 1);
+                SetSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Idle), true, 1);
                 ConsumeOneShots(AnimationSlot.Idle);
                 break;
             case EntityState.Move:
-                SetSpineAnimation(_activeAnimations.GetMove(moveBranch), true, 1);
-                ConsumeOneShots(MoveBranchSlot(moveBranch));
+                SetSpineAnimation(_activeAnimations.GetSingle(AnimationSet.MoveBranchSlot(moveBranch)), true, 1);
+                ConsumeOneShots(AnimationSet.MoveBranchSlot(moveBranch));
                 break;
             case EntityState.Attack:
                 PlayAttackAnimation(continueCombo);
                 break;
             case EntityState.Start:
-                SetSpineAnimation(_activeAnimations.Start, false, 1);
-                AddSpineAnimation(_activeAnimations.Idle, true, 1, 0);
+                SetSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Start), false, 1);
+                AddSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Idle), true, 1, 0);
                 ConsumeOneShots(AnimationSlot.Start, AnimationSlot.Idle);
                 break;
             case EntityState.Die:
-                SetSpineAnimation(_activeAnimations.Die, false, 1);
+                SetSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Die), false, 1);
                 ConsumeOneShots(AnimationSlot.Die);
                 break;
             default: break;
@@ -563,13 +482,13 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 _attackPhase = AttackPhase.Active;
                 if (_currentAttackEnd == null && Attack.Length == 1)
                 {
-                    AddSpineAnimation(_activeAnimations.Idle, true, 1, 0);
+                    AddSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Idle), true, 1, 0);
                     ConsumeOneShots(AnimationSlot.Idle);
                 }
                 break;
             case AnimKind.AttackEndAnim:
                 _attackPhase = AttackPhase.End;
-                AddSpineAnimation(_activeAnimations.Idle, true, 1, 0);
+                AddSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Idle), true, 1, 0);
                 ConsumeOneShots(AnimationSlot.Idle);
                 break;
             case AnimKind.StartAnim:
@@ -588,9 +507,9 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     // if-else evaluation order exactly.
     private AnimKind ClassifyAnimation(Spine.TrackEntry entry)
     {
-        if (_activeAnimations.Default && entry.Animation == _activeAnimations.Default.Animation) return AnimKind.DefaultAnim;
-        if (_activeAnimations.Idle && entry.Animation == _activeAnimations.Idle.Animation) return AnimKind.IdleAnim;
-        if (_activeAnimations.IsMoveAnimation(entry.Animation)) return AnimKind.MoveAnim;
+        if (_activeAnimations.GetSingle(AnimationSlot.Default) && entry.Animation == _activeAnimations.GetSingle(AnimationSlot.Default).Animation) return AnimKind.DefaultAnim;
+        if (_activeAnimations.GetSingle(AnimationSlot.Idle) && entry.Animation == _activeAnimations.GetSingle(AnimationSlot.Idle).Animation) return AnimKind.IdleAnim;
+        if (IsMoveAnimation(entry.Animation)) return AnimKind.MoveAnim;
         if (Attack != null)
         {
             bool inRange = _attackAnimationIndex < Attack.Length;
@@ -599,9 +518,22 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
             if (matchesInRange || matchesLast) return AnimKind.AttackAnim;
         }
         if (_currentAttackEnd && entry.Animation == _currentAttackEnd.Animation) return AnimKind.AttackEndAnim;
-        if (_activeAnimations.Start && entry.Animation == _activeAnimations.Start.Animation) return AnimKind.StartAnim;
-        if (_activeAnimations.Die && entry.Animation == _activeAnimations.Die.Animation) return AnimKind.DieAnim;
+        if (_activeAnimations.GetSingle(AnimationSlot.Start) && entry.Animation == _activeAnimations.GetSingle(AnimationSlot.Start).Animation) return AnimKind.StartAnim;
+        if (_activeAnimations.GetSingle(AnimationSlot.Die) && entry.Animation == _activeAnimations.GetSingle(AnimationSlot.Die).Animation) return AnimKind.DieAnim;
         return AnimKind.None;
+    }
+
+    private bool IsMoveAnimation(Spine.Animation animation)
+    {
+        return Matches(_activeAnimations.GetSingle(AnimationSlot.Move), animation)
+            || Matches(_activeAnimations.GetSingle(AnimationSlot.JumpBegin), animation)
+            || Matches(_activeAnimations.GetSingle(AnimationSlot.JumpLoop), animation)
+            || Matches(_activeAnimations.GetSingle(AnimationSlot.JumpEnd), animation);
+    }
+
+    private static bool Matches(AnimationReferenceAsset reference, Spine.Animation animation)
+    {
+        return reference != null && reference.Animation == animation;
     }
 
     private enum AnimKind
@@ -646,195 +578,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         }
     }
 
-    private sealed class AnimationSet
-    {
-        public AnimationReferenceAsset Default;
-        public AnimationReferenceAsset Idle;
-        public AnimationReferenceAsset Move;
-        public AnimationReferenceAsset JumpBegin;
-        public AnimationReferenceAsset JumpLoop;
-        public AnimationReferenceAsset JumpEnd;
-        public AnimationReferenceAsset Start;
-        public AnimationReferenceAsset Die;
-        public AnimationReferenceAsset AttackBegin;
-        public AnimationReferenceAsset AttackEnd;
-        public AnimationReferenceAsset[] AttackRemote;
-        public AnimationReferenceAsset[] AttackClose;
-        public AnimationReferenceAsset ChargeBegin;
-        public AnimationReferenceAsset[] Charge;
-        public AnimationReferenceAsset ChargeEnd;
-
-        public static AnimationSet From(AnimationResources resources)
-        {
-            AnimationResources.DefaultAnimationTemplate defaults = resources.Defaults;
-            AnimationResources.MovementAnimationGroup movement = resources.Movement;
-            AnimationResources.AttackAnimationGroup attack = resources.Attack;
-            return new AnimationSet
-            {
-                Default = defaults.Default,
-                Idle = defaults.Idle,
-                Move = movement.Move,
-                JumpBegin = movement.Jump.Begin,
-                JumpLoop = movement.Jump.Loop,
-                JumpEnd = movement.Jump.End,
-                Start = defaults.Start,
-                Die = defaults.Die,
-                AttackBegin = attack.AttackBegin,
-                AttackEnd = attack.AttackEnd,
-                AttackRemote = attack.AttackRemote,
-                AttackClose = attack.AttackClose,
-                ChargeBegin = attack.Charge.ChargeBegin,
-                Charge = attack.Charge.Charge,
-                ChargeEnd = attack.Charge.ChargeEnd,
-            };
-        }
-
-        public AnimationSet Copy()
-        {
-            return new AnimationSet
-            {
-                Default = Default,
-                Idle = Idle,
-                Move = Move,
-                JumpBegin = JumpBegin,
-                JumpLoop = JumpLoop,
-                JumpEnd = JumpEnd,
-                Start = Start,
-                Die = Die,
-                AttackBegin = AttackBegin,
-                AttackEnd = AttackEnd,
-                AttackRemote = AttackRemote,
-                AttackClose = AttackClose,
-                ChargeBegin = ChargeBegin,
-                Charge = Charge,
-                ChargeEnd = ChargeEnd,
-            };
-        }
-
-        public AnimationReferenceAsset GetSingle(AnimationSlot slot)
-        {
-            switch (slot)
-            {
-                case AnimationSlot.Default: return Default;
-                case AnimationSlot.Idle: return Idle;
-                case AnimationSlot.Move: return Move;
-                case AnimationSlot.JumpBegin: return JumpBegin;
-                case AnimationSlot.JumpLoop: return JumpLoop;
-                case AnimationSlot.JumpEnd: return JumpEnd;
-                case AnimationSlot.Start: return Start;
-                case AnimationSlot.Die: return Die;
-                case AnimationSlot.AttackBegin: return AttackBegin;
-                case AnimationSlot.AttackEnd: return AttackEnd;
-                case AnimationSlot.ChargeBegin: return ChargeBegin;
-                case AnimationSlot.ChargeEnd: return ChargeEnd;
-                default: return null;
-            }
-        }
-
-        public AnimationReferenceAsset[] GetGroup(AnimationSlot slot)
-        {
-            switch (slot)
-            {
-                case AnimationSlot.AttackRemote: return AttackRemote;
-                case AnimationSlot.AttackClose: return AttackClose;
-                case AnimationSlot.Charge: return Charge;
-                default: return null;
-            }
-        }
-
-        public AnimationReferenceAsset GetMove(MoveAnimationBranch branch)
-        {
-            switch (branch)
-            {
-                case MoveAnimationBranch.JumpBegin: return JumpBegin;
-                case MoveAnimationBranch.JumpLoop: return JumpLoop;
-                case MoveAnimationBranch.JumpEnd: return JumpEnd;
-                default: return Move;
-            }
-        }
-
-        public bool IsMoveAnimation(Spine.Animation animation)
-        {
-            return Matches(Move, animation) ||
-                Matches(JumpBegin, animation) ||
-                Matches(JumpLoop, animation) ||
-                Matches(JumpEnd, animation);
-        }
-
-        private static bool Matches(AnimationReferenceAsset reference, Spine.Animation animation)
-        {
-            return reference != null && reference.Animation == animation;
-        }
-
-        public void Apply(AnimationOverride animations, AnimationResources resources)
-        {
-            if (animations == null) return;
-            foreach (AnimationSlot slot in animations.ClearedSlots)
-            {
-                Clear(slot);
-            }
-            ApplySingle(animations.Default, resources, value => Default = value);
-            ApplySingle(animations.Idle, resources, value => Idle = value);
-            ApplySingle(animations.Move, resources, value => Move = value);
-            ApplySingle(animations.JumpBegin, resources, value => JumpBegin = value);
-            ApplySingle(animations.JumpLoop, resources, value => JumpLoop = value);
-            ApplySingle(animations.JumpEnd, resources, value => JumpEnd = value);
-            ApplySingle(animations.Start, resources, value => Start = value);
-            ApplySingle(animations.Die, resources, value => Die = value);
-            ApplySingle(animations.AttackBegin, resources, value => AttackBegin = value);
-            ApplySingle(animations.AttackEnd, resources, value => AttackEnd = value);
-            ApplyGroup(animations.AttackRemote, resources, value => AttackRemote = value);
-            ApplyGroup(animations.AttackClose, resources, value => AttackClose = value);
-            ApplySingle(animations.ChargeBegin, resources, value => ChargeBegin = value);
-            ApplyGroup(animations.Charge, resources, value => Charge = value);
-            ApplySingle(animations.ChargeEnd, resources, value => ChargeEnd = value);
-        }
-
-        private static void ApplySingle(
-            string resourceName,
-            AnimationResources resources,
-            Action<AnimationReferenceAsset> apply)
-        {
-            if (!string.IsNullOrEmpty(resourceName))
-            {
-                apply(resources.GetAnimation(resourceName));
-            }
-        }
-
-        private static void ApplyGroup(
-            string resourceName,
-            AnimationResources resources,
-            Action<AnimationReferenceAsset[]> apply)
-        {
-            if (!string.IsNullOrEmpty(resourceName))
-            {
-                apply(resources.GetAnimationGroup(resourceName));
-            }
-        }
-
-        private void Clear(AnimationSlot slot)
-        {
-            switch (slot)
-            {
-                case AnimationSlot.Default: Default = null; break;
-                case AnimationSlot.Idle: Idle = null; break;
-                case AnimationSlot.Move: Move = null; break;
-                case AnimationSlot.JumpBegin: JumpBegin = null; break;
-                case AnimationSlot.JumpLoop: JumpLoop = null; break;
-                case AnimationSlot.JumpEnd: JumpEnd = null; break;
-                case AnimationSlot.Start: Start = null; break;
-                case AnimationSlot.Die: Die = null; break;
-                case AnimationSlot.AttackBegin: AttackBegin = null; break;
-                case AnimationSlot.AttackEnd: AttackEnd = null; break;
-                case AnimationSlot.AttackRemote: AttackRemote = null; break;
-                case AnimationSlot.AttackClose: AttackClose = null; break;
-                case AnimationSlot.ChargeBegin: ChargeBegin = null; break;
-                case AnimationSlot.Charge: Charge = null; break;
-                case AnimationSlot.ChargeEnd: ChargeEnd = null; break;
-            }
-        }
-    }
-
     private AnimationSet ResolveAnimations()
     {
         AnimationSet resolved = _baseAnimations.Copy();
@@ -872,7 +615,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         // Die animation finished → kick off the fade-out. The tween's OnComplete
         // returns the entity to the pool. currentState guard keeps Dormancy-reset
         // (which replaces the Die track with Default) from re-triggering fade-out.
-        if (_activeAnimations.Die != null && currentState == EntityState.Die && trackEntry.Animation == _activeAnimations.Die.Animation)
+        if (_activeAnimations.GetSingle(AnimationSlot.Die) != null && currentState == EntityState.Die && trackEntry.Animation == _activeAnimations.GetSingle(AnimationSlot.Die).Animation)
         {
             SetColor(ColorEffect.FadeOut, 0.2f);
             return;
@@ -906,38 +649,25 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         skeleton.AnimationState.Start += HandleAnimationStateStart;
         skeleton.AnimationState.Complete += HandleAnimationStateComplete;
         skeleton.AnimationState.Data.DefaultMix = 0.1f;
-        SetMixToStart(_baseAnimations.Default);
-        SetMixToStart(_baseAnimations.Idle);
-        SetMixToStart(_baseAnimations.Move);
-        SetMixToStart(_baseAnimations.JumpBegin);
-        SetMixToStart(_baseAnimations.JumpLoop);
-        SetMixToStart(_baseAnimations.JumpEnd);
-        SetMixToStart(_baseAnimations.AttackBegin);
-        SetMixToStart(_baseAnimations.AttackEnd);
-        SetMixToStartAll(_baseAnimations.AttackRemote);
-        SetMixToStartAll(_baseAnimations.AttackClose);
-        SetMixToStart(_baseAnimations.ChargeBegin);
-        SetMixToStartAll(_baseAnimations.Charge);
-        SetMixToStart(_baseAnimations.ChargeEnd);
-        SetMixToStart(_baseAnimations.Die);
+        RegisterMixes(_baseAnimations);
     }
 
-    // Helper: zero mix time from a single animation to Start.
-    private void SetMixToStart(AnimationReferenceAsset animation)
+    // 从任何动画切入 Start（部署）一律零混合（旧 SetMixToStart 语义）。
+    private void RegisterMixes(AnimationSet set)
     {
-        if (animation != null && _baseAnimations.Start != null)
+        if (set == null || skeleton == null || _baseAnimations == null) return;
+        AnimationReferenceAsset start = _baseAnimations.GetSingle(AnimationSlot.Start);
+        if (start == null) return;
+        foreach (AnimationReferenceAsset animation in set.EnumerateSingles())
         {
-            skeleton.AnimationState.Data.SetMix(animation, _baseAnimations.Start, 0);
+            SetMixToStart(animation);
         }
-    }
-
-    // Helper: zero mix time from every animation in the array to Start.
-    private void SetMixToStartAll(AnimationReferenceAsset[] animations)
-    {
-        if (animations == null) return;
-        for (int i = 0; i < animations.Length; i++)
+        foreach (AnimationReferenceAsset[] group in set.EnumerateGroups())
         {
-            SetMixToStart(animations[i]);
+            for (int i = 0; i < group.Length; i++)
+            {
+                SetMixToStart(group[i]);
+            }
         }
     }
 
@@ -946,20 +676,16 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         if (animations == null || skeleton == null || _animationResources == null) return;
         var resolved = new AnimationSet();
         resolved.Apply(animations, _animationResources);
-        SetMixToStart(resolved.Default);
-        SetMixToStart(resolved.Idle);
-        SetMixToStart(resolved.Move);
-        SetMixToStart(resolved.JumpBegin);
-        SetMixToStart(resolved.JumpLoop);
-        SetMixToStart(resolved.JumpEnd);
-        SetMixToStart(resolved.AttackBegin);
-        SetMixToStart(resolved.AttackEnd);
-        SetMixToStartAll(resolved.AttackRemote);
-        SetMixToStartAll(resolved.AttackClose);
-        SetMixToStart(resolved.ChargeBegin);
-        SetMixToStartAll(resolved.Charge);
-        SetMixToStart(resolved.ChargeEnd);
-        SetMixToStart(resolved.Die);
+        RegisterMixes(resolved);
+    }
+
+    // Helper: zero mix time from a single animation to Start.
+    private void SetMixToStart(AnimationReferenceAsset animation)
+    {
+        if (animation != null && _baseAnimations.GetSingle(AnimationSlot.Start) != null)
+        {
+            skeleton.AnimationState.Data.SetMix(animation, _baseAnimations.GetSingle(AnimationSlot.Start), 0);
+        }
     }
 
     public void Initialize()

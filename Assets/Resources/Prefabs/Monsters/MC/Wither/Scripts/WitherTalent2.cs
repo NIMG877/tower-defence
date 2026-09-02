@@ -12,7 +12,7 @@ public class WitherTalent2 : Talent
     [SerializeField] private float _recoverTime;
     public override void Initialize()
     {
-        _thisEntity.entityAM.AddOverride(this, new AnimationOverride { Idle = _recoverLoop });
+        _thisEntity.entityAM.AddOverride(this, new AnimationOverride { [AnimationSlot.Idle] = _recoverLoop });
         _thisEntity.Stats.CurrentHpRate = 0.001f;
         _thisEntity.buffController.AddAbnormalState(-10, 3);
         _thisEntity.buffController.AddAbnormalState(-10, 0);
@@ -24,7 +24,7 @@ public class WitherTalent2 : Talent
         await UniTask.WaitForSeconds(_thisEntity.entityAM.ResolveAnimationDuration(AnimationSlot.Start) * 0.9f);
         _recoverEffect.SetActive(true);
         _thisEntity.entityAM.TrySetState(EntityState.Idle, true);
-        _thisEntity.entityAM.AddOverride(this, new AnimationOverride { Start = _start2 });
+        _thisEntity.entityAM.AddOverride(this, new AnimationOverride { [AnimationSlot.Start] = _start2 });
         DOTween.To((value) =>
         {
             _thisEntity.Stats.CurrentHpRate = value;

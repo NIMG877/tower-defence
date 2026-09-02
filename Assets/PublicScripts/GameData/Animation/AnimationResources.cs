@@ -14,6 +14,7 @@ public sealed class AnimationResources : ScriptableObject
         public AnimationReferenceAsset Default;
         public AnimationReferenceAsset Idle;
         public AnimationReferenceAsset Start;
+        public AnimationReferenceAsset Cast;
         public AnimationReferenceAsset Die;
     }
 

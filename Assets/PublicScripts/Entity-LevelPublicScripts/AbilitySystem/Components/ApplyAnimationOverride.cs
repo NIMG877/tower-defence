@@ -83,6 +83,7 @@ namespace AbilitySystem.Components
         {
             string[] slots = _slots();
             string[] resources = _resources();
+            if (slots == null || resources == null) return null;
             int count = Math.Min(slots.Length, resources.Length);
             if (slots.Length != resources.Length)
             {
@@ -97,11 +98,12 @@ namespace AbilitySystem.Components
             for (int i = 0; i < count; i++)
             {
                 if (string.IsNullOrEmpty(resources[i])) continue;
-                if (!TrySetSlot(result, slots[i], resources[i]))
+                if (!Enum.TryParse(slots[i], true, out AnimationSlot parsed))
                 {
                     Debug.LogWarning($"ApplyAnimationOverride: unknown animation slot '{slots[i]}'; skipping");
                     continue;
                 }
+                result[parsed] = resources[i];
                 hasValidEntry = true;
             }
             return hasValidEntry ? result : null;
@@ -116,31 +118,6 @@ namespace AbilitySystem.Components
             string key = _blackboardKey();
             if (string.IsNullOrEmpty(key) || ctx.sharedBlackboard == null) return null;
             return ctx.sharedBlackboard.Get<List<Entity>>(key, null);
-        }
-
-        private static bool TrySetSlot(AnimationOverride animations, string slot, string resource)
-        {
-            if (!Enum.TryParse(slot, true, out AnimationSlot parsed)) return false;
-            switch (parsed)
-            {
-                case AnimationSlot.Default: animations.Default = resource; break;
-                case AnimationSlot.Idle: animations.Idle = resource; break;
-                case AnimationSlot.Move: animations.Move = resource; break;
-                case AnimationSlot.JumpBegin: animations.JumpBegin = resource; break;
-                case AnimationSlot.JumpLoop: animations.JumpLoop = resource; break;
-                case AnimationSlot.JumpEnd: animations.JumpEnd = resource; break;
-                case AnimationSlot.Start: animations.Start = resource; break;
-                case AnimationSlot.Die: animations.Die = resource; break;
-                case AnimationSlot.AttackBegin: animations.AttackBegin = resource; break;
-                case AnimationSlot.AttackEnd: animations.AttackEnd = resource; break;
-                case AnimationSlot.AttackRemote: animations.AttackRemote = resource; break;
-                case AnimationSlot.AttackClose: animations.AttackClose = resource; break;
-                case AnimationSlot.ChargeBegin: animations.ChargeBegin = resource; break;
-                case AnimationSlot.Charge: animations.Charge = resource; break;
-                case AnimationSlot.ChargeEnd: animations.ChargeEnd = resource; break;
-                default: return false;
-            }
-            return true;
         }
     }
 

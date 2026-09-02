@@ -26,8 +26,8 @@ public class WdslmSkill3 : Skill
         _thisEntity.buffController.AddAbnormalState(-10, 0);
         _thisEntity.entityAM.AddOverride(this, new AnimationOverride
         {
-            Start = _skillStart,
-            Idle = _skillLoop,
+            [AnimationSlot.Start] = _skillStart,
+            [AnimationSlot.Idle] = _skillLoop,
         });
         _thisEntity.entityAM.TrySetState(EntityState.Die, true);
         SummonMachine();
@@ -50,7 +50,7 @@ public class WdslmSkill3 : Skill
             TargetEntity.Die();
         TargetEntity = null;
         _thisEntity.entityAM.RemoveOverrides(this);
-        _thisEntity.entityAM.AddOverride(this, new AnimationOverride { Start = _skillEnd });
+        _thisEntity.entityAM.AddOverride(this, new AnimationOverride { [AnimationSlot.Start] = _skillEnd });
         _thisEntity.entityAM.TrySetState(EntityState.Die, true);
         _thisEntity.buffController.TryRemoveAbnormalState(0);
         _thisEntity.buffController.TryRemoveAbnormalState(2);

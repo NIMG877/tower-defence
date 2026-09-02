@@ -15,8 +15,8 @@ public class WitchSkill : Skill
             return false;
         _animationOverride = _thisEntity.entityAM.AddOverride(this, new AnimationOverride
         {
-            AttackClose = _drink,
-            AttackRemote = _drink,
+            [AnimationSlot.AttackClose] = _drink,
+            [AnimationSlot.AttackRemote] = _drink,
         });
         _thisEntity.AttackBase.TryToAttack(new Entity[1] { _thisEntity }, true, false);
         _medicalLiquidLight.Play(true);

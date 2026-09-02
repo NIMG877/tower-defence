@@ -32,12 +32,12 @@ public class HeadSeterTalent1 : Talent
                 am.RemoveOverrides(this);
                 am.AddOverride(this, new AnimationOverride
                 {
-                    Default = _default_d,
-                    Move = _move_d,
-                    Idle = _idle_d,
-                    Die = _die_d,
-                    AttackClose = _set_d,
-                    AttackRemote = _set_d,
+                    [AnimationSlot.Default] = _default_d,
+                    [AnimationSlot.Move] = _move_d,
+                    [AnimationSlot.Idle] = _idle_d,
+                    [AnimationSlot.Die] = _die_d,
+                    [AnimationSlot.AttackClose] = _set_d,
+                    [AnimationSlot.AttackRemote] = _set_d,
                 });
                 am.TrySetState(EntityState.Default, true);
                 _thisEntity.buffController.CreateBuff(new Modifier[]{ new Modifier("MoveSpeed", ModifierOp.AddPercent, -0.35f) }, null, "slowSpeed", -5, false);
@@ -61,9 +61,9 @@ public class HeadSeterTalent1 : Talent
                     am.RemoveOverrides(this);
                     am.AddOverride(this, new AnimationOverride
                     {
-                        Default = _default_1,
-                        Move = _move_1,
-                        Idle = _idle_1,
+                        [AnimationSlot.Default] = _default_1,
+                        [AnimationSlot.Move] = _move_1,
+                        [AnimationSlot.Idle] = _idle_1,
                     });
                 }
                 _thisEntity.AttackBase.TryToAttack(new Entity[1] { _entities[i] }, false, false);
@@ -82,8 +82,8 @@ public class HeadSeterTalent1 : Talent
                         {
                             _thisEntity.entityAM.AddOverride(this, new AnimationOverride
                             {
-                                AttackClose = _attack,
-                                AttackRemote = _attack,
+                                [AnimationSlot.AttackClose] = _attack,
+                                [AnimationSlot.AttackRemote] = _attack,
                             });
                         }
                     }

@@ -4,6 +4,7 @@
     "references": [
         "BasicScripts",
         "GameData",
+        "spine-unity",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

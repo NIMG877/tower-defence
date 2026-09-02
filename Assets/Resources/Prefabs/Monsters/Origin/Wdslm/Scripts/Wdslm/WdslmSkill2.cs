@@ -42,8 +42,8 @@ public class WdslmSkill2 : Skill
             return false;
         _animationOverride = _thisEntity.entityAM.AddOverride(this, new AnimationOverride
         {
-            AttackClose = _inciteDefectionAnimation,
-            AttackRemote = _inciteDefectionAnimation,
+            [AnimationSlot.AttackClose] = _inciteDefectionAnimation,
+            [AnimationSlot.AttackRemote] = _inciteDefectionAnimation,
         });
         int maxIndex = 0;
         float countPriority(Entity entity, int type)

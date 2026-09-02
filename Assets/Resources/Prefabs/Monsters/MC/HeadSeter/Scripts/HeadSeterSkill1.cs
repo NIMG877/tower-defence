@@ -24,11 +24,11 @@ public class HeadSeterSkill1 : Skill
             return false;
         if (!IsDie)
         {
-            am.AddOverride(this, new AnimationOverride { Start = _begin });
+            am.AddOverride(this, new AnimationOverride { [AnimationSlot.Start] = _begin });
         }
         else
         {
-            am.AddOverride(this, new AnimationOverride { Start = _begin_d });
+            am.AddOverride(this, new AnimationOverride { [AnimationSlot.Start] = _begin_d });
         }
         am.TrySetState(EntityState.Die, false);
         _thisEntity.buffController.AddAbnormalState(-10, 0);
@@ -40,11 +40,11 @@ public class HeadSeterSkill1 : Skill
         base.SkillEnd();
         if (!IsDie)
         {
-            am.AddOverride(this, new AnimationOverride { Start = _end });
+            am.AddOverride(this, new AnimationOverride { [AnimationSlot.Start] = _end });
         }
         else
         {
-            am.AddOverride(this, new AnimationOverride { Start = _end_d });
+            am.AddOverride(this, new AnimationOverride { [AnimationSlot.Start] = _end_d });
         }
         am.TrySetState(EntityState.Die, false);
         _thisEntity.buffController.TryRemoveAbnormalState(0);

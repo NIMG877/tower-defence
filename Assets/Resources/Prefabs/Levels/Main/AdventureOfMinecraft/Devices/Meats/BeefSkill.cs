@@ -10,7 +10,7 @@ public class BeefSkill : Skill
     {
         if (!base.SkillBegin())
             return false;
-        AnimationOverrideHandle handle = _thisEntity.entityAM.AddOneShotOverride(this, new AnimationOverride { Idle = _skill });
+        AnimationOverrideHandle handle = _thisEntity.entityAM.AddOneShotOverride(this, new AnimationOverride { [AnimationSlot.Idle] = _skill });
         if (!_thisEntity.entityAM.TrySetState(EntityState.Idle, true))
         {
             // 状态未切换则当场撤销待用条目，否则下一次 Idle 播放会播到技能动画。

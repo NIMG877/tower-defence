@@ -79,8 +79,8 @@ namespace AbilitySystem.Components
             string animation = _attackAnimation();
             var animations = new AnimationOverride
             {
-                AttackClose = animation,
-                AttackRemote = animation,
+                [AnimationSlot.AttackClose] = animation,
+                [AnimationSlot.AttackRemote] = animation,
             };
 
             _isExtraAttack = true;
