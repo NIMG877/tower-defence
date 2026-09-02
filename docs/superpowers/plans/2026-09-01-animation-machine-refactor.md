@@ -189,6 +189,8 @@ namespace AbilitySystem.Tests
             sm.Tick(0.04f);
             Assert.That(sm.CurrentAttackPhase, Is.EqualTo(AttackPhase.ComboWindow), "0.05s 窗口未到");
             sm.Tick(0.02f);
+            Assert.That(sm.CurrentAttackPhase, Is.EqualTo(AttackPhase.ComboWindow), "越零当拍只递减不判定（旧 FixedUpdate 语义：递减与到期分拍）");
+            sm.Tick(0.02f);
             Assert.That(sm.CurrentAttackPhase, Is.EqualTo(AttackPhase.End));
             Assert.That(seen, Is.EqualTo(AttackPhase.End));
             Assert.That(sm.AttackComboIndex, Is.EqualTo(0));
@@ -199,7 +201,7 @@ namespace AbilitySystem.Tests
         {
             sm.TrySetState(EntityState.Attack, true);
             sm.NotifyAttackActiveCompleted(1);
-            sm.Tick(0.06f); // → End
+            sm.Tick(0.06f); // 越零递减（旧语义当拍仍 ComboWindow；本方法对非 None 相位均收尾）
             sm.NotifyAttackEndCompleted();
             Assert.That(sm.CurrentState, Is.EqualTo(EntityState.Idle));
             Assert.That(sm.CurrentAttackPhase, Is.EqualTo(AttackPhase.None));
