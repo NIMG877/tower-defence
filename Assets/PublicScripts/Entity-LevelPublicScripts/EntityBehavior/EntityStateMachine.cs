@@ -76,6 +76,7 @@ public sealed class EntityStateMachine
         return true;
     }
 
+    /// <summary>转换判定。注：连击特例读取的是机器的实时相位——from 仅在等于 CurrentState 时才有意义。</summary>
     public bool CanTransition(EntityState from, EntityState to, bool forceChange)
     {
         if (_banned.Contains(to)) return false;
@@ -124,7 +125,6 @@ public sealed class EntityStateMachine
     public void NotifyStartAnimationCompleted()
     {
         if (_current != EntityState.Start) return;
-        _attackPhase = AttackPhase.None;
         _current = EntityState.Idle;
         StateChanged?.Invoke(EntityState.Start, EntityState.Idle);
     }
@@ -138,10 +138,11 @@ public sealed class EntityStateMachine
         if (groupLength > 1) _attackComboIndex = (_attackComboIndex + 1) % groupLength;
     }
 
-    /// <summary>攻击收尾（End 段播完，或单发无 End 时主动段播完）→ 回 Idle。</summary>
+    /// <summary>攻击收尾（End 段播完，或单发无 End 时主动段播完）→ 回 Idle。
+    /// 相位为 Active 或 End 时均合法（单发无后摇从 Active 直接收尾）。</summary>
     public void NotifyAttackEndCompleted()
     {
-        if (_current != EntityState.Attack || _attackPhase == AttackPhase.None) return;
+        if (_current != EntityState.Attack) return;
         _attackPhase = AttackPhase.None;
         _current = EntityState.Idle;
         StateChanged?.Invoke(EntityState.Attack, EntityState.Idle);

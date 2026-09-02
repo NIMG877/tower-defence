@@ -182,10 +182,30 @@ namespace AbilitySystem.Tests
         }
 
         [Test]
+        public void AttackStarted_FiresAfterStateChanged_WithContinueComboPayload()
+        {
+            var log = new List<string>();
+            sm.StateChanged += (f, t) => log.Add($"StateChanged:{f}->{t}");
+            sm.AttackStarted += continueCombo => log.Add($"AttackStarted:{continueCombo}");
+            sm.TrySetAttackState(true, () => { });
+            Assert.That(log, Is.EqualTo(new[] { "StateChanged:Default->Attack", "AttackStarted:False" }),
+                "新攻击：StateChanged 先于 AttackStarted，载荷 false（表现层依赖此序：先刷新槽位再编排攻击）");
+            sm.NotifyAttackActiveCompleted(2); // 双段组 → ComboWindow
+            sm.TrySetAttackState(false, () => { }); // 连击窗口内非强制重入
+            Assert.That(log, Is.EqualTo(new[]
+            {
+                "StateChanged:Default->Attack", "AttackStarted:False",
+                "StateChanged:Attack->Attack", "AttackStarted:True",
+            }), "连击续播：载荷 true（无前摇直入主动段）");
+        }
+
+        [Test]
         public void DieAnimationCompleted_RaisedOnlyInDieState()
         {
             int raised = 0;
             sm.DieAnimationCompleted += () => raised++;
+            sm.NotifyDieAnimationCompleted(); // 非 Die 态的播完上报不得触发回收
+            Assert.That(raised, Is.EqualTo(0));
             sm.TrySetState(EntityState.Die, true);
             sm.NotifyDieAnimationCompleted();
             sm.NotifyDieAnimationCompleted();
