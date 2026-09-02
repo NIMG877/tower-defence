@@ -114,10 +114,14 @@ namespace AbilitySystem.Tests
         {
             var source = new AnimationSet();
             source.SetSingle(AnimationSlot.Idle, Anim("idle"));
+            AnimationReferenceAsset[] charge = { Anim("c") };
+            source.SetGroup(AnimationSlot.Charge, charge);
             AnimationSet copy = source.Copy();
             copy.SetSingle(AnimationSlot.Idle, Anim("other"));
 
             Assert.That(source.GetSingle(AnimationSlot.Idle).name, Is.EqualTo("idle"));
+            // 组数组浅共享是既定契约（全代码库只整组替换、不元素改写）；Task 4 表现层不得"修"成深拷贝
+            Assert.That(copy.GetGroup(AnimationSlot.Charge), Is.SameAs(charge));
         }
 
         [Test]

@@ -83,7 +83,11 @@ namespace AbilitySystem.Components
         {
             string[] slots = _slots();
             string[] resources = _resources();
-            if (slots == null || resources == null) return null;
+            if (slots == null || resources == null)
+            {
+                Debug.LogWarning("ApplyAnimationOverride: slots/resources param missing; override not applied");
+                return null;
+            }
             int count = Math.Min(slots.Length, resources.Length);
             if (slots.Length != resources.Length)
             {
@@ -98,7 +102,7 @@ namespace AbilitySystem.Components
             for (int i = 0; i < count; i++)
             {
                 if (string.IsNullOrEmpty(resources[i])) continue;
-                if (!Enum.TryParse(slots[i], true, out AnimationSlot parsed))
+                if (!Enum.TryParse(slots[i], true, out AnimationSlot parsed) || !Enum.IsDefined(typeof(AnimationSlot), parsed))
                 {
                     Debug.LogWarning($"ApplyAnimationOverride: unknown animation slot '{slots[i]}'; skipping");
                     continue;
