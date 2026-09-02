@@ -45,7 +45,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     private AttackAnimationBranch _attackBranch;
 
     // 当前攻击编排段（播完上报以 逻辑状态/相位 + Animation 对象身份 双重判定，与旧实现同防线；
-    // 跨槽位复用同一资产是既有惯用法（如 HeadSeterTalent1 把 AttackClose/AttackRemote 指向同一资产），身份单义不可靠）
+    // 跨槽位复用同一资产是既有惯用法（曾有用同一资产填 AttackClose/AttackRemote 两槽的配置），身份单义不可靠）
     private AnimationReferenceAsset[] _attackGroup;
     private AnimationReferenceAsset _currentAttackBegin;
     private AnimationReferenceAsset _currentAttackEnd;

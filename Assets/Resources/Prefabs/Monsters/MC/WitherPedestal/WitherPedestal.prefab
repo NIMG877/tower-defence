@@ -457,7 +457,6 @@ GameObject:
   - component: {fileID: 7346695484381571506}
   - component: {fileID: 6711057166326658613}
   - component: {fileID: 6918839178590651092}
-  - component: {fileID: 1367479136149146526}
   m_Layer: 0
   m_Name: WitherPedestal
   m_TagString: Untagged
@@ -523,24 +522,6 @@ MonoBehaviour:
   Die: {fileID: 0}
   Attack_Remote: []
   Attack_Close: []
---- !u!114 &1367479136149146526
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5752354500556713093}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 189d6436cfe1b56499804cc1c36f639f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _talentName: "\u201C\u51CB\u96F6\u201D\u57FA\u5EA7"
-  _talentDescription: "\u521D\u59CB\u83B7\u5F97\u6301\u7EED\u65F6\u95F4\u65E0\u9650\u7684\u65E0\u654C\uFF0C\u4EC5\u53EF\u88AB\u201C\u51CB\u96F6\u201D\u4FE1\u5F92\u9009\u4E2D\u3002\u53EF\u4EE5\u88AB\u201C\u51CB\u96F6\u201D\u4FE1\u5F92\u653E\u7F6E\u5934\u9885\u3002\u5F53\u653E\u6EE1\u4E09\u4E2A\u5934\u9885\u540E\uFF0C\u81EA\u8EAB\u6D88\u5931\uFF0C\u4EE5\u9884\u8BBE\u8DEF\u5F84\u53EC\u5524\u201C\u51CB\u96F6\u201D\u3002"
-  _heads:
-  - {fileID: 4199784896671547721}
-  - {fileID: 5930034199426027080}
-  - {fileID: 1848939224161291542}
 --- !u!1 &6472083187259603780
 GameObject:
   m_ObjectHideFlags: 0

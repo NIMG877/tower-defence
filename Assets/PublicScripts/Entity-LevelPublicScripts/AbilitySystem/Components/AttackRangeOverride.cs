@@ -60,8 +60,8 @@ namespace AbilitySystem.Components
         }
 
         // EntityVision.Range setter takes (int x, int y)[]; Vector2Int[] is designer-friendly
-        // but not assignable. Cheap shape conversion — same one Skill.cs does for its
-        // _skillAttackRange field.
+        // but not assignable. Cheap shape conversion — same one the old Skill.cs used for
+        // its _skillAttackRange field (see legacy-skill-archive tag).
         private static (int x, int y)[] ToTupleRange(Vector2Int[] range)
         {
             var arr = new (int x, int y)[range.Length];

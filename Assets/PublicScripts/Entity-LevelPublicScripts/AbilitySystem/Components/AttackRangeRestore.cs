@@ -36,8 +36,8 @@ namespace AbilitySystem.Components
             Entity target = ResolveTarget(ctx);
             if (target == null) return;
             // Re-assigning BaseRange to Range is the documented "restore" gesture —
-            // it re-runs MapDataManager.RangeCaculator, so orientation is honored.
-            // Mirrors the original Skill.cs:199 gesture (`Vision.Range = Vision.BaseRange`).
+            // it re-runs MapDataManager.RangeCaculator, so orientation is honored
+            // (`Vision.Range = Vision.BaseRange`; original Skill.cs:199, legacy-skill-archive tag).
             target.Vision.Range = target.Vision.BaseRange;
         }
 

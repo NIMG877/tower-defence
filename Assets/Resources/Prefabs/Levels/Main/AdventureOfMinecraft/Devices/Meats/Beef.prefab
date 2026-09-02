@@ -10,8 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1851903941389510252}
   - component: {fileID: -5683226116087877536}
-  - component: {fileID: -4813958174466627366}
-  - component: {fileID: -163107657585879709}
   m_Layer: 0
   m_Name: Beef
   m_TagString: Untagged
@@ -47,46 +45,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98c15169cca6fd54088c6e3b3c07ff80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &-4813958174466627366
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1394161085676338663}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dfc583c494e21704ca72438be0fa03dc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _skillName: 
-  _skillImg: {fileID: 0}
-  _skillDescription: 
-  _spRecoverMode: 0
-  _spConsumeMode: 0
-  _skillOpenMode: 0
-  _chargeNum: 1
-  _totalSp: 1
-  _initialSp: 1
-  _skillAmount: 0.99
-  _recoverForbidDuringSkill: 1
-  _canCloseSkill: 0
-  _skillAttackRange: []
-  _skill: 
---- !u!114 &-163107657585879709
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1394161085676338663}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 47b95baf379c72e4ab417d2c86c8f349, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _talentName: 
-  _talentDescription: 
 --- !u!1 &3209763114697817627
 GameObject:
   m_ObjectHideFlags: 0

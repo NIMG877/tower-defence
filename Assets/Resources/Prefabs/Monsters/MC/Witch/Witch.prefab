@@ -5229,8 +5229,6 @@ GameObject:
   - component: {fileID: 6918839178590651092}
   - component: {fileID: -2194638516088659704}
   - component: {fileID: -4401687450290542570}
-  - component: {fileID: 4369353878438980624}
-  - component: {fileID: 2941180825537635724}
   m_Layer: 0
   m_Name: Witch
   m_TagString: Untagged
@@ -5316,48 +5314,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b8f5bd5b58612f44b7e392028029c95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &4369353878438980624
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5752354500556713093}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b15d06cbe6cf19242aab2a133a0ca32a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _skillName: "\u996E\u7528\u836F\u6C34"
-  _skillImg: {fileID: 0}
-  _skillDescription: "\u5973\u5DEB\u6BCF8s\u4F1A\u5F00\u59CB\u6301\u7EED\u5C1D\u8BD5\u996E\u7528\u836F\u6C34\u3002\u82E5\u5F53\u524D\u751F\u547D\u503C\u6BD4\u4F8B\u5C0F\u4E8E70%\uFF0C\u5219\u996E\u7528\u4E00\u74F6\u6CBB\u7597\u836F\u6C34\uFF0C\u6062\u590D4000\u751F\u547D\u503C\uFF1B\u82E5\u5F53\u524D\u81EA\u751F\u6CA1\u6709\u6297\u6027\u63D0\u5347\uFF0C\u5219\u996E\u7528\u4E00\u74F6\u6297\u6027\u63D0\u5347\u836F\u6C34\uFF1B\u82E5\u5F53\u524D\u6CA1\u6709\u8FC5\u6377\uFF0C\u5219\u996E\u7528\u4E00\u74F6\u8FC5\u6377\u836F\u6C34\uFF1B\u5426\u5219\u7EE7\u7EED\u4E0B\u4E00\u6B21\u5C1D\u8BD5\u996E\u7528\u836F\u6C34\u3002\u5973\u5DEB\u4E00\u65E6\u5F00\u59CB\u996E\u7528\uFF0C\u5219\u4F1A\u83B7\u5F97\u201C\u675F\u7F1A\u201D\u548C\u201C\u7F34\u68B0\u201D\uFF0C2s\u540E\u996E\u7528\u7ED3\u675F\uFF0C\u89E6\u53D1\u5BF9\u5E94\u836F\u6C34\u6548\u679C\uFF0C\u5E76\u89E3\u9664\u201C\u675F\u7F1A\u201D\u548C\u201C\u7F34\u68B0\u201D\u3002"
-  _spRecoverMode: 0
-  _spConsumeMode: 0
-  _skillOpenMode: 0
-  _chargeNum: 0
-  _totalSp: 8
-  _initialSp: 8
-  _skillAmount: 2
-  _recoverForbidDuringSkill: 1
-  _canCloseSkill: 0
-  _skillAttackRange: []
-  _medicalLiquidLight: {fileID: 1374118063392710916}
-  _drink: 
---- !u!114 &2941180825537635724
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5752354500556713093}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f9ecd6813f7e327449b7b48aaaaab336, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _talentName: "\u836F\u5242\u7CBE\u901A"
-  _talentDescription: "\u5973\u5DEB\u7684\u653B\u51FB\u53D8\u4E3A\u6295\u63B7\u201C\u55B7\u6E85\u578B\u836F\u6C34\u201D\uFF0C\u5BF9\u76EE\u6807\u53CA\u5176\u5468\u56F4\u534A\u5F841.414\u5706\u5185\u7684\u5176\u4ED6\u6211\u65B9\u5355\u4F4D\u9020\u6210\u836F\u6C34\u6548\u679C\u3002"
-  _medicalLiquidLight: {fileID: 1374118063392710916}
 --- !u!1 &6265412910100638700
 GameObject:
   m_ObjectHideFlags: 0
