@@ -33,10 +33,10 @@ public class WdslmSkill3 : Skill
             [AnimationSlot.Cast] = _skillStart,
         });
         _thisEntity.StateMachine.TrySetState(EntityState.Cast, true);
-        SummonMachine();
+        SummonMachine().Forget();
         return true;
     }
-    private async void SummonMachine()
+    private async UniTaskVoid SummonMachine()
     {
         await UniTask.WaitForSeconds(_thisEntity.entityAM.ResolveNamedAnimationDuration(_skillStart), false, PlayerLoopTiming.Update, LevelResourceSharing.LevelCtk);
         _machine = EntityManager.Manager.SetMovableEntity(FlyMachineID, _thisEntity.Movement.Position, _thisEntity.Camp, _thisEntity.MoveBase.CurrentPathSerial);
@@ -59,7 +59,7 @@ public class WdslmSkill3 : Skill
             [AnimationSlot.Cast] = _skillEnd,
         });
         _thisEntity.StateMachine.TrySetState(EntityState.Cast, true);
-        RetireAfterSkillEnd();
+        RetireAfterSkillEnd().Forget();
         _thisEntity.buffController.TryRemoveAbnormalState(0);
         _thisEntity.buffController.TryRemoveAbnormalState(2);
         _thisEntity.buffController.TryRemoveAbnormalState(3);
@@ -68,7 +68,7 @@ public class WdslmSkill3 : Skill
     }
 
     // 结束演出播完后显式退场（Default+淡出+回池，原借 Die 淡出链的效果）
-    private async void RetireAfterSkillEnd()
+    private async UniTaskVoid RetireAfterSkillEnd()
     {
         await UniTask.WaitForSeconds(_thisEntity.entityAM.ResolveNamedAnimationDuration(_skillEnd), false, PlayerLoopTiming.Update, LevelResourceSharing.LevelCtk);
         _thisEntity.ArriveEnd();

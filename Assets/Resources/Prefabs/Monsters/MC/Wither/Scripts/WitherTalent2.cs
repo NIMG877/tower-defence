@@ -17,72 +17,72 @@ public class WitherTalent2 : Talent
         _thisEntity.buffController.AddAbnormalState(-10, 3);
         _thisEntity.buffController.AddAbnormalState(-10, 0);
         _thisEntity.buffController.AddAbnormalState(-10, 2);
-        EnterRecoverMode();
+        EnterRecoverMode().Forget();
     }
-    private async void EnterRecoverMode()
+    private async UniTaskVoid EnterRecoverMode()
     {
-        await UniTask.WaitForSeconds(_thisEntity.entityAM.ResolveAnimationDuration(AnimationSlot.Start) * 0.9f);
+        await UniTask.WaitForSeconds(_thisEntity.entityAM.ResolveAnimationDuration(AnimationSlot.Start) * 0.9f, false, PlayerLoopTiming.Update, LevelResourceSharing.LevelCtk);
         _recoverEffect.SetActive(true);
         _thisEntity.StateMachine.TrySetState(EntityState.Idle, true);
-        _thisEntity.entityAM.AddOverride(this, new AnimationOverride { [AnimationSlot.Start] = _start2 });
         DOTween.To((value) =>
         {
             _thisEntity.Stats.CurrentHpRate = value;
-        }, 0.001f, 1, _recoverTime).OnComplete(async () =>
+        }, 0.001f, 1, _recoverTime).OnComplete(() => Detonate().Forget());
+    }
+    // 终局演出：Cast 播 _start2，播完接爆炸，随后 HpCheck 狂暴 + 显式回 Idle（存活，恢复正常行为）
+    private async UniTaskVoid Detonate()
+    {
+        _thisEntity.entityAM.RemoveOverrides(this);
+        _thisEntity.entityAM.AddOneShotOverride(this, new AnimationOverride { [AnimationSlot.Cast] = _start2 });
+        _thisEntity.StateMachine.TrySetState(EntityState.Cast, true);
+        _boomEffect.SetActive(true);
+        _recoverEffect.SetActive(false);
+        await UniTask.WaitForSeconds(_thisEntity.entityAM.ResolveNamedAnimationDuration(_start2) * 0.7f, false, PlayerLoopTiming.Update, LevelResourceSharing.LevelCtk);
+        List<Entity> targets = EntityManager.Manager.EntitySelector_Radius((_thisEntity.Movement.Position.x, _thisEntity.Movement.Position.y), 2, false, _boomRadius, false);
+        targets.AddRange(EntityManager.Manager.EntitySelector_Radius((_thisEntity.Movement.Position.x, _thisEntity.Movement.Position.y), 1, false, _boomRadius, false));
+        float eneityR = EntityManager.EntityR;
+        for (int i = 0; i < targets.Count; i++)
         {
-            // 终局演出：Cast 播 _start2，播完接爆炸，随后 HpCheck 狂暴 + 显式回 Idle（存活，恢复正常行为）
-            _thisEntity.entityAM.RemoveOverrides(this);
-            _thisEntity.entityAM.AddOneShotOverride(this, new AnimationOverride { [AnimationSlot.Cast] = _start2 });
-            _thisEntity.StateMachine.TrySetState(EntityState.Cast, true);
-            _boomEffect.SetActive(true);
-            _recoverEffect.SetActive(false);
-            await UniTask.WaitForSeconds(_thisEntity.entityAM.ResolveNamedAnimationDuration(_start2) * 0.7f, false, PlayerLoopTiming.Update, LevelResourceSharing.LevelCtk);
-            List<Entity> targets = EntityManager.Manager.EntitySelector_Radius((_thisEntity.Movement.Position.x, _thisEntity.Movement.Position.y), 2, false, _boomRadius, false);
-            targets.AddRange(EntityManager.Manager.EntitySelector_Radius((_thisEntity.Movement.Position.x, _thisEntity.Movement.Position.y), 1, false, _boomRadius, false));
-            float eneityR = EntityManager.EntityR;
-            for (int i = 0; i < targets.Count; i++)
+            float r = Vector2.Distance(targets[i].Movement.Position, _thisEntity.Movement.Position);
+            if (r <= eneityR)
             {
-                float r = Vector2.Distance(targets[i].Movement.Position, _thisEntity.Movement.Position);
-                if (r <= eneityR)
+                targets[i].Stats.ApplyDamage(_thisEntity, _thisEntity.Stats.AttackS, 5, 0, 0, 0, 0, 0, 1);
+                if (targets[i].MoveBase)
                 {
-                    targets[i].Stats.ApplyDamage(_thisEntity, _thisEntity.Stats.AttackS, 5, 0, 0, 0, 0, 0, 1);
-                    if (targets[i].MoveBase)
-                    {
-                        targets[i].MoveBase.TryToAddImpulse((targets[i].Movement.Position - _thisEntity.Movement.Position).normalized, 5);
-                    }
-                }
-                else if (r <= 2 * eneityR)
-                {
-                    targets[i].Stats.ApplyDamage(_thisEntity, _thisEntity.Stats.AttackS, 4, 0, 0, 0, 0, 0, 1);
-                    if (targets[i].MoveBase)
-                    {
-                        targets[i].MoveBase.TryToAddImpulse((targets[i].Movement.Position - _thisEntity.Movement.Position).normalized, 4);
-                    }
-                }
-                else if (r <= 1.414 + eneityR)
-                {
-                    targets[i].Stats.ApplyDamage(_thisEntity, _thisEntity.Stats.AttackS, 3, 0, 0, 0, 0, 0, 1);
-                    if (targets[i].MoveBase)
-                    {
-                        targets[i].MoveBase.TryToAddImpulse((targets[i].Movement.Position - _thisEntity.Movement.Position).normalized, 3);
-                    }
-                }
-                else
-                {
-                    targets[i].Stats.ApplyDamage(_thisEntity, _thisEntity.Stats.AttackS, 2, 0, 0, 0, 0, 0, 1);
-                    if (targets[i].MoveBase)
-                    {
-                        targets[i].MoveBase.TryToAddImpulse((targets[i].Movement.Position - _thisEntity.Movement.Position).normalized, 2);
-                    }
+                    targets[i].MoveBase.TryToAddImpulse((targets[i].Movement.Position - _thisEntity.Movement.Position).normalized, 5);
                 }
             }
-            await UniTask.WaitForSeconds(_thisEntity.entityAM.ResolveNamedAnimationDuration(_start2) * 0.3f, false, PlayerLoopTiming.Update, LevelResourceSharing.LevelCtk);
-            _boomEffect.SetActive(false);
-            _thisEntity.buffController.TryRemoveAbnormalState(3);
-            _thisEntity.buffController.TryRemoveAbnormalState(0);
-            _thisEntity.buffController.TryRemoveAbnormalState(2);
-            _thisEntity.GetComponent<WitherTalent3>().HpCheck();
-            _thisEntity.StateMachine.TrySetState(EntityState.Idle, true);
-        });
+            else if (r <= 2 * eneityR)
+            {
+                targets[i].Stats.ApplyDamage(_thisEntity, _thisEntity.Stats.AttackS, 4, 0, 0, 0, 0, 0, 1);
+                if (targets[i].MoveBase)
+                {
+                    targets[i].MoveBase.TryToAddImpulse((targets[i].Movement.Position - _thisEntity.Movement.Position).normalized, 4);
+                }
+            }
+            else if (r <= 1.414 + eneityR)
+            {
+                targets[i].Stats.ApplyDamage(_thisEntity, _thisEntity.Stats.AttackS, 3, 0, 0, 0, 0, 0, 1);
+                if (targets[i].MoveBase)
+                {
+                    targets[i].MoveBase.TryToAddImpulse((targets[i].Movement.Position - _thisEntity.Movement.Position).normalized, 3);
+                }
+            }
+            else
+            {
+                targets[i].Stats.ApplyDamage(_thisEntity, _thisEntity.Stats.AttackS, 2, 0, 0, 0, 0, 0, 1);
+                if (targets[i].MoveBase)
+                {
+                    targets[i].MoveBase.TryToAddImpulse((targets[i].Movement.Position - _thisEntity.Movement.Position).normalized, 2);
+                }
+            }
+        }
+        await UniTask.WaitForSeconds(_thisEntity.entityAM.ResolveNamedAnimationDuration(_start2) * 0.3f, false, PlayerLoopTiming.Update, LevelResourceSharing.LevelCtk);
+        _boomEffect.SetActive(false);
+        _thisEntity.buffController.TryRemoveAbnormalState(3);
+        _thisEntity.buffController.TryRemoveAbnormalState(0);
+        _thisEntity.buffController.TryRemoveAbnormalState(2);
+        _thisEntity.GetComponent<WitherTalent3>().HpCheck();
+        _thisEntity.StateMachine.TrySetState(EntityState.Idle, true);
     }
 }

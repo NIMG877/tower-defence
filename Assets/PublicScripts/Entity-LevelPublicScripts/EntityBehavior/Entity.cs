@@ -186,9 +186,11 @@ public class Entity : MonoBehaviour, IPoolOperation
             AudioManager.Manager.PlayAudio("enemy_die", 1, false, false);
         }
     }
-    /// <summary>到达终点退场：转 Default + 淡出 + 回池（原 MoveBase.ArriveEnd 的表现部分上收）。</summary>
+    /// <summary>到达终点退场：失活（关死移动/攻击/技能门禁，防淡出窗口内二次死亡/攻击造成双重回池）
+    /// + 转 Default + 淡出 + 回池（原 MoveBase.ArriveEnd 的表现部分上收）。</summary>
     public void ArriveEnd()
     {
+        Stats.IsActive = false;
         _stateMachine.TrySetState(EntityState.Default, true);
         visuals.FadeOut(0.2f, () => thisEntityPool.Return(this));
     }

@@ -37,13 +37,13 @@ public class HeadSeterSkill1 : Skill
         _thisEntity.buffController.TryRemoveAbnormalState(0);
         _thisEntity.buffController.TryRemoveAbnormalState(3);
         FlashMove(_moveDis);
-        EmergeResume();
+        EmergeResume().Forget();
     }
 
     // 钻地/钻出演出：覆盖 Cast 槽并转入 Cast（粘性，播完保持末帧=潜伏姿态）。
     // 旧 Die 后门播的是 SO Die 槽资产且钻出后无恢复通路；此处播真实技能动画（Skill_Begin/Skill_End，
     // headSeter.asset 已登记）并由钻出动画播完后显式回 Idle 恢复行走。
-    private async void EmergeResume()
+    private async UniTaskVoid EmergeResume()
     {
         await UniTask.WaitForSeconds(am.ResolveNamedAnimationDuration(IsDie ? _end_d : _end), false, PlayerLoopTiming.Update, LevelResourceSharing.LevelCtk);
         _thisEntity.StateMachine.TrySetState(EntityState.Idle, true);

@@ -265,7 +265,6 @@ public class MoveBase : MonoBehaviour, IPoolOperation
     protected virtual void ArriveEnd()
     {
         _thisEntity.ArriveEnd();
-        _thisEntity.Stats.IsActive = false;
         if (_levelHpComsume > 0)
         {
             LevelResourceManager.Manager.LevelHpLeft -= LevelHpConsume;
