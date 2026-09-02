@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Spine;
 using Spine.Unity;
@@ -35,6 +34,8 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     private Entity thisEntity;
     private EntityStateMachine _sm;
     private EventData event_attack;
+    // OnStart 是数据侧存在但逻辑不消费的事件（多个骨骼的 Start 动画时间轴挂有它，部署必播）——显式静默，见 HandleAnimationStateEvent
+    private EventData event_start;
     private AnimationResources _animationResources;
     private AnimationSet _baseAnimations;
     private AnimationSet _activeAnimations;
@@ -43,7 +44,8 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     private MoveAnimationBranch _moveBranch;
     private AttackAnimationBranch _attackBranch;
 
-    // 当前攻击编排段（Animation 对象身份判定哪段播完——与旧实现同判据；跨段同资产的配置歧义与旧实现一致）
+    // 当前攻击编排段（播完上报以 逻辑状态/相位 + Animation 对象身份 双重判定，与旧实现同防线；
+    // 跨槽位复用同一资产是既有惯用法（如 HeadSeterTalent1 把 AttackClose/AttackRemote 指向同一资产），身份单义不可靠）
     private AnimationReferenceAsset[] _attackGroup;
     private AnimationReferenceAsset _currentAttackBegin;
     private AnimationReferenceAsset _currentAttackEnd;
@@ -177,6 +179,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         _baseAnimations = AnimationSet.From(_animationResources);
         _activeAnimations = ResolveAnimations();
         event_attack = skeleton.Skeleton.Data.FindEvent("OnAttack");
+        event_start = skeleton.Skeleton.Data.FindEvent("OnStart");
         skeleton.AnimationState.Event += HandleAnimationStateEvent;
         skeleton.AnimationState.Complete += HandleAnimationStateComplete;
         skeleton.AnimationState.Data.DefaultMix = 0.1f;
@@ -346,6 +349,10 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         {
             _sm.NotifyAttackFrame();
         }
+        else if (e.Data == event_start)
+        {
+            // 已注册但不消费（见字段注释）
+        }
         else
         {
             Debug.LogWarning($"Unregistered animation event: {e.Data.Name}");
@@ -354,30 +361,38 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
     private void HandleAnimationStateComplete(Spine.TrackEntry trackEntry)
     {
-        if (_activeAttackAnim != null && trackEntry.Animation == _activeAttackAnim)
+        // 以逻辑状态/相位为路由判据（与旧实现同防线）：跨槽位复用同一资产时
+        // 仅凭 Animation 对象身份无法区分是哪一段播完（如攻击中死亡且 Die 槽
+        // 复用攻击组资产——无状态守卫会把 Die 播完误路由给攻击分支，实体永不回池）。
+        if (_sm.CurrentState == EntityState.Attack)
         {
-            // 与旧实现同判据：有后摇或多段组才开连击窗口；单发无后摇直接收尾
-            if (_currentAttackEnd != null || _attackGroup.Length > 1)
+            if (_activeAttackAnim != null && trackEntry.Animation == _activeAttackAnim
+                && _sm.CurrentAttackPhase == AttackPhase.Active)
             {
-                _sm.NotifyAttackActiveCompleted(_attackGroup.Length);
+                // 与旧实现同判据：有后摇或多段组才开连击窗口；单发无后摇直接收尾
+                if (_currentAttackEnd != null || _attackGroup.Length > 1)
+                {
+                    _sm.NotifyAttackActiveCompleted(_attackGroup.Length);
+                }
+                else
+                {
+                    _sm.NotifyAttackEndCompleted();
+                }
+                return;
             }
-            else
+            if (_endAnim != null && trackEntry.Animation == _endAnim
+                && _sm.CurrentAttackPhase == AttackPhase.End)
             {
                 _sm.NotifyAttackEndCompleted();
+                return;
             }
-            return;
         }
-        if (_endAnim != null && trackEntry.Animation == _endAnim)
-        {
-            _sm.NotifyAttackEndCompleted();
-            return;
-        }
-        if (_dieAnim != null && trackEntry.Animation == _dieAnim)
+        if (_sm.CurrentState == EntityState.Die && _dieAnim != null && trackEntry.Animation == _dieAnim)
         {
             _sm.NotifyDieAnimationCompleted();
             return;
         }
-        if (_startAnim != null && trackEntry.Animation == _startAnim)
+        if (_sm.CurrentState == EntityState.Start && _startAnim != null && trackEntry.Animation == _startAnim)
         {
             _sm.NotifyStartAnimationCompleted();
         }
