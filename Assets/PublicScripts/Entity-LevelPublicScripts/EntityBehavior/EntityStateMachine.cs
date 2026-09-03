@@ -19,7 +19,7 @@ public enum AttackPhase
 /// 转换规则与旧 AnimationMachine.TrySetState 等价：非强制=目标优先级更高（Attack 连击窗口特例），
 /// 强制=当前非 Die；ban 表对两个分支都生效。
 /// Start 播完自动回 Idle（沿用旧 SetState(Start) 排队 Idle 的行为）；
-/// Cast 是粘性演出态——播完保持末帧不自动转出，退出由技能显式 TrySetState(…, true) 负责。
+/// Cast 演出播完同样回 Idle；技能可在播完前显式 TrySetState(…, true) 提前打断。
 /// </summary>
 public sealed class EntityStateMachine
 {
@@ -121,12 +121,20 @@ public sealed class EntityStateMachine
     }
 
     /// <summary>Start 动画播完 → 回 Idle（旧 SetState(Start) 排队 Idle 的显式化）。
-    /// 带守卫：状态已迁移则忽略晚到的上报。Cast 是粘性演出态，不走此通道。</summary>
+    /// 带守卫：状态已迁移则忽略晚到的上报。</summary>
     public void NotifyStartAnimationCompleted()
     {
         if (_current != EntityState.Start) return;
         _current = EntityState.Idle;
         StateChanged?.Invoke(EntityState.Start, EntityState.Idle);
+    }
+
+    /// <summary>Cast 演出动画播完 → 回 Idle。带守卫：状态已迁移则忽略晚到的上报。</summary>
+    public void NotifyCastAnimationCompleted()
+    {
+        if (_current != EntityState.Cast) return;
+        _current = EntityState.Idle;
+        StateChanged?.Invoke(EntityState.Cast, EntityState.Idle);
     }
 
     /// <summary>攻击主动段播完。groupLength=当前攻击组长度（表现层解析后传入），用于推进连击索引。</summary>

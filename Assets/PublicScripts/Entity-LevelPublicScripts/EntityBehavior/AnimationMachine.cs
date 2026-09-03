@@ -53,6 +53,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     private Spine.Animation _endAnim;
     private Spine.Animation _dieAnim;
     private Spine.Animation _startAnim;
+    private Spine.Animation _castAnim;
 
     public delegate void OperationsOnAttackAnimationBegin();
 
@@ -235,6 +236,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 _endAnim = null;
                 _dieAnim = null;
                 _startAnim = null;
+                _castAnim = null;
                 SetSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Default), false, 1);
                 ConsumeOneShots(AnimationSlot.Default);
                 break;
@@ -252,8 +254,8 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 ConsumeOneShots(AnimationSlot.Start);
                 break;
             case EntityState.Cast:
-                // 粘性演出态：不循环播放，播完保持末帧；转出由技能显式 TrySetState 负责
-                PlaySingle(AnimationSlot.Cast, false, 1);
+                // 演出态：不循环播放，播完经 HandleAnimationStateComplete 上报回 Idle
+                _castAnim = PlaySingle(AnimationSlot.Cast, false, 1);
                 ConsumeOneShots(AnimationSlot.Cast);
                 break;
             case EntityState.Die:
@@ -395,8 +397,12 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         if (_sm.CurrentState == EntityState.Start && _startAnim != null && trackEntry.Animation == _startAnim)
         {
             _sm.NotifyStartAnimationCompleted();
+            return;
         }
-        // Cast 播完不上报：粘性演出态，末帧保持，转出由技能负责
+        if (_sm.CurrentState == EntityState.Cast && _castAnim != null && trackEntry.Animation == _castAnim)
+        {
+            _sm.NotifyCastAnimationCompleted();
+        }
     }
 
     // ===== Spine 基础操作 =====

@@ -64,7 +64,7 @@ namespace AbilitySystem.Tests
 
             Assert.That(errors, Is.Empty, string.Join("\n", errors));
             Assert.That(ruleCount, Is.EqualTo(46));
-            Assert.That(stepCount, Is.EqualTo(100));
+            Assert.That(stepCount, Is.EqualTo(101));
             Assert.That(triggerCount, Is.EqualTo(50));
         }
 

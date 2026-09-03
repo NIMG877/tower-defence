@@ -5,7 +5,8 @@ namespace AbilitySystem.Tests
 {
     /// <summary>EntityStateMachine（纯C#逻辑状态机）的 EditMode 契约测试。
     /// 转换规则与旧 AnimationMachine.TrySetState 逐条等价：非强制=优先级更高（Attack 连击窗口特例）；
-    /// 强制=当前非 Die；ban 表两个分支都拦截。Cast 为粘性演出态：播完保持、由技能显式强制转出。</summary>
+    /// 强制=当前非 Die；ban 表两个分支都拦截。Cast 演出播完回 Idle（NotifyCastAnimationCompleted），
+    /// 播完前可由技能显式强制打断。</summary>
     public class EntityStateMachineTests
     {
         private EntityStateMachine sm;
@@ -68,7 +69,7 @@ namespace AbilitySystem.Tests
             Assert.That(sm.TrySetState(EntityState.Die, false), Is.True, "死亡可打断演出（Cast<Die）");
             sm.ResetForPool();
             sm.TrySetState(EntityState.Cast, true);
-            Assert.That(sm.TrySetState(EntityState.Idle, true), Is.True, "转出由技能显式强制负责");
+            Assert.That(sm.TrySetState(EntityState.Idle, true), Is.True, "播完前技能可显式强制打断");
         }
 
         [Test]
@@ -161,6 +162,23 @@ namespace AbilitySystem.Tests
             sm.TrySetState(EntityState.Start, false);
             sm.TrySetState(EntityState.Die, true);
             sm.NotifyStartAnimationCompleted(); // 晚到的播完上报不得把 Die 拉回 Idle
+            Assert.That(sm.CurrentState, Is.EqualTo(EntityState.Die));
+        }
+
+        [Test]
+        public void NotifyCastAnimationCompleted_ReturnsCastToIdle()
+        {
+            sm.TrySetState(EntityState.Cast, true);
+            sm.NotifyCastAnimationCompleted();
+            Assert.That(sm.CurrentState, Is.EqualTo(EntityState.Idle));
+        }
+
+        [Test]
+        public void NotifyCastAnimationCompleted_IgnoredWhenStateMovedOn()
+        {
+            sm.TrySetState(EntityState.Cast, true);
+            sm.TrySetState(EntityState.Die, true);
+            sm.NotifyCastAnimationCompleted(); // 晚到的播完上报不得把 Die 拉回 Idle
             Assert.That(sm.CurrentState, Is.EqualTo(EntityState.Die));
         }
 

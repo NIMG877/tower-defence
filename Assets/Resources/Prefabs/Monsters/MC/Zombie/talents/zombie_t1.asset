@@ -127,7 +127,7 @@ MonoBehaviour:
           fromBlackboard: 0
           type: 3
         - key: slots
-          value: Idle,Move,Start,AttackClose,AttackRemote
+          value: Idle,Move,Cast,AttackClose,AttackRemote
           fromBlackboard: 0
           type: 3
         - key: resources
@@ -138,6 +138,24 @@ MonoBehaviour:
           value: zombie_t1_animation_overrides
           fromBlackboard: 0
           type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: set_entity_state
+      args:
+        entries:
+        - key: state
+          value: Cast
+          fromBlackboard: 0
+          type: 3
+        - key: force
+          value: True
+          fromBlackboard: 0
+          type: 2
+        - key: toSelf
+          value: True
+          fromBlackboard: 0
+          type: 2
       condition: []
       steps: []
       elseSteps: []
