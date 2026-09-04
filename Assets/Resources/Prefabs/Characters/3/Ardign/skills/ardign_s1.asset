@@ -11,21 +11,89 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: ardign_s1
-  m_EditorClassIdentifier: 
-  abilityId: 
-  abilityName: 
-  description: 
+  m_EditorClassIdentifier:
+  abilityId: ardign_s1
+  abilityName: "生命回复·α型"
+  description: "立即恢复最大生命的40%"
   icon: {fileID: 21300000, guid: c02248b00e9cfb64796274000d279f37, type: 3}
   Kind: 0
   sp:
-    totalSp: 0
-    initialSp: 0
+    totalSp: 20
+    initialSp: 10
     chargeNum: 1
     abilityAmount: 0
     recoverMode: 0
     consumeMode: 0
-    openMode: 0
+    openMode: 3
     recoverForbidDuringAbility: 0
     canManualClose: 0
-  rules: []
+  rules:
+  - triggers:
+    - triggerEvent: 2
+      groups: []
+    reentry: 0
+    steps:
+    - op: write_blackboard
+      args:
+        entries:
+        - key: key
+          value: ardign_s1_heal
+          fromBlackboard: 0
+          type: 3
+        - key: source
+          value: entity
+          fromBlackboard: 0
+          type: 3
+        - key: path
+          value: maxhp
+          fromBlackboard: 0
+          type: 3
+        - key: method
+          value: set
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: write_blackboard
+      args:
+        entries:
+        - key: key
+          value: ardign_s1_heal
+          fromBlackboard: 0
+          type: 3
+        - key: method
+          value: mult
+          fromBlackboard: 0
+          type: 3
+        - key: value
+          value: 0.4
+          fromBlackboard: 0
+          type: 1
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: apply_damage
+      args:
+        entries:
+        - key: targetMode
+          value: self
+          fromBlackboard: 0
+          type: 3
+        - key: baseValueMode
+          value: fixed
+          fromBlackboard: 0
+          type: 3
+        - key: baseValue
+          value: ardign_s1_heal
+          fromBlackboard: 1
+          type: 1
+        - key: damageType
+          value: 3
+          fromBlackboard: 0
+          type: 0
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
   legacyComponents: []
