@@ -11,15 +11,15 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: fang_s1
-  m_EditorClassIdentifier: 
-  abilityId: 
-  abilityName: 
-  description: 
+  m_EditorClassIdentifier:
+  abilityId: fang_s1
+  abilityName: "冲锋号令·α型"
+  description: "立即获得6点部署费用"
   icon: {fileID: 21300000, guid: 8db69246fbb6ddf4c8fe7cc0fe6cfcd4, type: 3}
   Kind: 0
   sp:
-    totalSp: 0
-    initialSp: 0
+    totalSp: 25
+    initialSp: 6
     chargeNum: 1
     abilityAmount: 0
     recoverMode: 0
@@ -27,5 +27,21 @@ MonoBehaviour:
     openMode: 0
     recoverForbidDuringAbility: 0
     canManualClose: 0
-  rules: []
+  rules:
+  - triggers:
+    - triggerEvent: 2
+      groups: []
+    reentry: 0
+    steps:
+    - op: modify_cost
+      args:
+        entries:
+        - key: amount
+          value: 6
+          fromBlackboard: 0
+          type: 0
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
   legacyComponents: []
