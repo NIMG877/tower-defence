@@ -11,21 +11,77 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: beagle_s1
-  m_EditorClassIdentifier: 
-  abilityId: 
-  abilityName: 
-  description: 
+  m_EditorClassIdentifier:
+  abilityId: beagle_s1
+  abilityName: "防御力强化·α型"
+  description: "防御力+50%"
   icon: {fileID: 21300000, guid: 4a4dba8898fe74543b3cedb5b9adaad2, type: 3}
   Kind: 0
   sp:
-    totalSp: 0
+    totalSp: 40
     initialSp: 0
     chargeNum: 1
-    abilityAmount: 0
+    abilityAmount: 30
     recoverMode: 0
     consumeMode: 0
-    openMode: 0
-    recoverForbidDuringAbility: 0
+    openMode: 3
+    recoverForbidDuringAbility: 1
     canManualClose: 0
-  rules: []
+  rules:
+  - triggers:
+    - triggerEvent: 2
+      groups: []
+    reentry: 0
+    steps:
+    - op: apply_buff
+      args:
+        entries:
+        - key: attributes
+          value: Defense
+          fromBlackboard: 0
+          type: 3
+        - key: ops
+          value: AddPercent
+          fromBlackboard: 0
+          type: 3
+        - key: magnitudes
+          value: 0.5
+          fromBlackboard: 0
+          type: 1
+        - key: buffId
+          value: beagle_s1
+          fromBlackboard: 0
+          type: 3
+        - key: outputTarget
+          value: beagle_s1_buff_targets
+          fromBlackboard: 0
+          type: 3
+        - key: outputBuff
+          value: beagle_s1_buffs
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
+  - triggers:
+    - triggerEvent: 3
+      groups: []
+    reentry: 0
+    steps:
+    - op: destroy_buff
+      args:
+        entries:
+        - key: inputTarget
+          value: beagle_s1_buff_targets
+          fromBlackboard: 0
+          type: 3
+        - key: inputBuff
+          value: beagle_s1_buffs
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
   legacyComponents: []
