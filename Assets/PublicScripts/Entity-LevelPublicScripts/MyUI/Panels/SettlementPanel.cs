@@ -93,7 +93,7 @@ namespace MyUI
             normalState.gameObject.SetActive(true);
             pullState.gameObject.SetActive(false);
             levelName.text = _levelName;
-            accomplishState.text = _win ? "жɹ" : "жʧ";
+            accomplishState.text = _win ? "任务成功" : "任务失败";
             timer.text = _timer.ToString("0.0");
             if (_damageStatisticDatas != null)
             {

@@ -38,7 +38,7 @@ namespace MyUI
             _description = GetComponentInChildrenByPath<TextMeshProUGUI>("p1/right/description");
             _coSelectBtns = new List<Button>() { GetComponentInChildrenByPath<Button>("p1/frame/leftNaveBar/b") };
             _coSelectBtns[0].onClick.AddListener(() => ShowCollectionData(0));
-            //��ȡָ��·�������������Դ�ļ�  
+            //��ȡָ��·�������������Դ�ļ�  
             if (Directory.Exists("Assets/Resources/Prefabs/Levels/Main/"))
                 _main = new DirectoryInfo("Assets/Resources/Prefabs/Levels/Main/");
             if (Directory.Exists("Assets/Resources/Prefabs/Levels/S1/"))
@@ -57,6 +57,24 @@ namespace MyUI
                     ShowS1()
                 );
             }
+        }
+        public override void OnEnter()
+        {
+            base.OnEnter();
+            ShowDefaultCollection();
+        }
+        public override void OnResume()
+        {
+            base.OnResume();
+            ShowDefaultCollection();
+        }
+        /// <summary>
+        /// 每次展示重置为默认视图：主线集合列表 + 第一个集合的详情，避免 prefab 占位文字露出
+        /// </summary>
+        private void ShowDefaultCollection()
+        {
+            ShowMain();
+            ShowCollectionData(0);
         }
         private void ShowMain()
         {

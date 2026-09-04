@@ -47,6 +47,16 @@ namespace MyUI
                 });
             }
         }
+        public override void OnEnter()
+        {
+            base.OnEnter();
+            ShowLevelMessage(0);
+        }
+        public override void OnResume()
+        {
+            base.OnResume();
+            ShowLevelMessage(0);
+        }
         public void SetLevelCollectionData(LevelCollectionData data)
         {
             string[] _levelPaths = data.LevelPaths;

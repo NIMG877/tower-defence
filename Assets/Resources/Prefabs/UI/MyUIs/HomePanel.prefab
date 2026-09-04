@@ -116,7 +116,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 3886713591292820933}
   m_OnClick:
     m_PersistentCalls:
@@ -326,7 +326,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1376916661489770335}
   m_OnClick:
     m_PersistentCalls:
@@ -970,7 +970,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 8013325614514217165}
   m_OnClick:
     m_PersistentCalls:
@@ -1267,10 +1267,10 @@ RectTransform:
   - {fileID: 8044348632946464876}
   m_Father: {fileID: 4179093398262438347}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 1, y: 0.5}
+  m_AnchorMax: {x: 1, y: 0.5}
   m_AnchoredPosition: {x: -20, y: 0}
-  m_SizeDelta: {x: 400.6, y: -40}
+  m_SizeDelta: {x: 400.6, y: 380}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!1 &8156749185818280237
 GameObject:
@@ -1388,7 +1388,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 3122557489264795887}
   m_OnClick:
     m_PersistentCalls:

@@ -108,7 +108,7 @@ MonoBehaviour:
     - {x: -1, y: 2}
     - {x: -1, y: 3}
     VisionRadius: 0
-    Attack: 1692
+    Attack: 1602
     BaseAttackTime: 3
     AttackNum: 1
     DamageType: 1
@@ -123,11 +123,11 @@ MonoBehaviour:
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
-    Cost: 25
+    Cost: 23
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 1
-    RespawnTime: 70
+    RespawnTime: 66
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50
@@ -188,11 +188,11 @@ MonoBehaviour:
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
-    Cost: 11
+    Cost: 9
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 1
-    RespawnTime: 70
+    RespawnTime: 66
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50
@@ -235,7 +235,7 @@ MonoBehaviour:
     - {x: -1, y: 1}
     - {x: -1, y: 2}
     VisionRadius: 0
-    Attack: 520
+    Attack: 543
     BaseAttackTime: 1.6
     AttackNum: 1
     DamageType: 1
@@ -254,7 +254,7 @@ MonoBehaviour:
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 1
-    RespawnTime: 70
+    RespawnTime: 60
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50
@@ -307,7 +307,7 @@ MonoBehaviour:
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 0
-    RespawnTime: 70
+    RespawnTime: 66
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50
@@ -361,7 +361,7 @@ MonoBehaviour:
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 0
-    RespawnTime: 70
+    RespawnTime: 60
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50
@@ -425,7 +425,7 @@ MonoBehaviour:
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 1
-    RespawnTime: 70
+    RespawnTime: 60
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50
@@ -447,7 +447,7 @@ MonoBehaviour:
     Prefab: {fileID: 1995325550543481829, guid: b317bcd53b3bbdf7e548dd6a37d92392, type: 3}
     HeadImage: {fileID: 21300000, guid: cc21eb99331b6024898e2ccc3eae1166, type: 3}
     HalfBodyImage: {fileID: 21300000, guid: f5d11b53f57c9594daa3dff20d2ec0eb, type: 3}
-    WholeImage: {fileID: 21300000, guid: f5d11b53f57c9594daa3dff20d2ec0eb, type: 3}
+    WholeImage: {fileID: 0}
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 3
@@ -470,13 +470,13 @@ MonoBehaviour:
     - {x: -1, y: 2}
     - {x: -1, y: 3}
     VisionRadius: 0
-    Attack: 100
+    Attack: 438
     BaseAttackTime: 1
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
-    MaxHp: 1000
-    Defense: 100
+    MaxHp: 1080
+    Defense: 134
     MagicResistance: 0
     PhysicalDodge: 0
     MagicDodge: 0
@@ -485,11 +485,11 @@ MonoBehaviour:
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
-    Cost: 10
+    Cost: 9
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 1
-    RespawnTime: 70
+    RespawnTime: 60
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50
@@ -534,13 +534,13 @@ MonoBehaviour:
     - {x: -1, y: 2}
     - {x: -1, y: 3}
     VisionRadius: 0
-    Attack: 100
-    BaseAttackTime: 1
+    Attack: 427
+    BaseAttackTime: 2.85
     AttackNum: 1
     DamageType: 3
     TargetPriority: 2
-    MaxHp: 1000
-    Defense: 100
+    MaxHp: 1135
+    Defense: 109
     MagicResistance: 0
     PhysicalDodge: 0
     MagicDodge: 0
@@ -549,11 +549,11 @@ MonoBehaviour:
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
-    Cost: 10
+    Cost: 15
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 1
-    RespawnTime: 70
+    RespawnTime: 66
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50
@@ -587,13 +587,13 @@ MonoBehaviour:
     VisionRange:
     - {x: 0, y: 0}
     VisionRadius: 0
-    Attack: 100
-    BaseAttackTime: 1
+    Attack: 305
+    BaseAttackTime: 1.2
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
-    MaxHp: 1000
-    Defense: 100
+    MaxHp: 2630
+    Defense: 475
     MagicResistance: 0
     PhysicalDodge: 0
     MagicDodge: 0
@@ -602,11 +602,11 @@ MonoBehaviour:
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
-    Cost: 10
+    Cost: 16
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 0
-    RespawnTime: 70
+    RespawnTime: 60
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50
@@ -640,13 +640,13 @@ MonoBehaviour:
     VisionRange:
     - {x: 0, y: 0}
     VisionRadius: 0
-    Attack: 100
-    BaseAttackTime: 1
+    Attack: 295
+    BaseAttackTime: 1.2
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
-    MaxHp: 1000
-    Defense: 100
+    MaxHp: 2035
+    Defense: 578
     MagicResistance: 0
     PhysicalDodge: 0
     MagicDodge: 0
@@ -655,11 +655,11 @@ MonoBehaviour:
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
-    Cost: 10
+    Cost: 16
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 0
-    RespawnTime: 70
+    RespawnTime: 60
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50
@@ -707,13 +707,13 @@ MonoBehaviour:
     - {x: -1, y: 3}
     - {x: -1, y: 4}
     VisionRadius: 0
-    Attack: 100
-    BaseAttackTime: 1
+    Attack: 699
+    BaseAttackTime: 2.8
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
-    MaxHp: 1000
-    Defense: 100
+    MaxHp: 1150
+    Defense: 85
     MagicResistance: 0
     PhysicalDodge: 0
     MagicDodge: 0
@@ -722,11 +722,11 @@ MonoBehaviour:
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
-    Cost: 10
+    Cost: 21
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 1
-    RespawnTime: 70
+    RespawnTime: 60
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50
@@ -761,13 +761,13 @@ MonoBehaviour:
     - {x: 0, y: 0}
     - {x: 0, y: 1}
     VisionRadius: 0
-    Attack: 100
+    Attack: 516
     BaseAttackTime: 1
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
-    MaxHp: 1000
-    Defense: 100
+    MaxHp: 1226
+    Defense: 279
     MagicResistance: 0
     PhysicalDodge: 0
     MagicDodge: 0
@@ -776,11 +776,11 @@ MonoBehaviour:
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
-    Cost: 10
+    Cost: 8
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 0
-    RespawnTime: 70
+    RespawnTime: 60
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50
@@ -815,13 +815,13 @@ MonoBehaviour:
     - {x: 0, y: 0}
     - {x: 0, y: 1}
     VisionRadius: 0
-    Attack: 100
-    BaseAttackTime: 1
+    Attack: 325
+    BaseAttackTime: 1.05
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
-    MaxHp: 1000
-    Defense: 100
+    MaxHp: 1325
+    Defense: 330
     MagicResistance: 0
     PhysicalDodge: 0
     MagicDodge: 0
@@ -830,11 +830,11 @@ MonoBehaviour:
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
-    Cost: 10
+    Cost: 9
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 0
-    RespawnTime: 70
+    RespawnTime: 60
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50
@@ -876,14 +876,14 @@ MonoBehaviour:
     - {x: -1, y: 1}
     - {x: -1, y: 2}
     VisionRadius: 0
-    Attack: 100
-    BaseAttackTime: 1
+    Attack: 642
+    BaseAttackTime: 2.685
     AttackNum: 1
     DamageType: 1
     TargetPriority: 0
-    MaxHp: 1000
-    Defense: 100
-    MagicResistance: 0
+    MaxHp: 1141
+    Defense: 95
+    MagicResistance: 15
     PhysicalDodge: 0
     MagicDodge: 0
     BlockOccupation: 1
@@ -891,11 +891,11 @@ MonoBehaviour:
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
-    Cost: 10
+    Cost: 28
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 1
-    RespawnTime: 70
+    RespawnTime: 66
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50
@@ -936,14 +936,14 @@ MonoBehaviour:
     - {x: -1, y: 0}
     - {x: -1, y: 1}
     VisionRadius: 0
-    Attack: 100
-    BaseAttackTime: 1
+    Attack: 569
+    BaseAttackTime: 1.3
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
-    MaxHp: 1000
-    Defense: 100
-    MagicResistance: 0
+    MaxHp: 1653
+    Defense: 282
+    MagicResistance: 10
     PhysicalDodge: 0
     MagicDodge: 0
     BlockOccupation: 2
@@ -951,11 +951,11 @@ MonoBehaviour:
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
-    Cost: 10
+    Cost: 14
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 0
-    RespawnTime: 70
+    RespawnTime: 66
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50
@@ -1000,14 +1000,14 @@ MonoBehaviour:
     - {x: -1, y: 1}
     - {x: -1, y: 2}
     VisionRadius: 0
-    Attack: 100
-    BaseAttackTime: 1
+    Attack: 437
+    BaseAttackTime: 1.9
     AttackNum: 1
     DamageType: 1
     TargetPriority: 0
-    MaxHp: 1000
-    Defense: 100
-    MagicResistance: 0
+    MaxHp: 935
+    Defense: 83
+    MagicResistance: 15
     PhysicalDodge: 0
     MagicDodge: 0
     BlockOccupation: 1
@@ -1019,7 +1019,7 @@ MonoBehaviour:
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 1
-    RespawnTime: 70
+    RespawnTime: 60
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50
@@ -1054,13 +1054,13 @@ MonoBehaviour:
     - {x: 0, y: 0}
     - {x: 0, y: 1}
     VisionRadius: 0
-    Attack: 100
-    BaseAttackTime: 1
+    Attack: 568
+    BaseAttackTime: 1.2
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
-    MaxHp: 1000
-    Defense: 100
+    MaxHp: 1858
+    Defense: 245
     MagicResistance: 0
     PhysicalDodge: 0
     MagicDodge: 0
@@ -1069,11 +1069,11 @@ MonoBehaviour:
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
-    Cost: 10
+    Cost: 17
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 0
-    RespawnTime: 70
+    RespawnTime: 66
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50
@@ -1108,13 +1108,13 @@ MonoBehaviour:
     - {x: 0, y: 0}
     - {x: 0, y: 1}
     VisionRadius: 0
-    Attack: 100
-    BaseAttackTime: 1
+    Attack: 425
+    BaseAttackTime: 1.05
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
-    MaxHp: 1000
-    Defense: 100
+    MaxHp: 1270
+    Defense: 240
     MagicResistance: 0
     PhysicalDodge: 0
     MagicDodge: 0
@@ -1123,11 +1123,11 @@ MonoBehaviour:
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
     IsStatic: 1
-    Cost: 10
+    Cost: 9
     CanCallBack: 1
     NeedsDirectionSelection: 1
     CanSetType: 0
-    RespawnTime: 70
+    RespawnTime: 60
     RespawnStrategy: 1
     CanRespawn: 1
     RespawnCostUp: 50

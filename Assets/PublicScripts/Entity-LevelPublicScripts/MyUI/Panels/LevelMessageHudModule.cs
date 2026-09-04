@@ -60,7 +60,7 @@ namespace MyUI
             {
                 Time.timeScale = 0;
                 NoticeManager.NM.LaunchMessageBox(
-                    "ȷ���˳��ؿ���",
+                    "确认退出当前关卡？",
                     () => LevelActionManager.Manager.MissionEnd(false),
                     ApplyTimeScale);
             });
