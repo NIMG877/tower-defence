@@ -26,8 +26,8 @@ namespace AbilitySystem.Tests
                 new[] { "Assets/Resources" });
             Array.Sort(guids, StringComparer.Ordinal);
 
-            Assert.That(guids, Has.Length.EqualTo(20),
-                "The migrated Resources inventory must contain exactly 20 AbilityConfig assets.");
+            Assert.That(guids, Has.Length.EqualTo(45),
+                "The migrated Resources inventory must contain exactly 45 AbilityConfig assets.");
 
             int ruleCount = 0;
             int stepCount = 0;
@@ -63,9 +63,9 @@ namespace AbilitySystem.Tests
             }
 
             Assert.That(errors, Is.Empty, string.Join("\n", errors));
-            Assert.That(ruleCount, Is.EqualTo(46));
-            Assert.That(stepCount, Is.EqualTo(101));
-            Assert.That(triggerCount, Is.EqualTo(50));
+            Assert.That(ruleCount, Is.EqualTo(48));
+            Assert.That(stepCount, Is.EqualTo(111));
+            Assert.That(triggerCount, Is.EqualTo(51));
         }
 
         [Test]

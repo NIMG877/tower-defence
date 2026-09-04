@@ -16,6 +16,7 @@ MonoBehaviour:
     Default: {fileID: 11400000, guid: 3dbbb0bb4c50fd34b894bec64ddf44d9, type: 2}
     Idle: {fileID: 11400000, guid: e6d156b4bbd570d45bf9b826ed99b81e, type: 2}
     Start: {fileID: 11400000, guid: 3dbbb0bb4c50fd34b894bec64ddf44d9, type: 2}
+    Cast: {fileID: 11400000, guid: 1cd09ba1d909e3448adb862a1fe0e66e, type: 2}
     Die: {fileID: 11400000, guid: 91e16d0f8c0308f4da0ce82df94daccd, type: 2}
   _attack:
     AttackBegin: {fileID: 0}
