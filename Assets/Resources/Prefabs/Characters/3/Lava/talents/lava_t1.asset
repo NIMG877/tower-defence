@@ -11,20 +11,37 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: lava_t1
-  m_EditorClassIdentifier: 
-  abilityId: 
-  abilityName: 
-  description: 
+  m_EditorClassIdentifier:
+  abilityId: lava_t1
+  abilityName: "快速技能使用"
+  description: "部署后立即获得30点技力"
   icon: {fileID: 0}
-  Kind: 0
+  Kind: 1
   sp:
     totalSp: 0
     initialSp: 0
     chargeNum: 1
     abilityAmount: 0
     recoverMode: 0
-    consumeMode: 0
+    consumeMode: 5
     openMode: 0
     recoverForbidDuringAbility: 0
     canManualClose: 0
-  rules: []
+  rules:
+  - triggers:
+    - triggerEvent: 1
+      groups: []
+    reentry: 0
+    steps:
+    - op: recover_skill_sp
+      args:
+        entries:
+        - key: amount
+          value: 30
+          fromBlackboard: 0
+          type: 0
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
+  legacyComponents: []

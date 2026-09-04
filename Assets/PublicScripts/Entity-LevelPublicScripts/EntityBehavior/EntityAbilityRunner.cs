@@ -128,6 +128,20 @@ public class EntityAbilityRunner
         InvalidateAbilitiesCache();
     }
 
+    /// <summary>
+    /// 向选中技能的 SP 引擎恢复 amount 点（多蓄能技能走 RecoverSp 的蓄能语义）。
+    /// 供"部署后立即获得技力"类天赋组件调用；无已构建技能属配置错误，报错跳过。
+    /// </summary>
+    public void RecoverSkillSp(int amount)
+    {
+        if (Skills.Count == 0)
+        {
+            Debug.LogError("[EntityAbilityRunner] RecoverSkillSp: no built skill (talent configured on a skill-less entity?); skipped.");
+            return;
+        }
+        Skills[0].spEngine.RecoverSp(amount);
+    }
+
     public void OnInitialize()
     {
         // 1) 重新订阅事件
