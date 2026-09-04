@@ -83,6 +83,15 @@ public class EntityCombat
             case OrderLogic.Defense_Des:
                 entitiesList.Sort((x, y) => y.Stats.DefS.CompareTo(x.Stats.DefS));
                 break;
+            case OrderLogic.VisionFirst_Priority_Des:
+                entitiesList.Sort((x, y) =>
+                {
+                    bool xVision = x.Stats.VisionRadiusS > 0;
+                    bool yVision = y.Stats.VisionRadiusS > 0;
+                    if (xVision != yVision) return xVision ? -1 : 1; // VisionRadius>0 优先
+                    return -x.Movement.Priority.CompareTo(y.Movement.Priority);
+                });
+                break;
             default: break;
         }
         return entitiesList;

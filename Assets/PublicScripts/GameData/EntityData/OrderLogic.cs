@@ -8,4 +8,5 @@ public enum OrderLogic
     Priority_Des,
     Hprate_NoFull_Asc,
     Defense_Des,
+    VisionFirst_Priority_Des,
 }
