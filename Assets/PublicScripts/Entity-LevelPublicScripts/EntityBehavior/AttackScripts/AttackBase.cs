@@ -102,7 +102,7 @@ public class AttackBase : MonoBehaviour, IPoolOperation
     {
         _attackTimer = 0;
         DamageType = _thisEntity.EntityData.DamageType;
-        TargetPriority = _thisEntity.EntityData.TargetPriority;
+        TargetPriority = _thisEntity.Stats.TargetPriorityS;
     }
     public virtual void PreWarm()
     {

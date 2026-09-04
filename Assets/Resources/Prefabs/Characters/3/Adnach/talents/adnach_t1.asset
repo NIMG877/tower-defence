@@ -11,20 +11,79 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: adnach_t1
-  m_EditorClassIdentifier: 
-  abilityId: 
-  abilityName: 
-  description: 
+  m_EditorClassIdentifier:
+  abilityId: adnach_t1
+  abilityName: "短板突破"
+  description: "攻击速度+8，优先攻击可以远程攻击的敌人"
   icon: {fileID: 0}
-  Kind: 0
+  Kind: 1
   sp:
     totalSp: 0
     initialSp: 0
     chargeNum: 1
     abilityAmount: 0
     recoverMode: 0
-    consumeMode: 0
+    consumeMode: 5
     openMode: 0
     recoverForbidDuringAbility: 0
     canManualClose: 0
-  rules: []
+  rules:
+  - triggers:
+    - triggerEvent: 1
+      groups: []
+    reentry: 0
+    steps:
+    - op: apply_buff
+      args:
+        entries:
+        - key: attributes
+          value: AttackSpeed
+          fromBlackboard: 0
+          type: 3
+        - key: ops
+          value: AddFlat
+          fromBlackboard: 0
+          type: 3
+        - key: magnitudes
+          value: 8
+          fromBlackboard: 0
+          type: 1
+        - key: buffId
+          value: adnach_t1
+          fromBlackboard: 0
+          type: 3
+        - key: buffTime
+          value: -5
+          fromBlackboard: 0
+          type: 1
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: apply_buff
+      args:
+        entries:
+        - key: attributes
+          value: TargetPriority
+          fromBlackboard: 0
+          type: 3
+        - key: ops
+          value: AddFlat
+          fromBlackboard: 0
+          type: 3
+        - key: magnitudes
+          value: 4
+          fromBlackboard: 0
+          type: 1
+        - key: buffId
+          value: adnach_t1_priority
+          fromBlackboard: 0
+          type: 3
+        - key: buffTime
+          value: -5
+          fromBlackboard: 0
+          type: 1
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
+  legacyComponents: []
