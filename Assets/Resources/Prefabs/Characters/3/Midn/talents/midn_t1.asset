@@ -11,20 +11,69 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: midn_t1
-  m_EditorClassIdentifier: 
-  abilityId: 
-  abilityName: 
-  description: 
+  m_EditorClassIdentifier:
+  abilityId: midn_t1
+  abilityName: "要害瞄准·初级"
+  description: "攻击时，20%几率当次攻击的攻击力提升至150%"
   icon: {fileID: 0}
-  Kind: 0
+  Kind: 1
   sp:
     totalSp: 0
     initialSp: 0
     chargeNum: 1
     abilityAmount: 0
     recoverMode: 0
-    consumeMode: 0
+    consumeMode: 5
     openMode: 0
     recoverForbidDuringAbility: 0
     canManualClose: 0
-  rules: []
+  rules:
+  - triggers:
+    - triggerEvent: 6
+      groups: []
+    reentry: 0
+    steps:
+    - op: random_roll
+      args:
+        entries:
+        - key: input
+          value: 0.2
+          fromBlackboard: 0
+          type: 3
+        - key: outputKey
+          value: midn_t1_roll
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: branch
+      args:
+        entries: []
+      condition:
+      - units:
+        - op: 1
+          leftKey: midn_t1_roll
+          rightValue: "True"
+      steps:
+      - op: attack_event_value_modifier
+        args:
+          entries:
+          - key: fields
+            value: multiplyer
+            fromBlackboard: 0
+            type: 3
+          - key: methods
+            value: set
+            fromBlackboard: 0
+            type: 3
+          - key: values
+            value: 1.5
+            fromBlackboard: 0
+            type: 1
+        condition: []
+        steps: []
+        elseSteps: []
+      elseSteps: []
+    detached: 0
+  legacyComponents: []
