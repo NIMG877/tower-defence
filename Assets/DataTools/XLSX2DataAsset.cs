@@ -36,7 +36,9 @@ public class XLSX2DataAsset
     {
         try
         {
-            if (!EditorUtility.DisplayDialog(
+            // 批处理模式（-executeMethod 调用）下 DisplayDialog 不可用，跳过人工确认。
+            if (!Application.isBatchMode &&
+                !EditorUtility.DisplayDialog(
                 "Rebuild Entity Data Collection",
                 "This will overwrite EntityDataCollection.asset from EntityAttributes.xlsx.\n\n" +
                 "A timestamped backup of the current .asset will be written to:\n" + BackupDir + "\n\nContinue?",
@@ -230,6 +232,7 @@ public class XLSX2DataAsset
             AttackNum = GetInt(row, colMap, "AttackNum", sharedStrings),
             DamageType = GetInt(row, colMap, "DamageType", sharedStrings),
             TargetPriority = (OrderLogic)GetInt(row, colMap, "TargetPriority", sharedStrings),
+            SplashRadius = GetFloat(row, colMap, "SplashRadius", sharedStrings),
             MaxHp = GetFloat(row, colMap, "MaxHp", sharedStrings),
             Defense = GetFloat(row, colMap, "Defense", sharedStrings),
             MagicResistance = GetFloat(row, colMap, "MagicResistance", sharedStrings),

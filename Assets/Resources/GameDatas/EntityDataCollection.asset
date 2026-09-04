@@ -48,6 +48,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 1
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 1743
     Defense: 122
     MagicResistance: 20
@@ -113,6 +114,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 1
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 1678
     Defense: 135
     MagicResistance: 20
@@ -178,6 +180,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 1060
     Defense: 126
     MagicResistance: 0
@@ -240,6 +243,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 1
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 1100
     Defense: 90
     MagicResistance: 15
@@ -293,6 +297,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 1833
     Defense: 496
     MagicResistance: 10
@@ -347,6 +352,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 2745
     Defense: 155
     MagicResistance: 0
@@ -411,6 +417,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 3
     TargetPriority: 2
+    SplashRadius: 0
     MaxHp: 1220
     Defense: 110
     MagicResistance: 0
@@ -447,7 +454,7 @@ MonoBehaviour:
     Prefab: {fileID: 1995325550543481829, guid: b317bcd53b3bbdf7e548dd6a37d92392, type: 3}
     HeadImage: {fileID: 21300000, guid: cc21eb99331b6024898e2ccc3eae1166, type: 3}
     HalfBodyImage: {fileID: 21300000, guid: f5d11b53f57c9594daa3dff20d2ec0eb, type: 3}
-    WholeImage: {fileID: 0}
+    WholeImage: {fileID: 21300000, guid: 0e79bb16e7cd8d742a5b29c4cbbccc4b, type: 3}
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 3
@@ -475,6 +482,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 1080
     Defense: 134
     MagicResistance: 0
@@ -539,6 +547,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 3
     TargetPriority: 2
+    SplashRadius: 0
     MaxHp: 1135
     Defense: 109
     MagicResistance: 0
@@ -592,6 +601,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 2630
     Defense: 475
     MagicResistance: 0
@@ -645,6 +655,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 2035
     Defense: 578
     MagicResistance: 0
@@ -712,6 +723,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 1
     MaxHp: 1150
     Defense: 85
     MagicResistance: 0
@@ -766,6 +778,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 1226
     Defense: 279
     MagicResistance: 0
@@ -820,6 +833,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 1325
     Defense: 330
     MagicResistance: 0
@@ -881,6 +895,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 1
     TargetPriority: 0
+    SplashRadius: 1.1
     MaxHp: 1141
     Defense: 95
     MagicResistance: 15
@@ -941,6 +956,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 1653
     Defense: 282
     MagicResistance: 10
@@ -1005,6 +1021,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 1
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 935
     Defense: 83
     MagicResistance: 15
@@ -1059,6 +1076,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 1858
     Defense: 245
     MagicResistance: 0
@@ -1113,6 +1131,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 1270
     Defense: 240
     MagicResistance: 0
@@ -1165,6 +1184,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 5500
     Defense: 265
     MagicResistance: 0
@@ -1216,6 +1236,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 4590
     Defense: 185
     MagicResistance: 0
@@ -1267,6 +1288,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 12000
     Defense: 325
     MagicResistance: 10
@@ -1318,6 +1340,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 1
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 12500
     Defense: 375
     MagicResistance: 50
@@ -1368,6 +1391,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 1235
     Defense: 65
     MagicResistance: 5
@@ -1418,6 +1442,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 3600
     Defense: 150
     MagicResistance: 5
@@ -1471,6 +1496,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 6900
     Defense: 235
     MagicResistance: 5
@@ -1524,6 +1550,7 @@ MonoBehaviour:
     AttackNum: 1
     DamageType: 1
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 5000
     Defense: 500
     MagicResistance: 50
@@ -1574,6 +1601,7 @@ MonoBehaviour:
     AttackNum: 0
     DamageType: 0
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 100
     Defense: 0
     MagicResistance: 0
@@ -1626,6 +1654,7 @@ MonoBehaviour:
     AttackNum: 3
     DamageType: 1
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 32500
     Defense: 700
     MagicResistance: 50
@@ -1676,6 +1705,7 @@ MonoBehaviour:
     AttackNum: 0
     DamageType: 1
     TargetPriority: 0
+    SplashRadius: 0
     MaxHp: 100
     Defense: 0
     MagicResistance: 0

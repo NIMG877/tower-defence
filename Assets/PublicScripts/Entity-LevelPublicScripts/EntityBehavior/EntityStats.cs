@@ -99,6 +99,7 @@ public class EntityStats
     public int MonsterLevelHpConsumeS => (int)_store.GetFinal("MonsterLevelHpConsume");
     public int DamageTypeS => (int)_store.GetFinal("DamageType");
     public OrderLogic TargetPriorityS => (OrderLogic)(int)_store.GetFinal("TargetPriority");
+    public float SplashRadiusS => _store.GetFinal("SplashRadius");
     public bool IsStaticS => _store.GetFinal("IsStatic") > 0;
     public int CostS => (int)_store.GetFinal("Cost");
     public bool CanCallBackS => _store.GetFinal("CanCallBack") > 0;
@@ -194,6 +195,7 @@ public class EntityStats
         _store.SetBase("MonsterLevelHpConsume", data.MonsterLevelHpConsume);
         _store.SetBase("DamageType", data.DamageType);
         _store.SetBase("TargetPriority", (int)data.TargetPriority);
+        _store.SetBase("SplashRadius", data.SplashRadius);
         _store.SetBase("IsStatic", data.IsStatic ? 1f : 0f);
         _store.SetBase("Cost", data.Cost);
         _store.SetBase("CanCallBack", data.CanCallBack ? 1f : 0f);

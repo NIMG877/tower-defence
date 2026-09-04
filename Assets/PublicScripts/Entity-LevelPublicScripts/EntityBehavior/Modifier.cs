@@ -36,7 +36,7 @@ public readonly struct Modifier
     /// <para>按类型的约定：</para>
     /// <list type="bullet">
     /// <item><b>float 属性</b>（<c>Attack</c>/<c>Defense</c>/<c>MagicResistance</c>/<c>MaxHp</c>/<c>MoveSpeed</c>/
-    ///   <c>BaseAttackTime</c>/<c>RespawnTime</c>/<c>RespawnCostUp</c>/<c>VisionRadius</c>）：
+    ///   <c>BaseAttackTime</c>/<c>RespawnTime</c>/<c>RespawnCostUp</c>/<c>VisionRadius</c>/<c>SplashRadius</c>）：
     ///   <c>AddFlat</c>/<c>AddPercent</c> 叠加，magnitude 即数值。</item>
     /// <item><b>int 属性</b>（<c>AttackNum</c>/<c>AttackMinNum</c>/<c>BlockOccupation</c>/<c>TauntLevel</c>/
     ///   <c>DefaultCamp</c>/<c>CharacterRarity</c>/<c>CharacterJob</c>/<c>MonsterStatus</c>/

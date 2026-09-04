@@ -48,6 +48,7 @@ public class EntityData
     public int   AttackNum;
     public int   DamageType;            // 0=物伤,1=法伤,...
     public OrderLogic TargetPriority;   // 目标优先级排序逻辑（见 OrderLogic 枚举）
+    public float SplashRadius;          // 攻击溅射半径
     public float MaxHp;
     public float Defense;
     public float MagicResistance;
