@@ -11,21 +11,87 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: wyvern_s1
-  m_EditorClassIdentifier: 
-  abilityId: 
-  abilityName: 
-  description: 
+  m_EditorClassIdentifier:
+  abilityId: wyvern_s1
+  abilityName: "冲锋号令·援军"
+  description: "获得6点部署费用，攻击力+35%"
   icon: {fileID: 21300000, guid: cf5016ef768dba942b144e4190ebf6b8, type: 3}
   Kind: 0
   sp:
-    totalSp: 0
-    initialSp: 0
+    totalSp: 20
+    initialSp: 6
     chargeNum: 1
-    abilityAmount: 0
+    abilityAmount: 10
     recoverMode: 0
     consumeMode: 0
-    openMode: 0
-    recoverForbidDuringAbility: 0
+    openMode: 3
+    recoverForbidDuringAbility: 1
     canManualClose: 0
-  rules: []
+  rules:
+  - triggers:
+    - triggerEvent: 2
+      groups: []
+    reentry: 0
+    steps:
+    - op: modify_cost
+      args:
+        entries:
+        - key: amount
+          value: 6
+          fromBlackboard: 0
+          type: 0
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: apply_buff
+      args:
+        entries:
+        - key: attributes
+          value: Attack
+          fromBlackboard: 0
+          type: 3
+        - key: ops
+          value: AddPercent
+          fromBlackboard: 0
+          type: 3
+        - key: magnitudes
+          value: 0.35
+          fromBlackboard: 0
+          type: 3
+        - key: buffId
+          value: wyvern_s1
+          fromBlackboard: 0
+          type: 3
+        - key: outputTarget
+          value: wyvern_s1_buff_targets
+          fromBlackboard: 0
+          type: 3
+        - key: outputBuff
+          value: wyvern_s1_buffs
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
+  - triggers:
+    - triggerEvent: 3
+      groups: []
+    reentry: 0
+    steps:
+    - op: destroy_buff
+      args:
+        entries:
+        - key: inputTarget
+          value: wyvern_s1_buff_targets
+          fromBlackboard: 0
+          type: 3
+        - key: inputBuff
+          value: wyvern_s1_buffs
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
   legacyComponents: []
