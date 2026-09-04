@@ -108,6 +108,9 @@ are not authoring names.
 
 ### State flow
 
+- [SetEntityState](SetEntityState.md) - switches an entity's logical state;
+  Cast supports `OneShot` (default, return to Idle on completion) and
+  `Sustained` (loop until an explicit transition) modes.
 - [ChargeStateController](ChargeStateController.md) - controls a cancellable
   charge sequence and publishes phase transitions to Blackboard.
 

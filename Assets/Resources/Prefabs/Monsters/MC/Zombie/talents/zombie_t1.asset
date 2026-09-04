@@ -149,36 +149,10 @@ MonoBehaviour:
           fromBlackboard: 0
           type: 3
         - key: force
-          value: True
+          value: False
           fromBlackboard: 0
           type: 2
         - key: toSelf
-          value: True
-          fromBlackboard: 0
-          type: 2
-      condition: []
-      steps: []
-      elseSteps: []
-    - op: apply_animation_override
-      args:
-        entries:
-        - key: mode
-          value: once
-          fromBlackboard: 0
-          type: 3
-        - key: slots
-          value: Start
-          fromBlackboard: 0
-          type: 3
-        - key: resources
-          value: 1to2
-          fromBlackboard: 0
-          type: 3
-        - key: state
-          value: Start
-          fromBlackboard: 0
-          type: 3
-        - key: forceChange
           value: True
           fromBlackboard: 0
           type: 2

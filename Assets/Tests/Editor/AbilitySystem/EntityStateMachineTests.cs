@@ -5,8 +5,8 @@ namespace AbilitySystem.Tests
 {
     /// <summary>EntityStateMachine（纯C#逻辑状态机）的 EditMode 契约测试。
     /// 转换规则与旧 AnimationMachine.TrySetState 逐条等价：非强制=优先级更高（Attack 连击窗口特例）；
-    /// 强制=当前非 Die；ban 表两个分支都拦截。Cast 演出播完回 Idle（NotifyCastAnimationCompleted），
-    /// 播完前可由技能显式强制打断。</summary>
+    /// 强制=当前非 Die；ban 表两个分支都拦截。OneShot Cast 播完回 Idle，Sustained Cast
+    /// 忽略动画完成并由技能显式强制转出。</summary>
     public class EntityStateMachineTests
     {
         private EntityStateMachine sm;
@@ -22,6 +22,7 @@ namespace AbilitySystem.Tests
         {
             Assert.That(sm.CurrentState, Is.EqualTo(EntityState.Default));
             Assert.That(sm.CurrentAttackPhase, Is.EqualTo(AttackPhase.None));
+            Assert.That(sm.CurrentCastMode, Is.EqualTo(CastMode.OneShot));
         }
 
         [Test]
@@ -169,8 +170,65 @@ namespace AbilitySystem.Tests
         public void NotifyCastAnimationCompleted_ReturnsCastToIdle()
         {
             sm.TrySetState(EntityState.Cast, true);
+            Assert.That(sm.CurrentCastMode, Is.EqualTo(CastMode.OneShot),
+                "兼容入口 TrySetState(Cast) 默认使用 OneShot");
             sm.NotifyCastAnimationCompleted();
             Assert.That(sm.CurrentState, Is.EqualTo(EntityState.Idle));
+        }
+
+        [Test]
+        public void SustainedCast_IgnoresAnimationComplete_UntilExplicitExit()
+        {
+            Assert.That(sm.TrySetCastState(true, CastMode.Sustained), Is.True);
+            Assert.That(sm.CurrentState, Is.EqualTo(EntityState.Cast));
+            Assert.That(sm.CurrentCastMode, Is.EqualTo(CastMode.Sustained));
+
+            int completionTransitions = 0;
+            sm.StateChanged += (_, __) => completionTransitions++;
+            sm.NotifyCastAnimationCompleted();
+            Assert.That(sm.CurrentState, Is.EqualTo(EntityState.Cast),
+                "Spine 的循环 Complete 不能结束 Sustained Cast");
+            Assert.That(sm.CurrentCastMode, Is.EqualTo(CastMode.Sustained));
+            Assert.That(completionTransitions, Is.EqualTo(0));
+
+            Assert.That(sm.TrySetState(EntityState.Idle, true), Is.True);
+            Assert.That(sm.CurrentState, Is.EqualTo(EntityState.Idle));
+            Assert.That(sm.CurrentCastMode, Is.EqualTo(CastMode.OneShot),
+                "离开 Cast 后模式恢复默认，不能泄漏到下一次 Cast");
+        }
+
+        [Test]
+        public void TrySetCastState_PublishesModeBeforeStateChanged()
+        {
+            CastMode? seen = null;
+            sm.StateChanged += (_, next) =>
+            {
+                if (next == EntityState.Cast) seen = sm.CurrentCastMode;
+            };
+
+            sm.TrySetCastState(true, CastMode.Sustained);
+
+            Assert.That(seen, Is.EqualTo(CastMode.Sustained),
+                "AnimationMachine 在同步 StateChanged 回调中必须能读取本次模式");
+        }
+
+        [Test]
+        public void TrySetCastState_FailedReentry_DoesNotOverwriteMode()
+        {
+            sm.TrySetCastState(true, CastMode.Sustained);
+
+            Assert.That(sm.TrySetCastState(false, CastMode.OneShot), Is.False,
+                "非强制 Cast→Cast 仍受同态转换规则限制");
+            Assert.That(sm.CurrentCastMode, Is.EqualTo(CastMode.Sustained));
+        }
+
+        [Test]
+        public void TrySetCastState_InvalidMode_ThrowsWithoutChangingState()
+        {
+            Assert.Throws<System.ArgumentOutOfRangeException>(
+                () => sm.TrySetCastState(true, (CastMode)99));
+            Assert.That(sm.CurrentState, Is.EqualTo(EntityState.Default));
+            Assert.That(sm.CurrentCastMode, Is.EqualTo(CastMode.OneShot));
         }
 
         [Test]
@@ -240,6 +298,7 @@ namespace AbilitySystem.Tests
             sm.ResetForPool();
             Assert.That(sm.CurrentState, Is.EqualTo(EntityState.Default));
             Assert.That(sm.CurrentAttackPhase, Is.EqualTo(AttackPhase.None));
+            Assert.That(sm.CurrentCastMode, Is.EqualTo(CastMode.OneShot));
             Assert.That(sm.AttackComboIndex, Is.EqualTo(0));
             Assert.That(sm.TrySetState(EntityState.Move, false), Is.True, "ban 表已清");
         }

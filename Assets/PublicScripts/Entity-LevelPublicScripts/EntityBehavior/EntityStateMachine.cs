@@ -11,15 +11,22 @@ public enum AttackPhase
     End,
 }
 
+/// <summary>Cast 生命周期模式。OneShot 播完自动回 Idle；Sustained 持续到外部显式切换状态。</summary>
+public enum CastMode
+{
+    OneShot,
+    Sustained,
+}
+
 /// <summary>
 /// 实体逻辑状态机（纯 C#，由 Entity 构造并持有，同 AttributeStore/EntityMovement 先例）。
-/// 唯一的逻辑状态真相源：EntityState / AttackPhase / 连击索引 / 转换规则 / ban 表。
+/// 唯一的逻辑状态真相源：EntityState / AttackPhase / CastMode / 连击索引 / 转换规则 / ban 表。
 /// 表现层（AnimationMachine）订阅 StateChanged/AttackStarted/AttackPhaseChanged 播动画，
 /// 并通过 Notify* 上报动画时机；本类不引用任何表现层类型。
 /// 转换规则与旧 AnimationMachine.TrySetState 等价：非强制=目标优先级更高（Attack 连击窗口特例），
 /// 强制=当前非 Die；ban 表对两个分支都生效。
 /// Start 播完自动回 Idle（沿用旧 SetState(Start) 排队 Idle 的行为）；
-/// Cast 演出播完同样回 Idle；技能可在播完前显式 TrySetState(…, true) 提前打断。
+/// OneShot Cast 演出播完回 Idle；Sustained Cast 由技能显式 TrySetState(…, true) 结束。
 /// </summary>
 public sealed class EntityStateMachine
 {
@@ -28,12 +35,14 @@ public sealed class EntityStateMachine
     private readonly HashSet<EntityState> _banned = new HashSet<EntityState>();
     private EntityState _current = EntityState.Default;
     private AttackPhase _attackPhase = AttackPhase.None;
+    private CastMode _castMode = CastMode.OneShot;
     private int _attackComboIndex;
     private float _comboWindowTimer;
     private Action _attackAction;
 
     public EntityState CurrentState { get { return _current; } }
     public AttackPhase CurrentAttackPhase { get { return _attackPhase; } }
+    public CastMode CurrentCastMode { get { return _castMode; } }
     /// <summary>连击组内索引：主动段播完推进（循环），ComboWindow 结束归零。表现层按它选组内动画。</summary>
     public int AttackComboIndex { get { return _attackComboIndex; } }
 
@@ -64,9 +73,20 @@ public sealed class EntityStateMachine
     public bool TrySetState(EntityState state, bool forceChange)
     {
         if (!CanTransition(_current, state, forceChange)) return false;
-        SetState(state);
+        SetState(state, CastMode.OneShot);
         return true;
     }
+
+    /// <summary>进入 Cast，并指定本次演出的生命周期。模式在 StateChanged 前生效，供表现层同步读取。</summary>
+    public bool TrySetCastState(bool forceChange, CastMode mode)
+    {
+        if (mode != CastMode.OneShot && mode != CastMode.Sustained)
+            throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+        if (!CanTransition(_current, EntityState.Cast, forceChange)) return false;
+        SetState(EntityState.Cast, mode);
+        return true;
+    }
+
 
     /// <summary>进入 Attack 并登记一次性攻击回调（动画 OnAttack 帧经 NotifyAttackFrame 触发）。</summary>
     public bool TrySetAttackState(bool forceChange, Action attackAction)
@@ -110,11 +130,12 @@ public sealed class EntityStateMachine
         AttackPhaseChanged?.Invoke(AttackPhase.End);
     }
 
-    private void SetState(EntityState state)
+    private void SetState(EntityState state, CastMode castMode)
     {
         EntityState previous = _current;
         bool wasComboWindow = _attackPhase == AttackPhase.ComboWindow;
         _attackPhase = state == EntityState.Attack ? AttackPhase.Active : AttackPhase.None;
+        _castMode = state == EntityState.Cast ? castMode : CastMode.OneShot;
         _current = state;
         StateChanged?.Invoke(previous, state);
         if (state == EntityState.Attack) AttackStarted?.Invoke(wasComboWindow);
@@ -129,10 +150,12 @@ public sealed class EntityStateMachine
         StateChanged?.Invoke(EntityState.Start, EntityState.Idle);
     }
 
-    /// <summary>Cast 演出动画播完 → 回 Idle。带守卫：状态已迁移则忽略晚到的上报。</summary>
+    /// <summary>OneShot Cast 演出动画播完 → 回 Idle。
+    /// Sustained Cast 以及状态已迁移后的晚到上报均忽略。</summary>
     public void NotifyCastAnimationCompleted()
     {
-        if (_current != EntityState.Cast) return;
+        if (_current != EntityState.Cast || _castMode != CastMode.OneShot) return;
+        _castMode = CastMode.OneShot;
         _current = EntityState.Idle;
         StateChanged?.Invoke(EntityState.Cast, EntityState.Idle);
     }
@@ -179,6 +202,7 @@ public sealed class EntityStateMachine
         _comboWindowTimer = 0f;
         _banned.Clear();
         _attackPhase = AttackPhase.None;
+        _castMode = CastMode.OneShot;
         EntityState previous = _current;
         _current = EntityState.Default;
         StateChanged?.Invoke(previous, EntityState.Default);

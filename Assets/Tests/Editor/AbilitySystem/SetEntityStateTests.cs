@@ -8,7 +8,7 @@ namespace AbilitySystem.Tests
     /// <summary>SetEntityState（切目标实体状态机状态）的 EditMode 契约测试。
     /// 状态机本身的优先级/ban/连击语义已由 EntityStateMachineTests 覆盖，这里只测
     /// 组件契约：参数解析（非法状态名告警跳过）、目标解析三通道（blackboardKey
-    /// 优先/toSelf/皆无静默）、切换失败静默、多目标独立切换。</summary>
+    /// 优先/toSelf/皆无静默）、CastMode、切换失败静默、多目标独立切换。</summary>
     public class SetEntityStateTests
     {
         private readonly List<GameObject> _scratch = new List<GameObject>();
@@ -34,6 +34,72 @@ namespace AbilitySystem.Tests
             comp.OnTrigger(ctx);
 
             Assert.That(e.StateMachine.CurrentState, Is.EqualTo(EntityState.Cast));
+            Assert.That(e.StateMachine.CurrentCastMode, Is.EqualTo(CastMode.OneShot),
+                "省略 castMode 时保持向后兼容，默认 OneShot");
+        }
+
+        [Test]
+        public void CastMode_Sustained_AppliesThroughDedicatedCastPath()
+        {
+            Entity e = NewEntity();
+            AbilityContext ctx = Ctx(e);
+            var comp = new SetEntityState();
+            comp.OnInit(ctx, Params(("state", "Cast"), ("castMode", "Sustained")));
+
+            comp.OnTrigger(ctx);
+
+            Assert.That(e.StateMachine.CurrentState, Is.EqualTo(EntityState.Cast));
+            Assert.That(e.StateMachine.CurrentCastMode, Is.EqualTo(CastMode.Sustained));
+        }
+
+        [Test]
+        public void CastMode_FromBlackboard_IsReevaluatedPerTrigger()
+        {
+            Entity e = NewEntity();
+            var bb = new Blackboard();
+            var ctx = new AbilityContext { sharedBlackboard = bb, entity = e };
+            ParamList parameters = Params(
+                ("state", "Cast"),
+                ("force", "True"),
+                ("castMode", "cast_mode"));
+            parameters.entries[2].fromBlackboard = true;
+            var comp = new SetEntityState();
+            comp.OnInit(ctx, parameters);
+
+            bb.Set("cast_mode", "Sustained");
+            comp.OnTrigger(ctx);
+            Assert.That(e.StateMachine.CurrentCastMode, Is.EqualTo(CastMode.Sustained));
+
+            bb.Set("cast_mode", "OneShot");
+            comp.OnTrigger(ctx);
+            Assert.That(e.StateMachine.CurrentCastMode, Is.EqualTo(CastMode.OneShot));
+        }
+
+        [TestCase("Forever")]
+        [TestCase("1")]
+        public void UnknownCastMode_DoesNotSwitch(string castMode)
+        {
+            Entity e = NewEntity();
+            AbilityContext ctx = Ctx(e);
+            var comp = new SetEntityState();
+            comp.OnInit(ctx, Params(("state", "Cast"), ("castMode", castMode)));
+
+            comp.OnTrigger(ctx);
+
+            Assert.That(e.StateMachine.CurrentState, Is.EqualTo(EntityState.Default));
+        }
+
+        [Test]
+        public void CastMode_IsIgnoredForNonCastStates()
+        {
+            Entity e = NewEntity();
+            AbilityContext ctx = Ctx(e);
+            var comp = new SetEntityState();
+            comp.OnInit(ctx, Params(("state", "Move"), ("castMode", "Forever")));
+
+            comp.OnTrigger(ctx);
+
+            Assert.That(e.StateMachine.CurrentState, Is.EqualTo(EntityState.Move));
         }
 
         [Test]

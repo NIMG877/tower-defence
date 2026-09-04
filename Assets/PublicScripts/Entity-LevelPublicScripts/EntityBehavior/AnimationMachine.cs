@@ -254,8 +254,9 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 ConsumeOneShots(AnimationSlot.Start);
                 break;
             case EntityState.Cast:
-                // 演出态：不循环播放，播完经 HandleAnimationStateComplete 上报回 Idle
-                _castAnim = PlaySingle(AnimationSlot.Cast, false, 1);
+                // OneShot 播完上报回 Idle；Sustained 循环到外部显式切换状态。
+                bool loopCast = _sm.CurrentCastMode == CastMode.Sustained;
+                _castAnim = PlaySingle(AnimationSlot.Cast, loopCast, 1);
                 ConsumeOneShots(AnimationSlot.Cast);
                 break;
             case EntityState.Die:
@@ -399,7 +400,10 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
             _sm.NotifyStartAnimationCompleted();
             return;
         }
-        if (_sm.CurrentState == EntityState.Cast && _castAnim != null && trackEntry.Animation == _castAnim)
+        if (_sm.CurrentState == EntityState.Cast
+            && _sm.CurrentCastMode == CastMode.OneShot
+            && _castAnim != null
+            && trackEntry.Animation == _castAnim)
         {
             _sm.NotifyCastAnimationCompleted();
         }

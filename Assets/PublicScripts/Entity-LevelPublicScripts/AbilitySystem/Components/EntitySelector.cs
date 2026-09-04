@@ -163,7 +163,9 @@ namespace AbilitySystem.Components
 
             AddByRelation(
                 results,
-                sameCamp => subject.Camp == 1 ? subject.Vision.NearbyTurrets : subject.Vision.NearbyMonsters);
+                sameCamp => sameCamp
+                    ? (subject.Camp == 1 ? subject.Vision.NearbyTurrets : subject.Vision.NearbyMonsters)
+                    : (subject.Camp == 1 ? subject.Vision.NearbyMonsters : subject.Vision.NearbyTurrets));
             return results;
         }
 

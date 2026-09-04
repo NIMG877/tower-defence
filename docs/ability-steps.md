@@ -111,7 +111,7 @@ must not interfere.
 
 ## Canonical operations
 
-`RegisteredOps` exposes canonical names only. The 32 component-backed
+`RegisteredOps` exposes canonical names only. The 33 component-backed
 operations use snake_case. PascalCase component names are lookup aliases.
 
 | Canonical `op` | Backing implementation / reference |
@@ -142,6 +142,7 @@ operations use snake_case. PascalCase component names are lookup aliases.
 | `remove_animation_override` | [RemoveAnimationOverride](skill-components/RemoveAnimationOverride.md) |
 | `select_targets` | [EntitySelector](skill-components/EntitySelector.md) |
 | `select_landing_points` | [SelectLandingPoints](skill-components/SelectLandingPoints.md) |
+| `set_entity_state` | [SetEntityState](skill-components/SetEntityState.md) |
 | `share_attack_target` | [ShareAttackTarget](skill-components/ShareAttackTarget.md) |
 | `shared_target_extra_attack` | [SharedTargetExtraAttack](skill-components/SharedTargetExtraAttack.md) |
 | `spawn_entity` | [SpawnEntity](skill-components/SpawnEntity.md) |
