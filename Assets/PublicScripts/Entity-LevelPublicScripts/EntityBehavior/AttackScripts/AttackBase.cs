@@ -199,14 +199,14 @@ public class AttackBase : MonoBehaviour, IPoolOperation
             float mgrPenetrate_value = 0;
             int cumbo = 1;
             int damageType = DamageType;
-            OnBeforeAttack?.Invoke(attackTargets[i], ref multiplyer, ref defPenetrate, ref mgrPenetrate, ref defPenetrate_value, ref mgrPenetrate, ref cumbo, ref damageType, 0);
+            OnBeforeAttack?.Invoke(attackTargets[i], ref multiplyer, ref defPenetrate, ref mgrPenetrate, ref defPenetrate_value, ref mgrPenetrate_value, ref cumbo, ref damageType, 0);
             bool isDeadly = AttackSingleTargetOperation(OnBeforeTakeDamage, OnAfterTakeDamage, _attackEffectData, attackTargets[i], multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType);
             for (int j = 1; j < cumbo; j++)
             {
                 await UniTask.WaitForSeconds(0.1f);
                 isDeadly = AttackSingleTargetOperation(OnBeforeTakeDamage, OnAfterTakeDamage, _attackEffectData, attackTargets[i], multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType);
             }
-            OnAfterAttack?.Invoke(attackTargets[i], multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate, damageType, 0, isDeadly);
+            OnAfterAttack?.Invoke(attackTargets[i], multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, 0, isDeadly);
         }
         OnAttackSuccessfully?.Invoke();
     }

@@ -145,9 +145,9 @@ public class Bullet
     {
         if (_targetEntity != null && _targetEntity.Stats.IsActive)
         {
-            _onBeforeTakeDamage?.Invoke(_targetEntity, ref _multiplyer, ref _defPenetrate, ref _mgrPenetrate, ref _defPenetrate_value, ref _mgrPenetrate, ref _damageType, 0);
+            _onBeforeTakeDamage?.Invoke(_targetEntity, ref _multiplyer, ref _defPenetrate, ref _mgrPenetrate, ref _defPenetrate_value, ref _mgrPenetrate_value, ref _damageType, 0);
             bool isDeadly = _targetEntity.Stats.ApplyDamage(_originEntity, _damage, _multiplyer, _defPenetrate, _mgrPenetrate, _defPenetrate_value, _mgrPenetrate_value, _damageType, 0);
-            _onAfterTakeDamage?.Invoke(_targetEntity, _multiplyer, _defPenetrate, _mgrPenetrate, _defPenetrate_value, _mgrPenetrate, _damageType, 0, isDeadly);
+            _onAfterTakeDamage?.Invoke(_targetEntity, _multiplyer, _defPenetrate, _mgrPenetrate, _defPenetrate_value, _mgrPenetrate_value, _damageType, 0, isDeadly);
         }
         DestroyBullet();
     }
