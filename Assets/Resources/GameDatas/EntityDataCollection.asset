@@ -26,6 +26,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 6
     CharacterJob: 4
+    CharacterSubJob: 12
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -78,6 +79,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 27803cc15c4d451fa333120153dea722, type: 2}
     Talents:
     - {fileID: 11400000, guid: 9e0242c321b458831a624b77b4797a62, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: 2461a38d57218326426ef31b1d0335cf, type: 2}
     AnimationResources: {fileID: 11400000, guid: b7639e8dd39688e47a11dea72ef2238e, type: 2}
   - ID:
       ID_C: c
@@ -92,6 +94,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 6
     CharacterJob: 4
+    CharacterSubJob: 1
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -142,6 +145,7 @@ MonoBehaviour:
     Talents:
     - {fileID: 11400000, guid: 6676cdd6d28d4724eb351d16c36028a5, type: 2}
     - {fileID: 11400000, guid: 2e0973b3bd943054db55d52dbefbaa60, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: 2d58349af5c3f4f4c838ce1b5d4acf28, type: 2}
     AnimationResources: {fileID: 11400000, guid: e4017be5cb5e0f4449e1384dfd30b172, type: 2}
   - ID:
       ID_C: c
@@ -156,6 +160,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 3
+    CharacterSubJob: 10
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -207,6 +212,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 9a33ac06692c8a44b8df73dc20dcf0be, type: 2}
     Talents:
     - {fileID: 11400000, guid: 30336de6325142b458941f1e612088c2, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: 8ca1b39face32653dbc0b613483296ab, type: 2}
     AnimationResources: {fileID: 11400000, guid: 2eb42c200c1aab54496fec70451c4fa9, type: 2}
   - ID:
       ID_C: c
@@ -221,6 +227,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 4
+    CharacterSubJob: 0
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -270,6 +277,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 28d6c3a075490e84e9e8c27243786cf3, type: 2}
     Talents:
     - {fileID: 11400000, guid: 5e095252e619e0b4eaa17558e65bbb07, type: 2}
+    SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 11400000, guid: 4ad63c1c0debbf245b440f91c4f8157c, type: 2}
   - ID:
       ID_C: c
@@ -284,6 +292,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 2
+    CharacterSubJob: 9
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -324,6 +333,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 0940832e465d7b148bf445f12ce61a24, type: 2}
     Talents:
     - {fileID: 11400000, guid: 62fdda0674b0245499caf1f700a08fad, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: 6b63f56df3fe55536b8070f377aab8d3, type: 2}
     AnimationResources: {fileID: 11400000, guid: a009ade165267c246a1ad64b5d4d0d38, type: 2}
   - ID:
       ID_C: c
@@ -338,6 +348,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 1
+    CharacterSubJob: 7
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -379,6 +390,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 99db95c505cb4d341b4065b66f8ff78d, type: 2}
     Talents:
     - {fileID: 11400000, guid: 7d6b84033e6602140b4829f8674e4306, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: f8786338dcdcea0442b4e79925202f24, type: 2}
     AnimationResources: {fileID: 11400000, guid: 70eb60c57ea57be4d8adbabb43102e8b, type: 2}
   - ID:
       ID_C: c
@@ -393,6 +405,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 5
+    CharacterSubJob: 14
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -444,6 +457,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 74a7d2040c8b79442a54bd87961769d5, type: 2}
     Talents:
     - {fileID: 11400000, guid: bfb4d0f2a2b00134585e846bdb20816e, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: 41aa0d8980d2e18e0d21a56144828a30, type: 2}
     AnimationResources: {fileID: 11400000, guid: db1cfe2d343af164e8ae810c8e47b817, type: 2}
   - ID:
       ID_C: c
@@ -458,6 +472,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 3
+    CharacterSubJob: 10
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -509,6 +524,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 802d3238926950c5a3b4e76658c824d1, type: 2}
     Talents:
     - {fileID: 11400000, guid: cf32d747c72608173d632ba8569ac138, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: 8ca1b39face32653dbc0b613483296ab, type: 2}
     AnimationResources: {fileID: 11400000, guid: 61fcd16c983e26bd1ecae25433ca2f27, type: 2}
   - ID:
       ID_C: c
@@ -523,6 +539,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 5
+    CharacterSubJob: 14
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -574,6 +591,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: fc5172ff29cdb433edeacd84c49aff8e, type: 2}
     Talents:
     - {fileID: 11400000, guid: 569b440f470e1452c6db02ba28fec422, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: 41aa0d8980d2e18e0d21a56144828a30, type: 2}
     AnimationResources: {fileID: 11400000, guid: 2e344e728f8e9548b42638c373fcd9ee, type: 2}
   - ID:
       ID_C: c
@@ -588,6 +606,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 2
+    CharacterSubJob: 8
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -628,6 +647,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: b7e7ce38d7c67a514c68053dd81394fe, type: 2}
     Talents:
     - {fileID: 11400000, guid: 2080220f003a371b0d986fe5103c5e87, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: 3f521fa1d77a8a5b2d2b9c1d22456363, type: 2}
     AnimationResources: {fileID: 11400000, guid: 5733979cd0846c0bf2d32b9a6ea6a2a2, type: 2}
   - ID:
       ID_C: c
@@ -642,6 +662,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 2
+    CharacterSubJob: 8
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -682,6 +703,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 7237b039858f5fb651fd60167bf54491, type: 2}
     Talents:
     - {fileID: 11400000, guid: 7d5bdc5e01de8eef3e6903288fb3a90d, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: 3f521fa1d77a8a5b2d2b9c1d22456363, type: 2}
     AnimationResources: {fileID: 11400000, guid: 418a80f87e0f7abfe5561c0f4059d4ba, type: 2}
   - ID:
       ID_C: c
@@ -696,6 +718,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 3
+    CharacterSubJob: 11
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -750,6 +773,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 0d05cea8182bc26568791952e22bc21f, type: 2}
     Talents:
     - {fileID: 11400000, guid: 202d0ed21b2dc32fa52d2a01357f6cdc, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: 9b87bdf6c35377229178d01ebd2843bd, type: 2}
     AnimationResources: {fileID: 11400000, guid: e83e428a539fef1c91d4f9fbf2934c8d, type: 2}
   - ID:
       ID_C: c
@@ -764,6 +788,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 0
+    CharacterSubJob: 2
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -805,6 +830,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: e1cc824780e343898db97eec10380024, type: 2}
     Talents:
     - {fileID: 11400000, guid: d01de30b38ef799f5b2519cd52c07f6a, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: ab56b08c5027b9845953580e85c286b1, type: 2}
     AnimationResources: {fileID: 11400000, guid: 5651bf8b3b7a2c6097f39ca549d40460, type: 2}
   - ID:
       ID_C: c
@@ -819,6 +845,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 0
+    CharacterSubJob: 4
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -860,6 +887,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 4f352449a34652c2f4183671809a5787, type: 2}
     Talents:
     - {fileID: 11400000, guid: bebab288b1b7caf17ddde33a53d602ff, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: e88c495e9b8743aa56eae8ab9f06c8ac, type: 2}
     AnimationResources: {fileID: 11400000, guid: 4e03ab10cd9a9aaf6af65016d7e6d637, type: 2}
   - ID:
       ID_C: c
@@ -874,6 +902,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 4
+    CharacterSubJob: 13
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -922,6 +951,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: e317ea6fdd012cb488b754192c498dc1, type: 2}
     Talents:
     - {fileID: 11400000, guid: 0545be457cb2ad72b86bad611de9ecd4, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: 04f0710667248ec92395b4c7aa2b34f5, type: 2}
     AnimationResources: {fileID: 11400000, guid: 3d373dcce35e3804d6c6a5acb83cf5ad, type: 2}
   - ID:
       ID_C: c
@@ -936,6 +966,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 1
+    CharacterSubJob: 6
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -983,6 +1014,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 8ffc8ab18e54b03a389e7d9e8018cb14, type: 2}
     Talents:
     - {fileID: 11400000, guid: 494b62c971df1086b499a2a01a40e49c, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: 1cfc9bc6e6daa846496e0ac6c31f2132, type: 2}
     AnimationResources: {fileID: 11400000, guid: 74d9837242b1848a53a436d3840b5c36, type: 2}
   - ID:
       ID_C: c
@@ -997,6 +1029,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 6
+    CharacterSubJob: 3
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -1048,6 +1081,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 7777b6db17d94c450c09a3722b6626f8, type: 2}
     Talents:
     - {fileID: 11400000, guid: 9089c9f14579348a5f90198a3351c9d9, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: 56fcc34f0e5788341a97f51bce7a2453, type: 2}
     AnimationResources: {fileID: 11400000, guid: 9d53af842f6abec9cc0587e96859fd2b, type: 2}
   - ID:
       ID_C: c
@@ -1062,6 +1096,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 1
+    CharacterSubJob: 5
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -1103,6 +1138,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 96fa2797c4069d20105f3fd0dcce3cea, type: 2}
     Talents:
     - {fileID: 11400000, guid: 73602c53083fd764d24d664b24b61141, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: 1c546d60fcaae0b551e37f5dc70eda03, type: 2}
     AnimationResources: {fileID: 11400000, guid: 0f56ee53baaab0d736350c383814c89c, type: 2}
   - ID:
       ID_C: c
@@ -1117,6 +1153,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 0
+    CharacterSubJob: 4
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -1158,6 +1195,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: b27b68f8ff1ab6e7404cd918e799dbd4, type: 2}
     Talents:
     - {fileID: 11400000, guid: 246740e16521e37066196ec41443c858, type: 2}
+    SubJobTrait: {fileID: 11400000, guid: e88c495e9b8743aa56eae8ab9f06c8ac, type: 2}
     AnimationResources: {fileID: 11400000, guid: 542d904948985515ec3fc04a9ecb0acb, type: 2}
   - ID:
       ID_C: m
@@ -1172,6 +1210,7 @@ MonoBehaviour:
     DefaultCamp: 2
     CharacterRarity: 0
     CharacterJob: 9
+    CharacterSubJob: 0
     MonsterStatus: 0
     MonsterLabel: "\u4EA1\u7075\u751F\u7269"
     MonsterIsPrimary: 1
@@ -1210,6 +1249,7 @@ MonoBehaviour:
     Skills: []
     Talents:
     - {fileID: 11400000, guid: 0fa3a5a5548d012448f51c66faaafe07, type: 2}
+    SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 11400000, guid: 5c5f405e5ac452d43a6e420f1522f197, type: 2}
   - ID:
       ID_C: m
@@ -1224,6 +1264,7 @@ MonoBehaviour:
     DefaultCamp: 2
     CharacterRarity: 0
     CharacterJob: 9
+    CharacterSubJob: 0
     MonsterStatus: 0
     MonsterLabel: "\u4EA1\u7075\u751F\u7269"
     MonsterIsPrimary: 1
@@ -1262,6 +1303,7 @@ MonoBehaviour:
     Skills: []
     Talents:
     - {fileID: 11400000, guid: f0628830b80a7e74695be21f23cb7da3, type: 2}
+    SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 11400000, guid: 7a626b4b74dec5e4b89d0bc4bef34643, type: 2}
   - ID:
       ID_C: m
@@ -1276,6 +1318,7 @@ MonoBehaviour:
     DefaultCamp: 2
     CharacterRarity: 0
     CharacterJob: 9
+    CharacterSubJob: 0
     MonsterStatus: 1
     MonsterLabel: 
     MonsterIsPrimary: 1
@@ -1314,6 +1357,7 @@ MonoBehaviour:
     Skills: []
     Talents:
     - {fileID: 11400000, guid: 7686315d8385e1748857a2dc52d6d713, type: 2}
+    SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 11400000, guid: d0c65e57c85fd7f4a859cc396ef72414, type: 2}
   - ID:
       ID_C: m
@@ -1328,6 +1372,7 @@ MonoBehaviour:
     DefaultCamp: 2
     CharacterRarity: 0
     CharacterJob: 9
+    CharacterSubJob: 0
     MonsterStatus: 1
     MonsterLabel: "\u96F7\u51FB\u5F02\u53D8\u4F53"
     MonsterIsPrimary: 1
@@ -1365,6 +1410,7 @@ MonoBehaviour:
     MoveMethod: 0
     Skills: []
     Talents: []
+    SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 0}
   - ID:
       ID_C: m
@@ -1379,6 +1425,7 @@ MonoBehaviour:
     DefaultCamp: 2
     CharacterRarity: 0
     CharacterJob: 9
+    CharacterSubJob: 0
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 1
@@ -1416,6 +1463,7 @@ MonoBehaviour:
     MoveMethod: 0
     Skills: []
     Talents: []
+    SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 11400000, guid: 41fad29e61964b74e92cdc4ffbdd84d9, type: 2}
   - ID:
       ID_C: m
@@ -1430,6 +1478,7 @@ MonoBehaviour:
     DefaultCamp: 2
     CharacterRarity: 0
     CharacterJob: 9
+    CharacterSubJob: 0
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 1
@@ -1470,6 +1519,7 @@ MonoBehaviour:
     Skills: []
     Talents:
     - {fileID: 11400000, guid: 077e0c77018767047a76426b30fa15b9, type: 2}
+    SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 11400000, guid: 41fad29e61964b74e92cdc4ffbdd84d9, type: 2}
   - ID:
       ID_C: m
@@ -1484,6 +1534,7 @@ MonoBehaviour:
     DefaultCamp: 2
     CharacterRarity: 0
     CharacterJob: 9
+    CharacterSubJob: 0
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 1
@@ -1524,6 +1575,7 @@ MonoBehaviour:
     Skills: []
     Talents:
     - {fileID: 11400000, guid: 077e0c77018767047a76426b30fa15b9, type: 2}
+    SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 11400000, guid: 41fad29e61964b74e92cdc4ffbdd84d9, type: 2}
   - ID:
       ID_C: m
@@ -1538,6 +1590,7 @@ MonoBehaviour:
     DefaultCamp: 2
     CharacterRarity: 0
     CharacterJob: 9
+    CharacterSubJob: 0
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -1575,6 +1628,7 @@ MonoBehaviour:
     MoveMethod: 0
     Skills: []
     Talents: []
+    SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 0}
   - ID:
       ID_C: m
@@ -1589,6 +1643,7 @@ MonoBehaviour:
     DefaultCamp: 2
     CharacterRarity: 0
     CharacterJob: 9
+    CharacterSubJob: 0
     MonsterStatus: 0
     MonsterLabel: "\u6CD5\u672F\u9020\u7269"
     MonsterIsPrimary: 0
@@ -1628,6 +1683,7 @@ MonoBehaviour:
     MoveMethod: 0
     Skills: []
     Talents: []
+    SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 0}
   - ID:
       ID_C: m
@@ -1642,6 +1698,7 @@ MonoBehaviour:
     DefaultCamp: 2
     CharacterRarity: 0
     CharacterJob: 9
+    CharacterSubJob: 0
     MonsterStatus: 2
     MonsterLabel: "\u4EA1\u7075\u751F\u7269"
     MonsterIsPrimary: 1
@@ -1679,6 +1736,7 @@ MonoBehaviour:
     MoveMethod: 0
     Skills: []
     Talents: []
+    SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 0}
   - ID:
       ID_C: t
@@ -1693,6 +1751,7 @@ MonoBehaviour:
     DefaultCamp: 2
     CharacterRarity: 0
     CharacterJob: 9
+    CharacterSubJob: 0
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -1731,4 +1790,5 @@ MonoBehaviour:
     Skills: []
     Talents:
     - {fileID: 11400000, guid: 1d591fab0b3a4d2e83aca4ba993fc441, type: 2}
+    SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 11400000, guid: 6de2e3c964f4f114c898e83234721ced, type: 2}
