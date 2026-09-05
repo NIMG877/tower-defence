@@ -47,11 +47,14 @@ public class Bullet
     private event AttackBase.OperationsAfterTakeDamage _onAfterTakeDamage;
     public delegate void OperationsOnBulletDestroy(Vector2 bulletPos);
     private event OperationsOnBulletDestroy _onBulletDestroy;
-    public Bullet(AttackBase.OperationsBeforeTakeDamage operationsBeforeTakeDamage, AttackBase.OperationsAfterTakeDamage operationsAfterTakeDamage, OperationsOnBulletDestroy operationsOnBulletDestroy, BulletData bulletData, Entity originEntity, Entity targetEntity, Vector2 targetPos, Vector2 bulletSpawnPosition, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType)
+    public delegate void OperationsOnBulletLandWithoutHit(Entity targetEntity);
+    private event OperationsOnBulletLandWithoutHit _onLandWithoutHit;
+    public Bullet(AttackBase.OperationsBeforeTakeDamage operationsBeforeTakeDamage, AttackBase.OperationsAfterTakeDamage operationsAfterTakeDamage, OperationsOnBulletDestroy operationsOnBulletDestroy, BulletData bulletData, Entity originEntity, Entity targetEntity, Vector2 targetPos, Vector2 bulletSpawnPosition, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType, OperationsOnBulletLandWithoutHit onLandWithoutHit = null)
     {
         _onBeforeTakeDamage = operationsBeforeTakeDamage;
         _onAfterTakeDamage = operationsAfterTakeDamage;
         _onBulletDestroy = operationsOnBulletDestroy;
+        _onLandWithoutHit = onLandWithoutHit;
         _originEntity = originEntity;
         _targetEntity = targetEntity;
         _targetPos = targetPos;
@@ -148,6 +151,11 @@ public class Bullet
             _onBeforeTakeDamage?.Invoke(_targetEntity, ref _multiplyer, ref _defPenetrate, ref _mgrPenetrate, ref _defPenetrate_value, ref _mgrPenetrate_value, ref _damageType, 0);
             bool isDeadly = _targetEntity.Stats.ApplyDamage(_originEntity, _damage, _multiplyer, _defPenetrate, _mgrPenetrate, _defPenetrate_value, _mgrPenetrate_value, _damageType, 0);
             _onAfterTakeDamage?.Invoke(_targetEntity, _multiplyer, _defPenetrate, _mgrPenetrate, _defPenetrate_value, _mgrPenetrate_value, _damageType, 0, isDeadly);
+        }
+        else if (_targetEntity != null)
+        {
+            // AllowNoTarget 存活弹：主目标已死，落地不再对其结算，仍以其位置为圆心触发溅射
+            _onLandWithoutHit?.Invoke(_targetEntity);
         }
         DestroyBullet();
     }

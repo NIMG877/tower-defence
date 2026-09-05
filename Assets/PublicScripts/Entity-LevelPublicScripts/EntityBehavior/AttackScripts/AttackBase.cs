@@ -214,6 +214,69 @@ public class AttackBase : MonoBehaviour, IPoolOperation
     {
         return false;
     }
+
+    /// <summary>
+    /// 单目标完整命中（直伤路径统一入口，AttackBase 子类共用）：
+    /// 攻方 OnBeforeTakeDamage → ApplyDamage → OnAfterTakeDamage → 溅射。
+    /// 溅射复用主目标命中后的最终参数（攻方 OnBefore 链的改参对溅射同样生效）。
+    /// </summary>
+    protected bool HitTargetAndSplash(Entity attackTarget, OperationsBeforeTakeDamage onBeforeTakeDamage, OperationsAfterTakeDamage onAfterTakeDamage, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType)
+    {
+        onBeforeTakeDamage?.Invoke(attackTarget, ref multiplyer, ref defPenetrate, ref mgrPenetrate, ref defPenetrate_value, ref mgrPenetrate_value, ref damageType, 0);
+        bool isDeadly = attackTarget.Stats.ApplyDamage(_thisEntity, damage, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, 0);
+        onAfterTakeDamage?.Invoke(attackTarget, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, 0, isDeadly);
+        SplashAroundTarget(attackTarget, damage, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, onBeforeTakeDamage, onAfterTakeDamage);
+        return isDeadly;
+    }
+
+    /// <summary>
+    /// 以 center 为圆心结算溅射：SplashRadiusS 半径内捞可选目标（排除 center），
+    /// 逐个走完整攻方事件链 + ApplyDamage（受击方管线完整，含闪避/OnBeforeHurt/治疗封顶）。
+    /// 伤害参数复用本次命中快照，不做额外修改；溅射不嵌套（受害者不再作为圆心二次扩散）。
+    /// </summary>
+    protected void SplashAroundTarget(Entity center, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, OperationsBeforeTakeDamage onBeforeTakeDamage, OperationsAfterTakeDamage onAfterTakeDamage)
+    {
+        float radius = _thisEntity.Stats.SplashRadiusS;
+        if (radius <= 0) return;
+        // 候选营地板随 AttackTargetSelect：伤害型打敌方阵营，治疗型（DamageType==3）打己方阵营
+        List<Entity> victims = EntityManager.Manager.EntitySelector_Radius(
+            (center.transform.position.x, center.transform.position.y),
+            _thisEntity.Movement.Camp, DamageType == 3, radius, false);
+        for (int i = 0; i < victims.Count; i++)
+        {
+            if (victims[i] == center) continue;
+            // 溅射受害者 applyType=1（主目标命中仍为 0），下游事件与结算可据此区分伤害来源
+            HitTarget(victims[i], onBeforeTakeDamage, onAfterTakeDamage, damage, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, 1);
+        }
+    }
+
+    /// <summary>
+    /// 单目标命中：攻方 OnBeforeTakeDamage → ApplyDamage → OnAfterTakeDamage。
+    /// 每个受害者各持一份参数拷贝（ref 改参互不影响）；applyType 由调用方给定
+    /// （主目标 0 / 溅射受害者 1）。
+    /// </summary>
+    private bool HitTarget(Entity target, OperationsBeforeTakeDamage onBeforeTakeDamage, OperationsAfterTakeDamage onAfterTakeDamage, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType)
+    {
+        onBeforeTakeDamage?.Invoke(target, ref multiplyer, ref defPenetrate, ref mgrPenetrate, ref defPenetrate_value, ref mgrPenetrate_value, ref damageType, applyType);
+        bool isDeadly = target.Stats.ApplyDamage(_thisEntity, damage, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, applyType);
+        onAfterTakeDamage?.Invoke(target, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, applyType, isDeadly);
+        return isDeadly;
+    }
+
+    /// <summary>
+    /// 攻击组件的子弹发射统一入口（三个子类共用）：
+    /// 伤害取命中时刻的 AttackS 快照；OnAfterTakeDamage 链尾追加溅射（落点命中即扩散）；
+    /// AllowNoTarget 存活弹在主目标死后落地时，仍以落点主目标为圆心溅射。
+    /// </summary>
+    protected void FireBullet(OperationsBeforeTakeDamage onBeforeTakeDamage, OperationsAfterTakeDamage onAfterTakeDamage, Bullet.OperationsOnBulletDestroy onBulletDestroy, BulletData bulletData, Entity attackTarget, Vector2 bulletSpawnPosition, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType)
+    {
+        float damage = _thisEntity.Stats.AttackS;
+        OperationsAfterTakeDamage afterChain = onAfterTakeDamage;
+        afterChain += (hitTarget, m, dp, mp, dpv, mpv, dt, at, deadly) =>
+            SplashAroundTarget(hitTarget, damage, m, dp, mp, dpv, mpv, dt, onBeforeTakeDamage, onAfterTakeDamage);
+        new Bullet(onBeforeTakeDamage, afterChain, onBulletDestroy, bulletData, _thisEntity, attackTarget, Vector2.zero, bulletSpawnPosition, damage, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, 0,
+            landCenter => SplashAroundTarget(landCenter, damage, multiplyer, defPenetrate, mgrPenetrate, defPenetrate_value, mgrPenetrate_value, damageType, onBeforeTakeDamage, onAfterTakeDamage));
+    }
     protected Entity[] AttackTargetSelect(int selectNum_Max, int selectNum_Min)
     {
         List<Entity> tmpTarget;
