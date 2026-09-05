@@ -71,7 +71,7 @@ public class EntityPool
         }
         poolOperations = outEntity.GetComponents<IPoolOperation>();
         outEntity.Camp = camp;
-        // 池化实体跨关卡复用,每次部署重新断言生效技能(不同则休眠期重建)
+        // 池化实体跨部署复用（回收再部署），每次部署重新断言生效技能（不同则休眠期重建）
         outEntity.SetSelectedSkill(skillIndex);
         outEntity.Movement.SetPosition(destination);
         outEntity.gameObject.SetActive(true);
@@ -92,15 +92,17 @@ public class EntityPool
         }
     }
     /// <summary>
-    /// 实体离开实体池（退出关卡）时清空池内所有实体的局内 buff。
-    /// LevelEnd 时序保证 EntityManager.ToEnd 先行还池，遍历时实体应已全部在池内。
+    /// 退关销毁池（池生命周期与关卡对齐：每关创建、退关销毁）。
+    /// LevelEnd 时序保证 EntityManager.ToEnd 先行还池，此处销毁时实体应已全部在池内。
+    /// 局内 buff 等实体状态随 GameObject 销毁自然消失，无需逐项清理。
     /// </summary>
-    public void ClearLevelBuffs()
+    public void Teardown()
     {
-        for (int i = 0; i < inp_entities.Count; i++)
+        for (int i = inp_entities.Count - 1; i >= 0; i--)
         {
-            inp_entities[i].buffController.ClearLevelBuffs();
+            UnityEngine.Object.Destroy(inp_entities[i].gameObject);
         }
+        inp_entities.Clear();
     }
 }
 public class EntityPoolManager : IManagerStartEnd
@@ -178,11 +180,12 @@ public class EntityPoolManager : IManagerStartEnd
 
     public void ToEnd()
     {
-        // 池仅增不减、实体跨关卡复用，局内 buff 必须在退关卡时显式清空。
+        // 池生命周期与关卡对齐：销毁所有池并清空记录，下一关由 CreateOrExpandEntityPool 重建。
         for (int i = 0; i < entity_pools.Count; i++)
         {
-            entity_pools[i].ClearLevelBuffs();
+            entity_pools[i].Teardown();
         }
+        entity_pools.Clear();
     }
 
     public void ToStart()

@@ -76,7 +76,7 @@ public class EntityMovement
         _inBlocks = new (int i, int j)[4];
     }
 
-    // === 还池时清空格位记录，防止跨关卡复用时旧坐标索引到新关卡的 block 数组越界 ===
+    // === 还池时清空格位记录（Dormancy 先经 RemoveEntityFromBlock 退出格位表），防止跨部署复用残留旧坐标误操作格位表 ===
     public void ClearInBlocks()
     {
         for (int i = 0; i < _inBlocks.Length; i++)

@@ -6,7 +6,8 @@ namespace AbilitySystem.Tests
     /// <summary>
     /// 局内 buff（BuffScope.Level）生命周期契约：
     /// Dormancy（回收）保留局内 buff，且只按 group 移除 Normal/WhiteList 两列的 modifier；
-    /// ClearLevelBuffs（实体离开实体池，如退出关卡）才移除局内 buff。
+    /// 局内 buff 的最终清理由"池生命周期与关卡对齐"结构性保证——退关销毁实体池时
+    /// 随 GameObject 销毁，BuffController 无需清理点。
     /// </summary>
     public class BuffControllerLevelBuffTests
     {
@@ -46,19 +47,6 @@ namespace AbilitySystem.Tests
 
             // 普通 buff 已按 group 移除，局内 buff 保留：10 - 1 = 9
             Assert.That(_store.GetFinal("Cost"), Is.EqualTo(9f).Within(1e-4f));
-        }
-
-        [Test]
-        public void ClearLevelBuffs_RemovesLevelBuff_ModifiersAndList()
-        {
-            Buff levelBuff = _buffs.CreateBuff(new[] { new Modifier("Cost", ModifierOp.AddFlat, -1f) }, null, "level", -5f, BuffScope.Level);
-            Assert.That(_store.GetFinal("Cost"), Is.EqualTo(9f).Within(1e-4f));
-
-            _buffs.ClearLevelBuffs();
-
-            Assert.That(_store.GetFinal("Cost"), Is.EqualTo(10f).Within(1e-4f));
-            Assert.That(_buffs.ContainsBuff(levelBuff), Is.False);
-            Assert.That(_buffs.Buffs, Is.Empty);
         }
 
         [Test]

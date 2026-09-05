@@ -117,7 +117,7 @@ public class Entity : MonoBehaviour, IPoolOperation
 
     /// <summary>
     /// 生效技能在 <see cref="EntityData"/>.Skills 中的索引（部署期实例状态，同 Camp/Orientation）。
-    /// 池化实体跨关卡复用，每次 CallOut 由部署方重新断言；变更须在休眠期走 <see cref="SetSelectedSkill"/>。
+    /// 池化实体跨部署复用（回收再部署），每次 CallOut 由部署方重新断言；变更须在休眠期走 <see cref="SetSelectedSkill"/>。
     /// </summary>
     public int SelectedSkillIndex;
     /// <summary>

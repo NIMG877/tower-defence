@@ -24,7 +24,8 @@ public class Buff
 }
 /// <summary>
 /// buff 归属列表。Normal/WhiteList 随 Dormancy（每次回收）清除；
-/// Level（局内 buff）跨 Dormancy 存活，仅实体离开实体池（如退出关卡）时清空。
+/// Level（局内 buff）跨 Dormancy 存活，随实体 GameObject 销毁（池生命周期与关卡对齐）
+/// 自然消亡，无需显式清理点。
 /// </summary>
 public enum BuffScope
 {
@@ -108,7 +109,7 @@ public class BuffController : MonoBehaviour, IPoolOperation
     /// <param name="buffEffect">特效</param>
     /// <param name="buffName">名称（同名复用既有特效）</param>
     /// <param name="buffTime">时间，小于-5为永久</param>
-    /// <param name="scope">归属列表：Normal/WhiteList 随回收（Dormancy）清除；Level 局内 buff 跨回收存活，仅实体离开实体池时清空</param>
+    /// <param name="scope">归属列表：Normal/WhiteList 随回收（Dormancy）清除；Level 局内 buff 跨回收存活，随池销毁（退关）自然消亡</param>
     /// <returns>buff 实例</returns>
     public Buff CreateBuff(Modifier[] modifiers, GameObject buffEffect, string buffName, float buffTime, BuffScope scope)
     {
@@ -421,7 +422,7 @@ public class BuffController : MonoBehaviour, IPoolOperation
     }
     public void Dormancy()
     {
-        // Normal/WhiteList 随回收清除；Level（局内 buff）保留，仅实体离开实体池时清空。
+        // Normal/WhiteList 随回收清除；Level（局内 buff）保留，随实体销毁自然消亡。
         ClearListBuffs(white_list_buffs);
         ClearListBuffs(normal_buffs);
         DestroyLevelBuffEffects();
@@ -454,15 +455,6 @@ public class BuffController : MonoBehaviour, IPoolOperation
             list[i].modifierToken = 0;
         }
         list.Clear();
-    }
-
-    /// <summary>
-    /// 清空局内 buff（实体离开实体池时调用，如退出关卡）。
-    /// 与 Dormancy 的分工：Dormancy 保留局内 buff，仅清 Normal/WhiteList 两列。
-    /// </summary>
-    public void ClearLevelBuffs()
-    {
-        ClearListBuffs(level_buffs);
     }
 
 }
