@@ -43,6 +43,7 @@ namespace MyUI
             float abilityAmount = sp != null ? sp.abilityAmount : 0f;
             if (abilityAmount > 0f)
             {
+                skillAmountText.transform.parent.gameObject.SetActive(true);
                 skillAmountText.text = abilityAmount.ToString("0.#");
             }
             else
