@@ -37,6 +37,27 @@ namespace StaticData.Tests
         }
 
         [Test]
+        public void TryParseSubJob_AllOfficialSubJobs_MapToStableIds()
+        {
+            // 全部 14 个子职业(docs/profession_codes.md 代码):1-3 冻结(已持久化进 EntityDataCollection),
+            // 4-14 按主职业序追加
+            var expected = new (string name, int id)[]
+            {
+                ("秘术师", 1), ("冲锋手", 2), ("凝滞师", 3),
+                ("尖兵", 4), ("强攻手", 5), ("领主", 6), ("无畏者", 7),
+                ("铁卫", 8), ("守护者", 9),
+                ("速射手", 10), ("炮手", 11),
+                ("中坚术师", 12), ("扩散术师", 13),
+                ("医师", 14),
+            };
+            foreach (var (name, id) in expected)
+            {
+                Assert.IsTrue(XLSX2DataAsset.TryParseSubJob(name, out int parsed), $"unmapped: {name}");
+                Assert.AreEqual(id, parsed, name);
+            }
+        }
+
+        [Test]
         public void TryParseSubJob_UnknownName_ReturnsFalse()
         {
             // "术师"是 CharacterJob 名,不是子职业名——未知名返回 false,由调用方记日志跳过
@@ -55,11 +76,22 @@ namespace StaticData.Tests
         [Test]
         public void ResolveSubJobTrait_KnownSubJob_LoadsAsset()
         {
-            // 走生产注册表:占位资产已在 Prefabs/Abilities/SubJobs/ 下,应能 Resources.Load 到
+            // 走生产注册表:14 个正式资产已在 Prefabs/Abilities/SubJobs/ 下,应能 Resources.Load 到
             var (subJob, trait) = XLSX2DataAsset.ResolveSubJobTrait("秘术师");
             Assert.AreEqual(1, subJob);
             Assert.IsNotNull(trait);
-            Assert.AreEqual("mystic_t0", trait.abilityId);
+            Assert.AreEqual("mystic", trait.abilityId);
+
+            // 资产名 = docs/profession_codes.md 代码(无后缀)
+            var (subJob2, trait2) = XLSX2DataAsset.ResolveSubJobTrait("冲锋手");
+            Assert.AreEqual(2, subJob2);
+            Assert.IsNotNull(trait2);
+            Assert.AreEqual("charger", trait2.abilityId);
+
+            var (subJob3, trait3) = XLSX2DataAsset.ResolveSubJobTrait("中坚术师");
+            Assert.AreEqual(12, subJob3);
+            Assert.IsNotNull(trait3);
+            Assert.AreEqual("corecaster", trait3.abilityId);
         }
 
         [Test]

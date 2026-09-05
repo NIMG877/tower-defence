@@ -32,7 +32,7 @@ public class EntityData
     // 角色属性（当 entity 是 "c" 类别时使用）
     public int    CharacterRarity;
     public int    CharacterJob;          // 0=先锋,1=近卫,...,9=_
-    public int    CharacterSubJob;       // 0=无,1=秘术师,2=冲锋手,3=凝滞师,...（中文映射见 XLSX2DataAsset.ParseSubJob）
+    public int    CharacterSubJob;       // 0=无,1=秘术师,2=冲锋手,3=凝滞师,4-14 按主职业序（映射见 XLSX2DataAsset.TryParseSubJob）
 
     // 怪物属性（当 entity 是 "m" 类别时使用）
     public int    MonsterStatus;

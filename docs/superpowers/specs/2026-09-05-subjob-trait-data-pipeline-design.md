@@ -50,7 +50,11 @@ static readonly Dictionary<int, string> SubJobAbilityPaths = new()
 ```
 
 - 选显式字典而非"按 id 命名资产"的约定：路径即注册表，一眼可查哪些特性已实现；资产名不受 id 约束。
-- **不建** SO 定义表（YAGNI）：UI 阶段需要名称/图标元数据时再升级为定义表。
+
+> **修订（2026-09-05，全量登记）：** 子职业扩为全部 14 个（名单取 `docs/profession_codes.md`，
+> 资产名用其中**代码**、不带档位后缀：`<code>.asset`，如 `charger` / `slower`）。id 1-3 冻结——
+> 首批三个已持久化进 EntityDataCollection，不重编号；4-14 按主职业序追加。上面代码块保留
+> 初版三项目录作历史参照，现行完整映射见 `XLSX2DataAsset.TryParseSubJob` / `SubJobAbilityPaths`。
 
 ## 4. Rebuild 装载逻辑（XLSX2DataAsset.cs）
 
@@ -66,10 +70,10 @@ xlsx 新列 `CharacterSubJob`，格子填中文子职业名（与 CharacterJob �
    - id 已知但 `SubJobAbilityPaths` 无此 id、或 `Resources.Load` 落空 → LogWarning 指名，不装载——"子职业已登记、特性尚未实现/资产被挪走"是合法中间态。
 3. "trait 已装载 ⇒ 子职业已登记"由 `ResolveSubJobTrait` 构造期保证，无独立校验步骤（原 ValidateSubJobs 已删）。
 
-## 5. 占位资产与测试
+## 5. 资产与测试
 
-- `SubJobs/` 下建 3 个空规则 AbilityConfig 占位（abilityId：`mystic_t0` / `charge_t0` / `binder_t0`），使链路可端到端验证；实际规则待生效阶段讨论成熟后配置。
-- EditMode 测试（`Assets/Tests/Editor/`）：`ParseSubJob` 映射 + 装载三分支（空跳过 / 已知装载 / 已知但缺资产报错不装载）。
+- `SubJobs/` 下 14 个空规则 AbilityConfig（abilityId = 代码名：`mystic` / `charger` / `slower` / ...，见 §3 修订）。秘术师/冲锋手/凝滞师三个首批资产已写明设计效果；其余 11 个描述标注"效果规则待生效阶段配置"。规则本体均待生效阶段配置。
+- EditMode 测试（`Assets/Tests/Editor/`）：`ParseSubJob` 映射（含 14 名全量→稳定 id）+ 装载三分支（空跳过 / 已知装载 / 已知但缺资产警告不装载）。
 - xlsx 加列是 Excel 手工步骤（二进制文件不入代码改动）；代码对"列尚不存在"安全：`GetStr` 警告 → null → 0 → 无子职业。可先落代码后补表。
 
 ## 6. 本期不做（后续阶段）

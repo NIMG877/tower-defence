@@ -374,7 +374,9 @@ public class XLSX2DataAsset
     // 0=无;xlsx 缺列/空格子经 GetStr→TryParseSubJob 得 0,让"没有子职业"成为零配置默认值
     // (怪物行零填写)。有意不沿用 CharacterJob "末位=_" 约定,见 spec 2026-09-05 §2。
 
-    /// <summary>中文子职业名 → id。空=0(无,合法);未知名返回 false(数据错误,由调用方记日志跳过,不打断 Rebuild)。</summary>
+    /// <summary>中文子职业名 → id。空=0(无,合法);未知名返回 false(数据错误,由调用方记日志跳过,不打断 Rebuild)。
+    /// 全部 14 个子职业见 docs/profession_codes.md(资产用其中代码命名);1-3 是首批实现的,已持久化进
+    /// EntityDataCollection,保持稳定不重编号,其后按主职业顺序追加。</summary>
     public static bool TryParseSubJob(string s, out int id)
     {
         switch (s)
@@ -382,9 +384,20 @@ public class XLSX2DataAsset
             case null:
             case "":
                 id = 0; return true;
-            case "秘术师": id = 1; return true;
-            case "冲锋手": id = 2; return true;
-            case "凝滞师": id = 3; return true;
+            case "秘术师": id = 1; return true;      // mystic
+            case "冲锋手": id = 2; return true;      // charger
+            case "凝滞师": id = 3; return true;      // slower
+            case "尖兵": id = 4; return true;        // pioneer
+            case "强攻手": id = 5; return true;      // centurion
+            case "领主": id = 6; return true;        // lord
+            case "无畏者": id = 7; return true;      // fearless
+            case "铁卫": id = 8; return true;        // protector
+            case "守护者": id = 9; return true;      // guardian
+            case "速射手": id = 10; return true;     // fastshot
+            case "炮手": id = 11; return true;       // aoesniper
+            case "中坚术师": id = 12; return true;   // corecaster
+            case "扩散术师": id = 13; return true;   // splashcaster
+            case "医师": id = 14; return true;       // physician
             default:
                 id = 0; return false;
         }
@@ -394,9 +407,20 @@ public class XLSX2DataAsset
     // 没实现的子职业不进这张表,装载时按缺资产 LogWarning,不静默。
     static readonly Dictionary<int, string> SubJobAbilityPaths = new()
     {
-        [1] = "Prefabs/Abilities/SubJobs/mystic_t0",     // 秘术师:积攒攻击能量
-        [2] = "Prefabs/Abilities/SubJobs/charge_t0",     // 冲锋手:击杀获得 1 费用
-        [3] = "Prefabs/Abilities/SubJobs/binder_t0",     // 凝滞师:攻击造成停顿
+        [1] = "Prefabs/Abilities/SubJobs/mystic",       // 秘术师:积攒攻击能量
+        [2] = "Prefabs/Abilities/SubJobs/charger",      // 冲锋手:击杀获得 1 费用
+        [3] = "Prefabs/Abilities/SubJobs/slower",       // 凝滞师:攻击造成停顿
+        [4] = "Prefabs/Abilities/SubJobs/pioneer",      // 尖兵
+        [5] = "Prefabs/Abilities/SubJobs/centurion",    // 强攻手
+        [6] = "Prefabs/Abilities/SubJobs/lord",         // 领主
+        [7] = "Prefabs/Abilities/SubJobs/fearless",     // 无畏者
+        [8] = "Prefabs/Abilities/SubJobs/protector",    // 铁卫
+        [9] = "Prefabs/Abilities/SubJobs/guardian",     // 守护者
+        [10] = "Prefabs/Abilities/SubJobs/fastshot",    // 速射手
+        [11] = "Prefabs/Abilities/SubJobs/aoesniper",   // 炮手
+        [12] = "Prefabs/Abilities/SubJobs/corecaster",  // 中坚术师
+        [13] = "Prefabs/Abilities/SubJobs/splashcaster", // 扩散术师
+        [14] = "Prefabs/Abilities/SubJobs/physician",   // 医师
     };
 
     /// <summary>
@@ -409,7 +433,7 @@ public class XLSX2DataAsset
         paths ??= SubJobAbilityPaths;
         if (!TryParseSubJob(cell, out int id))
         {
-            Debug.LogWarning($"[XLSX2DataAsset] Unknown CharacterSubJob name \"{cell}\"; skipped (treated as no subjob). Known: 秘术师/冲锋手/凝滞师.");
+            Debug.LogWarning($"[XLSX2DataAsset] Unknown CharacterSubJob name \"{cell}\"; skipped (treated as no subjob). Known names: see TryParseSubJob.");
             return (0, null);
         }
         if (id == 0) return (0, null);
