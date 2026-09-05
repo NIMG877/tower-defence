@@ -11,20 +11,57 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: catap_t1
-  m_EditorClassIdentifier: 
-  abilityId: 
-  abilityName: 
-  description: 
+  m_EditorClassIdentifier:
+  abilityId: catap_t1
+  abilityName: "轻量化"
+  description: "自身部署费用-1"
   icon: {fileID: 0}
-  Kind: 0
+  Kind: 1
   sp:
     totalSp: 0
     initialSp: 0
     chargeNum: 1
     abilityAmount: 0
     recoverMode: 0
-    consumeMode: 0
+    consumeMode: 5
     openMode: 0
     recoverForbidDuringAbility: 0
     canManualClose: 0
-  rules: []
+  rules:
+  - triggers:
+    - triggerEvent: 0
+      groups: []
+    reentry: 0
+    steps:
+    - op: apply_buff
+      args:
+        entries:
+        - key: attributes
+          value: Cost
+          fromBlackboard: 0
+          type: 3
+        - key: ops
+          value: AddFlat
+          fromBlackboard: 0
+          type: 3
+        - key: magnitudes
+          value: -1
+          fromBlackboard: 0
+          type: 1
+        - key: buffId
+          value: catap_t1_cost
+          fromBlackboard: 0
+          type: 3
+        - key: buffTime
+          value: -5
+          fromBlackboard: 0
+          type: 1
+        - key: buffScope
+          value: level
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
+  legacyComponents: []
