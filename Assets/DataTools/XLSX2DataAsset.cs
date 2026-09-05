@@ -207,6 +207,7 @@ public class XLSX2DataAsset
         var idC = GetStr(row, colMap, "ID_C", sharedStrings);
         if (string.IsNullOrEmpty(idC)) return null;
 
+        var (subJob, subJobTrait) = ResolveSubJobTrait(GetStr(row, colMap, "CharacterSubJob", sharedStrings));
         return new EntityData
         {
             ID = new EntityID(idC, GetInt(row, colMap, "ID_N", sharedStrings)),
@@ -220,6 +221,7 @@ public class XLSX2DataAsset
             DefaultCamp = GetInt(row, colMap, "DefaultCamp", sharedStrings),
             CharacterRarity = GetInt(row, colMap, "CharacterRarity", sharedStrings),
             CharacterJob = ParseJob(GetStr(row, colMap, "CharacterJob", sharedStrings)),
+            CharacterSubJob = subJob,
             MonsterStatus = GetInt(row, colMap, "MonsterStatus", sharedStrings),
             MonsterLabel = GetStr(row, colMap, "MonsterLabel", sharedStrings),
             MonsterIsPrimary = GetInt(row, colMap, "MonsterIsPrimary", sharedStrings) != 0,
@@ -257,6 +259,7 @@ public class XLSX2DataAsset
             MoveMethod = GetInt(row, colMap, "MoveMethod", sharedStrings),
             Skills = LoadResourceList<AbilityConfig>(GetStr(row, colMap, "Skills", sharedStrings)),
             Talents = LoadResourceList<AbilityConfig>(GetStr(row, colMap, "Talents", sharedStrings)),
+            SubJobTrait = subJobTrait,
             AnimationResources = LoadResource<AnimationResources>(GetStr(row, colMap, "AnimationResources", sharedStrings)),
         };
     }
@@ -366,6 +369,60 @@ public class XLSX2DataAsset
         "先锋" => 0, "近卫" => 1, "重装" => 2, "狙击" => 3, "术师" => 4,
         "医疗" => 5, "辅助" => 6, "特种" => 7, "装置" => 8, _ => 9,
     };
+
+    // ===== 子职业（CharacterSubJob / SubJobTrait）=====
+    // 0=无;xlsx 缺列/空格子经 GetStr→TryParseSubJob 得 0,让"没有子职业"成为零配置默认值
+    // (怪物行零填写)。有意不沿用 CharacterJob "末位=_" 约定,见 spec 2026-09-05 §2。
+
+    /// <summary>中文子职业名 → id。空=0(无,合法);未知名返回 false(数据错误,由调用方记日志跳过,不打断 Rebuild)。</summary>
+    public static bool TryParseSubJob(string s, out int id)
+    {
+        switch (s)
+        {
+            case null:
+            case "":
+                id = 0; return true;
+            case "秘术师": id = 1; return true;
+            case "冲锋手": id = 2; return true;
+            case "凝滞师": id = 3; return true;
+            default:
+                id = 0; return false;
+        }
+    }
+
+    // 子职业 id → 特性资产(Resources 路径)。字典即"已实现特性注册表":
+    // 没实现的子职业不进这张表,装载时按缺资产 LogWarning,不静默。
+    static readonly Dictionary<int, string> SubJobAbilityPaths = new()
+    {
+        [1] = "Prefabs/Abilities/SubJobs/mystic_t0",     // 秘术师:积攒攻击能量
+        [2] = "Prefabs/Abilities/SubJobs/charge_t0",     // 冲锋手:击杀获得 1 费用
+        [3] = "Prefabs/Abilities/SubJobs/binder_t0",     // 凝滞师:攻击造成停顿
+    };
+
+    /// <summary>
+    /// xlsx 子职业格 → (CharacterSubJob, SubJobTrait)。
+    /// 三种不装载分支(未知名/缺映射/缺资产)一律 LogWarning 跳过,不打断 Rebuild;
+    /// "trait 已装载 ⇒ 子职业已登记"由本方法构造期保证。paths 仅供测试注入,生产用默认注册表。
+    /// </summary>
+    public static (int subJob, AbilityConfig trait) ResolveSubJobTrait(string cell, Dictionary<int, string> paths = null)
+    {
+        paths ??= SubJobAbilityPaths;
+        if (!TryParseSubJob(cell, out int id))
+        {
+            Debug.LogWarning($"[XLSX2DataAsset] Unknown CharacterSubJob name \"{cell}\"; skipped (treated as no subjob). Known: 秘术师/冲锋手/凝滞师.");
+            return (0, null);
+        }
+        if (id == 0) return (0, null);
+        if (!paths.TryGetValue(id, out var path))
+        {
+            Debug.LogWarning($"[XLSX2DataAsset] CharacterSubJob {id} ({cell}) has no trait asset registered in SubJobAbilityPaths; SubJobTrait left null.");
+            return (id, null);
+        }
+        var trait = Resources.Load<AbilityConfig>(path);
+        if (trait == null)
+            Debug.LogWarning($"[XLSX2DataAsset] CharacterSubJob {id} ({cell}) trait asset not found at: {path}; SubJobTrait left null.");
+        return (id, trait);
+    }
 
     static int ParseRespawnStrategy(string s) => s switch
     {

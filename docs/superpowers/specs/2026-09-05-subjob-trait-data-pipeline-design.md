@@ -54,13 +54,17 @@ static readonly Dictionary<int, string> SubJobAbilityPaths = new()
 
 ## 4. Rebuild 装载逻辑（XLSX2DataAsset.cs）
 
+> **修订（2026-09-05，用户裁定）：** 任何子职业数据问题都不得打断 Rebuild——原"未知名
+> throw 中断"与"ValidateSubJobs 校验 throw"取消，统一降为 LogWarning 跳过、继续装载。
+
 xlsx 新列 `CharacterSubJob`，格子填中文子职业名（与 CharacterJob 列同风格），空 = 无。
 
-1. `ParseSubJob(string)`：空 → 0；已知名 → id；**未知名字 → throw**（拼错是数据错误，按 `ValidateCanSpawnRefs` 同姿态让整个 Rebuild 失败，不静默吞）。
-2. 装载（`ReadEntityData` 内）：
-   - id == 0 → 不装载（`SubJobTrait = null`，正常态）。
-   - id 已知但 `SubJobAbilityPaths` 无此 id、或 `Resources.Load` 落空 → **LogError 指名子职业与期望路径，不装载**——"子职业已登记、特性尚未实现/资产被挪走"是合法中间态，允许 Rebuild 继续，但必须大声，不静默。
-3. 收尾校验 `ValidateSubJobs(data)`：`SubJobTrait != null` 必须 `CharacterSubJob != 0`，违反 throw（反向不查，理由见 2）。
+1. `TryParseSubJob(string, out int)`：空 → (true, 0)；已知名 → (true, id)；未知名 → (false, 0)。
+2. 装载（`ReadEntityData` 内经 `ResolveSubJobTrait`）：
+   - 空 → 不装载（`SubJobTrait = null`，正常态，无日志）。
+   - 未知名 → LogWarning 指名，按无子职业处理（`CharacterSubJob = 0`），继续装载。
+   - id 已知但 `SubJobAbilityPaths` 无此 id、或 `Resources.Load` 落空 → LogWarning 指名，不装载——"子职业已登记、特性尚未实现/资产被挪走"是合法中间态。
+3. "trait 已装载 ⇒ 子职业已登记"由 `ResolveSubJobTrait` 构造期保证，无独立校验步骤（原 ValidateSubJobs 已删）。
 
 ## 5. 占位资产与测试
 

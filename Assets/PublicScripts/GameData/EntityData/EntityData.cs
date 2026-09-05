@@ -32,6 +32,7 @@ public class EntityData
     // 角色属性（当 entity 是 "c" 类别时使用）
     public int    CharacterRarity;
     public int    CharacterJob;          // 0=先锋,1=近卫,...,9=_
+    public int    CharacterSubJob;       // 0=无,1=秘术师,2=冲锋手,3=凝滞师,...（中文映射见 XLSX2DataAsset.ParseSubJob）
 
     // 怪物属性（当 entity 是 "m" 类别时使用）
     public int    MonsterStatus;
@@ -80,13 +81,18 @@ public class EntityData
     public int   MassLevel;
     public int   MoveMethod;
 
-    // 技能 / 天赋（静态数据驱动框架）
+    // 技能 / 天赋 / 子职业特性（静态数据驱动框架）
     // Skills: 技能,SPEngine 充能式触发
     // Talents: 天赋,出生即生效(可扩展为 SPEngine 驱动)
     // 字段分开存储;PreWarm 时按列表来源赋值 AbilityRuntime.Kind
     // ExtraAbility 继续走运行时 AddExtraAbility 路径,不在这里
     public List<AbilityConfig> Skills = new List<AbilityConfig>();
     public List<AbilityConfig> Talents = new List<AbilityConfig>();
+
+    // 子职业特性:与子职业一一对应的共享模板(非列表),Rebuild 工具(XLSX2DataAsset)
+    // 按 CharacterSubJob 从 Prefabs/Abilities/SubJobs/ 装载;
+    // 运行时装配(PreWarm 构建/AbilityKind)为后续阶段,暂无消费方
+    public AbilityConfig SubJobTrait;
 
     // 动画资源
     public AnimationResources AnimationResources;
