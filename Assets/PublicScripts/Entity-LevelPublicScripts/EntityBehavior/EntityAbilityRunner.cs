@@ -162,21 +162,33 @@ public class EntityAbilityRunner
         // 3) 清空 per-Entity 共享黑板
         sharedBlackboard.Clear();
 
-        // 4) 重新初始化组件，并派发InitializeEvent
+        // 4) 重置组件（重新 OnInit = 按自复位契约做每部署重置，参数在构建期已绑定），
+        //    并派发InitializeEvent
         InitializeEvent evt= new InitializeEvent();
         for (int i = 0; i < _abilities.Count; i++)
         {
             var a = _abilities[i];
-            for (int c = 0; c < a.components.Count; c++)
-            {
-                var comp = a.components[c];
-                if (c < a.componentParams.Count)
-                {
-                    var initCtx = a.MakeContext(comp, null, sharedBlackboard, _entity);
-                    comp.OnInit(initCtx, a.componentParams[c]);
-                }
-            }
+            BindComponentParams(a);
             DispatchToAbility(a,evt);
+        }
+    }
+
+    /// <summary>
+    /// 把 ability 的组件参数绑定到组件（OnInit(ctx, param)），懒加载委托自此可用。
+    /// 绑定发生在构建期（BuildAbilityRuntime）：构造完整不变式——不存在"已构建
+    /// 未绑定"的 runtime，任何时点的派发（含 OnPreWarm）都不会命中未绑定委托。
+    /// OnInitialize 重复调用是按 OnInit 自复位契约做每部署重置，非重复绑定。
+    /// </summary>
+    private void BindComponentParams(AbilityRuntime a)
+    {
+        for (int c = 0; c < a.components.Count; c++)
+        {
+            var comp = a.components[c];
+            if (c < a.componentParams.Count)
+            {
+                var initCtx = a.MakeContext(comp, null, sharedBlackboard, _entity);
+                comp.OnInit(initCtx, a.componentParams[c]);
+            }
         }
     }
 
@@ -287,13 +299,8 @@ public class EntityAbilityRunner
         }
 
         var runtime = BuildAbilityRuntime(cfg, AbilityKind.ExtraAbility);
-        for (int i=0;i<runtime.components.Count;i++)
-        {
-            var ctx = runtime.MakeContext(runtime.components[i], null, sharedBlackboard, _entity);
-            runtime.components[i].OnInit(ctx, runtime.componentParams[i]);
-        }   
         DispatchToAbility(runtime, new InitializeEvent());
-        DispatchToAbility(runtime, new AbilityAddedEvent { ability = runtime });  
+        DispatchToAbility(runtime, new AbilityAddedEvent { ability = runtime });
         return runtime.runtimeId;
     }
 
@@ -358,6 +365,10 @@ public class EntityAbilityRunner
         runtime.spEngine.OnEnd   += () => runtime.SetActive(false);
 
         WireRuntime(runtime);
+
+        // 构建期内即绑定组件参数（见 BindComponentParams）：构建完成的 runtime
+        // 必然处于可派发状态，派发方无需各自记得"先绑定再派发"。
+        BindComponentParams(runtime);
 
         runtime.isInitialized = true;
         // single source of truth:BuildAbilityRuntime 负责把 runtime 加入 _abilities。
