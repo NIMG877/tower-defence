@@ -83,15 +83,16 @@ namespace MyUI
 
         public int CalculateCost()
         {
+            // 费用读 AttributeStore 终值（CostS），modifier 才能作用于部署费
             if (EntityData.RespawnCostUp <= 0)
-                return EntityData.Cost;
+                return EntityStats.CostS;
 
             float multiplier = 1 + EntityData.RespawnCostUp / 100;
             if (_deployCount == 0)
-                return EntityData.Cost;
+                return EntityStats.CostS;
             if (_deployCount == 1)
-                return (int)(EntityData.Cost * multiplier);
-            return (int)(EntityData.Cost * multiplier * multiplier);
+                return (int)(EntityStats.CostS * multiplier);
+            return (int)(EntityStats.CostS * multiplier * multiplier);
         }
 
         public void DeltaNum(int delta)
