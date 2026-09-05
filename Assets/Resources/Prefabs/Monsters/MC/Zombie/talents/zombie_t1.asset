@@ -104,10 +104,10 @@ MonoBehaviour:
           value: -10
           fromBlackboard: 0
           type: 1
-        - key: isWhiteList
-          value: True
+        - key: buffScope
+          value: whiteList
           fromBlackboard: 0
-          type: 2
+          type: 3
         - key: outputTarget
           value: zombie_t1_self_buff_targets
           fromBlackboard: 0
@@ -226,10 +226,10 @@ MonoBehaviour:
           value: -10
           fromBlackboard: 0
           type: 1
-        - key: isWhiteList
-          value: True
+        - key: buffScope
+          value: whiteList
           fromBlackboard: 0
-          type: 2
+          type: 3
         - key: blackboardKey
           value: zombie_t1_aura_targets
           fromBlackboard: 0

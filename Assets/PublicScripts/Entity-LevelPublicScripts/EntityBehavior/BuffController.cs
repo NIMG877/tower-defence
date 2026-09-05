@@ -22,6 +22,17 @@ public class Buff
         this.modifierToken = 0;
     }
 }
+/// <summary>
+/// buff 归属列表。Normal/WhiteList 随 Dormancy（每次回收）清除；
+/// Level（局内 buff）跨 Dormancy 存活，仅实体离开实体池（如退出关卡）时清空。
+/// </summary>
+public enum BuffScope
+{
+    Normal,
+    WhiteList,
+    Level,
+}
+
 public class BuffController : MonoBehaviour, IPoolOperation
 {
     private class DOTData
@@ -51,6 +62,7 @@ public class BuffController : MonoBehaviour, IPoolOperation
     private Entity _thisEntity;
     private List<Buff> white_list_buffs;
     private List<Buff> normal_buffs;
+    private List<Buff> level_buffs;
     private float[] _abnormalStateTime;
     private List<DOTData> _dotDatas;
     private AttributeStore _store;
@@ -61,6 +73,7 @@ public class BuffController : MonoBehaviour, IPoolOperation
             List<Buff> list = new List<Buff>();
             list.AddRange(white_list_buffs);
             list.AddRange(normal_buffs);
+            list.AddRange(level_buffs);
             return list;
         }
     }
@@ -69,7 +82,7 @@ public class BuffController : MonoBehaviour, IPoolOperation
     /// 无分配成员判定（aura 同步等高频路径用，避免 .Buffs 的 new List + AddRange）。
     /// </summary>
     public bool ContainsBuff(Buff b)
-        => white_list_buffs.Contains(b) || normal_buffs.Contains(b);
+        => white_list_buffs.Contains(b) || normal_buffs.Contains(b) || level_buffs.Contains(b);
 
     /// <summary>
     /// 注入 AttributeStore。Entity 在 PreWarm 中调用。
@@ -95,11 +108,11 @@ public class BuffController : MonoBehaviour, IPoolOperation
     /// <param name="buffEffect">特效</param>
     /// <param name="buffName">名称（同名复用既有特效）</param>
     /// <param name="buffTime">时间，小于-5为永久</param>
-    /// <param name="isWhiteList">白名单</param>
+    /// <param name="scope">归属列表：Normal/WhiteList 随回收（Dormancy）清除；Level 局内 buff 跨回收存活，仅实体离开实体池时清空</param>
     /// <returns>buff 实例</returns>
-    public Buff CreateBuff(Modifier[] modifiers, GameObject buffEffect, string buffName, float buffTime, bool isWhiteList)
+    public Buff CreateBuff(Modifier[] modifiers, GameObject buffEffect, string buffName, float buffTime, BuffScope scope)
     {
-        List<Buff> list = isWhiteList ? white_list_buffs : normal_buffs;
+        List<Buff> list = scope == BuffScope.WhiteList ? white_list_buffs : scope == BuffScope.Level ? level_buffs : normal_buffs;
         // 同名 buff 复用既有特效，否则实例化新特效。
         foreach (Buff b in list)
         {
@@ -131,7 +144,8 @@ public class BuffController : MonoBehaviour, IPoolOperation
         destroyBuff.modifierToken = 0;
         white_list_buffs.Remove(destroyBuff);
         normal_buffs.Remove(destroyBuff);
-        if (!(white_list_buffs.Contains(destroyBuff) || normal_buffs.Contains(destroyBuff)))
+        level_buffs.Remove(destroyBuff);
+        if (!(white_list_buffs.Contains(destroyBuff) || normal_buffs.Contains(destroyBuff) || level_buffs.Contains(destroyBuff)))
         {
             Destroy(destroyBuff.buff_effect);
         }
@@ -172,6 +186,18 @@ public class BuffController : MonoBehaviour, IPoolOperation
             else if (normal_buffs[i].buff_time > -5)
             {
                 DestroyBuff(normal_buffs[i--]);
+            }
+        }
+        // 局内 buff：持续时间语义与另两列一致（-5 及以下免倒计时）。
+        for (int i = 0; i < level_buffs.Count; i++)
+        {
+            if (level_buffs[i].buff_time > 0)
+            {
+                level_buffs[i].buff_time -= Time.fixedDeltaTime;
+            }
+            else if (level_buffs[i].buff_time > -5)
+            {
+                DestroyBuff(level_buffs[i--]);
             }
         }
     }
@@ -384,6 +410,7 @@ public class BuffController : MonoBehaviour, IPoolOperation
     {
         white_list_buffs = new List<Buff>();
         normal_buffs = new List<Buff>();
+        level_buffs = new List<Buff>();
         _thisEntity = this.transform.GetComponent<Entity>();
         _abnormalStateTime = new float[4];
         _dotDatas = new List<DOTData>();
@@ -394,20 +421,48 @@ public class BuffController : MonoBehaviour, IPoolOperation
     }
     public void Dormancy()
     {
-        for (int i = 0; i < white_list_buffs.Count; i++)
-        {
-            Destroy(white_list_buffs[i].buff_effect);
-        }
-        for (int i = 0; i < normal_buffs.Count; i++)
-        {
-            Destroy(normal_buffs[i].buff_effect);
-        }
-        if (_store != null) _store.Clear();
-        white_list_buffs.Clear();
-        normal_buffs.Clear();
+        // Normal/WhiteList 随回收清除；Level（局内 buff）保留，仅实体离开实体池时清空。
+        ClearListBuffs(white_list_buffs);
+        ClearListBuffs(normal_buffs);
+        DestroyLevelBuffEffects();
         for (int i = 0; i < _abnormalStateTime.Length; i++)
             _abnormalStateTime[i] = 0;
         _dotDatas.Clear();
+    }
+
+    /// <summary>
+    /// 销毁局内 buff 的特效并置空引用。特效挂在 TempContainer 下、随 Entity.Dormancy
+    /// 一并销毁——不置空会让 level_buffs 持有 fake-null。局内 buff 跨回收保留的是
+    /// 数值效果，特效跟随部署周期（重建属表现层需求，另行处理）。
+    /// </summary>
+    private void DestroyLevelBuffEffects()
+    {
+        for (int i = 0; i < level_buffs.Count; i++)
+        {
+            Destroy(level_buffs[i].buff_effect);
+            level_buffs[i].buff_effect = null;
+        }
+    }
+
+    /// <summary>清空指定列表：销毁特效 + 按 group 移除 store modifier，不动其他列表。</summary>
+    private void ClearListBuffs(List<Buff> list)
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            Destroy(list[i].buff_effect);
+            if (list[i].modifierToken != 0) _store.RemoveModifiers(list[i].modifierToken);
+            list[i].modifierToken = 0;
+        }
+        list.Clear();
+    }
+
+    /// <summary>
+    /// 清空局内 buff（实体离开实体池时调用，如退出关卡）。
+    /// 与 Dormancy 的分工：Dormancy 保留局内 buff，仅清 Normal/WhiteList 两列。
+    /// </summary>
+    public void ClearLevelBuffs()
+    {
+        ClearListBuffs(level_buffs);
     }
 
 }

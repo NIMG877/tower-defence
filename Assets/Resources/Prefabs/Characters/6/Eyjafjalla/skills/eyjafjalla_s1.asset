@@ -74,10 +74,6 @@ MonoBehaviour:
           value: -5
           fromBlackboard: 0
           type: 1
-        - key: isWhiteList
-          value: False
-          fromBlackboard: 0
-          type: 2
         - key: outputTarget
           value: eyjafjalla_s1_buff_targets
           fromBlackboard: 0

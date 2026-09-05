@@ -42,7 +42,7 @@ MonoBehaviour:
     reentry: 0
     steps:
     - op: apply_buff
-      args: {entries: [{key: attributes, value: 'PhysicalDamageRate,MagicDamageRate', fromBlackboard: 0, type: 3}, {key: ops, value: 'MulFinal,MulFinal', fromBlackboard: 0, type: 3}, {key: magnitudes, value: '0.01,0.01', fromBlackboard: 0, type: 1}, {key: buffId, value: lavaShell, fromBlackboard: 0, type: 3}, {key: buffTime, value: -5, fromBlackboard: 0, type: 1}, {key: isWhiteList, value: true, fromBlackboard: 0, type: 2}]}
+      args: {entries: [{key: attributes, value: 'PhysicalDamageRate,MagicDamageRate', fromBlackboard: 0, type: 3}, {key: ops, value: 'MulFinal,MulFinal', fromBlackboard: 0, type: 3}, {key: magnitudes, value: '0.01,0.01', fromBlackboard: 0, type: 1}, {key: buffId, value: lavaShell, fromBlackboard: 0, type: 3}, {key: buffTime, value: -5, fromBlackboard: 0, type: 1}, {key: buffScope, value: whiteList, fromBlackboard: 0, type: 3}]}
       condition: []
       steps: []
       elseSteps: []

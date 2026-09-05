@@ -54,7 +54,7 @@ public class MCEnvironmentalDevice : MonoBehaviour, IManagerStartEnd
             HungryValue = hungryValue;
             HungryState = type;
             _operationTimer = 1;
-            _hungryBuff = entity.buffController.CreateBuff(new Modifier[2] { new Modifier("Attack", ModifierOp.AddPercent, 0.15f), new Modifier("AttackSpeed", ModifierOp.AddFlat, 30f) }, null, "hungryBuff", -5, true);
+            _hungryBuff = entity.buffController.CreateBuff(new Modifier[2] { new Modifier("Attack", ModifierOp.AddPercent, 0.15f), new Modifier("AttackSpeed", ModifierOp.AddFlat, 30f) }, null, "hungryBuff", -5, BuffScope.WhiteList);
         }
         public void Update()
         {

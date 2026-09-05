@@ -91,6 +91,17 @@ public class EntityPool
             poolOperations[i].Dormancy();
         }
     }
+    /// <summary>
+    /// 实体离开实体池（退出关卡）时清空池内所有实体的局内 buff。
+    /// LevelEnd 时序保证 EntityManager.ToEnd 先行还池，遍历时实体应已全部在池内。
+    /// </summary>
+    public void ClearLevelBuffs()
+    {
+        for (int i = 0; i < inp_entities.Count; i++)
+        {
+            inp_entities[i].buffController.ClearLevelBuffs();
+        }
+    }
 }
 public class EntityPoolManager : IManagerStartEnd
 {
@@ -167,7 +178,11 @@ public class EntityPoolManager : IManagerStartEnd
 
     public void ToEnd()
     {
-
+        // 池仅增不减、实体跨关卡复用，局内 buff 必须在退关卡时显式清空。
+        for (int i = 0; i < entity_pools.Count; i++)
+        {
+            entity_pools[i].ClearLevelBuffs();
+        }
     }
 
     public void ToStart()

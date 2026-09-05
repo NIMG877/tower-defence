@@ -9,7 +9,7 @@ public class WitherAttack : AttackBase
     public override void Initialize()
     {
         base.Initialize();
-        _thisEntity.buffController.CreateBuff(new Modifier[]{ new Modifier("AttackMinNum", ModifierOp.AddFlat, 3f) }, null, "threeheadattack", -5, true);
+        _thisEntity.buffController.CreateBuff(new Modifier[]{ new Modifier("AttackMinNum", ModifierOp.AddFlat, 3f) }, null, "threeheadattack", -5, BuffScope.WhiteList);
     }
     public override bool TryToAttack(Entity[] attackTargets, bool forceChange, bool canBeInterrupt)
     {

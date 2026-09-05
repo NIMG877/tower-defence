@@ -25,7 +25,7 @@ namespace AbilitySystem.Components
         private Func<string[]> _attributes;
         private Func<string[]> _ops;
         private Func<float[]> _magnitudes;
-        private Func<bool> _isWhiteList;
+        private Func<string> _buffScope;
         private Func<string> _mode;
         // Output keys (optional). When both are set, OnTrigger appends this round's
         // (target, created-buff) pairs to the per-Entity shared blackboard at these
@@ -50,7 +50,7 @@ namespace AbilitySystem.Components
             _buffId          = p.GetStringLazy("buffId",        "skill_buff", bb);
             _buffTime        = p.GetFloatLazy ("buffTime",      -10f,         bb);
             _toSelf          = p.GetBoolLazy  ("toSelf",        true,         bb);
-            _isWhiteList     = p.GetBoolLazy  ("isWhiteList",   false,        bb);
+            _buffScope       = p.GetStringLazy("buffScope",      "normal",     bb);
             _mode            = p.GetStringLazy("mode",          "normal",     bb);
             _inputTargetKey  = p.GetStringLazy("blackboardKey", "",           bb);
             _outputTargetKey = p.GetStringLazy("outputTarget",  "",           bb);
@@ -88,6 +88,7 @@ namespace AbilitySystem.Components
         public override void OnTrigger(AbilityContext ctx)
         {
             if (ctx.entity == null) return;
+            if (!TryResolveScope(out BuffScope scope)) return;
             Modifier[] modifiers = GetModifiers();
             if (modifiers.Length == 0) return;
 
@@ -122,7 +123,7 @@ namespace AbilitySystem.Components
             {
                 Entity t = targets[i];
                 if(t == null || t.buffController == null) continue;
-                Buff created = t.buffController.CreateBuff(modifiers, null, _buffId(), _buffTime(), _isWhiteList());
+                Buff created = t.buffController.CreateBuff(modifiers, null, _buffId(), _buffTime(), scope);
                 if (needWrite)
                 {
                     roundTargets.Add(t);
@@ -137,6 +138,7 @@ namespace AbilitySystem.Components
 
         private void SyncAura(AbilityContext ctx, List<Entity> targets)
         {
+            if (!TryResolveScope(out BuffScope scope)) return;
             string targetKey = _outputTargetKey();
             string buffKey = _outputBuffKey();
             if (ctx.sharedBlackboard == null || string.IsNullOrEmpty(_inputTargetKey())
@@ -178,7 +180,7 @@ namespace AbilitySystem.Components
                 else
                 {
                     tracked = target.buffController.CreateBuff(
-                        modifiers, null, _buffId(), _buffTime(), _isWhiteList());
+                        modifiers, null, _buffId(), _buffTime(), scope);
                 }
 
                 nextTargets.Add(target);
@@ -269,6 +271,25 @@ namespace AbilitySystem.Components
             Entity t = _toSelf() ? ctx.entity : null;
             if (t == null || t.buffController == null) return null;
             return new List<Entity> { t };
+        }
+
+        /// <summary>
+        /// 归属列表解析：buffScope（缺省 normal）→ BuffScope。
+        /// unknown 值为配置错误（warn 一次 + 不施加），不允许静默回退 normal。
+        /// </summary>
+        private bool TryResolveScope(out BuffScope scope)
+        {
+            switch (Normalize(_buffScope()))
+            {
+                case "normal":    scope = BuffScope.Normal;    return true;
+                case "whitelist": scope = BuffScope.WhiteList; return true;
+                case "level":     scope = BuffScope.Level;     return true;
+                default:
+                    OneShotWarn.WarnOnce("apply-buff-buffscope:" + _buffScope(),
+                        $"ApplyBuff: 未知 buffScope '{_buffScope()}'（normal/whiteList/level）；跳过施加。");
+                    scope = default;
+                    return false;
+            }
         }
 
         private static string Normalize(string value)
