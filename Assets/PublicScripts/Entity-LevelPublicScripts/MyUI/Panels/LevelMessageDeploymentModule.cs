@@ -28,6 +28,8 @@ namespace MyUI
         private const float SelectorYAnchor = -60;
         private int _deployCount;
         private int _remainingCount;
+        /// <summary>再部署费用增幅 buff 名：Sample 上恒至多一条，量 = min(部署次数,2)×增幅率。</summary>
+        private const string RedeployCostBuffName = "redeploy_cost_up";
 
         public EntityID EntityId { get; private set; }
         /// <summary>该干员本次战斗携带的技能在 EntityData.Skills 中的索引（来自编队存档）。</summary>
@@ -81,16 +83,10 @@ namespace MyUI
 
         public int CalculateCost()
         {
-            // 费用读 AttributeStore 终值（CostS），modifier 才能作用于部署费
-            if (EntityData.RespawnCostUp <= 0)
-                return Sample.Stats.CostS;
-
-            float multiplier = 1 + EntityData.RespawnCostUp / 100;
-            if (_deployCount == 0)
-                return Sample.Stats.CostS;
-            if (_deployCount == 1)
-                return (int)(Sample.Stats.CostS * multiplier);
-            return (int)(Sample.Stats.CostS * multiplier * multiplier);
+            // 费用一律读 AttributeStore 终值（CostS）：再部署增幅以局内 buff 落在
+            // Cost 上（见 ApplyRedeployCostBuff），此处不复算增长曲线，
+            // RespawnCostUp 也只走 store 终值，无 UI 层直读原始数据的旁路。
+            return Sample.Stats.CostS;
         }
 
         public void DeltaNum(int delta)
@@ -124,9 +120,56 @@ namespace MyUI
             }
         }
 
+        /// <summary>
+        /// 再部署费用增幅：在实体回池时施加（撤退/死亡 → EntityPool.Return →
+        /// InteractableStatic.Dormancy → EntityBackToSelector → CallBackNum，每次
+        /// 回池恰好一次）。幂等契约：把 Sample 上同名 buff 的量校准到
+        /// min(部署次数, 2)×RespawnCostUpS%——回池#1 施加 1×，回池#2 经
+        /// SetBuffValues 原地换成 2×（单条目换值，不叠加新条目），之后封顶不再
+        /// 触发；buff 被外部途径拆掉的，下次回池按应有值重建。下次部署的
+        /// CalculateCost 经 AttributeStore 终值读到，冷却窗口期卡片显示即再部署
+        /// 实付费用。施加时机不能是部署时——部署是"消费"增幅的时刻（扣费先于
+        /// SetNum），在那之后加层会让增幅滞后一拍。
+        /// RespawnCostUpS 读 store 终值（当前值基准），为 0（未配置增幅）时不施加。
+        /// </summary>
+        private void ApplyRedeployCostBuff()
+        {
+            if (_deployCount < 1 || _deployCount > 2)
+                return;
+            float magnitude = Sample.Stats.RespawnCostUpS / 100f;
+            if (magnitude == 0f)
+                return;
+
+            float target = magnitude * _deployCount;   // _deployCount ∈ {1, 2}
+            Buff existing = FindLevelBuff(RedeployCostBuffName);
+            if (existing != null)
+            {
+                Sample.buffController.SetBuffValues(
+                    new[] { new Modifier("Cost", ModifierOp.AddPercent, target) }, existing);
+            }
+            else
+            {
+                Sample.buffController.CreateBuff(
+                    new[] { new Modifier("Cost", ModifierOp.AddPercent, target) },
+                    null, RedeployCostBuffName, -5f, BuffScope.Level);
+            }
+        }
+
+        private Buff FindLevelBuff(string buffName)
+        {
+            List<Buff> buffs = Sample.buffController.Buffs;
+            for (int i = 0; i < buffs.Count; i++)
+            {
+                if (buffs[i].buff_name == buffName)
+                    return buffs[i];
+            }
+            return null;
+        }
+
         public void CallBackNum(int number)
         {
             DeltaNum(number);
+            ApplyRedeployCostBuff();
             if (EntityData.RespawnStrategy == 1)
                 StartRespawnCooldown();
         }
