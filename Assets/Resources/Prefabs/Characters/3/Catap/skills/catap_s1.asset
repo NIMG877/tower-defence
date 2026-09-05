@@ -11,21 +11,77 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: catap_s1
-  m_EditorClassIdentifier: 
-  abilityId: 
-  abilityName: 
-  description: 
+  m_EditorClassIdentifier:
+  abilityId: catap_s1
+  abilityName: "爆破范围提升·α型"
+  description: "攻击的溅射范围提升至200%"
   icon: {fileID: 21300000, guid: 70061e7879891c643b2227f32bee2acd, type: 3}
   Kind: 0
   sp:
-    totalSp: 0
+    totalSp: 45
     initialSp: 0
     chargeNum: 1
-    abilityAmount: 0
+    abilityAmount: 30
     recoverMode: 0
     consumeMode: 0
-    openMode: 0
-    recoverForbidDuringAbility: 0
+    openMode: 3
+    recoverForbidDuringAbility: 1
     canManualClose: 0
-  rules: []
+  rules:
+  - triggers:
+    - triggerEvent: 2
+      groups: []
+    reentry: 0
+    steps:
+    - op: apply_buff
+      args:
+        entries:
+        - key: attributes
+          value: SplashRadius
+          fromBlackboard: 0
+          type: 3
+        - key: ops
+          value: AddPercent
+          fromBlackboard: 0
+          type: 3
+        - key: magnitudes
+          value: 1.0
+          fromBlackboard: 0
+          type: 1
+        - key: buffId
+          value: catap_s1
+          fromBlackboard: 0
+          type: 3
+        - key: outputTarget
+          value: catap_s1_buff_targets
+          fromBlackboard: 0
+          type: 3
+        - key: outputBuff
+          value: catap_s1_buffs
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
+  - triggers:
+    - triggerEvent: 3
+      groups: []
+    reentry: 0
+    steps:
+    - op: destroy_buff
+      args:
+        entries:
+        - key: inputTarget
+          value: catap_s1_buff_targets
+          fromBlackboard: 0
+          type: 3
+        - key: inputBuff
+          value: catap_s1_buffs
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
   legacyComponents: []
