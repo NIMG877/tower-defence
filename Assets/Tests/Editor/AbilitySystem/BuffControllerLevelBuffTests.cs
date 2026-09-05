@@ -70,6 +70,29 @@ namespace AbilitySystem.Tests
         }
 
         [Test]
+        public void CreateBuff_BeforePreWarm_Works()
+        {
+            // 池逆序 PreWarm 中 Entity（runner 派发 OnPreWarm → CreateBuff）先于
+            // BuffController.PreWarm：buff 列表须自组件构造起可用，不依赖 PreWarm。
+            var raw = new GameObject("no-prewarm-subject");
+            try
+            {
+                var buffs = raw.AddComponent<BuffController>();
+                var store = new AttributeStore();
+                store.SetBase("Cost", 10f);
+                buffs.Bind(store);
+
+                buffs.CreateBuff(new[] { new Modifier("Cost", ModifierOp.AddFlat, -1f) }, null, "level", -5f, BuffScope.Level);
+
+                Assert.That(store.GetFinal("Cost"), Is.EqualTo(9f).Within(1e-4f));
+            }
+            finally
+            {
+                Object.DestroyImmediate(raw);
+            }
+        }
+
+        [Test]
         public void Dormancy_NullsLevelBuffEffect_KeepsModifier()
         {
             var effect = new GameObject("level-buff-effect");

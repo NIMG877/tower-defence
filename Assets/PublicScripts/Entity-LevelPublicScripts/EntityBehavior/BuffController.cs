@@ -61,11 +61,15 @@ public class BuffController : MonoBehaviour, IPoolOperation
         }
     }
     private Entity _thisEntity;
-    private List<Buff> white_list_buffs;
-    private List<Buff> normal_buffs;
-    private List<Buff> level_buffs;
-    private float[] _abnormalStateTime;
-    private List<DOTData> _dotDatas;
+    // 状态容器在组件构造时创建（而非 PreWarm）：池逆序 PreWarm 中 Entity（runner 派发
+    // OnPreWarm）先于 BuffController.PreWarm 执行，OnPreWarm 触发的 CreateBuff/CreateDOT/
+    // AddAbnormalState 依赖容器已就绪。池复用只 Clear/归零、不置 null，引用跨部署有效；
+    // PreWarm 每 GameObject 恰一次（CreateNewEntity），与字段初始化一一对应。
+    private List<Buff> white_list_buffs = new List<Buff>();
+    private List<Buff> normal_buffs = new List<Buff>();
+    private List<Buff> level_buffs = new List<Buff>();
+    private float[] _abnormalStateTime = new float[4];
+    private List<DOTData> _dotDatas = new List<DOTData>();
     private AttributeStore _store;
     public List<Buff> Buffs
     {
@@ -409,12 +413,8 @@ public class BuffController : MonoBehaviour, IPoolOperation
 
     public void PreWarm()
     {
-        white_list_buffs = new List<Buff>();
-        normal_buffs = new List<Buff>();
-        level_buffs = new List<Buff>();
+        // 状态容器见字段初始化器；此处只取场景引用（依赖 GameObject 组件布局）。
         _thisEntity = this.transform.GetComponent<Entity>();
-        _abnormalStateTime = new float[4];
-        _dotDatas = new List<DOTData>();
     }
     public void Initialize()
     {
