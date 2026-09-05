@@ -27,9 +27,6 @@ re-evaluates the source on every call.
 | `key` | String | `""` | The BlackBoard key to write to. Empty = component is a no-op. |
 | `value` | typed (per `ParamEntry.type`) | `null` | The value to write (`set`) or the operand to apply (`add`/`mult`/`div`). |
 | `method` | String | `set` | One of `set` / `add` / `mult` / `div`. Unknown method → `LogWarning` + skip. |
-
-| Key | Type | Default | Description |
-|---|---|---|---|
 | `source` | String | `value` | Value source: `value`, `event`, `entity`, or `listCount`. |
 | `path` | String | `""` | Context field used by `source=event` / `entity`; BlackBoard entity-list key used by `source=listCount`. |
 | `scale` | Float | `1` | Multiplier applied by `source=listCount` (writes `count × scale` as float). Setting it with another source warns once and is ignored. |

@@ -1,5 +1,8 @@
 # Path Editor Implementation Plan
 
+> 文档状态：历史实施计划存档，非当前有效文档。当前实现以代码与 docs/ 现行文档为准。
+
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace `LevelData.CheckPoints : GameObject[]` (prefab-encoded path points) with `LevelData.Paths : PathData[]` (pure data), and add a `PathEditingSection` to the LevelEditor that visualizes the map, lets users add/move/delete checkpoints, and shows the A* actual path between consecutive checkpoints.

@@ -1,5 +1,8 @@
 # SPSlider 适配新 Skill 系统 Implementation Plan
 
+> 文档状态：历史实施计划存档，非当前有效文档。当前实现以代码与 docs/ 现行文档为准。
+
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 让 `SpSliderController` 读取新 `SkillRuntime.spEngine` 的 SP / 激活窗口数据，使 SPSlider 正常显示，旧 `Skill.cs` 与 `Entity.skill[]` 字段保留不动。

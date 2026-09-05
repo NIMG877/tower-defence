@@ -10,20 +10,22 @@ is attack-system-agnostic: any `List<Entity>` key works. Two typical sources:
 
 **Canonical op:** `filter_targets`
 **Component registration:** `EntityFilter`
+**Class:** `AbilitySystem.Components.EntityFilter`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/EntityFilter.cs`
 
 ## Parameters
 
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `blackboardKey` | String | `""` | The `List<Entity>` key to filter in place. For attack preference use the conventional key `attackCandidates`. |
-| `fields` | StringCsv | `""` | Entity fields, one per condition. |
-| `ops` | StringCsv | `""` | Comparison operations, one per condition. |
-| `values` | StringCsv | `""` | Comparison values, one per condition. Numeric fields parse their value as float (invariant culture); string fields compare literally. |
-| `groups` | IntCsv | `""` | Group id per condition. Conditions sharing an id are ANDed; distinct ids are ORed. |
+| `fields` | StringCsv | *(empty)* | Entity fields, one per condition. |
+| `ops` | StringCsv | *(empty)* | Comparison operations, one per condition. |
+| `values` | StringCsv | *(empty)* | Comparison values, one per condition. Numeric fields parse their value as float (invariant culture); string fields compare trimmed and case-insensitively. |
+| `groups` | IntCsv | *(empty)* | Group id per condition. Conditions sharing an id are ANDed; distinct ids are ORed. |
 
 All four condition arrays are parallel. Only entries up to the shortest array
 length are evaluated. With no complete conditions, the list is left
-unchanged.
+unchanged. Null entries in the list are removed.
 
 ## Attack preference wiring
 

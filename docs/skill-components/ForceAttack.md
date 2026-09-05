@@ -7,6 +7,8 @@ event bridges included) but selects no targets and deals no direct damage.
 
 **Canonical op:** `force_attack`
 **Component registration:** `ForceAttack`
+**Class:** `AbilitySystem.Components.ForceAttack`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/ForceAttack.cs`
 
 ## Parameters
 
@@ -32,7 +34,11 @@ spawned entities).
 
 ## Semantics
 
+- The "no targets, no damage" contract is guaranteed on the normal attack
+  path. Attack behaviors that preprocess the candidate list differ:
+  `ChargeAttack` treats the empty call as a charge-store attack, and
+  `WitherAttack` re-selects real targets and deals real damage. Check the
+  entity's attack behavior before relying on `force_attack` for those.
 - The main attack loop keeps ticking during the forced animation (the
   forced attack does not reset the attack timer) — its per-tick `TryToAttack`
-  fails against the already-active attack state; this mirrors legacy
-  forced-skill behavior.
+  fails against the already-active attack state.

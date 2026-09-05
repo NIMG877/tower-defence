@@ -1,7 +1,7 @@
 # Skill Blackboard Component Pattern — Spec
 
 **Date**: 2026-06-08
-**Status**: Approved
+**Status**: 已实施
 **Parent design**: [2026-06-07-skill-talent-refactor-design.md](2026-06-07-skill-talent-refactor-design.md)
 **Scope**: Conventions for skill components that share data through `Blackboard`. The mechanism (`Blackboard` class + `SkillContext.blackboard`) already exists; this spec defines **how to use it cleanly** without naming components after their plumbing.
 

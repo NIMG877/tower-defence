@@ -6,6 +6,8 @@ source is locked to the host's `EntityData.CanSpawnEntityIds` registry;
 
 **Canonical op:** `spawn_entity`
 **Component registration:** `SpawnEntity`
+**Class:** `AbilitySystem.Components.SpawnEntity`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/SpawnEntity.cs`
 
 ## Parameters
 
@@ -15,7 +17,7 @@ source is locked to the host's `EntityData.CanSpawnEntityIds` registry;
 | `positionMode` | String | `self` | `self`, `eventTarget`, `fixed`, or `event`. Any other value logs an error and skips. (No `blackboard` mode — read positions from the Blackboard via `fromBlackboard` on the parameters instead.) |
 | `position` | Vector2Int | `(0,0)` | Position for `positionMode=fixed`. |
 | `offset` | Vector2Int | `(0,0)` | Added after resolving the base position. (Random scatter is not built in — compose `RandomRoll` + Blackboard-fed `position`/`offset` instead.) |
-| `camp` | Int | source camp, otherwise `1` | Spawned entity camp; negative selects the default. |
+| `camp` | Int | `-1` | Spawned entity camp. Negative values (the default included) resolve in order: the detached snapshot's camp, the host's camp, then `1`. |
 | `placement` | String | `auto` | `static`, `move`, or `auto` (pool data decides). Any other value logs an error and skips. |
 | `orientation` | Int | `0` | Static-entity orientation. |
 | `pathSerial` | Int | host's current path | Movable-entity path serial; absent inherits the host's `CurrentPathSerial`. |
@@ -46,11 +48,13 @@ spawn has no summoner entity, so nothing is written to `summoner@spawn_entity`.
 
 ## Summoner data pass-through
 
-Every spawn unconditionally writes the summoner `Entity` (`ctx.entity`) into
+Every spawn writes the summoner `Entity` (`ctx.entity`) into
 the spawned entity's own Blackboard at the fixed protocol key
 **`summoner@spawn_entity`** — right after the spawn call returns (the board
 exists — pool checkout synchronously builds the runner, and the board is only
-cleared at the next checkout). The `@组件名` suffix keeps the key from
+cleared at the next checkout; a spawn product without a board logs a warning
+and records nothing). Detached spawns have no live summoner and write
+nothing. The `@组件名` suffix keeps the key from
 colliding with designer-chosen keys. Consumers read the fixed key rather than
 configuring their own; today that is `apply_damage`'s
 `attackerMode=summoner` (damage attribution to the summoner).
@@ -62,4 +66,4 @@ valid as data — recycled entities keep their `EntityData` — but re-checkouts
 reuse instances, so treat a summoner reference older than one recycle window
 as attribution-only, never as a live stat source. `passStat`+`passStatKey`
 (optional, designer-keyed) snapshot host stats onto the same board for the
-same lifetime reasons.
+same lifetime reasons — both keys must be non-empty for the write to happen.

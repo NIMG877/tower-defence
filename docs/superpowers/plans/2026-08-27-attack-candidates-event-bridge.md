@@ -1,5 +1,8 @@
 # 攻击候选事件桥接与 EntityFilter 职责拆分 · 实施计划
 
+> 文档状态：历史实施计划存档，非当前有效文档。当前实现以代码与 docs/ 现行文档为准。
+
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 把 `AttackBase.OnBeforeTargetSelect` 桥接成一等 runner 事件（候选列表挂黑板保留键 `attackCandidates`），EntityFilter/InjectAttackTargets 删除全部订阅管理代码变成纯触发操作。

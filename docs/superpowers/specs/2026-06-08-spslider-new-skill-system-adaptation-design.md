@@ -1,7 +1,7 @@
 # SPSlider 适配新 Skill 系统
 
 **Date**: 2026-06-08
-**Status**: Draft
+**Status**: 已实施
 **Author**: claude (brainstorm with user)
 **Supersedes**: 旧 `Skill.SkillMessage` 数据源
 

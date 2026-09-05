@@ -1,7 +1,7 @@
 # Skill Trigger Bucket Dispatch — Design Spec
 
 **Date**: 2026-06-10
-**Status**: Approved (autonomous execution authorized)
+**Status**: 已实施
 **Scope**: Wire `ConditionConfig.triggerEvent` into `EntitySkillRunner` dispatch path; replace
 "broadcast-then-self-filter" with pre-bucketed per-event routing.
 

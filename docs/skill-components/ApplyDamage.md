@@ -4,12 +4,14 @@ Applies one direct damage instance to each resolved target.
 
 **Canonical op:** `apply_damage`
 **Component registration:** `ApplyDamage`
+**Class:** `AbilitySystem.Components.ApplyDamage`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/ApplyDamage.cs`
 
 ## Parameters
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `targetMode` | String | `eventTarget` | Target source: `eventTarget`, `self`, or `blackboard`. |
+| `targetMode` | String | `eventTarget` | Target source: `eventTarget`, `self`, or `blackboard` (alias `blackboardentities`). |
 | `blackboardKey` | String | `""` | Input `List<Entity>` key used by `targetMode=blackboard`. |
 | `attackerMode` | String | `self` | Damage-origin source: `self` (`ctx.entity`) or `summoner` (the summoner `Entity` recorded by `spawn_entity` at the fixed protocol key `summoner@spawn_entity`). |
 | `baseValueMode` | String | `attack` | `attack` uses the resolved attacker's `Stats.AttackS`; `fixed` uses `baseValue`. |
@@ -20,7 +22,11 @@ Applies one direct damage instance to each resolved target.
 | `defPenetrateValue` | Float | `0` | Flat physical-defense penetration. |
 | `mgrPenetrateValue` | Float | `0` | Flat magical-resistance penetration. |
 | `damageType` | Int | `0` | Damage type; `0` physical, `1` magical, `2` siege, `3` healing. |
-| `applyType` | Int | `2` | Apply type passed to `Entity.TakeDamage`. |
+| `applyType` | Int | `2` | Apply type passed to `EntityStats.ApplyDamage`. |
+
+Damage application goes through `EntityStats.ApplyDamage`; for `damageType`
+0–2 a target whose HP is already depleted or that is flagged unhurtable
+(`hurtable > 0`) takes nothing.
 
 `eventTarget` is available only on events derived from `DamageEventBase`.
 Direct damage does not invoke the attacker's `AttackBase.OnAfterTakeDamage`,

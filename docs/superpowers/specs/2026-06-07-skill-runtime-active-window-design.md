@@ -1,7 +1,7 @@
 # Skill Runtime Active Window — Design Spec
 
 **Date**: 2026-06-07
-**Status**: Approved
+**Status**: 已实施
 **Parent design**: [2026-06-07-skill-talent-refactor-design.md](2026-06-07-skill-talent-refactor-design.md)
 **Scope**: Foundational infrastructure for the data-driven SkillSystem. Required by Phase 5 (data-driven skill migration): without this gate, no skill that uses event-mutating components (e.g. `AttackBoost`) can be safely migrated from the legacy `Skill.cs` per-skill scripts. Independent of the data format itself — could be implemented before any `SkillConfig` is created.
 

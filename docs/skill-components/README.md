@@ -27,8 +27,7 @@ Each parameter entry is a `(key, type, value, fromBlackboard)` quadruple:
   treats `value` as a BlackBoard key name, not a literal. The typed
   getter re-reads the BlackBoard on every invocation, so the same config
   can yield different results across step executions. See
-  `WriteBlackboard` and the `paramlist-lazy-blackboard-getter` memory
-  for the full mechanic.
+  `WriteBlackboard` for the full mechanic.
 
 ## Type encoding
 
@@ -55,8 +54,8 @@ inside its lazy getter:
 
 | Convention | Format | Example | Used by |
 |---|---|---|---|
-| `FloatCsv` | Plain floats, comma-separated | `0.5,1.0,-0.25` | `ApplyBuff`, `UpdateBuff`, `AttackEventValueModifier` |
-| `StringCsv` | Plain strings, comma-separated | `multiplyer,cumbo`, `Attack,AttackSpeed` | `AttackEventValueModifier`, `ApplyBuff`/`UpdateBuff` attributes & ops |
+| `FloatCsv` | Plain floats, comma-separated | `0.5,1.0,-0.25` | `ApplyBuff`, `UpdateBuff`, `AttackEventValueModifier`, `AttackTargetCountModifier` |
+| `StringCsv` | Plain strings, comma-separated | `multiplyer,cumbo`, `Attack,AttackSpeed` | `AttackEventValueModifier`, `AttackTargetCountModifier`, `ApplyBuff`/`UpdateBuff` attributes & ops |
 
 ## DamageType encoding (convention)
 
@@ -145,9 +144,23 @@ are not authoring names.
 - [AttackCandidateOverride](AttackCandidateOverride.md) - replaces the live
   target-candidate list with a Blackboard entity list during
   `OnBeforeTargetSelect` (the commit step of the attack-preference pipeline).
-- [SelectLandingPoints](SelectLandingPoints.md) — picks `count` points among
-  the host's attack-range cells maximizing enemy coverage, then pairwise
-  spacing.
+- [SelectLandingPoints](SelectLandingPoints.md) — picks `count` landing
+  points through a random pipeline: shuffled in-range enemies first, then
+  attack-range cells (ground before highland, in-layer shuffled, ±offset
+  jitter), repeating across both pools once they run out.
+- [AttackTargetCountModifier](AttackTargetCountModifier.md) - rewrites the
+  in-flight attack's `selectMaxNum` / `selectMinNum` via CSV-driven
+  `mult` / `add` / `set` / `div`; must trigger on `OnBeforeTargetSelect`.
+
+### Economy
+
+- [ModifyCost](ModifyCost.md) — applies a signed change to the level
+  deployment cost through `LevelResourceManager`.
+
+### Entity resources
+
+- [RecoverSkillSp](RecoverSkillSp.md) — restores SP to the host entity's
+  selected skill.
 
 ### Charge attacks
 
@@ -174,8 +187,8 @@ are not authoring names.
 ### Animation
 
 - [ApplyAnimationOverride](ApplyAnimationOverride.md) - registers a one-shot
-  override consumed as the machine next plays each covered slot, or adds a
-  persistent Named Resource override.
+  override consumed in full the first time any covered slot is actually
+  played, or adds a persistent Named Resource override.
 - [RemoveAnimationOverride](RemoveAnimationOverride.md) - removes animation
   overrides (persistent or still-pending one-shot) using records stored in the
   Blackboard.
@@ -232,13 +245,14 @@ trigger), equivalent to a condition unit with `op: None`.
 
 ### Operator semantics (from `ConditionEvaluator.cs`)
 
-The trimmed `ConditionOp` whitelist (per commit `54c3465`):
+The `ConditionOp` whitelist:
 
 | `op` | Comparison |
 |---|---|
 | `None` | always passes (unit-level) |
 | `Equal`, `NotEqual` | string `==` / `!=` on the key's value |
 | `Greater` / `GreaterOrEqual` / `Less` / `LessOrEqual` | `float.TryParse` on both sides, falls back to ordinal string compare if either is unparseable |
+| `KeyEqual` / `KeyNotEqual` | key-vs-key identity: `rightValue` names a second Blackboard key, both sides are read as objects and compared with `Equals`; single-entry `List<Entity>` values unwrap to the entity. A missing key on either side means "not equal". An empty `rightValue` is a wiring error — logs an error and fails the unit. |
 
 The Blackboard is an object store; condition keys are read as objects and
 stringified (invariant culture) before comparison, so a numeric counter

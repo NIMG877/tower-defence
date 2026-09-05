@@ -1,5 +1,8 @@
 # Ability System Implementation Plan
 
+> 文档状态：历史实施计划存档，非当前有效文档。当前实现以代码与 docs/ 现行文档为准。
+
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Unify Skill / Talent / ExtraAbility under one `AbilityRuntime` and add a runtime `AddExtraAbility` / `RemoveExtraAbility` API. Zero changes to the 22 existing `ISkillComponent` implementations.

@@ -4,6 +4,8 @@ Removes abnormal states recorded by `ApplyAbnormalState`.
 
 **Canonical op:** `destroy_abnormal_state`
 **Component registration:** `DestroyAbnormalState`
+**Class:** `AbilitySystem.Components.DestroyAbnormalState`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/DestroyAbnormalState.cs`
 
 ## Parameters
 

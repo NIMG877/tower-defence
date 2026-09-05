@@ -5,14 +5,16 @@ Replaces animation slots using names from the target entity's
 
 **Canonical op:** `apply_animation_override`
 **Component registration:** `ApplyAnimationOverride`
+**Class:** `AbilitySystem.Components.ApplyAnimationOverride`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/ApplyAnimationOverride.cs`
 **Pair with:** `RemoveAnimationOverride` for early revocation.
 
 ## Modes
 
 - `once`: registers a **one-shot** override. No state transition is performed —
-  each covered slot takes effect the next time the machine naturally plays it
-  (e.g. the attack system entering the attack state), and the entry removes
-  itself once every covered slot has played once.
+  the entry takes effect the next time the machine naturally plays a covered
+  slot (e.g. the attack system entering the attack state), and the whole entry
+  removes itself at that first actual play.
 - `override`: adds a persistent override that affects all future animation
   resolution until removed.
 
@@ -59,4 +61,4 @@ mode: once
 ```
 
 Registers the three-segment talent attack; the attack system's own
-`TryToAttack` transition resolves and plays it, consuming each slot once.
+`TryToAttack` transition resolves and plays it, consuming the entry whole.

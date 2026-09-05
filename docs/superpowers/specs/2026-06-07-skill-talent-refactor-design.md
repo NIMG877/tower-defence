@@ -1,4 +1,5 @@
 # Skill / Talent System Refactor — Design Spec
+> 状态：已归档（已被后续能力系统设计取代）
 
 **Date:** 2026-06-07
 **Status:** Draft (post-brainstorming, pending user review)

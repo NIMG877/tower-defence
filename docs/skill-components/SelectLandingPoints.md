@@ -1,7 +1,6 @@
 # SelectLandingPoints
 
-Picks `count` landing points for carrier bullets with a random pipeline
-(2026-08-29 revision; replaced the first-version coverage-optimizing search):
+Picks `count` landing points for carrier bullets with a random pipeline:
 
 1. **Enemies first** — all enemies in attack range (`Vision.NearbyMonsters`,
    the same per-frame list targeting uses), minus an optional exclusion
@@ -18,6 +17,8 @@ Picks `count` landing points for carrier bullets with a random pipeline
 
 **Canonical op:** `select_landing_points`
 **Component registration:** `SelectLandingPoints`
+**Class:** `AbilitySystem.Components.SelectLandingPoints`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/SelectLandingPoints.cs`
 
 ## Parameters
 
@@ -41,6 +42,8 @@ Picks `count` landing points for carrier bullets with a random pipeline
   draws in one cast are independent.
 - Config errors (radius-based vision with no cell range, missing map
   manager, no cells and no enemies at all) log an error and skip.
+- A detached execution (no host entity) or a missing blackboard skips
+  silently. `excludeKey` set to a missing or empty key excludes nothing.
 
 ## Tests
 

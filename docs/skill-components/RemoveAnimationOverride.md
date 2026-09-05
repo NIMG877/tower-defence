@@ -6,6 +6,8 @@ persistent entries, and one-shot entries still waiting to be consumed
 
 **Canonical op:** `remove_animation_override`
 **Component registration:** `RemoveAnimationOverride`
+**Class:** `AbilitySystem.Components.RemoveAnimationOverride`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/RemoveAnimationOverride.cs`
 
 ## Parameters
 
@@ -17,6 +19,8 @@ persistent entries, and one-shot entries still waiting to be consumed
 
 Matching records are removed from their animation machines and consumed from
 the Blackboard list. The Blackboard key is deleted when no records remain.
+An empty or unset `inputKey`, or a key with no record list, logs a warning
+and skips.
 
 Normally trigger this on `OnAbilityEnd` using the same key configured as the
 paired `ApplyAnimationOverride.outputKey`.

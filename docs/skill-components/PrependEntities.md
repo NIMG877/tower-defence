@@ -43,5 +43,6 @@ is what `AttackBase` will attack.
 |---|---|
 | Either key empty / holds no list | OneShotWarn + skip (wiring error exposed). |
 | Null entries in the source | Skipped. |
+| Duplicates within the source list | Only the first occurrence is inserted. |
 | Null entries in the destination | Left untouched. |
 | Empty source list | No-op (legitimate state). |

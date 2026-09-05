@@ -111,7 +111,7 @@ must not interfere.
 
 ## Canonical operations
 
-`RegisteredOps` exposes canonical names only. The 33 component-backed
+`RegisteredOps` exposes canonical names only. The 36 component-backed
 operations use snake_case. PascalCase component names are lookup aliases.
 
 | Canonical `op` | Backing implementation / reference |
@@ -124,8 +124,10 @@ operations use snake_case. PascalCase component names are lookup aliases.
 | `attack_behavior_override` | [AttackBehaviorOverride](skill-components/AttackBehaviorOverride.md) |
 | `attack_behavior_restore` | [AttackBehaviorRestore](skill-components/AttackBehaviorRestore.md) |
 | `attack_event_value_modifier` | [AttackEventValueModifier](skill-components/AttackEventValueModifier.md) |
+| `attack_candidate_override` | [AttackCandidateOverride](skill-components/AttackCandidateOverride.md) |
 | `attack_range_override` | [AttackRangeOverride](skill-components/AttackRangeOverride.md) |
 | `attack_range_restore` | [AttackRangeRestore](skill-components/AttackRangeRestore.md) |
+| `attack_target_count_modifier` | [AttackTargetCountModifier](skill-components/AttackTargetCountModifier.md) |
 | `charge_attack_damage_modifier` | [ChargeAttackDamageModifier](skill-components/ChargeAttackDamageModifier.md) |
 | `charge_attack_reserve_pool` | [ChargeAttackReservePool](skill-components/ChargeAttackReservePool.md) |
 | `charge_state_controller` | [ChargeStateController](skill-components/ChargeStateController.md) |
@@ -136,9 +138,10 @@ operations use snake_case. PascalCase component names are lookup aliases.
 | `fire_bullets` | [FireBullets](skill-components/FireBullets.md) |
 | `force_attack` | [ForceAttack](skill-components/ForceAttack.md) |
 | `force_reset_attack` | [ForceResetAttack](skill-components/ForceResetAttack.md) |
-| `attack_candidate_override` | [AttackCandidateOverride](skill-components/AttackCandidateOverride.md) |
+| `modify_cost` | [ModifyCost](skill-components/ModifyCost.md) |
 | `prepend_entities` | [PrependEntities](skill-components/PrependEntities.md) |
 | `random_roll` | [RandomRoll](skill-components/RandomRoll.md) |
+| `recover_skill_sp` | [RecoverSkillSp](skill-components/RecoverSkillSp.md) |
 | `remove_animation_override` | [RemoveAnimationOverride](skill-components/RemoveAnimationOverride.md) |
 | `select_targets` | [EntitySelector](skill-components/EntitySelector.md) |
 | `select_landing_points` | [SelectLandingPoints](skill-components/SelectLandingPoints.md) |

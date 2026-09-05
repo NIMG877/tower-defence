@@ -1,7 +1,7 @@
 # 关卡编辑器 (Level Editor) — 设计文档
 
 **日期**: 2026-06-22
-**状态**: Draft (待用户审阅)
+**状态**: 已实施
 **作者**: brainstorming session
 
 ---

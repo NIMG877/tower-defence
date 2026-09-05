@@ -1,5 +1,8 @@
 # Map Data Storage Refactor — Implementation Plan
 
+> 文档状态：历史实施计划存档，非当前有效文档。当前实现以代码与 docs/ 现行文档为准。
+
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace per-tile `BlockData` MonoBehaviour with a data-on-`LevelData` storage model; add a map-editing tab to the existing path editor; refactor `MapDataManager` to read from the new data store; keep `MapPrefab` purely as an optional visual model asset.

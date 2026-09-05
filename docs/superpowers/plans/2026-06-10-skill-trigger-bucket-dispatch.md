@@ -1,5 +1,8 @@
 # Skill Trigger Bucket Dispatch — Implementation Plan
 
+> 文档状态：历史实施计划存档，非当前有效文档。当前实现以代码与 docs/ 现行文档为准。
+
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Wire `ConditionConfig.triggerEvent` into `EntitySkillRunner` dispatch via a per-`SkillRuntime` trigger→components dictionary; drop dead types `DeathEvent`/`IntervalTickEvent`; remove component-side `is XxxEvent` guards.

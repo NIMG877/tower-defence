@@ -9,6 +9,8 @@ to consume.
 
 **Canonical op:** `fire_bullets`
 **Component registration:** `FireBullets`
+**Class:** `AbilitySystem.Components.FireBullets`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/FireBullets.cs`
 
 ## Parameters
 
@@ -36,11 +38,12 @@ entity target.
   only dispatches events to active abilities — an instant-cast skill is
   already inactive by the time its bullets land, so its own trigger-19
   rules never fire. Eyjafjalla S2 fires the bullets; the landing→spawn
-  rule lives on her Talent (`eyjafjalla_t1.asset`), matching the legacy
-  `Talent1.Skill2SetBubble` architecture.
+  rule lives on her Talent (`eyjafjalla_t1.asset`).
 - The landing callback closes over the host entity at fire time. If the
-  host dies mid-flight the event still dispatches (legacy behavior); a
-  missing runner is skipped.
+  host dies mid-flight the event still dispatches; a missing runner is
+  skipped.
+- A host without an `AttackBase` is a configuration error — the component
+  cannot resolve effect data and logs an error.
 - Config errors (missing points key, effect index out of range, missing
   spawn transform) log an error and skip.
 

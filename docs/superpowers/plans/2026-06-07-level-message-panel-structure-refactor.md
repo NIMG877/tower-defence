@@ -1,5 +1,8 @@
 # LevelMessagePanel.cs 结构重构 实施计划
 
+> 文档状态：历史实施计划存档，非当前有效文档。当前实现以代码与 docs/ 现行文档为准。
+
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 将 1811 行的 `LevelMessagePanel.cs` 重组为 8 个 `#region` 块、构造函数拆为 8 个 `Init*()` 方法、清理命名。仅文件结构与命名变化，行为完全不变。

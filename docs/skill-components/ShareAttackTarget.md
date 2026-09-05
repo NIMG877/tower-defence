@@ -5,6 +5,8 @@ optionally using a communication projectile before enqueueing the request.
 
 **Canonical op:** `share_attack_target`
 **Component registration:** `ShareAttackTarget`
+**Class:** `AbilitySystem.Components.ShareAttackTarget`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/ShareAttackTarget.cs`
 
 ## Parameters
 
@@ -23,9 +25,12 @@ optionally using a communication projectile before enqueueing the request.
 Use an `OnBeforeAttack` rule with `select_targets` before
 `share_attack_target`.
 Recipients are deduplicated; self, the active shared-request sender, and
-entities without `receiverAbilityId` are skipped. When the projectile arrives,
+entities without `receiverAbilityId` are skipped. Delivery requires the
+recipient to still be active (with a runner and `Stats`) — inactive
+recipients are dropped. When the projectile arrives,
 the `(sender, attack target)` request is appended only if the recipient does
-not currently see that enemy.
+not currently see that enemy; a recipient that went inactive by arrival time
+is dropped as well.
 
 The communication projectile deals zero final damage (`damage=1`,
 `multiplier=0`) before delivering its callback.

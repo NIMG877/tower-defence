@@ -1,5 +1,8 @@
 # Wave 多轨道 + 绝对时间重设计 实施计划
 
+> 文档状态：历史实施计划存档，非当前有效文档。当前实现以代码与 docs/ 现行文档为准。
+
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 把 `LevelData` 的 Wave 从单一时间轴升级为多命名轨道系统,Action 时间由相对 `GapFromLastAction` 改为绝对 `TriggerTime`,并配套迁移 v1 关卡数据 + 编辑器 UI 重写。

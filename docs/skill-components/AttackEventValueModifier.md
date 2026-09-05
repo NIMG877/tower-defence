@@ -19,18 +19,18 @@ Common configurations:
 
 ## Parameters
 
-All three parameters are read via the `ParamList` lazy API; each `Func<T>`
-re-runs the underlying `SplitCsv` (and float/int double-parse for `values`)
-on every call.
+Literal CSVs are parsed once at `OnInit` and the arrays cached; entries with
+`fromBlackboard=true` are re-read (and re-parsed) on every trigger.
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `fields` | StringCsv | `""` | Comma-separated field names to rewrite. Must be from the whitelist below. |
-| `values` | StringCsv | `""` | Comma-separated numeric values, one per field. Each value is parsed as both float and int inside the closure; the wrong-type slot is never read. A non-numeric value silently becomes `0` in both. |
-| `methods` | StringCsv | `""` | Comma-separated operator per field. One of `mult` (`field = field * value`), `add` (`field = field + value`), `set` (`field = value`), `div` (`field = field / value`). |
+| `fields` | StringCsv | *(empty)* | Comma-separated field names to rewrite. Must be from the whitelist below. |
+| `values` | FloatCsv | *(empty)* | Comma-separated numeric values, one per field, parsed as `float`. A non-numeric token is a config error — `float.Parse` throws and surfaces at init. |
+| `methods` | StringCsv | *(empty)* | Comma-separated operator per field. One of `mult` (`field = field * value`), `add` (`field = field + value`), `set` (`field = value`), `div` (`field = field / value`). |
 
 If the three CSVs differ in length, a warning is logged and the
-shortest length is applied.
+shortest length is applied. A key absent from the config yields an empty
+array (the rewrite is a no-op).
 
 ## Field whitelist
 
@@ -46,13 +46,13 @@ Field names use the spellings declared by the event classes
 | `mgrPenetrate_value` | float | `DamageEventBase` |
 | `damageType` | int | `DamageEventBase` (`3` = healing; see project convention in README) |
 | `applyType` | int | `DamageEventBase` |
-| `cumbo` | int | `BeforeAttackEvent` only — silently skipped on the other three |
+| `cumbo` | int | `BeforeAttackEvent` only — skipped (logged) on the other three |
 
-`mult` on int fields uses the float-parsed value and rounds
-(`Mathf.RoundToInt(current * floatValue)`) so a designer who typed
-`1.5` for `cumbo` still gets a sensible result. `add` and `set` on
-int fields use the int-parsed value to keep designer intent exact.
-`div` mirrors `mult` for the float-parsed value.
+Values are stored as float; the int fields cast at the apply site
+(`MathOps.ApplyIntMixed`): `mult` and `div` use the float operand and round
+(`Mathf.RoundToInt`), so a designer who typed `1.5` for `cumbo` still gets a
+sensible result. `add` and `set` use the operand truncated to int, keeping
+integer intent exact (`2.7` acts as `2`).
 
 ## Lenient matching
 
@@ -64,5 +64,6 @@ for choosing sensible combinations.
 ## Unknown inputs
 
 - **Unknown field name** → `LogWarning`, that entry is skipped.
-- **Unknown method** → `LogWarning`, that entry is skipped (field left unchanged).
+- **Unknown method** → one-shot warning per `(method, field)` pair, that entry
+  is skipped (field left unchanged).
 - **Event is not a `DamageEventBase`** → `LogError`, the whole trigger is skipped.

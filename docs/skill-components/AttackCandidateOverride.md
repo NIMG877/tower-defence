@@ -33,10 +33,10 @@ steps    = write_blackboard      { key = attackCandidates, source = event, path 
 ```
 
 `write_blackboard`'s `event.targets` path writes a copy, so the pipeline is
-read → transform → commit with a single mutation point. A source key holding
-no list (pipeline missing its `write_blackboard` step) or a rule not
-triggering on `OnBeforeTargetSelect` warns once and skips — the wiring error
-is exposed, not masked.
+read → transform → commit with a single mutation point. An empty/unset
+`blackboardKey`, a source key holding no list (pipeline missing its
+`write_blackboard` step), or a rule not triggering on `OnBeforeTargetSelect`
+warns once and skips — the wiring error is exposed, not masked.
 
 For preference semantics stricter than filtering (e.g. "always attack the
 bubbles first"), feed a list built by `select_targets`/`filter_targets` into

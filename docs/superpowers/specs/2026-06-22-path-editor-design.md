@@ -1,7 +1,7 @@
 # 关卡路径编辑器 (Path Editor) — 设计文档
 
 **日期**: 2026-06-22
-**状态**: Draft (待用户审阅)
+**状态**: 已实施
 **作者**: brainstorming session
 **上游依赖**: `docs/superpowers/specs/2026-06-22-level-editor-design.md` (Level Editor 主框架)
 

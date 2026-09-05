@@ -17,7 +17,7 @@ abilities (explosions, counters, list maintenance) become ordinary rules.
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `blackboardKey` | String | `""` | Blackboard key holding the watched `List<Entity>`. Empty = no-op. |
+| `blackboardKey` | String | `""` | Blackboard key holding the watched `List<Entity>`. Empty/unset, or a key with no list on read, unsubscribes everything (an empty watch). |
 
 ## Event payload
 
@@ -36,7 +36,8 @@ abilities (explosions, counters, list maintenance) become ordinary rules.
   reconciles: entities newly present in the list get subscribed, entities
   that left the list get unsubscribed. Pair it with a `spawn_entity` step
   that appends to the same list (`appendToListKey`) and the watch follows
-  the roster automatically.
+  the roster automatically. `OnInit` clears any handlers left over from a
+  previous active window before the first sync.
 - **On watched death:** unsubscribe → remove the entity from the Blackboard
   list → dispatch `SummonDeathEvent` on the host runner. Counters are NOT
   maintained here — keep them as pure arithmetic in the rules

@@ -40,7 +40,7 @@ as a string-parseable value in BB — e.g. `"0.6"`, not `0.6`).
 - Parse `input` as `float` (via `float.TryParse`). Unparseable → silent
   no-op.
 - Call `RandomHelper.Helper.RandomP(p)`. The helper uses the project's
-  shared 200-entry `[0, 1)` array (default `useArray=true`), so the
+  shared 200-entry `[0, 1]` array (default `useArray=true`), so the
   global random index advances on every call.
 - Write `"True"` or `"False"`. Downstream `ConditionConfig` should
   compare with `Equal leftKey=outputKey rightValue=True`.

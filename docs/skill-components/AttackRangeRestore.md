@@ -5,6 +5,8 @@ Restores the selected entity's attack range by assigning
 
 **Canonical op:** `attack_range_restore`
 **Component registration:** `AttackRangeRestore`
+**Class:** `AbilitySystem.Components.AttackRangeRestore`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/AttackRangeRestore.cs`
 
 ## Parameters
 

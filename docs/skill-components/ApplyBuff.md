@@ -60,8 +60,7 @@ each `Func<T>` re-evaluates the source on every call.
 | `buffId` | String | `skill_buff` | Id passed to `BuffController.CreateBuff`. In normal mode, repeated triggers may create additional records with the same id; aura mode updates its tracked record instead. |
 | `buffTime` | Float | `-10` | Duration in seconds. **Negative = permanent** (project convention: `-10` = permanent). |
 | `toSelf` | Bool | `True` | `true` = apply to `ctx.entity`; `false` = apply to the target carried by the current event. Ignored when `blackboardKey` is set. |
-| `isWhiteList` | *removed* | — | Replaced by `buffScope`. |
-| `buffScope` | String | `normal` | Which `BuffController` list owns the buff: `normal` or `whiteList` (both cleared on `Dormancy`, i.e. each recall), or `level` — survives `Dormancy` (redeploy); its final cleanup is structural: entity pools live one level (created on level entry, destroyed on level exit), so level buffs die with the entity `GameObject`. Unknown values are a config error (warn once, trigger skipped). | |
+| `buffScope` | String | `normal` | Which `BuffController` list owns the buff: `normal` or `whiteList` (both cleared on `Dormancy`, i.e. each recall), or `level` — survives `Dormancy` (redeploy); its final cleanup is structural: entity pools live one level (created on level entry, destroyed on level exit), so level buffs die with the entity `GameObject`. Unknown values are a config error (warn once, trigger skipped). |
 | `blackboardKey` | String | `""` | If set, read `List<Entity>` from this blackboard key and apply to each. Empty = single-target mode. |
 | `outputTarget` | String | `""` | If set (with `outputBuff`), append this round's target list to the blackboard at this key. |
 | `outputBuff` | String | `""` | If set (with `outputTarget`), append this round's buff list to the blackboard at this key. |

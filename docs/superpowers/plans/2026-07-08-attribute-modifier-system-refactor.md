@@ -1,5 +1,8 @@
 # 数值系统重构：Modifier + AttributeStore 实现计划
 
+> 文档状态：历史实施计划存档，非当前有效文档。当前实现以代码与 docs/ 现行文档为准。
+
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 将 `BuffController` 的账本式 `buffValue` 累计换成业界标准 `Modifier` + `AttributeStore`（lazy + 脏标记），modifier 与 buff 解耦，四类运算忠实表达。

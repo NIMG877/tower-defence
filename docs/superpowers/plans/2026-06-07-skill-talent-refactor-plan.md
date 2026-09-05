@@ -1,5 +1,8 @@
 # Skill / Talent Refactor Implementation Plan
 
+> 文档状态：历史实施计划存档，非当前有效文档。当前实现以代码与 docs/ 现行文档为准。
+
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace 28+ per-skill/per-talent MonoBehaviour scripts with a data-driven framework (EntityData → SkillConfig → ISkillComponent[]) and migrate every existing skill/talent to the new system.

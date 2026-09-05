@@ -65,7 +65,9 @@ Prefer:
 - documented target conventions such as self, event target, or Blackboard
   entity/list keys;
 - explicit records/snapshots for exact removal/restoration;
-- defensive no-op behavior for missing targets or optional data.
+- configuration errors surfaced with a one-time warning and a skipped
+  trigger; silent skips only for legitimate "upstream hasn't written yet"
+  states.
 
 ## 4. Choose Restrained Generality
 

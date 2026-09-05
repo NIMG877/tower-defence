@@ -5,6 +5,8 @@ results, then overwrites optional Blackboard entity-list and count outputs.
 
 **Canonical op:** `select_targets`
 **Component registration:** `EntitySelector`
+**Class:** `AbilitySystem.Components.EntitySelector`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/EntitySelector.cs`
 
 ## Parameters
 
@@ -30,15 +32,16 @@ vision lists.
 `ring` first performs the same outer-radius selection as `radius`, then keeps
 entities whose distance from the subject is strictly greater than
 `minRadius`. Its effective interval is `minRadius < distance <= radius`.
-With the default `minRadius=0`, an entity exactly at the subject's center is
-excluded.
+A non-positive `minRadius` (the default `0` included) skips the inner cut
+entirely, so the selection degenerates to the plain `radius` result and an
+entity at the subject's center is included.
 When `minRadius` is greater than a non-negative `radius`, the result is empty.
 
 `all` returns every on-field entity of the `campRelation` camp (selectability
 rules apply unless `force=true`). It routes through `EntitySelector_Radius`
-with `radius<0` (the existing whole-field convention — no distance test), so
-no new EntityManager API exists for it. The subject serves only as the camp
-anchor, so `all` also works in detached executions via the snapshot camp.
+with `radius<0` (the existing whole-field convention — no distance test).
+The subject serves only as the camp anchor, so `all` also works in detached
+executions via the snapshot camp.
 Typical use: "re-collect every entity of a kind currently on the field" at
 OnInitialize, paired with a `filter_targets` (mode `list`) step that narrows
 the result by identity.
@@ -56,9 +59,9 @@ Blackboard operands as strings and parses numeric comparisons from them.
 
 `subjectMode=self` mirrors `spawn_entity`'s `positionMode=self` convention:
 with no live entity, the subject degrades to the fork snapshot's
-`(position, camp)` captured at trigger time. Only pure-position selections
-(`radius`, `ring`) are usable; `vision` and `range` need a live
-entity and log an error in detached executions. Null entries inside a
+`(position, camp)` captured at trigger time. Selections that need only the
+snapshot (`radius`, `ring`, `all`) are usable; `vision` and `range` need a
+live entity and log an error in detached executions. Null entries inside a
 `subjectMode=blackboard` list are skipped.
 
 Typical shape: a summon's posthumous rule (`OnBeforeDieAnimation`, detached)

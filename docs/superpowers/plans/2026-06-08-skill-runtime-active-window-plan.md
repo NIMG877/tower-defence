@@ -1,5 +1,8 @@
 # Skill Runtime Active Window Implementation Plan
 
+> 文档状态：历史实施计划存档，非当前有效文档。当前实现以代码与 docs/ 现行文档为准。
+
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add an active-window gate to the data-driven SkillSystem so that components on a skill only run while the skill is firing. Required for Phase 5 (data-driven skill migration): without it, `AttackBoost` and similar event-mutating components would affect every attack, not just attacks during the skill.

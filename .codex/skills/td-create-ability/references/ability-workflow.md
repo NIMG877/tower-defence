@@ -151,6 +151,4 @@ Recursively inspect every rule and nested step. Check:
 
 Run focused tests or a relevant build when they cover the change. State that
 the asset still needs a Unity PlayMode smoke test when automated coverage does
-not execute the configured behavior. `Assets/Resources/` is ignored by this
-repository's Git configuration, so asset edits may not appear in normal
-`git status`.
+not execute the configured behavior.

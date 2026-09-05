@@ -56,8 +56,9 @@ Prefer:
 - optional args with explicit defaults;
 - explicit enums/strings and whitelisted fields;
 - lazy `ParamList` getters consistent with nearby code;
-- defensive no-op behavior for unavailable optional context;
 - one-shot warnings for invalid designer-authored values;
+- silent skips only for legitimate "upstream hasn't written yet" states —
+  never as a catch-all for bad configuration;
 - stable Blackboard data shapes and component lifecycle rules;
 - documented behavior for shared component state under `Parallel` reentry.
 

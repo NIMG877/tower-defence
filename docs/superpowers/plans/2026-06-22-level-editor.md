@@ -1,5 +1,8 @@
 # Level Editor Implementation Plan
 
+> 文档状态：历史实施计划存档，非当前有效文档。当前实现以代码与 docs/ 现行文档为准。
+
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 为 `LevelData` ScriptableObject 提供一个自定义 Inspector 编辑器,覆盖所有字段的可视化编辑 (元数据 / 引用 / 波次时间线 / 经济),含静态校验和一键 Playtest。

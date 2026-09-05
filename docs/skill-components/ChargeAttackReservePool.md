@@ -7,6 +7,8 @@ current target. Ineligible pool charges remain stored.
 
 **Canonical op:** `charge_attack_reserve_pool`
 **Component registration:** `ChargeAttackReservePool`
+**Class:** `AbilitySystem.Components.ChargeAttackReservePool`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/ChargeAttackReservePool.cs`
 
 ## Parameters
 
@@ -15,8 +17,8 @@ current target. Ineligible pool charges remain stored.
 | `toSelf` | Bool | `True` | Target `ctx.entity`. If false, read `List<Entity>` from `blackboardKey`. |
 | `blackboardKey` | String | `""` | Blackboard key containing target entities when `toSelf=false`. |
 | `capacity` | Int | `1` | Additional pool capacity. Values less than or equal to zero add no pool. |
-| `minMonsterStatus` | Int | omitted | Optional inclusive minimum accepted `EntityData.MonsterStatus`. |
-| `maxMonsterStatus` | Int | omitted | Optional inclusive maximum accepted `EntityData.MonsterStatus`. |
+| `minMonsterStatus` | Int | omitted | Optional inclusive minimum accepted `EntityData.MonsterStatus`. A configured entry is detected by presence in the config (`HasKey`), not by its value — sentinel-free. |
+| `maxMonsterStatus` | Int | omitted | Optional inclusive maximum accepted `EntityData.MonsterStatus`. Presence-detected like `minMonsterStatus`. |
 
 When neither MonsterStatus bound exists, the extra pool can be used against
 any target. When either bound exists, targets without `EntityData` are

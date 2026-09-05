@@ -263,12 +263,13 @@ namespace AbilitySystem.Components
                 return ctx.sharedBlackboard.Get<List<Entity>>(_inputTargetKey(), null);
             }
 
-            // Original single-target behavior preserved for backward compatibility.
             // The dispatcher routes this component by config.triggers[]; the event
             // type that arrives depends on the config, so we extract `target` from
             // whichever event payload carries one. Falls back to ctx.entity when
             // the event doesn't carry a target field (or _toSelf is true).
-            Entity t = _toSelf() ? ctx.entity : null;
+            Entity t = _toSelf()
+                ? ctx.entity
+                : ctx.currentEvent is DamageEventBase damageEvent ? damageEvent.target : ctx.entity;
             if (t == null || t.buffController == null) return null;
             return new List<Entity> { t };
         }

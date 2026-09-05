@@ -1,7 +1,7 @@
 # 动画状态机重构设计（AnimationMachine 解耦）
 
 - 日期：2026-09-01
-- 状态：设计已获用户逐节确认，待实施
+- 状态：已实施
 - 前置审计：见记忆 `animation-machine-coupling-audit`（2026-09-01）
 
 ## 1. 背景与问题

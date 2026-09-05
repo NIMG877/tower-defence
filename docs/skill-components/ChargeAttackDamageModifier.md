@@ -6,6 +6,8 @@ energy projectile but not the normal attack projectile.
 
 **Canonical op:** `charge_attack_damage_modifier`
 **Component registration:** `ChargeAttackDamageModifier`
+**Class:** `AbilitySystem.Components.ChargeAttackDamageModifier`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/ChargeAttackDamageModifier.cs`
 
 ## Parameters
 

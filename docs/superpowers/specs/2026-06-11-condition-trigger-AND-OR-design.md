@@ -1,4 +1,5 @@
 # Condition Trigger AND/OR + Blackboard Unification
+> 状态：已实施
 
 **Date:** 2026-06-11
 **Status:** Draft

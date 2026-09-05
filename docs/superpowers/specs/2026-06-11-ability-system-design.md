@@ -1,4 +1,5 @@
 # Ability System — Unified Skill / Talent / ExtraAbility Design
+> 状态：已实施
 
 > **Document status:** architecture history for Skill, Talent, and ExtraAbility
 > unification. Ability asset authoring and runtime sequence semantics are

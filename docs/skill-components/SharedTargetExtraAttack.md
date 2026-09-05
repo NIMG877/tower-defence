@@ -5,6 +5,8 @@ performs interruptible extra attacks against their exact targets.
 
 **Canonical op:** `shared_target_extra_attack`
 **Component registration:** `SharedTargetExtraAttack`
+**Class:** `AbilitySystem.Components.SharedTargetExtraAttack`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/SharedTargetExtraAttack.cs`
 
 ## Parameters
 
@@ -24,10 +26,13 @@ component instance for queue and active-request state.
 
 - `OnTick`: removes invalid queue-front targets, applies the abnormal state,
   and attempts the first exact-target attack unless the entity is in `Start`
-  or another shared extra attack is active.
+  or another shared extra attack is active. A host without an `AttackBase`
+  bails out entirely; without an animation machine the abnormal state is
+  still applied but no attack starts.
 - `OnAttackSuccessfully`: consumes the active request.
-- `OnAttackInterrupt`: clears the active marker but retains the request for a
-  later retry.
+- `OnAttackInterrupt`: aborts the shared sequence — clears the active marker,
+  **removes the whole queue**, and releases the abnormal state. Interrupted
+  requests are not retried.
 - Teardown clears the queue/source keys and removes its abnormal state.
 
 The underlying abnormal-state API has no source handle, so removing the state

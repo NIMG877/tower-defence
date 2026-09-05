@@ -1,7 +1,7 @@
 # Map Data Storage Refactor — Design Spec
 
 **Date**: 2026-06-23
-**Status**: Approved (pending user review of written spec)
+**Status**: 已实施
 **Scope**: Replace per-tile `BlockData` MonoBehaviour with a data-on-`LevelData` storage model; add a map-editing tab to the existing path editor; refactor `MapDataManager` to read from the new data store; keep `MapPrefab` purely as visual model asset (optional).
 
 ## 1. Goal & Motivation

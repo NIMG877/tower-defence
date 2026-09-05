@@ -40,8 +40,8 @@ current code behavior as authoritative and report documentation discrepancies.
 ## Operation Coverage
 
 Map every atomic behavior to `SPConfig` or one or more registered operations.
-Use primitive operations such as `delay`, `wait_until`, `branch`, `loop`, and
-`spawn_entity` when their documented contracts fit. Use component-backed
+Use the primitive operations `delay`, `wait_until`, `branch`, and `loop` when
+their documented contracts fit. Use component-backed
 operations through their canonical snake_case names.
 
 When registered operations cannot express an atomic behavior:

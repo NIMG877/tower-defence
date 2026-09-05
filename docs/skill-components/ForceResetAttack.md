@@ -6,6 +6,8 @@ attempts a forced attack transition.
 
 **Canonical op:** `force_reset_attack`
 **Component registration:** `ForceResetAttack`
+**Class:** `AbilitySystem.Components.ForceResetAttack`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/ForceResetAttack.cs`
 
 ## Parameters
 

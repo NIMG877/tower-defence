@@ -5,14 +5,16 @@ Blackboard. Its `normal` and `aura` modes mirror `ApplyBuff`.
 
 **Canonical op:** `apply_abnormal_state`
 **Component registration:** `ApplyAbnormalState`
+**Class:** `AbilitySystem.Components.ApplyAbnormalState`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/ApplyAbnormalState.cs`
 
 ## Parameters
 
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `mode` | String | `normal` | `normal` for one-shot application; `aura` for target-list synchronization. |
-| `abnormalTypes` | IntCsv | `""` | State types: `0` root, `1` stun, `2` disarm, `3` invulnerable/unselectable. |
-| `abnormalTimes` | FloatCsv | `""` | Parallel durations; values below `-5` are permanent. |
+| `abnormalTypes` | IntCsv | `""` | State types: `0` stun (bans Move), `1` unbalance (bans Move and Attack), `2` silence (bans Attack), `3` invulnerable (unselectable and unhurtable). |
+| `abnormalTimes` | FloatCsv | `""` | Parallel durations; `-5` or below is permanent. |
 | `toSelf` | Bool | `True` | Target `ctx.entity` when `blackboardKey` is empty. |
 | `blackboardKey` | String | `""` | Optional input `List<Entity>` key. |
 | `outputTarget` | String | `""` | Optional/required-in-aura output `List<Entity>` key. |

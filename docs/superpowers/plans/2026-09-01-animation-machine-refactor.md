@@ -1,5 +1,8 @@
 # 动画状态机重构实施计划
 
+> 文档状态：历史实施计划存档，非当前有效文档。当前实现以代码与 docs/ 现行文档为准。
+
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 把 AnimationMachine 拆成 纯C#逻辑状态机(EntityStateMachine) + 表现映射器(AnimationMachine) + EntityVisuals/EntityFacing，数据流单向化，新增 Cast 状态替换 Die 后门，槽位字典化。

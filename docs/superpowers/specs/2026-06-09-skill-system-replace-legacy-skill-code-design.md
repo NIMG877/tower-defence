@@ -1,4 +1,5 @@
 # Skill System Replace Legacy Skill Code — Design Spec
+> 状态：已实施
 
 **Date:** 2026-06-09
 **Status:** Draft (post-brainstorming, pending user review)

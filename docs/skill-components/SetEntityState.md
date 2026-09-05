@@ -6,6 +6,8 @@ Blackboard-provided entity list. `AnimationMachine` observes the resulting
 
 **Canonical op:** `set_entity_state`  
 **Component registration:** `SetEntityState`
+**Class:** `AbilitySystem.Components.SetEntityState`
+**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/SetEntityState.cs`
 
 ## Parameters
 
@@ -54,6 +56,9 @@ through the usual higher-priority transition.
 
 A non-forced `Cast -> Cast` request is rejected by the normal same-state rule.
 Use `force=True` only when intentionally restarting Cast or changing its mode.
+`Attack -> Attack` is the one same-state exception: the normal priority rule
+admits it while the machine's live attack phase is `ComboWindow` (chaining the
+next combo hit needs no force).
 
 ## Lifecycle and reentry
 
