@@ -29,7 +29,7 @@ MonoBehaviour:
     canManualClose: 0
   rules:
   - triggers:
-    - triggerEvent: 1
+    - triggerEvent: 2
       groups: []
     reentry: 0
     steps:
@@ -59,29 +59,13 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
-    - op: apply_buff
+    - op: attack_behavior_override
       args:
         entries:
-        - key: attributes
-          value: TargetPriority
+        - key: targetPriority
+          value: VisionFirst_Priority_Des
           fromBlackboard: 0
           type: 3
-        - key: ops
-          value: AddFlat
-          fromBlackboard: 0
-          type: 3
-        - key: magnitudes
-          value: 4
-          fromBlackboard: 0
-          type: 1
-        - key: buffId
-          value: adnach_t1_priority
-          fromBlackboard: 0
-          type: 3
-        - key: buffTime
-          value: -5
-          fromBlackboard: 0
-          type: 1
       condition: []
       steps: []
       elseSteps: []
