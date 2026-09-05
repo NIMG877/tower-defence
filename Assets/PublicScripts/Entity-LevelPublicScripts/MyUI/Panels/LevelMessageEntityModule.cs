@@ -198,11 +198,11 @@ namespace MyUI
                 _leftMessageOpen = true;
                 _leftMessage.SetActive(true);
             }
-            if (!_context.SelectedStaticEntityID.HasValue)
+            if (!_context.HasSelection)
                 return;
 
-            EntityData entityData = GetCurrentEntityData();
-            SwitchDetailsPage(_currentDetailsPage, entityData, _context.SelectedEntity);
+            EntityData entityData = _context.Inspected.EntityData;
+            SwitchDetailsPage(_currentDetailsPage, entityData, _context.Inspected);
             _attackRangeTiles.Show(entityData.VisionRange);
             _name.text = entityData.ChineseName;
             _class.sprite = _professionsLighten[entityData.CharacterJob];
@@ -211,20 +211,19 @@ namespace MyUI
 
         public void UpdateLeftMessage()
         {
-            if (!_context.SelectedStaticEntityID.HasValue)
+            if (!_context.HasSelection)
                 return;
 
-            EntityData entityData = GetCurrentEntityData();
-            EntityStats stats = GetCurrentEntityStats();
-            float attack = stats != null ? stats.AttackS : entityData.Attack;
-            float defense = stats != null ? stats.DefS : entityData.Defense;
-            float magicResistance = stats != null ? stats.MagicResistanceS : entityData.MagicResistance;
-            int block = stats != null ? stats.BlockOccupationS : entityData.BlockOccupation;
+            EntityStats stats = _context.Inspected.Stats;
+            float attack = stats.AttackS;
+            float defense = stats.DefS;
+            float magicResistance = stats.MagicResistanceS;
+            int block = stats.BlockOccupationS;
             _statsText.text =
                 $"攻击  {(int)attack}\n防御  {(int)defense}\n法抗  {(int)magicResistance}\n阻挡  {block}";
 
-            float maxHp = stats != null ? stats.MaxHpS : entityData.MaxHp;
-            float currentHp = stats != null && stats.IsActive ? stats.CurrentHp : maxHp;
+            float maxHp = stats.MaxHpS;
+            float currentHp = stats.IsActive ? stats.CurrentHp : maxHp;
             float hpRatio = maxHp > 0 ? currentHp / maxHp : 0;
             _hpSlider.sizeDelta = new Vector2(
                 _hpSliderSize.x * (hpRatio - 1),
@@ -251,8 +250,8 @@ namespace MyUI
                 return;
             }
 
-            Entity entity = _context.SelectedEntity;
-            if (entity == null)
+            Entity entity = _context.Inspected;
+            if (!_context.IsDeployed)
                 return;
             if (!_operatorOpen)
             {
@@ -428,9 +427,9 @@ namespace MyUI
                 click.callback.AddListener(_ =>
                 {
                     DetailsPage page = (DetailsPage)index;
-                    if (_currentDetailsPage == page || !_context.SelectedStaticEntityID.HasValue)
+                    if (_currentDetailsPage == page || !_context.HasSelection)
                         return;
-                    SwitchDetailsPage(page, GetCurrentEntityData(), _context.SelectedEntity);
+                    SwitchDetailsPage(page, _context.Inspected.EntityData, _context.Inspected);
                 });
                 buttons[i].GetComponent<EventTrigger>().triggers.Add(click);
             }
@@ -457,7 +456,7 @@ namespace MyUI
             var skillRangeClick = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
             skillRangeClick.callback.AddListener(_ =>
             {
-                if (_context.SelectedEntity == null || _skillRangeComponentParams == null)
+                if (!_context.IsDeployed || _skillRangeComponentParams == null)
                     return;
                 ShowSkillRange(_rangeDisplayMode != RangeDisplayMode.Skill);
             });
@@ -475,30 +474,17 @@ namespace MyUI
             return callBackClick;
         }
 
-        private EntityStats GetCurrentEntityStats()
-        {
-            return _context.SelectedEntity != null
-                ? _context.SelectedEntity.Stats
-                : _context.SelectedPlaceData?.EntityStats;
-        }
-
-        private EntityData GetCurrentEntityData()
-        {
-            return _context.SelectedEntity != null
-                ? _context.SelectedEntity.EntityData
-                : _context.SelectedPlaceData?.EntityData;
-        }
-
         private (int x, int y)[] GetCurrentWorldRange()
         {
-            if (_context.SelectedEntity != null)
-                return _context.SelectedEntity.Vision?.Range;
+            if (!_context.HasSelection)
+                return null;
 
-            if (_context.SelectedPlaceData != null &&
-                _context.Orientation != -1 &&
-                _context.HasPreviewPosition)
+            if (_context.IsDeployed)
+                return _context.Inspected.Vision?.Range;
+
+            if (_context.Orientation != -1 && _context.HasPreviewPosition)
             {
-                var baseRange = _context.SelectedPlaceData.EntityVision?.BaseRange;
+                var baseRange = _context.Inspected.Vision?.BaseRange;
                 if (baseRange != null)
                 {
                     Vector2 position = _context.PreviewPosition;
@@ -511,9 +497,7 @@ namespace MyUI
                 }
             }
 
-            if (!_context.SelectedStaticEntityID.HasValue)
-                return null;
-            List<Vector2Int> baseVisionRange = GetCurrentEntityData()?.VisionRange;
+            List<Vector2Int> baseVisionRange = _context.Inspected.EntityData.VisionRange;
             if (baseVisionRange == null)
                 return null;
             var result = new (int x, int y)[baseVisionRange.Count];
@@ -526,7 +510,7 @@ namespace MyUI
         {
             if (show)
             {
-                if (_context.SelectedEntity == null || _skillRangeComponentParams == null)
+                if (!_context.IsDeployed || _skillRangeComponentParams == null)
                     return;
                 SetRangeMode(RangeDisplayMode.Skill);
                 _skillRange.sprite = _skillRangeButton[1];
@@ -542,19 +526,19 @@ namespace MyUI
         {
             if (_rangeDisplayMode == RangeDisplayMode.Normal)
             {
-                if (!_context.SelectedStaticEntityID.HasValue)
+                if (!_context.HasSelection)
                     return null;
                 return GetCurrentWorldRange();
             }
 
             if (_rangeDisplayMode != RangeDisplayMode.Skill ||
-                _context.SelectedEntity == null ||
+                !_context.IsDeployed ||
                 _skillRangeComponentParams == null)
             {
                 return null;
             }
 
-            Entity entity = _context.SelectedEntity;
+            Entity entity = _context.Inspected;
             Vector2Int[] skillRange = _skillRangeComponentParams.GetVector2IntArrayLazy(
                 "range",
                 null,
@@ -662,7 +646,7 @@ namespace MyUI
             }, 0, 1, duration).SetUpdate(true).SetId("LevelMessagePanel");
         }
 
-        private void SwitchDetailsPage(DetailsPage page, EntityData entityData, Entity entity = null)
+        private void SwitchDetailsPage(DetailsPage page, EntityData entityData, Entity entity)
         {
             if (_currentDetailsPage != page)
             {
@@ -705,16 +689,18 @@ namespace MyUI
 
         private void ShowAbilityDetails(EntityData entityData, Entity entity)
         {
+            AbilitySystem.AbilityRuntime runtime = null;
             AbilitySystem.AbilityConfig config = null;
-            AbilitySystem.AbilityRuntime runtime = GetPrimarySkill(entity);
-            if (entity != null)
+            if (_context.IsDeployed)
             {
+                runtime = GetPrimarySkill(entity);
                 if (runtime != null)
                     config = runtime.config;
             }
             else if (entityData.Skills != null && entityData.Skills.Count > 0)
             {
-                // 部署前预览:entityData 来自 SelectedPlaceData,显示该干员本次携带(编队选择)的技能
+                // 部署前预览:显示该干员本次携带(编队选择)的技能。样本实体的
+                // SelectedSkillIndex 恒为默认 0,不代表编队选择,故走卡片配置。
                 config = entityData.Skills[_context.SelectedPlaceData.SkillIndex];
             }
 
@@ -734,15 +720,16 @@ namespace MyUI
         private void ShowTalentDetails(EntityData entityData, Entity entity)
         {
             AbilitySystem.AbilityConfig[] talents;
-            var runner = entity != null ? entity.AbilityRunner : null;
-            if (runner != null)
+            if (_context.IsDeployed)
             {
+                var runner = entity.AbilityRunner;
                 talents = new AbilitySystem.AbilityConfig[runner.Talents.Count];
                 for (int i = 0; i < runner.Talents.Count; i++)
                     talents[i] = runner.Talents[i].config;
             }
             else
             {
+                // 部署前预览:走卡片配置(理由同 ShowAbilityDetails)
                 talents = entityData.Talents != null
                     ? entityData.Talents.ToArray()
                     : System.Array.Empty<AbilitySystem.AbilityConfig>();
@@ -767,9 +754,9 @@ namespace MyUI
 
         private void ShowBuffDetails(Entity entity)
         {
-            List<Buff> buffs = entity != null && entity.buffController != null
-                ? entity.buffController.Buffs
-                : null;
+            // 池化实体契约:CreateNewEntity 必 AddComponent BuffController 且 Entity.PreWarm
+            // 已缓存——部署前(样本实体)也能读到 level buff,不加判空,契约破坏就崩。
+            List<Buff> buffs = entity.buffController.Buffs;
             int buffCount = buffs?.Count ?? 0;
             for (int i = 0; i < buffCount; i++)
             {

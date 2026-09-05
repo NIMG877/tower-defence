@@ -10,7 +10,7 @@ namespace MyUI
     /// <summary>
     /// Data and view behavior for one deployable entity selector.
     /// </summary>
-    internal sealed class LevelMessagePlaceData
+    public sealed class LevelMessagePlaceData
     {
         private readonly LevelMessageDeploymentModule _owner;
         private readonly GameObject _selectorRoot;
@@ -33,11 +33,14 @@ namespace MyUI
         /// <summary>该干员本次战斗携带的技能在 EntityData.Skills 中的索引（来自编队存档）。</summary>
         public int SkillIndex { get; private set; }
         public EntityData EntityData { get; private set; }
-        public EntityStats EntityStats { get; private set; }
-        public EntityVision EntityVision { get; private set; }
+        /// <summary>
+        /// 池样本实体：与 CallOut 派出的是同一 GameObject。部署前详情的
+        /// Stats/Vision/level buff 数据源（数值为 store 终值，含 OnPreWarm 落的局内 buff）。
+        /// </summary>
+        public Entity Sample { get; private set; }
         public bool IsAffordable { get; private set; }
 
-        public LevelMessagePlaceData(LevelMessageDeploymentModule owner, GameObject selector)
+        internal LevelMessagePlaceData(LevelMessageDeploymentModule owner, GameObject selector)
         {
             _owner = owner;
             _selectorRoot = selector;
@@ -61,12 +64,7 @@ namespace MyUI
             EntityPool pool = EntityPoolManager.Manager.FetchEntityPool(staticId);
             if (pool != null)
             {
-                Entity sample = pool.GetEntity();
-                if (sample != null)
-                {
-                    EntityStats = sample.Stats;
-                    EntityVision = sample.Vision;
-                }
+                Sample = pool.GetEntity();
             }
 
             _respawnTimer = 0;
@@ -85,14 +83,14 @@ namespace MyUI
         {
             // 费用读 AttributeStore 终值（CostS），modifier 才能作用于部署费
             if (EntityData.RespawnCostUp <= 0)
-                return EntityStats.CostS;
+                return Sample.Stats.CostS;
 
             float multiplier = 1 + EntityData.RespawnCostUp / 100;
             if (_deployCount == 0)
-                return EntityStats.CostS;
+                return Sample.Stats.CostS;
             if (_deployCount == 1)
-                return (int)(EntityStats.CostS * multiplier);
-            return (int)(EntityStats.CostS * multiplier * multiplier);
+                return (int)(Sample.Stats.CostS * multiplier);
+            return (int)(Sample.Stats.CostS * multiplier * multiplier);
         }
 
         public void DeltaNum(int delta)
@@ -551,7 +549,7 @@ namespace MyUI
 
         public void HandleSelectorClick(LevelMessagePlaceData placeData)
         {
-            if (!_context.SelectedStaticEntityID.HasValue)
+            if (!_context.HasSelection)
             {
                 _showPreview(placeData);
                 placeData.SelectorMove(true);
@@ -571,7 +569,7 @@ namespace MyUI
 
         public void HandleSelectorBeginDrag(LevelMessagePlaceData placeData)
         {
-            if (!_context.SelectedStaticEntityID.HasValue)
+            if (!_context.HasSelection)
             {
                 placeData.SelectorMove(true);
             }

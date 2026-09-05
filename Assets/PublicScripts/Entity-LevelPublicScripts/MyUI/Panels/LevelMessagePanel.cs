@@ -15,33 +15,41 @@ namespace MyUI
     }
 
     /// <summary>
-    /// The small piece of state shared by deployment and selected-entity presentation.
-    /// State transitions are owned by <see cref="LevelMessagePanel"/>.
+    /// The single "inspected entity" plus placement-preview state, shared by
+    /// deployment and selected-entity presentation. State transitions are owned
+    /// by <see cref="LevelMessagePanel"/>.
+    /// Inspected：部署前 = 待部署槽位的池样本实体（与 CallOut 派出的是同一
+    /// GameObject，Stats/Vision/level buff 可读），部署后 = 场上实体；
+    /// IsDeployed 区分二者。SelectedPlaceData 仍归属"卡片"（数量/费用/技能索引），
+    /// 与被查看实体正交。public 供 EditMode 测试直接断言（测试 asmdef 无
+    /// InternalsVisibleTo）。
     /// </summary>
-    internal sealed class LevelMessageSelectionContext
+    public sealed class LevelMessageSelectionContext
     {
         public LevelMessagePlaceData SelectedPlaceData { get; private set; }
-        public Entity SelectedEntity { get; private set; }
-        public EntityID? SelectedStaticEntityID { get; private set; }
+        public Entity Inspected { get; private set; }
+        public bool IsDeployed { get; private set; }
+        public bool HasSelection => Inspected != null;
+        public EntityID? SelectedStaticEntityID => Inspected?.EntityData.ID;
         public int Orientation { get; private set; } = -1;
         public Vector2 PreviewPosition { get; private set; }
         public bool HasPreviewPosition { get; private set; }
 
         public void SelectPlace(LevelMessagePlaceData placeData)
         {
-            SelectedEntity = null;
             SelectedPlaceData = placeData;
-            SelectedStaticEntityID = placeData.EntityId;
+            Inspected = placeData.Sample;
+            IsDeployed = false;
             Orientation = -1;
             PreviewPosition = default;
             HasPreviewPosition = false;
         }
 
-        public void SelectEntity(EntityID entityId, Entity entity)
+        public void SelectEntity(Entity entity)
         {
             SelectedPlaceData = null;
-            SelectedEntity = entity;
-            SelectedStaticEntityID = entityId;
+            Inspected = entity;
+            IsDeployed = true;
             Orientation = -1;
             PreviewPosition = default;
             HasPreviewPosition = false;
@@ -50,8 +58,8 @@ namespace MyUI
         public void Clear()
         {
             SelectedPlaceData = null;
-            SelectedEntity = null;
-            SelectedStaticEntityID = null;
+            Inspected = null;
+            IsDeployed = false;
             Orientation = -1;
             PreviewPosition = default;
             HasPreviewPosition = false;
@@ -259,7 +267,7 @@ namespace MyUI
             _hud.OnResume();
             _deployment.OnResume();
             if (_currentState == LevelMessageUIState.ViewAfterSet &&
-                (_selection.SelectedEntity == null || !_selection.SelectedEntity.Stats.IsActive))
+                !_selection.Inspected.Stats.IsActive)
             {
                 SwitchToNormal();
             }
@@ -298,10 +306,10 @@ namespace MyUI
             EnterPoolPreviewState(LevelMessageUIState.Choosing, placeData);
         }
 
-        private void SwitchToViewAfterSet(EntityID entityId, Entity entity)
+        private void SwitchToViewAfterSet(Entity entity)
         {
             _hud.SetSlow(true);
-            _selection.SelectEntity(entityId, entity);
+            _selection.SelectEntity(entity);
             ApplyStateView(LevelMessageUIState.ViewAfterSet);
             EnterStateAndStartUpdates(LevelMessageUIState.ViewAfterSet);
         }
@@ -362,8 +370,7 @@ namespace MyUI
                     _entity.UpdateLeftMessage();
                     break;
                 case LevelMessageUIState.ViewAfterSet:
-                    if (_selection.SelectedEntity == null ||
-                        !_selection.SelectedEntity.Stats.IsActive)
+                    if (!_selection.Inspected.Stats.IsActive)
                     {
                         SwitchToNormal();
                         return;
@@ -414,7 +421,7 @@ namespace MyUI
                     ((int)(worldPosition.y + 0.5), (int)(worldPosition.x + 0.5));
                 Entity entity = EntityManager.Manager.GetStaticEntityInBlock(block.i, block.j);
                 if (entity != null && entity.Stats.IsActive)
-                    SwitchToViewAfterSet(entity.EntityData.ID, entity);
+                    SwitchToViewAfterSet(entity);
             });
             trigger.triggers.Add(blankClick);
         }
