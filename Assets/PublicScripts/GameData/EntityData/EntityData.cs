@@ -91,7 +91,7 @@ public class EntityData
 
     // 子职业特性:与子职业一一对应的共享模板(非列表),Rebuild 工具(XLSX2DataAsset)
     // 按 CharacterSubJob 从 Prefabs/Abilities/SubJobs/ 装载;
-    // 运行时装配(PreWarm 构建/AbilityKind)为后续阶段,暂无消费方
+    // PreWarm 构建为 AbilityKind.SubJobTrait(常驻能力,teardown 保留语义同 Talents)
     public AbilityConfig SubJobTrait;
 
     // 动画资源

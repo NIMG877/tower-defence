@@ -78,6 +78,14 @@ xlsx 新列 `CharacterSubJob`，格子填中文子职业名（与 CharacterJob �
 
 ## 6. 本期不做（后续阶段）
 
+> **修订（2026-09-06，运行时装配 + UI 已接入）：** 前两条已完成——`AbilityKind` 尾部追加
+> `SubJobTrait`；`EntityAbilityRunner.PreWarm` 构建 `EntityData.SubJobTrait`（teardown 保留
+> 语义同 Talents 自然成立，OnTeardown 本就只清 ExtraAbility）。14 个资产的 sp 块与天赋同型
+> （totalSp=0 + Auto + NoConsume）⇒ 首帧 Tick 自动开启并常驻，规则随事件派发。UI 侧
+> `SubpCard.UpdateSubpCardMessage` 按 `SubJobTrait` 资产显示（无子职业隐藏整卡），接入
+> LevelMessagePanel 子职业页签与 CharacterSelectPanel 预留的 `subpArea`（单卡、无选择逻辑）。
+> 特性规则本体（秘术师/冲锋手/凝滞师三个已定效果的 rules 配置）与下条职责划分仍为后续。
+
 - **运行时装配**：`EntityAbilityRunner.PreWarm` 构建 `SubJobTrait`；届时大概率给 `AbilityKind` 枚举尾部追加 `SubJobTrait` 值（保既有资产序号稳定），并决定 `OnTeardown` 保留语义（同 Talents）。
 - **UI**：`SubpCard.UpdateSubpCardMessage` 按 `CharacterSubJob` 显示名称/图标/描述。
 - **秘术师职责划分**：`ChargeAttack`（prefab 攻击模块变体）与特性资产的边界、`ebnhlz_t1` 是否并入特性资产。

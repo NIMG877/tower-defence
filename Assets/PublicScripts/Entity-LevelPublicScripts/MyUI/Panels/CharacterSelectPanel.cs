@@ -54,17 +54,27 @@ namespace MyUI
             }
         }
 
-        private bool _showSkill, _showTalent;
-        private Image _skillImage, _talentImage;
+        // 消息页切换:枚举序 = skillTalentSwitch 下按钮子节点序(skill/talent/subp)
+        private enum MessagePage
+        {
+            Skill,
+            Talent,
+            Subp,
+        }
+        private MessagePage _page = MessagePage.Skill;
+        private Image _skillImage, _talentImage, _subpImage;
         private Color _white1 = new Color(0.7686f, 0.7686f, 0.7686f);
         private Color _black1 = new Color(0.2196f, 0.2196f, 0.2196f);
-        private TextMeshProUGUI _skillText, _talentText;
+        private TextMeshProUGUI _skillText, _talentText, _subpText;
         private RectTransform _skillSelectRT;
         private ScrollRect _skillContent;
         private RectTransform _skillArea, _content;
         private RectTransform _talentArea, _talentContent;
         private AbilityCard[] _abilitySelectorCards;
         private List<TalentCard> _talentCardList;
+        private ScrollRect _subpArea;
+        private RectTransform _subpContent;
+        private SubpCard _subpCard;
         private UnityAction[] _skillSelectorActions;
         private GameObject[] _noneSkillInfo;
 
@@ -97,26 +107,11 @@ namespace MyUI
             _skillText = GetComponentInChildrenByPath<TextMeshProUGUI>("container/characterMessage/skillTalentSwitch/skill/text");
             _talentImage = GetComponentInChildrenByPath<Image>("container/characterMessage/skillTalentSwitch/talent");
             _talentText = GetComponentInChildrenByPath<TextMeshProUGUI>("container/characterMessage/skillTalentSwitch/talent/text");
-            EventTrigger.Entry skillClick = new EventTrigger.Entry();
-            skillClick.eventID = EventTriggerType.PointerClick;
-            skillClick.callback.AddListener((data) =>
-            {
-                if (!_showSkill)
-                {
-                    SwitchToSkill_Talent(true);
-                }
-            });
-            _skillImage.GetComponent<EventTrigger>().triggers.Add(skillClick);
-            EventTrigger.Entry talentClick = new EventTrigger.Entry();
-            talentClick.eventID = EventTriggerType.PointerClick;
-            talentClick.callback.AddListener((data) =>
-            {
-                if (!_showTalent)
-                {
-                    SwitchToSkill_Talent(false);
-                }
-            });
-            _talentImage.GetComponent<EventTrigger>().triggers.Add(talentClick);
+            _subpImage = GetComponentInChildrenByPath<Image>("container/characterMessage/skillTalentSwitch/subp");
+            _subpText = GetComponentInChildrenByPath<TextMeshProUGUI>("container/characterMessage/skillTalentSwitch/subp/text");
+            BindPageSwitch(_skillImage, MessagePage.Skill);
+            BindPageSwitch(_talentImage, MessagePage.Talent);
+            BindPageSwitch(_subpImage, MessagePage.Subp);
             _selectMarks = new List<(RectTransform, TextMeshProUGUI)>() { (sp, sp.GetChild(0).GetComponent<TextMeshProUGUI>()) };
             GetComponentInChildrenByPath<Button>("done").onClick.AddListener(() =>
             {
@@ -198,33 +193,51 @@ namespace MyUI
             _talentArea = GetComponentInChildrenByPath<RectTransform>("container/characterMessage/talentArea");
             _talentContent = GetComponentInChildrenByPath<RectTransform>("container/characterMessage/talentArea/view/content");
             _talentCardList = new List<TalentCard>();
+            _subpArea = GetComponentInChildrenByPath<ScrollRect>("container/characterMessage/subpArea");
+            _subpContent = GetComponentInChildrenByPath<RectTransform>("container/characterMessage/subpArea/view/content");
+            _subpCard = new SubpCard(_subpContent, Color.black);
+            _subpCard.SubpRT.gameObject.SetActive(false);
         }
-        private void SwitchToSkill_Talent(bool isSkill)
+        private void BindPageSwitch(Image button, MessagePage page)
         {
-            if (isSkill)
+            EventTrigger.Entry click = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
+            click.callback.AddListener((data) =>
             {
-                _showSkill = true;
-                _showTalent = false;
-                _skillImage.color = _white1;
-                _skillText.color = _black1;
-                _talentImage.color = _black1;
-                _talentText.color = _white1;
-                _skillArea.gameObject.SetActive(true);
-                _talentArea.gameObject.SetActive(false);
-                LayoutRebuilder.ForceRebuildLayoutImmediate(_content);
-            }
-            else
+                if (_page != page)
+                {
+                    SwitchPage(page);
+                }
+            });
+            button.GetComponent<EventTrigger>().triggers.Add(click);
+        }
+        /// <summary>切换消息页：按钮选中态白底黑字、未选中黑底白字；只显示当前页内容区，
+        /// 并对新显示区的 content 强制重建布局。</summary>
+        private void SwitchPage(MessagePage page)
+        {
+            _page = page;
+            SetSwitchButton(_skillImage, _skillText, page == MessagePage.Skill);
+            SetSwitchButton(_talentImage, _talentText, page == MessagePage.Talent);
+            SetSwitchButton(_subpImage, _subpText, page == MessagePage.Subp);
+            _skillArea.gameObject.SetActive(page == MessagePage.Skill);
+            _talentArea.gameObject.SetActive(page == MessagePage.Talent);
+            _subpArea.gameObject.SetActive(page == MessagePage.Subp);
+            switch (page)
             {
-                _showTalent = true;
-                _showSkill = false;
-                _skillImage.color = _black1;
-                _skillText.color = _white1;
-                _talentImage.color = _white1;
-                _talentText.color = _black1;
-                _skillArea.gameObject.SetActive(false);
-                _talentArea.gameObject.SetActive(true);
-                LayoutRebuilder.ForceRebuildLayoutImmediate(_talentContent);
+                case MessagePage.Skill:
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(_content);
+                    break;
+                case MessagePage.Talent:
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(_talentContent);
+                    break;
+                case MessagePage.Subp:
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(_subpContent);
+                    break;
             }
+        }
+        private void SetSwitchButton(Image button, TextMeshProUGUI text, bool selected)
+        {
+            button.color = selected ? _white1 : _black1;
+            text.color = selected ? _black1 : _white1;
         }
         private void UpDateSelectMask()
         {
@@ -349,6 +362,7 @@ namespace MyUI
         {
             _skillArea.gameObject.SetActive(true);
             _talentArea.gameObject.SetActive(true);
+            _subpArea.gameObject.SetActive(true);
             if (characterId.ID_C == null)
             {
                 for (int i = 0; i < 3; i++)
@@ -361,6 +375,8 @@ namespace MyUI
                 _nullMask.SetActive(true);
                 _attackRangeTiles.Clear();
                 _skillSelectRT.gameObject.SetActive(false);
+                // 区常驻,只藏上一角色的残留卡片
+                _subpCard.SubpRT.gameObject.SetActive(false);
                 for (int i = 0; i < _talentCardList.Count; i++)
                 {
                     _talentCardList[i].TalentRT.gameObject.SetActive(false);
@@ -446,7 +462,10 @@ namespace MyUI
                     _talentCardList.Add(card);
                 }
             }
-            SwitchToSkill_Talent(_showSkill);
+            // 特性卡:按有无特性自显隐(数据源 SubJobTrait 资产),单卡无选择逻辑;
+            // 可见时的布局重建由 SwitchPage 统一处理
+            _subpCard.UpdateSubpCardMessage(entityData);
+            SwitchPage(_page);
         }
         public override void OnEnter()
         {
@@ -462,7 +481,7 @@ namespace MyUI
             {
                 UpdateCharacterMessage(EntityID.Null);
             }
-            SwitchToSkill_Talent(true);
+            SwitchPage(MessagePage.Skill);
         }
         public override void OnPause()
         {

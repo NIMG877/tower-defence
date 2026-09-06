@@ -119,9 +119,16 @@ namespace MyUI
             subpName.color = textColor;
             description.color = textColor;
         }
+        /// <summary>子职业特性卡:数据源 <c>EntityData.SubJobTrait</c> 资产(abilityName=子职业名,
+        /// description=特性描述,icon=职业图标)。无子职业(0=无)时隐藏整卡。</summary>
         public void UpdateSubpCardMessage(EntityData entityData)
         {
-
+            AbilityConfig trait = entityData.SubJobTrait;
+            SubpRT.gameObject.SetActive(trait != null);
+            if (trait == null) return;
+            if (trait.icon != null) subpImage.sprite = trait.icon;
+            subpName.text = trait.abilityName;
+            description.text = trait.description;
         }
     }
     public class BuffCard

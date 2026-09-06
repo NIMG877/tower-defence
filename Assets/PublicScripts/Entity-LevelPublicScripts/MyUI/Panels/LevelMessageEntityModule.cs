@@ -21,11 +21,12 @@ namespace MyUI
             Skill,
         }
 
+        // 页签枚举序 = prefab selectBar 子节点序(skill/talent/subp/buffs),BindDetailsTabs 按 GetChild(i) 绑定
         private enum DetailsPage
         {
             Ability,
-            SubProfession,
             Talent,
+            SubProfession,
             Buff,
         }
 
@@ -671,7 +672,7 @@ namespace MyUI
                     ShowAbilityDetails(entityData, entity);
                     break;
                 case DetailsPage.SubProfession:
-                    _subpCard.SubpRT.gameObject.SetActive(true);
+                    // 卡片自管激活:无子职业(CharacterSubJob=0)时隐藏,页面留白
                     _subpCard.UpdateSubpCardMessage(entityData);
                     break;
                 case DetailsPage.Talent:

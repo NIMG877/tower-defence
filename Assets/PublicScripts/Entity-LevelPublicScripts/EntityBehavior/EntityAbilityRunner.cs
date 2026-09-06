@@ -16,10 +16,11 @@ public class EntityAbilityRunner
 {
     private readonly Entity _entity;
     // 单一来源:PreWarm/Add/Remove/Teardown 都改这一个列表,不分 Kind;
-    // 对外按语义切分为 Skills / Talents / ExtraAbilities 三个只读视图(下方缓存实现)。
+    // 对外按语义切分为 Skills / Talents / SubJobTraits / ExtraAbilities 四个只读视图(下方缓存实现)。
     private readonly List<AbilityRuntime> _abilities = new List<AbilityRuntime>();
     private readonly List<AbilityRuntime> _skillsCache = new List<AbilityRuntime>();
     private readonly List<AbilityRuntime> _talentsCache = new List<AbilityRuntime>();
+    private readonly List<AbilityRuntime> _subJobsCache = new List<AbilityRuntime>();
     private readonly List<AbilityRuntime> _extrasCache = new List<AbilityRuntime>();
     private bool _abilitiesCacheDirty = true;
 
@@ -38,6 +39,11 @@ public class EntityAbilityRunner
     {
         get { EnsureAbilitiesCache(); return _talentsCache; }
     }
+    /// <summary>子职业特性列表(AbilityKind.SubJobTrait)。PreWarm 时从 <c>EntityData.SubJobTrait</c> 注入(0 或 1 个)。</summary>
+    public IReadOnlyList<AbilityRuntime> SubJobTraits
+    {
+        get { EnsureAbilitiesCache(); return _subJobsCache; }
+    }
     /// <summary>额外能力列表(AbilityKind.ExtraAbility)。由 <see cref="AddExtraAbility"/> 运行时加入,可用 <see cref="RemoveExtraAbility"/> 移除。</summary>
     public IReadOnlyList<AbilityRuntime> ExtraAbilities
     {
@@ -49,6 +55,7 @@ public class EntityAbilityRunner
         if (!_abilitiesCacheDirty) return;
         _skillsCache.Clear();
         _talentsCache.Clear();
+        _subJobsCache.Clear();
         _extrasCache.Clear();
         for (int i = 0; i < _abilities.Count; i++)
         {
@@ -57,6 +64,7 @@ public class EntityAbilityRunner
             {
                 case AbilityKind.Skill: _skillsCache.Add(a); break;
                 case AbilityKind.Talent: _talentsCache.Add(a); break;
+                case AbilityKind.SubJobTrait: _subJobsCache.Add(a); break;
                 case AbilityKind.ExtraAbility: _extrasCache.Add(a); break;
             }
         }
@@ -90,6 +98,10 @@ public class EntityAbilityRunner
 
         // Talents 在前,Skills 在后(语义优先 + 保持"天赋在技能前"的传统顺序)
         PreWarmList(data.Talents, AbilityKind.Talent);
+        // 子职业特性:单字段(0 或 1 个)。资产 sp 块与天赋同型(totalSp=0 + Auto +
+        // NoConsume),首帧 Tick 自动开启并常驻,规则随事件常驻派发。
+        if (data.SubJobTrait != null)
+            BuildAbilityRuntime(data.SubJobTrait, AbilityKind.SubJobTrait);
         // 只构建选中的技能(全量构建时未选中的技能也永远无人触发,白占 runtime)
         if (data.Skills != null && data.Skills.Count > 0 && data.Skills[_entity.SelectedSkillIndex] != null)
             BuildAbilityRuntime(data.Skills[_entity.SelectedSkillIndex], AbilityKind.Skill);
@@ -217,7 +229,7 @@ public class EntityAbilityRunner
         }
 
         // 3) Unwire + 仅清掉 ExtraAbility（运行时 AddExtraAbility 加入的动态能力）。
-        //    Talents/Skills 保留在 _abilities,等下次 OnInitialize 走 spEngine.Reset + 组件 OnTeardown/OnInit 重置。
+        //    Talents/SubJobTrait/Skills 保留在 _abilities,等下次 OnInitialize 走 spEngine.Reset + 组件 OnTeardown/OnInit 重置。
         for (int i = _abilities.Count - 1; i >= 0; i--)
         {
             var a = _abilities[i];

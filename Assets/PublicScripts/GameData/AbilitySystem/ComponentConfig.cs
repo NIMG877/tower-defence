@@ -495,6 +495,8 @@ namespace AbilitySystem
         Skill,
         Talent,
         ExtraAbility,
+        // 追加在尾部：既有资产按序号序列化，禁插中间。
+        SubJobTrait,
     }
 
     public enum ConditionOp
