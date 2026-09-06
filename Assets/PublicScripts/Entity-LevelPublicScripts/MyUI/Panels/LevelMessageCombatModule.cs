@@ -6,16 +6,26 @@ using UnityEngine;
 
 namespace MyUI
 {
+    /// <summary>战斗飘字类型，颜色与文本格式统一在 <see cref="LevelMessageCombatModule.StyleFor"/>。</summary>
+    public enum CombatTextKind
+    {
+        Damage,
+        Heal,
+        AddCost,
+        ReduceCost,
+        SpAdd,
+        Miss,
+    }
+
     /// <summary>
     /// Owns combat event subscriptions, floating combat text, and settlement statistics.
     /// </summary>
     internal sealed class LevelMessageCombatModule
     {
         private readonly Transform _textRoot;
-        private readonly List<TextMeshProUGUI>[] _textPools;
+        private readonly List<TextMeshProUGUI> _textPool = new List<TextMeshProUGUI>();
+        private readonly HashSet<TextMeshProUGUI> _borrowedTexts = new HashSet<TextMeshProUGUI>();
         private readonly HashSet<Entity> _registeredEntities = new HashSet<Entity>();
-        private readonly Dictionary<TextMeshProUGUI, int> _borrowedTexts =
-            new Dictionary<TextMeshProUGUI, int>();
         private readonly Dictionary<EntityID, int> _statisticsIndex =
             new Dictionary<EntityID, int>();
 
@@ -26,17 +36,10 @@ namespace MyUI
         public LevelMessageCombatModule(GameObject root)
         {
             _textRoot = LevelMessageViewLookup.Get<Transform>(root, "texts");
-            string[] textNames =
-                { "textDamage", "textHeal", "textAddCost", "textReduceCost", "spAdd", "miss" };
-            _textPools = new List<TextMeshProUGUI>[textNames.Length];
-            for (int i = 0; i < textNames.Length; i++)
-            {
-                TextMeshProUGUI sample =
-                    LevelMessageViewLookup.Get<TextMeshProUGUI>(root, $"texts/{textNames[i]}");
-                _textPools[i] = new List<TextMeshProUGUI> { sample };
-                for (int j = 0; j < 4; j++)
-                    _textPools[i].Add(Object.Instantiate(sample, _textRoot));
-            }
+            _textPool.Add(LevelMessageViewLookup.Get<TextMeshProUGUI>(root, "texts/floatingText"));
+            // 共享单池按全场并发峰值增长，预热 8 个（原 6 类型 × 各 4 个 = 30 个常驻）
+            for (int i = 0; i < 8; i++)
+                _textPool.Add(Object.Instantiate(_textPool[0], _textRoot));
         }
 
         public void OnEnter(EntityID[] characters)
@@ -75,42 +78,54 @@ namespace MyUI
             ResetFloatingTexts();
         }
 
-        public void ShowText(Vector2 entityPosition, int textType, int value)
+        public void ShowText(Vector2 entityPosition, CombatTextKind kind, int value)
         {
-            if (textType < 0 || textType >= _textPools.Length)
-            {
-                Debug.LogWarning($"Unsupported level combat text type: {textType}");
-                return;
-            }
-
             TextMeshProUGUI text;
-            if (_textPools[textType].Count > 1)
+            if (_textPool.Count > 1)
             {
-                text = _textPools[textType][1];
-                _textPools[textType].RemoveAt(1);
+                text = _textPool[1];
+                _textPool.RemoveAt(1);
             }
             else
             {
-                text = Object.Instantiate(_textPools[textType][0], _textRoot);
+                text = Object.Instantiate(_textPool[0], _textRoot);
             }
-            _borrowedTexts[text] = textType;
+            _borrowedTexts.Add(text);
 
-            switch (textType)
-            {
-                case 0: text.text = value.ToString(); break;
-                case 1: text.text = "+" + value; break;
-                case 2: text.text = "COST " + value; break;
-                case 3: text.text = "COST- " + value; break;
-                case 4: text.text = "SP " + value; break;
-            }
+            (Color color, string content) = StyleFor(kind, value);
+            text.color = color;
+            text.text = content;
 
-            text.transform.position = entityPosition + 1.2f * Vector2.up + 0.1f * Random.insideUnitCircle;
+            text.transform.position = entityPosition + 1.2f * Vector2.up + 0.06f * Random.insideUnitCircle;
             text.transform.localScale = Vector3.zero;
             text.gameObject.SetActive(true);
             text.transform.DOScale(1, 0.2f)
                 .SetUpdate(true)
                 .SetId("LevelMessagePanel")
                 .OnComplete(() => HideTextAfterDelay(text).Forget());
+        }
+
+        /// <summary>类型 → 颜色与文本。颜色取自原 6 个样本节点的预制体值；
+        /// 未知类型直接抛出，不静默落默认样式。</summary>
+        private static (Color color, string content) StyleFor(CombatTextKind kind, int value)
+        {
+            switch (kind)
+            {
+                case CombatTextKind.Damage:
+                    return (new Color(0.7264151f, 0f, 0f), value.ToString());
+                case CombatTextKind.Heal:
+                    return (new Color(0f, 0.745283f, 0f), "+" + value);
+                case CombatTextKind.AddCost:
+                    return (new Color(0.81960785f, 0.580853f, 0f), "COST " + value);
+                case CombatTextKind.ReduceCost:
+                    return (new Color(0.8773585f, 0f, 0f), "COST- " + value);
+                case CombatTextKind.SpAdd:
+                    return (new Color(0f, 0.5386607f, 0.8584906f), "SP " + value);
+                case CombatTextKind.Miss:
+                    return (new Color(0.9056604f, 0.83616626f, 0f), "MISS");
+                default:
+                    throw new System.ArgumentOutOfRangeException(nameof(kind), kind, null);
+            }
         }
 
         public void AcceptDamageMessage(
@@ -130,7 +145,7 @@ namespace MyUI
             try
             {
                 await UniTask.WaitForSeconds(
-                    0.3f,
+                    0.36f,
                     true,
                     PlayerLoopTiming.Update,
                     LevelResourceSharing.LevelCtk);
@@ -141,7 +156,7 @@ namespace MyUI
                 return;
             }
 
-            if (!_borrowedTexts.ContainsKey(text))
+            if (!_borrowedTexts.Contains(text))
                 return;
             text.transform.DOScale(0, 0.2f)
                 .SetUpdate(true)
@@ -151,28 +166,24 @@ namespace MyUI
 
         private void ReturnText(TextMeshProUGUI text)
         {
-            if (text == null || !_borrowedTexts.TryGetValue(text, out int textType))
+            if (text == null || !_borrowedTexts.Remove(text))
                 return;
             text.transform.DOKill();
             text.transform.localScale = Vector3.zero;
             text.gameObject.SetActive(false);
-            _borrowedTexts.Remove(text);
-            if (!_textPools[textType].Contains(text))
-                _textPools[textType].Add(text);
+            _textPool.Add(text);
         }
 
         private void ResetFloatingTexts()
         {
-            foreach (KeyValuePair<TextMeshProUGUI, int> pair in _borrowedTexts)
+            foreach (TextMeshProUGUI text in _borrowedTexts)
             {
-                TextMeshProUGUI text = pair.Key;
                 if (text == null)
                     continue;
                 text.transform.DOKill();
                 text.transform.localScale = Vector3.zero;
                 text.gameObject.SetActive(false);
-                if (!_textPools[pair.Value].Contains(text))
-                    _textPools[pair.Value].Add(text);
+                _textPool.Add(text);
             }
             _borrowedTexts.Clear();
         }
@@ -220,7 +231,7 @@ namespace MyUI
             switch (resolution.Kind)
             {
                 case DamageResolutionKind.Dodged:
-                    ShowText(target.transform.position, 5, 0);
+                    ShowText(target.transform.position, CombatTextKind.Miss, 0);
                     break;
                 case DamageResolutionKind.Damage:
                     RecordDamage(
@@ -229,13 +240,13 @@ namespace MyUI
                         resolution.Amount,
                         resolution.DamageType);
                     if (resolution.IsCritical)
-                        ShowText(target.transform.position, 0, (int)resolution.Amount);
+                        ShowText(target.transform.position, CombatTextKind.Damage, (int)resolution.Amount);
                     break;
                 case DamageResolutionKind.Healing:
                     RecordHealing(
                         resolution.Origin,
                         resolution.Amount);
-                    ShowText(target.Movement.Position, 1, (int)resolution.Amount);
+                    ShowText(target.Movement.Position, CombatTextKind.Heal, (int)resolution.Amount);
                     break;
             }
         }

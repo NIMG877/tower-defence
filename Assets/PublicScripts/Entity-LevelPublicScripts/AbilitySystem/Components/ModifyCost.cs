@@ -34,9 +34,10 @@ namespace AbilitySystem.Components
         {
             if (applied == 0)
                 return;
-            int textType = applied > 0 ? 2 : 3;
             MyUI.LevelMessagePanel.Panel.ShowText(
-                ctx.entity.transform.position, textType, Mathf.Abs(applied));
+                ctx.entity.transform.position,
+                applied > 0 ? MyUI.CombatTextKind.AddCost : MyUI.CombatTextKind.ReduceCost,
+                Mathf.Abs(applied));
             if (applied > 0)
                 AudioManager.Manager.PlayAudio("get_cost", 1, false, false);
         }

@@ -163,9 +163,9 @@ namespace MyUI
             _deployment.AddSelectors(idList, nums);
         }
 
-        public void ShowText(Vector2 entityPos, int textType, int value)
+        public void ShowText(Vector2 entityPos, CombatTextKind kind, int value)
         {
-            _combat.ShowText(entityPos, textType, value);
+            _combat.ShowText(entityPos, kind, value);
         }
 
         public void EntityBackToSelector(Entity entityToBack)
