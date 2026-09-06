@@ -135,10 +135,6 @@ namespace MyUI
     {
         public RectTransform BuffRT;
         private TextMeshProUGUI buffName, buffDetail;
-        private Dictionary<string, string> buffs = new Dictionary<string, string>()
-        {
-            {"AttackMinNum","��С������" }
-        };
         public BuffCard(RectTransform parent, Color textColor)
         {
             RectTransform buffCard = Resources.Load<RectTransform>("Prefabs/UI/MyUIs/Components/buffCard");
@@ -153,13 +149,31 @@ namespace MyUI
             buffDetail.text = null;
             for (int i = 0; i < m.Length; i++)
             {
-                string effectName=buffs.TryGetValue(m[i].attribute, out var dn) ? dn : m[i].attribute;
-                string effectvalue = m[i].magnitude.ToString("0.000");
-                buffDetail.text += $"{effectName}: {effectvalue}";
+                string effectName = m[i].attribute;
+                buffDetail.text += $"{effectName}: {FormatMagnitude(m[i])}";
                 if (i < m.Length - 1)
                 {
                     buffDetail.text += '\n';
                 }
+            }
+        }
+
+        /// <summary>按运算方式区分显示:直接加算 +300 / 直接百分比 +15% /
+        /// 最终加算 +50(最终) / 最终乘算 ×1.5。语义见 ModifierOp。</summary>
+        private static string FormatMagnitude(Modifier modifier)
+        {
+            switch (modifier.op)
+            {
+                case ModifierOp.AddPercent:
+                    return (modifier.magnitude * 100).ToString("+0.#;-0.#") + "%";
+                case ModifierOp.AddFlatFinal:
+                    return modifier.magnitude.ToString("+0.#;-0.#");
+                case ModifierOp.MulFinal:
+                    return "×" + (modifier.magnitude * 100).ToString("0.#")+ "%";
+                case ModifierOp.AddFlat:
+                    return modifier.magnitude.ToString("+0.#;-0.#");
+                default:
+                    return "error_op";
             }
         }
     }
