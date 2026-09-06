@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: guardian
   m_EditorClassIdentifier: 
   abilityId: guardian
-  abilityName: "守护者"
-  description: "子职业特性模板：守护者。效果规则待生效阶段配置。"
-  icon: {fileID: 0}
+  abilityName: "\u5B88\u62A4\u8005"
+  description: "\u6280\u80FD\u53EF\u4EE5\u6CBB\u7597\u53CB\u65B9\u5355\u4F4D"
+  icon: {fileID: 21300000, guid: f875001285897064b998bd7b36cff39f, type: 3}
   Kind: 1
   sp:
     totalSp: 0
@@ -26,5 +26,6 @@ MonoBehaviour:
     consumeMode: 5
     openMode: 0
     recoverForbidDuringAbility: 0
+    canManualClose: 0
   rules: []
   legacyComponents: []

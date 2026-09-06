@@ -11,11 +11,11 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: charger
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   abilityId: charger
-  abilityName: "冲锋手"
-  description: "击杀目标后获得1点部署费用"
-  icon: {fileID: 0}
+  abilityName: "\u51B2\u950B\u624B"
+  description: "\u51FB\u6740\u76EE\u6807\u540E\u83B7\u5F971\u70B9\u90E8\u7F72\u8D39\u7528\uFF0C\u64A4\u9000\u65F6\u8FD4\u8FD8\u8BE5\u6B21\u90E8\u7F72\u8D39\u7528"
+  icon: {fileID: 21300000, guid: 44418e4b1311463488d1d469e9878051, type: 3}
   Kind: 1
   sp:
     totalSp: 0
@@ -66,7 +66,8 @@ MonoBehaviour:
       - units:
         - op: 1
           leftKey: charger_kill
-          rightValue: "True"
+          rightValue: True
+          rightKey: 
       steps:
       - op: modify_cost
         args:

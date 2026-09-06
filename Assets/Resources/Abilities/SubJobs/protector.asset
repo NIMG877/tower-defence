@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: protector
   m_EditorClassIdentifier: 
   abilityId: protector
-  abilityName: "铁卫"
-  description: "子职业特性模板：铁卫。效果规则待生效阶段配置。"
-  icon: {fileID: 0}
+  abilityName: "\u94C1\u536B"
+  description: "\u80FD\u591F\u963B\u6321\u4E09\u4E2A\u654C\u4EBA"
+  icon: {fileID: 21300000, guid: 39cb0b86fe058e04c96fa11e911c74fe, type: 3}
   Kind: 1
   sp:
     totalSp: 0
@@ -26,5 +26,6 @@ MonoBehaviour:
     consumeMode: 5
     openMode: 0
     recoverForbidDuringAbility: 0
+    canManualClose: 0
   rules: []
   legacyComponents: []

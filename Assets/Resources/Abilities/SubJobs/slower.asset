@@ -11,11 +11,11 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: slower
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   abilityId: slower
-  abilityName: "凝滞师"
-  description: "攻击造成法术伤害，并对目标造成短暂的停顿"
-  icon: {fileID: 0}
+  abilityName: "\u51DD\u6EDE\u5E08"
+  description: "\u653B\u51FB\u9020\u6210\u6CD5\u672F\u4F24\u5BB3\uFF0C\u5E76\u5BF9\u76EE\u6807\u9020\u6210\u77ED\u6682\u7684\u505C\u987F"
+  icon: {fileID: 21300000, guid: f8129bdd695f55841bfd8d5ad182be39, type: 3}
   Kind: 1
   sp:
     totalSp: 0
@@ -79,7 +79,7 @@ MonoBehaviour:
           fromBlackboard: 0
           type: 3
         - key: abnormalTypes
-          value: "4"
+          value: 4
           fromBlackboard: 0
           type: 3
         - key: abnormalTimes

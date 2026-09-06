@@ -227,7 +227,7 @@ MonoBehaviour:
     DefaultCamp: 1
     CharacterRarity: 3
     CharacterJob: 4
-    CharacterSubJob: 0
+    CharacterSubJob: 12
     MonsterStatus: 0
     MonsterLabel: 
     MonsterIsPrimary: 0
@@ -277,7 +277,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 28d6c3a075490e84e9e8c27243786cf3, type: 2}
     Talents:
     - {fileID: 11400000, guid: 5e095252e619e0b4eaa17558e65bbb07, type: 2}
-    SubJobTrait: {fileID: 0}
+    SubJobTrait: {fileID: 11400000, guid: 2461a38d57218326426ef31b1d0335cf, type: 2}
     AnimationResources: {fileID: 11400000, guid: 4ad63c1c0debbf245b440f91c4f8157c, type: 2}
   - ID:
       ID_C: c
@@ -1108,7 +1108,7 @@ MonoBehaviour:
     VisionRadius: 0
     Attack: 568
     BaseAttackTime: 1.2
-    AttackNum: 1
+    AttackNum: 2
     DamageType: 0
     TargetPriority: 0
     SplashRadius: 0

@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: fastshot
   m_EditorClassIdentifier: 
   abilityId: fastshot
-  abilityName: "速射手"
-  description: "子职业特性模板：速射手。效果规则待生效阶段配置。"
-  icon: {fileID: 0}
+  abilityName: "\u901F\u5C04\u624B"
+  description: "\u4F18\u5148\u653B\u51FB\u7A7A\u4E2D\u5355\u4F4D"
+  icon: {fileID: 21300000, guid: 11b2c3111b7609644b8241a785f3b04c, type: 3}
   Kind: 1
   sp:
     totalSp: 0
@@ -26,5 +26,6 @@ MonoBehaviour:
     consumeMode: 5
     openMode: 0
     recoverForbidDuringAbility: 0
+    canManualClose: 0
   rules: []
   legacyComponents: []

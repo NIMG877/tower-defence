@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: pioneer
   m_EditorClassIdentifier: 
   abilityId: pioneer
-  abilityName: "尖兵"
-  description: "子职业特性模板：尖兵。效果规则待生效阶段配置。"
-  icon: {fileID: 0}
+  abilityName: "\u5C16\u5175"
+  description: "\u80FD\u591F\u963B\u6321\u4E24\u4E2A\u654C\u4EBA"
+  icon: {fileID: 21300000, guid: ab003eb15f1b3e74da5280e7aff829c1, type: 3}
   Kind: 1
   sp:
     totalSp: 0
@@ -26,5 +26,6 @@ MonoBehaviour:
     consumeMode: 5
     openMode: 0
     recoverForbidDuringAbility: 0
+    canManualClose: 0
   rules: []
   legacyComponents: []

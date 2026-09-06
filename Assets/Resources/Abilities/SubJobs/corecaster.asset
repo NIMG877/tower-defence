@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: corecaster
   m_EditorClassIdentifier: 
   abilityId: corecaster
-  abilityName: "中坚术师"
-  description: "子职业特性模板：中坚术师。效果规则待生效阶段配置。"
-  icon: {fileID: 0}
+  abilityName: "\u4E2D\u575A\u672F\u5E08"
+  description: "\u653B\u51FB\u9020\u6210\u6CD5\u672F\u4F24\u5BB3"
+  icon: {fileID: 21300000, guid: 65ced028265b5e2428cc4b2dfe4c5cd0, type: 3}
   Kind: 1
   sp:
     totalSp: 0
@@ -26,5 +26,6 @@ MonoBehaviour:
     consumeMode: 5
     openMode: 0
     recoverForbidDuringAbility: 0
+    canManualClose: 0
   rules: []
   legacyComponents: []

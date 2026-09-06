@@ -14,9 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   abilityId: mystic
   abilityName: "\u79D8\u672F\u5E08"
-  description: "\u5B50\u804C\u4E1A\u7279\u6027\u6A21\u677F\uFF1A\u65E0\u653B\u51FB\u76EE\u6807\u65F6\u79EF\u6512\u653B\u51FB\u80FD\u91CF\uFF08\u9ED8\u8BA4\u5BB9\u91CF
-    4\uFF09\uFF0C\u4E0B\u6B21\u653B\u51FB\u6D88\u8017\u5168\u90E8\u80FD\u91CF\u4E00\u5E76\u5C04\u51FA\u3002"
-  icon: {fileID: 21300000, guid: edbbba2a7d6a3f24d81205924b63415b, type: 3}
+  description: "\u653B\u51FB\u9020\u6210\u6CD5\u672F\u4F24\u5BB3\uFF0C\u5728\u627E\u4E0D\u5230\u653B\u51FB\u76EE\u6807\u65F6\u53EF\u4EE5\u5C06\u653B\u51FB\u80FD\u91CF\u50A8\u5B58\u8D77\u6765\u4E4B\u540E\u4E00\u9F50\u53D1\u5C04"
+  icon: {fileID: 21300000, guid: 814a65ab2616981488a57a65fd7488f2, type: 3}
   Kind: 1
   sp:
     totalSp: 0

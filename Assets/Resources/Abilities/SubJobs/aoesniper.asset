@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: aoesniper
   m_EditorClassIdentifier: 
   abilityId: aoesniper
-  abilityName: "炮手"
-  description: "子职业特性模板：炮手。效果规则待生效阶段配置。"
-  icon: {fileID: 0}
+  abilityName: "\u70AE\u624B"
+  description: "\u653B\u51FB\u9020\u6210\u7FA4\u4F53\u7269\u7406\u4F24\u5BB3"
+  icon: {fileID: 21300000, guid: 10c84cfb787b9de4290cf8097b4e15c8, type: 3}
   Kind: 1
   sp:
     totalSp: 0
@@ -26,5 +26,6 @@ MonoBehaviour:
     consumeMode: 5
     openMode: 0
     recoverForbidDuringAbility: 0
+    canManualClose: 0
   rules: []
   legacyComponents: []

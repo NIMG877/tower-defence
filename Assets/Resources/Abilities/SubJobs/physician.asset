@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: physician
   m_EditorClassIdentifier: 
   abilityId: physician
-  abilityName: "医师"
-  description: "子职业特性模板：医师。效果规则待生效阶段配置。"
-  icon: {fileID: 0}
+  abilityName: "\u533B\u5E08"
+  description: "\u6062\u590D\u53CB\u65B9\u5355\u4F4D\u751F\u547D"
+  icon: {fileID: 21300000, guid: 5e95506b733df0448bd7c801f44207eb, type: 3}
   Kind: 1
   sp:
     totalSp: 0
@@ -26,5 +26,6 @@ MonoBehaviour:
     consumeMode: 5
     openMode: 0
     recoverForbidDuringAbility: 0
+    canManualClose: 0
   rules: []
   legacyComponents: []
