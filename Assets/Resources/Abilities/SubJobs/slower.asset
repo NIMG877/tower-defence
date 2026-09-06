@@ -11,10 +11,10 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: slower
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier:
   abilityId: slower
   abilityName: "凝滞师"
-  description: "子职业特性模板：攻击使命中目标停顿（攻击间隔大幅延长）。"
+  description: "攻击造成法术伤害，并对目标造成短暂的停顿"
   icon: {fileID: 0}
   Kind: 1
   sp:
@@ -27,5 +27,67 @@ MonoBehaviour:
     openMode: 0
     recoverForbidDuringAbility: 0
     canManualClose: 0
-  rules: []
+  rules:
+  - triggers:
+    - triggerEvent: 2
+      groups: []
+    reentry: 0
+    steps:
+    - op: attack_behavior_override
+      args:
+        entries:
+        - key: damageType
+          value: 1
+          fromBlackboard: 0
+          type: 0
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
+  - triggers:
+    - triggerEvent: 7
+      groups: []
+    reentry: 0
+    steps:
+    - op: write_blackboard
+      args:
+        entries:
+        - key: key
+          value: slower_target
+          fromBlackboard: 0
+          type: 3
+        - key: source
+          value: event
+          fromBlackboard: 0
+          type: 3
+        - key: path
+          value: target
+          fromBlackboard: 0
+          type: 3
+        - key: method
+          value: set
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: apply_abnormal_state
+      args:
+        entries:
+        - key: blackboardKey
+          value: slower_target
+          fromBlackboard: 0
+          type: 3
+        - key: abnormalTypes
+          value: "4"
+          fromBlackboard: 0
+          type: 3
+        - key: abnormalTimes
+          value: 0.8
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
   legacyComponents: []
