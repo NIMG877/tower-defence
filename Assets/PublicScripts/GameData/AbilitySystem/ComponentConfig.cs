@@ -141,7 +141,8 @@ namespace AbilitySystem
         }
 
         // 数组版 Lazy:字面量同时吃 CSV("1.4,2.5")和单值("1.4")——CsvParser.Split 天然支持。
-        // fromBlackboard 路径容错:BB 里存 float[]/float/string 都能读;其它类型走 warn 桶。
+        // fromBlackboard 路径容错:BB 里存 float[]/float/int/string 都能读(int 无损升位);
+        // 其它类型走 warn 桶。
         public Func<float[]> GetFloatArrayLazy(string key, float[] defaultValue = null, Blackboard bb = null)
         {
             var entry = FindEntry(key);
@@ -358,6 +359,10 @@ namespace AbilitySystem
             {
                 case float[] arr: return arr;
                 case float f:     return new[] { f };
+                // int 无损升位,属数值标量契约(write_blackboard 字面量 type:Int、int
+                // 属性装箱都会在 BB 留下 int)。有损方向不静默转:double 精度降位、float
+                // 值读 int[] 都保留类型告警暴露。
+                case int i:       return new[] { (float)i };
                 case string s:    return CsvParser.Split(s, float.Parse);
                 default:
                     WarnBlackboardArrayTypeMismatchOnce(bbKey);
@@ -370,7 +375,7 @@ namespace AbilitySystem
             OneShotWarn.WarnOnce(
                 "bb-array-type:" + bbKey,
                 $"[ParamList] Blackboard key '{bbKey}' runtime type cannot be read as float[]; " +
-                "expected float[]/float/string. Returning defaultValue.");
+                "expected float[]/float/int/string. Returning defaultValue.");
         }
 
         // GetStringArrayLazy<T> 的 fromBlackboard 容错读,与字面量路径对称:BB 里存

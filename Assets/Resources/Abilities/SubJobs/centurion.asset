@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: centurion
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier:
   abilityId: centurion
   abilityName: "强攻手"
   description: "子职业特性模板：强攻手。效果规则待生效阶段配置。"
@@ -26,5 +26,52 @@ MonoBehaviour:
     consumeMode: 5
     openMode: 0
     recoverForbidDuringAbility: 0
-  rules: []
+    canManualClose: 0
+  rules:
+  - triggers:
+    - triggerEvent: 18
+      groups: []
+    reentry: 0
+    steps:
+    - op: write_blackboard
+      args:
+        entries:
+        - key: key
+          value: centurion_block
+          fromBlackboard: 0
+          type: 3
+        - key: source
+          value: entity
+          fromBlackboard: 0
+          type: 3
+        - key: path
+          value: blockoccupation
+          fromBlackboard: 0
+          type: 3
+        - key: method
+          value: set
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: attack_target_count_modifier
+      args:
+        entries:
+        - key: fields
+          value: selectmaxnum
+          fromBlackboard: 0
+          type: 3
+        - key: methods
+          value: set
+          fromBlackboard: 0
+          type: 3
+        - key: values
+          value: centurion_block
+          fromBlackboard: 1
+          type: 1
+      condition: []
+      steps: []
+      elseSteps: []
+    detached: 0
   legacyComponents: []

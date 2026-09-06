@@ -194,6 +194,7 @@ namespace AbilitySystem.Components
                 case "currenthprate": return entity.Stats.CurrentHpRate;
                 case "maxhp": return entity.Stats.MaxHpS;
                 case "attack": return entity.Stats.AttackS;
+                case "blockoccupation": return entity.Stats.BlockOccupationS;
                 case "monsterstatus": return entity.EntityData != null ? entity.EntityData.MonsterStatus : 0;
                 default:
                     WarnUnknownContextPath("entity", path);
