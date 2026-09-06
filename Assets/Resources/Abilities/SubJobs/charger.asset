@@ -11,10 +11,10 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: charger
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier:
   abilityId: charger
   abilityName: "冲锋手"
-  description: "子职业特性模板：击杀敌人后获得 1 点部署费用。"
+  description: "击杀目标后获得1点部署费用"
   icon: {fileID: 0}
   Kind: 1
   sp:
@@ -27,5 +27,57 @@ MonoBehaviour:
     openMode: 0
     recoverForbidDuringAbility: 0
     canManualClose: 0
-  rules: []
+  rules:
+  - triggers:
+    - triggerEvent: 7
+      groups: []
+    reentry: 0
+    steps:
+    - op: write_blackboard
+      args:
+        entries:
+        - key: key
+          value: charger_kill
+          fromBlackboard: 0
+          type: 3
+        - key: source
+          value: event
+          fromBlackboard: 0
+          type: 3
+        - key: path
+          value: isdeadly
+          fromBlackboard: 0
+          type: 3
+        - key: method
+          value: set
+          fromBlackboard: 0
+          type: 3
+        - key: asString
+          value: true
+          fromBlackboard: 0
+          type: 2
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: branch
+      args:
+        entries: []
+      condition:
+      - units:
+        - op: 1
+          leftKey: charger_kill
+          rightValue: "True"
+      steps:
+      - op: modify_cost
+        args:
+          entries:
+          - key: amount
+            value: 1
+            fromBlackboard: 0
+            type: 1
+        condition: []
+        steps: []
+        elseSteps: []
+      elseSteps: []
+    detached: 0
   legacyComponents: []
