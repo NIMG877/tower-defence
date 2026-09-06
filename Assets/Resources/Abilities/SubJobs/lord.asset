@@ -26,5 +26,65 @@ MonoBehaviour:
     consumeMode: 5
     openMode: 0
     recoverForbidDuringAbility: 0
-  rules: []
+  rules:
+  - triggers:
+    - triggerEvent: 8
+      groups: []
+    reentry: 0
+    steps:
+    - op: write_blackboard
+      args:
+        entries:
+        - key: key
+          value: lord_blocked
+          fromBlackboard: 0
+          type: 3
+        - key: source
+          value: event
+          fromBlackboard: 0
+          type: 3
+        - key: path
+          value: targetblocked
+          fromBlackboard: 0
+          type: 3
+        - key: method
+          value: set
+          fromBlackboard: 0
+          type: 3
+        - key: asString
+          value: true
+          fromBlackboard: 0
+          type: 2
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: branch
+      args:
+        entries: []
+      condition:
+      - units:
+        - op: 1
+          leftKey: lord_blocked
+          rightValue: "False"
+      steps:
+      - op: attack_event_value_modifier
+        args:
+          entries:
+          - key: fields
+            value: multiplyer
+            fromBlackboard: 0
+            type: 3
+          - key: methods
+            value: mult
+            fromBlackboard: 0
+            type: 3
+          - key: values
+            value: 0.8
+            fromBlackboard: 0
+            type: 1
+        condition: []
+        steps: []
+        elseSteps: []
+      elseSteps: []
+    detached: 0
   legacyComponents: []

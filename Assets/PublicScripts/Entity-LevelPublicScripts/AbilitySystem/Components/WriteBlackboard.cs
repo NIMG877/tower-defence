@@ -75,7 +75,7 @@ namespace AbilitySystem.Components
             switch (Normalize(_source()))
             {
                 case "event":
-                    value = ResolveEventValue(ctx.currentEvent, Normalize(_path()));
+                    value = ResolveEventValue(ctx.entity, ctx.currentEvent, Normalize(_path()));
                     break;
                 case "entity":
                     value = ResolveEntityValue(ctx.entity, Normalize(_path()));
@@ -101,7 +101,7 @@ namespace AbilitySystem.Components
                 : value.ToString();
         }
 
-        private static object ResolveEventValue(AbilityEvent evt, string path)
+        private static object ResolveEventValue(Entity entity, AbilityEvent evt, string path)
         {
             if (evt == null) return null;
 
@@ -110,6 +110,7 @@ namespace AbilitySystem.Components
                 switch (path)
                 {
                     case "target": return ToEntityList(damageEvent.target);
+                    case "targetblocked": return entity.Movement.ResistList.Contains(damageEvent.target);
                     case "multiplier":
                     case "multiplyer": return damageEvent.multiplyer;
                     case "defpenetrate": return damageEvent.defPenetrate;
