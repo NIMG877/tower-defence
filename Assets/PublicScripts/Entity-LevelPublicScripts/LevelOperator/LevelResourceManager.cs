@@ -95,19 +95,15 @@ public class LevelResourceManager : IManagerStartEnd
         _costRecoverSpeed = costRecoverSpeed;
         _costRecoverTimer = 0;
     }
-    public void ChangeCost(int changeNum)
+    /// <summary>增减费用并 clamp 到 [0, <see cref="_maxCost"/>]。</summary>
+    /// <returns>clamp 后实际生效的变化量，可正可负可为 0。</returns>
+    public int ChangeCost(int changeNum)
     {
-        _cost += changeNum;
-        if (_cost < 0)
-        {
-            _cost = 0;
-        }
-        else if (_cost > _maxCost)
-        {
-            _cost = _maxCost;
-        }
+        int before = _cost;
+        _cost = Mathf.Clamp(_cost + changeNum, 0, _maxCost);
         if (_start)
             LevelMessagePanel.Panel.CostTextUpDate();
+        return _cost - before;
     }
 
     private async UniTaskVoid CostRecover()
