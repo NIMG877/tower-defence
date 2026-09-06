@@ -64,7 +64,7 @@ MonoBehaviour:
             fromBlackboard: 0
             type: 3
           - key: methods
-            value: set
+            value: mult
             fromBlackboard: 0
             type: 3
           - key: values
