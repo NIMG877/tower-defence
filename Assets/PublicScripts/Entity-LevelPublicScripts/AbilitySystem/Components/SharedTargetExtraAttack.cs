@@ -137,7 +137,7 @@ namespace AbilitySystem.Components
         {
             if (_abnormalApplied || entity?.buffController == null) return;
             int type = _abnormalType();
-            if (type < 0 || type > 3) return;
+            if (!BuffController.IsValidAbnormalType(type)) return;
             entity.buffController.AddAbnormalState(_abnormalTime(), type);
             _abnormalApplied = true;
         }
@@ -146,7 +146,7 @@ namespace AbilitySystem.Components
         {
             if (!_abnormalApplied || entity?.buffController == null) return;
             int type = _abnormalType();
-            if (type >= 0 && type <= 3) entity.buffController.TryRemoveAbnormalState(type);
+            if (BuffController.IsValidAbnormalType(type)) entity.buffController.TryRemoveAbnormalState(type);
             _abnormalApplied = false;
         }
     }

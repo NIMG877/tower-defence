@@ -31,7 +31,7 @@ namespace AbilitySystem.Components
             {
                 Entity target = targets[i];
                 int type = states[i];
-                if (target == null || target.buffController == null || type < 0 || type > 3) continue;
+                if (target == null || target.buffController == null || !BuffController.IsValidAbnormalType(type)) continue;
                 target.buffController.TryRemoveAbnormalState(type);
             }
 

@@ -15,7 +15,7 @@ performs interruptible extra attacks against their exact targets.
 | `queueKey` | String | `shared_attack_requests` | Input `List<SharedAttackRequest>` Blackboard key. |
 | `activeSourceKey` | String | `shared_attack_source` | Writes the active request sender so `ShareAttackTarget` can prevent echo. |
 | `attackAnimation` | String | `""` | Named Animation Group used for both `AttackClose` and `AttackRemote`. |
-| `abnormalType` | Int | `0` | Abnormal state held while the queue is nonempty. Supported range `0..3`. |
+| `abnormalType` | Int | `0` | Abnormal state held while the queue is nonempty. Supported range `0..4`. |
 | `abnormalTime` | Float | `-10` | Abnormal-state duration; the default is permanent until explicitly removed. |
 
 ## Triggers and lifecycle

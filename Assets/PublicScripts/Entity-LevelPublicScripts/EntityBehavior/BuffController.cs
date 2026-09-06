@@ -68,7 +68,7 @@ public class BuffController : MonoBehaviour, IPoolOperation
     private List<Buff> white_list_buffs = new List<Buff>();
     private List<Buff> normal_buffs = new List<Buff>();
     private List<Buff> level_buffs = new List<Buff>();
-    private float[] _abnormalStateTime = new float[4];
+    private float[] _abnormalStateTime = new float[AbnormalStateTypeCount];
     private List<DOTData> _dotDatas = new List<DOTData>();
     private AttributeStore _store;
     public List<Buff> Buffs
@@ -210,6 +210,15 @@ public class BuffController : MonoBehaviour, IPoolOperation
     #region///异常状态
     /// <summary>异常状态永久阈值：施加时长 ≤ 此值视为无限持续，不随帧衰减，仅显式移除。</summary>
     private const float PermanentAbnormalTime = -5f;
+    /// <summary>异常状态类型数：0-束缚、1-失衡、2-沉默、3-无敌、4-停顿。</summary>
+    private const int AbnormalStateTypeCount = 5;
+    /// <summary>停顿(type 4)激活时的移动速度因子（降低 80%）。</summary>
+    private const float HaltSpeedFactor = 0.2f;
+    /// <summary>异常状态类型合法性判定，施加/移除组件共用。</summary>
+    public static bool IsValidAbnormalType(int abnormalType)
+    {
+        return abnormalType >= 0 && abnormalType < AbnormalStateTypeCount;
+    }
     /// <summary>
     /// 已激活时的刷新判定 = "取更长"，永久为最高档：永久不被限时覆盖，
     /// 限时可升级为永久（击退滑行以 -10 施加失衡、与技能限时失衡并存的场景依赖此语义）。
@@ -224,7 +233,7 @@ public class BuffController : MonoBehaviour, IPoolOperation
     /// 添加异常状态
     /// </summary>
     /// <param name="abnormalTime">添加异常状态的时长,值小于等于-5表示无限时长持续</param>
-    /// <param name="abnormalType">添加异常状态类型:0-眩晕,1-失衡,2-沉默,3-无敌</param>
+    /// <param name="abnormalType">添加异常状态类型:0-束缚,1-失衡,2-沉默,3-无敌,4-停顿</param>
     public void AddAbnormalState(float abnormalTime, int abnormalType)
     {
         switch (abnormalType)
@@ -284,6 +293,14 @@ public class BuffController : MonoBehaviour, IPoolOperation
                 }
                 break;
 
+            case 4:
+                // 停顿无进入副作用（减速由 GetMoveSpeedFactor 在速度出口查询），纯计时
+                if (ShouldRefreshAbnormal(_abnormalStateTime[4], abnormalTime))
+                {
+                    _abnormalStateTime[4] = abnormalTime;
+                }
+                break;
+
             default: break;
         }
     }
@@ -310,6 +327,9 @@ public class BuffController : MonoBehaviour, IPoolOperation
                     _thisEntity.Stats.AddHurtable(-1);
                     _thisEntity.Stats.AddSelectable(-1);
                     break;
+                case 4:
+                    _abnormalStateTime[4] = 0;
+                    break;
                 default: break;
             }
         }
@@ -328,6 +348,14 @@ public class BuffController : MonoBehaviour, IPoolOperation
     public float FetchAbnormalStateTime(int abnormalType)
     {
         return _abnormalStateTime[abnormalType];
+    }
+    /// <summary>
+    /// 移动速度因子，由移动出口（MoveBase.MoveSpeedS）统一结算：
+    /// 停顿(type 4)激活时降至 20%，否则 1。
+    /// </summary>
+    public float GetMoveSpeedFactor()
+    {
+        return FetchAbnormalState(4) ? HaltSpeedFactor : 1f;
     }
     private void AbnormalStateUpdate()
     {

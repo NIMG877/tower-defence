@@ -26,7 +26,8 @@ public class MoveBase : MonoBehaviour, IPoolOperation
     private Action _reachTempTarget;
     public delegate void OnReachSectionEnd();
     public OnReachSectionEnd OperationsOnReachSectionEnd;
-    public float MoveSpeedS { get { return _thisEntity.Stats.MoveSpeedS; } }
+    /// <summary>移动速度统一出口：属性值 × 停顿(type 4)减速因子，寻路移动消费此处。</summary>
+    public float MoveSpeedS { get { return _thisEntity.Stats.MoveSpeedS * _thisEntity.buffController.GetMoveSpeedFactor(); } }
     public int CurrentPathSerial { get { return _currentPathSerial; } }
     public int CurrentSectionSerial { get { return _currentSectionSerial; } }
     public int CurrentPointSerial { get { return _currentPointSerial; } }

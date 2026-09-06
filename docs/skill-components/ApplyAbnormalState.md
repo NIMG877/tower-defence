@@ -13,7 +13,7 @@ Blackboard. Its `normal` and `aura` modes mirror `ApplyBuff`.
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `mode` | String | `normal` | `normal` for one-shot application; `aura` for target-list synchronization. |
-| `abnormalTypes` | IntCsv | `""` | State types: `0` stun (bans Move), `1` unbalance (bans Move and Attack), `2` silence (bans Attack), `3` invulnerable (unselectable and unhurtable). |
+| `abnormalTypes` | IntCsv | `""` | State types: `0` restrain (bans Move), `1` unbalance (bans Move and Attack), `2` silence (bans Attack), `3` invulnerable (unselectable and unhurtable), `4` halt (reduces move speed by 80%). |
 | `abnormalTimes` | FloatCsv | `""` | Parallel durations; `-5` or below is permanent. |
 | `toSelf` | Bool | `True` | Target `ctx.entity` when `blackboardKey` is empty. |
 | `blackboardKey` | String | `""` | Optional input `List<Entity>` key. |
@@ -21,7 +21,7 @@ Blackboard. Its `normal` and `aura` modes mirror `ApplyBuff`.
 | `outputState` | String | `""` | Optional/required-in-aura parallel output `List<int>` key. |
 
 `abnormalTypes` and `abnormalTimes` must have equal lengths. Types outside
-`0..3` are skipped with a one-shot warning.
+`0..4` are skipped with a one-shot warning.
 
 ## Modes and lifecycle
 

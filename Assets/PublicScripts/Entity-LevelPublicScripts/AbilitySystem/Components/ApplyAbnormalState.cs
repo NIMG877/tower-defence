@@ -176,10 +176,10 @@ namespace AbilitySystem.Components
 
         private static bool IsValidType(int type)
         {
-            if (type >= 0 && type <= 3) return true;
+            if (BuffController.IsValidAbnormalType(type)) return true;
             OneShotWarn.WarnOnce(
                 "apply-abnormal-type:" + type,
-                $"ApplyAbnormalState: abnormal type {type} is outside the supported range 0..3; skipping.");
+                $"ApplyAbnormalState: abnormal type {type} is not a valid abnormal state type; skipping.");
             return false;
         }
 
