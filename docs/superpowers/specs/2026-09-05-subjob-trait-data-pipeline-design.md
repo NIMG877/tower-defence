@@ -37,7 +37,7 @@ public AbilityConfig SubJobTrait;    // 子职业特性；Rebuild 工具按 Char
 
 ## 3. 资产目录与映射（XLSX2DataAsset.cs）
 
-- 新文件夹 `Assets/Resources/Prefabs/Abilities/SubJobs/`，每个**已实现**的特性一个 `.asset`（AbilityConfig）。
+- 新文件夹 `Assets/Resources/Abilities/SubJobs/`，每个**已实现**的特性一个 `.asset`（AbilityConfig）。
 - 子职业 id → 资产 Resources 路径的映射为工具内**显式字典**——字典即"已实现特性注册表"：
 
 ```csharp
@@ -96,5 +96,5 @@ xlsx 新列 `CharacterSubJob`，格子填中文子职业名（与 CharacterJob �
 |---|---|
 | `Assets/PublicScripts/GameData/EntityData/EntityData.cs` | +`CharacterSubJob`、+`SubJobTrait`、注释更新 |
 | `Assets/DataTools/XLSX2DataAsset.cs` | +`ParseSubJob`、+`SubJobAbilityPaths`、`ReadEntityData` 装载、`ValidateSubJobs` |
-| `Assets/Resources/Prefabs/Abilities/SubJobs/` | 新目录 + 3 个占位 AbilityConfig .asset |
+| `Assets/Resources/Abilities/SubJobs/` | 新目录 + 3 个占位 AbilityConfig .asset |
 | `Assets/Tests/Editor/...` | ParseSubJob / 装载三分支测试 |

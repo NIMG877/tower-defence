@@ -76,7 +76,7 @@ namespace StaticData.Tests
         [Test]
         public void ResolveSubJobTrait_KnownSubJob_LoadsAsset()
         {
-            // 走生产注册表:14 个正式资产已在 Prefabs/Abilities/SubJobs/ 下,应能 Resources.Load 到
+            // 走生产注册表:14 个正式资产已在 Resources/Abilities/SubJobs/ 下,应能 Resources.Load 到
             var (subJob, trait) = XLSX2DataAsset.ResolveSubJobTrait("秘术师");
             Assert.AreEqual(1, subJob);
             Assert.IsNotNull(trait);
@@ -117,7 +117,7 @@ namespace StaticData.Tests
         [Test]
         public void ResolveSubJobTrait_MissingAsset_LogsWarningAndSkips()
         {
-            var paths = new Dictionary<int, string> { [1] = "Prefabs/Abilities/SubJobs/does_not_exist" };
+            var paths = new Dictionary<int, string> { [1] = "Abilities/SubJobs/does_not_exist" };
             LogAssert.Expect(LogType.Warning, new Regex("trait asset not found"));
             var (subJob, trait) = XLSX2DataAsset.ResolveSubJobTrait("秘术师", paths);
             Assert.AreEqual(1, subJob);

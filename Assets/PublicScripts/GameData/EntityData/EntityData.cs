@@ -90,7 +90,7 @@ public class EntityData
     public List<AbilityConfig> Talents = new List<AbilityConfig>();
 
     // 子职业特性:与子职业一一对应的共享模板(非列表),Rebuild 工具(XLSX2DataAsset)
-    // 按 CharacterSubJob 从 Prefabs/Abilities/SubJobs/ 装载;
+    // 按 CharacterSubJob 从 Resources/Abilities/SubJobs/ 装载;
     // PreWarm 构建为 AbilityKind.SubJobTrait(常驻能力,teardown 保留语义同 Talents)
     public AbilityConfig SubJobTrait;
 

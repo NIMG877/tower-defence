@@ -407,20 +407,20 @@ public class XLSX2DataAsset
     // 没实现的子职业不进这张表,装载时按缺资产 LogWarning,不静默。
     static readonly Dictionary<int, string> SubJobAbilityPaths = new()
     {
-        [1] = "Prefabs/Abilities/SubJobs/mystic",       // 秘术师:积攒攻击能量
-        [2] = "Prefabs/Abilities/SubJobs/charger",      // 冲锋手:击杀获得 1 费用
-        [3] = "Prefabs/Abilities/SubJobs/slower",       // 凝滞师:攻击造成停顿
-        [4] = "Prefabs/Abilities/SubJobs/pioneer",      // 尖兵
-        [5] = "Prefabs/Abilities/SubJobs/centurion",    // 强攻手
-        [6] = "Prefabs/Abilities/SubJobs/lord",         // 领主
-        [7] = "Prefabs/Abilities/SubJobs/fearless",     // 无畏者
-        [8] = "Prefabs/Abilities/SubJobs/protector",    // 铁卫
-        [9] = "Prefabs/Abilities/SubJobs/guardian",     // 守护者
-        [10] = "Prefabs/Abilities/SubJobs/fastshot",    // 速射手
-        [11] = "Prefabs/Abilities/SubJobs/aoesniper",   // 炮手
-        [12] = "Prefabs/Abilities/SubJobs/corecaster",  // 中坚术师
-        [13] = "Prefabs/Abilities/SubJobs/splashcaster", // 扩散术师
-        [14] = "Prefabs/Abilities/SubJobs/physician",   // 医师
+        [1] = "Abilities/SubJobs/mystic",       // 秘术师:积攒攻击能量
+        [2] = "Abilities/SubJobs/charger",      // 冲锋手:击杀获得 1 费用
+        [3] = "Abilities/SubJobs/slower",       // 凝滞师:攻击造成停顿
+        [4] = "Abilities/SubJobs/pioneer",      // 尖兵
+        [5] = "Abilities/SubJobs/centurion",    // 强攻手
+        [6] = "Abilities/SubJobs/lord",         // 领主
+        [7] = "Abilities/SubJobs/fearless",     // 无畏者
+        [8] = "Abilities/SubJobs/protector",    // 铁卫
+        [9] = "Abilities/SubJobs/guardian",     // 守护者
+        [10] = "Abilities/SubJobs/fastshot",    // 速射手
+        [11] = "Abilities/SubJobs/aoesniper",   // 炮手
+        [12] = "Abilities/SubJobs/corecaster",  // 中坚术师
+        [13] = "Abilities/SubJobs/splashcaster", // 扩散术师
+        [14] = "Abilities/SubJobs/physician",   // 医师
     };
 
     /// <summary>

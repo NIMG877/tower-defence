@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: mystic
   m_EditorClassIdentifier: 
   abilityId: mystic
-  abilityName: "秘术师"
-  description: "子职业特性模板：无攻击目标时积攒攻击能量（默认容量 4），下次攻击消耗全部能量一并射出。"
-  icon: {fileID: 0}
+  abilityName: "\u79D8\u672F\u5E08"
+  description: "\u5B50\u804C\u4E1A\u7279\u6027\u6A21\u677F\uFF1A\u65E0\u653B\u51FB\u76EE\u6807\u65F6\u79EF\u6512\u653B\u51FB\u80FD\u91CF\uFF08\u9ED8\u8BA4\u5BB9\u91CF
+    4\uFF09\uFF0C\u4E0B\u6B21\u653B\u51FB\u6D88\u8017\u5168\u90E8\u80FD\u91CF\u4E00\u5E76\u5C04\u51FA\u3002"
+  icon: {fileID: 21300000, guid: edbbba2a7d6a3f24d81205924b63415b, type: 3}
   Kind: 1
   sp:
     totalSp: 0
