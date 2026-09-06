@@ -208,6 +208,18 @@ public class BuffController : MonoBehaviour, IPoolOperation
     }
     #endregion
     #region///异常状态
+    /// <summary>异常状态永久阈值：施加时长 ≤ 此值视为无限持续，不随帧衰减，仅显式移除。</summary>
+    private const float PermanentAbnormalTime = -5f;
+    /// <summary>
+    /// 已激活时的刷新判定 = "取更长"，永久为最高档：永久不被限时覆盖，
+    /// 限时可升级为永久（击退滑行以 -10 施加失衡、与技能限时失衡并存的场景依赖此语义）。
+    /// </summary>
+    private static bool ShouldRefreshAbnormal(float current, float incoming)
+    {
+        if (current <= PermanentAbnormalTime) return false;
+        if (incoming <= PermanentAbnormalTime) return true;
+        return incoming > current;
+    }
     /// <summary>
     /// 添加异常状态
     /// </summary>
@@ -218,7 +230,7 @@ public class BuffController : MonoBehaviour, IPoolOperation
         switch (abnormalType)
         {
             case 0:
-                if (_abnormalStateTime[0] <= 0 && _abnormalStateTime[0] > -5)
+                if (_abnormalStateTime[0] <= 0 && _abnormalStateTime[0] > PermanentAbnormalTime)
                 {
                     _abnormalStateTime[0] = abnormalTime;
                     _thisEntity.StateMachine.AddStateToBan(new[] { EntityState.Move });
@@ -227,25 +239,25 @@ public class BuffController : MonoBehaviour, IPoolOperation
                         _thisEntity.StateMachine.TrySetState(EntityState.Idle, true);
                     }
                 }
-                else if (_abnormalStateTime[0] < abnormalTime)
+                else if (ShouldRefreshAbnormal(_abnormalStateTime[0], abnormalTime))
                 {
                     _abnormalStateTime[0] = abnormalTime;
                 }
                 break;
             case 1:
-                if (_abnormalStateTime[1] <= 0 && _abnormalStateTime[1] > -5)
+                if (_abnormalStateTime[1] <= 0 && _abnormalStateTime[1] > PermanentAbnormalTime)
                 {
                     _abnormalStateTime[1] = abnormalTime;
                     _thisEntity.StateMachine.AddStateToBan(new[] { EntityState.Move, EntityState.Attack });
                     _thisEntity.StateMachine.TrySetState(EntityState.Idle, true);
                 }
-                else if (_abnormalStateTime[1] < abnormalTime)
+                else if (ShouldRefreshAbnormal(_abnormalStateTime[1], abnormalTime))
                 {
                     _abnormalStateTime[1] = abnormalTime;
                 }
                 break;
             case 2:
-                if (_abnormalStateTime[2] <= 0 && _abnormalStateTime[2] > -5)
+                if (_abnormalStateTime[2] <= 0 && _abnormalStateTime[2] > PermanentAbnormalTime)
                 {
                     _abnormalStateTime[2] = abnormalTime;
                     _thisEntity.StateMachine.AddStateToBan(new[] { EntityState.Attack });
@@ -254,19 +266,19 @@ public class BuffController : MonoBehaviour, IPoolOperation
                         _thisEntity.StateMachine.TrySetState(EntityState.Idle, true);
                     }
                 }
-                else if (_abnormalStateTime[2] < abnormalTime)
+                else if (ShouldRefreshAbnormal(_abnormalStateTime[2], abnormalTime))
                 {
                     _abnormalStateTime[2] = abnormalTime;
                 }
                 break;
             case 3:
-                if (_abnormalStateTime[3] <= 0 && _abnormalStateTime[3] > -5)
+                if (_abnormalStateTime[3] <= 0 && _abnormalStateTime[3] > PermanentAbnormalTime)
                 {
                     _abnormalStateTime[3] = abnormalTime;
                     _thisEntity.Stats.AddSelectable(1);
                     _thisEntity.Stats.AddHurtable(1);
                 }
-                else if (_abnormalStateTime[3] < abnormalTime)
+                else if (ShouldRefreshAbnormal(_abnormalStateTime[3], abnormalTime))
                 {
                     _abnormalStateTime[3] = abnormalTime;
                 }
@@ -277,7 +289,7 @@ public class BuffController : MonoBehaviour, IPoolOperation
     }
     public void TryRemoveAbnormalState(int abnormalType)
     {
-        if (_abnormalStateTime[abnormalType] > 0 || _abnormalStateTime[abnormalType] <= -5)
+        if (_abnormalStateTime[abnormalType] > 0 || _abnormalStateTime[abnormalType] <= PermanentAbnormalTime)
         {
             switch (abnormalType)
             {
@@ -304,11 +316,18 @@ public class BuffController : MonoBehaviour, IPoolOperation
     }
     public bool FetchAbnormalState(int abnormalType)
     {
-        if (_abnormalStateTime[abnormalType] > 0 || _abnormalStateTime[abnormalType] <= -5)
+        if (_abnormalStateTime[abnormalType] > 0 || _abnormalStateTime[abnormalType] <= PermanentAbnormalTime)
         {
             return true;
         }
         return false;
+    }
+    /// <summary>
+    /// 读取异常状态当前计时：>0 为限时剩余，≤-5 为永久，0 为未激活。
+    /// </summary>
+    public float FetchAbnormalStateTime(int abnormalType)
+    {
+        return _abnormalStateTime[abnormalType];
     }
     private void AbnormalStateUpdate()
     {
@@ -318,7 +337,7 @@ public class BuffController : MonoBehaviour, IPoolOperation
             {
                 _abnormalStateTime[i] -= Time.fixedDeltaTime;
             }
-            else if (_abnormalStateTime[i] > -5)
+            else if (_abnormalStateTime[i] > PermanentAbnormalTime)
             {
                 TryRemoveAbnormalState(i);
             }
