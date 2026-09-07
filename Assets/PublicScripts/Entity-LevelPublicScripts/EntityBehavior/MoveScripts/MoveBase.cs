@@ -90,7 +90,8 @@ public class MoveBase : MonoBehaviour, IPoolOperation
     }
     private void FindEntitiesAroundAndTryToBeBlock()
     {
-        if (_thisEntity.Stats.BlockOccupationS >= 0)
+        // 失衡滑行期间禁用阻挡检测
+        if (_thisEntity.Stats.BlockOccupationS >= 0 && !_thisEntity.buffController.FetchAbnormalState(1))
         {
             List<Entity> entitiesAround = new List<Entity>();
             entitiesAround = EntityManager.Manager.EntitySelector_Radius((this.transform.position.x, this.transform.position.y), _thisEntity.Movement.Camp, false, 0.5f + EntityManager.EntityR, true);
@@ -149,7 +150,8 @@ public class MoveBase : MonoBehaviour, IPoolOperation
                         }
                     }
                 }
-                float entityR = EntityManager.EntityR * 1.1f;
+                // 留 0.0001 迟滞防贴墙静止时逐帧重触发
+                float entityR = EntityManager.EntityR * 1.0001f;
                 if (xConstrain != 0 && yConstrain != 0)
                 {
                     _unBalancedMoveSpeed = Vector2.zero;

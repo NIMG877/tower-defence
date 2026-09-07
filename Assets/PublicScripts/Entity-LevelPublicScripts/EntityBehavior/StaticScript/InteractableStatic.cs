@@ -98,7 +98,7 @@ public class InteractableStatic : MonoBehaviour, IPoolOperation
                 }
             }
             _thisEntity.Movement.ResistList.Add(movableEntity);
-            ++_blockOccupationNum;
+            _blockOccupationNum += movableEntity.Stats.BlockOccupationS;
             if (xFree && yFree)
             {
                 return thisP + AC;
