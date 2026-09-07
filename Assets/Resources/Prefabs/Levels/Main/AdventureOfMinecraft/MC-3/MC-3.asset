@@ -1557,7 +1557,7 @@ MonoBehaviour:
     WaitTimes:
     - 0
     - 117.83691
-    - 28.39523
+    - 6.98016
     - 0
   - Name: skeleton_l2
     CheckPoints:
@@ -1606,7 +1606,7 @@ MonoBehaviour:
     WaitTimes:
     - 0
     - 104.39674
-    - 29.45506
+    - 7.78018
     - 0
   - Name: skeleton_r1
     CheckPoints:
@@ -1682,7 +1682,7 @@ MonoBehaviour:
     - 12
     - 8.23862
     - 72.09536
-    - 58.59251
+    - 36.64084
     - 0
   - Name: skeleton_r3
     CheckPoints:
@@ -1695,7 +1695,7 @@ MonoBehaviour:
     - 0
     - 43
     - 47.39012
-    - 59.03261
+    - 36.80084
     - 0
   - Name: timer
     CheckPoints:
@@ -1711,7 +1711,7 @@ MonoBehaviour:
     - {x: 9, y: 5}
     WaitTimes:
     - 0
-    - 200
+    - 118.1247
     - 0
   - Name: zombie_s2
     CheckPoints:
@@ -1720,7 +1720,7 @@ MonoBehaviour:
     - {x: 9, y: 5}
     WaitTimes:
     - 0
-    - 200
+    - 119.1247
     - 0
   - Name: zombie_s3
     CheckPoints:
@@ -1729,7 +1729,7 @@ MonoBehaviour:
     - {x: 9, y: 5}
     WaitTimes:
     - 0
-    - 200
+    - 120.1047
     - 0
   - Name: zombie_s4
     CheckPoints:
@@ -1738,7 +1738,7 @@ MonoBehaviour:
     - {x: 9, y: 5}
     WaitTimes:
     - 0
-    - 200
+    - 118.4447
     - 0
   - Name: zombie_s5
     CheckPoints:
@@ -1747,7 +1747,7 @@ MonoBehaviour:
     - {x: 9, y: 5}
     WaitTimes:
     - 0
-    - 200
+    - 119.4247
     - 0
   - Name: zombie_s6
     CheckPoints:
@@ -1756,10 +1756,10 @@ MonoBehaviour:
     - {x: 9, y: 5}
     WaitTimes:
     - 0
-    - 200
+    - 120.3647
     - 0
-  LevelHp: 100
+  LevelHp: 3
   Cost0: 10
-  MaxCost: 9999
+  MaxCost: 99
   CanSetNum: 8
   CostRecoverSpeed: 1

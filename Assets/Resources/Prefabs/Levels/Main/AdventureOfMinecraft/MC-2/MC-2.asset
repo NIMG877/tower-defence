@@ -1201,7 +1201,7 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  LevelHp: 100
+  LevelHp: 3
   Cost0: 10
   MaxCost: 99
   CanSetNum: 8
