@@ -18,8 +18,10 @@ public class LevelActionManager : IManagerStartEnd
     }
     private LevelActionManager()
     {
-        _printerPoolWalk = new List<TrailRenderer>() { Object.Instantiate(Resources.Load<TrailRenderer>("Prefabs/PathPrinter/Printer_walk")) };
-        _printerPoolFly = new List<TrailRenderer>() { Object.Instantiate(Resources.Load<TrailRenderer>("Prefabs/PathPrinter/Printer_fly")) };
+        _printerTemplateWalk = Resources.Load<TrailRenderer>("Prefabs/PathPrinter/Printer_walk");
+        _printerTemplateFly = Resources.Load<TrailRenderer>("Prefabs/PathPrinter/Printer_fly");
+        _printerPoolWalk = new List<TrailRenderer>();
+        _printerPoolFly = new List<TrailRenderer>();
         _printerWalk = new List<TrailRenderer>();
         _printerFly = new List<TrailRenderer>();
     }
@@ -29,6 +31,8 @@ public class LevelActionManager : IManagerStartEnd
     private int _actionProcessNum;
     private bool _holdingWaveWhileExistWaveEntities;
 
+    private TrailRenderer _printerTemplateWalk;
+    private TrailRenderer _printerTemplateFly;
     private List<TrailRenderer> _printerPoolWalk;
     private List<TrailRenderer> _printerWalk;
     private List<TrailRenderer> _printerPoolFly;
@@ -216,26 +220,29 @@ public class LevelActionManager : IManagerStartEnd
     {
         List<TrailRenderer> printerPool;
         List<TrailRenderer> printerReceive;
+        TrailRenderer printerTemplate;
         if (moveMethod <= 1)
         {
             printerPool = _printerPoolWalk;
             printerReceive = _printerWalk;
+            printerTemplate = _printerTemplateWalk;
         }
         else
         {
             printerPool = _printerPoolFly;
             printerReceive = _printerFly;
+            printerTemplate = _printerTemplateFly;
         }
 
         TrailRenderer printer;
-        if (printerPool.Count > 1)
+        if (printerPool.Count > 0)
         {
-            printer = printerPool[1];
-            printerPool.RemoveAt(1);
+            printer = printerPool[printerPool.Count - 1];
+            printerPool.RemoveAt(printerPool.Count - 1);
         }
         else
         {
-            printer = Object.Instantiate(printerPool[0], LevelResourceSharing.LM);
+            printer = Object.Instantiate(printerTemplate, LevelResourceSharing.LM);
         }
         printerReceive.Add(printer);
         printer.transform.position = destination;
