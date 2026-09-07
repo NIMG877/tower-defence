@@ -163,7 +163,7 @@ public class Bullet
     {
         if (_destroyed) return;
         _destroyed = true;
-        EffectManager.Manager.ReturnEffect(_bulletData.BulletPrefab, _bulletObject);
+        EffectManager.Manager.ReturnEffect(_bulletObject);
         _onBulletDestroy?.Invoke(_bulletObject.transform.position);
         if (_bulletDestroyEffect)
         {
@@ -171,7 +171,7 @@ public class Bullet
         }
         if (_bulletTrailObject)
         {
-            EffectManager.Manager.SetEffectAutoReturn(_bulletData.BulletTrailPrefab, _bulletTrailObject);
+            EffectManager.Manager.SetEffectAutoReturn(_bulletTrailObject);
         }
         _activeBullets.Remove(this);
     }

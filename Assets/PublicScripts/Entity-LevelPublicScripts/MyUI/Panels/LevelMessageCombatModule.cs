@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Pool;
 
 namespace MyUI
 {
@@ -23,7 +23,10 @@ namespace MyUI
     internal sealed class LevelMessageCombatModule
     {
         private readonly Transform _textRoot;
-        private readonly List<TextMeshProUGUI> _textPool = new List<TextMeshProUGUI>();
+        // 场景模板节点，只作克隆源、永不借出（原实现占 list[0] 的隐式约定改为显式字段）
+        private readonly TextMeshProUGUI _textTemplate;
+        private readonly ObjectPool<TextMeshProUGUI> _textPool;
+        // 在展示中的飘字注册表：暂停/退出时据此全量收回；归还仅由补间链终点触发
         private readonly HashSet<TextMeshProUGUI> _borrowedTexts = new HashSet<TextMeshProUGUI>();
         private readonly HashSet<Entity> _registeredEntities = new HashSet<Entity>();
         private readonly Dictionary<EntityID, int> _statisticsIndex =
@@ -36,10 +39,14 @@ namespace MyUI
         public LevelMessageCombatModule(GameObject root)
         {
             _textRoot = LevelMessageViewLookup.Get<Transform>(root, "texts");
-            _textPool.Add(LevelMessageViewLookup.Get<TextMeshProUGUI>(root, "texts/floatingText"));
+            _textTemplate = LevelMessageViewLookup.Get<TextMeshProUGUI>(root, "texts/floatingText");
+            _textPool = new ObjectPool<TextMeshProUGUI>(
+                () => Object.Instantiate(_textTemplate, _textRoot),
+                actionOnRelease: ResetText,
+                collectionCheck: true);
             // 共享单池按全场并发峰值增长，预热 8 个（原 6 类型 × 各 4 个 = 30 个常驻）
             for (int i = 0; i < 8; i++)
-                _textPool.Add(Object.Instantiate(_textPool[0], _textRoot));
+                _textPool.Release(_textPool.Get());
         }
 
         public void OnEnter(EntityID[] characters)
@@ -80,16 +87,7 @@ namespace MyUI
 
         public void ShowText(Vector2 entityPosition, CombatTextKind kind, int value)
         {
-            TextMeshProUGUI text;
-            if (_textPool.Count > 1)
-            {
-                text = _textPool[1];
-                _textPool.RemoveAt(1);
-            }
-            else
-            {
-                text = Object.Instantiate(_textPool[0], _textRoot);
-            }
+            TextMeshProUGUI text = _textPool.Get();
             _borrowedTexts.Add(text);
 
             (Color color, string content) = StyleFor(kind, value);
@@ -99,10 +97,20 @@ namespace MyUI
             text.transform.position = entityPosition + 1.2f * Vector2.up + 0.06f * Random.insideUnitCircle;
             text.transform.localScale = Vector3.zero;
             text.gameObject.SetActive(true);
+            // 弹出→停顿→收缩是同一条补间链（延时挂在收缩补间上）：暂停/退出由
+            // ResetText 的 DOKill 与面板 Kill("LevelMessagePanel") 整链取消，
+            // 归还只发生在链正常走完时
             text.transform.DOScale(1, 0.2f)
                 .SetUpdate(true)
                 .SetId("LevelMessagePanel")
-                .OnComplete(() => HideTextAfterDelay(text).Forget());
+                .OnComplete(() =>
+                {
+                    text.transform.DOScale(0, 0.2f)
+                        .SetDelay(0.36f)
+                        .SetUpdate(true)
+                        .SetId("LevelMessagePanel")
+                        .OnComplete(() => ReturnText(text));
+                });
         }
 
         /// <summary>类型 → 颜色与文本。颜色取自原 6 个样本节点的预制体值；
@@ -140,51 +148,25 @@ namespace MyUI
                 RecordHealing(origin, finalDamage);
         }
 
-        private async UniTask HideTextAfterDelay(TextMeshProUGUI text)
-        {
-            try
-            {
-                await UniTask.WaitForSeconds(
-                    0.36f,
-                    true,
-                    PlayerLoopTiming.Update,
-                    LevelResourceSharing.LevelCtk);
-            }
-            catch (System.OperationCanceledException)
-            {
-                ReturnText(text);
-                return;
-            }
-
-            if (!_borrowedTexts.Contains(text))
-                return;
-            text.transform.DOScale(0, 0.2f)
-                .SetUpdate(true)
-                .SetId("LevelMessagePanel")
-                .OnComplete(() => ReturnText(text));
-        }
-
         private void ReturnText(TextMeshProUGUI text)
         {
-            if (text == null || !_borrowedTexts.Remove(text))
-                return;
+            _borrowedTexts.Remove(text);
+            _textPool.Release(text);
+        }
+
+        /// <summary>归还前的统一重置，也是池的 actionOnRelease（预热/收回路径复用）：
+        /// 杀掉该节点上的整条展示补间链并复位视觉。</summary>
+        private void ResetText(TextMeshProUGUI text)
+        {
             text.transform.DOKill();
             text.transform.localScale = Vector3.zero;
             text.gameObject.SetActive(false);
-            _textPool.Add(text);
         }
 
         private void ResetFloatingTexts()
         {
             foreach (TextMeshProUGUI text in _borrowedTexts)
-            {
-                if (text == null)
-                    continue;
-                text.transform.DOKill();
-                text.transform.localScale = Vector3.zero;
-                text.gameObject.SetActive(false);
-                _textPool.Add(text);
-            }
+                _textPool.Release(text); // actionOnRelease(ResetText) 负责杀链与视觉复位
             _borrowedTexts.Clear();
         }
 

@@ -383,13 +383,19 @@ public class EntityManager : IManagerStartEnd
     public void ToEnd()
     {
         OnAfterSetEntity = null;
-        for (int i = _turrets.Count - 1; i >= 0; i--)
+        ReturnAll(_turrets);
+        ReturnAll(_monsters);
+    }
+
+    /// <summary>Return → Dormancy → RemoveFromWaveEntities 链上可能重入
+    /// MissionEnd → LevelEnd → 本方法（败北时最后一只主怪回池即触发），
+    /// 列表会在迭代中被清空——按"弹尾部直至取空"推进，重入后外层自然退出。</summary>
+    private static void ReturnAll(List<Entity> entities)
+    {
+        while (entities.Count > 0)
         {
-            _turrets[i].thisEntityPool.Return(_turrets[i]);
-        }
-        for (int i = _monsters.Count - 1; i >= 0; i--)
-        {
-            _monsters[i].thisEntityPool.Return(_monsters[i]);
+            Entity entity = entities[entities.Count - 1];
+            entity.thisEntityPool.Return(entity);
         }
     }
 }

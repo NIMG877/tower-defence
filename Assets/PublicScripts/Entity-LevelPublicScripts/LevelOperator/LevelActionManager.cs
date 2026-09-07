@@ -3,6 +3,8 @@ using MyUI;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Pool;
+using Object = UnityEngine.Object;
 
 public class LevelActionManager : IManagerStartEnd
 {
@@ -20,10 +22,16 @@ public class LevelActionManager : IManagerStartEnd
     {
         _printerTemplateWalk = Resources.Load<TrailRenderer>("Prefabs/PathPrinter/Printer_walk");
         _printerTemplateFly = Resources.Load<TrailRenderer>("Prefabs/PathPrinter/Printer_fly");
-        _printerPoolWalk = new List<TrailRenderer>();
-        _printerPoolFly = new List<TrailRenderer>();
         _printerWalk = new List<TrailRenderer>();
         _printerFly = new List<TrailRenderer>();
+        _printerPoolWalk = new ObjectPool<TrailRenderer>(
+            () => Object.Instantiate(_printerTemplateWalk, LevelResourceSharing.LM),
+            actionOnRelease: printer => printer.gameObject.SetActive(false),
+            collectionCheck: true);
+        _printerPoolFly = new ObjectPool<TrailRenderer>(
+            () => Object.Instantiate(_printerTemplateFly, LevelResourceSharing.LM),
+            actionOnRelease: printer => printer.gameObject.SetActive(false),
+            collectionCheck: true);
     }
     private LevelActions.Wave[] _waves;
     private List<Entity> _waveEntities;
@@ -33,9 +41,10 @@ public class LevelActionManager : IManagerStartEnd
 
     private TrailRenderer _printerTemplateWalk;
     private TrailRenderer _printerTemplateFly;
-    private List<TrailRenderer> _printerPoolWalk;
+    // 走/飞两条通道各自的空闲栈；_printerWalk/_printerFly 为在用列表（关末全量归还）
+    private ObjectPool<TrailRenderer> _printerPoolWalk;
     private List<TrailRenderer> _printerWalk;
-    private List<TrailRenderer> _printerPoolFly;
+    private ObjectPool<TrailRenderer> _printerPoolFly;
     private List<TrailRenderer> _printerFly;
     private float printerMoveSpeed = 8;
     private float printerLifeTime = 0.8f;
@@ -218,32 +227,20 @@ public class LevelActionManager : IManagerStartEnd
     }
     public void SetPathPrinter(Vector2 destination, int pathSerial, int sectionSerial, int pointSerial, int moveMethod)
     {
-        List<TrailRenderer> printerPool;
+        ObjectPool<TrailRenderer> printerPool;
         List<TrailRenderer> printerReceive;
-        TrailRenderer printerTemplate;
         if (moveMethod <= 1)
         {
             printerPool = _printerPoolWalk;
             printerReceive = _printerWalk;
-            printerTemplate = _printerTemplateWalk;
         }
         else
         {
             printerPool = _printerPoolFly;
             printerReceive = _printerFly;
-            printerTemplate = _printerTemplateFly;
         }
 
-        TrailRenderer printer;
-        if (printerPool.Count > 0)
-        {
-            printer = printerPool[printerPool.Count - 1];
-            printerPool.RemoveAt(printerPool.Count - 1);
-        }
-        else
-        {
-            printer = Object.Instantiate(printerTemplate, LevelResourceSharing.LM);
-        }
+        TrailRenderer printer = printerPool.Get();
         printerReceive.Add(printer);
         printer.transform.position = destination;
         printer.gameObject.SetActive(true);
@@ -251,7 +248,7 @@ public class LevelActionManager : IManagerStartEnd
     }
     public void ReturnPathPrinter(TrailRenderer pathPrinter, int moveMethod)
     {
-        List<TrailRenderer> printerPool;
+        ObjectPool<TrailRenderer> printerPool;
         List<TrailRenderer> printerReceive;
         if (moveMethod <= 1)
         {
@@ -263,9 +260,11 @@ public class LevelActionManager : IManagerStartEnd
             printerPool = _printerPoolFly;
             printerReceive = _printerFly;
         }
-        pathPrinter.gameObject.SetActive(false);
+        // 归还与借出一一配对（PathPrinterMove 生命周期终点或关末 ToEnd）：
+        // 协程被取消时以异常退出、不会走到归还，双归还即逻辑错误，由池的
+        // collectionCheck 抛出
         printerReceive.Remove(pathPrinter);
-        printerPool.Add(pathPrinter);
+        printerPool.Release(pathPrinter);
     }
 
     public void Initialize()

@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 
 public class SlidersManager : IManagerStartEnd
 {
@@ -17,7 +18,7 @@ public class SlidersManager : IManagerStartEnd
     private SlidersManager()
     {
         _allTypeSlider = new List<GameObject>();
-        _allTypeSliderPool = new List<List<SliderControllerBasic>>();
+        _sliderPools = new List<ObjectPool<SliderControllerBasic>>();
         _allTypeSliderShow = new List<List<SliderControllerBasic>>();
         int poolNum = 10;
         UISlider = GameObject.Find("GameUI/Sliders").transform;
@@ -30,7 +31,8 @@ public class SlidersManager : IManagerStartEnd
     }
     private Transform UISlider;
     private List<GameObject> _allTypeSlider;
-    private List<List<SliderControllerBasic>> _allTypeSliderPool;
+    // 每个血条类型一个 ObjectPool：GameObject 与控制器一起由 createFunc 创建
+    private List<ObjectPool<SliderControllerBasic>> _sliderPools;
     private List<List<SliderControllerBasic>> _allTypeSliderShow;
 
     private int _sliderCountShow;
@@ -77,40 +79,37 @@ public class SlidersManager : IManagerStartEnd
     {
         sliderType.SetActive(false);
         _allTypeSlider.Add(sliderType);
-        List<SliderControllerBasic> thisTypePool = new List<SliderControllerBasic>();
         List<SliderControllerBasic> thisTypeShow = new List<SliderControllerBasic>();
+        GameObject template = sliderType;
+        Transform parent = UISlider;
+        // 池跨关存活、从不 Clear（不设 actionOnDestroy），与原行为一致
+        ObjectPool<SliderControllerBasic> pool = new ObjectPool<SliderControllerBasic>(
+            () =>
+            {
+                GameObject slider = Object.Instantiate(template, parent);
+                T sc = new T();
+                sc.SliderInitialize(slider);
+                return sc;
+            },
+            collectionCheck: true);
         for (int i = 0; i < poolNum; i++)
         {
-            GameObject slider = Object.Instantiate(sliderType, UISlider);
-            T sc = new T();
-            sc.SliderInitialize(slider);
-            thisTypePool.Add(sc);
+            pool.Release(pool.Get()); // 预热：实例化后直接入空闲栈（模板已失活，克隆同态）
         }
-        _allTypeSliderPool.Add(thisTypePool);
+        _sliderPools.Add(pool);
         _allTypeSliderShow.Add(thisTypeShow);
         return _allTypeSlider.Count - 1;
     }
     /// <summary>
     /// ����UI��
     /// </summary>
-    /// <param name="hostEntity">Ŀ��ʵ��</param>
-    /// <param name="type">�����ͣ�0-����HP��1-��ɫHP��2-BOSSHP��3-����SP��4-��ɫSP��5-MOVEELEMENT��6-STATICELEMENT</param>
-    public void SetSlider<T>(Entity hostEntity, float smoothSpeed, int type, int positionLayer, bool hideWhenFull, bool moveSlider) where T : SliderControllerBasic, new()
+    /// <param name="hostEntity">Ŀ������</param>
+    /// <param name="type">�������ͣ�0-����HP��1-��ɫHP��2-BOSSHP��3-����SP��4-��ɫSP��5-MOVEELEMENT��6-STATICELEMENT</param>
+    public void SetSlider(Entity hostEntity, float smoothSpeed, int type, int positionLayer, bool hideWhenFull, bool moveSlider)
     {
-        if (_allTypeSliderPool[type].Count > 0)
-        {
-            _allTypeSliderPool[type][0].SetHostEntity(hostEntity, smoothSpeed, type, positionLayer, hideWhenFull, moveSlider);
-            _allTypeSliderShow[type].Add(_allTypeSliderPool[type][0]);
-            _allTypeSliderPool[type].RemoveAt(0);
-        }
-        else
-        {
-            GameObject slider = Object.Instantiate(_allTypeSlider[type], UISlider);
-            T sc = new T();
-            sc.SliderInitialize(slider);
-            sc.SetHostEntity(hostEntity, smoothSpeed, type, positionLayer, hideWhenFull, moveSlider);
-            _allTypeSliderShow[type].Add(sc);
-        }
+        SliderControllerBasic sc = _sliderPools[type].Get();
+        sc.SetHostEntity(hostEntity, smoothSpeed, type, positionLayer, hideWhenFull, moveSlider);
+        _allTypeSliderShow[type].Add(sc);
         _sliderCountShow++;
         if (_sliderCountShow == 1)
         {
@@ -120,7 +119,7 @@ public class SlidersManager : IManagerStartEnd
     public void ReturnSlider(SliderControllerBasic sliderControllerBasic, int type)
     {
         _allTypeSliderShow[type].Remove(sliderControllerBasic);
-        _allTypeSliderPool[type].Add(sliderControllerBasic);
+        _sliderPools[type].Release(sliderControllerBasic);
         _sliderCountShow--;
     }
     public void TakeOverSliderMove()

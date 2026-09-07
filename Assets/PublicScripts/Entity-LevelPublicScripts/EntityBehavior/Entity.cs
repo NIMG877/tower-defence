@@ -103,6 +103,9 @@ public class Entity : MonoBehaviour, IPoolOperation
 
     /// <summary>
     public EntityPool thisEntityPool;
+    /// <summary>实体池生命周期回调数组：CreateNewEntity 时扫描一次并缓存，
+    /// 出池/入池派发 PreWarm/Initialize/Dormancy 时直接使用，避免每次 GetComponents。</summary>
+    public IPoolOperation[] PoolOps { get; set; }
     [SerializeField] public Transform TempContainer;
     /// <summary>
     /// 朝向 0-up 1-right 2-down 3-left。setter 走 <see cref="SetOrientation"/>（带 Vision 同步副作用）。
@@ -275,10 +278,10 @@ public class Entity : MonoBehaviour, IPoolOperation
         }
         bool canmove = MoveBase;
         bool camp2 = Camp == 2;
-        SlidersManager.Manager.SetSlider<HpSliderController>(this, 4, camp2 ? 0 : 1, 0, camp2, canmove);
+        SlidersManager.Manager.SetSlider(this, 4, camp2 ? 0 : 1, 0, camp2, canmove);
         if (EntityData != null && EntityData.Skills != null && EntityData.Skills.Count >= 1)
         {
-            SlidersManager.Manager.SetSlider<SpSliderController>(this, 10, camp2 ? 3 : 4, 1, camp2, canmove);
+            SlidersManager.Manager.SetSlider(this, 10, camp2 ? 3 : 4, 1, camp2, canmove);
         }
 
         _skillRunner.OnInitialize();

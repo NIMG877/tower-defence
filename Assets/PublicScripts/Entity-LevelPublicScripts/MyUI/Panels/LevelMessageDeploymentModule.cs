@@ -28,7 +28,9 @@ namespace MyUI
         private const float SelectorYAnchor = -60;
         private int _deployCount;
         private int _remainingCount;
-        /// <summary>再部署费用增幅 buff 名：Sample 上恒至多一条，量 = min(部署次数,2)×增幅率。</summary>
+        /// <summary>各克隆自身的部署次数（费用增幅按实体计：回池几次加几层，封顶 2）。</summary>
+        private readonly Dictionary<Entity, int> _deployCounts = new Dictionary<Entity, int>();
+        /// <summary>再部署费用增幅 buff 名：每个克隆身上恒至多一条，量 = min(它自身的部署次数,2)×增幅率。</summary>
         private const string RedeployCostBuffName = "redeploy_cost_up";
 
         public EntityID EntityId { get; private set; }
@@ -36,10 +38,11 @@ namespace MyUI
         public int SkillIndex { get; private set; }
         public EntityData EntityData { get; private set; }
         /// <summary>
-        /// 池样本实体：与 CallOut 派出的是同一 GameObject。部署前详情的
-        /// Stats/Vision/level buff 数据源（数值为 store 终值，含 OnPreWarm 落的局内 buff）。
+        /// 即将出池的实体（与下一次 CallOut 派出的是同一 GameObject，休眠态）。
+        /// 部署前详情的 Stats/Vision/level buff 数据源（数值为 store 终值）。
+        /// 池内克隆可互换，但其上各自的再部署增幅可能不同——显示与取价都读它，保证一致。
         /// </summary>
-        public Entity Sample { get; private set; }
+        public Entity NextOut => EntityPoolManager.Manager.FetchEntityPool(EntityId).PeekNext();
         public bool IsAffordable { get; private set; }
 
         internal LevelMessagePlaceData(LevelMessageDeploymentModule owner, GameObject selector)
@@ -63,12 +66,6 @@ namespace MyUI
             SkillIndex = skillIndex;
             EntityData = GameDataService.EntityRepository.Get(staticId);
 
-            EntityPool pool = EntityPoolManager.Manager.FetchEntityPool(staticId);
-            if (pool != null)
-            {
-                Sample = pool.GetEntity();
-            }
-
             _respawnTimer = 0;
             _deployCount = 0;
             _remainingCount = number;
@@ -86,7 +83,15 @@ namespace MyUI
             // 费用一律读 AttributeStore 终值（CostS）：再部署增幅以局内 buff 落在
             // Cost 上（见 ApplyRedeployCostBuff），此处不复算增长曲线，
             // RespawnCostUp 也只走 store 终值，无 UI 层直读原始数据的旁路。
-            return Sample.Stats.CostS;
+            // 读"即将出池的实体"自身——它带着自己历史部署攒下的增幅，显示即实付。
+            return NextOut.Stats.CostS;
+        }
+
+        /// <summary>部署落地时记录：该克隆自身部署次数 +1（费用增幅按实体计）。</summary>
+        public void NoteDeployed(Entity entity)
+        {
+            _deployCounts.TryGetValue(entity, out int count);
+            _deployCounts[entity] = count + 1;
         }
 
         public void DeltaNum(int delta)
@@ -121,43 +126,48 @@ namespace MyUI
         }
 
         /// <summary>
-        /// 再部署费用增幅：在实体回池时施加（撤退/死亡 → EntityPool.Return →
-        /// InteractableStatic.Dormancy → EntityBackToSelector → CallBackNum，每次
-        /// 回池恰好一次）。幂等契约：把 Sample 上同名 buff 的量校准到
-        /// min(部署次数, 2)×RespawnCostUpS%——回池#1 施加 1×，回池#2 经
-        /// SetBuffValues 原地换成 2×（单条目换值，不叠加新条目），之后封顶不再
-        /// 触发；buff 被外部途径拆掉的，下次回池按应有值重建。下次部署的
-        /// CalculateCost 经 AttributeStore 终值读到，冷却窗口期卡片显示即再部署
-        /// 实付费用。施加时机不能是部署时——部署是"消费"增幅的时刻（扣费先于
-        /// SetNum），在那之后加层会让增幅滞后一拍。
-        /// RespawnCostUpS 读 store 终值（当前值基准），为 0（未配置增幅）时不施加。
+        /// 再部署费用增幅：增幅跟随实体自身——在它回池时施加到它身上（撤退/死亡 →
+        /// EntityPool.Return → InteractableStatic.Dormancy → EntityBackToSelector →
+        /// CallBackNum，每次回池恰好一次）。幂等契约：把该克隆身上同名 buff 的量校准到
+        /// min(它自身的部署次数, 2)×RespawnCostUpS%——回池#1 施加 1×，回池#2 经
+        /// SetBuffValues 原地换成 2×（单条目换值，不叠加新条目），之后封顶不再触发；
+        /// buff 被外部途径拆掉的，下次回池按应有值重建。下次部署取价读的就是即将
+        /// 出池实体自己的 store 终值（见 CalculateCost），冷却窗口期卡片显示即实付。
+        /// 多克隆池中各克隆增幅独立：没部署出去的克隆保持基础价。
+        /// 施加时机不能是部署时——部署是"消费"增幅的时刻（扣费先于 SetNum），
+        /// 在那之后加层会让增幅滞后一拍。
+        /// RespawnCostUpS 读该实体 store 终值（当前值基准），为 0（未配置增幅）时不施加。
         /// </summary>
-        private void ApplyRedeployCostBuff()
+        private void ApplyRedeployCostBuff(Entity entity)
         {
-            if (_deployCount < 1 || _deployCount > 2)
+            // 只对经本卡片部署过的克隆生效（TryGetValue 未命中 = 召唤物等外来实体，
+            // 不适用再部署增幅，直接跳过——这是业务分支，非防护）
+            if (!_deployCounts.TryGetValue(entity, out int count))
                 return;
-            float magnitude = Sample.Stats.RespawnCostUpS / 100f;
+            if (count < 1 || count > 2)
+                return;
+            float magnitude = entity.Stats.RespawnCostUpS / 100f;
             if (magnitude == 0f)
                 return;
 
-            float target = magnitude * _deployCount;   // _deployCount ∈ {1, 2}
-            Buff existing = FindLevelBuff(RedeployCostBuffName);
+            float target = magnitude * count;   // count ∈ {1, 2}
+            Buff existing = FindLevelBuff(entity, RedeployCostBuffName);
             if (existing != null)
             {
-                Sample.buffController.SetBuffValues(
+                entity.buffController.SetBuffValues(
                     new[] { new Modifier("Cost", ModifierOp.AddPercent, target) }, existing);
             }
             else
             {
-                Sample.buffController.CreateBuff(
+                entity.buffController.CreateBuff(
                     new[] { new Modifier("Cost", ModifierOp.AddPercent, target) },
                     null, RedeployCostBuffName, -5f, BuffScope.Level);
             }
         }
 
-        private Buff FindLevelBuff(string buffName)
+        private Buff FindLevelBuff(Entity entity, string buffName)
         {
-            List<Buff> buffs = Sample.buffController.Buffs;
+            List<Buff> buffs = entity.buffController.Buffs;
             for (int i = 0; i < buffs.Count; i++)
             {
                 if (buffs[i].buff_name == buffName)
@@ -166,10 +176,10 @@ namespace MyUI
             return null;
         }
 
-        public void CallBackNum(int number)
+        public void CallBackNum(int number, Entity returnedEntity)
         {
             DeltaNum(number);
-            ApplyRedeployCostBuff();
+            ApplyRedeployCostBuff(returnedEntity);
             if (EntityData.RespawnStrategy == 1)
                 StartRespawnCooldown();
         }
@@ -411,7 +421,7 @@ namespace MyUI
                 if (_placeDataList[i].EntityId != entity.EntityData.ID)
                     continue;
 
-                _placeDataList[i].CallBackNum(1);
+                _placeDataList[i].CallBackNum(1, entity);
                 MarkCanSetDirty();
                 return;
             }
@@ -573,9 +583,11 @@ namespace MyUI
                     1,
                     _context.Orientation,
                     _context.SelectedPlaceData.SkillIndex);
-                int cost = _context.SelectedPlaceData.CalculateCost();
+                // 取价读刚出池的实体自身（含它历史部署攒下的再部署增幅），与卡片显示同源
+                int cost = entity.Stats.CostS;
                 entity.GetComponent<InteractableStatic>().CurrentSetCost = cost;
                 LevelResourceManager.Manager.ChangeCost(-cost);
+                _context.SelectedPlaceData.NoteDeployed(entity);
                 _context.SelectedPlaceData.SelectorMove(false);
                 _context.SelectedPlaceData.SetNum(1);
                 _chooser.color = new Color(1, 1, 0, 0.4f);

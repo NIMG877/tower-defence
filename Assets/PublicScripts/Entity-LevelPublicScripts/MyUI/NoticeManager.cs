@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityEngine.UI;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -27,7 +28,11 @@ public class NoticeManager
         MessageBoxInitialize();
         _notificationsShow = new List<NotificationData>();
         _notificationPrefab = Resources.Load<GameObject>("Prefabs/UI/MyUIs/Components/notification");
-        _notificationsPool = new List<NotificationData>() { new NotificationData(Object.Instantiate(_notificationPrefab, _notice)) };
+        _notificationsPool = new ObjectPool<NotificationData>(
+            () => new NotificationData(Object.Instantiate(_notificationPrefab, _notice)),
+            actionOnRelease: data => data.Notification.SetActive(false),
+            collectionCheck: true);
+        _notificationsPool.Release(_notificationsPool.Get()); // 预热 1 个
     }
     #region//Notification
     private class NotificationData
@@ -43,6 +48,8 @@ public class NoticeManager
         public TextMeshProUGUI Content;
         public RectTransform RTransform;
         public bool IsPause;
+        /// <summary>关闭流程唯一化标志：置位后到期计时循环退出、重复关闭直接跳过。</summary>
+        public bool Closed;
         public NotificationData(GameObject notification)
         {
             Notification = notification;
@@ -66,25 +73,17 @@ public class NoticeManager
         }
     }
     private List<NotificationData> _notificationsShow;
-    private List<NotificationData> _notificationsPool;
+    private ObjectPool<NotificationData> _notificationsPool;
     private GameObject _notificationPrefab;
 
     public void LaunchNotification(Image photo, string title, string content, float duration, bool allowPause, bool allowClose)
     {
-        NotificationData notificationData;
-        if (_notificationsPool.Count > 0)
-        {
-            notificationData = _notificationsPool[0];
-            _notificationsPool.Remove(notificationData);
-        }
-        else
-        {
-            notificationData = new NotificationData(Object.Instantiate(_notificationPrefab, _notice));
-        }
+        NotificationData notificationData = _notificationsPool.Get();
         _notificationsShow.Add(notificationData);
         notificationData.Title.text = title;
         notificationData.Content.text = content;
         notificationData.IsPause = false;
+        notificationData.Closed = false;
         if (photo)
         {
             notificationData.PhotoObject.SetActive(true);
@@ -120,11 +119,16 @@ public class NoticeManager
     }
     private void RemoveNotificationDataFromShow(NotificationData notificationData)
     {
+        // 关闭唯一入口：点击关闭、到期计时、退出动画期间的再次点击都会走到这里。
+        // 已关闭（退出动画进行中/已回池）直接跳过——这是用户可触发的真实时序，非逻辑错误。
+        if (notificationData.Closed)
+            return;
+        notificationData.Closed = true;
         RectTransform notificationRT0 = notificationData.RTransform;
         DOTween.To((value) => { notificationRT0.anchoredPosition = new Vector2(value, notificationRT0.anchoredPosition.y); }, notificationRT0.anchoredPosition.x, notificationRT0.sizeDelta.x, 0.2f).OnComplete(() =>
         {
             notificationData.Notification.SetActive(false);
-            _notificationsPool.Add(notificationData);
+            _notificationsPool.Release(notificationData);
         });
         int index = _notificationsShow.IndexOf(notificationData);
         _notificationsShow.RemoveAt(index);
@@ -137,7 +141,7 @@ public class NoticeManager
     private async void NotificationTimeUpdate(NotificationData notificationData, float duration)
     {
         float timeleft = duration;
-        while (timeleft > 0 && !notificationData.IsPause)
+        while (timeleft > 0 && !notificationData.IsPause && !notificationData.Closed)
         {
             timeleft -= Time.fixedDeltaTime;
             notificationData.TimeSlider.fillAmount = timeleft / duration;

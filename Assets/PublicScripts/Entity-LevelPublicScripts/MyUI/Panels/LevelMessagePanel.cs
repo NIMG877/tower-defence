@@ -18,8 +18,8 @@ namespace MyUI
     /// The single "inspected entity" plus placement-preview state, shared by
     /// deployment and selected-entity presentation. State transitions are owned
     /// by <see cref="LevelMessagePanel"/>.
-    /// Inspected：部署前 = 待部署槽位的池样本实体（与 CallOut 派出的是同一
-    /// GameObject，Stats/Vision/level buff 可读），部署后 = 场上实体；
+    /// Inspected：部署前 = 待部署槽位"即将出池"的实体（与下一次 CallOut 派出的是
+    /// 同一 GameObject，休眠态，Stats/Vision/level buff 可读），部署后 = 场上实体；
     /// IsDeployed 区分二者。SelectedPlaceData 仍归属"卡片"（数量/费用/技能索引），
     /// 与被查看实体正交。public 供 EditMode 测试直接断言（测试 asmdef 无
     /// InternalsVisibleTo）。
@@ -38,7 +38,7 @@ namespace MyUI
         public void SelectPlace(LevelMessagePlaceData placeData)
         {
             SelectedPlaceData = placeData;
-            Inspected = placeData.Sample;
+            Inspected = placeData.NextOut;
             IsDeployed = false;
             Orientation = -1;
             PreviewPosition = default;

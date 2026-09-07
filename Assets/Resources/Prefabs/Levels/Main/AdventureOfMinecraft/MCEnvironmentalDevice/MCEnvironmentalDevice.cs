@@ -153,7 +153,7 @@ public class MCEnvironmentalDevice : MonoBehaviour, IManagerStartEnd
             if (setEntity.Camp == 1 && setEntity.TryGetComponent(out InteractableStatic staticEntity) && setEntity.EntityData.CharacterJob != 8)
             {
                 EntityAndHungryMessage thisMessage = new EntityAndHungryMessage(setEntity, 130, 0);
-                SlidersManager.Manager.SetSlider<HungrySliderController>(setEntity, 4, _hungrySliderType, 2, false, false);
+                SlidersManager.Manager.SetSlider(setEntity, 4, _hungrySliderType, 2, false, false);
                 setEntity.AttackBase.OnAttackSuccessfully += () =>
                 {
                     if (thisMessage.HungryState != 1)

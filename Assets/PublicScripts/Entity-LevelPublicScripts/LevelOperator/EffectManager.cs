@@ -1,9 +1,9 @@
-using Codice.CM.Client.Differences.Merge;
-using Codice.CM.Common;
-using Cysharp.Threading.Tasks;
-
+using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Pool;
+using Object = UnityEngine.Object;
 
 
 public class EffectManager : IManagerStartEnd
@@ -18,217 +18,281 @@ public class EffectManager : IManagerStartEnd
             return _instance;
         }
     }
+
+    /// <summary>一条借出记录：实例、粒子/拖尾组件、autoReturn 时被临时改写的粒子原值。
+    /// 原实现用三个平行列表靠索引对齐，归还时 IndexOf + 三表同步删除，现合并为单记录。</summary>
+    private sealed class BorrowedEffect
+    {
+        public GameObject Instance;
+        public ParticleSystem[] Particles;
+        public TrailRenderer[] Trails;
+        public (bool loop, bool prewarm)[] OriginSets;
+        public bool AutoReturn;
+    }
+
+    /// <summary>单个 prefab 的特效池：空闲集合由 ObjectPool 管理（LIFO），
+    /// 粒子/拖尾的重置在借出路径上做，autoReturn 记录与自动回收循环留在本类。</summary>
     private class EffectPool
     {
-        public GameObject EffectPrefab;
-        private List<(ParticleSystem[] particals, TrailRenderer[] trails, (bool loop, bool prewarm)[] originParticleSet)> _effectAutoMessages;
-        private List<GameObject> _effectAutoDelete;
-        private List<GameObject> _effectInstanceNotAutoDelete;
-        private List<GameObject> _effectsInPool;
-        public EffectPool(GameObject effectPrefab)
+        public readonly GameObject EffectPrefab;
+        private readonly ObjectPool<GameObject> _pool;
+        // 归还成功后回调 Manager（移除实例归属映射）：自动归还路径也走这里，
+        // 保证映射移除只发生在归还真正落地之后
+        private readonly Action<GameObject> _onReturned;
+        private readonly List<BorrowedEffect> _borrowed = new List<BorrowedEffect>();
+        // 拖尾基准时长按实例缓存：借出时绝对赋值 baseTime/timeScale，
+        // 修掉原实现每次出池 /= timeScale 的复用累除 bug
+        private readonly Dictionary<GameObject, float[]> _trailBaseTimes =
+            new Dictionary<GameObject, float[]>();
+        private bool _autoReturnLoopRunning;
+
+        public EffectPool(GameObject effectPrefab, Action<GameObject> onReturned)
         {
             EffectPrefab = effectPrefab;
-            _effectAutoMessages = new List<(ParticleSystem[] particals, TrailRenderer[] trails, (bool loop, bool prewarm)[] originParticleSet)>();
-            _effectAutoDelete = new List<GameObject>();
-            _effectInstanceNotAutoDelete = new List<GameObject>();
-            _effectsInPool = new List<GameObject>();
+            _onReturned = onReturned;
+            _pool = new ObjectPool<GameObject>(
+                () => Object.Instantiate(effectPrefab),
+                actionOnRelease: instance => instance.SetActive(false),
+                actionOnDestroy: instance => Object.Destroy(instance),
+                collectionCheck: true);
         }
+
+        public GameObject CreateEffect(Vector3 worldPosition, Quaternion worldQuaternion, Transform parent, float timeScale, bool autoReturn)
+        {
+            GameObject newEffect = _pool.Get();
+            newEffect.transform.SetParent(parent);
+            newEffect.transform.SetPositionAndRotation(worldPosition, worldQuaternion);
+
+            ParticleSystem[] particleSystems = newEffect.GetComponents<ParticleSystem>();
+            TrailRenderer[] trailRenderers = newEffect.GetComponents<TrailRenderer>();
+            for (int i = 0; i < particleSystems.Length; i++)
+            {
+                // 设置粒子速度并重新开始播放
+                ParticleSystem.MainModule mainModule = particleSystems[i].main;
+                mainModule.simulationSpeed = timeScale;
+                particleSystems[i].Play();
+            }
+            if (trailRenderers.Length > 0)
+            {
+                float[] baseTimes = CacheTrailBaseTimes(newEffect, trailRenderers);
+                for (int i = 0; i < trailRenderers.Length; i++)
+                {
+                    trailRenderers[i].Clear();
+                    trailRenderers[i].time = baseTimes[i] / timeScale;
+                }
+            }
+
+            BorrowedEffect record = new BorrowedEffect
+            {
+                Instance = newEffect,
+                Particles = particleSystems,
+                Trails = trailRenderers,
+            };
+            _borrowed.Add(record);
+            if (autoReturn)
+            {
+                MakeAutoReturn(record);
+                if (!_autoReturnLoopRunning)
+                {
+                    _autoReturnLoopRunning = true;
+                    UpdateAutoDelete().Forget();
+                }
+            }
+            newEffect.SetActive(true);
+            return newEffect;
+        }
+
+        /// <summary>把借出记录切到"播完自动归还"：关掉 loop/prewarm 保证粒子能播完，
+        /// 原值记录在 OriginSets，归还时还原。已在自动归还中的实例直接跳过。</summary>
+        public void AddToAutoReturn(GameObject effectInstance)
+        {
+            BorrowedEffect record = FindRecord(effectInstance);
+            if (record == null)
+                throw new InvalidOperationException(
+                    $"SetEffectAutoReturn 收到了不属于任何借出记录的特效实例: {effectInstance.name}");
+            // 已在自动归还中不重复快照——重拍 OriginSets 会用当前值（已被关掉的
+            // loop/prewarm）覆盖原始备份，破坏归还时的还原
+            if (record.AutoReturn)
+                return;
+            MakeAutoReturn(record);
+        }
+
+        private void MakeAutoReturn(BorrowedEffect record)
+        {
+            record.OriginSets = new (bool loop, bool prewarm)[record.Particles.Length];
+            for (int i = 0; i < record.Particles.Length; i++)
+            {
+                ParticleSystem.MainModule mainModule = record.Particles[i].main;
+                record.OriginSets[i].loop = mainModule.loop;
+                record.OriginSets[i].prewarm = mainModule.prewarm;
+                mainModule.loop = false;
+                mainModule.prewarm = false;
+            }
+            record.AutoReturn = true;
+        }
+
+        public void ReturnEffect(GameObject effectInstance)
+        {
+            // 归还与借出一一配对：未知实例在此 NRE、双归还由池的 collectionCheck
+            // 抛出——都是逻辑错误，响亮失败，不做静默跳过
+            BorrowedEffect record = FindRecord(effectInstance);
+            effectInstance.SetActive(false);
+            for (int i = 0; i < record.Particles.Length; i++)
+            {
+                record.Particles[i].Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+            if (record.AutoReturn)
+            {
+                for (int i = 0; i < record.Particles.Length; i++)
+                {
+                    ParticleSystem.MainModule mainModule = record.Particles[i].main;
+                    mainModule.loop = record.OriginSets[i].loop;
+                    mainModule.prewarm = record.OriginSets[i].prewarm;
+                }
+            }
+            _borrowed.Remove(record);
+            _pool.Release(effectInstance);
+            _onReturned?.Invoke(effectInstance);
+        }
+
+        public void ReturnAllEffect()
+        {
+            for (int i = _borrowed.Count - 1; i >= 0; i--)
+            {
+                ReturnEffect(_borrowed[i].Instance);
+            }
+        }
+
+        private BorrowedEffect FindRecord(GameObject instance)
+        {
+            for (int i = 0; i < _borrowed.Count; i++)
+            {
+                if (_borrowed[i].Instance == instance)
+                    return _borrowed[i];
+            }
+            return null;
+        }
+
+        private bool HasAutoReturn()
+        {
+            for (int i = 0; i < _borrowed.Count; i++)
+            {
+                if (_borrowed[i].AutoReturn)
+                    return true;
+            }
+            return false;
+        }
+
+        private float[] CacheTrailBaseTimes(GameObject instance, TrailRenderer[] trails)
+        {
+            if (_trailBaseTimes.TryGetValue(instance, out float[] cached) && cached.Length == trails.Length)
+                return cached;
+            float[] baseTimes = new float[trails.Length];
+            for (int i = 0; i < trails.Length; i++)
+            {
+                baseTimes[i] = trails[i].time;
+            }
+            _trailBaseTimes[instance] = baseTimes;
+            return baseTimes;
+        }
+
         private async UniTaskVoid UpdateAutoDelete()
         {
             int gap = 0;
-            while (_effectAutoDelete.Count > 0)
+            try
             {
-                if (gap < 3)
+                while (HasAutoReturn())
                 {
-                    gap++;
-                    if (await UniTask.WaitForFixedUpdate(LevelResourceSharing.LevelCtk).SuppressCancellationThrow())
-                        return;
-                }
-                else
-                {
-                    gap = 0;
-                    for (int i = _effectAutoMessages.Count - 1; i >= 0; i--)
+                    if (gap < 3)
                     {
-                        bool isEnd = true;
-                        (ParticleSystem[] pi, TrailRenderer[] ti, (bool loop, bool prewarm)[] ps) = _effectAutoMessages[i];
-                        for (int j = 0; j < pi.Length; j++)
+                        gap++;
+                        if (await UniTask.WaitForFixedUpdate(LevelResourceSharing.LevelCtk).SuppressCancellationThrow())
+                            return;
+                    }
+                    else
+                    {
+                        gap = 0;
+                        for (int i = _borrowed.Count - 1; i >= 0; i--)
                         {
-                            if (!pi[j].isStopped)
+                            BorrowedEffect record = _borrowed[i];
+                            if (!record.AutoReturn)
+                                continue;
+                            bool isEnd = true;
+                            for (int j = 0; j < record.Particles.Length; j++)
                             {
-                                isEnd = false;
-                                break;
-                            }
-                        }
-                        if (isEnd)
-                        {
-                            for (int j = 0; j < ti.Length; j++)
-                            {
-                                if (ti[j].positionCount > 0)
+                                if (!record.Particles[j].isStopped)
                                 {
                                     isEnd = false;
                                     break;
                                 }
                             }
-                        }
-                        if (isEnd)
-                        {
-                            ReturnEffect(_effectAutoDelete[i]);
+                            if (isEnd)
+                            {
+                                for (int j = 0; j < record.Trails.Length; j++)
+                                {
+                                    if (record.Trails[j].positionCount > 0)
+                                    {
+                                        isEnd = false;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (isEnd)
+                            {
+                                ReturnEffect(record.Instance);
+                            }
                         }
                     }
                 }
-
             }
-        }
-        public void AddToAutoReturn(GameObject effectInstance, ParticleSystem[] particleSystems, TrailRenderer[] trailRenderers)
-        {
-            if (!_effectAutoDelete.Contains(effectInstance))
+            finally
             {
-                (bool loop, bool prewarm)[] particleSets = new (bool loop, bool prewarm)[particleSystems.Length];
-                for (int i = 0; i < particleSystems.Length; i++)
-                {
-                    ParticleSystem.MainModule mainModule = particleSystems[i].main;
-                    particleSets[i].loop = mainModule.loop;
-                    particleSets[i].prewarm = mainModule.prewarm;
-                    mainModule.loop = false;
-                    mainModule.prewarm = false;
-                }
-                _effectInstanceNotAutoDelete.Remove(effectInstance);
-                _effectAutoDelete.Add(effectInstance);
-                _effectAutoMessages.Add((particleSystems, trailRenderers, particleSets));
-                if (_effectAutoDelete.Count == 1)
-                {
-                    UpdateAutoDelete().Forget();
-                }
-            }
-        }
-        public GameObject CreateEffect(Vector3 worldPosition, Quaternion worldQuaternion, Transform transform, float timeScale, bool autoReturn)
-        {
-            GameObject newEffect;
-            if (_effectsInPool.Count > 0)
-            {
-                newEffect = _effectsInPool[0];
-                _effectsInPool.RemoveAt(0);
-                newEffect.transform.parent = transform;
-                newEffect.transform.SetPositionAndRotation(worldPosition, worldQuaternion);
-            }
-            else
-            {
-                newEffect = Object.Instantiate(EffectPrefab, worldPosition, Quaternion.identity, transform);
-            }
-            ParticleSystem[] particleSystems = newEffect.GetComponents<ParticleSystem>();
-            TrailRenderer[] trailRenderers = newEffect.GetComponents<TrailRenderer>();
-            for (int i = 0; i < particleSystems.Length; i++)
-            {
-                // ���������ٶ�
-                ParticleSystem.MainModule mainModule = particleSystems[i].main;
-                mainModule.simulationSpeed = timeScale;  // ���ò����ٶ�
-
-                // ���¿�ʼ����ϵͳ
-                particleSystems[i].Play();
-            }
-            for (int i = 0; i < trailRenderers.Length; i++)
-            {
-                trailRenderers[i].Clear();
-                trailRenderers[i].time /= timeScale;
-            }
-            if (autoReturn)
-            {
-                AddToAutoReturn(newEffect, particleSystems, trailRenderers);
-            }
-            else
-            {
-                _effectInstanceNotAutoDelete.Add(newEffect);
-            }
-            newEffect.SetActive(true);
-            return newEffect;
-        }
-        public void ReturnEffect(GameObject effectInstance)
-        {
-            effectInstance.SetActive(false);
-            ParticleSystem[] particleSystems = effectInstance.GetComponents<ParticleSystem>();
-            TrailRenderer[] trailRenderers = effectInstance.GetComponents<TrailRenderer>();
-            for (int i = 0; i < particleSystems.Length; i++)
-            {
-                particleSystems[i].Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            }
-            if (_effectAutoDelete.Contains(effectInstance))
-            {
-                int index = _effectAutoDelete.IndexOf(effectInstance);
-                for (int i = 0; i < particleSystems.Length; i++)
-                {
-                    ParticleSystem.MainModule mainModule = particleSystems[i].main;
-                    mainModule.loop = _effectAutoMessages[index].originParticleSet[i].loop;
-                    mainModule.prewarm = _effectAutoMessages[index].originParticleSet[i].prewarm;
-                }
-                _effectAutoDelete.RemoveAt(index);
-                _effectAutoMessages.RemoveAt(index);
-            }
-            else
-            {
-                _effectInstanceNotAutoDelete.Remove(effectInstance);
-            }
-            _effectsInPool.Add(effectInstance);
-        }
-        public void ReturnAllEffect()
-        {
-            for (int i = _effectInstanceNotAutoDelete.Count - 1; i >= 0; i--)
-            {
-                ReturnEffect(_effectInstanceNotAutoDelete[i]);
-            }
-            for (int i = _effectAutoDelete.Count - 1; i >= 0; i--)
-            {
-                ReturnEffect(_effectAutoDelete[i]);
+                _autoReturnLoopRunning = false;
             }
         }
     }
-    private List<EffectPool> _effectPool;
+
+    private Dictionary<GameObject, EffectPool> _effectPool;
+    // 借出实例 -> 所属池：归还/转自动归还按实例路由，不再要求调用方传对 prefab 键
+    private readonly Dictionary<GameObject, EffectPool> _poolOfInstance =
+        new Dictionary<GameObject, EffectPool>();
 
     public GameObject CreateEffect(GameObject effectPrefab, Vector3 worldPosition, Quaternion worldQuaternion, Transform transform, float timeScale, bool autoReturn)
     {
-        for (int i = 0; i < _effectPool.Count; i++)
+        if (!_effectPool.TryGetValue(effectPrefab, out EffectPool pool))
         {
-            if (_effectPool[i].EffectPrefab == effectPrefab)
-            {
-                return _effectPool[i].CreateEffect(worldPosition, worldQuaternion, transform, timeScale, autoReturn);
-            }
+            pool = new EffectPool(effectPrefab, instance => _poolOfInstance.Remove(instance));
+            _effectPool.Add(effectPrefab, pool);
         }
-        EffectPool newPool = new EffectPool(effectPrefab);
-        _effectPool.Add(newPool);
-        return newPool.CreateEffect(worldPosition, worldQuaternion, transform, timeScale, autoReturn);
+        GameObject instance = pool.CreateEffect(worldPosition, worldQuaternion, transform, timeScale, autoReturn);
+        _poolOfInstance[instance] = pool;
+        return instance;
     }
-    public void SetEffectAutoReturn(GameObject effectPrefab, GameObject effectInstance)
-    {
-        for (int i = 0; i < _effectPool.Count; i++)
-        {
 
-            if (_effectPool[i].EffectPrefab == effectPrefab)
-            {
-                _effectPool[i].AddToAutoReturn(effectInstance, effectInstance.GetComponents<ParticleSystem>(), effectInstance.GetComponents<TrailRenderer>());
-            }
-        }
-    }
-    public void ReturnEffect(GameObject effectPrefab, GameObject effectInstance)
+    public void SetEffectAutoReturn(GameObject effectInstance)
     {
-        for (int i = 0; i < _effectPool.Count; i++)
-        {
-
-            if (_effectPool[i].EffectPrefab == effectPrefab)
-            {
-                _effectPool[i].ReturnEffect(effectInstance);
-            }
-        }
+        // 索引器直取：实例必然先经 CreateEffect 借出，缺失即逻辑错误，响亮失败
+        _poolOfInstance[effectInstance].AddToAutoReturn(effectInstance);
     }
+
+    public void ReturnEffect(GameObject effectInstance)
+    {
+        // 映射移除由池的归还回调执行（自动归还路径同样覆盖），保证先归还后摘映射
+        _poolOfInstance[effectInstance].ReturnEffect(effectInstance);
+    }
+
     public void Initialize()
     {
         if (_effectPool == null)
-            _effectPool = new List<EffectPool>();
+            _effectPool = new Dictionary<GameObject, EffectPool>();
     }
 
     public void ToEnd()
     {
-        for (int i = 0; i < _effectPool.Count; i++)
+        // 归还全部活跃实例；池内空闲实例跨关存活（单常驻场景，LM 不销毁，复用安全）
+        foreach (var kv in _effectPool)
         {
-            _effectPool[i].ReturnAllEffect();
+            kv.Value.ReturnAllEffect();
         }
     }
 
