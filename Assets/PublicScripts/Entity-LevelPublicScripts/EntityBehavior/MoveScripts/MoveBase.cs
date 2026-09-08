@@ -271,7 +271,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
         if (_levelHpComsume > 0)
         {
             LevelResourceManager.Manager.LevelHpLeft -= LevelHpConsume;
-            AudioManager.Manager.PlayAudio("alarm", 1, false, false);
+            AudioManager.Manager.PlayAudio("alarm");
         }
     }
     public virtual void FindPath()

@@ -177,16 +177,16 @@ public class Entity : MonoBehaviour, IPoolOperation
         {
             if (EntityData.ID.ID_C == "t")
             {
-                AudioManager.Manager.PlayAudio("token_die", 1, false, false);
+                AudioManager.Manager.PlayAudio("token_die");
             }
             else
             {
-                AudioManager.Manager.PlayAudio("char_die", 1, false, false);
+                AudioManager.Manager.PlayAudio("char_die");
             }
         }
         else
         {
-            AudioManager.Manager.PlayAudio("enemy_die", 1, false, false);
+            AudioManager.Manager.PlayAudio("enemy_die");
         }
     }
     /// <summary>到达终点退场：失活（关死移动/攻击/技能门禁，防淡出窗口内二次死亡/攻击造成双重回池）

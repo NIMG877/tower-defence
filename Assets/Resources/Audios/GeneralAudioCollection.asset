@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16a58eb89c624ba5baea892e7157a09b, type: 3}
+  m_Name: GeneralAudioCollection
+  m_EditorClassIdentifier: 
+  _entries:
+  - Name: char_set
+    Clip: {fileID: 8300000, guid: 64d2f9867e404fe45b4ba6860314750d, type: 3}
+  - Name: char_die
+    Clip: {fileID: 8300000, guid: afa7c72aafe2dfc468cb9dc3671a7450, type: 3}
+  - Name: token_set
+    Clip: {fileID: 8300000, guid: fbeb1364d1150824b845a7394608e253, type: 3}
+  - Name: token_die
+    Clip: {fileID: 8300000, guid: 523eea533e1c4134c94068876a717956, type: 3}
+  - Name: enemy_die
+    Clip: {fileID: 8300000, guid: b1760880cd016fa4a823e507d7f1aadf, type: 3}
+  - Name: escape
+    Clip: {fileID: 8300000, guid: 818ccf75f670ab34589e6f86643a2277, type: 3}
+  - Name: alarm
+    Clip: {fileID: 8300000, guid: 9912edf6adb35d04bbdc8c817f727e88, type: 3}
+  - Name: get_cost
+    Clip: {fileID: 8300000, guid: f7ac43fc52f897a49aff0aa19adcdf8e, type: 3}
+  - Name: get_resource
+    Clip: {fileID: 8300000, guid: 36c4f916c753efc4ab63f1a34cc812fc, type: 3}
+  - Name: lose
+    Clip: {fileID: 8300000, guid: 59705b7d526e69642b2df88e394b610b, type: 3}
+  - Name: win
+    Clip: {fileID: 8300000, guid: 429f9b64d5593db44ab7e4559adb9531, type: 3}
+  - Name: skill_atkboost
+    Clip: {fileID: 8300000, guid: 40703985ac97d854586546e6372089cf, type: 3}
+  - Name: skill_defboost
+    Clip: {fileID: 8300000, guid: cb8bb6602ebd00e408ea2147a8d24148, type: 3}
+  - Name: skill_healboost
+    Clip: {fileID: 8300000, guid: 811f4d5ae737b8f4982236981cb91bf8, type: 3}
+  - Name: skill_boostclose
+    Clip: {fileID: 8300000, guid: b585b2e8377590742b300e79855d7e18, type: 3}

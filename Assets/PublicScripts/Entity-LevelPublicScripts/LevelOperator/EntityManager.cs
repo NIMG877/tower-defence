@@ -76,11 +76,11 @@ public class EntityManager : IManagerStartEnd
             {
                 if (staticEntity.EntityData.ID.ID_C == "t")
                 {
-                    AudioManager.Manager.PlayAudio("token_set", 1, false, false);
+                    AudioManager.Manager.PlayAudio("token_set");
                 }
                 else
                 {
-                    AudioManager.Manager.PlayAudio("char_set", 1, false, false);
+                    AudioManager.Manager.PlayAudio("char_set");
                 }
             }
             OnAfterSetEntity?.Invoke(staticEntity);

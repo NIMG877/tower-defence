@@ -272,7 +272,7 @@ namespace MyUI
                         (int)(entity.GetComponent<InteractableStatic>().CurrentSetCost * 0.5f));
                     entity.Stats.IsActive = false;
                     entity.thisEntityPool.Return(entity);
-                    AudioManager.Manager.PlayAudio("escape", 1, false, false);
+                    AudioManager.Manager.PlayAudio("escape");
                     _returnToNormal();
                 });
             }
@@ -469,7 +469,7 @@ namespace MyUI
                 if (_selectedAbilityRuntime != null && _selectedAbilityRuntime.spEngine != null)
                     _selectedAbilityRuntime.spEngine.EndAbility();
                 _returnToNormal();
-                AudioManager.Manager.PlayAudio("skill_boostclose", 1, false, false);
+                AudioManager.Manager.PlayAudio("skill_boostclose");
             });
             _stop.GetComponent<EventTrigger>().triggers.Add(stopClick);
             return callBackClick;

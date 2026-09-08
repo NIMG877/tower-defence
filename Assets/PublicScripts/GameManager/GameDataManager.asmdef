@@ -1,6 +1,7 @@
 {
     "name": "GameDataManager",
     "references": [
-        "GUID:49b05dfb3ba40974886753aa2993aaff"
+        "GUID:49b05dfb3ba40974886753aa2993aaff",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
     ]
 }

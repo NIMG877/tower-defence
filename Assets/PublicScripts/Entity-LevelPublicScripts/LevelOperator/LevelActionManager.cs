@@ -214,7 +214,7 @@ public class LevelActionManager : IManagerStartEnd
     {
         if (LevelResourceSharing.LevelCtk != default)
         {
-            AudioManager.Manager.PlayAudio(win ? "win" : "lose", 1, false, false);
+            AudioManager.Manager.PlayAudio(win ? "win" : "lose");
             SettlementPanel.Panel.SetDatas($"{LevelResourceSharing.LD.LevelCode}  {LevelResourceSharing.LD.LevelName}", win, 0, LevelMessagePanel.Panel.DamageStatisticDatas);
             // 必须先 LevelEnd 再 Push：ToEnd 会把 _turrets 里的静态干员还池，触发
             // InteractableStatic.Dormancy → EntityBackToSelector 回填 _placeDataList。

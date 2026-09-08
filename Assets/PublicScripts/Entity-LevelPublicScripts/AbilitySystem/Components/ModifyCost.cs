@@ -39,7 +39,7 @@ namespace AbilitySystem.Components
                 applied > 0 ? MyUI.CombatTextKind.AddCost : MyUI.CombatTextKind.ReduceCost,
                 Mathf.Abs(applied));
             if (applied > 0)
-                AudioManager.Manager.PlayAudio("get_cost", 1, false, false);
+                AudioManager.Manager.PlayAudio("get_cost");
         }
     }
 }
