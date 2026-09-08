@@ -321,7 +321,6 @@ namespace MyUI
                 ? Mathf.Clamp01(sp.CurrentSp / config.totalSp)
                 : 0;
             int currentCharge = sp.CurrentCharge;
-            _spMask.fillAmount = currentSpRate;
             _skillChargeNum.gameObject.SetActive(currentCharge >= 1);
             if (currentCharge >= 1)
                 _skillChargeNumText.text = currentCharge.ToString();
@@ -332,7 +331,7 @@ namespace MyUI
                 return;
             }
 
-            RenderActiveSkillState(config, currentSpRate);
+            RenderActiveSkillState(sp, config);
         }
 
         private void RenderInactiveSkillState(
@@ -357,6 +356,7 @@ namespace MyUI
 
             _spMask.enabled = true;
             _spMask.color = _lightGreenHalf;
+            _spMask.fillAmount = currentSpRate;
             _spText.text = $"{(int)(config.totalSp * currentSpRate)}/{config.totalSp}";
             if (currentCharge == 0 && currentSpRate < 1)
             {
@@ -372,7 +372,7 @@ namespace MyUI
             }
         }
 
-        private void RenderActiveSkillState(AbilitySystem.SPConfig config, float currentSpRate)
+        private void RenderActiveSkillState(AbilitySystem.SPEngine sp, AbilitySystem.SPConfig config)
         {
             int consumeType = (int)config.consumeMode;
             _spBackground.color = _orange;
@@ -383,10 +383,14 @@ namespace MyUI
                 _spMask.color = _orangeHalf;
                 _spState.sprite = _spMessageAtlas[consumeType + 1];
                 _spText.color = Color.white;
+                // 开启态展示的是技能剩余量 CurrentAmount，与 SP 恢复无关
                 if (consumeType == 0)
-                    _spText.text = (config.abilityAmount * currentSpRate).ToString("0.0") + "s";
+                    _spText.text = sp.CurrentAmount.ToString("0.0") + "s";
                 else
-                    _spText.text = config.abilityAmount * currentSpRate + "/" + config.abilityAmount;
+                    _spText.text = sp.CurrentAmount + "/" + config.abilityAmount;
+                _spMask.fillAmount = config.abilityAmount > 0
+                    ? Mathf.Clamp01(sp.CurrentAmount / config.abilityAmount)
+                    : 0f;
             }
             else
             {
