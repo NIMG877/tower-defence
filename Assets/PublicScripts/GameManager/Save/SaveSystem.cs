@@ -81,12 +81,12 @@ public static class SaveSystem
     static PlayerSave CreateDefault()
     {
         var save = new PlayerSave();
-        // 拥有的角色默认 = 全部可用角色（来自静态配置）
+        // 拥有的角色默认 = 全部稀有度为 3 的角色（来自静态配置）
         foreach (var c in GameDataService.EntityRepository.GetByCategory("c"))
-            save.charactersOwn.Add(c.ID);
-        // 4 支空队伍
-        for (int i = 1; i <= 4; i++)
-            save.teams.Add(new TeamSave { teamName = "编队" + i });
+            if (c.CharacterRarity == 3)
+                save.charactersOwn.Add(c.ID);
+        // 1 支空队伍
+        save.teams.Add(new TeamSave { teamName = "编队1" });
         save.currentTeam = save.teams[0].teamName;
         return save;
     }
