@@ -77,11 +77,13 @@ public class EntityPool
     /// <summary>
     /// 查看下一次 CallOut 将取出的实体（不移除、不触发 Initialize/Dormancy）。
     /// 实体处于休眠态，Stats/EntityData 等纯数据可读；部署 UI 用它做"即将出池实体"的
-    /// 显示与取价。空闲栈为空时会提前创建下一个克隆——与 CallOut 空池新建等价，
-    /// 只是时机提前，该克隆之后照常出池。
+    /// 显示与取价。池空时返回 null："下一个出池者"尚不存在，取价/预览对它无从谈起，
+    /// 由调用方跳过。Peek 不做实例化，保持零副作用。
     /// </summary>
     public Entity PeekNext()
     {
+        if (_pool.CountInactive == 0)
+            return null;
         Entity entity = _pool.Get();
         _pool.Release(entity);
         return entity;

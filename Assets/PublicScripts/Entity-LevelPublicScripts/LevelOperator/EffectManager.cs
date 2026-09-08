@@ -92,11 +92,7 @@ public class EffectManager : IManagerStartEnd
             if (autoReturn)
             {
                 MakeAutoReturn(record);
-                if (!_autoReturnLoopRunning)
-                {
-                    _autoReturnLoopRunning = true;
-                    UpdateAutoDelete().Forget();
-                }
+                EnsureAutoReturnLoop();
             }
             newEffect.SetActive(true);
             return newEffect;
@@ -115,6 +111,19 @@ public class EffectManager : IManagerStartEnd
             if (record.AutoReturn)
                 return;
             MakeAutoReturn(record);
+            // 标记自动归还必须点火清扫循环：循环在无任何 AutoReturn 记录时退出，
+            // 若只打标记不点火，bullet trail 这类由 SetEffectAutoReturn 转入
+            // 自动归还的实例会成为无人清扫的孤儿，永不归还
+            EnsureAutoReturnLoop();
+        }
+
+        /// <summary>保证清扫循环在岗。调用时机必然刚借出/标记了 AutoReturn 记录。</summary>
+        private void EnsureAutoReturnLoop()
+        {
+            if (_autoReturnLoopRunning)
+                return;
+            _autoReturnLoopRunning = true;
+            UpdateAutoDelete().Forget();
         }
 
         private void MakeAutoReturn(BorrowedEffect record)
@@ -161,6 +170,14 @@ public class EffectManager : IManagerStartEnd
             {
                 ReturnEffect(_borrowed[i].Instance);
             }
+        }
+
+        /// <summary>关末销毁池（池生命周期与关卡对齐，同 EntityPool.Teardown）：
+        /// 调用前 ReturnAllEffect 必须先行，全部实例已在空闲集合内，
+        /// Clear 触发 actionOnDestroy 逐个 Destroy。</summary>
+        public void Teardown()
+        {
+            _pool.Clear();
         }
 
         private BorrowedEffect FindRecord(GameObject instance)
@@ -289,11 +306,14 @@ public class EffectManager : IManagerStartEnd
 
     public void ToEnd()
     {
-        // 归还全部活跃实例；池内空闲实例跨关存活（单常驻场景，LM 不销毁，复用安全）
+        // 池生命周期与关卡对齐：先归还全部活跃实例，再销毁全部池实例并清空池记录，
+        // 下一关由 CreateEffect 按需重建。LM 下不留失活克隆。
         foreach (var kv in _effectPool)
         {
             kv.Value.ReturnAllEffect();
+            kv.Value.Teardown();
         }
+        _effectPool.Clear();
     }
 
     public void ToStart()

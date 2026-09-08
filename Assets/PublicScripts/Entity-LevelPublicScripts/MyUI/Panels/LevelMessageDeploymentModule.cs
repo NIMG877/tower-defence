@@ -41,6 +41,7 @@ namespace MyUI
         /// 即将出池的实体（与下一次 CallOut 派出的是同一 GameObject，休眠态）。
         /// 部署前详情的 Stats/Vision/level buff 数据源（数值为 store 终值）。
         /// 池内克隆可互换，但其上各自的再部署增幅可能不同——显示与取价都读它，保证一致。
+        /// 池空时为 null："下一个出池者"尚不存在，消费方（取价/预览）自行跳过。
         /// </summary>
         public Entity NextOut => EntityPoolManager.Manager.FetchEntityPool(EntityId).PeekNext();
         public bool IsAffordable { get; private set; }
@@ -76,15 +77,6 @@ namespace MyUI
             _photoImage.sprite = EntityData.HeadImage;
             _classImage.sprite = _owner.ProfessionSprites[EntityData.CharacterJob];
             BindEvents();
-        }
-
-        public int CalculateCost()
-        {
-            // 费用一律读 AttributeStore 终值（CostS）：再部署增幅以局内 buff 落在
-            // Cost 上（见 ApplyRedeployCostBuff），此处不复算增长曲线，
-            // RespawnCostUp 也只走 store 终值，无 UI 层直读原始数据的旁路。
-            // 读"即将出池的实体"自身——它带着自己历史部署攒下的增幅，显示即实付。
-            return NextOut.Stats.CostS;
         }
 
         /// <summary>部署落地时记录：该克隆自身部署次数 +1（费用增幅按实体计）。</summary>
@@ -132,7 +124,7 @@ namespace MyUI
         /// min(它自身的部署次数, 2)×RespawnCostUpS%——回池#1 施加 1×，回池#2 经
         /// SetBuffValues 原地换成 2×（单条目换值，不叠加新条目），之后封顶不再触发；
         /// buff 被外部途径拆掉的，下次回池按应有值重建。下次部署取价读的就是即将
-        /// 出池实体自己的 store 终值（见 CalculateCost），冷却窗口期卡片显示即实付。
+        /// 出池实体自己的 store 终值（见 UpdateAffordability），冷却窗口期卡片显示即实付。
         /// 多克隆池中各克隆增幅独立：没部署出去的克隆保持基础价。
         /// 施加时机不能是部署时——部署是"消费"增幅的时刻（扣费先于 SetNum），
         /// 在那之后加层会让增幅滞后一拍。
@@ -203,7 +195,16 @@ namespace MyUI
 
         public void UpdateAffordability()
         {
-            int cost = CalculateCost();
+            // 费用一律读 AttributeStore 终值（CostS）：再部署增幅以局内 buff 落在
+            // Cost 上（见 ApplyRedeployCostBuff），无 UI 层直读原始数据的旁路；
+            // 读"即将出池的实体"自身——它带着自己历史部署攒下的增幅，显示即实付。
+            // 池空 = "下一个出池者"尚不存在（PeekNext 不再预创建），取价无从谈起。
+            // 典型时机：CallOut 取走最后一个克隆后、SetNum 隐藏卡片前，ChangeCost
+            // 会同步触发 RefreshAffordability 打在空池上——跳过即可，与调用顺序解耦
+            Entity nextOut = NextOut;
+            if (nextOut == null)
+                return;
+            int cost = nextOut.Stats.CostS;
             _costText.text = cost.ToString();
             IsAffordable =
                 _respawnTimer <= 0 &&

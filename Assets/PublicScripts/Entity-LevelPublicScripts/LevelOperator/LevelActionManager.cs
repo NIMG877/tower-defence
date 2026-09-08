@@ -27,10 +27,12 @@ public class LevelActionManager : IManagerStartEnd
         _printerPoolWalk = new ObjectPool<TrailRenderer>(
             () => Object.Instantiate(_printerTemplateWalk, LevelResourceSharing.LM),
             actionOnRelease: printer => printer.gameObject.SetActive(false),
+            actionOnDestroy: printer => Object.Destroy(printer.gameObject),
             collectionCheck: true);
         _printerPoolFly = new ObjectPool<TrailRenderer>(
             () => Object.Instantiate(_printerTemplateFly, LevelResourceSharing.LM),
             actionOnRelease: printer => printer.gameObject.SetActive(false),
+            actionOnDestroy: printer => Object.Destroy(printer.gameObject),
             collectionCheck: true);
     }
     private LevelActions.Wave[] _waves;
@@ -334,6 +336,10 @@ public class LevelActionManager : IManagerStartEnd
         {
             ReturnPathPrinter(_printerFly[i], 2);
         }
+        // 池生命周期与关卡对齐：在用打印机已全量归还，Clear 触发 actionOnDestroy
+        // 销毁全部池实例，LM 下不留失活克隆；下一关随用随建
+        _printerPoolWalk.Clear();
+        _printerPoolFly.Clear();
     }
 
 
