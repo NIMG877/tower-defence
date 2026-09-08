@@ -1,4 +1,3 @@
-using Codice.Client.BaseCommands;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -97,6 +96,15 @@ public class MapDataManager : IManagerStartEnd
     public int jSize;
     public (int iSize, int jSize) MapSize { get { return (iSize, jSize); } }
     private GameObject _map;
+    /// <summary>不可部署标记材质的 Resources 路径(不含扩展名)。</summary>
+    private const string UndeployableMarkerMaterialPath = "Prefabs/Levels/Main/MainImgs/UndeployableMarker";
+    /// <summary>
+    /// 标记层 z:本项目相机在 -z 侧朝 +z 看,z 越小越靠上层。地块 quad 在 0.01(最底层),
+    /// 实体/装饰在 0(上层),标记取 0.005 夹在中间——盖住地块、不被单位挡住。
+    /// </summary>
+    private const float UndeployableMarkerZ = 0.005f;
+    /// <summary>运行时 new 的 Mesh 是独立于 GameObject 的原生对象,须在 ToEnd 显式销毁。</summary>
+    private Mesh _undeployableOverlayMesh;
 
     public ref Tile GetPosBlockRef(int i, int j)
     {
@@ -169,7 +177,6 @@ public class MapDataManager : IManagerStartEnd
         jSize = _levelData != null ? _levelData.jSize : 0;
         // Tile 是 struct,new Tile[iSize, jSize] 给的是 default(Tile) (int=0, bool=false),
         // 不会跑 Tile.Default() 的字段赋值,所以这里手动填一遍。这样:
-        //   - 未画刷格子的 passableType=2 (所有 moveMethod 都能走)
         //   - 未画刷格子的 portalOutI/J=-1 (避开 A* 的 portalEnter 误判)
         Tiles         = (iSize > 0 && jSize > 0) ? new Tile[iSize, jSize]    : null;
         TileMaterials = (iSize > 0 && jSize > 0) ? new Material[iSize, jSize] : null;
@@ -204,6 +211,8 @@ public class MapDataManager : IManagerStartEnd
             }
         }
 
+        BuildUndeployableOverlays();
+
         graph = (iSize > 0 && jSize > 0) ? new AStarProperty[iSize, jSize] : null;
         heap = (iSize > 0 && jSize > 0) ? new HeapEntry[iSize * jSize + 16] : null;
         if (graph != null)
@@ -218,6 +227,73 @@ public class MapDataManager : IManagerStartEnd
             }
         }
         EntityManager.Manager.BlockEntitysInitialize(iSize, jSize);
+    }
+
+    /// <summary>
+    /// 不可部署覆盖层:对"有地块方块但 canSet=false"的格子,在 _map 下生成一张合批
+    /// Mesh(一格两个三角形)贴上标记贴图。视觉从 Tiles 数据派生,重画地图无需改
+    /// 美术资源;覆盖层只是 _map 的一个子物体,随 ToEnd 销毁 _map 一并带走。
+    /// 未画刷格子没有地块方块(TileMaterials 为 null),本就不在关卡视觉范围内,不贴。
+    /// 材质缺失只警告一次,不阻断地图初始化。
+    /// </summary>
+    private void BuildUndeployableOverlays()
+    {
+        if (_map == null) return;
+        Material markerMaterial = Resources.Load<Material>(UndeployableMarkerMaterialPath);
+        if (markerMaterial == null)
+        {
+            Debug.LogWarning(
+                $"Undeployable marker material not found at Resources/{UndeployableMarkerMaterialPath}");
+            return;
+        }
+
+        var vertices = new List<Vector3>();
+        var triangles = new List<int>();
+        for (int i = 0; i < iSize; i++)
+        {
+            for (int j = 0; j < jSize; j++)
+            {
+                if (Tiles[i, j].canSet || TileMaterials[i, j] == null) continue;
+
+                // 顶点序 BL,BR,TL,TR;三角面按顺时针,正对相机(相机在 -z 侧看向 +z)。
+                int v = vertices.Count;
+                vertices.Add(new Vector3(j - 0.5f, i - 0.5f, UndeployableMarkerZ));
+                vertices.Add(new Vector3(j + 0.5f, i - 0.5f, UndeployableMarkerZ));
+                vertices.Add(new Vector3(j - 0.5f, i + 0.5f, UndeployableMarkerZ));
+                vertices.Add(new Vector3(j + 0.5f, i + 0.5f, UndeployableMarkerZ));
+                triangles.Add(v);     triangles.Add(v + 2); triangles.Add(v + 1);
+                triangles.Add(v + 2); triangles.Add(v + 3); triangles.Add(v + 1);
+            }
+        }
+        if (vertices.Count == 0) return;
+
+        var mesh = new Mesh
+        {
+            vertices = vertices.ToArray(),
+            triangles = triangles.ToArray(),
+            uv = BuildMarkerUvs(vertices.Count),
+        };
+        mesh.RecalculateBounds();
+        _undeployableOverlayMesh = mesh;
+
+        var overlay = new GameObject("UndeployableOverlay");
+        overlay.transform.SetParent(_map.transform, false);
+        overlay.AddComponent<MeshFilter>().sharedMesh = mesh;
+        overlay.AddComponent<MeshRenderer>().sharedMaterial = markerMaterial;
+    }
+
+    /// <summary>每格 4 个顶点共享同一张 0..1 贴图;裁切留白由贴图自身的透明边距控制。</summary>
+    private static Vector2[] BuildMarkerUvs(int vertexCount)
+    {
+        var uvs = new Vector2[vertexCount];
+        for (int k = 0; k < vertexCount; k += 4)
+        {
+            uvs[k]     = new Vector2(0f, 0f);
+            uvs[k + 1] = new Vector2(1f, 0f);
+            uvs[k + 2] = new Vector2(0f, 1f);
+            uvs[k + 3] = new Vector2(1f, 1f);
+        }
+        return uvs;
     }
     public (int x, int y)[] RangeCaculator((int x, int y)[] originRange, (int x, int y) pos, int orientation)
     {
@@ -525,6 +601,11 @@ public class MapDataManager : IManagerStartEnd
 
     public void ToEnd()
     {
+        if (_undeployableOverlayMesh != null)
+        {
+            UnityEngine.Object.Destroy(_undeployableOverlayMesh);
+            _undeployableOverlayMesh = null;
+        }
         UnityEngine.Object.Destroy(_map);
     }
 }
