@@ -1256,7 +1256,7 @@ MonoBehaviour:
       ID_N: 2
     ChineseName: "\u9AB7\u9AC5"
     EnglishName: Skeleton
-    Description: "\u9AB7\u9AC5\u662F\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u64C5\u957F\u4F7F\u7528\u5F13\u7BAD\u8FDC\u7A0B\u653B\u51FB\u7684\u602A\u7269\u3002\u4F5C\u4E3A\u4EA1\u7075\u751F\u7269\uFF0C\u5B83\u60E7\u6015\u9633\u5149\uFF0C\u4F46\u5B83\u5934\u9876\u7684\u5E3D\u5B50\u4F3C\u4E4E\u53EF\u4EE5\u5E2E\u4ED6\u89E3\u51B3\u8FD9\u4E2A\u95EE\u9898\u3002\u9AB7\u9AC5\u770B\u4F3C\u4E00\u5177\u5080\u5121\uFF0C\u4F46\u5B83\u4EEC\u4F3C\u4E4E\u62E5\u6709\u4EA4\u6D41\u80FD\u529B\uFF0C\u53EF\u4EE5\u5C06\u5BF9\u624B\u7684\u4FE1\u606F\u544A\u8BC9\u961F\u53CB\u3002"
+    Description: "\u9AB7\u9AC5\u662F\u201C\u6211\u7684\u4E16\u754C\u201D\u4E2D\u64C5\u957F\u4F7F\u7528\u5F13\u7BAD\u8FDC\u7A0B\u653B\u51FB\u7684\u602A\u7269\u3002\u4F5C\u4E3A\u4EA1\u7075\u751F\u7269\uFF0C\u5B83\u60E7\u6015\u9633\u5149\uFF0C\u4F46\u5B83\u5934\u9876\u7684\u5E3D\u5B50\u4F3C\u4E4E\u53EF\u4EE5\u5E2E\u4ED6\u89E3\u51B3\u8FD9\u4E2A\u95EE\u9898\u3002\u9AB7\u9AC5\u4E4B\u95F4\u4F3C\u4E4E\u62E5\u6709\u4EA4\u6D41\u80FD\u529B\uFF0C\u53EF\u4EE5\u5C06\u5BF9\u624B\u7684\u4FE1\u606F\u544A\u8BC9\u5BF9\u65B9\u3002"
     Prefab: {fileID: 5752354500556713093, guid: 73542255c8c9d20478283f1106ab97ba, type: 3}
     HeadImage: {fileID: 21300000, guid: bd74f9d899ec05b4f9fd65a9dcf201c0, type: 3}
     HalfBodyImage: {fileID: 0}
@@ -1271,7 +1271,7 @@ MonoBehaviour:
     MonsterCountOperated: 1
     MonsterLevelHpConsume: 1
     VisionRange: []
-    VisionRadius: 2.828
+    VisionRadius: 2.828428
     Attack: 395
     BaseAttackTime: 5
     AttackNum: 1
@@ -1325,7 +1325,7 @@ MonoBehaviour:
     MonsterCountOperated: 1
     MonsterLevelHpConsume: 1
     VisionRange: []
-    VisionRadius: 1.414
+    VisionRadius: 1.414214
     Attack: 1050
     BaseAttackTime: 3
     AttackNum: 1

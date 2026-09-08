@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   abilityId: creeper_t1
   abilityName: "\u7206\u70B8"
-  description: "\u9644\u8FD1\u5B58\u5728\u6211\u65B9\u5355\u4F4D\u65F6\u84C4\u529B1\u79D2\uFF0C\u7136\u540E\u7206\u70B8\uFF0C\u5BF9\u534A\u5F842.915\u5185\u7684\u5B9E\u4F53\u9020\u6210\u8DDD\u79BB\u8870\u51CF\u7684\u7269\u7406\u4F24\u5BB3\u548C\u51B2\u91CF\uFF1B\u84C4\u529B\u671F\u95F4\u5931\u53BB\u76EE\u6807\u5219\u9000\u706B\u3002"
+  description: "\u9644\u8FD1\u5B58\u5728\u6211\u65B9\u5355\u4F4D\u65F6\u84C4\u529B1\u79D2\uFF0C\u7136\u540E\u7206\u70B8\uFF0C\u5BF9\u5927\u8303\u56F4\u5185\u7684\u6240\u6709\u5B9E\u4F53\u9020\u6210\u8DDD\u79BB\u8870\u51CF\u7684\u7269\u7406\u4F24\u5BB3\u548C\u51B2\u91CF\uFF1B\u84C4\u529B\u671F\u95F4\u5931\u53BB\u76EE\u6807\u5219\u9000\u706B\u3002"
   icon: {fileID: 0}
   Kind: 1
   sp:
@@ -297,7 +297,7 @@ MonoBehaviour:
           fromBlackboard: 0
           type: 1
         - key: radius
-          value: 0.25
+          value: 0.5
           fromBlackboard: 0
           type: 1
         - key: outputEntitiesKey
@@ -359,11 +359,11 @@ MonoBehaviour:
           fromBlackboard: 0
           type: 3
         - key: minRadius
-          value: 0.25
+          value: 0.5
           fromBlackboard: 0
           type: 1
         - key: radius
-          value: 0.5
+          value: 0.76
           fromBlackboard: 0
           type: 1
         - key: outputEntitiesKey
@@ -385,7 +385,7 @@ MonoBehaviour:
           fromBlackboard: 0
           type: 3
         - key: multiplier
-          value: 2
+          value: 3
           fromBlackboard: 0
           type: 1
         - key: applyType
@@ -407,7 +407,7 @@ MonoBehaviour:
           fromBlackboard: 0
           type: 3
         - key: strengthLevel
-          value: 4
+          value: 3
           fromBlackboard: 0
           type: 0
       condition: []
@@ -425,11 +425,11 @@ MonoBehaviour:
           fromBlackboard: 0
           type: 3
         - key: minRadius
-          value: 0.5
+          value: 0.76
           fromBlackboard: 0
           type: 1
         - key: radius
-          value: 1.664
+          value: 1.414214
           fromBlackboard: 0
           type: 1
         - key: outputEntitiesKey
@@ -451,7 +451,7 @@ MonoBehaviour:
           fromBlackboard: 0
           type: 3
         - key: multiplier
-          value: 1
+          value: 1.8
           fromBlackboard: 0
           type: 1
         - key: applyType
@@ -491,11 +491,11 @@ MonoBehaviour:
           fromBlackboard: 0
           type: 3
         - key: minRadius
-          value: 1.664
+          value: 1.414214
           fromBlackboard: 0
           type: 1
         - key: radius
-          value: 2.915
+          value: 1.732051
           fromBlackboard: 0
           type: 1
         - key: outputEntitiesKey
@@ -517,7 +517,7 @@ MonoBehaviour:
           fromBlackboard: 0
           type: 3
         - key: multiplier
-          value: 0.5
+          value: 1.2
           fromBlackboard: 0
           type: 1
         - key: applyType
@@ -540,6 +540,138 @@ MonoBehaviour:
           type: 3
         - key: strengthLevel
           value: 2
+          fromBlackboard: 0
+          type: 0
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: select_targets
+      args:
+        entries:
+        - key: selectionMode
+          value: ring
+          fromBlackboard: 0
+          type: 3
+        - key: campRelation
+          value: both
+          fromBlackboard: 0
+          type: 3
+        - key: minRadius
+          value: 1.732051
+          fromBlackboard: 0
+          type: 1
+        - key: radius
+          value: 2.414214
+          fromBlackboard: 0
+          type: 1
+        - key: outputEntitiesKey
+          value: creeper_t1_bucket_5
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: apply_damage
+      args:
+        entries:
+        - key: targetMode
+          value: blackboard
+          fromBlackboard: 0
+          type: 3
+        - key: blackboardKey
+          value: creeper_t1_bucket_5
+          fromBlackboard: 0
+          type: 3
+        - key: multiplier
+          value: 0.6
+          fromBlackboard: 0
+          type: 1
+        - key: applyType
+          value: 1
+          fromBlackboard: 0
+          type: 0
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: apply_impulse
+      args:
+        entries:
+        - key: targetMode
+          value: blackboard
+          fromBlackboard: 0
+          type: 3
+        - key: blackboardKey
+          value: creeper_t1_bucket_5
+          fromBlackboard: 0
+          type: 3
+        - key: strengthLevel
+          value: 1
+          fromBlackboard: 0
+          type: 0
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: select_targets
+      args:
+        entries:
+        - key: selectionMode
+          value: ring
+          fromBlackboard: 0
+          type: 3
+        - key: campRelation
+          value: both
+          fromBlackboard: 0
+          type: 3
+        - key: minRadius
+          value: 2.414214
+          fromBlackboard: 0
+          type: 1
+        - key: radius
+          value: 2.613126
+          fromBlackboard: 0
+          type: 1
+        - key: outputEntitiesKey
+          value: creeper_t1_bucket_6
+          fromBlackboard: 0
+          type: 3
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: apply_damage
+      args:
+        entries:
+        - key: targetMode
+          value: blackboard
+          fromBlackboard: 0
+          type: 3
+        - key: blackboardKey
+          value: creeper_t1_bucket_6
+          fromBlackboard: 0
+          type: 3
+        - key: multiplier
+          value: 0.3
+          fromBlackboard: 0
+          type: 1
+        - key: applyType
+          value: 1
+          fromBlackboard: 0
+          type: 0
+      condition: []
+      steps: []
+      elseSteps: []
+    - op: apply_impulse
+      args:
+        entries:
+        - key: targetMode
+          value: blackboard
+          fromBlackboard: 0
+          type: 3
+        - key: blackboardKey
+          value: creeper_t1_bucket_6
+          fromBlackboard: 0
+          type: 3
+        - key: strengthLevel
+          value: 1
           fromBlackboard: 0
           type: 0
       condition: []

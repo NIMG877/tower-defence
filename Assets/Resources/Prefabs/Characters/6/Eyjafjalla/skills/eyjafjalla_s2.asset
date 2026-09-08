@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   abilityId: eyjafjalla_s2
   abilityName: "\u70B9\u71C3"
-  description: "\u5411\u653B\u51FB\u8303\u56F4\u51854\u4E2A\u6700\u4F18\u843D\u70B9\u53D1\u5C04\u706B\u5C71\u5F39\uFF0C\u843D\u5730\u5404\u751F\u6210\u4E00\u4E2A\u7194\u5CA9\u6CE1\u6CE1"
+  description: "\u5411\u653B\u51FB\u8303\u56F4\u5185\u53D1\u5C044\u4E2A\u7194\u5CA9\u5F39\uFF0C\u843D\u5730\u5404\u751F\u6210\u4E00\u4E2A\u201C\u7194\u5CA9\u6CE1\u6CE1\u201D"
   icon: {fileID: 21300000, guid: 8df64c6b9b77c9448984b80a6e8c1172, type: 3}
   Kind: 0
   sp:

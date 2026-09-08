@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb7f1744c96d9834491e7169ccef37cc, type: 3}
   m_Name: MC-2
   m_EditorClassIdentifier: 
-  LevelName: zombie show
+  LevelName: "\u52C7\u731B\u7684\u6218\u58EB"
   LevelCode: MC-2
-  LevelDescription: zombie show
+  LevelDescription: "<\u9971\u98DF\u5EA6> \u9971\u98DF\u5EA6\u5C06\u968F\u65F6\u95F4\u81EA\u7136\u8870\u51CF\uFF0C\u5E72\u5458\u8FDB\u884C\u653B\u51FB\u65F6\u4E5F\u4F1A\u6D88\u8017\u9971\u98DF\u5EA6\u3002\u9AD8\u9971\u98DF\u5EA6\u4E0B\u6301\u7EED\u6D88\u8017\u9971\u98DF\u5EA6\u4E3A\u5E72\u5458\u56DE\u590D\u751F\u547D\u503C\uFF0C\u540C\u65F6\u83B7\u5F97\u653B\u51FB\u529B\u3001\u653B\u51FB\u901F\u5EA6\u63D0\u5347\u3002\u4F4E\u9971\u98DF\u5EA6\u4E0B\u5E72\u5458\u6301\u7EED\u635F\u5931\u751F\u547D\u503C\uFF0C\u653B\u51FB\u529B\u4E0E\u653B\u51FB\u901F\u5EA6\u4E0B\u964D\u3002"
   CameraSize: 4.5
   CameraPos: {x: 4, y: 3}
   CutToLevelTexture: {fileID: 2800000, guid: f44a6d0f153c7f8478b214480fd37139, type: 3}

@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   abilityId: skeleton_t1
   abilityName: "\u76EE\u6807\u5171\u4EAB"
-  description: "\u653B\u51FB\u524D\u5411\u534A\u5F842\u5185\u7684\u5176\u4ED6\u9AB7\u9AC5\u5171\u4EAB\u76EE\u6807\u3002\u63A5\u6536\u8005\u82E5\u5F53\u524D\u770B\u4E0D\u5230\u8BE5\u76EE\u6807\uFF0C\u5219\u5B9A\u8EAB\u5E76\u6301\u7EED\u5BF9\u5171\u4EAB\u76EE\u6807\u53D1\u8D77\u989D\u5916\u653B\u51FB\uFF0C\u76F4\u81F3\u961F\u5217\u6E05\u7A7A\u3002"
+  description: "\u653B\u51FB\u524D\u5411\u534A\u5F842\u5185\u7684\u5176\u4ED6\u9AB7\u9AC5\u5171\u4EAB\u76EE\u6807\u3002\u63A5\u6536\u8005\u82E5\u5F53\u524D\u770B\u4E0D\u5230\u8BE5\u76EE\u6807\uFF0C\u5219\u7ACB\u5373\u5BF9\u5171\u4EAB\u76EE\u6807\u53D1\u8D77\u989D\u5916\u653B\u51FB\u3002"
   icon: {fileID: 0}
-  Kind: 0
+  Kind: 1
   sp:
     totalSp: 0
     initialSp: 0
@@ -101,6 +101,7 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
+    detached: 0
   - triggers:
     - triggerEvent: 16
       groups: []
@@ -136,3 +137,5 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
+    detached: 0
+  legacyComponents: []
