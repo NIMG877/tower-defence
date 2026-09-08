@@ -148,7 +148,7 @@ namespace MyUI
                             _selectedCharacterSkill.RemoveAt(index_s);
                             UpdateCharacterMessage(EntityID.Null);
                         }
-                        else
+                        else if (_selectedCharacters.Count < TeamFrame.MaxMembers)
                         {
                             _selectedCharacters.Add(characters[cindex]);
                             _selectedCharacterSkill.Add(0);

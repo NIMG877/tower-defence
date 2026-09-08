@@ -19,6 +19,9 @@ namespace MyUI
         private Button _deleteButton;
         private TextMeshProUGUI _deleteText;
 
+        /// <summary>编队人数上限，同时决定 teamFrame 的角色格数量。</summary>
+        public const int MaxMembers = 12;
+
         /// <summary>删除了当前编队（TeamPanel 据此刷新编队下拉——删除后 currentTeam 已切到相邻一支）。</summary>
         public event Action TeamDeleted;
 
@@ -39,7 +42,7 @@ namespace MyUI
             RectTransform teamFrame = Resources.Load<RectTransform>("Prefabs/UI/MyUIs/Components/teamFrame");
             _teamFrame = Object.Instantiate(teamFrame.gameObject, parent).GetComponent<RectTransform>();
             _teamFrame.anchoredPosition = anchorPos;
-            _characterTabs = new Button[12];
+            _characterTabs = new Button[MaxMembers];
             _characterTabs[0] = _teamFrame.Find("0").GetComponent<Button>();
             _characterSelectPanel = CharacterSelectPanel.Panel;
             for (int i = 0; i < _characterTabs.Length; i++)
