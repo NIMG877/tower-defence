@@ -1224,7 +1224,7 @@ MonoBehaviour:
     DamageType: 0
     TargetPriority: 0
     SplashRadius: 0
-    MaxHp: 5500
+    MaxHp: 5960
     Defense: 265
     MagicResistance: 0
     PhysicalDodge: 0
@@ -1278,7 +1278,7 @@ MonoBehaviour:
     DamageType: 0
     TargetPriority: 0
     SplashRadius: 0
-    MaxHp: 4590
+    MaxHp: 5090
     Defense: 185
     MagicResistance: 0
     PhysicalDodge: 0
@@ -1332,7 +1332,7 @@ MonoBehaviour:
     DamageType: 0
     TargetPriority: 0
     SplashRadius: 0
-    MaxHp: 12000
+    MaxHp: 12500
     Defense: 325
     MagicResistance: 10
     PhysicalDodge: 0
@@ -1386,7 +1386,7 @@ MonoBehaviour:
     DamageType: 1
     TargetPriority: 0
     SplashRadius: 0
-    MaxHp: 12500
+    MaxHp: 13000
     Defense: 375
     MagicResistance: 50
     PhysicalDodge: 0

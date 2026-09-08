@@ -1412,7 +1412,7 @@ MonoBehaviour:
     - {x: 7, y: 3}
     WaitTimes:
     - 0
-    - 1
+    - 1.2
     - 0
     - 0
   - Name: creeper_j1

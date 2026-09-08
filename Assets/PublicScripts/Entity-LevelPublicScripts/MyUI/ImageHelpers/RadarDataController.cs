@@ -2,7 +2,6 @@ using UnityEngine.UI;
 using UnityEngine;
 using System.Collections.Generic;
 using DG.Tweening;
-using Unity.Plastic.Newtonsoft.Json.Linq;
 
 public class RadarDataController : Graphic
 {

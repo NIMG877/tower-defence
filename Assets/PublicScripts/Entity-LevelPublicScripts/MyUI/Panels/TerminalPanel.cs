@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -20,7 +20,6 @@ namespace MyUI
                 return (TerminalPanel)_instance;
             }
         }
-        private DirectoryInfo _main, _s1;
         private LevelCollectionData[] _mains, _s1s;
         private LevelCollectionData[] _currentDatas;
 
@@ -38,11 +37,6 @@ namespace MyUI
             _description = GetComponentInChildrenByPath<TextMeshProUGUI>("p1/right/description");
             _coSelectBtns = new List<Button>() { GetComponentInChildrenByPath<Button>("p1/frame/leftNaveBar/b") };
             _coSelectBtns[0].onClick.AddListener(() => ShowCollectionData(0));
-            //��ȡָ��·�������������Դ�ļ�  
-            if (Directory.Exists("Assets/Resources/Prefabs/Levels/Main/"))
-                _main = new DirectoryInfo("Assets/Resources/Prefabs/Levels/Main/");
-            if (Directory.Exists("Assets/Resources/Prefabs/Levels/S1/"))
-                _s1 = new DirectoryInfo("Assets/Resources/Prefabs/Levels/S1/");
             Button mainB = GetComponentInChildrenByPath<Button>("DownNaveBar/main");
             if (mainB != null)
             {
@@ -80,12 +74,8 @@ namespace MyUI
         {
             if (_mains == null)
             {
-                FileInfo[] files = _main.GetFiles("*.asset", SearchOption.TopDirectoryOnly);
-                _mains = new LevelCollectionData[files.Length];
-                for (int i = 0; i < files.Length; i++)
-                {
-                    _mains[i] = Resources.Load<LevelCollectionData>("Prefabs/Levels/Main/" + files[i].Name.Split('.')[0]);
-                }
+                _mains = Resources.LoadAll<LevelCollectionData>("Prefabs/Levels/Main")
+                    .OrderBy(d => d.name).ToArray();
             }
             _p1.gameObject.SetActive(true);
             ChangeCoSelectBtns(_mains);
@@ -94,12 +84,8 @@ namespace MyUI
         {
             if (_s1s == null)
             {
-                FileInfo[] files = _s1.GetFiles("*.asset", SearchOption.TopDirectoryOnly);
-                _s1s = new LevelCollectionData[files.Length];
-                for (int i = 0; i < files.Length; i++)
-                {
-                    _s1s[i] = Resources.Load<LevelCollectionData>("Prefabs/Levels/S1/" + files[i].Name.Split('.')[0]);
-                }
+                _s1s = Resources.LoadAll<LevelCollectionData>("Prefabs/Levels/S1")
+                    .OrderBy(d => d.name).ToArray();
             }
             _p1.gameObject.SetActive(true);
             ChangeCoSelectBtns(_s1s);

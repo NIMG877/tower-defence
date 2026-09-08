@@ -4,7 +4,6 @@ using UnityEngine;
 using MyUI;
 using Cysharp.Threading.Tasks;
 using UnityEngine.UI;
-using UnityEditorInternal;
 using static UnityEngine.EventSystems.EventTrigger;
 
 public class MCEnvironmentalDevice : MonoBehaviour, IManagerStartEnd
