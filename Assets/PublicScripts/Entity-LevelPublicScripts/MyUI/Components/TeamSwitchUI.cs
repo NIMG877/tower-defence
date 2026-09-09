@@ -13,7 +13,8 @@ namespace MyUI
     /// TMP_Dropdown 每次展开都会克隆 Template 生成"Dropdown List"、收起即销毁，
     /// 运行时监听器不随克隆复制，因此绑定分两层：
     /// - 选项与选中：常驻绑定 onValueChanged，选项在 RefreshOptions 从存档重建；
-    /// - 行内改名输入框与 Add 按钮：长在克隆列表里，每次展开后由 BindOpenedList 重新绑定。
+    /// - 行内 Edit 按钮、改名输入框与 Add 按钮：长在克隆列表里，每次展开后由 BindOpenedList 重新绑定。
+    ///   改名输入框平时禁用组件，点击不进入编辑（事件落到行 Toggle 上=选中该行），编辑入口收敛到 Edit 按钮。
     ///   展开入口是挂在 teamswitch 上的 EventTrigger.PointerClick：同物体上 TMP_Dropdown
     ///   是 prefab 序列化组件（先挂）、EventTrigger 由代码追加（后挂），事件按组件顺序派发，
     ///   保证回调触发时 TMP_Dropdown.OnPointerClick 已经同步克隆出列表。
@@ -106,12 +107,29 @@ namespace MyUI
             {
                 TMP_InputField input = content.GetChild(i + 1).GetComponentInChildren<TMP_InputField>();
                 // 克隆体的 InputField 内部文本与显示文本不同步，聚焦编辑时会清空显示——先对齐
+                // （此时克隆体组件仍处于启用状态，同步才会落到显示文本上）
                 input.text = _dropdown.options[i].text;
+                // 非编辑态禁用组件：点击不再进入编辑（射线落到行 Toggle 上=选中该行），编辑入口收敛到 Edit 按钮
+                input.enabled = false;
                 int index = i;
                 input.onEndEdit.AddListener(newName => OnRenameCommitted(index, newName, input));
+                // 提交/取消/失焦统一切回禁用态；改名回退分支里 text 赋值先执行，同步显示不受影响
+                input.onEndEdit.AddListener(_ => input.enabled = false);
+                Button editButton = content.GetChild(i + 1).Find("Edit").GetComponent<Button>();
+                editButton.onClick.AddListener(() => OnEditClicked(input));
             }
 
             list.Find("Add").GetComponent<Button>().onClick.AddListener(OnAddClicked);
+        }
+
+        /// <summary>
+        /// Edit 按钮进入编辑：启用输入框组件并激活。
+        /// 与 TMP 点击进入编辑走同一入口（ActivateInputField），光标/全选/提交行为不变。
+        /// </summary>
+        private void OnEditClicked(TMP_InputField input)
+        {
+            input.enabled = true;
+            input.ActivateInputField();
         }
 
         /// <summary>行内改名提交：未修改则规范化显示，空名/重名回退原名，不改存档。</summary>
