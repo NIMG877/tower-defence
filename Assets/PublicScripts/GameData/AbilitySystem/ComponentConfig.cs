@@ -488,11 +488,12 @@ namespace AbilitySystem
         // 同样追加在末尾以保持既有 asset 的枚举序号稳定。
         OnSummonDeath,
         // 索敌候选确定后、数量裁剪前派发（EntityAbilityRunner 桥接
-        // AttackBase.OnBeforeTargetSelect）。
+        // EntityAttack.OnBeforeTargetSelect）。
         OnBeforeTargetSelect,
         // 子弹（视觉载弹）抵达目标点销毁时派发（FireBullets 桥接；子弹非实体，
         // 事件走宿主 runner）。追加在末尾以保持既有 asset 的枚举序号稳定。
         OnBulletLanded,
+        OnAttackIdle,
     }
 
     public enum AbilityKind

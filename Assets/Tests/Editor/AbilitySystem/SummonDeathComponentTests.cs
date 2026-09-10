@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace AbilitySystem.Tests
 {
     /// <summary>召唤物死亡桥相关注册与事件枚举的契约测试。组件本体依赖
-    /// Entity/AttackBase/BuffController（MonoBehaviour + 场景装配），
+    /// Entity/EntityAttack/BuffController（随实体场景装配），
     /// 与既有组件同样不做 EditMode 单测，由 PlayMode 验证。</summary>
     public class SummonDeathComponentTests
     {

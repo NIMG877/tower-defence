@@ -76,14 +76,13 @@ namespace AbilitySystem.Components
                     continue;
                 }
 
-                var bulletData = new BulletData
-                {
-                    BulletPrefab = bulletPrefab,
-                    BulletTrailPrefab = trailPrefab,
-                    BulletSpeed = _bulletSpeed(),
-                    BulletType = 0,
-                    AllowNoTarget = false,
-                };
+                var bulletData = ScriptableObject.CreateInstance<BulletData>();
+                bulletData.hideFlags = HideFlags.HideAndDontSave;
+                bulletData.BulletPrefab = bulletPrefab;
+                bulletData.BulletTrailPrefab = trailPrefab;
+                bulletData.BulletSpeed = _bulletSpeed();
+                bulletData.BulletType = 0;
+                bulletData.AllowNoTarget = false;
                 new Bullet(
                     null,
                     (target, multiplier, defPenetrate, mgrPenetrate, defPenetrateValue,
@@ -96,6 +95,7 @@ namespace AbilitySystem.Components
                     Vector2.zero,
                     sender.Movement.Position,
                     1f, 0f, 0f, 0f, 0f, 0f, 0, 0);
+                UnityEngine.Object.Destroy(bulletData);
             }
         }
 

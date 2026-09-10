@@ -420,15 +420,16 @@ public class EntityAbilityRunner
     private void Subscribe()
     {
         if (_entity == null) return;
-        if (_entity.AttackBase != null)
+        if (_entity.Attack != null)
         {
-            _entity.AttackBase.OnBeforeAttack += OnBeforeAttack;
-            _entity.AttackBase.OnAfterAttack += OnAfterAttack;
-            _entity.AttackBase.OnBeforeTakeDamage += OnBeforeTakeDamage;
-            _entity.AttackBase.OnAfterTakeDamage += OnAfterTakeDamage;
-            _entity.AttackBase.OnAttackSuccessfully += OnAttackSuccessfully;
-            _entity.AttackBase.OnAttackInterrupt += OnAttackInterrupt;
-            _entity.AttackBase.OnBeforeTargetSelect += OnBeforeTargetSelect;
+            _entity.Attack.OnBeforeAttack += OnBeforeAttack;
+            _entity.Attack.OnAfterAttack += OnAfterAttack;
+            _entity.Attack.OnBeforeTakeDamage += OnBeforeTakeDamage;
+            _entity.Attack.OnAfterTakeDamage += OnAfterTakeDamage;
+            _entity.Attack.OnAttackSuccessfully += OnAttackSuccessfully;
+            _entity.Attack.OnAttackInterrupt += OnAttackInterrupt;
+            _entity.Attack.OnAttackIdle += OnAttackIdle;
+            _entity.Attack.OnBeforeTargetSelect += OnBeforeTargetSelect;
         }
         _entity.OnBeforeHurt += OnBeforeHurt;
         _entity.OnAfterHurt += OnAfterHurt;
@@ -439,15 +440,16 @@ public class EntityAbilityRunner
     private void Unsubscribe()
     {
         if (_entity == null) return;
-        if (_entity.AttackBase != null)
+        if (_entity.Attack != null)
         {
-            _entity.AttackBase.OnBeforeAttack -= OnBeforeAttack;
-            _entity.AttackBase.OnAfterAttack -= OnAfterAttack;
-            _entity.AttackBase.OnBeforeTakeDamage -= OnBeforeTakeDamage;
-            _entity.AttackBase.OnAfterTakeDamage -= OnAfterTakeDamage;
-            _entity.AttackBase.OnAttackSuccessfully -= OnAttackSuccessfully;
-            _entity.AttackBase.OnAttackInterrupt -= OnAttackInterrupt;
-            _entity.AttackBase.OnBeforeTargetSelect -= OnBeforeTargetSelect;
+            _entity.Attack.OnBeforeAttack -= OnBeforeAttack;
+            _entity.Attack.OnAfterAttack -= OnAfterAttack;
+            _entity.Attack.OnBeforeTakeDamage -= OnBeforeTakeDamage;
+            _entity.Attack.OnAfterTakeDamage -= OnAfterTakeDamage;
+            _entity.Attack.OnAttackSuccessfully -= OnAttackSuccessfully;
+            _entity.Attack.OnAttackInterrupt -= OnAttackInterrupt;
+            _entity.Attack.OnAttackIdle -= OnAttackIdle;
+            _entity.Attack.OnBeforeTargetSelect -= OnBeforeTargetSelect;
         }
         _entity.OnBeforeHurt -= OnBeforeHurt;
         _entity.OnAfterHurt -= OnAfterHurt;
@@ -490,6 +492,7 @@ public class EntityAbilityRunner
         for (int i = 0; i < _abilities.Count; i++) _abilities[i].spEngine?.OnAttackSuccessfully(); 
     }
     private void OnAttackInterrupt() { DispatchEvent(new AttackInterruptEvent()); }
+    private void OnAttackIdle() { DispatchEvent(new AttackIdleEvent()); }
 
     private void OnBeforeTargetSelect(List<Entity> targets, ref int selectMaxNum, ref int selectMinNum, ref bool sameComp)
     {

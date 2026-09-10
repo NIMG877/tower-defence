@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fa49cb953a94f0dba056cbeb50af003, type: 3}
+  m_Name: skeleton
+  m_EditorClassIdentifier: 
+  BulletPrefab: {fileID: 7814424976800272869, guid: eaed7b69e4a80f2408db418c4c5e42b1, type: 3}
+  BulletTrailPrefab: {fileID: 179391116157181972, guid: 2631ab7df91e8cd4dbfaea1f68dd6cb4, type: 3}
+  BulletSpawnEffect: {fileID: 3457875813190922772, guid: 9a190ff549a23134b90cb7726d6ee9d2, type: 3}
+  BulletDestroyEffect: {fileID: 0}
+  BulletSpeed: 15
+  BulletType: 0
+  AllowNoTarget: 0
+  DevitationXRate: 0
+  DevitationYValue: 0

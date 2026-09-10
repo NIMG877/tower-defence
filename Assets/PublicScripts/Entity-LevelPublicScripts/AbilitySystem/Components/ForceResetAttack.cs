@@ -23,7 +23,7 @@ namespace AbilitySystem.Components
 
             for (int i = 0; i < targets.Count; i++)
             {
-                targets[i]?.AttackBase?.ForceResetAttack();
+                targets[i]?.Attack?.ForceResetAttack();
             }
         }
 

@@ -92,8 +92,8 @@ MonoBehaviour:
           value: eyjafjalla_s2_points
           fromBlackboard: 0
           type: 3
-        - key: effectDataIndex
-          value: 0
+        - key: bulletDataIndex
+          value: 1
           fromBlackboard: 0
           type: 0
       condition: []

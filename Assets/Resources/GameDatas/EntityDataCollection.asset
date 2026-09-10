@@ -81,6 +81,9 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 9e0242c321b458831a624b77b4797a62, type: 2}
     SubJobTrait: {fileID: 11400000, guid: 2461a38d57218326426ef31b1d0335cf, type: 2}
     AnimationResources: {fileID: 11400000, guid: b7639e8dd39688e47a11dea72ef2238e, type: 2}
+    Bullets:
+    - {fileID: 11400000, guid: 58bfa608a4294adfba0a9b18ce5caa71, type: 2}
+    - {fileID: 11400000, guid: 237efba1d3d54b0e88c908ebf6ec780d, type: 2}
   - ID:
       ID_C: c
       ID_N: 2
@@ -147,6 +150,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 2e0973b3bd943054db55d52dbefbaa60, type: 2}
     SubJobTrait: {fileID: 11400000, guid: 2d58349af5c3f4f4c838ce1b5d4acf28, type: 2}
     AnimationResources: {fileID: 11400000, guid: e4017be5cb5e0f4449e1384dfd30b172, type: 2}
+    Bullets: []
   - ID:
       ID_C: c
       ID_N: 3
@@ -214,6 +218,8 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 30336de6325142b458941f1e612088c2, type: 2}
     SubJobTrait: {fileID: 11400000, guid: 8ca1b39face32653dbc0b613483296ab, type: 2}
     AnimationResources: {fileID: 11400000, guid: 2eb42c200c1aab54496fec70451c4fa9, type: 2}
+    Bullets:
+    - {fileID: 11400000, guid: d21063da7163b0241bfd9fef412f84fc, type: 2}
   - ID:
       ID_C: c
       ID_N: 4
@@ -279,6 +285,8 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 5e095252e619e0b4eaa17558e65bbb07, type: 2}
     SubJobTrait: {fileID: 11400000, guid: 2461a38d57218326426ef31b1d0335cf, type: 2}
     AnimationResources: {fileID: 11400000, guid: 4ad63c1c0debbf245b440f91c4f8157c, type: 2}
+    Bullets:
+    - {fileID: 11400000, guid: 6cc4004e776db104fabec48011c8c4df, type: 2}
   - ID:
       ID_C: c
       ID_N: 5
@@ -335,6 +343,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 62fdda0674b0245499caf1f700a08fad, type: 2}
     SubJobTrait: {fileID: 11400000, guid: 6b63f56df3fe55536b8070f377aab8d3, type: 2}
     AnimationResources: {fileID: 11400000, guid: a009ade165267c246a1ad64b5d4d0d38, type: 2}
+    Bullets: []
   - ID:
       ID_C: c
       ID_N: 6
@@ -392,6 +401,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 7d6b84033e6602140b4829f8674e4306, type: 2}
     SubJobTrait: {fileID: 11400000, guid: f8786338dcdcea0442b4e79925202f24, type: 2}
     AnimationResources: {fileID: 11400000, guid: 70eb60c57ea57be4d8adbabb43102e8b, type: 2}
+    Bullets: []
   - ID:
       ID_C: c
       ID_N: 7
@@ -459,6 +469,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: bfb4d0f2a2b00134585e846bdb20816e, type: 2}
     SubJobTrait: {fileID: 11400000, guid: 41aa0d8980d2e18e0d21a56144828a30, type: 2}
     AnimationResources: {fileID: 11400000, guid: db1cfe2d343af164e8ae810c8e47b817, type: 2}
+    Bullets: []
   - ID:
       ID_C: c
       ID_N: 8
@@ -526,6 +537,8 @@ MonoBehaviour:
     - {fileID: 11400000, guid: cf32d747c72608173d632ba8569ac138, type: 2}
     SubJobTrait: {fileID: 11400000, guid: 8ca1b39face32653dbc0b613483296ab, type: 2}
     AnimationResources: {fileID: 11400000, guid: 61fcd16c983e26bd1ecae25433ca2f27, type: 2}
+    Bullets:
+    - {fileID: 11400000, guid: d21063da7163b0241bfd9fef412f84fc, type: 2}
   - ID:
       ID_C: c
       ID_N: 9
@@ -593,6 +606,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 569b440f470e1452c6db02ba28fec422, type: 2}
     SubJobTrait: {fileID: 11400000, guid: 41aa0d8980d2e18e0d21a56144828a30, type: 2}
     AnimationResources: {fileID: 11400000, guid: 2e344e728f8e9548b42638c373fcd9ee, type: 2}
+    Bullets: []
   - ID:
       ID_C: c
       ID_N: 10
@@ -649,6 +663,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 2080220f003a371b0d986fe5103c5e87, type: 2}
     SubJobTrait: {fileID: 11400000, guid: 3f521fa1d77a8a5b2d2b9c1d22456363, type: 2}
     AnimationResources: {fileID: 11400000, guid: 5733979cd0846c0bf2d32b9a6ea6a2a2, type: 2}
+    Bullets: []
   - ID:
       ID_C: c
       ID_N: 11
@@ -705,6 +720,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 7d5bdc5e01de8eef3e6903288fb3a90d, type: 2}
     SubJobTrait: {fileID: 11400000, guid: 3f521fa1d77a8a5b2d2b9c1d22456363, type: 2}
     AnimationResources: {fileID: 11400000, guid: 418a80f87e0f7abfe5561c0f4059d4ba, type: 2}
+    Bullets: []
   - ID:
       ID_C: c
       ID_N: 12
@@ -775,6 +791,8 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 202d0ed21b2dc32fa52d2a01357f6cdc, type: 2}
     SubJobTrait: {fileID: 11400000, guid: 9b87bdf6c35377229178d01ebd2843bd, type: 2}
     AnimationResources: {fileID: 11400000, guid: e83e428a539fef1c91d4f9fbf2934c8d, type: 2}
+    Bullets:
+    - {fileID: 11400000, guid: d21063da7163b0241bfd9fef412f84fc, type: 2}
   - ID:
       ID_C: c
       ID_N: 13
@@ -832,6 +850,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: d01de30b38ef799f5b2519cd52c07f6a, type: 2}
     SubJobTrait: {fileID: 11400000, guid: ab56b08c5027b9845953580e85c286b1, type: 2}
     AnimationResources: {fileID: 11400000, guid: 5651bf8b3b7a2c6097f39ca549d40460, type: 2}
+    Bullets: []
   - ID:
       ID_C: c
       ID_N: 14
@@ -889,6 +908,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: bebab288b1b7caf17ddde33a53d602ff, type: 2}
     SubJobTrait: {fileID: 11400000, guid: e88c495e9b8743aa56eae8ab9f06c8ac, type: 2}
     AnimationResources: {fileID: 11400000, guid: 4e03ab10cd9a9aaf6af65016d7e6d637, type: 2}
+    Bullets: []
   - ID:
       ID_C: c
       ID_N: 15
@@ -953,6 +973,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 0545be457cb2ad72b86bad611de9ecd4, type: 2}
     SubJobTrait: {fileID: 11400000, guid: 04f0710667248ec92395b4c7aa2b34f5, type: 2}
     AnimationResources: {fileID: 11400000, guid: 3d373dcce35e3804d6c6a5acb83cf5ad, type: 2}
+    Bullets: []
   - ID:
       ID_C: c
       ID_N: 16
@@ -1016,6 +1037,8 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 494b62c971df1086b499a2a01a40e49c, type: 2}
     SubJobTrait: {fileID: 11400000, guid: 1cfc9bc6e6daa846496e0ac6c31f2132, type: 2}
     AnimationResources: {fileID: 11400000, guid: 74d9837242b1848a53a436d3840b5c36, type: 2}
+    Bullets:
+    - {fileID: 11400000, guid: d21063da7163b0241bfd9fef412f84fc, type: 2}
   - ID:
       ID_C: c
       ID_N: 17
@@ -1083,6 +1106,8 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 9089c9f14579348a5f90198a3351c9d9, type: 2}
     SubJobTrait: {fileID: 11400000, guid: 56fcc34f0e5788341a97f51bce7a2453, type: 2}
     AnimationResources: {fileID: 11400000, guid: 9d53af842f6abec9cc0587e96859fd2b, type: 2}
+    Bullets:
+    - {fileID: 11400000, guid: 6cc4004e776db104fabec48011c8c4df, type: 2}
   - ID:
       ID_C: c
       ID_N: 18
@@ -1140,6 +1165,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 73602c53083fd764d24d664b24b61141, type: 2}
     SubJobTrait: {fileID: 11400000, guid: 1c546d60fcaae0b551e37f5dc70eda03, type: 2}
     AnimationResources: {fileID: 11400000, guid: 0f56ee53baaab0d736350c383814c89c, type: 2}
+    Bullets: []
   - ID:
       ID_C: c
       ID_N: 19
@@ -1197,6 +1223,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 246740e16521e37066196ec41443c858, type: 2}
     SubJobTrait: {fileID: 11400000, guid: e88c495e9b8743aa56eae8ab9f06c8ac, type: 2}
     AnimationResources: {fileID: 11400000, guid: 542d904948985515ec3fc04a9ecb0acb, type: 2}
+    Bullets: []
   - ID:
       ID_C: m
       ID_N: 1
@@ -1251,6 +1278,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 0fa3a5a5548d012448f51c66faaafe07, type: 2}
     SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 11400000, guid: 5c5f405e5ac452d43a6e420f1522f197, type: 2}
+    Bullets: []
   - ID:
       ID_C: m
       ID_N: 2
@@ -1305,6 +1333,8 @@ MonoBehaviour:
     - {fileID: 11400000, guid: f0628830b80a7e74695be21f23cb7da3, type: 2}
     SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 11400000, guid: 7a626b4b74dec5e4b89d0bc4bef34643, type: 2}
+    Bullets:
+    - {fileID: 11400000, guid: 3a479dbb1059482a8f26c92e6ab68255, type: 2}
   - ID:
       ID_C: m
       ID_N: 3
@@ -1359,6 +1389,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 7686315d8385e1748857a2dc52d6d713, type: 2}
     SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 11400000, guid: d0c65e57c85fd7f4a859cc396ef72414, type: 2}
+    Bullets: []
   - ID:
       ID_C: m
       ID_N: 4
@@ -1412,6 +1443,8 @@ MonoBehaviour:
     Talents: []
     SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 0}
+    Bullets:
+    - {fileID: 11400000, guid: 4f2f7b75b33049d5923cb4c9116c55c7, type: 2}
   - ID:
       ID_C: m
       ID_N: 6
@@ -1465,6 +1498,7 @@ MonoBehaviour:
     Talents: []
     SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 11400000, guid: 41fad29e61964b74e92cdc4ffbdd84d9, type: 2}
+    Bullets: []
   - ID:
       ID_C: m
       ID_N: 7
@@ -1521,6 +1555,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 077e0c77018767047a76426b30fa15b9, type: 2}
     SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 11400000, guid: 41fad29e61964b74e92cdc4ffbdd84d9, type: 2}
+    Bullets: []
   - ID:
       ID_C: m
       ID_N: 8
@@ -1577,6 +1612,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 077e0c77018767047a76426b30fa15b9, type: 2}
     SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 11400000, guid: 41fad29e61964b74e92cdc4ffbdd84d9, type: 2}
+    Bullets: []
   - ID:
       ID_C: m
       ID_N: 9
@@ -1630,6 +1666,7 @@ MonoBehaviour:
     Talents: []
     SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 0}
+    Bullets: []
   - ID:
       ID_C: m
       ID_N: 10
@@ -1685,6 +1722,7 @@ MonoBehaviour:
     Talents: []
     SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 0}
+    Bullets: []
   - ID:
       ID_C: m
       ID_N: 11
@@ -1738,6 +1776,7 @@ MonoBehaviour:
     Talents: []
     SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 0}
+    Bullets: []
   - ID:
       ID_C: t
       ID_N: 1
@@ -1792,3 +1831,4 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 1d591fab0b3a4d2e83aca4ba993fc441, type: 2}
     SubJobTrait: {fileID: 0}
     AnimationResources: {fileID: 11400000, guid: 6de2e3c964f4f114c898e83234721ced, type: 2}
+    Bullets: []

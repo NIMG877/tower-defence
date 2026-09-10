@@ -8,8 +8,8 @@ namespace AbilitySystem.Components
     /// 向黑板 <c>List&lt;Vector2&gt;</c> 点列表逐一发纯视觉载弹（无实体目标、
     /// 零伤害——伤害语义由落点侧规则负责），弹着时在宿主 runner 上派发
     /// <see cref="BulletLandedEvent"/>（position=实际落点，抛物线含随机偏移）。
-    /// 弹幕配置取宿主 <c>AttackBase._extraEffectDatas[effectDataIndex]</c>：
-    /// GameObject 引用装不进 ParamList，带引用的弹幕配置登记在攻击组件上。
+    /// 弹幕配置取宿主 <c>EntityAttack._bulletDatas[bulletDataIndex]</c>：
+    /// GameObject 引用装不进 ParamList，带引用的弹幕配置登记在实体攻击数据上。
     /// </summary>
     [RegisterComponent("FireBullets")]
     public class FireBullets : AbilityComponentBase
@@ -23,9 +23,9 @@ namespace AbilitySystem.Components
 
         public override void OnTrigger(AbilityContext ctx)
         {
-            if (ctx.entity == null || ctx.entity.AttackBase == null)
+            if (ctx.entity == null || ctx.entity.Attack == null)
             {
-                Debug.LogError("[FireBullets] Host entity has no AttackBase; extra effect data unavailable.");
+                Debug.LogError("[FireBullets] Host entity has no EntityAttack; bullet data unavailable.");
                 return;
             }
 
@@ -39,13 +39,19 @@ namespace AbilitySystem.Components
                 return;
             }
 
-            int index = _args.GetIntLazy("effectDataIndex", 0, ctx.sharedBlackboard)();
-            if (!ctx.entity.AttackBase.TryGetExtraEffectData(index, out AttackBase.AttackEffectData data))
-                return; // TryGetExtraEffectData 已记录越界详情。
+            int index = _args.GetIntLazy("bulletDataIndex", 0, ctx.sharedBlackboard)();
+            if (!ctx.entity.Attack.TryGetBulletData(index, out EntityAttack.AttackBulletData data))
+                return; // TryGetBulletData 已记录越界详情。
+
+            if (data.BulletData == null || data.BulletData.BulletPrefab == null)
+            {
+                Debug.LogError($"[FireBullets] Bullet data [{index}] has no BulletData projectile asset.");
+                return;
+            }
 
             if (data.BulletSpawnTransform == null)
             {
-                Debug.LogError($"[FireBullets] Extra effect data [{index}] has no BulletSpawnTransform; carrier bullets need a spawn bone.");
+                Debug.LogError($"[FireBullets] Bullet data [{index}] has no BulletSpawnTransform; carrier bullets need a spawn bone.");
                 return;
             }
 

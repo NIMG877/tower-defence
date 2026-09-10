@@ -32,7 +32,7 @@ public class XLSX2DataAsset
     const int    DataStart = 4;   // 0-based：第 5 行起是数据
 
     [MenuItem("Tools/Static Data/Rebuild Entity Collection")]
-    static void Rebuild()
+    public static void Rebuild()
     {
         try
         {
@@ -261,6 +261,7 @@ public class XLSX2DataAsset
             Talents = LoadResourceList<AbilityConfig>(GetStr(row, colMap, "Talents", sharedStrings)),
             SubJobTrait = subJobTrait,
             AnimationResources = LoadResource<AnimationResources>(GetStr(row, colMap, "AnimationResources", sharedStrings)),
+            Bullets = LoadBulletDatas(GetStr(row, colMap, "Bullets", sharedStrings)),
         };
     }
 
@@ -491,6 +492,31 @@ public class XLSX2DataAsset
         var backupPath = Path.Combine(BackupDir, $"EntityDataCollection.{stamp}.bak");
         File.Copy(AssetPath, backupPath, overwrite: true);
         Debug.Log($"[XLSX2DataAsset] Backed up to {backupPath}");
+    }
+
+    static List<BulletData> LoadBulletDatas(string s)
+    {
+        var list = new List<BulletData>();
+        if (string.IsNullOrEmpty(s)) return list;
+        try
+        {
+            var names = JsonConvert.DeserializeObject<string[]>(s);
+            if (names == null) return list;
+            foreach (var name in names)
+            {
+                if (string.IsNullOrWhiteSpace(name) || string.Equals(name.Trim(), "''", StringComparison.Ordinal))
+                {
+                    list.Add(null);
+                    continue;
+                }
+                list.Add(LoadResource<BulletData>($"GameDatas/Bullets/{name}"));
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[XLSX2DataAsset] ParseBulletDataList failed: {ex.Message} (raw: {s})");
+        }
+        return list;
     }
 
     static T LoadResource<T>(string path) where T : UnityEngine.Object

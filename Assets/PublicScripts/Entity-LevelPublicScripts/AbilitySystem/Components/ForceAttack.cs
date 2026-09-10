@@ -29,7 +29,7 @@ namespace AbilitySystem.Components
 
             for (int i = 0; i < targets.Count; i++)
             {
-                targets[i]?.AttackBase?.TryToAttack(Array.Empty<Entity>(), true, false);
+                targets[i]?.Attack?.TryToAttack(Array.Empty<Entity>(), true, false);
             }
         }
 

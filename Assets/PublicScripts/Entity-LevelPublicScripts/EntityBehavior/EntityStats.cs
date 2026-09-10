@@ -29,11 +29,10 @@ public class EntityStats
     // 例外（仍留字段）：
     //   _physicalDodgeBase/_magicDodgeBase：Dodge 固有闪避，参与薄壳 1-(1-固有)*Final（store base=1 是"未命中乘数"）。
     //   _attackNumBase：仅用于 <0 哨兵判断（AttackNum<0 表示无限攻击次数），不参与加法。
-    //   _attackBase/_baseAttackTimeBase：下游 AttackBase 读原始基准，故留字段+公开。
+    //   _baseAttackTimeBase：下游 EntityAttack 读原始基准（攻击计时），故留字段+公开。
     private float _physicalDodgeBase;
     private float _magicDodgeBase;
     private int _attackNumBase;
-    private float _attackBase;
     private float _baseAttackTimeBase;
 
     // === 状态 ===
@@ -58,7 +57,6 @@ public class EntityStats
     }
 
     // === 基础属性读（仅暴露下游真正需要的原始基准值；其余经 store 聚合） ===
-    public float AttackBase => _attackBase;
     public float BaseAttackTimeBase => _baseAttackTimeBase;
     // TauntLevel：纯读 store（base 已 SetBase，无 clamp，语义值）。
     public int TauntLevel => (int)_store.GetFinal("TauntLevel");
@@ -155,11 +153,10 @@ public class EntityStats
         // 与战斗 buff 同机制（区别仅在生命周期），而非并入 SetBase（并入会抹掉"固有基础 vs 环境修正"的区分）。
         // TODO(level-base-buffs): 关卡环境基础 buff 落地后，在此作为永久 group AddFlat/AddPercent 即可。
 
-        // 仍需字段的 base（Dodge 固有值参与薄壳复合公式；AttackNum 仅作 <0 哨兵；Attack/BaseAttackTime 下游读原始基准）。
+        // 仍需字段的 base（Dodge 固有值参与薄壳复合公式；AttackNum 仅作 <0 哨兵；BaseAttackTime 下游读原始基准）。
         _physicalDodgeBase = data.PhysicalDodge;
         _magicDodgeBase = data.MagicDodge;
         _attackNumBase = data.AttackNum;
-        _attackBase = data.Attack;
         _baseAttackTimeBase = data.BaseAttackTime;
 
         // === 注入基础值到 AttributeStore ===

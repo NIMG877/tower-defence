@@ -131,7 +131,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7346695484381571506}
   - component: {fileID: 6918839178590651092}
-  - component: {fileID: 7915518268081645992}
   - component: {fileID: -4401687450290542570}
   m_Layer: 0
   m_Name: Creeper
@@ -168,44 +167,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98c15169cca6fd54088c6e3b3c07ff80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &7915518268081645992
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5752354500556713093}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62a03b516ab1ae5498c989285df1e562, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _attackEffectData:
-    BulletData:
-      BulletPrefab: {fileID: 0}
-      BulletTrailPrefab: {fileID: 0}
-      BulletSpawnEffect: {fileID: 0}
-      BulletDestroyEffect: {fileID: 0}
-      BulletSpeed: 0
-      BulletType: 0
-      AllowNoTarget: 0
-      DevitationXRate: 0
-      DevitationYValue: 0
-    BulletSpawnTransform: {fileID: 0}
-    AttackEffect: {fileID: 0}
-  _attackEffectData0:
-    BulletData:
-      BulletPrefab: {fileID: 0}
-      BulletTrailPrefab: {fileID: 0}
-      BulletSpawnEffect: {fileID: 0}
-      BulletDestroyEffect: {fileID: 0}
-      BulletSpeed: 0
-      BulletType: 0
-      AllowNoTarget: 0
-      DevitationXRate: 0
-      DevitationYValue: 0
-    BulletSpawnTransform: {fileID: 0}
-    AttackEffect: {fileID: 0}
 --- !u!114 &-4401687450290542570
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -131,7 +131,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7346695484381571506}
   - component: {fileID: 6918839178590651092}
-  - component: {fileID: -2194638516088659704}
   - component: {fileID: 840365125945758641}
   m_Layer: 0
   m_Name: Slime_Middle
@@ -168,64 +167,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98c15169cca6fd54088c6e3b3c07ff80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  o_default: {fileID: 11400000, guid: 2935cf3294683574db74a8a518959fe4, type: 2}
-  o_idle: {fileID: 11400000, guid: 58ae9ac4758ea5c43ac9d7c581c67bf0, type: 2}
-  o_move: {fileID: 0}
-  o_attack_begin: {fileID: 0}
-  o_attack_end: {fileID: 0}
-  o_start: {fileID: 11400000, guid: 30c0b87d5884ffe44b6c981118576087, type: 2}
-  o_die: {fileID: 11400000, guid: 3bef70b4346c28a4784a79d46220ea8d, type: 2}
-  o_attack_remote:
-  - {fileID: 11400000, guid: 324ec951faf145e4ea169d91d5e8b151, type: 2}
-  o_attack_close:
-  - {fileID: 11400000, guid: 324ec951faf145e4ea169d91d5e8b151, type: 2}
-  Default: {fileID: 0}
-  Idle: {fileID: 0}
-  Move: {fileID: 0}
-  Attack_Begin: {fileID: 0}
-  Attack_End: {fileID: 0}
-  Start: {fileID: 0}
-  Die: {fileID: 0}
-  Attack_Remote: []
-  Attack_Close: []
---- !u!114 &-2194638516088659704
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5752354500556713093}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62a03b516ab1ae5498c989285df1e562, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _attackEffectData:
-    BulletData:
-      BulletPrefab: {fileID: 0}
-      BulletTrailPrefab: {fileID: 0}
-      BulletSpawnEffect: {fileID: 0}
-      BulletDestroyEffect: {fileID: 0}
-      BulletSpeed: 0
-      BulletType: 0
-      AllowNoTarget: 0
-      DevitationXRate: 0
-      DevitationYValue: 0
-    BulletSpawnTransform: {fileID: 0}
-    AttackEffect: {fileID: 0}
-  _attackEffectData0:
-    BulletData:
-      BulletPrefab: {fileID: 0}
-      BulletTrailPrefab: {fileID: 0}
-      BulletSpawnEffect: {fileID: 0}
-      BulletDestroyEffect: {fileID: 0}
-      BulletSpeed: 0
-      BulletType: 0
-      AllowNoTarget: 0
-      DevitationXRate: 0
-      DevitationYValue: 0
-    BulletSpawnTransform: {fileID: 0}
-    AttackEffect: {fileID: 0}
 --- !u!114 &840365125945758641
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -260,6 +201,3 @@ MonoBehaviour:
   - {x: -2, y: 0}
   - {x: -2, y: 1}
   _jumpGap: 4
-  _jumpBegin: {fileID: 11400000, guid: 5fed8220524b97f4f8104172cbf61e74, type: 2}
-  _jumpEnd: {fileID: 11400000, guid: a2f4922fc909bbe4a8d2959e5e0436f3, type: 2}
-  _jump: {fileID: 11400000, guid: abf6fd3b6cc990f45a216cfa8663345d, type: 2}

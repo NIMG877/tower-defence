@@ -51,15 +51,15 @@ namespace AbilitySystem.Components
             for (int i = 0; i < targets.Count; i++)
             {
                 Entity target = targets[i];
-                if (target == null || target.AttackBase == null) continue;
+                if (target == null || target.Attack == null) continue;
 
                 snapshots?.Add(new AttackBehaviorSnapshot(
                     target,
-                    target.AttackBase.DamageType,
-                    target.AttackBase.TargetPriority));
+                    target.Attack.DamageType,
+                    target.Attack.TargetPriority));
 
-                if (_hasDamageType) target.AttackBase.DamageType = _damageType();
-                if (applyTargetPriority) target.AttackBase.TargetPriority = parsedTargetPriority;
+                if (_hasDamageType) target.Attack.DamageType = _damageType();
+                if (applyTargetPriority) target.Attack.TargetPriority = parsedTargetPriority;
             }
 
             if (snapshots != null)

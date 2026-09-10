@@ -96,4 +96,5 @@ public class EntityData
 
     // 动画资源
     public AnimationResources AnimationResources;
+    public List<BulletData> Bullets = new List<BulletData>();
 }

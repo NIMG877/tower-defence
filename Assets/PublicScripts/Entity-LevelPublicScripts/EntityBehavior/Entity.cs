@@ -50,7 +50,15 @@ public class Entity : MonoBehaviour, IPoolOperation
     [HideInInspector] public EntityVisuals visuals;
     [HideInInspector] public EntityFacing facing;
     [HideInInspector] public BuffController buffController;
-    [HideInInspector] public AttackBase AttackBase;
+    private EntityAttack _attack;
+    public EntityAttack Attack => _attack;
+
+    // Test-only construction hook: EditMode tests compile in a separate assembly without InternalsVisibleTo.
+    public EntityAttack CreateAttackForTests()
+    {
+        _attack = new EntityAttack(this);
+        return _attack;
+    }
     [HideInInspector] public MoveBase MoveBase;
     public InteractableStatic InteractableStatic;
 
@@ -166,6 +174,7 @@ public class Entity : MonoBehaviour, IPoolOperation
         Stats.CheckDeath();
         Vision.Refresh();
         _stateMachine.Tick(Time.fixedDeltaTime);
+        _attack?.Tick(Time.fixedDeltaTime);
         if (_skillRunner != null) _skillRunner.Tick(Time.fixedDeltaTime);
     }
 
@@ -226,14 +235,6 @@ public class Entity : MonoBehaviour, IPoolOperation
         {
             Debug.LogWarning("未绑定Buff控制器");
         }
-        if (this.TryGetComponent(out AttackBase ab))
-        {
-            AttackBase = ab;
-        }
-        else
-        {
-            Debug.LogWarning("未绑定攻击模块");
-        }
         if (this.TryGetComponent(out MoveBase mb))
         {
             MoveBase = mb;
@@ -255,12 +256,14 @@ public class Entity : MonoBehaviour, IPoolOperation
         _vision = new EntityVision(this);
         _movement = new EntityMovement(this);
         _combat = new EntityCombat(this);
+        _attack = new EntityAttack(this);
         _skillRunner = new EntityAbilityRunner(this);
         _stateMachine.DieAnimationCompleted += () => visuals.FadeOut(0.2f, () => thisEntityPool.Return(this));
 
         _vision.InitializeFromData(EntityData);
         Stats.AttributesCaculateFirst(EntityData);
         Movement.Initialize();
+        _attack.PreWarm();
 
         _skillRunner.PreWarm();
     }
@@ -269,6 +272,7 @@ public class Entity : MonoBehaviour, IPoolOperation
     {
         _stateMachine.TrySetState(EntityState.Start, false);
         Stats.ResetState();
+        _attack.Initialize();
         TempContainer = new GameObject("TempContainer").transform;
         TempContainer.position = this.transform.position;
         TempContainer.parent = this.transform;
@@ -289,6 +293,7 @@ public class Entity : MonoBehaviour, IPoolOperation
 
     public virtual void Dormancy()
     {
+        _attack.Dormancy();
         _stateMachine.ResetForPool();
         Movement.ResistList.Clear();
         Vision.ClearLists();

@@ -450,7 +450,7 @@ GameObject:
   - component: {fileID: 2679485638432126119}
   - component: {fileID: 4246323467107902120}
   m_Layer: 0
-  m_Name: F_Muzzle
+  m_Name: Muzzle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -556,7 +556,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6893803144390001881}
   - component: {fileID: -8233499676567559834}
-  - component: {fileID: 3974420059893658530}
   m_Layer: 0
   m_Name: Eyjafjalla
   m_TagString: Untagged
@@ -592,57 +591,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98c15169cca6fd54088c6e3b3c07ff80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &3974420059893658530
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4310881110139641480}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62a03b516ab1ae5498c989285df1e562, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _attackEffectData:
-    BulletData:
-      BulletPrefab: {fileID: 0}
-      BulletTrailPrefab: {fileID: 0}
-      BulletSpawnEffect: {fileID: 0}
-      BulletDestroyEffect: {fileID: 0}
-      BulletSpeed: 0
-      BulletType: 0
-      AllowNoTarget: 0
-      DevitationXRate: 0
-      DevitationYValue: 0
-    BulletSpawnTransform: {fileID: 0}
-    AttackEffect: {fileID: 0}
-  _attackEffectData0:
-    BulletData:
-      BulletPrefab: {fileID: 2407971600655478370, guid: d359abca4200f394dbbec29fddff4aab, type: 3}
-      BulletTrailPrefab: {fileID: 2407971600655478370, guid: 7df6c9ca687b7c542adb5be9e2088a0a, type: 3}
-      BulletSpawnEffect: {fileID: 519481326241669108, guid: 4f9b2f1ccb2317f4a8ed2c9820c63ff5, type: 3}
-      BulletDestroyEffect: {fileID: 519481326241669108, guid: 7a521f453005466478bc5063f13a2555, type: 3}
-      BulletSpeed: 10
-      BulletType: 1
-      AllowNoTarget: 0
-      DevitationXRate: 0.15
-      DevitationYValue: 0.9
-    BulletSpawnTransform: {fileID: 2679485638432126119}
-    AttackEffect: {fileID: 1929037728802243661, guid: 387d3a01d5cd7fe4bb854b4bca0a122e, type: 3}
-  _extraEffectDatas:
-  - BulletData:
-      BulletPrefab: {fileID: 2407971600655478370, guid: d359abca4200f394dbbec29fddff4aab, type: 3}
-      BulletTrailPrefab: {fileID: 2407971600655478370, guid: 7df6c9ca687b7c542adb5be9e2088a0a, type: 3}
-      BulletSpawnEffect: {fileID: 519481326241669108, guid: 4f9b2f1ccb2317f4a8ed2c9820c63ff5, type: 3}
-      BulletDestroyEffect: {fileID: 519481326241669108, guid: 7a521f453005466478bc5063f13a2555, type: 3}
-      BulletSpeed: 6
-      BulletType: 1
-      AllowNoTarget: 1
-      DevitationXRate: 0.2
-      DevitationYValue: 1.5
-    BulletSpawnTransform: {fileID: 2679485638432126119}
-    AttackEffect: {fileID: 0}
 --- !u!1 &4419058731784888279
 GameObject:
   m_ObjectHideFlags: 0

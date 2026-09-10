@@ -5,7 +5,7 @@ namespace AbilitySystem.Components
 {
     /// <summary>
     /// 用黑板实体列表整表覆盖攻击索敌候选：清空事件的 live 候选列表，再把源列表
-    /// 全部填入（Clear + AddRange——AttackBase 后续继续使用同一列表对象，无需回写）。
+    /// 全部填入（Clear + AddRange——EntityAttack 后续继续使用同一列表对象，无需回写）。
     /// 覆盖为空列表是合法语义（如"技能期间只打精英"且场上无精英→本次索敌无目标）。
     ///
     /// <para>用法：规则触发器设为 OnBeforeTargetSelect。典型三步流水线：

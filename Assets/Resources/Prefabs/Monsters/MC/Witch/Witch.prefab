@@ -399,7 +399,7 @@ GameObject:
   - component: {fileID: 1374118063392710916}
   - component: {fileID: 8249098821294442637}
   m_Layer: 0
-  m_Name: liquid
+  m_Name: Muzzle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5227,7 +5227,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7346695484381571506}
   - component: {fileID: 6918839178590651092}
-  - component: {fileID: -2194638516088659704}
   - component: {fileID: -4401687450290542570}
   m_Layer: 0
   m_Name: Witch
@@ -5264,44 +5263,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98c15169cca6fd54088c6e3b3c07ff80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &-2194638516088659704
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5752354500556713093}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62a03b516ab1ae5498c989285df1e562, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _attackEffectData:
-    BulletData:
-      BulletPrefab: {fileID: 529862836275843411, guid: 0173d89124c2cad4a903bba9caba8314, type: 3}
-      BulletTrailPrefab: {fileID: 179391116157181972, guid: 2345cebd84299274c99fd24302b0e9c8, type: 3}
-      BulletSpawnEffect: {fileID: 0}
-      BulletDestroyEffect: {fileID: 0}
-      BulletSpeed: 8
-      BulletType: 1
-      AllowNoTarget: 1
-      DevitationXRate: 0.3
-      DevitationYValue: 2
-    BulletSpawnTransform: {fileID: 6508361269817469351}
-    AttackEffect: {fileID: 0}
-  _attackEffectData0:
-    BulletData:
-      BulletPrefab: {fileID: 529862836275843411, guid: 0173d89124c2cad4a903bba9caba8314, type: 3}
-      BulletTrailPrefab: {fileID: 179391116157181972, guid: 2345cebd84299274c99fd24302b0e9c8, type: 3}
-      BulletSpawnEffect: {fileID: 0}
-      BulletDestroyEffect: {fileID: 0}
-      BulletSpeed: 6
-      BulletType: 1
-      AllowNoTarget: 1
-      DevitationXRate: 0.4
-      DevitationYValue: 1.5
-    BulletSpawnTransform: {fileID: 1961825381291014246}
-    AttackEffect: {fileID: 0}
 --- !u!114 &-4401687450290542570
 MonoBehaviour:
   m_ObjectHideFlags: 0

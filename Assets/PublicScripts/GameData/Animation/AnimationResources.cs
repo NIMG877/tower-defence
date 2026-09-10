@@ -40,11 +40,11 @@ public sealed class AnimationResources : ScriptableObject
         public AnimationReferenceAsset[] AttackRemote = Array.Empty<AnimationReferenceAsset>();
         public AnimationReferenceAsset[] AttackClose = Array.Empty<AnimationReferenceAsset>();
         public AnimationReferenceAsset AttackEnd;
-        public ChargeAttackAnimationTemplate Charge = new ChargeAttackAnimationTemplate();
+        public ChargeAnimationTemplate Charge = new ChargeAnimationTemplate();
     }
 
     [Serializable]
-    public sealed class ChargeAttackAnimationTemplate
+    public sealed class ChargeAnimationTemplate
     {
         public AnimationReferenceAsset ChargeBegin;
         public AnimationReferenceAsset[] Charge = Array.Empty<AnimationReferenceAsset>();
@@ -216,20 +216,20 @@ public sealed class AnimationResources : ScriptableObject
         ValidateGroup(_attack.AttackRemote, "default remote attack group", true);
         ValidateGroup(_attack.AttackClose, "default close attack group", true);
 
-        ChargeAttackAnimationTemplate charge = _attack.Charge;
+        ChargeAnimationTemplate charge = _attack.Charge;
         ValidateGroup(charge.Charge, "charge animation group", false);
-        bool hasAnyChargeAttack =
+        bool hasAnyChargeAnimation =
             charge.ChargeBegin != null ||
             HasAnimations(charge.Charge) ||
             charge.ChargeEnd != null;
-        bool hasAllChargeAttack =
+        bool hasAllChargeAnimation =
             charge.ChargeBegin != null &&
             HasAnimations(charge.Charge) &&
             charge.ChargeEnd != null;
-        if (hasAnyChargeAttack && !hasAllChargeAttack)
+        if (hasAnyChargeAnimation && !hasAllChargeAnimation)
         {
             Debug.LogWarning(
-                $"[{name}] Charge attack template must configure Charge Begin, Charge, and Charge End together.",
+                $"[{name}] Charge animation template must configure Charge Begin, Charge, and Charge End together.",
                 this);
         }
 
@@ -282,7 +282,7 @@ public sealed class AnimationResources : ScriptableObject
         if (_movement == null) _movement = new MovementAnimationGroup();
         if (_movement.Jump == null) _movement.Jump = new JumpAnimationTemplate();
         if (_attack == null) _attack = new AttackAnimationGroup();
-        if (_attack.Charge == null) _attack.Charge = new ChargeAttackAnimationTemplate();
+        if (_attack.Charge == null) _attack.Charge = new ChargeAnimationTemplate();
         if (_animations == null) _animations = new List<NamedAnimation>();
         if (_animationGroups == null) _animationGroups = new List<NamedAnimationGroup>();
     }

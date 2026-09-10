@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6382904186835255511}
   - component: {fileID: 8610068560641938412}
   m_Layer: 0
-  m_Name: F_Muzzle
+  m_Name: Muzzle
   m_TagString: Untagged
   m_Icon: {fileID: 2800000, guid: d1de1604dfe4cb64c9d31246a8e43c78, type: 3}
   m_NavMeshLayer: 0
@@ -800,7 +800,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6893803144390001881}
   - component: {fileID: -8233499676567559834}
-  - component: {fileID: -6651244420014338039}
   m_Layer: 0
   m_Name: Ebnhlz
   m_TagString: Untagged
@@ -836,64 +835,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98c15169cca6fd54088c6e3b3c07ff80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &-6651244420014338039
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4310881110139641480}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b203cb2ee83428f4eaa50261aee3846e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _attackEffectData:
-    BulletData:
-      BulletPrefab: {fileID: 1929037728802243661, guid: e8ee549ab76b7514a8f87d0980e814ad, type: 3}
-      BulletTrailPrefab: {fileID: 5083139593694126701, guid: d1ea8e3037e1061409953fe8c53c2c60, type: 3}
-      BulletSpawnEffect: {fileID: 0}
-      BulletDestroyEffect: {fileID: 0}
-      BulletSpeed: 17
-      BulletType: 0
-      AllowNoTarget: 0
-      DevitationXRate: 0
-      DevitationYValue: 0
-    BulletSpawnTransform: {fileID: 6382904186835255511}
-    AttackEffect: {fileID: 0}
-  _attackEffectData0:
-    BulletData:
-      BulletPrefab: {fileID: 1929037728802243661, guid: e8ee549ab76b7514a8f87d0980e814ad, type: 3}
-      BulletTrailPrefab: {fileID: 5083139593694126701, guid: d1ea8e3037e1061409953fe8c53c2c60, type: 3}
-      BulletSpawnEffect: {fileID: 0}
-      BulletDestroyEffect: {fileID: 0}
-      BulletSpeed: 17
-      BulletType: 0
-      AllowNoTarget: 0
-      DevitationXRate: 0
-      DevitationYValue: 0
-    BulletSpawnTransform: {fileID: 6382904186835255511}
-    AttackEffect: {fileID: 0}
-  _defaultChargeCapacity: 4
-  _chargeEffects:
-  - {fileID: 5659832311820539195}
-  - {fileID: 4506915812231508269}
-  - {fileID: 5012632411847902813}
-  - {fileID: 1720032353052939121}
-  - {fileID: 8496476726067613783}
-  _chargeEffectData:
-    BulletData:
-      BulletPrefab: {fileID: 1929037728802243661, guid: e8ee549ab76b7514a8f87d0980e814ad, type: 3}
-      BulletTrailPrefab: {fileID: 5083139593694126701, guid: d1ea8e3037e1061409953fe8c53c2c60, type: 3}
-      BulletSpawnEffect: {fileID: 0}
-      BulletDestroyEffect: {fileID: 0}
-      BulletSpeed: 17
-      BulletType: 0
-      AllowNoTarget: 0
-      DevitationXRate: 0
-      DevitationYValue: 0
-    BulletSpawnTransform: {fileID: 6382904186835255511}
-    AttackEffect: {fileID: 0}
 --- !u!1 &5969290163758359879
 GameObject:
   m_ObjectHideFlags: 0
@@ -1324,11 +1265,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 387d3a01d5cd7fe4bb854b4bca0a122e, type: 3}
---- !u!1 &1720032353052939121 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1929037728802243661, guid: 387d3a01d5cd7fe4bb854b4bca0a122e, type: 3}
-  m_PrefabInstance: {fileID: 944517699226294076}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5734220863635551195 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4796213384109532391, guid: 387d3a01d5cd7fe4bb854b4bca0a122e, type: 3}
@@ -1407,11 +1343,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 387d3a01d5cd7fe4bb854b4bca0a122e, type: 3}
---- !u!1 &4506915812231508269 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1929037728802243661, guid: 387d3a01d5cd7fe4bb854b4bca0a122e, type: 3}
-  m_PrefabInstance: {fileID: 2616197300710798688}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &7404211615268163975 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4796213384109532391, guid: 387d3a01d5cd7fe4bb854b4bca0a122e, type: 3}
@@ -1495,11 +1426,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4796213384109532391, guid: 387d3a01d5cd7fe4bb854b4bca0a122e, type: 3}
   m_PrefabInstance: {fileID: 6074953579779772790}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &5659832311820539195 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1929037728802243661, guid: 387d3a01d5cd7fe4bb854b4bca0a122e, type: 3}
-  m_PrefabInstance: {fileID: 6074953579779772790}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6869435319030661648
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1578,11 +1504,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4796213384109532391, guid: 387d3a01d5cd7fe4bb854b4bca0a122e, type: 3}
   m_PrefabInstance: {fileID: 6869435319030661648}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &5012632411847902813 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1929037728802243661, guid: 387d3a01d5cd7fe4bb854b4bca0a122e, type: 3}
-  m_PrefabInstance: {fileID: 6869435319030661648}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8011020867577828378
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1659,10 +1580,5 @@ PrefabInstance:
 --- !u!4 &3288559709021630717 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4796213384109532391, guid: 387d3a01d5cd7fe4bb854b4bca0a122e, type: 3}
-  m_PrefabInstance: {fileID: 8011020867577828378}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &8496476726067613783 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1929037728802243661, guid: 387d3a01d5cd7fe4bb854b4bca0a122e, type: 3}
   m_PrefabInstance: {fileID: 8011020867577828378}
   m_PrefabAsset: {fileID: 0}

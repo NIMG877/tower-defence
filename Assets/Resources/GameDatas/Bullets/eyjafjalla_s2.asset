@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fa49cb953a94f0dba056cbeb50af003, type: 3}
+  m_Name: eyjafjalla_s2
+  m_EditorClassIdentifier: 
+  BulletPrefab: {fileID: 2407971600655478370, guid: d359abca4200f394dbbec29fddff4aab, type: 3}
+  BulletTrailPrefab: {fileID: 2407971600655478370, guid: 7df6c9ca687b7c542adb5be9e2088a0a, type: 3}
+  BulletSpawnEffect: {fileID: 519481326241669108, guid: 4f9b2f1ccb2317f4a8ed2c9820c63ff5, type: 3}
+  BulletDestroyEffect: {fileID: 519481326241669108, guid: 7a521f453005466478bc5063f13a2555, type: 3}
+  BulletSpeed: 6
+  BulletType: 1
+  AllowNoTarget: 1
+  DevitationXRate: 0.2
+  DevitationYValue: 1.5

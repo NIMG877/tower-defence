@@ -36,10 +36,10 @@ namespace AbilitySystem.Components
             {
                 AttackBehaviorSnapshot snapshot = snapshots[i];
                 if (snapshot == null || !targetSet.Contains(snapshot.Target)) continue;
-                if (snapshot.Target != null && snapshot.Target.AttackBase != null)
+                if (snapshot.Target != null && snapshot.Target.Attack != null)
                 {
-                    snapshot.Target.AttackBase.DamageType = snapshot.DamageType;
-                    snapshot.Target.AttackBase.TargetPriority = snapshot.TargetPriority;
+                    snapshot.Target.Attack.DamageType = snapshot.DamageType;
+                    snapshot.Target.Attack.TargetPriority = snapshot.TargetPriority;
                 }
                 snapshots.RemoveAt(i);
             }

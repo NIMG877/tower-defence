@@ -3,20 +3,6 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 
-[Serializable]
-public struct BulletData
-{
-    public GameObject BulletPrefab;
-    public GameObject BulletTrailPrefab;
-    public GameObject BulletSpawnEffect;
-    public GameObject BulletDestroyEffect;
-    public float BulletSpeed;
-    public int BulletType;
-    public bool AllowNoTarget;
-    [Header("BulletType=1")]
-    public float DevitationXRate;
-    public float DevitationYValue;
-}
 public class Bullet
 {
     private static readonly List<Bullet> _activeBullets = new List<Bullet>();
@@ -43,13 +29,13 @@ public class Bullet
     private bool _allowNoEntityTarget;
     private bool _destroyed;
     private BulletData _bulletData;
-    private event AttackBase.OperationsBeforeTakeDamage _onBeforeTakeDamage;
-    private event AttackBase.OperationsAfterTakeDamage _onAfterTakeDamage;
+    private event EntityAttack.OperationsBeforeTakeDamage _onBeforeTakeDamage;
+    private event EntityAttack.OperationsAfterTakeDamage _onAfterTakeDamage;
     public delegate void OperationsOnBulletDestroy(Vector2 bulletPos);
     private event OperationsOnBulletDestroy _onBulletDestroy;
     public delegate void OperationsOnBulletLandWithoutHit(Entity targetEntity);
     private event OperationsOnBulletLandWithoutHit _onLandWithoutHit;
-    public Bullet(AttackBase.OperationsBeforeTakeDamage operationsBeforeTakeDamage, AttackBase.OperationsAfterTakeDamage operationsAfterTakeDamage, OperationsOnBulletDestroy operationsOnBulletDestroy, BulletData bulletData, Entity originEntity, Entity targetEntity, Vector2 targetPos, Vector2 bulletSpawnPosition, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType, OperationsOnBulletLandWithoutHit onLandWithoutHit = null)
+    public Bullet(EntityAttack.OperationsBeforeTakeDamage operationsBeforeTakeDamage, EntityAttack.OperationsAfterTakeDamage operationsAfterTakeDamage, OperationsOnBulletDestroy operationsOnBulletDestroy, BulletData bulletData, Entity originEntity, Entity targetEntity, Vector2 targetPos, Vector2 bulletSpawnPosition, float damage, float multiplyer, float defPenetrate, float mgrPenetrate, float defPenetrate_value, float mgrPenetrate_value, int damageType, int applyType, OperationsOnBulletLandWithoutHit onLandWithoutHit = null)
     {
         _onBeforeTakeDamage = operationsBeforeTakeDamage;
         _onAfterTakeDamage = operationsAfterTakeDamage;

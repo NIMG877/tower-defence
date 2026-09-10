@@ -60,7 +60,7 @@ namespace AbilitySystem.Components
 
         private void ProcessQueue(AbilityContext ctx)
         {
-            if (ctx.entity == null || ctx.entity.AttackBase == null || ctx.sharedBlackboard == null) return;
+            if (ctx.entity == null || ctx.entity.Attack == null || ctx.sharedBlackboard == null) return;
             List<SharedAttackRequest> queue = GetQueue(ctx.sharedBlackboard);
             RemoveInvalidFront(queue);
             if (queue.Count == 0)
@@ -86,7 +86,7 @@ namespace AbilitySystem.Components
             _isExtraAttack = true;
             ctx.sharedBlackboard.Set(_activeSourceKey(), request.Sender);
             AnimationOverrideHandle handle = ctx.entity.entityAM.AddOneShotOverride(this, animations);
-            if (!ctx.entity.AttackBase.TryToAttack(new[] { request.Target }, false, true))
+            if (!ctx.entity.Attack.TryToAttack(new[] { request.Target }, false, true))
             {
                 // 攻击未启动则当场撤销待用条目，否则下一次自然攻击会播到协作动画。
                 ctx.entity.entityAM.RemoveOverride(handle);

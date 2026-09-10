@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fa49cb953a94f0dba056cbeb50af003, type: 3}
+  m_Name: default_physics
+  m_EditorClassIdentifier: 
+  BulletPrefab: {fileID: 7814424976800272869, guid: bc2ed22f642d65743a4434f29b7cdcfd, type: 3}
+  BulletTrailPrefab: {fileID: 179391116157181972, guid: d5185ff047eac8145bc9ea520d52cc80, type: 3}
+  BulletSpawnEffect: {fileID: 3457875813190922772, guid: 97cc7237aa6a7a54695dc0cf743a76cd, type: 3}
+  BulletDestroyEffect: {fileID: 0}
+  BulletSpeed: 15
+  BulletType: 0
+  AllowNoTarget: 0
+  DevitationXRate: 0
+  DevitationYValue: 0

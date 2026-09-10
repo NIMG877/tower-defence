@@ -61,7 +61,7 @@ namespace AbilitySystem.Tests
             comp.OnInit(ctx, Params(("blackboardKey", "src")));
             comp.OnTrigger(ctx);
 
-            Assert.That(evt.targets, Is.SameAs(live), "清空重填同一列表对象，AttackBase 无需回写");
+            Assert.That(evt.targets, Is.SameAs(live), "清空重填同一列表对象，EntityAttack 无需回写");
             Assert.That(live.Count, Is.EqualTo(1));
             Assert.That(live[0], Is.SameAs(src[0]));
         }

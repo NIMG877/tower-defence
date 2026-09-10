@@ -52,8 +52,12 @@ namespace AbilitySystem
     {
         public override TriggerEvent TriggerEvent => AbilitySystem.TriggerEvent.OnAttackInterrupt;
     }
+    public class AttackIdleEvent : AbilityEvent
+    {
+        public override TriggerEvent TriggerEvent => AbilitySystem.TriggerEvent.OnAttackIdle;
+    }
 
-    // 索敌候选确定后、数量裁剪前派发（AttackBase.AttackTargetSelect 内经
+    // 索敌候选确定后、数量裁剪前派发（EntityAttack.AttackTargetSelect 内经
     // EntityAbilityRunner 桥接）。targets 为候选列表本体（引用，订阅方可直接
     // 增删；write_blackboard 以 source=event path=targets 提取的是副本）；
     // 三个标量派发后回写。

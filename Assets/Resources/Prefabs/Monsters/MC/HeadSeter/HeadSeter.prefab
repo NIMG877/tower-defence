@@ -131,7 +131,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7346695484381571506}
   - component: {fileID: 6918839178590651092}
-  - component: {fileID: 7915518268081645992}
   - component: {fileID: -4401687450290542570}
   m_Layer: 0
   m_Name: HeadSeter
@@ -168,64 +167,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98c15169cca6fd54088c6e3b3c07ff80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  o_default: {fileID: 11400000, guid: 18c59d05847bddd4e9355cb5ddfd411f, type: 2}
-  o_idle: {fileID: 11400000, guid: c7a133df3d781a94c8a99e9816c848e6, type: 2}
-  o_move: {fileID: 11400000, guid: b6e46bfdd3bc9e44ebd51d08dfe55ab5, type: 2}
-  o_attack_begin: {fileID: 0}
-  o_attack_end: {fileID: 0}
-  o_start: {fileID: 11400000, guid: 18c59d05847bddd4e9355cb5ddfd411f, type: 2}
-  o_die: {fileID: 11400000, guid: b2f0b461e41160646be682731052c033, type: 2}
-  o_attack_remote:
-  - {fileID: 11400000, guid: 8b5d2b3aa041d0a4a8696dafd675a669, type: 2}
-  o_attack_close:
-  - {fileID: 11400000, guid: 8b5d2b3aa041d0a4a8696dafd675a669, type: 2}
-  Default: {fileID: 0}
-  Idle: {fileID: 0}
-  Move: {fileID: 0}
-  Attack_Begin: {fileID: 0}
-  Attack_End: {fileID: 0}
-  Start: {fileID: 0}
-  Die: {fileID: 0}
-  Attack_Remote: []
-  Attack_Close: []
---- !u!114 &7915518268081645992
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5752354500556713093}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62a03b516ab1ae5498c989285df1e562, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _attackEffectData:
-    BulletData:
-      BulletPrefab: {fileID: 0}
-      BulletTrailPrefab: {fileID: 0}
-      BulletSpawnEffect: {fileID: 0}
-      BulletDestroyEffect: {fileID: 0}
-      BulletSpeed: 0
-      BulletType: 0
-      AllowNoTarget: 0
-      DevitationXRate: 0
-      DevitationYValue: 0
-    BulletSpawnTransform: {fileID: 0}
-    AttackEffect: {fileID: 0}
-  _attackEffectData0:
-    BulletData:
-      BulletPrefab: {fileID: 0}
-      BulletTrailPrefab: {fileID: 0}
-      BulletSpawnEffect: {fileID: 0}
-      BulletDestroyEffect: {fileID: 0}
-      BulletSpeed: 0
-      BulletType: 0
-      AllowNoTarget: 0
-      DevitationXRate: 0
-      DevitationYValue: 0
-    BulletSpawnTransform: {fileID: 0}
-    AttackEffect: {fileID: 0}
 --- !u!114 &-4401687450290542570
 MonoBehaviour:
   m_ObjectHideFlags: 0
