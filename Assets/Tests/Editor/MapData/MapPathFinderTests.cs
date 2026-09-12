@@ -13,7 +13,7 @@ namespace MapData.Tests
     /// </summary>
     public class MapPathFinderTests
     {
-        const float EntityR = 0.25f;
+        const float EntityR = 0.1f; // EntityManager.MovableEntityR，与 AStarWayFinding 传参保持 parity
 
         // Build a fresh MapDataManager + LevelData, attached. Returns the manager
         // (already Initialized). Caller is responsible for DestroyImmediate.

@@ -295,6 +295,16 @@ public class Entity : MonoBehaviour, IPoolOperation
     {
         _attack.Dormancy();
         _stateMachine.ResetForPool();
+        // 静态实体（阻挡者）回池前先逐个通知被挡敌人解除——Dormancy 链上 PoolOps 逆序派发，
+        // 本方法先于 InteractableStatic.Dormancy 执行且撤退不置 IsActive=false，
+        // 不主动通知的话被挡敌人会永久保持阻挡状态
+        if (InteractableStatic != null)
+        {
+            for (int i = Movement.ResistList.Count - 1; i >= 0; i--)
+            {
+                Movement.ResistList[i].MoveBase.RelieveBlock(this);
+            }
+        }
         Movement.ResistList.Clear();
         Vision.ClearLists();
 

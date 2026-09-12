@@ -56,6 +56,13 @@ public class EntityMovement
     // === 阻挡列表（原 entityResistList） ===
     public List<Entity> ResistList => _resistList;
 
+    // === 稳定阻挡位置（明日方舟 F 点语义：吸附时锁定并覆写，作为同干员后续多敌排开基准） ===
+    public Vector2 StableBlockPosition { get; private set; }
+    public void SetStableBlockPosition(Vector2 pos)
+    {
+        StableBlockPosition = pos;
+    }
+
     // === 阵营（只读镜像；setter 留 Entity 根） ===
     public int Camp => _entity.Camp;
 
@@ -86,7 +93,8 @@ public class EntityMovement
     // === 格位刷新（替代原 Entity.FindSelfInBlocks） ===
     public void FindSelfInBlocks(Vector2 point)
     {
-        float entityR = EntityManager.EntityR;
+        // 静态实体（干员/召唤物）与可移动实体（敌人）碰撞半径不同，按组件互斥绑定取值
+        float entityR = _entity.MoveBase != null ? EntityManager.MovableEntityR : EntityManager.StaticEntityR;
         EntityManager.Manager.RemoveEntityFromBlock(_inBlocks, _entity, Camp);
         (int i, int j) ij0 = ((int)(point.y + 0.5), (int)(point.x + 0.5));
         _inBlocks[0] = ij0;

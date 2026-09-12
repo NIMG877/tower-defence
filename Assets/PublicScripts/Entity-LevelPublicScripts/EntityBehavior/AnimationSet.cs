@@ -111,16 +111,4 @@ public sealed class AnimationSet
     {
         return _groups.Values;
     }
-
-    /// <summary>移动分支（走/跳三段）→ 对应单动画槽。表现层专用。</summary>
-    public static AnimationSlot MoveBranchSlot(MoveAnimationBranch branch)
-    {
-        switch (branch)
-        {
-            case MoveAnimationBranch.JumpBegin: return AnimationSlot.JumpBegin;
-            case MoveAnimationBranch.JumpLoop: return AnimationSlot.JumpLoop;
-            case MoveAnimationBranch.JumpEnd: return AnimationSlot.JumpEnd;
-            default: return AnimationSlot.Move;
-        }
-    }
 }

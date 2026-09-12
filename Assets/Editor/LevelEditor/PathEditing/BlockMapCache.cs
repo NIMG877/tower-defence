@@ -30,7 +30,7 @@ public sealed class BlockMapCache : IDisposable
 
         cache.ISize = levelData.iSize;
         cache.JSize = levelData.jSize;
-        cache.EntityR = EntityManager.EntityR;
+        cache.EntityR = EntityManager.MovableEntityR;
         if (cache.ISize <= 0 || cache.JSize <= 0) return cache;
 
         cache.Blocks = new Tile[cache.ISize, cache.JSize];

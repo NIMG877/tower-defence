@@ -1,7 +1,4 @@
-using Cysharp.Threading.Tasks;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -24,6 +21,12 @@ public class MoveBase : MonoBehaviour, IPoolOperation
     private bool _tempTargetExist;
     private float _tempWaitTime;
     private Action _reachTempTarget;
+    /// <summary>阻挡偏移时长：被吸附的敌人在该时间内滑向稳定阻挡位置（对齐明日方舟 0.2s 强制移动）。</summary>
+    private const float BlockOffsetDuration = 0.2f;
+    private Vector2 _blockOffsetFrom;
+    private Vector2 _blockOffsetTo;
+    private float _blockOffsetT;
+    private bool _blockOffsetRunning;
     public delegate void OnReachSectionEnd();
     public OnReachSectionEnd OperationsOnReachSectionEnd;
     /// <summary>移动速度统一出口：属性值 × 停顿(type 4)减速因子，寻路移动消费此处。</summary>
@@ -39,16 +42,13 @@ public class MoveBase : MonoBehaviour, IPoolOperation
     {
         if (!_thisEntity.Stats.IsActive)
             return;
-        if (_thisEntity.Movement.ResistList.Count == 0)
-        {
-            FindEntitiesAroundAndTryToBeBlock();
-        }
-        else if (_thisEntity.Movement.ResistList[0].Stats.IsActive == false)
+        if (_thisEntity.Movement.ResistList.Count > 0 && _thisEntity.Movement.ResistList[0].Stats.IsActive == false)
         {
             RelieveBlock(_thisEntity.Movement.ResistList[0]);
         }
         Move();
         UnBalancedMove();
+        UpdateBlockOffset();
     }
     private void OnDrawGizmosSelected()
     {
@@ -88,37 +88,49 @@ public class MoveBase : MonoBehaviour, IPoolOperation
         (_forceUnmoveTime, _currentSection) = PathDataManager.Manager.GetSection(_currentPathSerial, _currentSectionSerial, _moveMethod);
         CountPriority();
     }
-    private void FindEntitiesAroundAndTryToBeBlock()
-    {
-        // 失衡滑行期间禁用阻挡检测
-        if (_thisEntity.Stats.BlockOccupationS >= 0 && !_thisEntity.buffController.FetchAbnormalState(1))
-        {
-            List<Entity> entitiesAround = new List<Entity>();
-            entitiesAround = EntityManager.Manager.EntitySelector_Radius((this.transform.position.x, this.transform.position.y), _thisEntity.Movement.Camp, false, 0.5f + EntityManager.EntityR, true);
-
-            for (int i = 0; i < entitiesAround.Count; i++)
-            {
-                if (entitiesAround[i].InteractableStatic)
-                {
-                    Vector2 targetPos = entitiesAround[i].InteractableStatic.TryAddToEntityResistList(_thisEntity);
-                    if (targetPos.x != -100)
-                    {
-                        _thisEntity.Movement.ResistList.Add(entitiesAround[i]);
-                        if (_thisEntity.StateMachine.CurrentState == EntityState.Move)
-                        {
-                            _thisEntity.StateMachine.TrySetState(EntityState.Idle, true);
-                        }
-                        _thisEntity.Movement.Position = targetPos;
-                        return;
-                    }
-                }
-            }
-        }
-
-    }
     public void RelieveBlock(Entity entity)
     {
         _thisEntity.Movement.ResistList.Remove(entity);
+        _blockOffsetRunning = false;
+    }
+
+    /// <summary>
+    /// 被干员吸附时由对方调用：从当前位置向稳定阻挡位置插值（明日方舟阻挡偏移）。
+    /// 重合特例（明日方舟：敌我中心距离&lt;0.00001）不产生位移。
+    /// </summary>
+    public void BeginBlockOffset(Vector2 target)
+    {
+        Vector2 from = _thisEntity.Movement.Position;
+        _blockOffsetRunning = false;
+        if ((target - from).sqrMagnitude < 1e-10f)
+        {
+            return;
+        }
+        _blockOffsetFrom = from;
+        _blockOffsetTo = target;
+        _blockOffsetT = 0;
+        _blockOffsetRunning = true;
+    }
+
+    private void UpdateBlockOffset()
+    {
+        if (!_blockOffsetRunning)
+        {
+            return;
+        }
+        // 解除阻挡或进入失衡滑行时立即中断，位置停在当前值
+        if (_thisEntity.Movement.ResistList.Count == 0 || _thisEntity.buffController.FetchAbnormalState(1))
+        {
+            _blockOffsetRunning = false;
+            return;
+        }
+        _blockOffsetT += Time.fixedDeltaTime / BlockOffsetDuration;
+        if (_blockOffsetT >= 1f)
+        {
+            _blockOffsetT = 1f;
+            _blockOffsetRunning = false;
+        }
+        _thisEntity.Movement.Position = Vector2.LerpUnclamped(_blockOffsetFrom, _blockOffsetTo, _blockOffsetT);
     }
     private void UnBalancedMove()
     {
@@ -151,7 +163,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
                     }
                 }
                 // 留 0.0001 迟滞防贴墙静止时逐帧重触发
-                float entityR = EntityManager.EntityR * 1.0001f;
+                float entityR = EntityManager.MovableEntityR * 1.0001f;
                 if (xConstrain != 0 && yConstrain != 0)
                 {
                     _unBalancedMoveSpeed = Vector2.zero;
@@ -241,7 +253,6 @@ public class MoveBase : MonoBehaviour, IPoolOperation
             }
             if (_thisEntity.StateMachine.CurrentState != EntityState.Move && _thisEntity.Movement.ResistList.Count == 0)
             {
-                _thisAM.SetMoveBranch(MoveAnimationBranch.Normal);
                 _thisEntity.StateMachine.TrySetState(EntityState.Move, false);
             }
             if (_thisEntity.StateMachine.CurrentState == EntityState.Move)
@@ -296,6 +307,7 @@ public class MoveBase : MonoBehaviour, IPoolOperation
     public virtual void Initialize()
     {
         _tempTargetExist = false;
+        _blockOffsetRunning = false;
     }
 
     public void Dormancy()

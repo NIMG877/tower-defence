@@ -15,7 +15,10 @@ public class EntityManager : IManagerStartEnd
         }
     }
 
-    public static float EntityR = 0.25f;
+    /// <summary>静态实体（干员/召唤物）碰撞半径，对齐明日方舟干员碰撞体积。</summary>
+    public static float StaticEntityR = 0.25f;
+    /// <summary>可移动实体（敌人）碰撞半径，对齐明日方舟敌方受击判定圆。</summary>
+    public static float MovableEntityR = 0.1f;
     private EntityManager()
     {
         _orientationImg = Resources.Load<GameObject>("Prefabs/EffectPrefabs/facing");
@@ -69,7 +72,7 @@ public class EntityManager : IManagerStartEnd
             Entity staticEntity = entityPool.CallOut(destination, camp, skillIndex);
             AddEntityToStaticList(staticEntity);
             staticEntity.SetOrientation(orientation);
-            Object.Instantiate(_shadowImg, destination, Quaternion.identity, staticEntity.TempContainer).transform.localScale *= EntityR / 0.5f;
+            Object.Instantiate(_shadowImg, destination, Quaternion.identity, staticEntity.TempContainer).transform.localScale *= StaticEntityR / 0.5f;
             Object.Instantiate(_orientationImg, destination, Quaternion.identity, staticEntity.TempContainer).transform.Rotate(Vector3.forward, 90 * (1 - orientation));
             AddEntityToList(staticEntity, camp);
             if (camp == 1)
@@ -104,7 +107,7 @@ public class EntityManager : IManagerStartEnd
         {
             Entity movableEntity = entityPool.CallOut(destination, camp);
             movableEntity.MoveBase?.SetMoveParameters(pathSerial, 0, 0);
-            Object.Instantiate(_shadowImg, destination, Quaternion.identity, movableEntity.TempContainer).transform.localScale *= EntityR / 0.5f;
+            Object.Instantiate(_shadowImg, destination, Quaternion.identity, movableEntity.TempContainer).transform.localScale *= MovableEntityR / 0.5f;
             AddEntityToList(movableEntity, camp);
             OnAfterSetEntity?.Invoke(movableEntity);
             return movableEntity;

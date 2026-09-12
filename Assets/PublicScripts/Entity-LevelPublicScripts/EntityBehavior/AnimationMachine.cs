@@ -3,14 +3,6 @@ using Spine;
 using Spine.Unity;
 using UnityEngine;
 
-public enum MoveAnimationBranch
-{
-    Normal,
-    JumpBegin,
-    JumpLoop,
-    JumpEnd,
-}
-
 public enum AttackAnimationBranch
 {
     Normal,
@@ -41,7 +33,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     private AnimationSet _activeAnimations;
     private readonly List<OverrideEntry> _overrides = new List<OverrideEntry>();
     private int _nextOverrideId;
-    private MoveAnimationBranch _moveBranch;
     private AttackAnimationBranch _attackBranch;
 
     // 当前攻击编排段（播完上报以 逻辑状态/相位 + Animation 对象身份 双重判定，与旧实现同防线；
@@ -63,15 +54,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     /// first frame of the attack animation.
     /// </summary>
     public event OperationsOnAttackAnimationBegin OnAttackAnimationBegin;
-
-    /// <summary>
-    /// Move 分支（走/跳三段）为纯表现分支：逻辑方先设分支再 TrySetState(Move)，
-    /// 分支在转换失败时无害残留（下一次设置覆盖）。
-    /// </summary>
-    public void SetMoveBranch(MoveAnimationBranch branch)
-    {
-        _moveBranch = branch;
-    }
 
     /// <summary>
     /// Attack 分支（普攻/蓄力）：每个 TrySetAttackState 调用点先设分支；
@@ -194,7 +176,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     {
         // 仅复位分支：Initialize 逆序晚于 Entity.Initialize 的 Start 播放，
         // 此处若清播完追踪字段会抹掉刚记录的 _startAnim（追踪字段在 OnStateChanged(Default) 清）
-        _moveBranch = MoveAnimationBranch.Normal;
         _attackBranch = AttackAnimationBranch.Normal;
     }
 
@@ -245,9 +226,8 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
                 ConsumeOneShots(AnimationSlot.Idle);
                 break;
             case EntityState.Move:
-                AnimationSlot moveSlot = AnimationSet.MoveBranchSlot(_moveBranch);
-                SetSpineAnimation(_activeAnimations.GetSingle(moveSlot), true, 1);
-                ConsumeOneShots(moveSlot);
+                SetSpineAnimation(_activeAnimations.GetSingle(AnimationSlot.Move), true, 1);
+                ConsumeOneShots(AnimationSlot.Move);
                 break;
             case EntityState.Start:
                 _startAnim = PlaySingle(AnimationSlot.Start, false, 1);
