@@ -356,6 +356,73 @@ public class EntityAbilityRunner
         return false;
     }
 
+    // ===== Public API: Add/Remove Skill（运行时生成技能注入，见 plan-llm-generated-ability） =====
+
+    /// <summary>
+    /// 运行时注入一个 Kind=Skill 的能力。与 AddExtraAbility 同构：BuildAbilityRuntime
+    /// → InitializeEvent → AbilityAddedEvent。供 LLM 生成技能（AbilityConfigBuilder.FromDto
+    /// 产物）等运行时来源使用；cfg 生命周期归调用方（本方法不 Destroy，设计师资产
+    /// 同样可走此路径，运行时无法区分两种来源）。
+    /// 同 cfg 幂等返回旧 runtimeId。Skill 的 runtimeId 即 cfg.abilityId，若与既有
+    /// Skill 重 id 并存，按 runtimeId 的移除/查询只会命中先加入者——生成侧须保证 id 唯一。
+    /// </summary>
+    public string AddSkill(AbilityConfig cfg)
+    {
+        if (cfg == null)
+        {
+            Debug.LogError("[EntityAbilityRunner] AddSkill: cfg is null");
+            return null;
+        }
+
+        for (int i = 0; i < _abilities.Count; i++)
+        {
+            var a = _abilities[i];
+            if (a.Kind == AbilityKind.Skill && a.config == cfg)
+            {
+                return a.runtimeId;
+            }
+        }
+
+        var runtime = BuildAbilityRuntime(cfg, AbilityKind.Skill);
+        DispatchToAbility(runtime, new InitializeEvent());
+        DispatchToAbility(runtime, new AbilityAddedEvent { ability = runtime });
+        return runtime.runtimeId;
+    }
+
+    /// <summary>
+    /// 按 runtimeId 移除一个 Skill（含 PreWarm 构建的数据驱动技能——本方法不区分
+    /// 来源，移除后该实例生命周期内不会自动重建，数据驱动技能的重建请走
+    /// RebuildSelectedSkill）。拆除序列与 RemoveExtraAbility 同构，幂等。
+    /// </summary>
+    public bool RemoveSkill(string runtimeId)
+    {
+        if (string.IsNullOrEmpty(runtimeId)) return false;
+        int idx = -1;
+        for (int i = 0; i < _abilities.Count; i++)
+        {
+            if (_abilities[i].runtimeId == runtimeId) { idx = i; break; }
+        }
+        if (idx < 0) return false;
+        var a = _abilities[idx];
+        if (a.Kind != AbilityKind.Skill)
+        {
+            Debug.LogError("[EntityAbilityRunner] RemoveSkill: target is not a Skill");
+            return false;
+        }
+        DispatchToAbility(a, new AbilityRemovedEvent { ability = a });
+        a.SetActive(false);
+        a.CancelStepExecutions();
+        for (int c = 0; c < a.components.Count; c++)
+        {
+            var ctx = a.MakeContext(a.components[c], null, sharedBlackboard, _entity);
+            a.components[c].OnTeardown(ctx);
+        }
+        UnwireRuntime(a);
+        _abilities.RemoveAt(idx);
+        InvalidateAbilitiesCache();
+        return true;
+    }
+
     // ===== Build / Wire =====
 
     private AbilityRuntime BuildAbilityRuntime(AbilityConfig cfg, AbilityKind kind)
