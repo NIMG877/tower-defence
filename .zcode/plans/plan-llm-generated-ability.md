@@ -1,14 +1,11 @@
 # LLM 运行时生成技能——实施计划
 
-> **实施状态（2026-09-12）**：阶段一已完成代码落地，待 Unity 编译与 EditMode 测试验证。
-> 落地偏差两处：① schema 文件路径改为 `Assets/Resources/Data/AbilityOps/ability-ops.json`
-> （原定 Validation/ 目录下不可 Resources 加载）；② 图标池改为聚合现有 AbilityConfig
-> 资产的 icon（`Resources.LoadAll<AbilityConfig>("Abilities")`，键为 Sprite 名），
-> 无需新建图标目录。组件参数提取发现并记录了 FireBullets/UpdateBuff/WriteBlackboard/
-> AttackRangeOverride 等文档-代码分歧，均以代码为准录入 schema。
-> 产出：Dto/{AbilityConfigDto, AbilityConfigBuilder, AbilityIconPool, SnapshotBlackboardKeys}、
-> Validation/{AbilityOpsSchema, AbilityConfigValidator}、AbilityGeneration/BattleSnapshotBuilder
-> （BasicScripts 侧）、EntityAbilityRunner.AddSkill/RemoveSkill、Tests 4 件、ability-ops.json（34 组件 op + 4 原语 + 钳制域）。
+> **实施状态（2026-09-12）**
+> **阶段一已完成并验证**：本特性 30 个 EditMode 测试 batch 全绿；PlayMode 探针三入口（快照/注入/拒绝）实测通过。用户决定：存量 30 个 EditMode 失败不修。
+> **阶段二已完成**：`ability-server/`（FastAPI + **三阶段 Agent**：analyze 工具循环→describe 设计→generate 独立重试；Python 镜像校验引擎 + 版本握手 + 鉴权限流缓存 + 异步 job 阶段流轮询 + 案例落盘 + mock 模式），49 个纯逻辑测试全绿，异步 mock 冒烟通过；**首次真实 LLM 样本一次通过**（glm-5.3-flash，attempts=1）。Editor 探针菜单 ④ 经服务器生成并注入（**EditorApplication.update 非阻塞轮询**，阶段日志实时滚动）；菜单 ⑤ 导出技能语料。config 仅 `ABILITY_LLM_API_KEY` 走环境变量、其余字面值（`config.py`）。
+> **语料检索已实施（方案 2+3，用户拍板）**：菜单 ⑤ 把 SubJobs 特性类资产（`Resources/Abilities`）+ `EntityDataCollection` 各实体 Skills/Talents 引用的 AbilityConfig（按引用去重、经客户端校验过滤）导出为 `ability-server/data/skills.json`；服务端 `corpus.py` 在 describe 产出 plannedOps 后按 **op 集合 Jaccard 取 top-3 范例**注入 generate user 消息，**全语料风格统计**（op 参数取值范围/常用值、reentry 分布、规模）常驻 generate system，语料 abilityId 集合供校验器做**撞名 warning**；语料缺失/损坏静默降级，按 mtime 惰性重载（重新导出无需重启服务）。**待真实 key 多样本质量统计**（检验语料对组合惯用法/数值量级的增益）。
+> 落地偏差：① schema 路径改为 `Assets/Resources/Data/AbilityOps/ability-ops.json`；② 图标池聚合现有 AbilityConfig 资产；③ 发现并修正 groups 存储形状契约错误（实为对象数组 `[{units:[...]}]`，schema/Python 校验器曾误写为数组的数组——C# 运行时形状为准）。
+> 产出：Dto/、Validation/、AbilityGeneration/、AddSkill/RemoveSkill、Tests 5 件、ability-ops.json、GeneratedSkillProbe.cs（菜单 ①-④）+ SkillCorpusExporter.cs（菜单 ⑤）、ability-server/（app 8 模块含 corpus.py + tests 5 件 + pytest.ini）。
 
 ## 目标
 做一个可"按战局生成技能"的角色：部署时把战局快照（地图/敌我位置与血量/自身状态/交叉项）发给服务端，服务端组装提示词（AbilitySystem 组件文档 + schema + 快照 + 宿主资产清单）调用大模型，生成技能描述与 AbilityConfig DTO，经校验闭环后返回客户端，运行时构建并注入角色。

@@ -5,11 +5,12 @@ using Newtonsoft.Json;
 using UnityEngine;
 
 /// <summary>
-/// 战局快照序列化器：把当前战局（敌我/静态实体、地图可部署格、C# 预算的交叉项）
-/// 投影成紧凑 JSON，供服务端组装 LLM 提示词。快照在请求时刻固化，实体位置/血量
-/// 均为请求瞬间的取值。
+/// 战局快照序列化器：把当前战局<b>基本信息</b>（自身/敌我实体/地图可部署格/技能 SP）
+/// 投影成紧凑 JSON，供服务端 Agent 分析。派生交叉项（最近敌距/半径内清单等）不在
+/// 客户端预计算——服务端 Agent 用 compute_cross_items 工具按需计算（crossitems.py），
+/// 减少上下文消耗与噪声。
 /// 交叉项词表与 AbilitySystem.SnapshotBlackboardKeys（GameData 侧）对应；阶段三把
-/// 交叉项同步写入宿主黑板后，生成技能的 fromBlackboard 参数引用同一词表。
+/// 指标同步写入宿主黑板后，生成技能的 fromBlackboard 参数引用同一词表。
 /// </summary>
 public static class BattleSnapshotBuilder
 {
@@ -44,27 +45,18 @@ public static class BattleSnapshotBuilder
         public bool active;
     }
 
-    public class SnapshotCross
-    {
-        public int enemyCount;
-        public int allyCount;   // 不含自身
-        public float nearestEnemyDistance;   // 场上无敌人 = -1
-        public float lowestEnemyHpRate;
-        public string lowestEnemyId;
-    }
-
     public class BattleSnapshot
     {
         public string selfId;
         public int camp;
         public float selfHpRate;
+        public SnapshotPos selfPos;
         public SnapshotSkill skill;     // 首个已构建技能的 SP 状态，无则 null
         public int mapI;
         public int mapJ;
         public string[] canSetHigher;   // 高台可部署格 "i,j" 列表
         public string[] canSetLower;    // 地面可部署格 "i,j" 列表
         public SnapshotEntity[] entities;   // 不含自身
-        public SnapshotCross cross;
     }
 
     /// <summary>
@@ -105,13 +97,17 @@ public static class BattleSnapshotBuilder
             selfId = self.EntityData.ID.ToString(),
             camp = self.Camp,
             selfHpRate = Round(self.Stats.CurrentHpRate, 3),
+            selfPos = new SnapshotPos
+            {
+                x = Round(self.Movement.Position.x, 2),
+                y = Round(self.Movement.Position.y, 2),
+            },
             skill = BuildSkillSnapshot(self),
             mapI = map.iSize,
             mapJ = map.jSize,
             canSetHigher = CollectCanSet(map.HigherCanSetBlock),
             canSetLower = CollectCanSet(map.LowerCanSetBlock),
             entities = entities.ToArray(),
-            cross = BuildCross(selfPos, entities, self.Camp),
         };
         return snapshot;
     }
@@ -142,44 +138,6 @@ public static class BattleSnapshotBuilder
             job = data.CharacterJob,
             label = data.MonsterLabel,
         };
-    }
-
-    /// <summary>
-    /// 交叉项计算。纯函数，公开供 EditMode 测试。敌我按 camp 区分（camp 与自身
-    /// 不同即视为敌方）；nearestEnemyDistance 场上无敌人时为 -1；lowestEnemyHpRate
-    /// 初值 1（无敌人时保持 1、id 为 null）。
-    /// </summary>
-    public static SnapshotCross BuildCross(Vector2 selfPos, List<SnapshotEntity> entities, int selfCamp)
-    {
-        var cross = new SnapshotCross
-        {
-            nearestEnemyDistance = -1f,
-            lowestEnemyHpRate = 1f,
-            lowestEnemyId = null,
-        };
-        if (entities == null) return cross;
-
-        for (int i = 0; i < entities.Count; i++)
-        {
-            SnapshotEntity e = entities[i];
-            if (e == null || e.camp == selfCamp)
-            {
-                if (e != null) cross.allyCount++;
-                continue;
-            }
-            cross.enemyCount++;
-            float dx = e.pos.x - selfPos.x;
-            float dy = e.pos.y - selfPos.y;
-            float dist = Mathf.Sqrt(dx * dx + dy * dy);
-            if (cross.nearestEnemyDistance < 0f || dist < cross.nearestEnemyDistance)
-                cross.nearestEnemyDistance = Round(dist, 2);
-            if (e.hpRate < cross.lowestEnemyHpRate)
-            {
-                cross.lowestEnemyHpRate = e.hpRate;
-                cross.lowestEnemyId = e.id;
-            }
-        }
-        return cross;
     }
 
     private static void AppendAll(List<SnapshotEntity> destination, HashSet<Entity> seen, List<Entity> source)

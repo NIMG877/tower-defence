@@ -82,3 +82,10 @@ consulo/
 #   audio, models, fonts, plugins, Resources, StreamingAssets, and TextMesh Pro.
 # - Packages/manifest.json and Packages/packages-lock.json.
 # - ProjectSettings/** including ProjectVersion.txt and project .asset settings.
+
+# Python (ability-server)
+__pycache__/
+*.pyc
+.venv/
+ability-server/logs/
+.pytest_tmp/

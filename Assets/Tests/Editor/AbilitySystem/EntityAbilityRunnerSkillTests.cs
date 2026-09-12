@@ -161,5 +161,62 @@ namespace AbilitySystem.Tests
                 Object.DestroyImmediate(cfg);
             }
         }
+        [Test]
+        public void ReplaceSkill_SwapsAllCurrentSkills_InPlace()
+        {
+            var runner = new EntityAbilityRunner((Entity)null);
+            AbilityConfig first = AbilityConfigBuilder.FromDto(ProbeDto());
+            AbilityConfig second = AbilityConfigBuilder.FromDto(ProbeDto());
+            AbilityConfig third = AbilityConfigBuilder.FromDto(ProbeDto());
+            second.abilityId = "gen_runner_probe_2";
+            third.abilityId = "gen_runner_probe_3";
+            try
+            {
+                // 存量可能不止一个（PreWarm 构建 + 历史注入），替换应全部拆除，
+                // 保证 Skills[0] 即新技能（SpSlider/技能卡/RecoverSkillSp 的当前技能语义）。
+                runner.AddSkill(first);
+                runner.AddSkill(second);
+                string replacedId = runner.ReplaceSkill(third);
+                Assert.AreEqual("gen_runner_probe_3", replacedId);
+                Assert.AreEqual(1, runner.Skills.Count, "替换后应只剩新技能");
+                Assert.AreEqual("gen_runner_probe_3", runner.Skills[0].config.abilityId);
+                Assert.IsFalse(runner.RemoveSkill("gen_runner_probe"), "旧技能应已被替换拆除");
+                Assert.IsFalse(runner.RemoveSkill("gen_runner_probe_2"));
+                // 新技能的 InitializeEvent 已派发（write_blackboard 探针生效）。
+                Assert.AreEqual(42, runner.sharedBlackboard.Get<object>("runner_probe"));
+            }
+            finally
+            {
+                Object.DestroyImmediate(first);
+                Object.DestroyImmediate(second);
+                Object.DestroyImmediate(third);
+            }
+        }
+
+        [Test]
+        public void ReplaceSkill_OnFreshRunner_JustAdds()
+        {
+            var runner = new EntityAbilityRunner((Entity)null);
+            AbilityConfig cfg = AbilityConfigBuilder.FromDto(ProbeDto());
+            try
+            {
+                string id = runner.ReplaceSkill(cfg);
+                Assert.AreEqual("gen_runner_probe", id);
+                Assert.AreEqual(1, runner.Skills.Count);
+                Assert.AreEqual(42, runner.sharedBlackboard.Get<object>("runner_probe"));
+            }
+            finally
+            {
+                Object.DestroyImmediate(cfg);
+            }
+        }
+
+        [Test]
+        public void ReplaceSkill_NullCfg_IsRejected()
+        {
+            var runner = new EntityAbilityRunner((Entity)null);
+            LogAssert.Expect(LogType.Error, new Regex("ReplaceSkill: cfg is null"));
+            Assert.IsNull(runner.ReplaceSkill(null));
+        }
     }
 }

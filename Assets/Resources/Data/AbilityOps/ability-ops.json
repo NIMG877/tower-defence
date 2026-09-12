@@ -22,7 +22,7 @@
   "ruleShape": {
     "rule": "rules[] 每项 = { triggers: [{triggerEvent, groups}], reentry, steps, detached }；triggers 外层 OR 内层 AND，空 groups 无条件通过；空 triggers 的规则永不执行",
     "step": "steps[] 每项 = { op, args: { entries: [{key, value, type, fromBlackboard}] }, condition, steps, elseSteps }；所有 value 都是字符串",
-    "conditionUnit": "{ op, leftKey, rightValue, rightKey }；leftKey 从黑板读，rightValue 为字面量；KeyEqual/KeyNotEqual 用 rightKey 做键对键比较",
+    "conditionGroup": "groups 是对象数组（每项一个 OR 组）：[{ \"units\": [ {\"op\":\"Equal\",\"leftKey\":\"黑板键\",\"rightValue\":\"字面量\",\"rightKey\":null}, ... ] }, ...]；units 内为 AND",
     "notes": [
       "condition（含 wait_until/branch/loop 的条件、loop 的循环条件）只在 delay 之外的 4 个原语 op 上生效；component op 步骤上的 condition 会被运行时忽略",
       "elseSteps 只被 branch 消费，其它 op 上配 elseSteps 是死配置",

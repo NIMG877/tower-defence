@@ -1,18 +1,24 @@
+using System.Collections.Generic;
 using AbilitySystem;
+using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Networking;
 
 /// <summary>
-/// 阶段一闭环验证探针（plan-llm-generated-ability）。临时工具，阶段二 Editor 触发
-/// 工具成型后可删。三个入口：
+/// 阶段一闭环验证探针（plan-llm-generated-ability）。四个入口：
 ///   1. 打印战局快照 —— 验证 BattleSnapshotBuilder（需 PlayMode + 已部署干员）；
-///   2. 注入探针技能 —— 走完整管线 JSON→Parse→Validate→FromDto→AddSkill，效果为
-///      部署即 +99 费用（modify_cost 飘字+音效，肉眼可见）；
-///   3. 注入非法技能 —— op 不在注册表，验证校验器拒绝路径（应弹 error 且不注入）。
+///   2. 注入探针技能 —— 走完整管线 JSON→Parse→Validate→FromDto→ReplaceSkill，
+///      效果为部署即 +99 费用（modify_cost 飘字+音效，肉眼可见）；
+///   3. 注入非法技能 —— op 不在注册表，验证校验器拒绝路径（应弹 error 且不注入）；
+///   4. 经本地服务器 Agent 生成 —— 阶段二管线：异步提交快照+opList+宿主清单，
+///      EditorApplication.update 非阻塞轮询 Agent 三阶段状态（analyze/describe/generate，
+///      阶段日志实时滚动，编辑器不卡），完成后客户端终检并 ReplaceSkill 注入。
+///      启动方式见 ability-server/README.md；ABILITY_LLM_MOCK=1 无 key 可跑通。
 /// </summary>
 public static class GeneratedSkillProbe
 {
-    private const string ProbeAbilityId = "gen_probe_1";
+    private const string ServerBaseUrl = "http://127.0.0.1:8765";
 
     // 效果选 modify_cost：无目标依赖、全局立即生效、自带 UI 反馈，最适合闭环演示。
     private const string ProbeJson = @"
@@ -56,25 +62,15 @@ public static class GeneratedSkillProbe
         if (self == null) return;
         BattleSnapshotBuilder.BattleSnapshot snapshot = BattleSnapshotBuilder.Build(self);
         Debug.Log($"[Probe] 战局快照（{snapshot.entities.Length} 个实体，地图 {snapshot.mapI}x{snapshot.mapJ}，" +
-                  $"敌 {snapshot.cross.enemyCount}/友 {snapshot.cross.allyCount}，最近敌距 {snapshot.cross.nearestEnemyDistance}）：\n" +
+                  $"自身血量比 {snapshot.selfHpRate}，交叉项由服务端 Agent 按需计算）：\n" +
                   BattleSnapshotBuilder.ToJson(snapshot, indented: true));
     }
 
-    [MenuItem("Tools/AbilityGeneration/2. 注入探针技能（JSON→校验→AddSkill）")]
+    [MenuItem("Tools/AbilityGeneration/2. 注入探针技能（JSON→校验→ReplaceSkill）")]
     public static void InjectProbeSkill()
     {
         Entity self = FindProbeHost();
         if (self == null) return;
-
-        // 幂等按 abilityId（AddSkill 的幂等按 cfg 引用，这里每次 Parse 出新实例）。
-        foreach (var ability in self.AbilityRunner.Skills)
-        {
-            if (ability.config != null && ability.config.abilityId == ProbeAbilityId)
-            {
-                Debug.Log($"[Probe] {ProbeAbilityId} 已注入，跳过（每次部署的 InitializeEvent 会再触发一次 +99）");
-                return;
-            }
-        }
 
         AbilityConfigDto dto = AbilityConfigBuilder.Parse(ProbeJson);
         AbilityConfigValidator.Result result = AbilityConfigValidator.Validate(dto);
@@ -86,8 +82,8 @@ public static class GeneratedSkillProbe
         }
 
         AbilityConfig cfg = AbilityConfigBuilder.FromDto(result.Sanitized);
-        string runtimeId = self.AbilityRunner.AddSkill(cfg);
-        Debug.Log($"[Probe] 注入成功 id={runtimeId}，Skills.Count={self.AbilityRunner.Skills.Count}，" +
+        string runtimeId = self.AbilityRunner.ReplaceSkill(cfg);
+        Debug.Log($"[Probe] 已替换当前技能 id={runtimeId}，Skills.Count={self.AbilityRunner.Skills.Count}，" +
                   $"icon={(cfg.icon != null ? cfg.icon.name : "null")}；" +
                   "此刻应看到 +99 费用飘字与音效（modify_cost），撤退再部署会再触发一次");
     }
@@ -107,6 +103,215 @@ public static class GeneratedSkillProbe
             return;
         }
         Debug.Log("[Probe] 非法技能被校验器正确拒绝（未注入）。上面的 error 即 unknown-op 路径。");
+    }
+
+    [MenuItem("Tools/AbilityGeneration/4. 经本地服务器 Agent 生成技能（阶段二）")]
+    public static void GenerateViaServer()
+    {
+        Entity self = FindProbeHost();
+        if (self == null) return;
+
+        BattleSnapshotBuilder.BattleSnapshot snapshot = BattleSnapshotBuilder.Build(self);
+        var payload = new
+        {
+            protocolVersion = AbilityOpsSchema.Load().protocolVersion,
+            opList = AbilityStepOpRegistry.RegisteredOps,
+            battleSnapshot = snapshot,
+            hostAssets = new
+            {
+                canSpawnEntityIds = self.EntityData.CanSpawnEntityIds != null
+                    ? self.EntityData.CanSpawnEntityIds.ConvertAll(id => id.ToString())
+                    : new List<string>(),
+                bulletCount = self.EntityData.Bullets?.Count ?? 0,
+                iconKeys = AbilityIconPool.GetAllKeys(),
+            },
+            constraints = new { },
+        };
+        string body = JsonConvert.SerializeObject(payload);
+
+        // 异步提交（短请求，本地秒回）；轮询交给 EditorApplication.update 状态机。
+        string submitRaw = HttpPost($"{ServerBaseUrl}/generate-ability/async", body);
+        if (submitRaw == null) return;
+        var submit = JsonConvert.DeserializeObject<Dictionary<string, string>>(submitRaw);
+        if (submit == null || !submit.TryGetValue("jobId", out string jobId))
+        {
+            Debug.LogError($"[Probe] 异步提交失败：{submitRaw}");
+            return;
+        }
+        Debug.Log($"[Probe] 任务已提交 jobId={jobId}，后台轮询中（阶段日志实时滚动，编辑器可继续操作）");
+        _poll = new ServerPoll { self = self, jobId = jobId,
+                                 deadline = Time.realtimeSinceStartup + PollTimeoutSeconds };
+        EditorApplication.update += PollTick;
+    }
+
+    private class ServerResponse
+    {
+        public string status;
+        public AbilityConfigDto ability;
+        public Report report;
+    }
+
+    private class Report
+    {
+        public int attempts;
+        public bool cached;
+        public List<IssueDto> issues;
+    }
+
+    private class IssueDto
+    {
+        public string severity;
+        public string path;
+        public string message;
+    }
+
+    private class JobStatus
+    {
+        public bool done;
+        public List<PhaseDto> phases;
+        public string error;
+        public ServerResponse response;
+    }
+
+    private class PhaseDto
+    {
+        public string phase;
+        public string detail;
+    }
+
+    private const float PollTimeoutSeconds = 240f; // 真实 LLM 的 analyze+generate 可能要一两分钟
+
+    /// <summary>菜单④的在途轮询状态；_poll 非 null 即生成进行中（兼作重入闸）。</summary>
+    private class ServerPoll
+    {
+        public Entity self;             // 完成时可能已被销毁，用 Unity null 判定
+        public string jobId;
+        public float deadline;
+        public float nextPollAt;
+        public int printed;
+        public UnityWebRequest request; // 在途的单次 GET；null = 可发下一发
+    }
+
+    private static ServerPoll _poll;
+
+    /// <summary>挂 EditorApplication.update 的非阻塞轮询：每 0.4s 发一次 GET，
+    /// isDone 后在主线程解析——阶段日志实时滚动，编辑器全程可交互。</summary>
+    private static void PollTick()
+    {
+        ServerPoll poll = _poll;
+        float now = Time.realtimeSinceStartup;
+        if (now > poll.deadline)
+        {
+            FailPoll($"[Probe] 轮询超时（{PollTimeoutSeconds}s），jobId={poll.jobId}");
+            return;
+        }
+
+        if (poll.request == null)
+        {
+            if (now < poll.nextPollAt) return;
+            poll.nextPollAt = now + 0.4f;
+            poll.request = UnityWebRequest.Get($"{ServerBaseUrl}/jobs/{poll.jobId}");
+            poll.request.timeout = 5;
+            poll.request.SendWebRequest();
+            return;
+        }
+
+        if (!poll.request.isDone) return;
+        UnityWebRequest request = poll.request;
+        poll.request = null;
+        string raw = request.result == UnityWebRequest.Result.Success
+            ? request.downloadHandler.text : null;
+        string requestError = request.error;
+        request.Dispose();
+        if (raw == null)
+        {
+            FailPoll($"[Probe] 轮询请求失败：{requestError}");
+            return;
+        }
+
+        JobStatus status = JsonConvert.DeserializeObject<JobStatus>(raw);
+        if (status == null)
+        {
+            FailPoll("[Probe] 轮询响应解析失败");
+            return;
+        }
+        if (status.phases != null)
+        {
+            for (; poll.printed < status.phases.Count; poll.printed++)
+                Debug.Log($"[Probe][Agent] {status.phases[poll.printed].phase}  {status.phases[poll.printed].detail}");
+        }
+        if (!status.done) return;
+        CompletePoll(poll.self, status);
+    }
+
+    private static void StopPolling()
+    {
+        EditorApplication.update -= PollTick;
+        _poll = null;
+    }
+
+    private static void FailPoll(string message)
+    {
+        StopPolling();
+        Debug.LogError(message);
+    }
+
+    /// <summary>job done：主线程终检 + 注入（原同步路径的后半段）。
+    /// 先报服务端结果再判宿主——宿主已死也不能把拒绝/成功信息吞掉。</summary>
+    private static void CompletePoll(Entity self, JobStatus status)
+    {
+        StopPolling();
+        if (!string.IsNullOrEmpty(status.error))
+        {
+            Debug.LogError($"[Probe] 服务端任务异常：{status.error}");
+            return;
+        }
+
+        ServerResponse response = status.response;
+        if (response == null || response.status != "ok" || response.ability == null)
+        {
+            Debug.LogError($"[Probe] 服务端拒绝生成（attempts={response?.report?.attempts ?? 0}）");
+            LogServerIssues(response);
+            return;
+        }
+
+        if (self == null)
+        {
+            Debug.LogError("[Probe] 生成成功但宿主已不在场上（阵亡/撤退/退出战斗），放弃注入；完整结果见 ability-server/logs/");
+            return;
+        }
+
+        // 客户端终检（防 schema 版本漂移），再走与阶段一相同的注入路径。
+        AbilityConfigValidator.Result result = AbilityConfigValidator.Validate(response.ability);
+        LogIssues(result);
+        LogServerIssues(response);
+        if (!result.Ok)
+        {
+            Debug.LogError("[Probe] 服务端返回未通过客户端终检（op 注册表与服务端 schema 漂移？）");
+            return;
+        }
+
+        AbilityConfig cfg = AbilityConfigBuilder.FromDto(result.Sanitized);
+        string runtimeId = self.AbilityRunner.ReplaceSkill(cfg);
+        Debug.Log($"[Probe] 服务器生成技能已替换当前技能 id={runtimeId}，Skills.Count={self.AbilityRunner.Skills.Count}，" +
+                  $"icon={(cfg.icon != null ? cfg.icon.name : "null")}，cached={response.report?.cached}；" +
+                  "SpSlider 与技能卡读实时列表，现在释放/等待的就是新技能");
+    }
+
+    private static string HttpPost(string url, string body)
+    {
+        using var request = new UnityWebRequest(url, "POST");
+        request.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(body));
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+        UnityWebRequestAsyncOperation op = request.SendWebRequest();
+        while (!op.isDone) System.Threading.Thread.Sleep(30); // 编辑器主线程阻塞等待；localhost 秒回
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"[Probe] 服务器请求失败：{request.error}（确认已启动 ability-server，见 ability-server/README.md）");
+            return null;
+        }
+        return request.downloadHandler.text;
     }
 
     private static Entity FindProbeHost()
@@ -138,6 +343,20 @@ public static class GeneratedSkillProbe
             AbilityConfigValidator.Issue issue = result.Issues[i];
             if (issue.IsError) Debug.LogError($"[Probe][校验 error] {issue}");
             else Debug.LogWarning($"[Probe][校验 warning] {issue}");
+        }
+    }
+
+    /// <summary>服务端 report.issues（撞名 warning、钳制、设计层失败原因等）打到 Console。</summary>
+    private static void LogServerIssues(ServerResponse response)
+    {
+        List<IssueDto> issues = response?.report?.issues;
+        if (issues == null) return;
+        foreach (IssueDto issue in issues)
+        {
+            if (issue.severity == "error")
+                Debug.LogError($"[Probe][服务端 error] {issue.path}: {issue.message}");
+            else
+                Debug.LogWarning($"[Probe][服务端 warning] {issue.path}: {issue.message}");
         }
     }
 }

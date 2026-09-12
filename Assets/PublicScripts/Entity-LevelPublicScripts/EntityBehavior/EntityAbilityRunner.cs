@@ -331,17 +331,7 @@ public class EntityAbilityRunner
             Debug.LogError("[EntityAbilityRunner] RemoveExtraAbility: only ExtraAbility is removable");
             return false;
         }
-        DispatchToAbility(a, new AbilityRemovedEvent { ability = a });
-        a.SetActive(false);
-        a.CancelStepExecutions();
-        for (int c = 0; c < a.components.Count; c++)
-        {
-            var ctx = a.MakeContext(a.components[c], null, sharedBlackboard, _entity);
-            a.components[c].OnTeardown(ctx);
-        }
-        UnwireRuntime(a);
-        _abilities.RemoveAt(idx);
-        InvalidateAbilitiesCache();
+        TeardownAndRemove(a);
         return true;
     }
 
@@ -409,6 +399,46 @@ public class EntityAbilityRunner
             Debug.LogError("[EntityAbilityRunner] RemoveSkill: target is not a Skill");
             return false;
         }
+        TeardownAndRemove(a);
+        return true;
+    }
+
+    /// <summary>
+    /// 用 cfg 替换当前生效的 Skill，<b>不触碰 EntityData.Skills</b>——EntityData 是
+    /// 共享静态数据，运行时只改 runner 自己的能力列表。语义：拆除现有全部 Skill
+    /// runtime（PreWarm 构建者与历史注入者），注入新 runtime——保证替换后
+    /// Skills[0] 即新技能（SpSlider/技能卡/RecoverSkillSp 都以 Skills[0] 为当前技能）。
+    /// 顺序：先构建并初始化新 runtime，再逐个拆除旧 runtime，任意时刻至少一个技能
+    /// 在位。部署中与休眠期均可调用。SP 状态按新 cfg.sp 重置（新 SPEngine）。
+    /// cfg 生命周期归调用方（不 Destroy）。
+    /// </summary>
+    public string ReplaceSkill(AbilityConfig cfg)
+    {
+        if (cfg == null)
+        {
+            Debug.LogError("[EntityAbilityRunner] ReplaceSkill: cfg is null");
+            return null;
+        }
+
+        // 先捕获全部旧 Skill 再构建新 runtime，避免列表变化后定位错误。
+        List<AbilityRuntime> currents = new List<AbilityRuntime>();
+        for (int i = 0; i < _abilities.Count; i++)
+        {
+            if (_abilities[i].Kind == AbilityKind.Skill) currents.Add(_abilities[i]);
+        }
+
+        var runtime = BuildAbilityRuntime(cfg, AbilityKind.Skill);
+        DispatchToAbility(runtime, new InitializeEvent());
+        DispatchToAbility(runtime, new AbilityAddedEvent { ability = runtime });
+
+        for (int i = 0; i < currents.Count; i++) TeardownAndRemove(currents[i]);
+        return runtime.runtimeId;
+    }
+
+    /// <summary>RemoveSkill/RemoveExtraAbility/ReplaceSkill 共用的拆除序列：
+    /// AbilityRemoved 派发 → 失活 → 撤异步序列 → 组件 OnTeardown → Unwire → 移出列表。</summary>
+    private void TeardownAndRemove(AbilityRuntime a)
+    {
         DispatchToAbility(a, new AbilityRemovedEvent { ability = a });
         a.SetActive(false);
         a.CancelStepExecutions();
@@ -418,9 +448,8 @@ public class EntityAbilityRunner
             a.components[c].OnTeardown(ctx);
         }
         UnwireRuntime(a);
-        _abilities.RemoveAt(idx);
+        _abilities.Remove(a);
         InvalidateAbilitiesCache();
-        return true;
     }
 
     // ===== Build / Wire =====
