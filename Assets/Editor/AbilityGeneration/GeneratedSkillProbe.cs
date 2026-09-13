@@ -74,7 +74,7 @@ public static class GeneratedSkillProbe
 
         AbilityConfigDto dto = AbilityConfigBuilder.Parse(ProbeJson);
         AbilityConfigValidator.Result result = AbilityConfigValidator.Validate(dto);
-        LogIssues(result);
+        AgentJobStatus.LogValidatorIssues(result, "[Probe]");
         if (!result.Ok)
         {
             Debug.LogError("[Probe] 校验未通过，拒绝注入");
@@ -96,7 +96,7 @@ public static class GeneratedSkillProbe
 
         AbilityConfigDto dto = AbilityConfigBuilder.Parse(InvalidJson);
         AbilityConfigValidator.Result result = AbilityConfigValidator.Validate(dto);
-        LogIssues(result);
+        AgentJobStatus.LogValidatorIssues(result, "[Probe]");
         if (result.Ok)
         {
             Debug.LogError("[Probe] 非法技能意外通过校验——校验器有漏洞，检查 unknown-op 路径！");
@@ -111,23 +111,7 @@ public static class GeneratedSkillProbe
         Entity self = FindProbeHost();
         if (self == null) return;
 
-        BattleSnapshotBuilder.BattleSnapshot snapshot = BattleSnapshotBuilder.Build(self);
-        var payload = new
-        {
-            protocolVersion = AbilityOpsSchema.Load().protocolVersion,
-            opList = AbilityStepOpRegistry.RegisteredOps,
-            battleSnapshot = snapshot,
-            hostAssets = new
-            {
-                canSpawnEntityIds = self.EntityData.CanSpawnEntityIds != null
-                    ? self.EntityData.CanSpawnEntityIds.ConvertAll(id => id.ToString())
-                    : new List<string>(),
-                bulletCount = self.EntityData.Bullets?.Count ?? 0,
-                iconKeys = AbilityIconPool.GetAllKeys(),
-            },
-            constraints = new { },
-        };
-        string body = JsonConvert.SerializeObject(payload);
+        string body = JsonConvert.SerializeObject(AgentGenerateRequest.Build(self, new { }));
 
         // 异步提交（短请求，本地秒回）；轮询交给 EditorApplication.update 状态机。
         string submitRaw = HttpPost($"{ServerBaseUrl}/generate-ability/async", body);
@@ -142,41 +126,6 @@ public static class GeneratedSkillProbe
         _poll = new ServerPoll { self = self, jobId = jobId,
                                  deadline = Time.realtimeSinceStartup + PollTimeoutSeconds };
         EditorApplication.update += PollTick;
-    }
-
-    private class ServerResponse
-    {
-        public string status;
-        public AbilityConfigDto ability;
-        public Report report;
-    }
-
-    private class Report
-    {
-        public int attempts;
-        public bool cached;
-        public List<IssueDto> issues;
-    }
-
-    private class IssueDto
-    {
-        public string severity;
-        public string path;
-        public string message;
-    }
-
-    private class JobStatus
-    {
-        public bool done;
-        public List<PhaseDto> phases;
-        public string error;
-        public ServerResponse response;
-    }
-
-    private class PhaseDto
-    {
-        public string phase;
-        public string detail;
     }
 
     private const float PollTimeoutSeconds = 240f; // 真实 LLM 的 analyze+generate 可能要一两分钟
@@ -229,7 +178,7 @@ public static class GeneratedSkillProbe
             return;
         }
 
-        JobStatus status = JsonConvert.DeserializeObject<JobStatus>(raw);
+        AgentJobStatus status = JsonConvert.DeserializeObject<AgentJobStatus>(raw);
         if (status == null)
         {
             FailPoll("[Probe] 轮询响应解析失败");
@@ -258,7 +207,7 @@ public static class GeneratedSkillProbe
 
     /// <summary>job done：主线程终检 + 注入（原同步路径的后半段）。
     /// 先报服务端结果再判宿主——宿主已死也不能把拒绝/成功信息吞掉。</summary>
-    private static void CompletePoll(Entity self, JobStatus status)
+    private static void CompletePoll(Entity self, AgentJobStatus status)
     {
         StopPolling();
         if (!string.IsNullOrEmpty(status.error))
@@ -267,11 +216,11 @@ public static class GeneratedSkillProbe
             return;
         }
 
-        ServerResponse response = status.response;
+        AgentJobStatus.GenerateResponse response = status.response;
         if (response == null || response.status != "ok" || response.ability == null)
         {
             Debug.LogError($"[Probe] 服务端拒绝生成（attempts={response?.report?.attempts ?? 0}）");
-            LogServerIssues(response);
+            AgentJobStatus.LogServerIssues(response, "[Probe]");
             return;
         }
 
@@ -283,8 +232,8 @@ public static class GeneratedSkillProbe
 
         // 客户端终检（防 schema 版本漂移），再走与阶段一相同的注入路径。
         AbilityConfigValidator.Result result = AbilityConfigValidator.Validate(response.ability);
-        LogIssues(result);
-        LogServerIssues(response);
+        AgentJobStatus.LogValidatorIssues(result, "[Probe]");
+        AgentJobStatus.LogServerIssues(response, "[Probe]");
         if (!result.Ok)
         {
             Debug.LogError("[Probe] 服务端返回未通过客户端终检（op 注册表与服务端 schema 漂移？）");
@@ -334,29 +283,5 @@ public static class GeneratedSkillProbe
             return null;
         }
         return turrets[0];
-    }
-
-    private static void LogIssues(AbilityConfigValidator.Result result)
-    {
-        for (int i = 0; i < result.Issues.Count; i++)
-        {
-            AbilityConfigValidator.Issue issue = result.Issues[i];
-            if (issue.IsError) Debug.LogError($"[Probe][校验 error] {issue}");
-            else Debug.LogWarning($"[Probe][校验 warning] {issue}");
-        }
-    }
-
-    /// <summary>服务端 report.issues（撞名 warning、钳制、设计层失败原因等）打到 Console。</summary>
-    private static void LogServerIssues(ServerResponse response)
-    {
-        List<IssueDto> issues = response?.report?.issues;
-        if (issues == null) return;
-        foreach (IssueDto issue in issues)
-        {
-            if (issue.severity == "error")
-                Debug.LogError($"[Probe][服务端 error] {issue.path}: {issue.message}");
-            else
-                Debug.LogWarning($"[Probe][服务端 warning] {issue.path}: {issue.message}");
-        }
     }
 }

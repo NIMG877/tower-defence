@@ -6,7 +6,7 @@ from app import schema as schema_mod
 def test_schema_loads_with_expected_counts():
     schema = schema_mod.load_schema()
     assert schema["protocolVersion"] >= 1
-    assert len(schema["componentOps"]) == 34
+    assert len(schema["componentOps"]) == 35
     assert len(schema["primitives"]) == 4
     assert schema_mod.canonical_ops(schema) == set(schema["primitives"]) | set(schema["componentOps"])
 

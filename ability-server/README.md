@@ -88,6 +88,12 @@ python -m pytest tests/ -q     # 49 个纯逻辑测试（无需 fastapi；agent 
   打印 Agent 阶段 → 客户端终检（AbilityConfigValidator）→ ReplaceSkill 注入
   （替换当前技能，不动 EntityData）。
 
+运行时管线（阶段三，真机可用）：`generate_skill` 组件（见
+docs/skill-components/GenerateSkill.md）——天赋挂在角色 `EntityData.Talents`
+（xlsx Talents 列配资产路径），部署时（OnInitialize）异步提交战局快照，组件
+OnTick 轮询，完成后客户端终检并 ReplaceSkill 替换当前技能（仅本场有效）。
+样例资产 `Resources/Prefabs/Characters/3/Kroos/talents/kroos_tllm.asset`。
+
 ## 安全提醒
 
 生产部署必须：设 `config.server_token`、HTTPS、限流收紧；API key 只存在服务端

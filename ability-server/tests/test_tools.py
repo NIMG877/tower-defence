@@ -18,7 +18,7 @@ def test_tool_definitions_cover_four_tools():
 
 def test_list_components_returns_full_index():
     result = json.loads(tools.execute_tool("list_components", {}, {}, SCHEMA))
-    assert len(result["components"]) == 34
+    assert len(result["components"]) == 35
     entry = next(c for c in result["components"] if c["op"] == "apply_damage")
     assert entry["class"] == "ApplyDamage"
     assert entry["summary"]  # 一句话摘要非空

@@ -301,6 +301,15 @@
         { "key": "blackboardKey", "type": "string", "default": "", "fromBlackboard": true, "values": null, "bbRole": "readKey", "desc": "toSelf=false 时读取该黑板键的 List<Entity> 作为重置攻击的目标实体；键为空或无列表则静默跳过" }
       ]
     },
+    "generate_skill": {
+      "class": "GenerateSkill", "aliases": ["GenerateSkill"], "doc": "docs/skill-components/GenerateSkill.md",
+      "fixedWrites": [],
+      "notes": "运行时 LLM 生成技能：OnTrigger 把战局快照+宿主清单异步提交 ability-server 后立即返回（不阻塞步骤序列），生成完成（约 1-2 分钟）后经客户端终检并 ReplaceSkill 替换当前技能（仅本场有效）。有未完成任务时忽略再次触发；宿主休眠/阵亡会中止在途任务。典型配置：常驻天赋（sp 为 totalSp=0+Auto+NoConsume）触发 OnInitialize，部署时生成一次",
+      "params": [
+        { "key": "request", "type": "string", "default": "", "fromBlackboard": true, "values": null, "bbRole": null, "desc": "生成诉求文本，随 constraints.request 传给服务端 Agent（空=由 Agent 依据战局自行设计）" },
+        { "key": "serverUrl", "type": "string", "default": "http://127.0.0.1:8765", "fromBlackboard": true, "values": null, "bbRole": null, "desc": "ability-server 基地址（含端口，不含路径）" }
+      ]
+    },
     "modify_cost": {
       "class": "ModifyCost", "aliases": ["ModifyCost"], "doc": "docs/skill-components/ModifyCost.md",
       "fixedWrites": [],
