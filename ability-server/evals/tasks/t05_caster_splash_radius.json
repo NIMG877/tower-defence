@@ -1,0 +1,168 @@
+{
+ "taskId": "t05_caster_splash_radius",
+ "title": "溅射范围扩大",
+ "notes": "覆盖：apply_buff SplashRadius / 术师原型",
+ "request": {
+  "battleSnapshot": {
+   "selfId": "catap",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "catap",
+     "name": "catap",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 900,
+     "maxHp": 900,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 2
+     },
+     "attack": 480,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 4,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 3
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m3",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 4,
+   "subJob": 0,
+   "cost": 16,
+   "baseAttackTime": 1.2,
+   "damageType": 1,
+   "blockOccupation": 1,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "让我的攻击溅射范围扩大一倍，方便清群。"
+  }
+ },
+ "expected": {
+  "opsMustInclude": [
+   "apply_buff"
+  ],
+  "opsMustExclude": [
+   "apply_damage",
+   "modify_cost"
+  ],
+  "triggerEventsMustInclude": [
+   "OnAbilityBegin"
+  ],
+  "magnitude": [
+   {
+    "path": "apply_buff.magnitudes",
+    "min": 0.5,
+    "max": 1.5
+   }
+  ],
+  "effectSummary": "技能期间攻击溅射半径提升 50%~150%"
+ }
+}

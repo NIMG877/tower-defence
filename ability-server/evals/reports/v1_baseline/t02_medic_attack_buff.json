@@ -1,0 +1,330 @@
+{
+ "envelope": {
+  "protocolVersion": 1,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "hibisc",
+   "camp": 1,
+   "selfHpRate": 1.0,
+   "selfPos": {
+    "x": 4,
+    "y": 4
+   },
+   "skill": null,
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "m1",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 6
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier"
+    },
+    {
+     "id": "m2",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 3
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster"
+    }
+   ]
+  },
+  "hostAssets": {
+   "canSpawnEntityIds": [],
+   "bulletCount": 0,
+   "iconKeys": []
+  },
+  "constraints": {
+   "request": "给我一个开技能时强化自己攻击（治疗量随之提升）、关技能时恢复原样的技能。"
+  }
+ },
+ "taskId": "t02_medic_attack_buff",
+ "contract": "v1",
+ "wallSeconds": 0.03,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "hibisc_s1",
+   "abilityName": "自我鼓舞",
+   "description": "开启技能时，自身攻击力提升50%，治疗量随攻击力同步提升；关闭技能时，攻击力恢复原样。",
+   "iconKey": "",
+   "sp": {
+    "totalSp": 45,
+    "initialSp": 0,
+    "chargeNum": 1,
+    "abilityAmount": 30.0,
+    "recoverMode": "Natural",
+    "consumeMode": "Natural",
+    "openMode": "Manual",
+    "recoverForbidDuringAbility": true,
+    "canManualClose": true
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "apply_buff",
+       "args": {
+        "entries": [
+         {
+          "key": "attributes",
+          "value": "Attack",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "ops",
+          "value": "AddPercent",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "magnitudes",
+          "value": "0.5",
+          "type": "floatArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "buffId",
+          "value": "hibisc_s1",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "buffTime",
+          "value": "-10",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "toSelf",
+          "value": "True",
+          "type": "bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputTarget",
+          "value": "hibisc_s1_buff_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputBuff",
+          "value": "hibisc_s1_buffs",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    },
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityEnd",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "destroy_buff",
+       "args": {
+        "entries": [
+         {
+          "key": "inputTarget",
+          "value": "hibisc_s1_buff_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "inputBuff",
+          "value": "hibisc_s1_buffs",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [
+    {
+     "severity": "warning",
+     "path": "abilityId",
+     "message": "'hibisc_s1' already exists in the skill corpus; use a distinct id unless overriding intentionally"
+    }
+   ],
+   "attempts": 1,
+   "phases": [
+    {
+     "phase": "analyze",
+     "detail": "start",
+     "t": 0.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool compute_cross_items round 1",
+     "t": 18.22
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool list_components round 1",
+     "t": 18.22
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 58.74
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 58.75
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_contract_doc round 2",
+     "t": 58.75
+    },
+    {
+     "phase": "describe",
+     "detail": "start",
+     "t": 120.18
+    },
+    {
+     "phase": "describe",
+     "detail": "plannedOps=['apply_buff', 'destroy_buff']",
+     "t": 137.92
+    },
+    {
+     "phase": "retrieve",
+     "detail": "top: adnach_s1(1.0), beagle_s1(1.0), catap_s1(1.0)",
+     "t": 137.92
+    },
+    {
+     "phase": "generate",
+     "detail": "attempt 1",
+     "t": 137.92
+    },
+    {
+     "phase": "validate",
+     "detail": "ok",
+     "t": 173.07
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 173.07
+    }
+   ],
+   "analysis": "## 战局分析结论\n\n### 1. 敌我态势\n- **自身**：hibisc（camp 1），满血（hpRate 1.0），位于 (4,4) 高台格；当前 `skill=null`，属于首次生成技能的宿主。\n- **友军**：场上 0 名友军（ally_count=0）。作为医疗定位单位，本波内治疗对象暂缺，但攻击强化对输出/续航属性本身依然有效。\n- **敌人**：共 2 名，均在攻击范围内威胁距离内：\n  - m1 士兵：1200 HP（满血）、物防 150、魔抗 0，位于 (5,6)，距离 2.24（最近敌人）。\n  - m2 术师：800 HP、物防 20、魔抗 50，位于 (7,3)，距离 3.16。\n- 两敌均满血，当前无残血目标；m2 魔抗 50 说明法术/治疗路线收益会被部分削减，但物理层面 m2 几乎无防御。\n\n### 2. 可利用的机制机会（对照需求）\n需求 = \"开技能强化自身攻击（治疗量随攻击提升），关技能恢复原样\"，这是一个**标准开启/关闭双规则切换型技能**，组件链路已确认可行：\n- **开启规则（OnAbilityBegin）**：`apply_buff`（normal 模式，`toSelf=true`，`buffTime=-10` 持续到关闭），`attributes=Attack` + `ops` 取项目 ModifierOp 枚举（如 `AddPercent`，加成幅度建议 0.4~0.6 起步），并**必须同时配置 `outputTarget`/`outputBuff` 黑板输出键**，把目标与 Buff 句柄写入共享黑板供关闭时消费。\n- **关闭规则（OnAbilityEnd）**：`destroy_buff`，`inputTarget`/`inputBuff` 与上一步输出键配对，读取后即清键，重新开启时不会残留双份记录。\n- 关键契约依据：normal 模式的 apply_buff **不会**在技能结束时自动销毁 Buff（文档已知限制），必须由 OnAbilityEnd 规则里的 destroy_buff 成对回收；OnAbilityEnd 派发时该步骤为同步即时步骤，会在下次 SetActive(true) 取消执行前完成，无竞态。\n- 开启规则建议 `reentry=IgnoreWhileRunning`：normal 模式下重复触发会追加同 id 新 Buff 记录（叠加风险），忽略重入可规避。\n- 幅度用固定字面量即可：apply_buff 的 modifiers 首次构建后缓存复用，无需 fromBlackboard 动态调值。\n\n### 3. 本次生成约束\n- **hostAssets 为空**：`canSpawnEntityIds=[]`、`bulletCount=0`、`iconKeys=[]` → 不可使用 `spawn_entity`、`fire_bullets` 及任何依赖宿主弹幕/图标的组件；`apply_animation_override` 因 slots/resources 缺失不会生效，应避免，纯属性 Buff 即可。\n- **无友军**：damageType=3（治疗）的目标选择会切到同阵营，本波无治疗目标；技能定位仍以攻击强化为主，属正常设计，不构成阻塞。\n- **敌人配置**：m1 高物防低魔抗、m2 低物防高魔抗——纯攻击加成对两类目标均有收益，单一 Attack 强化与需求完全匹配，无需附加伤害类型改写。\n- 组件选型：仅需 `apply_buff` + `destroy_buff` 两个 op、两条规则（Begin / End），无需 select_targets（目标即自身）、无需 OnTick 轮询（非 aura 模式）。",
+   "design": {
+    "abilityName": "自我鼓舞",
+    "description": "开启技能时，自身攻击力提升50%，治疗量随攻击力同步提升；关闭技能时，攻击力恢复原样。",
+    "designNotes": "触发事件：规则1 OnAbilityBegin 开启瞬间；规则2 OnAbilityEnd 关闭瞬间。步骤序列：规则1 单步 apply_buff（normal 模式，toSelf=true 单目标自身，attributes=Attack，ops=AddPercent，magnitudes=0.5，buffTime=-10 永续至关闭，buffId=skill_buff，outputTarget=skill_buff_targets / outputBuff=skill_buff_buffs 写入共享黑板）；规则2 单步 destroy_buff（inputTarget=skill_buff_targets / inputBuff=skill_buff_buffs，消费后自动清键，防重复开启叠加）。目标选择：无需 select_targets，开启规则目标即宿主自身（toSelf=true）。数值依据：场上两敌 m1(防150/抗0)、m2(防20/抗50)，50% 攻击加成对物理/法术双路线均有收益且幅度适中；hibisc 为医疗定位，治疗量随攻击属性成长。机制依据：normal 模式 apply_buff 不会在技能结束时自动销毁（文档已知限制），故必须由 OnAbilityEnd 规则的 destroy_buff 配对回收；开启规则 reentry=IgnoreWhileRunning 防止重复触发追加同 id Buff。目标选择：仅自身，无范围判定；hostAssets 为空故不引用召唤/子弹/动画组件。",
+    "plannedOps": [
+     "apply_buff",
+     "destroy_buff"
+    ]
+   },
+   "cached": true
+  }
+ }
+}

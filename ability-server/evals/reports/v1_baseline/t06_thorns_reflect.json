@@ -1,0 +1,419 @@
+{
+ "envelope": {
+  "protocolVersion": 1,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "thorn",
+   "camp": 1,
+   "selfHpRate": 1.0,
+   "selfPos": {
+    "x": 4,
+    "y": 4
+   },
+   "skill": null,
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "m1",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier"
+    },
+    {
+     "id": "m2",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 6
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster"
+    }
+   ]
+  },
+  "hostAssets": {
+   "canSpawnEntityIds": [],
+   "bulletCount": 0,
+   "iconKeys": []
+  },
+  "constraints": {
+   "request": "被打的时候把受到的伤害的一部分反弹给攻击者。"
+  }
+ },
+ "taskId": "t06_thorns_reflect",
+ "contract": "v1",
+ "wallSeconds": 0.03,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "thorn_t1",
+   "abilityName": "荆棘反甲",
+   "description": "被动：受到攻击后，将本次所受伤害的40%以魔法伤害反弹给攻击者（无来源的伤害不反弹）。",
+   "iconKey": null,
+   "sp": {
+    "totalSp": 0,
+    "initialSp": 0,
+    "chargeNum": 1,
+    "abilityAmount": 0.0,
+    "recoverMode": "Natural",
+    "consumeMode": "NoConsume",
+    "openMode": "Auto",
+    "recoverForbidDuringAbility": false,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAfterTakeDamage",
+       "groups": []
+      }
+     ],
+     "reentry": "Parallel",
+     "detached": false,
+     "steps": [
+      {
+       "op": "write_blackboard",
+       "args": {
+        "entries": [
+         {
+          "key": "key",
+          "value": "thorn_reflect_target",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "source",
+          "value": "event",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "path",
+          "value": "origin",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "method",
+          "value": "set",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "write_blackboard",
+       "args": {
+        "entries": [
+         {
+          "key": "key",
+          "value": "thorn_reflect_damage",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "source",
+          "value": "event",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "path",
+          "value": "damage",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "method",
+          "value": "set",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "filter_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "blackboardKey",
+          "value": "thorn_reflect_target",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "fields",
+          "value": "CurrentHp",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "ops",
+          "value": "GreaterOrEqual",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "values",
+          "value": "0",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "groups",
+          "value": "0",
+          "type": "intArray",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "apply_damage",
+       "args": {
+        "entries": [
+         {
+          "key": "targetMode",
+          "value": "blackboard",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "blackboardKey",
+          "value": "thorn_reflect_target",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "attackerMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "baseValueMode",
+          "value": "fixed",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "baseValue",
+          "value": "thorn_reflect_damage",
+          "type": "float",
+          "fromBlackboard": true
+         },
+         {
+          "key": "multiplier",
+          "value": "0.4",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "damageType",
+          "value": "1",
+          "type": "int",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [
+    {
+     "severity": "warning",
+     "path": "blackboard",
+     "message": "read key 'damage' has no producer in this ability (externally-fed keys are legitimate; verify intent)"
+    },
+    {
+     "severity": "warning",
+     "path": "blackboard",
+     "message": "read key 'origin' has no producer in this ability (externally-fed keys are legitimate; verify intent)"
+    }
+   ],
+   "attempts": 1,
+   "phases": [
+    {
+     "phase": "analyze",
+     "detail": "start",
+     "t": 0.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool compute_cross_items round 1",
+     "t": 11.52
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool list_components round 1",
+     "t": 11.52
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 22.09
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 22.09
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_contract_doc round 2",
+     "t": 22.09
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 3",
+     "t": 87.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 3",
+     "t": 87.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 4",
+     "t": 144.17
+    },
+    {
+     "phase": "describe",
+     "detail": "start",
+     "t": 215.22
+    },
+    {
+     "phase": "describe",
+     "detail": "plannedOps=['write_blackboard', 'filter_targets', 'apply_damage']",
+     "t": 286.52
+    },
+    {
+     "phase": "retrieve",
+     "detail": "top: ardign_s1(0.667), lavabubble_t1(0.333), centurion(0.25)",
+     "t": 286.52
+    },
+    {
+     "phase": "generate",
+     "detail": "attempt 1",
+     "t": 286.52
+    },
+    {
+     "phase": "validate",
+     "detail": "ok",
+     "t": 327.5
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 327.5
+    }
+   ],
+   "analysis": "## 战局分析\n\n**一、敌我态势**\n- 自身：thorn（营1），位于 (4,4) 高台格，满血（HP率 1.0）；场上无友军（ally_count=0），孤立作战。\n- 敌方共 2 名，均在 3.5 半径内：\n  - **m1 士兵**（近战肉盾型）：HP 1200，攻击 200，**防御 150 / 魔抗 0**，位于 (4,5)，距自身仅 **1.0**——紧贴自身，是反弹被动的持续触发源。\n  - **m2 术师**（远程法伤型）：HP 800，攻击 250，防御 20 / **魔抗 50**，位于 (6,6)，距 2.83——可能越过近战格间接触发反弹。\n- 威胁判断：m1 逐帧贴脸输出，反弹触发频率最高；m2 火力更高（250）但触发取决于其攻击范围。\n\n**二、可利用的机制机会（已核对组件文档）**\n- 反弹需求的核心管线已验证可行：触发 `OnAfterTakeDamage` → `write_blackboard(source=event, path=origin)` 取攻击者写入实体列表 → `apply_damage(targetMode=blackboard, attackerMode=self, baseValueMode=fixed+fromBlackboard)` 反打。\n- **无自递归风险**：apply_damage 的直接伤害不回灌 OnAfterTakeDamage，反弹不会触发对方的反弹链（或自身循环）。\n- 伤害类型取舍：m1 魔抗 0，**魔法反射（damageType=1）对其全额生效**、绕开其 150 高防；代价是对 m2（魔抗 50）打折。建议按\"所受伤害 × 固定百分比\"做 fromBlackboard 快照式反弹（自适应伤害量），伤害类型选魔法。反弹对 m2 用物伤更优，但单规则只能选一种——推荐魔法（主威胁是 m1）。\n- 步骤序列全为即时操作（write_blackboard + apply_damage 同步完成），reentry 用 Parallel 即可支持连续多次受击独立反弹。\n\n**三、生成约束**\n- **hostAssets 为空**：canSpawnEntityIds=[]、bulletCount=0、iconKeys=[] → 不可召唤、不可发射子弹、无图标/动画资源；技能只能是纯事件逻辑规则（禁用 spawn_entity / fire_bullets / apply_animation_override）。\n- skill 为空、无 SP 通道：按无需施法的被动/天赋型技能生成。\n- 边界防御：`event.origin` 可能为空（无来源伤害）→ 在 write_blackboard 后加一步 `filter_targets` 清除列表中的 null 项，避免 apply_damage 对空实体生效。\n\n**四、落地要点（供第二步生成遵循）**\n- 规则：trigger=`OnAfterTakeDamage`，steps = write_blackboard(origin→实体键) → filter_targets(去空) → apply_damage(fixed、baseValue=fromBlackboard 受击伤害快照、multiplier≈0.3~0.5、damageType=1)。\n- 反弹比例不建议 >0.5：自身防御衰减后实际受击量未知，50% 以下为安全带。\n- 数值预期：m1 单次受击若约 100~150，魔法反弹约 30~75/次（魔抗 0 全额），对 1200 血需 20~40 次触发，需依赖自身攻击协同输出；反弹定位为抗压/惩罚机制而非独立斩杀。",
+   "design": {
+    "abilityName": "荆棘反甲",
+    "description": "被动：受到攻击后，将本次所受伤害的40%以魔法伤害反弹给攻击者（无来源的伤害不反弹）。",
+    "designNotes": "触发：OnAfterTakeDamage（DamageEventBase 派生的受击事件，事件路径含 origin/damage/isDeadly），无条件触发；reentry=Parallel（四步全即时操作，同帧连续受击各自独立反弹）。步骤序列：① write_blackboard(method=set, source=event, path=origin) → key=thorn_reflect_target，把攻击者以 List<Entity> 写入黑板；② write_blackboard(method=set, source=event, path=damage) → key=thorn_reflect_damage，记录本次所受伤害数值；③ filter_targets(blackboardKey=thorn_reflect_target, fields=CurrentHp, ops=GreaterOrEqual, values=0, groups=0)：恒真条件借其 null 清除语义，剔除无来源伤害产生的空实体项；④ apply_damage(targetMode=blackboard, blackboardKey=thorn_reflect_target, attackerMode=self, baseValueMode=fixed, baseValue=thorn_reflect_damage 且 fromBlackboard=true, multiplier=0.4, damageType=1)。数值依据：反弹比 40% 位于分析给出的 30–50% 安全带；damageType=1 魔法——m1 士兵魔抗 0 全额生效、绕开其 150 高防，m2 术师魔抗 50 打折，主收益对象是距自身 1.0 的贴脸 m1，m2 远程攻击同样可触发。安全性：apply_damage 直接伤害不回灌 OnAfterTakeDamage，无自递归；origin 缺失时①告警跳过、②③正常执行、④对空/陈旧列表无操作（无来源受击为罕见情形，可接受）。hostAssets 为空（无召唤/子弹/动画资源），故纯事件逻辑被动，不使用 spawn_entity/fire_bullets/动画组件。",
+    "plannedOps": [
+     "write_blackboard",
+     "filter_targets",
+     "apply_damage"
+    ]
+   },
+   "cached": true
+  }
+ }
+}

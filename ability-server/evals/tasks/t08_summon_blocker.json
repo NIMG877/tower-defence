@@ -1,0 +1,163 @@
+{
+ "taskId": "t08_summon_blocker",
+ "title": "召唤阻挡物",
+ "notes": "覆盖：spawn_entity / canSpawnEntities 注册表 / watch_summon_death 可选",
+ "request": {
+  "battleSnapshot": {
+   "selfId": "summoner",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "summoner",
+     "name": "summoner",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 1100,
+     "maxHp": 1100,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 4
+     },
+     "attack": 300,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 6,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m2",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 6,
+   "subJob": 0,
+   "cost": 15,
+   "baseAttackTime": 1.2,
+   "damageType": 0,
+   "blockOccupation": 1,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   },
+   "canSpawnEntities": [
+    {
+     "id": "summon_blocker",
+     "name": "碎石偶",
+     "isStatic": true,
+     "hp": 900,
+     "maxHp": 900,
+     "hpRate": 1.0,
+     "attack": 60,
+     "defence": 80,
+     "magicRes": 0,
+     "count": 2
+    }
+   ]
+  },
+  "constraints": {
+   "request": "在我身边召唤一个能挡路的召唤物（用我注册的召唤物），召唤物阵亡时我要能感知到。"
+  }
+ },
+ "expected": {
+  "opsMustInclude": [
+   "spawn_entity"
+  ],
+  "opsMustExclude": [
+   "fire_bullets",
+   "apply_damage"
+  ],
+  "triggerEventsMustInclude": [
+   "OnAbilityBegin"
+  ],
+  "magnitude": [
+   {
+    "path": "spawn_entity.spawnIndex",
+    "min": 0,
+    "max": 0
+   }
+  ],
+  "effectSummary": "召唤注册表中的碎石偶挡路，并桥接其阵亡事件"
+ }
+}

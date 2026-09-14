@@ -1,57 +1,240 @@
-"""Agent 工具测试：渐进式披露的索引/文档读取与交叉项工具壳。"""
+"""tools 工具集测试：update_plan/submit_skill/validate_draft 会话状态、
+明细查询、schema 词表、语料检索、文档工具（tools.py 后端）。"""
 
 import json
 
-from app import schema as schema_mod, tools
+from app import tools
+from app.config import Config
 
-SCHEMA = schema_mod.load_schema()
-
-
-def test_tool_definitions_cover_four_tools():
-    names = [t["function"]["name"] for t in tools.tool_definitions()]
-    assert names == ["compute_cross_items", "list_components",
-                     "read_component_doc", "read_contract_doc"]
-    # 交叉项工具的描述应内嵌全部可用指标词表（LLM 不需要猜）。
-    desc = tools.tool_definitions()[0]["function"]["description"]
-    assert "nearest_enemy_distance" in desc and "enemies_within" in desc
+SCHEMA_JSON = None
 
 
-def test_list_components_returns_full_index():
-    result = json.loads(tools.execute_tool("list_components", {}, {}, SCHEMA))
-    assert len(result["components"]) == 35
-    entry = next(c for c in result["components"] if c["op"] == "apply_damage")
-    assert entry["class"] == "ApplyDamage"
-    assert entry["summary"]  # 一句话摘要非空
+def schema():
+    global SCHEMA_JSON
+    if SCHEMA_JSON is None:
+        from app import schema as schema_mod
+        SCHEMA_JSON = schema_mod.load_schema()
+    return SCHEMA_JSON
 
 
-def test_read_component_doc_by_op_and_alias():
-    by_op = json.loads(tools.execute_tool("read_component_doc", {"name": "apply_damage"}, {}, SCHEMA))
-    by_alias = json.loads(tools.execute_tool("read_component_doc", {"name": "ApplyDamage"}, {}, SCHEMA))
-    assert by_op["op"] == by_alias["op"] == "apply_damage"
-    assert by_op["doc"] == "docs/skill-components/ApplyDamage.md"
-    assert "# ApplyDamage" in by_op["content"]
+def make_ctx(**request_overrides) -> tools.ToolContext:
+    request = {
+        "protocolVersion": schema()["protocolVersion"],
+        "battleSnapshot": {
+            "selfId": "c-1", "mapI": 8, "mapJ": 9,
+            "canSetHigher": ["4,5", "6,7"], "canSetLower": ["3,4"],
+            "entities": [
+                {"id": "c-1", "camp": 1, "isStatic": False, "hp": 1500, "maxHp": 1500,
+                 "hpRate": 1.0, "pos": {"x": 4, "y": 4}, "attack": 500, "defence": 100,
+                 "magicRes": 10, "job": 1, "label": None, "massLevel": 2},
+                {"id": "m-1", "camp": 2, "isStatic": False, "hp": 400, "maxHp": 800,
+                 "hpRate": 0.5, "pos": {"x": 5, "y": 4}, "attack": 120, "defence": 30,
+                 "magicRes": 0, "job": -1, "label": "slime", "massLevel": 1},
+                {"id": "m-2", "camp": 2, "isStatic": False, "hp": 1200, "maxHp": 1200,
+                 "hpRate": 1.0, "pos": {"x": 7, "y": 7}, "attack": 200, "defence": 150,
+                 "magicRes": 0, "job": -1, "label": "soldier", "massLevel": 2},
+            ],
+        },
+        "hostAssets": {"job": 1, "cost": 15, "damageType": 0,
+                       "canSpawnEntityIds": ["s-1"], "bulletCount": 1, "iconKeys": []},
+        "constraints": {"request": "测试诉求"},
+    }
+    request.update(request_overrides)
+    cfg = Config(llm_mock=True, log_dir=None, corpus_path=None)
+    return tools.ToolContext(request, cfg, schema(), None)
 
 
-def test_read_component_doc_unknown_name_is_tool_error():
-    result = json.loads(tools.execute_tool("read_component_doc", {"name": "nope"}, {}, SCHEMA))
-    assert "error" in result and "list_components" in result["error"]
+def call(ctx, name, args) -> dict:
+    return json.loads(tools.execute_tool(ctx, name, args))
 
 
-def test_read_contract_doc_returns_text():
-    result = json.loads(tools.execute_tool("read_contract_doc", {}, {}, SCHEMA))
-    assert "AbilityConfig" in result["doc"]
+def valid_config() -> dict:
+    return {
+        "abilityId": "gen_t", "abilityName": "n", "description": "d",
+        "sp": {"totalSp": 0, "consumeMode": "NoConsume", "openMode": "Auto"},
+        "rules": [{"triggers": [{"triggerEvent": "OnInitialize", "groups": []}],
+                   "steps": [{"op": "modify_cost",
+                              "args": {"entries": [{"key": "amount", "value": "5",
+                                                    "type": "Int", "fromBlackboard": False}]}}]}],
+    }
 
 
-def test_compute_cross_items_shell():
-    snapshot = {"selfPos": {"x": 0, "y": 0},
-                "entities": [{"id": "m-1", "camp": 2, "pos": {"x": 1, "y": 0}, "hpRate": 0.5}]}
-    result = json.loads(tools.execute_tool(
-        "compute_cross_items", {"items": ["enemy_count", "bogus"]}, snapshot, SCHEMA))
-    assert result["results"]["enemy_count"] == 1
-    assert result["results"]["bogus"].startswith("error:")
+# ---------- 会话状态工具 ----------
+
+def test_update_plan_records_and_counts():
+    ctx = make_ctx()
+    assert call(ctx, "update_plan", {"plan": "先读文档再设计"})["ok"] is True
+    assert ctx.plan == "先读文档再设计" and ctx.plan_updates == 1
+    assert call(ctx, "update_plan", {"plan": ""})["error"]
+    assert ctx.plan_updates == 1  # 失败的修订不计数
+
+
+def test_update_plan_limit_reached():
+    ctx = make_ctx()
+    ctx.cfg.agent_max_plan_updates = 1
+    assert call(ctx, "update_plan", {"plan": "v1"})["ok"] is True
+    assert "limit" in call(ctx, "update_plan", {"plan": "v2"})["error"]
+    assert ctx.plan == "v1"
+
+
+def test_submit_skill_accepts_and_stashes_sanitized():
+    ctx = make_ctx()
+    dto = valid_config()
+    dto["iconKey"] = "charger"  # sanitize 恒剥离
+    out = call(ctx, "submit_skill", {"config": dto})
+    assert out["accepted"] is True
+    assert ctx.submitted is not None and "iconKey" not in ctx.submitted
+    assert ctx.draft is None  # submit 不写草稿位（草稿只来自 validate_draft）
+
+
+def test_submit_skill_rejects_bad_config_and_loops_on():
+    ctx = make_ctx()
+    dto = valid_config()
+    dto["rules"][0]["steps"][0]["op"] = "make_big_explosion"
+    out = call(ctx, "submit_skill", {"config": dto})
+    assert out["accepted"] is False
+    assert any(i["severity"] == "error" for i in out["issues"])
+    assert ctx.submitted is None
+
+
+def test_validate_draft_stashes_only_on_ok():
+    ctx = make_ctx()
+    assert call(ctx, "validate_draft", {"config": valid_config()})["ok"] is True
+    assert ctx.draft is not None
+    bad = valid_config()
+    bad["rules"] = []
+    assert call(ctx, "validate_draft", {"config": bad})["ok"] is False
+    assert ctx.draft["abilityId"] == "gen_t"  # 失败不覆盖既有草稿
+
+
+def test_non_object_config_rejected():
+    ctx = make_ctx()
+    out = call(ctx, "submit_skill", {"config": "json string"})
+    assert out["accepted"] is False
+
+
+# ---------- 数据源工具 ----------
+
+def test_entity_and_entities_at():
+    ctx = make_ctx()
+    out = call(ctx, "entity", {"id": "m-1"})
+    assert out["entity"]["id"] == "m-1" and out["entity"]["massLevel"] == 1
+    assert "error" in call(ctx, "entity", {"id": "ghost"})["entity"]
+
+    out = call(ctx, "entities_at", {"x": 4, "y": 4, "radius": 2.0, "camp": 2})
+    assert [e["id"] for e in out["entities"]] == ["m-1"]
+    out = call(ctx, "entities_at", {"x": 4, "y": 4, "radius": 10.0})
+    assert len(out["entities"]) == 3  # 含自身（v2：self 在 entities）
+
+
+def test_deploy_cells_near_tool():
+    ctx = make_ctx()
+    out = call(ctx, "deploy_cells_near", {"x": 4, "y": 4, "radius": 1.5})
+    assert out == {"higher": ["4,5"], "lower": ["3,4"]}
+
+
+def test_compute_cross_items_v2_items():
+    ctx = make_ctx()
+    out = call(ctx, "compute_cross_items",
+               {"items": ["enemy_group_stats", "pairwise_distance(m-1,m-2)"]})
+    stats = out["results"]["enemy_group_stats"]
+    assert stats["count"] == 2 and stats["totalHp"] == 1600
+    assert out["results"]["pairwise_distance(m-1,m-2)"] == 3.61  # (5,4)->(7,7) = √13
+
+
+def test_read_schema_vocab_sections():
+    ctx = make_ctx()
+    out = call(ctx, "read_schema_vocab", {})
+    assert out["triggerEvents"] and out["conditionOps"] and out["ruleReentry"]
+    assert out["paramValueTypeEncoding"] and out["clamps"]
+    assert out["entityContext"]  # M2 语义词表随 schema 出（轻节默认返回）
+    assert "eventContext" not in out  # 重节分段按需取（§4.4 体积自限，防 4k 背闸切坏 JSON）
+    assert "eventContext" in out["note"]
+    heavy = call(ctx, "read_schema_vocab", {"section": "eventContext"})
+    assert "isdeadly" in heavy["eventContext"]["OnAfterAttack"]
+    assert "currenthprate" in out["entityContext"]
+    assert "1=友军 2=敌人" in out["fieldSemantics"]["camp"]
+    assert "0=先锋" in out["fieldSemantics"]["job"]
+    assert "unknown section" in call(ctx, "read_schema_vocab", {"section": "nope"})["error"]
 
 
 def test_tool_errors_never_raise():
     # 未知工具名/坏参数都返回 error JSON，不抛异常（让 LLM 自行修正调用）。
-    assert "error" in json.loads(tools.execute_tool("nope", {}, {}, SCHEMA))
-    assert "error" in json.loads(tools.execute_tool("compute_cross_items", None, {}, SCHEMA))
+    ctx = make_ctx()
+    assert "error" in call(ctx, "no_such_tool", {})
+    assert "error" in call(ctx, "compute_cross_items", None)
+
+
+# ---------- 文档工具后端（tools.py；>4k 由工具层截断，故直测纯函数） ----------
+
+def test_list_components_returns_full_index():
+    from app import tools
+
+    components = tools.component_index(schema())
+    assert len(components) == 35
+    entry = next(c for c in components if c["op"] == "apply_damage")
+    assert entry["class"] == "ApplyDamage" and entry["summary"]
+
+
+def test_read_component_doc_by_op_and_alias():
+    from app import tools
+
+    by_op = tools.component_doc(schema(), "apply_damage")
+    by_alias = tools.component_doc(schema(), "ApplyDamage")
+    assert by_op["op"] == by_alias["op"] == "apply_damage"
+    assert by_op["doc"] == "docs/skill-components/ApplyDamage.md"
+    assert "# ApplyDamage" in by_op["content"]
+    assert "error" in tools.component_doc(schema(), "nope")
+
+
+def test_read_contract_doc_returns_text():
+    from app import schema as schema_mod
+
+    assert "AbilityConfig" in schema_mod.contract_docs()
+
+
+# ---------- 语料检索（fixture 语料，不依赖 data/skills.json） ----------
+
+def make_corpus_ctx() -> tools.ToolContext:
+    ctx = make_ctx()
+    corpus_data = {
+        "skills": [
+            {"abilityId": "fang_s1", "abilityName": "冲锋号令",
+             "description": "开技能快速回费，回复部署费用",
+             "sp": {"totalSp": 25},
+             "rules": [{"triggers": [], "steps": [{"op": "modify_cost", "args": {"entries": []}}]}]},
+            {"abilityId": "hibisc_s1", "abilityName": "治疗强化", "description": "提升攻击力",
+             "sp": {"totalSp": 30},
+             "rules": [{"triggers": [], "steps": [{"op": "apply_buff", "args": {"entries": []}}]}]},
+        ],
+        "existingIds": {"fang_s1", "hibisc_s1"},
+    }
+    return tools.ToolContext(
+        {"protocolVersion": schema()["protocolVersion"], "battleSnapshot": {},
+         "hostAssets": {}, "constraints": {}},
+        Config(llm_mock=True, log_dir=None, corpus_path=None), schema(), corpus_data)
+
+
+def test_search_skills_matches_text_and_ops():
+    ctx = make_corpus_ctx()
+    out = call(ctx, "search_skills", {"query": "回费"})
+    assert [s["abilityId"] for s in out["skills"]] == ["fang_s1"]
+    out = call(ctx, "search_skills", {"query": "modify_cost"})
+    assert [s["abilityId"] for s in out["skills"]] == ["fang_s1"]
+    assert out["skills"][0]["ops"] == ["modify_cost"]
+
+
+def test_read_skill_prefers_host_skills_then_corpus():
+    ctx = make_corpus_ctx()
+    ctx.host_skills = {"host_skill": {"abilityId": "host_skill", "rules": []}}
+    out = call(ctx, "read_skill", {"abilityId": "host_skill"})
+    assert out["skill"]["abilityId"] == "host_skill"
+    out = call(ctx, "read_skill", {"abilityId": "fang_s1"})
+    assert out["skill"]["abilityName"] == "冲锋号令"
+    assert "error" in call(ctx, "read_skill", {"abilityId": "ghost"})
+
+
+def test_search_skills_without_corpus_degrades():
+    ctx = make_ctx()  # corpus_data=None
+    out = call(ctx, "search_skills", {"query": "回费"})
+    assert out == {"skills": [], "note": "corpus unavailable; design without precedent lookup"}

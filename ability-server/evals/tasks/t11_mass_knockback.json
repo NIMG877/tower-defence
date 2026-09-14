@@ -1,0 +1,161 @@
+{
+ "taskId": "t11_mass_knockback",
+ "title": "失衡击退",
+ "notes": "覆盖：apply_impulse / massLevel 对比",
+ "request": {
+  "battleSnapshot": {
+   "selfId": "pusher",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "pusher",
+     "name": "pusher",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 1700,
+     "maxHp": 1700,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 4
+     },
+     "attack": 540,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 1,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m2",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    },
+    {
+     "id": "m3",
+     "name": "重甲领主",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 4500,
+     "maxHp": 4500,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 6
+     },
+     "attack": 500,
+     "defence": 400,
+     "magicRes": 30,
+     "job": -1,
+     "label": "boss",
+     "massLevel": 5
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 1,
+   "subJob": 0,
+   "cost": 19,
+   "baseAttackTime": 1.2,
+   "damageType": 0,
+   "blockOccupation": 2,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "开技能时把身边的轻装敌人往外推开，重甲敌人推不动。"
+  }
+ },
+ "expected": {
+  "opsMustInclude": [
+   "apply_impulse"
+  ],
+  "opsMustExclude": [
+   "modify_cost",
+   "fire_bullets"
+  ],
+  "triggerEventsMustInclude": [
+   "OnAbilityBegin"
+  ],
+  "effectSummary": "对身边轻质量敌人施加击退脉冲，重质量敌人不受影响"
+ }
+}

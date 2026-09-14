@@ -1,0 +1,312 @@
+{
+ "envelope": {
+  "protocolVersion": 1,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "duelist",
+   "camp": 1,
+   "selfHpRate": 1.0,
+   "selfPos": {
+    "x": 4,
+    "y": 4
+   },
+   "skill": null,
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "m1",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 4
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier"
+    },
+    {
+     "id": "m2",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 6
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier"
+    }
+   ]
+  },
+  "hostAssets": {
+   "canSpawnEntityIds": [],
+   "bulletCount": 0,
+   "iconKeys": []
+  },
+  "constraints": {
+   "request": "开技能时把我的攻击动画换成 Skill2_Fire 的演出，关技能后恢复原样。"
+  }
+ },
+ "taskId": "t10_animation_costume_swap",
+ "contract": "v1",
+ "wallSeconds": 0.04,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "duelist_s2",
+   "abilityName": "燃焰姿态",
+   "description": "开启技能时，自身攻击动作切换为 Skill2_Fire 的演出；关闭技能后恢复原本的攻击动画。纯演出替换，不改变攻击的伤害、目标与射程。",
+   "iconKey": "",
+   "sp": {
+    "totalSp": 20,
+    "initialSp": 10,
+    "chargeNum": 1,
+    "abilityAmount": 30.0,
+    "recoverMode": "Natural",
+    "consumeMode": "Natural",
+    "openMode": "Manual",
+    "recoverForbidDuringAbility": true,
+    "canManualClose": true
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "apply_animation_override",
+       "args": {
+        "entries": [
+         {
+          "key": "toSelf",
+          "value": "True",
+          "type": "bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "mode",
+          "value": "override",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "slots",
+          "value": "AttackBegin,AttackRemote,AttackClose,AttackEnd",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "resources",
+          "value": "Skill2_Fire,Skill2_Fire,Skill2_Fire,Skill2_Fire",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "priority",
+          "value": "0",
+          "type": "int",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputKey",
+          "value": "skill2_fire_anim",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    },
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityEnd",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "remove_animation_override",
+       "args": {
+        "entries": [
+         {
+          "key": "toSelf",
+          "value": "True",
+          "type": "bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "inputKey",
+          "value": "skill2_fire_anim",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [],
+   "attempts": 1,
+   "phases": [
+    {
+     "phase": "analyze",
+     "detail": "start",
+     "t": 0.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool compute_cross_items round 1",
+     "t": 14.56
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool list_components round 1",
+     "t": 14.56
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 23.88
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 23.89
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_contract_doc round 2",
+     "t": 23.89
+    },
+    {
+     "phase": "describe",
+     "detail": "start",
+     "t": 76.53
+    },
+    {
+     "phase": "describe",
+     "detail": "plannedOps=['apply_animation_override', 'remove_animation_override']",
+     "t": 113.44
+    },
+    {
+     "phase": "retrieve",
+     "detail": "top: ebnhlz_s3(0.25), spot_s1(0.222), eyjafjalla_s2(0.2)",
+     "t": 113.44
+    },
+    {
+     "phase": "generate",
+     "detail": "attempt 1",
+     "t": 113.44
+    },
+    {
+     "phase": "validate",
+     "detail": "ok",
+     "t": 146.03
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 146.03
+    }
+   ],
+   "analysis": "## 战局分析结论\n\n### 敌我态势\n- 场上敌人 2 名，友军 0 名，自身满血（duelist，camp=1，位于 (4,4)，高台可部署格）。\n- **m1（士兵）**：距自身 1.0（紧邻），满血 1200，攻 200 / 防 150 / 魔抗 0，job=-1。\n- **m2（士兵）**：距自身 2.83，同样满血满配。\n- 本体血量健康，无濒死单位；敌人均为常规近战型，数值压力中等。\n\n### 机制机会\n- m1 与自身距离仅 1.0，开技能后下一次攻击很快就会触发，动画替换效果能立即得到视觉验证。\n- 战局简单（2 近战、无远程、无召唤物），无需为索敌/伤害逻辑做复杂设计，本次需求本质是**纯演出层改造**，不涉及攻击行为、伤害或召唤。\n- 宿主资产限制：canSpawnEntityIds 为空、bulletCount=0、iconKeys 为空 → 不可召唤、不可发弹幕；恰好本需求也不需要。\n\n### 本次生成技能的方案要点（基于已读组件文档）\n1. **开启技能（OnAbilityBegin）**：`apply_animation_override`\n   - `toSelf=true`，`mode=override`（持久覆盖，直到显式移除——不能用 `once`，once 播一次就自毁，无法满足\"关技能才恢复\"）。\n   - `slots` 覆盖攻击演出槽位，建议同时覆盖 `AttackBegin/AttackRemote/AttackClose/AttackEnd`（文档确认\"两套攻击槽都覆盖\"是保证任意攻击形态都被替换的受支持模式），`resources` 平行填 Skill2_Fire。\n   - `outputKey` 落黑板（如 `skill2_fire_anim`）存 `List<AnimationOverrideRecord>`，供关闭时移除。\n2. **关闭技能（OnAbilityEnd）**：`remove_animation_override`\n   - `toSelf=true`，`inputKey` 与上一步 `outputKey` 相同；移除覆盖记录后动画机自动回落到原攻击动画，无需额外\"恢复\"操作。\n   - 该步骤为即时完成型，位于 End 派发的同步前缀内，可安全撤销。\n3. 两条规则相互独立、各只含即时步骤，`reentry: IgnoreWhileRunning` 即可。\n\n### 风险与待确认约束\n- **Skill2_Fire 的资源类型待确认**：`AttackRemote/AttackClose` 槽位要求 Named Animation **Group**，其余槽位要求 Named **Animation**。若 Skill2_Fire 是单个动画而非组，则不应填入远程/近战槽位，slots 需收窄（资源缺失时该槽位不会被应用，不会报错但会漏覆盖）。\n- 若 Skill2_Fire 未登记在 duelist 的 `AnimationResources` 命名资源中，整个 apply 会被跳过（slots/resources 缺失即不应用）——需求方命名明确，按其存在处理，但生成时应保留该假设说明。\n- 技能若为\"瞬时施放立即结束\"型，OnAbilityEnd 会立刻触发移除、演出形同虚设；用户语义（\"关技能后恢复\"）指向开关型/持续型技能，按 OnAbilityBegin/OnAbilityEnd 生命周期对设计。",
+   "design": {
+    "abilityName": "燃焰姿态",
+    "description": "开启技能时，自身攻击动作切换为 Skill2_Fire 的演出；关闭技能后恢复原本的攻击动画。纯演出替换，不改变攻击的伤害、目标与射程。",
+    "designNotes": "机制要点：共两条规则，目标均为宿主自身，无目标选择、无数值改动、不依赖召唤物/子弹（hostAssets 全空，本需求也不需要）。规则1（OnAbilityBegin，无条件触发，reentry=IgnoreWhileRunning）：单步 apply_animation_override，toSelf=true、mode=override（持久覆盖直到显式移除；不用 once，因其首次实际播放后自毁，无法满足『关技能才恢复』）、slots=AttackBegin,AttackRemote,AttackClose,AttackEnd（同时覆盖两套攻击槽是文档支持的『任意攻击形态都被替换』模式，宿主为近战但敌距 1.0，下一次攻击即验证演出）、resources=Skill2_Fire,Skill2_Fire,Skill2_Fire,Skill2_Fire（平行 CSV）、priority=0、outputKey=skill2_fire_anim（写回 List<AnimationOverrideRecord> 供撤销）；若 Skill2_Fire 仅登记为 Named Animation 而非 Group，Remote/Close 槽位资源缺失按文档静默不应用，不报错，仅覆盖其余槽位。规则2（OnAbilityEnd，无条件触发，reentry=IgnoreWhileRunning）：单步 remove_animation_override，toSelf=true、inputKey=skill2_fire_anim，与规则1的 outputKey 严格同名配对；移除持久覆盖记录后动画机自然回落原攻击动画，无需额外恢复操作。End 派发的取消保证（SetActive(true) 前会取消未完成的 End 规则）确保不会出现误撤后仍残留的状态；两规则各只含一个即时步骤，无 delay/wait，位于事件派发同步前缀内。",
+    "plannedOps": [
+     "apply_animation_override",
+     "remove_animation_override"
+    ]
+   },
+   "cached": true
+  }
+ }
+}

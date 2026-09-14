@@ -1,0 +1,365 @@
+{
+ "envelope": {
+  "protocolVersion": 1,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "witch_hunter",
+   "camp": 1,
+   "selfHpRate": 1.0,
+   "selfPos": {
+    "x": 5,
+    "y": 3
+   },
+   "skill": null,
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "m1",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 4
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster"
+    },
+    {
+     "id": "m2",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 5
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster"
+    },
+    {
+     "id": "m3",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 6
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier"
+    }
+   ]
+  },
+  "hostAssets": {
+   "canSpawnEntityIds": [],
+   "bulletCount": 0,
+   "iconKeys": []
+  },
+  "constraints": {
+   "request": "让附近正在施法的敌人沉默几秒，打断他们的节奏。"
+  }
+ },
+ "taskId": "t14_silence_casters",
+ "contract": "v1",
+ "wallSeconds": 0.03,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "witch_hunter_s1",
+   "abilityName": "静默咒印",
+   "description": "猎巫人原地布下咒印，使周围 3 格内的所有敌人沉默 5 秒：期间无法攻击、无法施法，其施法节奏被强行打断。",
+   "iconKey": null,
+   "sp": {
+    "totalSp": 30,
+    "initialSp": 15,
+    "chargeNum": 1,
+    "abilityAmount": 0.0,
+    "recoverMode": "Natural",
+    "consumeMode": "Consume",
+    "openMode": "Manual",
+    "recoverForbidDuringAbility": false,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "select_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "subjectMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "selectionMode",
+          "value": "radius",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "radius",
+          "value": "3",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "campRelation",
+          "value": "opposing",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "excludeSubjects",
+          "value": "True",
+          "type": "bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputEntitiesKey",
+          "value": "silence_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputCountKey",
+          "value": "silence_targets_count",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "apply_abnormal_state",
+       "args": {
+        "entries": [
+         {
+          "key": "mode",
+          "value": "normal",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "abnormalTypes",
+          "value": "2",
+          "type": "intArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "abnormalTimes",
+          "value": "5",
+          "type": "floatArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "toSelf",
+          "value": "False",
+          "type": "bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "blackboardKey",
+          "value": "silence_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputTarget",
+          "value": "silence_applied",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputState",
+          "value": "silence_applied_states",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [
+    {
+     "severity": "warning",
+     "path": "rules[0].steps[1]",
+     "message": "param 'abnormalTypes' type label 'FloatArray' coerced to schema type 'intArray'"
+    }
+   ],
+   "attempts": 1,
+   "phases": [
+    {
+     "phase": "analyze",
+     "detail": "start",
+     "t": 0.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool compute_cross_items round 1",
+     "t": 5.71
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool list_components round 1",
+     "t": 5.71
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 17.54
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 17.54
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 17.54
+    },
+    {
+     "phase": "describe",
+     "detail": "start",
+     "t": 62.46
+    },
+    {
+     "phase": "describe",
+     "detail": "tool read_contract_doc (attempt 1)",
+     "t": 73.21
+    },
+    {
+     "phase": "describe",
+     "detail": "plannedOps=['select_targets', 'apply_abnormal_state']",
+     "t": 110.65
+    },
+    {
+     "phase": "retrieve",
+     "detail": "top: ebnhlz_t2(0.333), creeper_t1(0.25), skeleton_t1(0.25)",
+     "t": 110.65
+    },
+    {
+     "phase": "generate",
+     "detail": "attempt 1",
+     "t": 110.65
+    },
+    {
+     "phase": "validate",
+     "detail": "ok",
+     "t": 206.28
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 206.28
+    }
+   ],
+   "analysis": "## 战局分析结论\n\n**敌我态势**\n- 场上仅自身（witch_hunter，阵营1，满血），无任何友军；敌方 3 人，均未受创：\n  - m1 术师 (6,4)：距我 1.41，攻 250 / 法抗 50 / 防 20 / HP 800 —— 紧贴自身，威胁最大\n  - m2 术师 (7,5)：距我 2.83，同款术师\n  - m3 士兵 (4,6)：距我 3.16，高防 150 / 魔抗 0 / HP 1200\n- 两名术师合计 500 攻击力且贴脸，是当前主要压力来源，与需求\"打断施法节奏\"吻合。\n\n**可利用的机制机会**\n- `select_targets`（selectionMode=radius）以自身为圆心选敌方：**半径 3 恰好只覆盖 m1、m2 两名术师**（m3 在 3.16 被排除），几何上天然契合\"只打施法者\"。\n- `filter_targets` 可按 `Camp` 过滤敌我，但**不支持按 label/job（caster）字段过滤**，字段仅限 Camp/HP/IdC/IdN 等；如需严格只沉默术师，须运行时提供其 IdC/IdN。快照未给出，故推荐方案：半径 3 选取敌方全员施放沉默（本战局等效于只命中术师），附带沉默到士兵也不亏。\n- `apply_abnormal_state`：`abnormalTypes=2`（silence，禁攻击/施法）正是需求语义；normal 模式一次性施加，`abnormalTimes` 直接给持续秒数（建议 4–6 秒）。若要\"正在施法\"的判定（如攻击前摇内才打断），需额外规则，复杂度收益比低，不建议。\n- 备选强化：type 1（unbalance，禁移动+攻击）可同时压制士兵走位，但超出\"仅沉默\"需求，可作可选升级。\n- 注意组件限制：BuffController 同类型状态每来源仅一个计时器、无引用计数——不要设计多重沉默叠加逻辑；显式解除需配 OnAbilityEnd + destroy_abnormal_state。\n\n**本次生成约束**\n- hostAssets 为空：无子弹（bulletCount=0）、无可召唤实体（canSpawnEntityIds=[]）、无图标/动画资源——技能必须做成**纯状态型技能**：选目标→施加异常状态，不可引用 fire_bullets / spawn_entity / 动画覆盖素材。\n- 触发建议：技能主动释放（OnAbilityStart/OnUse 类触发）一次性执行即可，无需 aura/OnTick 同步。\n- 沉默方向正确的原因：术师魔抗 50 但本技能不造成伤害，绕开魔抗减伤；沉默直接禁止其 Attack，节奏被打断。",
+   "design": {
+    "abilityName": "静默咒印",
+    "description": "猎巫人原地布下咒印，使周围 3 格内的所有敌人沉默 5 秒：期间无法攻击、无法施法，其施法节奏被强行打断。",
+    "designNotes": "触发：OnAbilityBegin（主动释放时无条件触发一次，reentry=IgnoreWhileRunning）。步骤序列（全同步，无 yield）：1) select_targets：subjectMode=self、selectionMode=radius、radius=3、campRelation=opposing、excludeSubjects=true，输出 outputEntitiesKey=silence_targets（outputCountKey=silence_targets_count）；2) apply_abnormal_state：mode=normal、blackboardKey=silence_targets、abnormalTypes=2（silence，禁攻击）、abnormalTimes=5、toSelf=false、outputTarget=silence_applied、outputState=silence_applied_states。目标选择依据：实测 m1 距 1.41、m2 距 2.83 均在半径 3 内，m3 距 3.16 被排除——两名正在施法的术师被精确覆盖，等效'只沉默施法者'；EntityFilter 不支持按 label/job 过滤，故不做身份过滤，士兵意外被沉默亦无损失。数值依据：沉默 5 秒为临时状态（-5 以下才永久），由 BuffController 计时器自然到期，无需配 OnAbilityEnd 清理；纯状态技能不造成伤害，绕开术师 50 魔抗。约束：hostAssets 无子弹/召唤/动画资源，不使用 fire_bullets/spawn_entity/动画类组件。",
+    "plannedOps": [
+     "select_targets",
+     "apply_abnormal_state"
+    ]
+   },
+   "cached": true
+  }
+ }
+}

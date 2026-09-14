@@ -198,7 +198,8 @@ def test_blackboard_read_without_producer_is_warning():
                                "fromBlackboard": False}]}}]
     ok, issues, _ = validate(dto, SCHEMA)
     assert ok, "\n".join(messages(issues))
-    assert not any("snapshot:lowest_enemy_id" in i["message"] for i in issues)
+    # 快照黑板键已随 knownBlackboardKeys 清空移除，snapshot: 前缀同样是无生产者读键。
+    assert any("snapshot:lowest_enemy_id" in i["message"] for i in issues)
     assert any("ghost_key" in i["message"] for i in issues)
 
 
@@ -227,3 +228,212 @@ def test_alias_resolution_like_runtime_registry():
     ok, issues, sanitized = validate(dto, SCHEMA)
     assert ok, "\n".join(messages(issues))
     assert sanitized["rules"][0]["steps"][0]["op"] == "apply_damage"
+
+
+# ---------- hostAssets 边界校验（error 级） ----------
+
+def test_spawn_index_out_of_range_is_error():
+    dto = valid_dto()
+    dto["rules"][0]["steps"] = [{
+        "op": "spawn_entity",
+        "args": {"entries": [{"key": "spawnIndex", "value": "2", "type": "Int",
+                              "fromBlackboard": False}]}}]
+    ok, issues, _ = validate(dto, SCHEMA, host_assets={"canSpawnEntityIds": ["s-0", "s-1"]})
+    assert not ok
+    assert any("spawnIndex=2 out of range" in i["message"] for i in issues)
+    # 下标落在注册表范围内 → 通过。
+    ok, issues, _ = validate(dto, SCHEMA, host_assets={"canSpawnEntityIds": ["s-0", "s-1", "s-2"]})
+    assert ok, "\n".join(messages(issues))
+
+
+def test_spawn_index_from_blackboard_skips_bound_check():
+    """fromBlackboard=true 时 value 是黑板键名，下标运行时才解析，静态不查。"""
+    dto = valid_dto()
+    dto["rules"][0]["steps"] = [{
+        "op": "spawn_entity",
+        "args": {"entries": [{"key": "spawnIndex", "value": "enemy_idx", "type": "String",
+                              "fromBlackboard": True}]}}]
+    ok, issues, _ = validate(dto, SCHEMA, host_assets={"canSpawnEntityIds": []})
+    assert ok, "\n".join(messages(issues))
+
+
+def test_spawn_index_checks_contract_v2_registry_shape():
+    """契约 v2 的 canSpawnEntities（实体投影列表）同样作为注册表长度来源。"""
+    dto = valid_dto()
+    dto["rules"][0]["steps"] = [{
+        "op": "spawn_entity",
+        "args": {"entries": [{"key": "spawnIndex", "value": "0", "type": "Int",
+                              "fromBlackboard": False}]}}]
+    ok, issues, _ = validate(dto, SCHEMA, host_assets={"canSpawnEntities": []})
+    assert not ok  # 空注册表：任何下标都越界
+    assert any("spawnIndex=0 out of range" in i["message"] for i in issues)
+
+
+def test_bullet_data_index_out_of_range_is_error():
+    dto = valid_dto()
+    dto["rules"][0]["steps"] = [{
+        "op": "fire_bullets",
+        "args": {"entries": [{"key": "bulletDataIndex", "value": "3", "type": "Int",
+                              "fromBlackboard": False}]}}]
+    ok, issues, _ = validate(dto, SCHEMA, host_assets={"bulletCount": 2})
+    assert not ok
+    assert any("bulletDataIndex=3 out of range" in i["message"] for i in issues)
+    ok, issues, _ = validate(dto, SCHEMA, host_assets={"bullets": [{}, {}, {}, {}]})  # v2 形状
+    assert ok, "\n".join(messages(issues))
+
+
+def test_animation_resource_outside_host_vocabulary_is_error():
+    dto = valid_dto()
+    dto["rules"][0]["steps"] = [{
+        "op": "apply_animation_override",
+        "args": {"entries": [
+            {"key": "slots", "value": "AttackRemote", "type": "StringArray", "fromBlackboard": False},
+            {"key": "resources", "value": "attack_far,attack_cut", "type": "StringArray",
+             "fromBlackboard": False}]}}]
+    host = {"animations": {"named": ["attack_far"], "groups": ["attack_cut"]}}
+    ok, issues, _ = validate(dto, SCHEMA, host_assets=host)
+    assert ok, "\n".join(messages(issues))
+    host = {"animations": {"named": ["attack_far"], "groups": []}}
+    ok, issues, _ = validate(dto, SCHEMA, host_assets=host)
+    assert not ok
+    assert any("attack_cut" in i["message"] and "hostAssets.animations" in i["message"]
+               for i in issues)
+
+
+def test_boundary_checks_skip_when_host_assets_lack_the_lists():
+    """hostAssets 未携带对应清单时无从校验（契约 v2 前没有 animations 字段）。"""
+    dto = valid_dto()
+    dto["rules"][0]["steps"] = [{
+        "op": "apply_animation_override",
+        "args": {"entries": [{"key": "resources", "value": "no_such_anim", "type": "StringArray",
+                              "fromBlackboard": False}]}}]
+    for host in ({}, None):
+        ok, issues, _ = validate(dto, SCHEMA, host_assets=host)
+        assert ok, "\n".join(messages(issues))
+
+
+def test_icon_key_always_stripped_from_sanitized():
+    """生成技能统一图标：sanitize 恒剥离 iconKey，技能卡走 AbilityIconPool null 兜底。"""
+    dto = valid_dto()
+    dto["iconKey"] = "charger"
+    ok, issues, sanitized = validate(dto, SCHEMA)
+    assert ok, "\n".join(messages(issues))
+    assert "iconKey" not in sanitized
+
+
+# ---------- 语义验证层（M2：上下文 path / listCount 时序 / 低频挡位） ----------
+
+def write_bb_rule(trigger_events, entries, steps=None):
+    """构造含 write_blackboard 步骤的规则（可多 trigger 验证并集语义）。"""
+    return {"triggers": [{"triggerEvent": ev, "groups": []} for ev in trigger_events],
+            "steps": steps or [{"op": "write_blackboard",
+                                "args": {"entries": entries}}]}
+
+
+def test_event_context_path_outside_vocab_warns():
+    """OnAfterAttack 是 DamageEventBase 非 HurtEventBase：没有 damage/origin 路径，
+    但有 isdeadly——按 WriteBlackboard.ResolveEventValue 逐分支核对。"""
+    dto = valid_dto()
+    dto["rules"] = [write_bb_rule(
+        ["OnAfterAttack"],
+        [{"key": "key", "value": "probe", "type": "String", "fromBlackboard": False},
+         {"key": "source", "value": "event", "type": "String", "fromBlackboard": False},
+         {"key": "path", "value": "damage", "type": "String", "fromBlackboard": False}])]
+    ok, issues, _ = validate(dto, SCHEMA)
+    assert ok, "\n".join(messages(issues))  # warning 不拒
+    assert any("source=event path 'damage'" in i["message"] for i in issues)
+    # 换成该事件合法路径 → 无此告警
+    dto["rules"][0]["steps"][0]["args"]["entries"][2]["value"] = "isdeadly"
+    ok, issues, _ = validate(dto, SCHEMA)
+    assert ok and not issues, "\n".join(messages(issues))
+
+
+def test_event_context_multi_trigger_union():
+    """多 trigger 规则的 eventContext 取并集：cumbo（BeforeAttack 专有）与
+    damage（Hurt 分支）同时合法。"""
+    dto = valid_dto()
+    wb = [{"key": "key", "value": "probe", "type": "String", "fromBlackboard": False},
+          {"key": "source", "value": "event", "type": "String", "fromBlackboard": False},
+          {"key": "path", "value": "cumbo", "type": "String", "fromBlackboard": False}]
+    dmg = [dict(e) for e in wb]
+    dmg[2] = {"key": "path", "value": "damage", "type": "String", "fromBlackboard": False}
+    dto["rules"] = [write_bb_rule(["OnBeforeAttack", "OnAfterHurt"], wb,
+                                  steps=[{"op": "write_blackboard", "args": {"entries": wb}},
+                                         {"op": "write_blackboard", "args": {"entries": dmg}}])]
+    ok, issues, _ = validate(dto, SCHEMA)
+    assert ok and not issues, "\n".join(messages(issues))
+
+
+def test_entity_context_path_checked():
+    dto = valid_dto()
+    dto["rules"][0]["steps"] = [{
+        "op": "write_blackboard",
+        "args": {"entries": [
+            {"key": "key", "value": "probe", "type": "String", "fromBlackboard": False},
+            {"key": "source", "value": "entity", "type": "String", "fromBlackboard": False},
+            {"key": "path", "value": "hp", "type": "String", "fromBlackboard": False}]}}]
+    ok, issues, _ = validate(dto, SCHEMA)
+    assert ok
+    assert any("source=entity path 'hp'" in i["message"] for i in issues)
+    dto["rules"][0]["steps"][0]["args"]["entries"][2]["value"] = "currenthprate"
+    ok, issues, _ = validate(dto, SCHEMA)
+    assert ok and not issues, "\n".join(messages(issues))
+
+
+def test_list_count_requires_earlier_select_targets():
+    """listCount 的 path 须为此前 select_targets（outputEntitiesKey）产出。"""
+    select = {"op": "select_targets",
+              "args": {"entries": [{"key": "outputEntitiesKey", "value": "targets",
+                                    "type": "String", "fromBlackboard": False}]}}
+    writer_entries = [
+        {"key": "key", "value": "enemy_count", "type": "String", "fromBlackboard": False},
+        {"key": "source", "value": "listCount", "type": "String", "fromBlackboard": False},
+        {"key": "path", "value": "targets", "type": "String", "fromBlackboard": False}]
+    writer = {"op": "write_blackboard", "args": {"entries": writer_entries}}
+
+    # select 在前 → 干净
+    dto = valid_dto()
+    dto["rules"][0]["steps"] = [select, writer]
+    ok, issues, _ = validate(dto, SCHEMA)
+    assert ok and not issues, "\n".join(messages(issues))
+
+    # select 缺失 → warning
+    dto = valid_dto()
+    dto["rules"][0]["steps"] = [writer]
+    ok, issues, _ = validate(dto, SCHEMA)
+    assert ok
+    assert any("no earlier select_targets" in i["message"] for i in issues)
+
+    # select 在后（步骤序颠倒）→ warning
+    dto = valid_dto()
+    dto["rules"][0]["steps"] = [writer, select]
+    ok, issues, _ = validate(dto, SCHEMA)
+    assert ok
+    assert any("no earlier select_targets" in i["message"] for i in issues)
+
+    # path 来自黑板（fromBlackboard=true）：运行时才解析路径名，静态上下文检查跳过；
+    # 但它读的黑板键（targets）仍受写前读序约束——带上 select 产出则干净。
+    dto = valid_dto()
+    dto["rules"][0]["steps"] = [select, writer]
+    dto["rules"][0]["steps"][1]["args"]["entries"][2]["fromBlackboard"] = True
+    ok, issues, _ = validate(dto, SCHEMA)
+    assert ok and not issues, "\n".join(messages(issues))
+
+
+def test_corpus_rare_usage_hints_are_info_level():
+    """语料零使用的触发事件 / reentry 记 info（不拒、不计 warning 断言）。"""
+    dto = valid_dto()
+    dto["rules"][0]["triggers"][0]["triggerEvent"] = "OnSummonDeath"  # 语料 1 次也算有先例
+    dto["rules"][0]["reentry"] = "Restart"                            # 语料零使用
+    usage = {"triggerEvents": {"OnInitialize", "OnAbilityBegin"},
+             "reentries": {"IgnoreWhileRunning", "Parallel"}}
+    ok, issues, _ = validate(dto, SCHEMA, corpus_usage=usage)
+    assert ok, "\n".join(messages(issues))
+    infos = [i for i in issues if i["severity"] == "info"]
+    assert any("Restart" in i["message"] for i in infos)
+    assert any("OnSummonDeath" in i["message"] for i in infos)
+    assert all(i["severity"] != "info" for i in issues if i not in infos)
+
+    # 不传 corpus_usage（v1 路径/无语料）→ 无 info 提示
+    ok, issues, _ = validate(dto, SCHEMA)
+    assert ok and not issues, "\n".join(messages(issues))

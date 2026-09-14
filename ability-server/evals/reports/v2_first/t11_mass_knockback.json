@@ -1,0 +1,420 @@
+{
+ "envelope": {
+  "protocolVersion": 3,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "pusher",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "pusher",
+     "name": "pusher",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 1700,
+     "maxHp": 1700,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 4
+     },
+     "attack": 540,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 1,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m2",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    },
+    {
+     "id": "m3",
+     "name": "重甲领主",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 4500,
+     "maxHp": 4500,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 6
+     },
+     "attack": 500,
+     "defence": 400,
+     "magicRes": 30,
+     "job": -1,
+     "label": "boss",
+     "massLevel": 5
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 1,
+   "subJob": 0,
+   "cost": 19,
+   "baseAttackTime": 1.2,
+   "damageType": 0,
+   "blockOccupation": 2,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "开技能时把身边的轻装敌人往外推开，重甲敌人推不动。"
+  }
+ },
+ "taskId": "t11_mass_knockback",
+ "contract": "v2",
+ "wallSeconds": 157.64,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "pusher_t1",
+   "abilityName": "大力推击",
+   "description": "开技能时，将身边1.5范围内的敌方单位向外推开，被推动者失衡短暂无法行动；重甲单位因质量过大推不动。",
+   "sp": {
+    "totalSp": 30,
+    "initialSp": 15,
+    "chargeNum": 1,
+    "abilityAmount": 0.0,
+    "recoverMode": "Natural",
+    "consumeMode": "Consume",
+    "openMode": "Manual",
+    "recoverForbidDuringAbility": false,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "select_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "subjectMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "selectionMode",
+          "value": "radius",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "campRelation",
+          "value": "opposing",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "radius",
+          "value": "1.5",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputEntitiesKey",
+          "value": "pusher_t1_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputCountKey",
+          "value": "pusher_t1_target_count",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "apply_impulse",
+       "args": {
+        "entries": [
+         {
+          "key": "targetMode",
+          "value": "blackboard",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "blackboardKey",
+          "value": "pusher_t1_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "strengthLevel",
+          "value": "4",
+          "type": "int",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [],
+   "rounds": 8,
+   "phases": [
+    {
+     "phase": "plan",
+     "detail": "round 1 model=glm-5.3-flash",
+     "t": 0.0
+    },
+    {
+     "phase": "plan",
+     "detail": "tool update_plan",
+     "t": 15.16
+    },
+    {
+     "phase": "plan",
+     "detail": "round 2 model=glm-5.3-flash",
+     "t": 15.16
+    },
+    {
+     "phase": "act",
+     "detail": "tool list_components",
+     "t": 16.38
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_schema_vocab",
+     "t": 16.39
+    },
+    {
+     "phase": "act",
+     "detail": "round 3 model=glm-5.3-flash",
+     "t": 16.39
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 22.05
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 22.05
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 22.05
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 22.05
+    },
+    {
+     "phase": "act",
+     "detail": "round 4 model=glm-5.3-flash",
+     "t": 22.05
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 39.49
+    },
+    {
+     "phase": "act",
+     "detail": "round 5 model=glm-5.3-flash",
+     "t": 39.49
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 81.01
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_contract_doc",
+     "t": 81.01
+    },
+    {
+     "phase": "act",
+     "detail": "round 6 model=glm-5.3-flash",
+     "t": 81.01
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 99.04
+    },
+    {
+     "phase": "act",
+     "detail": "round 7 model=glm-5.3-flash",
+     "t": 99.04
+    },
+    {
+     "phase": "review",
+     "detail": "tool validate_draft",
+     "t": 143.74
+    },
+    {
+     "phase": "act",
+     "detail": "round 8 model=glm-5.3-flash",
+     "t": 143.74
+    },
+    {
+     "phase": "submit",
+     "detail": "tool submit_skill",
+     "t": 156.64
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 156.64
+    }
+   ],
+   "plan": "目标：为 pusher（近卫，攻 540，位于 (4,4)）设计\"开技能推开身边轻装敌人、重甲推不动\"的技能。\n\n1. 研究组件：list_components 找位移/推挤/击退类 op，读其文档确认参数（推力等级/质量阈值/位移距离）。\n2. 词表契约：read_schema_vocab 拿触发事件与参数编码（重点 massLevel 语义），read_contract_doc 确认多步骤规则与条件触发写法。\n3. 先例：search_skills 查\"推/击退/位移\"类语料，参考数值量级（推多远、范围多大）。\n4. 设计思路（草案，待组件文档修正）：\n   - 触发：手动/开技能触发一次；\n   - 步骤：select_targets（自身半径 ~1.5~2 内敌人）→ 条件筛 massLevel ≤ 某阈值（轻装）→ 对命中者施加位移（向外推开）；\n   - 重甲（massLevel 高）不在筛选内，自然推不动——不附加伤害或其他效果，宁简勿滥。\n5. 黑板键：select_targets 写实体列表 → write_blackboard source=listCount 桥接计数（若条件分支需要读数）。\n6. validate_draft 自检 → 修复 issues → submit_skill。",
+   "tokens": {
+    "calls": 17,
+    "prompt_tokens": 216161,
+    "completion_tokens": 12770
+   }
+  }
+ }
+}

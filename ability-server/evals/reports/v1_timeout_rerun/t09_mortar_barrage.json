@@ -1,0 +1,438 @@
+{
+ "envelope": {
+  "protocolVersion": 1,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "mortar",
+   "camp": 1,
+   "selfHpRate": 1.0,
+   "selfPos": {
+    "x": 6,
+    "y": 3
+   },
+   "skill": null,
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 3,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime"
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 3,
+      "y": 5
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime"
+    },
+    {
+     "id": "m3",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier"
+    },
+    {
+     "id": "m4",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 6
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster"
+    }
+   ]
+  },
+  "hostAssets": {
+   "canSpawnEntityIds": [],
+   "bulletCount": 1,
+   "iconKeys": []
+  },
+  "constraints": {
+   "request": "朝敌人最密集的地方发射一轮弹幕，每发弹着点附近炸开一次范围伤害。"
+  }
+ },
+ "taskId": "t09_mortar_barrage",
+ "contract": "v1",
+ "wallSeconds": 474.6,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "mortar_s1",
+   "abilityName": "迫击弹幕·覆压",
+   "description": "向攻击范围内敌人最密集处连续发射4发迫击弹：每发优先锁定一名在场敌人（不足时随机补点），弹着点炸开后对周围1.5格内所有敌人造成400点法术伤害（法术穿透50%）。",
+   "iconKey": null,
+   "sp": {
+    "totalSp": 20,
+    "initialSp": 10,
+    "chargeNum": 1,
+    "abilityAmount": 5.0,
+    "recoverMode": "Natural",
+    "consumeMode": "OnAttackSuccessfully",
+    "openMode": "Manual",
+    "recoverForbidDuringAbility": false,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "select_landing_points",
+       "args": {
+        "entries": [
+         {
+          "key": "count",
+          "value": "4",
+          "type": "int",
+          "fromBlackboard": false
+         },
+         {
+          "key": "offset",
+          "value": "0.24",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputKey",
+          "value": "mortar_s1_points",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "fire_bullets",
+       "args": {
+        "entries": [
+         {
+          "key": "pointsKey",
+          "value": "mortar_s1_points",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "bulletDataIndex",
+          "value": "0",
+          "type": "int",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    },
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnBulletLanded",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "select_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "subjectMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "selectionMode",
+          "value": "radius",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "campRelation",
+          "value": "opposing",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "radius",
+          "value": "1.5",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputEntitiesKey",
+          "value": "mortar_s1_hits",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "apply_damage",
+       "args": {
+        "entries": [
+         {
+          "key": "targetMode",
+          "value": "blackboard",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "blackboardKey",
+          "value": "mortar_s1_hits",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "baseValueMode",
+          "value": "fixed",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "baseValue",
+          "value": "400",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "multiplier",
+          "value": "1",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "damageType",
+          "value": "1",
+          "type": "int",
+          "fromBlackboard": false
+         },
+         {
+          "key": "mgrPenetrate",
+          "value": "50",
+          "type": "float",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [],
+   "attempts": 1,
+   "phases": [
+    {
+     "phase": "analyze",
+     "detail": "start",
+     "t": 0.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool compute_cross_items round 1",
+     "t": 14.55
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool list_components round 1",
+     "t": 14.55
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 22.21
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 22.21
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_contract_doc round 2",
+     "t": 22.25
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 3",
+     "t": 42.09
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 3",
+     "t": 42.1
+    },
+    {
+     "phase": "describe",
+     "detail": "start",
+     "t": 117.77
+    },
+    {
+     "phase": "describe",
+     "detail": "tool read_component_doc (attempt 1)",
+     "t": 288.35
+    },
+    {
+     "phase": "describe",
+     "detail": "plannedOps=['select_landing_points', 'fire_bullets', 'select_targets', 'apply_damage']",
+     "t": 318.65
+    },
+    {
+     "phase": "retrieve",
+     "detail": "top: ebnhlz_t2(0.5), eyjafjalla_s2(0.333), lavabubble_t1(0.286)",
+     "t": 318.66
+    },
+    {
+     "phase": "generate",
+     "detail": "attempt 1",
+     "t": 318.66
+    },
+    {
+     "phase": "validate",
+     "detail": "ok",
+     "t": 474.32
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 474.32
+    }
+   ],
+   "analysis": "## 战局分析结论\n\n**一、敌我态势**\n- 我方：仅宿主 `mortar`（camp 1，血量满），位于 (6,3)；场上友军 0，**没有任何队友，也没有可召唤物**（CanSpawnEntityIds 为空）。\n- 敌方：4 名敌人（camp 2），全员满血、全部非静止（正在移动逼近）：\n  - m1 史莱姆 (3,4)：HP 550，防 30，攻 120\n  - m2 史莱姆 (3,5)：HP 550，防 30，攻 120\n  - m3 士兵 (4,5)：HP 1200，**防 150**，攻 200，距我最近（2.83）\n  - m4 术师 (5,6)：HP 800，防 20 / 法抗 50，攻 250（最高威胁），距我 3.16\n- 半径 3.5 内有 m1/m3/m4 三个敌人；4 敌全部落在 4.5 范围内，且互相间距仅 1.0–1.4 格，处于同一可覆盖弹幕区。\n\n**二、可利用的机制机会**\n- **密集簇明确**：m1/m2/m3 聚在 (3~4, 4~5) 一带（间距≤1.41），以任意一敌为弹着点、AoE 半径 ≥1.5 即可同时炸到 2–3 个目标；m4 稍偏，单独一发可覆盖。\n- **组件链路成熟**：`select_landing_points`（敌人优先取精确坐标 → 恰好命中\"最密集处\"，count=4 时 4 敌各吃一发，无需补格）→ `fire_bullets` → 落点 `OnBulletLanded` 规则里 `select_targets(radius)` + `apply_damage(targetMode=blackboard)` 实现\"每弹着点炸一次范围伤害\"。\n- **伤害类型建议**：全员法抗 0；但 m3 防御 150 会明显减免物理。用 `apply_damage` 固定值伤害时建议选攻城/法术或带 `defPenetrate`，否则弹幕对士兵收益低。\n\n**三、本次生成的关键约束（必须遵守）**\n1. **弹幕资源限制**：`bulletCount=1`，宿主 `AttackBase._extraEffectDatas` 只有索引 0 一条弹道配置——所有载体弹只能用 `effectDataIndex=0`，弹幕数量靠落点数撑起（一发弹道、多点投放）。\n2. **落点规则的生命周期陷阱（最重要）**：`fire_bullets` 是无害载体弹，伤害必须由 `OnBulletLanded` 消费；而运行时只向**仍处于激活状态**的 ability 派发事件——纯瞬时技能的子弹落地时技能已失活，自身的落点规则永远不会触发。因此本技能必须做成**持续型（duration）技能**：开启 → 选点 → 发射 → 保持激活直到子弹落地，或把落点 AoE 规则挂在常驻 Talent 上。\n3. **落点事件锚点待确认**：`BulletLandedEvent` 携带的是落点坐标而非实体目标，且未证实其为 `DamageEventBase` 派生——`select_targets`/`apply_damage` 的 `eventTarget` 模式在该事件上不可用，AoE 索敌需改用可用锚点（如宿主自身/黑板主题）或落点专用选点方式；生成时需先确认 `OnBulletLanded` 事件的可用参数再接线。\n4. **落点不追踪移动**：敌人位置在触发瞬间快照，飞行期间移动不跟随；当前敌间距小，偏差可接受，但 AoE 半径建议 ≥1.5 以容错。\n5. **无召唤、无图标、无动画资源**：`fire_bullets` 需要宿主有 AttackBase 与配置好的出生挂点（mortar 自带迫击炮弹道，满足）；禁止引用任何不存在的召唤物/特效资产。\n\n**四、建议技能骨架**\n- 规则 1（技能开启）：`select_landing_points(count=4, outputKey=…)` → `fire_bullets(pointsKey=…, effectDataIndex=0)`；技能保持激活至子弹落地。\n- 规则 2（OnBulletLanded）：围绕落点 `select_targets(radius≈1.5, opposing)` → `apply_damage(targetMode=blackboard, fixed 值/攻城或带穿透)`。\n- 重入策略用 `IgnoreWhileRunning` 防止重复触发放大弹幕。",
+   "design": {
+    "abilityName": "迫击弹幕·覆压",
+    "description": "向攻击范围内敌人最密集处连续发射4发迫击弹：每发优先锁定一名在场敌人（不足时随机补点），弹着点炸开后对周围1.5格内所有敌人造成400点法术伤害（法术穿透50%）。",
+    "designNotes": "触发：Rule1 OnAbilityBegin（技能为持续型，开启后保持激活至子弹全部落地，满足 fire_bullets 对 OnBulletLanded 消费方的生命周期要求）。步骤序列：select_landing_points(count=4, offset=0.24, outputKey=barrage_points) → fire_bullets(pointsKey=barrage_points, effectDataIndex=0，宿主 _extraEffectDatas 仅索引0一条弹道，bulletCount=1)。Rule2 OnBulletLanded：select_targets(subjectMode=self, selectionMode=radius, radius=1.5, campRelation=opposing, outputEntitiesKey=barrage_hits) → apply_damage(targetMode=blackboard, blackboardKey=barrage_hits, baseValueMode=fixed, baseValue=400, multiplier=1, damageType=1, mgrPenetrate=50)。目标选择依据：4敌全在4.5格内且m1/m2/m3间距≤1.41，敌人优先流水线使每弹锁定一名敌人精确坐标，4发恰好覆盖全部4敌，AoE半径1.5容错飞行期间移动偏移。数值依据：全员法抗0（仅术师m4为50），取法术类型可无视士兵150护甲；固定400伤害下史莱姆(550HP)两发内清空、术师(800HP)穿透后每点200、士兵吃满400；Rule1重入策略 IgnoreWhileRunning 防止重复触发放大弹幕，Rule2 短序列自然幂等。落点事件携带坐标而非实体，故不用 eventTarget 模式，统一走黑板实体表。",
+    "plannedOps": [
+     "select_landing_points",
+     "fire_bullets",
+     "select_targets",
+     "apply_damage"
+    ]
+   }
+  }
+ }
+}

@@ -45,7 +45,7 @@ namespace AbilitySystem
             }
         }
 
-        public static Result Validate(AbilityConfigDto dto)
+        public static Result Validate(AbilityConfigDto dto, HostAssets hostAssets = null)
         {
             AbilityOpsSchema schema = AbilityOpsSchema.Load();
             var result = new Result();
@@ -68,9 +68,101 @@ namespace AbilitySystem
                 sp = dto.sp == null ? null : SanitizeSp(dto.sp, ctx),
                 rules = SanitizeRules(dto.rules, ctx),
             };
+            // hostAssets 边界终检（与服务端同款语义）：引用只能指向宿主实际持有的
+            // 资产，越界在注入前拒绝。hostAssets 为 null 时跳过（探针/旧调用点）。
+            CheckHostAssetBounds(dto, hostAssets, ctx);
             CheckBlackboardSymmetry(ctx);
             result.Sanitized = sanitized;
             return result;
+        }
+
+        // ========= hostAssets 边界终检（与服务端 P0-2 对齐，error 级） =========
+
+        private static void CheckHostAssetBounds(AbilityConfigDto dto,
+            HostAssets host, WalkContext ctx)
+        {
+            if (host == null) return;
+            int spawnCount = host.canSpawnEntities?.Count ?? 0;
+            int bulletCount = host.bullets?.Count ?? 0;
+            var animationNames = new HashSet<string>(StringComparer.Ordinal);
+            if (host.animations != null)
+            {
+                CollectNames(host.animations.named, animationNames);
+                CollectNames(host.animations.groups, animationNames);
+            }
+            if (dto.rules == null) return;
+            foreach (AbilityRuleConfig rule in dto.rules)
+            {
+                WalkHostSteps(rule?.steps, spawnCount, bulletCount, animationNames, ctx);
+            }
+        }
+
+        private static void CollectNames(List<string> names, HashSet<string> into)
+        {
+            if (names == null) return;
+            foreach (string name in names)
+            {
+                if (!string.IsNullOrEmpty(name)) into.Add(name);
+            }
+        }
+
+        private static void WalkHostSteps(StepConfig[] steps, int spawnCount, int bulletCount,
+            HashSet<string> animationNames, WalkContext ctx)
+        {
+            if (steps == null) return;
+            foreach (StepConfig step in steps)
+            {
+                if (step == null) continue;
+                CheckStepHostBounds(step, spawnCount, bulletCount, animationNames, ctx);
+                WalkHostSteps(step.steps, spawnCount, bulletCount, animationNames, ctx);
+                WalkHostSteps(step.elseSteps, spawnCount, bulletCount, animationNames, ctx);
+            }
+        }
+
+        private static void CheckStepHostBounds(StepConfig step, int spawnCount, int bulletCount,
+            HashSet<string> animationNames, WalkContext ctx)
+        {
+            if (string.IsNullOrEmpty(step.op) || step.args?.entries == null) return;
+            // DTO 的 op 可能是别名（探针/手写配置），去下划线小写归一后比对。
+            string op = step.op.Replace("_", "").ToLowerInvariant();
+
+            if (op == "spawnentity" || op == "firebullets")
+            {
+                bool isSpawn = op == "spawnentity";
+                string param = isSpawn ? "spawnIndex" : "bulletDataIndex";
+                string label = isSpawn ? "spawn_entity.spawnIndex" : "fire_bullets.bulletDataIndex";
+                int count = isSpawn ? spawnCount : bulletCount;
+                ParamEntry entry = FindEntry(step.args, param);
+                if (entry == null || entry.fromBlackboard || string.IsNullOrEmpty(entry.value)) return;
+                if (int.TryParse(entry.value.Trim(), out int index) && (index < 0 || index >= count))
+                {
+                    ctx.Result.Add(true, label,
+                        $"{label}={index} out of range: hostAssets has {count} entries");
+                }
+            }
+            else if (op == "applyanimationoverride" && animationNames.Count > 0)
+            {
+                ParamEntry entry = FindEntry(step.args, "resources");
+                if (entry == null || entry.fromBlackboard || string.IsNullOrEmpty(entry.value)) return;
+                foreach (string token in entry.value.Split(','))
+                {
+                    string name = token.Trim();
+                    if (name.Length > 0 && !animationNames.Contains(name))
+                    {
+                        ctx.Result.Add(true, "apply_animation_override.resources",
+                            $"animation resource '{name}' is not in hostAssets.animations (named ∪ groups)");
+                    }
+                }
+            }
+        }
+
+        private static ParamEntry FindEntry(ParamList args, string key)
+        {
+            foreach (ParamEntry entry in args.entries)
+            {
+                if (entry != null && entry.key == key) return entry;
+            }
+            return null;
         }
 
         // ========= 内部遍历 =========

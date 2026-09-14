@@ -1,0 +1,150 @@
+{
+ "taskId": "t02_medic_attack_buff",
+ "title": "医疗攻击强化",
+ "notes": "覆盖：apply_buff+destroy_buff 配对 / OnAbilityBegin+OnAbilityEnd",
+ "request": {
+  "battleSnapshot": {
+   "selfId": "hibisc",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "hibisc",
+     "name": "hibisc",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 1000,
+     "maxHp": 1000,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 4
+     },
+     "attack": 350,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 5,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 6
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    },
+    {
+     "id": "m2",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 3
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster",
+     "massLevel": 1
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 5,
+   "subJob": 0,
+   "cost": 14,
+   "baseAttackTime": 1.2,
+   "damageType": 1,
+   "blockOccupation": 1,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "给我一个开技能时强化自己攻击（治疗量随之提升）、关技能时恢复原样的技能。"
+  }
+ },
+ "expected": {
+  "opsMustInclude": [
+   "apply_buff",
+   "destroy_buff"
+  ],
+  "opsMustExclude": [
+   "apply_damage",
+   "modify_cost"
+  ],
+  "triggerEventsMustInclude": [
+   "OnAbilityBegin"
+  ],
+  "magnitude": [
+   {
+    "path": "apply_buff.magnitudes",
+    "min": 0.2,
+    "max": 0.8
+   }
+  ],
+  "effectSummary": "技能期间自身攻击力提升 20%~80%，技能结束恢复"
+ }
+}

@@ -54,6 +54,80 @@ namespace AbilitySystem.Tests
         }
 
         [Test]
+        public void HostAssetBounds_OutOfRangeReferences_AreErrors()
+        {
+            // 与服务端 P0-2 同款边界（M2 终检）：越界引用在注入前拒绝。
+            AbilityConfigDto dto = ValidDto();
+            dto.rules[0].steps = new[]
+            {
+                new StepConfig
+                {
+                    op = "spawn_entity",
+                    args = new ParamList
+                    {
+                        entries = new[] { new ParamEntry { key = "spawnIndex", value = "3", type = ParamValueType.Int } },
+                    },
+                },
+            };
+            var host = new HostAssets
+            {
+                canSpawnEntities = new List<HostAssets.SpawnableEntry>
+                {
+                    new HostAssets.SpawnableEntry { id = "s-0" },
+                },
+            };
+            AbilityConfigValidator.Result result = AbilityConfigValidator.Validate(dto, host);
+            Assert.IsFalse(result.Ok);
+            Assert.IsTrue(result.Issues.Any(i => i.Message.Contains("spawnIndex=3 out of range")));
+
+            // 在界下标 → 通过
+            dto.rules[0].steps[0].args.entries[0].value = "0";
+            Assert.IsTrue(AbilityConfigValidator.Validate(dto, host).Ok);
+
+            // fire_bullets 越界 bulletDataIndex → error
+            dto.rules[0].steps[0].op = "fire_bullets";
+            dto.rules[0].steps[0].args.entries[0] =
+                new ParamEntry { key = "bulletDataIndex", value = "2", type = ParamValueType.Int };
+            host.bullets = new List<HostAssets.BulletEntry>
+            {
+                new HostAssets.BulletEntry { index = 0 },
+            };
+            result = AbilityConfigValidator.Validate(dto, host);
+            Assert.IsFalse(result.Ok);
+            Assert.IsTrue(result.Issues.Any(i => i.Message.Contains("bulletDataIndex=2 out of range")));
+
+            // apply_animation_override 引用清单外动画名 → error
+            dto.rules[0].steps[0].op = "apply_animation_override";
+            dto.rules[0].steps[0].args.entries = new[]
+            {
+                new ParamEntry { key = "slots", value = "AttackRemote", type = ParamValueType.String },
+                new ParamEntry { key = "resources", value = "attack_far,attack_cut", type = ParamValueType.String },
+            };
+            host.animations = new HostAssets.AnimationNames
+            {
+                named = new List<string> { "attack_far" },
+                groups = new List<string> { "attack_cut" },
+            };
+            host.bullets.Clear();
+            dto.rules[0].steps[0].op = "apply_animation_override";
+            Assert.IsTrue(AbilityConfigValidator.Validate(dto, host).Ok,
+                "两个动画名都在清单内，不应报错");
+
+            host.animations.named.Clear();
+            result = AbilityConfigValidator.Validate(dto, host);
+            Assert.IsFalse(result.Ok);
+            Assert.IsTrue(result.Issues.Any(i => i.Message.Contains("attack_far") && i.Message.Contains("hostAssets.animations")));
+
+            // fromBlackboard 的下标是黑板键名，运行时才解析 → 不做静态边界检查
+            dto.rules[0].steps[0].op = "spawn_entity";
+            dto.rules[0].steps[0].args.entries = new[]
+            {
+                new ParamEntry { key = "spawnIndex", value = "enemy_idx", type = ParamValueType.String, fromBlackboard = true },
+            };
+            Assert.IsTrue(AbilityConfigValidator.Validate(dto, host).Ok);
+        }
+
+        [Test]
         public void NullDto_IsError()
         {
             AbilityConfigValidator.Result result = AbilityConfigValidator.Validate(null);
@@ -206,7 +280,8 @@ namespace AbilitySystem.Tests
                     {
                         entries = new[]
                         {
-                            // 读 snapshot: 前缀的快照键（knownBlackboardKeys）不应告警。
+                            // snapshot: 前缀的快照键已随 knownBlackboardKeys 清空移除，
+                            // 现在同样是"读键无生产者"警告。
                             new ParamEntry { key = "subjectBlackboardKey", value = "snapshot:lowest_enemy_id", type = ParamValueType.String },
                         },
                     },
@@ -227,7 +302,7 @@ namespace AbilitySystem.Tests
             };
             AbilityConfigValidator.Result result = AbilityConfigValidator.Validate(dto);
             Assert.IsTrue(result.Ok, string.Join("\n", result.Issues.Select(i => i.ToString())));
-            Assert.IsFalse(result.Issues.Any(i => i.Message.Contains("snapshot:lowest_enemy_id")));
+            Assert.IsTrue(result.Issues.Any(i => i.Message.Contains("snapshot:lowest_enemy_id")));
             Assert.IsTrue(result.Issues.Any(i => i.Message.Contains("ghost_key")));
         }
 

@@ -1,0 +1,143 @@
+{
+ "taskId": "t06_thorns_reflect",
+ "title": "荆棘反伤",
+ "notes": "覆盖：write_blackboard source=event / OnAfterTakeDamage 事件上下文",
+ "request": {
+  "battleSnapshot": {
+   "selfId": "thorn",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "thorn",
+     "name": "thorn",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 2600,
+     "maxHp": 2600,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 4
+     },
+     "attack": 220,
+     "defence": 350,
+     "magicRes": 10,
+     "job": 2,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    },
+    {
+     "id": "m2",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 6
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster",
+     "massLevel": 1
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 2,
+   "subJob": 0,
+   "cost": 16,
+   "baseAttackTime": 1.2,
+   "damageType": 0,
+   "blockOccupation": 3,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "被打的时候把受到的伤害的一部分反弹给攻击者。"
+  }
+ },
+ "expected": {
+  "opsMustInclude": [
+   "write_blackboard",
+   "apply_damage"
+  ],
+  "opsMustExclude": [
+   "modify_cost",
+   "spawn_entity"
+  ],
+  "triggerEventsMustInclude": [
+   "OnAfterTakeDamage"
+  ],
+  "effectSummary": "受到伤害时按所受伤害的一部分反弹给攻击来源"
+ }
+}

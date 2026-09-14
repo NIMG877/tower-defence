@@ -1,0 +1,143 @@
+{
+ "taskId": "t10_animation_costume_swap",
+ "title": "换装演出",
+ "notes": "覆盖：apply_animation_override+remove_animation_override / animations 清单",
+ "request": {
+  "battleSnapshot": {
+   "selfId": "duelist",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "duelist",
+     "name": "duelist",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 1500,
+     "maxHp": 1500,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 4
+     },
+     "attack": 560,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 1,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 4
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    },
+    {
+     "id": "m2",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 6
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 1,
+   "subJob": 0,
+   "cost": 17,
+   "baseAttackTime": 1.2,
+   "damageType": 0,
+   "blockOccupation": 2,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2_Fire"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose",
+     "Charge"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "开技能时把我的攻击动画换成 Skill2_Fire 的演出，关技能后恢复原样。"
+  }
+ },
+ "expected": {
+  "opsMustInclude": [
+   "apply_animation_override"
+  ],
+  "opsMustExclude": [
+   "apply_damage",
+   "modify_cost"
+  ],
+  "triggerEventsMustInclude": [
+   "OnAbilityBegin"
+  ],
+  "effectSummary": "技能期间攻击动画换为 Skill2_Fire，结束还原"
+ }
+}

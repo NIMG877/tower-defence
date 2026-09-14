@@ -1,0 +1,376 @@
+{
+ "envelope": {
+  "protocolVersion": 1,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "aura",
+   "camp": 1,
+   "selfHpRate": 1.0,
+   "selfPos": {
+    "x": 4,
+    "y": 4
+   },
+   "skill": null,
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime"
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 5
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime"
+    },
+    {
+     "id": "m3",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 7
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster"
+    }
+   ]
+  },
+  "hostAssets": {
+   "canSpawnEntityIds": [],
+   "bulletCount": 0,
+   "iconKeys": []
+  },
+  "constraints": {
+   "request": "以我为中心持续灼烧周围一圈敌人，伤害低但稳定。"
+  }
+ },
+ "taskId": "t13_tick_damage_aura",
+ "contract": "v1",
+ "wallSeconds": 0.01,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "aura_s1",
+   "abilityName": "灼焰环绕",
+   "description": "以自身为中心，持续灼烧周围1.5格内的敌人：每秒对所有圈内敌人造成40点魔法伤害。伤害虽低但稳定持续，接近的敌人将自动被纳入灼烧范围。",
+   "iconKey": null,
+   "sp": {
+    "totalSp": 0,
+    "initialSp": 0,
+    "chargeNum": 1,
+    "abilityAmount": 0.0,
+    "recoverMode": "Natural",
+    "consumeMode": "NoConsume",
+    "openMode": "Auto",
+    "recoverForbidDuringAbility": false,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnTick",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "select_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "subjectMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "selectionMode",
+          "value": "ring",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "minRadius",
+          "value": "0",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "radius",
+          "value": "1.5",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "campRelation",
+          "value": "opposing",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "excludeSubjects",
+          "value": "True",
+          "type": "bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputEntitiesKey",
+          "value": "aura_burn_targets",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "apply_damage",
+       "args": {
+        "entries": [
+         {
+          "key": "targetMode",
+          "value": "blackboard",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "blackboardKey",
+          "value": "aura_burn_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "attackerMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "baseValueMode",
+          "value": "fixed",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "baseValue",
+          "value": "40",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "multiplier",
+          "value": "1",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "damageType",
+          "value": "1",
+          "type": "int",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "delay",
+       "args": {
+        "entries": [
+         {
+          "key": "seconds",
+          "value": "1",
+          "type": "float",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [],
+   "attempts": 1,
+   "phases": [
+    {
+     "phase": "analyze",
+     "detail": "start",
+     "t": 0.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool compute_cross_items round 1",
+     "t": 16.31
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool list_components round 1",
+     "t": 16.31
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 24.35
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 24.35
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 24.35
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_contract_doc round 2",
+     "t": 24.35
+    },
+    {
+     "phase": "describe",
+     "detail": "start",
+     "t": 55.73
+    },
+    {
+     "phase": "describe",
+     "detail": "plannedOps=['select_targets', 'apply_damage', 'delay']",
+     "t": 109.2
+    },
+    {
+     "phase": "retrieve",
+     "detail": "top: ebnhlz_t2(0.667), lavabubble_t1(0.333), ardign_s1(0.25)",
+     "t": 109.2
+    },
+    {
+     "phase": "generate",
+     "detail": "attempt 1",
+     "t": 109.2
+    },
+    {
+     "phase": "validate",
+     "detail": "ok",
+     "t": 138.25
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 138.25
+    }
+   ],
+   "analysis": "## 战局分析结论\n\n**一、敌我态势**\n- 自身：aura（camp 1），位于 (4,4) 高台格，满血（hpRate 1.0），场上有可用高台 (4,4)/(4,5)/(5,4)，其中 (5,4) 已被敌占。\n- 敌方共 3 个（camp 2），无友军：\n  - m1 史莱姆：距自身 1.0，HP 550，攻 120/防 30/魔抗 0\n  - m2 史莱姆：距自身 1.41，HP 550，攻 120/防 30/魔抗 0\n  - m3 术师：距自身 4.24，HP 800，攻 250/防 20/魔抗 50（远程威胁，但远离灼烧圈）\n- 半径 1.5 内敌人 = m1、m2 共 2 个；m3 在圈外。\n\n**二、可利用的机制机会**\n- 需求\"以我为中心持续灼烧周围一圈\"与 `select_targets`（selectionMode=ring，minRadius=0、radius≈1.5，excludeSubjects=true 排除自身）完全匹配，输出到黑板实体列表。\n- 持续伤害用 **OnTick 规则**驱动：每轮 `select_targets` → `apply_damage`（targetMode=blackboard），步内以 `delay`（约 1s）让序列让出，实现\"低但稳定\"的周期跳伤。\n- 伤害类型建议 **魔法（damageType=1）**：圈内两只史莱姆魔抗为 0，不会被 30 点防御减免；术师魔抗 50 但不在圈内，无需考虑。\n- 伤害基数用 `baseValueMode=fixed`（低固定值，如每跳 30~50），attackerMode=self，不依赖攻击力波动，符合\"稳定\"要求。\n- 可选扩展：用 `apply_abnormal_state`（mode=aura，type 4 halt）同步圈内敌人减速，形成\"灼烧+粘滞\"圈，但需 blackboardKey/outputTarget/outputState 三键齐全。\n\n**三、本次生成的约束**\n- hostAssets 为空：canSpawnEntityIds 空、bulletCount=0、iconKeys 空 → **不可召唤、不可发弹幕、不可挂动画/图标**，技能只能是纯数值/状态效果。\n- tick 循环需注意：Reentry 建议 IgnoreWhileRunning（或 Restart+delay），防止每物理帧重复触发导致跳伤过频；无界循环内必须含让出型步骤（delay）。\n- 术师 m3 攻击 250，超出灼烧圈射程外，本技能对其无覆盖；若它接近（进入 ring 半径）会被自动纳入 select_targets 结果，无需额外逻辑。\n- 自身满血且为高台位，无需自保逻辑；禁止把伤害打到友军（campRelation=opposing 已保证）。",
+   "design": {
+    "abilityName": "灼焰环绕",
+    "description": "以自身为中心，持续灼烧周围1.5格内的敌人：每秒对所有圈内敌人造成40点魔法伤害。伤害虽低但稳定持续，接近的敌人将自动被纳入灼烧范围。",
+    "designNotes": "机制要点：\n【触发】OnTick 每物理帧派发，reentry=IgnoreWhileRunning——序列在 delay 让出期间忽略重复请求，序列完成后由下一次 OnTick 重新启动，形成约1秒一跳的稳定节拍（steps 为 select_targets → apply_damage → delay(1.0)，单遍跑完后靠 tick 重触发循环）。\n【步骤1 select_targets】subjectMode=self（当前活跃实体自身(4,4)），selectionMode=ring，minRadius=0（默认，跳过内切割，含贴身敌），radius=1.5，campRelation=opposing，excludeSubjects=True（排除自身），outputEntitiesKey=aura_burn_targets；覆盖 m1(距1.0)、m2(距1.41)，m3(距4.24) 在圈外，接近后自动纳入，无需额外逻辑。\n【步骤2 apply_damage】targetMode=blackboard，blackboardKey=aura_burn_targets，attackerMode=self，baseValueMode=fixed，baseValue=40，multiplier=1，damageType=1（魔法：两只史莱姆魔抗0，绕开其30点物理防御；圈外术师魔抗50不受影响），每跳40×圈内敌人数；对550HP史莱姆约14秒烧穿，符合'伤害低但稳定'。\n【步骤3 delay】seconds=1.0，让出序列并作为跳伤间隔。\n【约束遵守】hostAssets 全空：不用召唤/子弹/动画/图标，纯数值效果；循环由 delay 让出 + IgnoreWhileRunning 限流，不会每帧重复跳伤；campRelation=opposing 保证不伤友军。",
+    "plannedOps": [
+     "select_targets",
+     "apply_damage",
+     "delay"
+    ]
+   },
+   "cached": true
+  }
+ }
+}

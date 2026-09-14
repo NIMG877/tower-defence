@@ -1,0 +1,168 @@
+{
+ "taskId": "t13_tick_damage_aura",
+ "title": "持续伤害光环",
+ "notes": "覆盖：OnTick / select_targets 半径 / apply_damage 小倍率",
+ "request": {
+  "battleSnapshot": {
+   "selfId": "aura",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "aura",
+     "name": "aura",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 1300,
+     "maxHp": 1300,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 4
+     },
+     "attack": 320,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 4,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 5
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m3",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 7
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster",
+     "massLevel": 1
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 4,
+   "subJob": 0,
+   "cost": 17,
+   "baseAttackTime": 1.2,
+   "damageType": 1,
+   "blockOccupation": 1,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "以我为中心持续灼烧周围一圈敌人，伤害低但稳定。"
+  }
+ },
+ "expected": {
+  "opsMustInclude": [
+   "apply_damage"
+  ],
+  "opsMustExclude": [
+   "modify_cost",
+   "spawn_entity"
+  ],
+  "triggerEventsMustInclude": [
+   "OnTick"
+  ],
+  "magnitude": [
+   {
+    "path": "apply_damage.multiplier",
+    "min": 0.05,
+    "max": 0.5
+   }
+  ],
+  "effectSummary": "每跳对周围敌人造成约 5%~50% 攻击力的持续伤害"
+ }
+}

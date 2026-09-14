@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using AbilitySystem;
 using Newtonsoft.Json;
 using UnityEditor;
@@ -61,8 +61,8 @@ public static class GeneratedSkillProbe
         Entity self = FindProbeHost();
         if (self == null) return;
         BattleSnapshotBuilder.BattleSnapshot snapshot = BattleSnapshotBuilder.Build(self);
-        Debug.Log($"[Probe] 战局快照（{snapshot.entities.Length} 个实体，地图 {snapshot.mapI}x{snapshot.mapJ}，" +
-                  $"自身血量比 {snapshot.selfHpRate}，交叉项由服务端 Agent 按需计算）：\n" +
+        Debug.Log($"[Probe] 战局快照（{snapshot.entities.Length} 个实体含自身，地图 {snapshot.mapI}x{snapshot.mapJ}，" +
+                  $"交叉项由服务端 Agent 按需计算）：\n" +
                   BattleSnapshotBuilder.ToJson(snapshot, indented: true));
     }
 
@@ -128,7 +128,7 @@ public static class GeneratedSkillProbe
         EditorApplication.update += PollTick;
     }
 
-    private const float PollTimeoutSeconds = 240f; // 真实 LLM 的 analyze+generate 可能要一两分钟
+    private const float PollTimeoutSeconds = 900f; // 服务端 v2 预算 660s 硬闸 + 轮询/握手余量，与 GenerateSkill 同步
 
     /// <summary>菜单④的在途轮询状态；_poll 非 null 即生成进行中（兼作重入闸）。</summary>
     private class ServerPoll
@@ -230,8 +230,9 @@ public static class GeneratedSkillProbe
             return;
         }
 
-        // 客户端终检（防 schema 版本漂移），再走与阶段一相同的注入路径。
-        AbilityConfigValidator.Result result = AbilityConfigValidator.Validate(response.ability);
+        // 客户端终检（防 schema 版本漂移 + hostAssets 边界），再走与阶段一相同的注入路径。
+        AbilityConfigValidator.Result result = AbilityConfigValidator.Validate(
+            response.ability, HostAssets.FromEntityData(self.EntityData));
         AgentJobStatus.LogValidatorIssues(result, "[Probe]");
         AgentJobStatus.LogServerIssues(response, "[Probe]");
         if (!result.Ok)

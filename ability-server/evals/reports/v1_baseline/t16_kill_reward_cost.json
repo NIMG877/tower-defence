@@ -1,0 +1,436 @@
+{
+ "envelope": {
+  "protocolVersion": 1,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "reaper",
+   "camp": 1,
+   "selfHpRate": 1.0,
+   "selfPos": {
+    "x": 4,
+    "y": 4
+   },
+   "skill": null,
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime"
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 5
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime"
+    },
+    {
+     "id": "m3",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 6
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier"
+    }
+   ]
+  },
+  "hostAssets": {
+   "canSpawnEntityIds": [],
+   "bulletCount": 0,
+   "iconKeys": []
+  },
+  "constraints": {
+   "request": "我每次亲手击杀敌人时，给我回一点部署费用。"
+  }
+ },
+ "taskId": "t16_kill_reward_cost",
+ "contract": "v1",
+ "wallSeconds": 0.01,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "reaper_t1",
+   "abilityName": "猎杀犒赏",
+   "description": "每次你亲手击杀一名敌人，立即返还 6 点部署费用。",
+   "iconKey": null,
+   "sp": {
+    "totalSp": 0,
+    "initialSp": 0,
+    "chargeNum": 1,
+    "abilityAmount": 0.0,
+    "recoverMode": "Natural",
+    "consumeMode": "NoConsume",
+    "openMode": "Auto",
+    "recoverForbidDuringAbility": false,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAfterAttack",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "select_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "subjectMode",
+          "value": "eventTarget",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "selectionMode",
+          "value": "radius",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "campRelation",
+          "value": "opposing",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "radius",
+          "value": "0.5",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "force",
+          "value": "True",
+          "type": "bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputEntitiesKey",
+          "value": "reaper_kill_list",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "filter_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "blackboardKey",
+          "value": "reaper_kill_list",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "fields",
+          "value": "CurrentHp",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "ops",
+          "value": "LessOrEqual",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "values",
+          "value": "0",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "groups",
+          "value": "0",
+          "type": "intArray",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "select_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "subjectMode",
+          "value": "blackboard",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "subjectBlackboardKey",
+          "value": "reaper_kill_list",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "selectionMode",
+          "value": "radius",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "campRelation",
+          "value": "same",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "radius",
+          "value": "0.1",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "force",
+          "value": "True",
+          "type": "bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputCountKey",
+          "value": "reaper_kill_count",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "branch",
+       "args": {
+        "entries": []
+       },
+       "condition": [
+        {
+         "units": [
+          {
+           "op": "GreaterOrEqual",
+           "leftKey": "reaper_kill_count",
+           "rightValue": "1",
+           "rightKey": ""
+          }
+         ]
+        }
+       ],
+       "steps": [
+        {
+         "op": "modify_cost",
+         "args": {
+          "entries": [
+           {
+            "key": "amount",
+            "value": "6",
+            "type": "int",
+            "fromBlackboard": false
+           }
+          ]
+         },
+         "condition": [],
+         "steps": [],
+         "elseSteps": []
+        }
+       ],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [],
+   "attempts": 1,
+   "phases": [
+    {
+     "phase": "analyze",
+     "detail": "start",
+     "t": 0.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool compute_cross_items round 1",
+     "t": 9.9
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool list_components round 1",
+     "t": 9.9
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_contract_doc round 1",
+     "t": 9.9
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 29.41
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 29.41
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 3",
+     "t": 46.51
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 3",
+     "t": 46.51
+    },
+    {
+     "phase": "describe",
+     "detail": "start",
+     "t": 165.47
+    },
+    {
+     "phase": "describe",
+     "detail": "plannedOps=['select_targets', 'filter_targets', 'modify_cost']",
+     "t": 206.25
+    },
+    {
+     "phase": "retrieve",
+     "detail": "top: fang_s1(0.333), charger(0.25), ebnhlz_t2(0.25)",
+     "t": 206.25
+    },
+    {
+     "phase": "generate",
+     "detail": "attempt 1",
+     "t": 206.25
+    },
+    {
+     "phase": "validate",
+     "detail": "ok",
+     "t": 280.64
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 280.64
+    }
+   ],
+   "analysis": "## 战局分析结论文本\n\n### 一、敌我态势\n- 我方仅宿主 `reaper`（camp=1）一个单位，位于 (4,4) 高台格，血量满（1.0）。场上无友军、无召唤物。\n- 敌方 3 个（camp=2）：史莱姆 m1 (5,4) 距离 1.0（贴脸）、史莱姆 m2 (6,5) 距离 2.24、士兵 m3 (7,6) 距离 3.61；三者均满血。\n- 威胁评估：m1 已在近身位（攻 120），m3 是高防单位（防 150、攻 200、1200 血）。敌方魔抗全为 0，法伤收益高；物理打 m3 需穿透。\n- 战斗节奏判断：m1 极可能最快被宿主打死，\"亲手击杀→回费\"的触发链马上就会被验证，规则要一次写对。\n\n### 二、需求拆解（\"每次亲手击杀敌人时回一点部署费用\"）\n- \"亲手击杀\"的语义 = 宿主自己的攻击结算造成致命一击。最可靠的锚点是宿主自身的攻击成功事件（`OnAfterAttack`，属于 DamageEventBase 派生，`eventTarget` 可用）+ 事后校验目标已死；敌方直接死亡事件（如 OnBeforeDieAnimation）只派发给死亡实体本身，reaper 的能力收不到，不可依赖。\n- 需要一条\"击杀校验 + 回费\"规则，全部用同步即时步骤（发事件当场完成，避免计数重复/时序问题）：\n  1. `select_targets`：subjectMode=eventTarget、radius≈0.5、campRelation=opposing、force=true → 写入击杀校验列表（把本次攻击的事件目标装进黑板）。\n  2. `filter_targets`：fields=CurrentHp、ops=LessOrEqual、values=0 → 原地只留已死目标（击杀判定核心）。\n  3. 计数：再走一次 `select_targets`（subjectMode=blackboard、radius≈0.1、force=true）对过滤后列表取数，写 `outputCountKey` 为击杀数——因为 filter_targets 不输出计数，这是获取\"死了几个\"的可行通道；`force=true` 规避死亡实体可能不可选取的问题（关键风险点，需实测；兜底方案是改用 `MonsterStatus` 字段过滤，但需确认死亡状态枚举值）。\n  4. `branch`（击杀数 ≥ 1）→ `modify_cost` 回费。\n- 回费金额（可选增强）：`modify_cost.amount` 支持 fromBlackboard，可用 `write_blackboard` 先 set 单杀回费值、再按击杀数 mult，实现\"杀几个回几份\"；若 AoE 单杀场景为主，直接写死固定值即可。\n\n### 三、数值/平衡建议\n- \"回一点\"= 小额回费：单杀建议 +6~8 点量级，避免与击杀频率叠加过强；具体随宿主攻速/伤害档位微调。\n- reentry 用 `IgnoreWhileRunning` 即可：整条链全即时步骤，触发当帧同步完成，天然不会重复触发或残留运行状态。\n\n### 四、本次生成技能的硬约束\n- hostAssets 全空：`canSpawnEntityIds=[]`、`bulletCount=0`、无 iconKeys → 禁用 spawn_entity、fire_bullets、select_landing_points 等所有依赖宿主资源的表现组件；apply_animation_override 无 slots/resources 也不会生效。\n- 因此本技能只能是纯逻辑规则（事件→校验→modify_cost），**无任何视觉/弹道/召唤反馈**，不要引用任何宿主资产。\n- 事件可用性：`OnAfterAttack` 为 DamageEventBase 派生，eventTarget/subjectMode=eventTarget 合法；`apply_damage` 在本需求中不需要（伤害由普攻本身产生，规则只做死亡判定与回费，禁止反向加伤害造成语义混淆）。\n- 严禁自我触发循环：不要在 OnAfterTakeDamage 等链路上挂 modify_cost，只挂宿主自己的攻击成功事件；直接伤害类技能不会派发攻击成功事件，天然不会被误计为\"亲手击杀\"。\n\n### 五、结论\n可行且结构简单：一条单规则技能（OnAfterAttack → 死亡校验四步链 → branch → modify_cost），唯一需实测确认的风险点是\"死亡实体在 select_targets 中是否可被 force 选取\"，兜底为 MonsterStatus 过滤。其余全部满足宿主约束。",
+   "design": {
+    "abilityName": "猎杀犒赏",
+    "description": "每次你亲手击杀一名敌人，立即返还 6 点部署费用。",
+    "designNotes": "触发事件：宿主自身 OnAfterAttack（DamageEventBase 派生，eventTarget 可用，仅普攻击杀计入，直接伤害不派发该事件故不会误计）。步骤序列（全同步即时链，reentry=IgnoreWhileRunning）：1) select_targets subjectMode=eventTarget/selectionMode=radius/radius=0.5/campRelation=opposing/force=true/outputEntitiesKey=reaper_kill_list——把本次攻击的事件目标装进黑板；2) filter_targets blackboardKey=reaper_kill_list/fields=CurrentHp/ops=LessOrEqual/values=0/groups=0——原地只留已死目标（亲手击杀判定核心）；3) select_targets subjectMode=blackboard/subjectBlackboardKey=reaper_kill_list/selectionMode=radius/radius=0.1/campRelation=same/force=true/outputCountKey=reaper_kill_count——因 filter_targets 不输出计数，用二次半径选取对过滤列表计数（force=true 规避死亡实体不可选取问题，需实测，兜底为 MonsterStatus 字段过滤）；4) branch condition=reaper_kill_count>=1 的 steps 内执行 modify_cost amount=6。数值依据：小额回费取建议区间 6~8 的下限，防止高频击杀下部署经济膨胀；单次攻击杀多敌时 eventTarget 单锚点按一份计，当前宿主无 AoE 资产（bulletCount=0、无召唤），可接受。宿主资产约束：无子弹/召唤/动画资源，技能为纯逻辑规则，无任何表现反馈。",
+    "plannedOps": [
+     "select_targets",
+     "filter_targets",
+     "modify_cost"
+    ]
+   },
+   "cached": true
+  }
+ }
+}

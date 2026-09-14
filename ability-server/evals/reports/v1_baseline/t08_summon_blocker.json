@@ -1,0 +1,336 @@
+{
+ "envelope": {
+  "protocolVersion": 1,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "summoner",
+   "camp": 1,
+   "selfHpRate": 1.0,
+   "selfPos": {
+    "x": 4,
+    "y": 4
+   },
+   "skill": null,
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime"
+    },
+    {
+     "id": "m2",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier"
+    }
+   ]
+  },
+  "hostAssets": {
+   "canSpawnEntityIds": [
+    "summon_blocker"
+   ],
+   "bulletCount": 0,
+   "iconKeys": []
+  },
+  "constraints": {
+   "request": "在我身边召唤一个能挡路的召唤物（用我注册的召唤物），召唤物阵亡时我要能感知到。"
+  }
+ },
+ "taskId": "t08_summon_blocker",
+ "contract": "v1",
+ "wallSeconds": 0.03,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "summoner_s1",
+   "abilityName": "石卫护道",
+   "description": "施放时在我东侧邻格 (5,5)（地面格）召唤一名石卫（summon_blocker，我方阵营），拦在敌军来路上。石卫阵亡时，宿主会收到阵亡事件，并将石卫阵亡计数 +1 记录在自身黑板 summon_death_count 中，供后续反应技能读取。",
+   "iconKey": null,
+   "sp": {
+    "totalSp": 30,
+    "initialSp": 15,
+    "chargeNum": 1,
+    "abilityAmount": 0.0,
+    "recoverMode": "Natural",
+    "consumeMode": "Natural",
+    "openMode": "Manual",
+    "recoverForbidDuringAbility": false,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "spawn_entity",
+       "args": {
+        "entries": [
+         {
+          "key": "spawnIndex",
+          "value": "0",
+          "type": "int",
+          "fromBlackboard": false
+         },
+         {
+          "key": "positionMode",
+          "value": "fixed",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "position",
+          "value": "5,5",
+          "type": "vector2int",
+          "fromBlackboard": false
+         },
+         {
+          "key": "placement",
+          "value": "auto",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "appendToListKey",
+          "value": "summon_roster",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "watch_summon_death",
+       "args": {
+        "entries": [
+         {
+          "key": "blackboardKey",
+          "value": "summon_roster",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    },
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnSummonDeath",
+       "groups": []
+      }
+     ],
+     "reentry": "Parallel",
+     "detached": false,
+     "steps": [
+      {
+       "op": "write_blackboard",
+       "args": {
+        "entries": [
+         {
+          "key": "key",
+          "value": "summon_death_count",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "method",
+          "value": "add",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "value",
+          "value": "1",
+          "type": "Int",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [],
+   "attempts": 1,
+   "phases": [
+    {
+     "phase": "analyze",
+     "detail": "start",
+     "t": 0.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool compute_cross_items round 1",
+     "t": 15.59
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool list_components round 1",
+     "t": 15.59
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 22.19
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 22.19
+    },
+    {
+     "phase": "describe",
+     "detail": "start",
+     "t": 65.43
+    },
+    {
+     "phase": "describe",
+     "detail": "tool read_component_doc (attempt 1)",
+     "t": 83.55
+    },
+    {
+     "phase": "describe",
+     "detail": "tool read_contract_doc (attempt 1)",
+     "t": 83.56
+    },
+    {
+     "phase": "describe",
+     "detail": "plannedOps=['spawn_entity', 'watch_summon_death', 'write_blackboard']",
+     "t": 128.26
+    },
+    {
+     "phase": "retrieve",
+     "detail": "top: slime_t1(0.333), eyjafjalla_t1(0.273), ardign_s1(0.25)",
+     "t": 128.26
+    },
+    {
+     "phase": "generate",
+     "detail": "attempt 1",
+     "t": 128.26
+    },
+    {
+     "phase": "validate",
+     "detail": "ok",
+     "t": 167.58
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 167.58
+    }
+   ],
+   "analysis": "## 战局分析\n\n### 一、敌我态势\n- **自身**：召唤师（camp 1），位于 (4,4)（高台格），满血。\n- **友军**：0 个，目前完全孤立。\n- **敌人**：2 个，均从东侧逼近：\n  - **m1 史莱姆**：(6,4)，距我 **2.0**，550 HP，攻 120 / 防 30 / 法抗 0——已进入 2 格半径，是迫近威胁，血量也最低。\n  - **m2 士兵**：(7,5)，距我 **3.16**，1200 HP，攻 200 / 防 150——高攻肉盾型，紧随其后。\n- 敌人沿东侧走廊直线向我推进，(5,4)、(4,5)（高台邻格）与 (5,5)（地面邻格）是天然卡位点；其中 **(5,4) 正卡在我与史莱姆的连线上**，是首选拦截位。\n\n### 二、可利用的机制机会\n- **宿主召唤注册表**：`canSpawnEntityIds = [\"summon_blocker\"]`，恰好是一个挡路型召唤物；`spawn_entity` 的 `spawnIndex=0` 即可取用，camp 默认解析为宿主阵营（1），无需额外配置。\n- **\"感知阵亡\"有现成协议链**：\n  1. `spawn_entity` 用 `appendToListKey`（如 `summon_roster`）把召唤物登记进黑板列表（get-or-create）；\n  2. `watch_summon_death` 配同一 `blackboardKey` 订阅花名册——差量同步，OnTick 自动补订，后续再召唤也会被自动纳入监听；\n  3. 被监听单位死亡时，事件以 `SummonDeathEvent`（触发器 `OnSummonDeath`）重派发到**宿主**的 runner 上，宿主即可\"感知\"。\n- **事件安全要点**：`SummonDeathEvent.target` 在延迟步骤中不可信（可能已被回收），`position` 是派发时快照，是延迟步骤唯一安全的位置来源；若要做\"阵亡复仇\"类后续规则，消费规则建议 `reentry: Parallel` 以支持多召唤物同时死亡。\n- **宿主透传**：spawn 会自动把宿主写进召唤物黑板的 `summoner@spawn_entity` 键，未来若需\"召唤物反伤归因于我\"可直接复用。\n\n### 三、本次生成的约束\n- **召唤来源锁定**：只能通过 `spawnIndex` 引用注册表，不可凭空指定实体 id；本次只用第 0 项 `summon_blocker`。\n- **站位方式**：建议 `positionMode=fixed`（如 position=(5,4)）或 `self`+offset，落到与敌人接敌的邻格实现拦截；不要落在我所在格。\n- **无弹幕/图标资产**：`bulletCount=0`、`iconKeys=[]`，方案不得引用子弹或图标资源。\n- **监听依赖列表**：`watch_summon_death` 只认黑板 `List<Entity>`，必须与 spawn 的 `appendToListKey` 同键配对，否则订阅落空。\n- **威胁评估**：士兵攻 200，召唤物需按承伤单位预期（m2 紧随 m1 之后会持续输出）；史莱姆防/法抗均为 0，若后续做阵亡反制伤害，物理/法术均有效。\n- **建议规则结构**：规则 A（触发时）：`spawn_entity`（登记花名册）→ `watch_summon_death` 开启监听；规则 B（`OnSummonDeath` 触发）：宿主侧的感知/反制响应。",
+   "design": {
+    "abilityName": "石卫护道",
+    "description": "施放时在我东侧邻格 (5,5)（地面格）召唤一名石卫（summon_blocker，我方阵营），拦在敌军来路上。石卫阵亡时，宿主会收到阵亡事件，并将石卫阵亡计数 +1 记录在自身黑板 summon_death_count 中，供后续反应技能读取。",
+    "designNotes": "规则A：触发 OnAbilityBegin（技能激活即召唤），reentry=IgnoreWhileRunning。步骤：1) spawn_entity：spawnIndex=0（宿主 CanSpawnEntityIds[0]=summon_blocker），positionMode=fixed，position=(5,5)，placement=auto（由池数据决定可移动挡路形态），camp 留默认 -1（解析为宿主 camp 1），appendToListKey=summon_roster 维护召唤花名册；2) watch_summon_death：blackboardKey=summon_roster，开启差量监听（OnTick 自动补订后续召唤物）。站位依据：(5,5) 是可部署地面格、邻接自身 (4,4)，正对东侧走廊上 m2(7,5)→m1(6,4) 的来向，可实现地面阻挡。规则B：触发 OnSummonDeath（watch_summon_death 把花名册内单位死亡桥接到宿主 runner），reentry=Parallel（支持多召唤物同时死亡各跑各序列）；步骤：write_blackboard key=summon_death_count method=add value=1（type Int）。约束说明：不读 SummonDeathEvent.target/position 做黑板写入（write_blackboard source=event 的路径白名单不含该事件字段）；本技能不引用子弹/图标（bulletCount=0、iconKeys=[]）；'感知'以 OnSummonDeath 派发 + summon_death_count 计数落地为验收点，宿主可在此基础上扩展复仇规则。",
+    "plannedOps": [
+     "spawn_entity",
+     "watch_summon_death",
+     "write_blackboard"
+    ]
+   },
+   "cached": true
+  }
+ }
+}

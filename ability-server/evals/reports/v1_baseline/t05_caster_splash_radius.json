@@ -1,0 +1,360 @@
+{
+ "envelope": {
+  "protocolVersion": 1,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "catap",
+   "camp": 1,
+   "selfHpRate": 1.0,
+   "selfPos": {
+    "x": 5,
+    "y": 2
+   },
+   "skill": null,
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 3
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime"
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime"
+    },
+    {
+     "id": "m3",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier"
+    }
+   ]
+  },
+  "hostAssets": {
+   "canSpawnEntityIds": [],
+   "bulletCount": 0,
+   "iconKeys": []
+  },
+  "constraints": {
+   "request": "让我的攻击溅射范围扩大一倍，方便清群。"
+  }
+ },
+ "taskId": "t05_caster_splash_radius",
+ "contract": "v1",
+ "wallSeconds": 0.04,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "catap_s1",
+   "abilityName": "重炮散射",
+   "description": "开启技能后，攻击范围扩大为原来的两倍，且每次攻击最多同时命中的目标数翻倍，持续到技能结束，便于快速清理成群敌人。",
+   "iconKey": null,
+   "sp": {
+    "totalSp": 35,
+    "initialSp": 10,
+    "chargeNum": 1,
+    "abilityAmount": 25.0,
+    "recoverMode": "Natural",
+    "consumeMode": "Natural",
+    "openMode": "Manual",
+    "recoverForbidDuringAbility": true,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "attack_range_override",
+       "args": {
+        "entries": [
+         {
+          "key": "toSelf",
+          "value": "True",
+          "type": "bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "range",
+          "value": "[[0,0],[0,1],[0,2],[0,3],[0,4]]",
+          "type": "vector2intArray",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    },
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnBeforeTargetSelect",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "attack_target_count_modifier",
+       "args": {
+        "entries": [
+         {
+          "key": "fields",
+          "value": "selectmaxnum",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "methods",
+          "value": "mult",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "values",
+          "value": "2",
+          "type": "floatArray",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    },
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityEnd",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "attack_range_restore",
+       "args": {
+        "entries": []
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [
+    {
+     "severity": "warning",
+     "path": "abilityId",
+     "message": "'catap_s1' already exists in the skill corpus; use a distinct id unless overriding intentionally"
+    }
+   ],
+   "attempts": 1,
+   "phases": [
+    {
+     "phase": "analyze",
+     "detail": "start",
+     "t": 0.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool compute_cross_items round 1",
+     "t": 17.96
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool list_components round 1",
+     "t": 17.96
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 30.19
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 30.19
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 30.2
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_contract_doc round 2",
+     "t": 30.2
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 3",
+     "t": 115.74
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 3",
+     "t": 115.75
+    },
+    {
+     "phase": "describe",
+     "detail": "start",
+     "t": 159.61
+    },
+    {
+     "phase": "describe",
+     "detail": "tool read_component_doc (attempt 1)",
+     "t": 252.4
+    },
+    {
+     "phase": "describe",
+     "detail": "plannedOps=['attack_range_override', 'attack_target_count_modifier', 'attack_range_restore']",
+     "t": 270.84
+    },
+    {
+     "phase": "retrieve",
+     "detail": "top: ansel_s1(0.333), ansel_t1(0.25), centurion(0.25)",
+     "t": 270.85
+    },
+    {
+     "phase": "generate",
+     "detail": "attempt 1",
+     "t": 270.85
+    },
+    {
+     "phase": "validate",
+     "detail": "ok",
+     "t": 330.82
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 330.82
+    }
+   ],
+   "analysis": "## 战局分析结论\n\n**一、敌我态势**\n- 敌方共 3 个，我方 0 友军（孤军），自身满血（HP 100%），位置 (5,2)。\n- m1 史莱姆 (6,3)：550 HP / 防 30 / 攻 120，距我约 1.41，是最近敌人，且与 m2 上下相邻。\n- m2 史莱姆 (6,4)：550 HP / 防 30 / 攻 120，在半径 3 内（半径 2 内仅 m1）。\n- m3 士兵 (7,5)：1200 HP / 防 150 / 攻 200，距离更远，高防单体，威胁最大但非清群目标。\n- 两只史莱姆相邻聚团 → 溅射/多目标攻击的性价比极高；总敌血量 2250。\n\n**二、可利用机制机会（对应\"溅射范围扩大一倍\"）**\n- **命中数翻倍**：`attack_target_count_modifier`（仅 OnBeforeTargetSelect 生效）对 `selectmaxnum` 做 `mult=2`，让单次攻击溅射命中的目标数直接翻倍，最贴合\"清群\"诉求。\n- **攻击范围翻倍**：`attack_range_override` + `attack_range_restore` 成对使用（OnAbilityBegin 覆盖 / OnAbilityEnd 恢复），扩大索敌半径，让更多敌人进入溅射候选池。\n- 注意：range 覆盖的是 EntityVision.Range 计算值，宿主若发生朝向变更（SetOrientation）会重算并丢弃覆盖，需要重新应用；`attack_target_count_modifier` 在其他事件上会告警跳过，规则必须挂在 OnBeforeTargetSelect。\n- 敌方均为魔抗 0、双史莱姆低防：物理溅射即可有效清群，m3 高防留给单体处理，不必在本技能中特化。\n\n**三、本次生成技能的约束**\n- hostAssets 完全受限：canSpawnEntityIds 空（不能召唤）、bulletCount=0（不能 fire_bullets / 子弹类表现）、iconKeys 空（无图标资源）。\n- apply_animation_override 无资源可用，跳过动画表现。\n- 结论：本技能只能是**纯行为/数值修改型**——OnAbilityBegin 范围覆盖 → OnAbilityEnd 恢复 + OnBeforeTargetSelect 命中数×2，无实体、无子弹、无新动画。\n- 技能当前 skill=null，无已装备技能冲突；自身为 camp=1 独立作战，建议范围类 buff 挂自身、无 aura 同步需求。",
+   "design": {
+    "abilityName": "重炮散射",
+    "description": "开启技能后，攻击范围扩大为原来的两倍，且每次攻击最多同时命中的目标数翻倍，持续到技能结束，便于快速清理成群敌人。",
+    "designNotes": "机制要点：1) 触发事件与步骤序列——规则一 OnAbilityBegin：attack_range_override（toSelf=true，range=[[0,0],[0,1],[0,2],[0,3],[0,4]]，约2格半公称射程的2倍覆盖，替换 EntityVision.Range 计算值）；规则二 OnBeforeTargetSelect（reentry=IgnoreWhileRunning）：attack_target_count_modifier，fields=selectmaxnum，methods=mult，values=2，仅此事件合法，把本次攻击的溅射命中上限翻倍；规则三 OnAbilityEnd：attack_range_restore 把 BaseRange 写回 Range 完成恢复。2) 目标选择——不自选目标，全部通过修改原生攻击管线（范围→候选池→命中数）实现，随原生索敌生效。3) 数值依据——快照中 m1/m2 相邻聚团（半径3内2敌），翻倍命中数可直接双杀史莱姆；敌魔抗0、双史莱姆低防，物理溅射性价比最高，m3 高防单体留给普攻单体削血。4) 风险与约束——hostAssets 无子弹/召唤/动画资源，故纯行为覆盖；朝向变更（SetOrientation）会丢弃 range 覆盖，OnAbilityEnd 恢复兜底，若战斗中转向需后续版本加 OnTick 重应用；attack_target_count_modifier 的 mult 按 int 截断，2 为安全值。",
+    "plannedOps": [
+     "attack_range_override",
+     "attack_target_count_modifier",
+     "attack_range_restore"
+    ]
+   },
+   "cached": true
+  }
+ }
+}

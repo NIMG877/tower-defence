@@ -1,0 +1,14 @@
+{
+ "run": "v1_timeout_rerun",
+ "tasks": 1,
+ "submitOkRate": 1.0,
+ "replayGreenRate": 1.0,
+ "perTask": [
+  {
+   "taskId": "t09_mortar_barrage",
+   "submitted": true,
+   "replayGreen": true,
+   "replayErrors": 0
+  }
+ ]
+}

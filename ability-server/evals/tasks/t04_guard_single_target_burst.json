@@ -1,0 +1,168 @@
+{
+ "taskId": "t04_guard_single_target_burst",
+ "title": "近卫单体爆发",
+ "notes": "覆盖：apply_damage 高倍率 / select_targets 可选",
+ "request": {
+  "battleSnapshot": {
+   "selfId": "guard",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "guard",
+     "name": "guard",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 1600,
+     "maxHp": 1600,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 3
+     },
+     "attack": 620,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 1,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 3
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 5
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m3",
+     "name": "重甲领主",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 4500,
+     "maxHp": 4500,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 7
+     },
+     "attack": 500,
+     "defence": 400,
+     "magicRes": 30,
+     "job": -1,
+     "label": "boss",
+     "massLevel": 5
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 1,
+   "subJob": 0,
+   "cost": 20,
+   "baseAttackTime": 1.2,
+   "damageType": 0,
+   "blockOccupation": 2,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "给一个主动技：开技能时对眼前最近的敌人打出一发高倍率物理伤害。"
+  }
+ },
+ "expected": {
+  "opsMustInclude": [
+   "apply_damage"
+  ],
+  "opsMustExclude": [
+   "modify_cost",
+   "spawn_entity"
+  ],
+  "triggerEventsMustInclude": [
+   "OnAbilityBegin"
+  ],
+  "magnitude": [
+   {
+    "path": "apply_damage.multiplier",
+    "min": 1.5,
+    "max": 3.5
+   }
+  ],
+  "effectSummary": "开启技能对最近敌人造成约 1.5~3.5 倍攻击力的物理伤害"
+ }
+}

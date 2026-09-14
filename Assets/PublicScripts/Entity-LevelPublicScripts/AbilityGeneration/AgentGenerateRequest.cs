@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using AbilitySystem;
 
 /// <summary>
@@ -6,6 +5,14 @@ using AbilitySystem;
 /// protocolVersion + opList + battleSnapshot + hostAssets + constraints。
 /// Editor 探针（菜单④）与运行时 GenerateSkill 组件共用——契约字段只改这里，
 /// 避免两份手抄漂移。返回匿名对象，由调用方自行序列化。
+/// 契约 v2：快照 self 拍平进 entities；hostAssets 携带技能原型的第一决定因素
+/// （job/subJob/攻击节奏/物法方向等决策字段）与资产清单投影（不传引用）——
+/// bullets/canSpawnEntities 按下标登记（spawnIndex/bulletDataIndex 的合法域），
+/// animations 是 apply_animation_override.resources 的合法域。skills/talents
+/// 默认不传（宿主现有技能/天赋上下文按需开启）。不产出 iconKey（统一图标，
+/// 技能卡走 AbilityIconPool null 兜底）。
+/// hostAssets 的形状与构建器在 AbilitySystem.HostAssets（GameData 程序集）——
+/// 客户端终检（AbilityConfigValidator 边界校验）与请求构建共享同一投影。
 /// </summary>
 public static class AgentGenerateRequest
 {
@@ -16,14 +23,7 @@ public static class AgentGenerateRequest
             protocolVersion = AbilityOpsSchema.Load().protocolVersion,
             opList = AbilityStepOpRegistry.RegisteredOps,
             battleSnapshot = BattleSnapshotBuilder.Build(self),
-            hostAssets = new
-            {
-                canSpawnEntityIds = self.EntityData.CanSpawnEntityIds != null
-                    ? self.EntityData.CanSpawnEntityIds.ConvertAll(id => id.ToString())
-                    : new List<string>(),
-                bulletCount = self.EntityData.Bullets?.Count ?? 0,
-                iconKeys = AbilityIconPool.GetAllKeys(),
-            },
+            hostAssets = HostAssets.FromEntityData(self.EntityData),
             constraints = constraints,
         };
     }

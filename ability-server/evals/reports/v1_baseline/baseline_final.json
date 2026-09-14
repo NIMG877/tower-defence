@@ -1,0 +1,351 @@
+{
+ "run": "v1_baseline",
+ "contract": "v1",
+ "code": "aba2923",
+ "collected": "2026-09-13（三次采集合并：首跑+重跑+定向补采）",
+ "tasks": 16,
+ "ok": 15,
+ "errors": [
+  "t09_mortar_barrage"
+ ],
+ "okRate": 0.938,
+ "autoPassRate": 0.467,
+ "wallSeconds": {
+  "median": 167.6,
+  "max": 379.6,
+  "overClient240sDeadline": 4
+ },
+ "attempts": [
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+ ],
+ "note": "t09_mortar_barrage 三次尝试均失败（120s读超时×2+DNS瞬断×1）——v1 自身超时配置下的真实失败，作为基线数据点保留；cached 任务的 wallSeconds 已回填该任务首次真实生成的时间（会话记录）",
+ "perTask": [
+  {
+   "taskId": "t01_vanguard_cost_recovery",
+   "status": "ok",
+   "error": null,
+   "cached": true,
+   "wallSeconds": 134.83,
+   "attempts": 1,
+   "autoPass": false,
+   "opCoverage": {
+    "missing": [],
+    "banned": [],
+    "anyOfUnmet": [],
+    "triggerEventsMissing": [],
+    "triggerEventsAnyUnmet": false
+   },
+   "magnitudeOutOfBand": [
+    {
+     "path": "modify_cost.amount",
+     "found": [
+      2.0
+     ]
+    }
+   ]
+  },
+  {
+   "taskId": "t02_medic_attack_buff",
+   "status": "ok",
+   "error": null,
+   "cached": true,
+   "wallSeconds": 173.3,
+   "attempts": 1,
+   "autoPass": true,
+   "opCoverage": {
+    "missing": [],
+    "banned": [],
+    "anyOfUnmet": [],
+    "triggerEventsMissing": [],
+    "triggerEventsAnyUnmet": false
+   },
+   "magnitudeOutOfBand": []
+  },
+  {
+   "taskId": "t03_defender_defense_buff",
+   "status": "ok",
+   "error": null,
+   "cached": true,
+   "wallSeconds": 153.09,
+   "attempts": 1,
+   "autoPass": false,
+   "opCoverage": {
+    "missing": [],
+    "banned": [],
+    "anyOfUnmet": [],
+    "triggerEventsMissing": [],
+    "triggerEventsAnyUnmet": false
+   },
+   "magnitudeOutOfBand": [
+    {
+     "path": "apply_buff.magnitudes",
+     "found": []
+    }
+   ]
+  },
+  {
+   "taskId": "t04_guard_single_target_burst",
+   "status": "ok",
+   "error": null,
+   "cached": true,
+   "wallSeconds": 114.41,
+   "attempts": 1,
+   "autoPass": false,
+   "opCoverage": {
+    "missing": [],
+    "banned": [],
+    "anyOfUnmet": [],
+    "triggerEventsMissing": [],
+    "triggerEventsAnyUnmet": false
+   },
+   "magnitudeOutOfBand": [
+    {
+     "path": "apply_damage.multiplier",
+     "found": [
+      4.0
+     ]
+    }
+   ]
+  },
+  {
+   "taskId": "t05_caster_splash_radius",
+   "status": "ok",
+   "error": null,
+   "cached": true,
+   "wallSeconds": 330.92,
+   "attempts": 1,
+   "autoPass": false,
+   "opCoverage": {
+    "missing": [
+     "apply_buff"
+    ],
+    "banned": [],
+    "anyOfUnmet": [],
+    "triggerEventsMissing": [],
+    "triggerEventsAnyUnmet": false
+   },
+   "magnitudeOutOfBand": [
+    {
+     "path": "apply_buff.magnitudes",
+     "found": []
+    }
+   ]
+  },
+  {
+   "taskId": "t06_thorns_reflect",
+   "status": "ok",
+   "error": null,
+   "cached": true,
+   "wallSeconds": 328.45,
+   "attempts": 1,
+   "autoPass": true,
+   "opCoverage": {
+    "missing": [],
+    "banned": [],
+    "anyOfUnmet": [],
+    "triggerEventsMissing": [],
+    "triggerEventsAnyUnmet": false
+   },
+   "magnitudeOutOfBand": []
+  },
+  {
+   "taskId": "t07_sniper_extra_target",
+   "status": "ok",
+   "error": null,
+   "cached": true,
+   "wallSeconds": 117.75,
+   "attempts": 1,
+   "autoPass": false,
+   "opCoverage": {
+    "missing": [],
+    "banned": [],
+    "anyOfUnmet": [],
+    "triggerEventsMissing": [
+     "OnAbilityBegin"
+    ],
+    "triggerEventsAnyUnmet": false
+   },
+   "magnitudeOutOfBand": []
+  },
+  {
+   "taskId": "t08_summon_blocker",
+   "status": "ok",
+   "error": null,
+   "cached": true,
+   "wallSeconds": 167.6,
+   "attempts": 1,
+   "autoPass": true,
+   "opCoverage": {
+    "missing": [],
+    "banned": [],
+    "anyOfUnmet": [],
+    "triggerEventsMissing": [],
+    "triggerEventsAnyUnmet": false
+   },
+   "magnitudeOutOfBand": []
+  },
+  {
+   "taskId": "t09_mortar_barrage",
+   "status": "error",
+   "error": "job error: LlmError: LLM request failed: The read operation timed out",
+   "cached": false,
+   "wallSeconds": 214.6,
+   "attempts": null,
+   "autoPass": null,
+   "opCoverage": null,
+   "magnitudeOutOfBand": null
+  },
+  {
+   "taskId": "t10_animation_costume_swap",
+   "status": "ok",
+   "error": null,
+   "cached": true,
+   "wallSeconds": 146.35,
+   "attempts": 1,
+   "autoPass": true,
+   "opCoverage": {
+    "missing": [],
+    "banned": [],
+    "anyOfUnmet": [],
+    "triggerEventsMissing": [],
+    "triggerEventsAnyUnmet": false
+   },
+   "magnitudeOutOfBand": []
+  },
+  {
+   "taskId": "t11_mass_knockback",
+   "status": "ok",
+   "error": null,
+   "cached": true,
+   "wallSeconds": 193.66,
+   "attempts": 1,
+   "autoPass": true,
+   "opCoverage": {
+    "missing": [],
+    "banned": [],
+    "anyOfUnmet": [],
+    "triggerEventsMissing": [],
+    "triggerEventsAnyUnmet": false
+   },
+   "magnitudeOutOfBand": []
+  },
+  {
+   "taskId": "t12_gamble_buff",
+   "status": "ok",
+   "error": null,
+   "cached": true,
+   "wallSeconds": 160.38,
+   "attempts": 1,
+   "autoPass": true,
+   "opCoverage": {
+    "missing": [],
+    "banned": [],
+    "anyOfUnmet": [],
+    "triggerEventsMissing": [],
+    "triggerEventsAnyUnmet": false
+   },
+   "magnitudeOutOfBand": []
+  },
+  {
+   "taskId": "t13_tick_damage_aura",
+   "status": "ok",
+   "error": null,
+   "cached": true,
+   "wallSeconds": 139.01,
+   "attempts": 1,
+   "autoPass": false,
+   "opCoverage": {
+    "missing": [],
+    "banned": [],
+    "anyOfUnmet": [],
+    "triggerEventsMissing": [],
+    "triggerEventsAnyUnmet": false
+   },
+   "magnitudeOutOfBand": [
+    {
+     "path": "apply_damage.multiplier",
+     "found": [
+      1.0
+     ]
+    }
+   ]
+  },
+  {
+   "taskId": "t14_silence_casters",
+   "status": "ok",
+   "error": null,
+   "cached": true,
+   "wallSeconds": 207.0,
+   "attempts": 1,
+   "autoPass": false,
+   "opCoverage": {
+    "missing": [],
+    "banned": [],
+    "anyOfUnmet": [],
+    "triggerEventsMissing": [],
+    "triggerEventsAnyUnmet": false
+   },
+   "magnitudeOutOfBand": [
+    {
+     "path": "apply_abnormal_state.duration",
+     "found": []
+    }
+   ]
+  },
+  {
+   "taskId": "t15_blocked_priority",
+   "status": "ok",
+   "error": null,
+   "cached": false,
+   "wallSeconds": 379.58,
+   "attempts": 1,
+   "autoPass": true,
+   "opCoverage": {
+    "missing": [],
+    "banned": [],
+    "anyOfUnmet": [],
+    "triggerEventsMissing": [],
+    "triggerEventsAnyUnmet": false
+   },
+   "magnitudeOutOfBand": []
+  },
+  {
+   "taskId": "t16_kill_reward_cost",
+   "status": "ok",
+   "error": null,
+   "cached": true,
+   "wallSeconds": 280.76,
+   "attempts": 1,
+   "autoPass": false,
+   "opCoverage": {
+    "missing": [],
+    "banned": [],
+    "anyOfUnmet": [],
+    "triggerEventsMissing": [],
+    "triggerEventsAnyUnmet": false
+   },
+   "magnitudeOutOfBand": [
+    {
+     "path": "modify_cost.amount",
+     "found": [
+      6.0
+     ]
+    }
+   ]
+  }
+ ]
+}

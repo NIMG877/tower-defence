@@ -1,15 +1,19 @@
-"""三阶段生成 Agent：分析战局 → 给出设计 → 生成格式化输出。
+"""v2 单线程自由循环 Agent：强制 plan + 随手校验 + submit_skill 唯一关卡。
 
-- analyze：携带工具（交叉项计算/组件索引/组件文档/契约文档）的 function-calling
-  循环，LLM 按需取用——客户端快照只送基本信息，派生指标服务端按需算。
-- describe：同样是工具循环（设计时可复读组件文档确认参数能力），出口是设计
-  JSON（abilityName/description/designNotes/plannedOps），plannedOps 全部已注册。
-- generate：新开无工具线程，只注入 plannedOps 的参数 schema + 语料范例，产出
-  AbilityConfig DTO；校验失败只重试本阶段（分析/设计成果保留），重试反馈附
-  上一轮问题清单。
+plan-agent-framework-v2 §七：跑分达标（§六验收，见 evals/reports/ACCEPTANCE_v2.md）后替换 v1 三段接力（git 保留）。
 
-每个阶段经 on_phase(phase, detail) 实时上报（异步任务模式转发给轮询客户端），
-同时计入 report.phases 供落盘回放。
+编排（§4.1）：
+  握手（opList + protocolVersion 相等断言）
+  thread = [system(角色+工作方式+运行时边界), user(digest + hostAssets摘要 + constraints)]
+  loop（预算内）:
+    按路由状态选档（plan_pending→strong，其余→mid）调 chat_tools
+    执行工具 → 结果回填（>4k chars 截断，原文入 report.toolOutputs）
+    submit_skill 通过即结束；裸文本输出 → 回喂引导，不解析交付
+  预算耗尽（轮数/墙钟/tokens/熔断）→ 降级：交付最近一次 validate_draft ok 的
+  sanitized 草稿（response.degraded=true + report.degradedReason）；无草稿宁 rejected
+
+路由是显式两态机（§4.3）：调用前必须定 model，而"这轮做什么"只有模型自己
+知道，推断式路由错了无反馈信号。
 """
 
 from __future__ import annotations
@@ -17,7 +21,16 @@ from __future__ import annotations
 import json
 import time
 
-from . import corpus, llm, prompt as prompt_mod, schema as schema_mod, tools, validator
+from . import battle_digest, corpus, llm, schema as schema_mod, tools, validator
+
+# 自检间隔（§4.3）：每 N 轮向线程注入一次自检提醒，防长循环悄悄跑偏。
+SELF_CHECK_EVERY = 5
+
+# §4.4：剩余墙钟低于此值不再发起实现轮（一次调用+收尾放不下），直接进降级判定。
+MIN_ROUND_MARGIN_SECONDS = 30.0
+
+STATE_PLAN_PENDING = "plan_pending"
+STATE_ACT = "act"
 
 
 class HandshakeError(Exception):
@@ -25,6 +38,7 @@ class HandshakeError(Exception):
 
 
 def check_handshake(request: dict, schema: dict) -> None:
+    """opList 集合 diff + protocolVersion 相等断言（形状漂移在入口拒绝，不静默错位）。"""
     client_ops = set(request.get("opList") or [])
     server_ops = schema_mod.canonical_ops(schema)
     missing_on_client = sorted(server_ops - client_ops)
@@ -35,9 +49,54 @@ def check_handshake(request: dict, schema: dict) -> None:
             "missingOnClient": missing_on_client,
             "unknownToServer": unknown_on_server,
         }, ensure_ascii=False))
+    client_version = request.get("protocolVersion")
+    server_version = schema.get("protocolVersion")
+    if client_version != server_version:
+        raise HandshakeError(json.dumps({
+            "reason": "protocolVersion drift between client and server schema",
+            "clientVersion": client_version, "serverVersion": server_version,
+        }, ensure_ascii=False))
+
+SYSTEM = (
+    "你是塔防游戏的技能生成 Agent，自主完成一次技能设计并交付可运行的 AbilityConfig。\n"
+    "工作方式（单线程自由循环，自己决定节奏）：\n"
+    "1. 第一轮必须用 update_plan 提交计划：打算读哪些组件文档、技能设计思路（触发事件/"
+    "步骤序列/目标选择）、黑板键方案（哪些键谁写谁读）。中途重大转向时用 update_plan 修订。\n"
+    "2. 研究：list_components 看索引 → read_component_doc 读参数表 → read_contract_doc "
+    "确认规则契约 → read_schema_vocab 拿触发事件/词表/字段编码。不确定的词表一律查，不要凭记忆猜。\n"
+    "3. 战局：首条消息已给战局 digest 与宿主资产摘要；明细用 entity(id)/entities_at/"
+    "deploy_cells_near，派生指标用 compute_cross_items（那是设计期参考）。\n"
+    "4. 先例：search_skills 查相似技能 → read_skill 看完整配置与数值量级。\n"
+    "5. 交付：写好配置先 validate_draft 随手校验，按 issues 修复，然后 submit_skill 提交。"
+    "submit_skill 是唯一交付出口——不要以裸文本输出配置 JSON，那不会被接受。\n"
+    "运行时边界（违反会被关卡拒绝）：\n"
+    "- spawn_entity.spawnIndex / fire_bullets.bulletDataIndex 只能引用 hostAssets 实际清单"
+    "的下标；apply_animation_override.resources 的动画名只能取 hostAssets.animations。\n"
+    "- 战局 digest 是设计期参考，运行时条件只能走黑板：select_targets（写实体列表）→ "
+    "write_blackboard source=listCount（桥接计数）→ 条件读键这条链。\n"
+    "- 生成配置不产出 iconKey（统一图标）。\n"
+    "设计纪律：机制范围对齐 constraints.request，只实现诉求要求的机制，不附加未要求的"
+    "效果（宁简勿滥）；数值量级先查语料先例再定，不凭感觉。\n"
+)
+
+BARE_TEXT_FEEDBACK = (
+    "检测到裸文本输出。配置 JSON 不会被当文本解析——请调用 submit_skill(config) 工具交付；"
+    "若尚未提交过计划，先调用 update_plan。"
+)
+PLAN_REQUIRED_FEEDBACK = (
+    "你还没有用 update_plan 提交过计划。第一轮必须先出计划（研究哪些文档/设计思路/黑板键方案），"
+    "再继续研究与设计。"
+)
+SELF_CHECK_FEEDBACK = (
+    "自检：对照你最新一次 update_plan 的计划，当前行为是否仍在轨道上？偏离了就修订计划，"
+    "在轨道上就继续。设计成型后记得 validate_draft → submit_skill。"
+)
+LLM_ERROR_FEEDBACK = "上一次模型调用失败：{exc}。从中断处继续。"
 
 
 class _Reporter:
+    """phase 上报：异步任务模式转发给轮询客户端，同时计入 report.phases 供落盘回放。"""
+
     def __init__(self, on_phase):
         self.on_phase = on_phase
         self.phases: list[dict] = []
@@ -54,178 +113,251 @@ class _Reporter:
                 pass
 
 
+def route_model(state: str, cfg) -> str | None:
+    """两态路由（§4.3）：plan_pending→strong（错误代价高、token 量小）；
+    其余一切轮次→mid（产出体量大、有机器反馈兜底）。None 回退默认档。"""
+    if state == STATE_PLAN_PENDING:
+        return cfg.llm_model_strong or cfg.llm_model
+    return cfg.llm_model_mid or cfg.llm_model
+
+
 def run(request: dict, cfg, schema: dict, on_phase=None) -> dict:
     reporter = _Reporter(on_phase)
+    started = time.monotonic()
+
+    def finish(status: str, ability, issues: list[dict], rounds: int, ctx,
+               tokens: dict | None = None,
+               degraded_reason: str | None = None) -> dict:
+        reporter.report("done", status)
+        report = {"issues": issues, "rounds": rounds,
+                  "phases": reporter.phases,
+                  "plan": ctx.plan if ctx else None}
+        if tokens is not None:
+            report["tokens"] = tokens
+        if ctx is not None and ctx.tool_outputs:
+            report["toolOutputs"] = ctx.tool_outputs
+        if degraded_reason is not None:
+            report["degradedReason"] = degraded_reason
+        response = {"status": status, "ability": ability, "report": report}
+        if degraded_reason is not None:
+            response["degraded"] = True
+        return response
 
     try:
         check_handshake(request, schema)
     except HandshakeError as exc:
         reporter.report("handshake", "drift rejected")
-        return {"status": "rejected", "ability": None,
-                "report": {"issues": [{"severity": "error", "path": "handshake",
-                                       "message": str(exc)}], "attempts": 0,
-                           "phases": reporter.phases}}
-
-    snapshot = request.get("battleSnapshot") or {}
+        return finish("rejected", None,
+                      [{"severity": "error", "path": "handshake", "message": str(exc)}], 0, None)
 
     if cfg.llm_mock:
-        return _run_mock(request, cfg, schema, reporter)
+        return _run_mock(request, cfg, schema, reporter, finish)
 
-    # ---- 阶段一：分析战局（工具循环）----
-    reporter.report("analyze", "start")
-    thread = prompt_mod.analyze_messages(request)
+    usage_start = llm.usage_snapshot()
+    try:
+        digest = battle_digest.build(request.get("battleSnapshot") or {})
+    except ValueError as exc:
+        return finish("rejected", None,
+                      [{"severity": "error", "path": "battleSnapshot", "message": str(exc)}],
+                      0, None)
+
+    corpus_data = corpus.get_corpus(cfg.corpus_path)
+    ctx = tools.ToolContext(request, cfg, schema, corpus_data)
+    thread = [
+        {"role": "system", "content": SYSTEM},
+        {"role": "user", "content": _first_user(digest, ctx)},
+    ]
     tool_defs = tools.tool_definitions()
-    analysis = ""
-    for round_no in range(max(1, cfg.agent_max_rounds)):
-        message = llm.chat_tools(thread, tool_defs, cfg)
+    state = STATE_PLAN_PENDING
+    issues: list[dict] = []
+    consecutive_llm_errors = 0
+
+    def budget_used() -> tuple[float, int]:
+        """剩余墙钟与已耗 tokens（§4.4 预算闸的两个检查维度）。"""
+        tokens = llm.usage_delta(usage_start)
+        remaining = cfg.agent_max_wall_seconds - (time.monotonic() - started)
+        return remaining, tokens["prompt_tokens"] + tokens["completion_tokens"]
+
+    def degrade_or_reject(reason: str, rounds: int) -> dict:
+        """预算耗尽出口：有 validate_draft 全绿的 sanitized 草稿则降级交付
+        （status ok + degraded 标记，服务端不入缓存）；无草稿宁 rejected。"""
+        tokens = llm.usage_delta(usage_start)
+        if ctx.draft is not None:
+            reporter.report("degraded", f"budget exhausted ({reason}); delivering last validated draft")
+            return finish("ok", ctx.draft, issues, rounds, ctx, tokens,
+                          degraded_reason=reason)
+        reporter.report("act", f"budget exhausted ({reason}); no validated draft, rejecting")
+        return finish("rejected", None, issues, rounds, ctx, tokens)
+
+    for round_no in range(1, cfg.agent_max_rounds + 1):
+        remaining_wall, used_tokens = budget_used()
+        if remaining_wall < MIN_ROUND_MARGIN_SECONDS:
+            return degrade_or_reject("wall_budget_exhausted", round_no - 1)
+        if used_tokens > cfg.agent_max_total_tokens:
+            return degrade_or_reject("token_budget_exhausted", round_no - 1)
+        model = route_model(state, cfg)
+        # 轮次上报落在对外 phase 词表（§4.1）：plan_pending 态计为 plan。
+        reporter.report("plan" if state == STATE_PLAN_PENDING else "act",
+                        f"round {round_no} model={model}")
+        # 单次调用 timeout 收紧至剩余预算（§4.4）：挂起中的调用不受轮间检查约束，
+        # 不收紧会穿破墙钟死线。能走到这里 remaining ≥ 30s，减 5s 留收尾余量。
+        call_timeout = min(cfg.llm_timeout_seconds, remaining_wall - 5.0)
+        try:
+            message = llm.chat_tools(thread, tool_defs, cfg, model=model,
+                                     timeout=call_timeout)
+        except llm.LlmError as exc:
+            # 429/网络瞬断：指数退避重试；连续 4 次失败判定为外部故障（配额耗尽/
+            # 断网），烧完预算只会更糟，直接进降级判定。
+            consecutive_llm_errors += 1
+            reporter.report("act", f"llm error ({consecutive_llm_errors}): {exc}")
+            if consecutive_llm_errors >= 4:
+                reporter.report("act", "circuit breaker: 4 consecutive llm errors; aborting")
+                return degrade_or_reject("llm_error_circuit_breaker", round_no)
+            thread.append({"role": "user", "content": LLM_ERROR_FEEDBACK.format(exc=exc)})
+            time.sleep(min(5 * 2 ** (consecutive_llm_errors - 1), 30))
+            continue
+        consecutive_llm_errors = 0
+
         tool_calls = message.get("tool_calls")
         if not tool_calls:
-            analysis = message.get("content") or ""
-            thread.append({"role": "assistant", "content": analysis})
-            break
+            content = message.get("content") or ""
+            thread.append({"role": "assistant", "content": content})
+            nudge = PLAN_REQUIRED_FEEDBACK if ctx.plan is None else BARE_TEXT_FEEDBACK
+            thread.append({"role": "user", "content": nudge})
+            reporter.report("act", "bare text; nudged")
+            state = STATE_ACT
+            continue
+
         thread.append({"role": "assistant", "content": message.get("content"),
                        "tool_calls": tool_calls})
+        planned_this_round = False
         for call in tool_calls:
             function = call.get("function", {})
+            name = function.get("name", "")
             try:
                 arguments = json.loads(function.get("arguments") or "{}")
             except json.JSONDecodeError:
                 arguments = {}
-            result = tools.execute_tool(function.get("name", ""), arguments, snapshot, schema)
-            reporter.report("analyze", f"tool {function.get('name')} round {round_no + 1}")
+            tool_out_idx = len(ctx.tool_outputs)
+            result = tools.execute_tool(ctx, name, arguments)
+            if len(ctx.tool_outputs) > tool_out_idx and cfg.llm_model_weak:
+                # §4.4 weak 档摘要兜底：截断背闸触发时先用 weak 档压缩全文再回喂。
+                digested = _digest_tool_result(ctx, cfg)
+                if digested is not None:
+                    result = digested
+                    reporter.report("act", f"tool {name} digested via {cfg.llm_model_weak}")
+                else:
+                    reporter.report("act", f"tool {name} digest failed; truncation fallback")
+            reporter.report(tools.phase_for(name), f"tool {name}")
             thread.append({"role": "tool", "tool_call_id": call.get("id"),
                            "content": result})
-    else:
-        analysis = "（分析轮数达到上限，直接进入设计）"
 
-    # ---- 阶段二：给出设计（保留工具：设计时模型需要复读组件文档确认参数能力——
-    #      完全禁用工具会把"想调工具"的话当文本吐出来（实测两次）。工具子循环的
-    #      出口是合法设计 JSON，轮数受 agent_max_rounds 限制；解析失败/未注册 op
-    #      按分析层同款方式回喂重试）----
-    reporter.report("describe", "start")
-    design = None
-    last_error = None
-    for attempt in range(2):  # 设计层只做一次带错重试（JSON 非法 / plannedOps 未注册）
-        thread.append(prompt_mod.describe_user())
-        for _ in range(max(1, cfg.agent_max_rounds)):
-            message = llm.chat_tools(thread, tool_defs, cfg)
-            tool_calls = message.get("tool_calls")
-            if not tool_calls:
-                content = message.get("content") or ""
-                thread.append({"role": "assistant", "content": content})
+            if name == "submit_skill":
                 try:
-                    design = llm.extract_json(content)
-                except llm.LlmError as exc:
-                    last_error = str(exc)
-                    thread.append({"role": "user",
-                                   "content": f"输出不是合法 JSON：{exc}。重新输出设计 JSON。"})
-                    design = None
-                break
-            thread.append({"role": "assistant", "content": message.get("content"),
-                           "tool_calls": tool_calls})
-            for call in tool_calls:
-                function = call.get("function", {})
-                try:
-                    arguments = json.loads(function.get("arguments") or "{}")
+                    outcome = json.loads(result)
                 except json.JSONDecodeError:
-                    arguments = {}
-                result = tools.execute_tool(function.get("name", ""), arguments, snapshot, schema)
-                reporter.report("describe", f"tool {function.get('name')} (attempt {attempt + 1})")
-                thread.append({"role": "tool", "tool_call_id": call.get("id"),
-                               "content": result})
-        else:
-            last_error = "tool rounds exhausted"
-            thread.append({"role": "user",
-                           "content": "工具轮数已达上限。不要再调用工具，直接输出设计 JSON。"})
-            continue
-        if design is None:
-            continue
-        if not isinstance(design, dict):
-            last_error = "design is not a JSON object"
-            thread.append({"role": "user", "content": "设计必须是单个 JSON 对象。重新输出设计 JSON。"})
-            design = None
-            continue
-        unknown = [op for op in design.get("plannedOps", [])
-                   if schema_mod.resolve_op(schema, op) is None]
-        if unknown:
-            thread.append({"role": "user",
-                           "content": f"plannedOps 含未注册 op：{unknown}。"
-                                      "请改用 list_components 里确认过的 op，重新输出设计 JSON。"})
-            design = None
-            continue
-        break
-    if not isinstance(design, dict):
-        return {"status": "rejected", "ability": None,
-                "report": {"issues": [{"severity": "error", "path": "design",
-                                       "message": f"design phase failed to produce valid JSON "
-                                                  f"(last attempt: {last_error})"}],
-                           "attempts": 0, "phases": reporter.phases}}
-    planned_ops = [op for op in design.get("plannedOps", [])
-                   if schema_mod.resolve_op(schema, op) is not None]
-    reporter.report("describe", f"plannedOps={planned_ops}")
+                    outcome = {}
+                if outcome.get("accepted"):
+                    issues = outcome.get("issues") or []
+                    return finish("ok", ctx.submitted, issues, round_no, ctx,
+                                  llm.usage_delta(usage_start))
+                issues = outcome.get("issues") or issues
+            elif name == "update_plan" and _result_flag(result, "ok"):
+                planned_this_round = True
 
-    # ---- 语料检索：op 重叠 top-k 范例 + 全语料风格统计（语料缺失/损坏则静默降级）----
-    corpus_data = corpus.get_corpus(cfg.corpus_path)
-    examples = corpus.retrieve(corpus_data, planned_ops, schema) if corpus_data else []
-    style = corpus.style_summary(corpus_data, schema) if corpus_data else None
-    existing_ids = corpus_data["existingIds"] if corpus_data else None
-    if examples:
-        reporter.report("retrieve", "top: " + ", ".join(
-            f"{e['abilityId']}({e['_score']})" for e in examples))
+        state = STATE_PLAN_PENDING if planned_this_round else STATE_ACT
+        if ctx.plan is None:
+            thread.append({"role": "user", "content": PLAN_REQUIRED_FEEDBACK})
+        elif round_no % SELF_CHECK_EVERY == 0:
+            thread.append({"role": "user", "content": SELF_CHECK_FEEDBACK})
 
-    # ---- 阶段三：生成格式化输出（独立重试；设计成果保留）----
-    issues: list[dict] = []
-    dto = None
-    attempts = 0
-    generate_thread = [
-        {"role": "system", "content": prompt_mod.generate_system(schema, planned_ops, style)},
-        {"role": "user", "content": prompt_mod.generate_user(request, analysis, design, examples)},
-    ]
-    for attempt in range(max(1, cfg.max_attempts)):
-        attempts = attempt + 1
-        reporter.report("generate", f"attempt {attempts}")
-        try:
-            content = llm.chat(generate_thread, cfg)
-            candidate = llm.extract_json(content)
-        except llm.LlmError as exc:
-            issues = [{"severity": "error", "path": "llm", "message": str(exc)}]
-            generate_thread.append({"role": "user", "content": f"{exc}。重新输出完整 JSON。"})
-            continue
-        ok, issues, sanitized = validator.validate(candidate, schema, existing_ids)
-        reporter.report("validate", "ok" if ok else f"{sum(1 for i in issues if i['severity'] == 'error')} errors")
-        if ok:
-            dto = sanitized
-            break
-        generate_thread.append({"role": "assistant", "content": content})
-        generate_thread.append({"role": "user", "content": prompt_mod.retry_feedback(issues)})
-
-    reporter.report("done", "ok" if dto is not None else "rejected")
-    if dto is None:
-        return {"status": "rejected", "ability": None,
-                "report": {"issues": issues, "attempts": attempts, "phases": reporter.phases,
-                           "analysis": analysis, "design": design}}
-    return {"status": "ok", "ability": dto,
-            "report": {"issues": issues, "attempts": attempts, "phases": reporter.phases,
-                       "analysis": analysis, "design": design}}
+    return degrade_or_reject("round_budget_exhausted", cfg.agent_max_rounds)
 
 
-def _run_mock(request: dict, cfg, schema: dict, reporter: _Reporter) -> dict:
-    """mock 模式：不调 LLM，脚本化走完三阶段（管线/客户端联调用）。"""
-    reporter.report("analyze", "mock: skip tool loop")
-    analysis = "mock 分析：敌方 1 单位接近，建议即时生效的全局收益技能。"
-    planned_ops = ["modify_cost"]
-    reporter.report("describe", f"plannedOps={planned_ops}")
-    design = {"abilityName": llm._MOCK_ABILITY["abilityName"],
-              "description": llm._MOCK_ABILITY["description"],
-              "designNotes": "mock", "plannedOps": planned_ops}
-    reporter.report("generate", "attempt 1")
-    ok, issues, sanitized = validator.validate(llm._MOCK_ABILITY, schema)
-    reporter.report("validate", "ok" if ok else "errors")
-    reporter.report("done", "ok" if ok else "rejected")
-    if not ok:
-        return {"status": "rejected", "ability": None,
-                "report": {"issues": issues, "attempts": 1, "phases": reporter.phases,
-                           "analysis": analysis, "design": design}}
-    return {"status": "ok", "ability": sanitized,
-            "report": {"issues": issues, "attempts": 1, "phases": reporter.phases,
-                       "analysis": analysis, "design": design}}
+def _run_mock(request: dict, cfg, schema: dict, reporter: _Reporter, finish) -> dict:
+    """mock 模式：不调 LLM，脚本化 plan→submit（service 层 v2 管线/客户端联调用）。"""
+    reporter.report("plan", "mock: scripted plan")
+    reporter.report("submit", "mock: submit_skill")
+    ok, issues, sanitized = validator.validate(MOCK_ABILITY, schema,
+                                               host_assets=request.get("hostAssets"))
+    return finish("ok" if ok else "rejected", sanitized if ok else None, issues, 1, None)
+
+
+# mock 模式样例：modify_cost 探针技能（无 key 跑通全管线；效果肉眼可见）。
+MOCK_ABILITY = {
+    "abilityId": "gen_mock_1",
+    "abilityName": "模拟生成技能",
+    "description": "mock 管线验证：部署即获得 99 点部署费用",
+    "sp": {"totalSp": 0, "initialSp": 0, "chargeNum": 1, "abilityAmount": 0,
+           "recoverMode": "Natural", "consumeMode": "NoConsume", "openMode": "Auto"},
+    "rules": [
+        {"triggers": [{"triggerEvent": "OnInitialize", "groups": []}],
+         "reentry": "IgnoreWhileRunning",
+         "steps": [{"op": "modify_cost",
+                    "args": {"entries": [{"key": "amount", "value": "99", "type": "Int",
+                                          "fromBlackboard": False}]}}]},
+    ],
+}
+
+
+def _result_flag(result_json: str, key: str) -> bool:
+    try:
+        return json.loads(result_json).get(key) is True
+    except json.JSONDecodeError:
+        return False
+
+
+DIGEST_SYSTEM = (
+    "你是工具结果压缩器。把用户给出的完整工具结果压缩为紧凑 JSON，"
+    "保留对技能设计有意义的结构化字段与全部数值，丢弃重复与冗长描述；"
+    "输出不超过 1200 字符。"
+)
+# 摘要输入上限：超长全文只取前段（盲截断只能保 4k，摘要有 60k 可用已是大改善）。
+DIGEST_INPUT_CHAR_LIMIT = 60_000
+
+
+def _digest_tool_result(ctx: tools.ToolContext, cfg) -> str | None:
+    """weak 档摘要兜底（§4.4）：把刚被截断的工具结果全文压缩后回喂；失败返回
+    None（调用方回退盲截断版）。全文始终留在 report.toolOutputs 供回放。"""
+    full = ctx.tool_outputs[-1]["full"]
+    try:
+        text = llm.chat([{"role": "system", "content": DIGEST_SYSTEM},
+                         {"role": "user", "content": full[:DIGEST_INPUT_CHAR_LIMIT]}],
+                        cfg, model=cfg.llm_model_weak, timeout=60.0)
+    except llm.LlmError:
+        return None
+    digest = text.strip()
+    return (f"{digest}\n[digested from {len(full)} chars by {cfg.llm_model_weak}; "
+            f"full text in report.toolOutputs]")
+
+
+def _first_user(digest: dict, ctx: tools.ToolContext) -> str:
+    """信息分档（§4.1）：digest 直入；hostAssets 决策字段直入、参考清单计数+样例；
+    constraints 原文。快照不全量直入（payload 大小与 prompt 大小是两回事）。"""
+    host = ctx.host_assets
+    decision = {k: host[k] for k in ("job", "subJob", "cost", "baseAttackTime",
+                                     "damageType", "blockOccupation", "targetPriority",
+                                     "visionRadius", "visionRange") if k in host}
+    animations = host.get("animations") or {}
+    named = animations.get("named") or []
+    groups = animations.get("groups") or []
+    bullets = host.get("bullets") or []
+    spawnables = host.get("canSpawnEntities") or []
+    host_summary = {
+        "decision": decision,
+        "encoding": tools.FIELD_SEMANTICS,
+        "animations": {"namedCount": len(named), "groupsCount": len(groups),
+                       "namedSample": named[:5], "groupsSample": groups[:5]},
+        "bullets": {"count": len(bullets), "sample": bullets[:6]},
+        "canSpawnEntities": spawnables if len(spawnables) <= 4
+        else {"count": len(spawnables), "sample": spawnables[:2]},
+    }
+    if ctx.host_skills:
+        host_summary["skills"] = [
+            {"abilityId": s.get("abilityId"), "name": s.get("abilityName"),
+             "sp": (s.get("sp") or {}).get("totalSp"),
+             "ops": sorted(corpus.skill_ops(s, ctx.schema))}
+            for s in ctx.host_skills.values()]
+    return json.dumps({"battleDigest": digest, "hostAssets": host_summary,
+                       "constraints": ctx.constraints},
+                      ensure_ascii=False, indent=1)

@@ -26,14 +26,18 @@ Asynchronous fire-and-forget — this op does **not** block the step sequence:
    `{serverUrl}/generate-ability/async`. The step completes immediately; the
    component then polls.
 2. **OnTick** drives the poll loop (0.4s interval, 5s per-request timeout,
-   240s overall deadline) and scrolls Agent phase logs to the Console
-   (analyze/describe/generate/validate). Requires the host ability to be
+   3600s overall deadline — raised from 240s when the server agent moved to the
+   multi-minute v2 free loop) and scrolls Agent phase logs to the Console
+   (plan/act/review/submit/degraded). Requires the host ability to be
    active while polling.
-3. **Completion** (~1-2 minutes with a real LLM): mirrors the Editor probe's
+3. **Completion** (~1-10 minutes with a real LLM): mirrors the Editor probe's
    ordering — server `error` → log error; `status != "ok"` → log rejection
    with server issues; `ok` → client-side `AbilityConfigValidator` final check
    (schema-drift guard) → `AbilityConfigBuilder.FromDto` → destroy the previous
    generated config → `ReplaceSkill` (Skills[0] becomes the new skill).
+   A degraded response (`status="ok"` + `degraded=true`: the server exhausted
+   its budget and delivers the last validated draft) passes the same path and
+   is injected like any other ok result.
 
 ## Lifecycle notes
 

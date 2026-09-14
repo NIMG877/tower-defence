@@ -1,0 +1,33 @@
+{
+ "run": "v2_smoke",
+ "contract": "v2",
+ "server": "http://127.0.0.1:8766",
+ "tasks": 1,
+ "cachedHits": 0,
+ "okRate": 1.0,
+ "autoPassRate": 1.0,
+ "attempts": [],
+ "wallSeconds": [
+  96.41
+ ],
+ "perTask": [
+  {
+   "taskId": "t01_vanguard_cost_recovery",
+   "status": "ok",
+   "cached": false,
+   "wallSeconds": 96.41,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [],
+    "autoPass": true
+   }
+  }
+ ]
+}

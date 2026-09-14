@@ -36,18 +36,34 @@ class GenerateService:
         self._cache = _Cache(cfg.cache_size)
 
     def generate(self, request: dict, on_phase=None) -> dict:
-        snapshot_key = json.dumps(request.get("battleSnapshot"), sort_keys=True,
-                                  ensure_ascii=False, default=str)
-        cache_key = hashlib.sha256(
-            (str(request.get("opList", "")) + "|" + snapshot_key).encode()).hexdigest()
+        cache_key = self._cache_key(request)
         cached = self._cache.get(cache_key)
         if cached is not None:
             return {**cached, "report": {**cached.get("report", {}), "cached": True}}
 
         response = agent.run(request, self.cfg, self.schema, on_phase)
-        self._cache.put(cache_key, response)
+        # 非 ok / 降级产物不入缓存：同 payload 重触发可重跑，坏结果不被永久命中。
+        if response.get("status") == "ok" and not response.get("degraded"):
+            self._cache.put(cache_key, response)
         self._log(request, response)
         return response
+
+    @staticmethod
+    def _cache_key(request: dict) -> str:
+        """缓存键覆盖所有影响生成结果的请求输入（opList/快照/hostAssets/constraints）——
+        只含快照会让同战局换宿主或换诉求命中旧技能。"""
+        def norm(value) -> str:
+            if isinstance(value, str):
+                return value
+            return json.dumps(value, sort_keys=True, ensure_ascii=False, default=str)
+
+        parts = "|".join((
+            str(request.get("opList", "")),
+            norm(request.get("battleSnapshot")),
+            norm(request.get("hostAssets")),
+            norm(request.get("constraints")),
+        ))
+        return hashlib.sha256(parts.encode()).hexdigest()
 
     def _log(self, request: dict, response: dict) -> None:
         if not self.cfg.log_dir:

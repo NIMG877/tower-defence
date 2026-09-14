@@ -1,0 +1,168 @@
+{
+ "taskId": "t14_silence_casters",
+ "title": "沉默施法单位",
+ "notes": "覆盖：apply_abnormal_state / 特种原型",
+ "request": {
+  "battleSnapshot": {
+   "selfId": "witch_hunter",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "witch_hunter",
+     "name": "witch_hunter",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 1100,
+     "maxHp": 1100,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 3
+     },
+     "attack": 380,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 7,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 4
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster",
+     "massLevel": 1
+    },
+    {
+     "id": "m2",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 5
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster",
+     "massLevel": 1
+    },
+    {
+     "id": "m3",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 6
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 7,
+   "subJob": 0,
+   "cost": 12,
+   "baseAttackTime": 1.2,
+   "damageType": 0,
+   "blockOccupation": 1,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "让附近正在施法的敌人沉默几秒，打断他们的节奏。"
+  }
+ },
+ "expected": {
+  "opsMustInclude": [
+   "apply_abnormal_state"
+  ],
+  "opsMustExclude": [
+   "modify_cost",
+   "spawn_entity"
+  ],
+  "triggerEventsMustInclude": [
+   "OnAbilityBegin"
+  ],
+  "magnitude": [
+   {
+    "path": "apply_abnormal_state.duration",
+    "min": 2,
+    "max": 8
+   }
+  ],
+  "effectSummary": "周围敌人被沉默数秒无法施法"
+ }
+}

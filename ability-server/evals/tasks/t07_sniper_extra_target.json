@@ -1,0 +1,157 @@
+{
+ "taskId": "t07_sniper_extra_target",
+ "title": "狙击额外目标",
+ "notes": "覆盖：attack_target_count_modifier / 狙击原型",
+ "request": {
+  "battleSnapshot": {
+   "selfId": "sniper",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "sniper",
+     "name": "sniper",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 850,
+     "maxHp": 850,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 2
+     },
+     "attack": 520,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 3,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 2,
+      "y": 3
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 3,
+      "y": 5
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m3",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 6
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 3,
+   "subJob": 0,
+   "cost": 15,
+   "baseAttackTime": 2.4,
+   "damageType": 0,
+   "blockOccupation": 1,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "技能开启期间我的攻击可以同时多打一个目标。"
+  }
+ },
+ "expected": {
+  "opsMustInclude": [
+   "attack_target_count_modifier"
+  ],
+  "triggerEventsMustInclude": [
+   "OnAbilityBegin"
+  ],
+  "effectSummary": "技能期间每次攻击可命中额外一个目标"
+ }
+}

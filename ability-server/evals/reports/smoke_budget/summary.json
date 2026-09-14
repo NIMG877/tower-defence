@@ -1,0 +1,25 @@
+{
+ "run": "smoke_budget",
+ "contract": "v2",
+ "server": "http://127.0.0.1:8766",
+ "tasks": 1,
+ "cachedHits": 0,
+ "okRate": 0.0,
+ "autoPassRate": 0.0,
+ "attempts": [],
+ "wallSeconds": [
+  14.24
+ ],
+ "perTask": [
+  {
+   "taskId": "t16_kill_reward_cost",
+   "status": "rejected",
+   "cached": false,
+   "wallSeconds": 14.24,
+   "auto": {
+    "submitted": false
+   },
+   "print": "[t16_kill_reward_cost] rejected wall=14.24s  autoPass=None"
+  }
+ ]
+}

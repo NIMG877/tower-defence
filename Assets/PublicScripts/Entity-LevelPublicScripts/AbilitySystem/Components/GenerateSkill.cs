@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
@@ -23,7 +23,7 @@ namespace AbilitySystem.Components
     {
         private const string DefaultServerUrl = "http://127.0.0.1:8765";
         private const float PollIntervalSeconds = 0.4f;
-        private const float PollTimeoutSeconds = 240f; // 真实 LLM 的 analyze+generate 可能要一两分钟
+        private const float PollTimeoutSeconds = 900f; // 服务端 v2 预算 660s 硬闸 + 轮询/握手余量
 
         private enum TaskPhase { Idle, AwaitJobId, Polling }
 
@@ -194,7 +194,10 @@ namespace AbilitySystem.Components
         /// </summary>
         public string ApplyGeneratedAbility(EntityAbilityRunner runner, AbilityConfigDto dto)
         {
-            AbilityConfigValidator.Result result = AbilityConfigValidator.Validate(dto);
+            // 终检带 hostAssets 边界：hostAssets 全部取自 EntityData 静态数据，
+            // 轮询完成时重投影与请求时一致（宿主若已销毁走不到这里，OnTeardown 中止轮询）。
+            AbilityConfigValidator.Result result = AbilityConfigValidator.Validate(
+                dto, HostAssets.FromEntityData(_host.EntityData));
             AgentJobStatus.LogValidatorIssues(result, "[GenerateSkill]");
             if (!result.Ok)
             {

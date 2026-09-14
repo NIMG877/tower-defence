@@ -1,0 +1,168 @@
+{
+ "taskId": "t03_defender_defense_buff",
+ "title": "重装双抗提升",
+ "notes": "覆盖：apply_buff attributes 多值 / 重装原型",
+ "request": {
+  "battleSnapshot": {
+   "selfId": "beagle",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "beagle",
+     "name": "beagle",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 2200,
+     "maxHp": 2200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 3,
+      "y": 4
+     },
+     "attack": 180,
+     "defence": 400,
+     "magicRes": 10,
+     "job": 2,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    },
+    {
+     "id": "m2",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 4
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    },
+    {
+     "id": "m3",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 6
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster",
+     "massLevel": 1
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 2,
+   "subJob": 0,
+   "cost": 18,
+   "baseAttackTime": 1.5,
+   "damageType": 0,
+   "blockOccupation": 3,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "前线压力很大，开技能时让我的防御和法抗都明显提升，关技能后恢复。"
+  }
+ },
+ "expected": {
+  "opsMustInclude": [
+   "apply_buff"
+  ],
+  "opsMustExclude": [
+   "apply_damage",
+   "modify_cost"
+  ],
+  "triggerEventsMustInclude": [
+   "OnAbilityBegin"
+  ],
+  "magnitude": [
+   {
+    "path": "apply_buff.magnitudes",
+    "min": 0.3,
+    "max": 1.0
+   }
+  ],
+  "effectSummary": "技能期间自身防御与法抗提升 30%~100%"
+ }
+}

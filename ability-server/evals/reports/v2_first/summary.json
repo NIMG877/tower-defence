@@ -1,0 +1,56 @@
+{
+ "run": "v2_first",
+ "contract": "v2",
+ "server": "http://127.0.0.1:8766",
+ "tasks": 2,
+ "cachedHits": 0,
+ "okRate": 1.0,
+ "autoPassRate": 0.5,
+ "attempts": [],
+ "wallSeconds": [
+  510.08,
+  567.58
+ ],
+ "perTask": [
+  {
+   "taskId": "t09_mortar_barrage",
+   "status": "ok",
+   "cached": false,
+   "wallSeconds": 510.08,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [],
+    "autoPass": true
+   },
+   "print": "[t09_mortar_barrage] ok wall=510.08s  autoPass=True"
+  },
+  {
+   "taskId": "t15_blocked_priority",
+   "status": "ok",
+   "cached": false,
+   "wallSeconds": 567.58,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [
+      "OnAbilityBegin"
+     ],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [],
+    "autoPass": false
+   },
+   "print": "[t15_blocked_priority] ok wall=567.58s  autoPass=False"
+  }
+ ]
+}

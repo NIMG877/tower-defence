@@ -1,0 +1,149 @@
+{
+ "taskId": "t01_vanguard_cost_recovery",
+ "title": "先锋回费",
+ "notes": "覆盖：modify_cost / OnAbilityBegin / job 决定技能原型",
+ "request": {
+  "battleSnapshot": {
+   "selfId": "fang",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "fang",
+     "name": "fang",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 1300,
+     "maxHp": 1300,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 3,
+      "y": 3
+     },
+     "attack": 280,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 0,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 6
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 0,
+   "subJob": 2,
+   "cost": 9,
+   "baseAttackTime": 1.2,
+   "damageType": 0,
+   "blockOccupation": 2,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "我的部署费用经常跟不上，开技能时帮我回一笔费用，量级对齐先锋标准。"
+  }
+ },
+ "expected": {
+  "opsMustInclude": [
+   "modify_cost"
+  ],
+  "opsMustExclude": [
+   "apply_damage",
+   "apply_buff"
+  ],
+  "triggerEventsMustInclude": [
+   "OnAbilityBegin"
+  ],
+  "magnitude": [
+   {
+    "path": "modify_cost.amount",
+    "min": 4,
+    "max": 8
+   }
+  ],
+  "effectSummary": "开启技能时立即获得一笔部署费用（4~8 点）"
+ }
+}

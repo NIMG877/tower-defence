@@ -1,0 +1,340 @@
+{
+ "run": "v1_baseline",
+ "contract": "v1",
+ "server": "http://127.0.0.1:8765",
+ "tasks": 16,
+ "cachedHits": 14,
+ "okRate": 0.5,
+ "autoPassRate": 0.5,
+ "attempts": [],
+ "wallSeconds": [
+  214.6,
+  379.58
+ ],
+ "perTask": [
+  {
+   "taskId": "t01_vanguard_cost_recovery",
+   "status": "ok",
+   "cached": true,
+   "wallSeconds": 0.05,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [
+     {
+      "path": "modify_cost.amount",
+      "found": [
+       2.0
+      ]
+     }
+    ],
+    "autoPass": false
+   }
+  },
+  {
+   "taskId": "t02_medic_attack_buff",
+   "status": "ok",
+   "cached": true,
+   "wallSeconds": 0.03,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [],
+    "autoPass": true
+   }
+  },
+  {
+   "taskId": "t03_defender_defense_buff",
+   "status": "ok",
+   "cached": true,
+   "wallSeconds": 0.02,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [
+     {
+      "path": "apply_buff.magnitudes",
+      "found": []
+     }
+    ],
+    "autoPass": false
+   }
+  },
+  {
+   "taskId": "t04_guard_single_target_burst",
+   "status": "ok",
+   "cached": true,
+   "wallSeconds": 0.0,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [
+     {
+      "path": "apply_damage.multiplier",
+      "found": [
+       4.0
+      ]
+     }
+    ],
+    "autoPass": false
+   }
+  },
+  {
+   "taskId": "t05_caster_splash_radius",
+   "status": "ok",
+   "cached": true,
+   "wallSeconds": 0.04,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [
+      "apply_buff"
+     ],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [
+     {
+      "path": "apply_buff.magnitudes",
+      "found": []
+     }
+    ],
+    "autoPass": false
+   }
+  },
+  {
+   "taskId": "t06_thorns_reflect",
+   "status": "ok",
+   "cached": true,
+   "wallSeconds": 0.03,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [],
+    "autoPass": true
+   }
+  },
+  {
+   "taskId": "t07_sniper_extra_target",
+   "status": "ok",
+   "cached": true,
+   "wallSeconds": 0.03,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [
+      "OnAbilityBegin"
+     ],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [],
+    "autoPass": false
+   }
+  },
+  {
+   "taskId": "t08_summon_blocker",
+   "status": "ok",
+   "cached": true,
+   "wallSeconds": 0.03,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [],
+    "autoPass": true
+   }
+  },
+  {
+   "taskId": "t09_mortar_barrage",
+   "status": "job error: LlmError: LLM request failed: The read operation timed out",
+   "cached": false,
+   "wallSeconds": 214.6,
+   "auto": {}
+  },
+  {
+   "taskId": "t10_animation_costume_swap",
+   "status": "ok",
+   "cached": true,
+   "wallSeconds": 0.04,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [],
+    "autoPass": true
+   }
+  },
+  {
+   "taskId": "t11_mass_knockback",
+   "status": "ok",
+   "cached": true,
+   "wallSeconds": 0.0,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [],
+    "autoPass": true
+   }
+  },
+  {
+   "taskId": "t12_gamble_buff",
+   "status": "ok",
+   "cached": true,
+   "wallSeconds": 0.03,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [],
+    "autoPass": true
+   }
+  },
+  {
+   "taskId": "t13_tick_damage_aura",
+   "status": "ok",
+   "cached": true,
+   "wallSeconds": 0.01,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [
+     {
+      "path": "apply_damage.multiplier",
+      "found": [
+       1.0
+      ]
+     }
+    ],
+    "autoPass": false
+   }
+  },
+  {
+   "taskId": "t14_silence_casters",
+   "status": "ok",
+   "cached": true,
+   "wallSeconds": 0.03,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [
+     {
+      "path": "apply_abnormal_state.duration",
+      "found": []
+     }
+    ],
+    "autoPass": false
+   }
+  },
+  {
+   "taskId": "t15_blocked_priority",
+   "status": "ok",
+   "cached": false,
+   "wallSeconds": 379.58,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [],
+    "autoPass": true
+   }
+  },
+  {
+   "taskId": "t16_kill_reward_cost",
+   "status": "ok",
+   "cached": true,
+   "wallSeconds": 0.01,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [
+     {
+      "path": "modify_cost.amount",
+      "found": [
+       6.0
+      ]
+     }
+    ],
+    "autoPass": false
+   }
+  }
+ ]
+}

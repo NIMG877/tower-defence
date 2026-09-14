@@ -1,0 +1,196 @@
+{
+ "taskId": "t09_mortar_barrage",
+ "title": "弹幕齐射",
+ "notes": "覆盖：select_landing_points+fire_bullets / bullets 注册表 / OnBulletLanded 可选",
+ "request": {
+  "battleSnapshot": {
+   "selfId": "mortar",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "mortar",
+     "name": "mortar",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 950,
+     "maxHp": 950,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 3
+     },
+     "attack": 460,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 4,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 3,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 3,
+      "y": 5
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m3",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    },
+    {
+     "id": "m4",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 6
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster",
+     "massLevel": 1
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 4,
+   "subJob": 0,
+   "cost": 18,
+   "baseAttackTime": 1.2,
+   "damageType": 1,
+   "blockOccupation": 1,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   },
+   "bullets": [
+    {
+     "index": 0,
+     "bulletType": 1,
+     "allowNoTarget": false
+    }
+   ]
+  },
+  "constraints": {
+   "request": "朝敌人最密集的地方发射一轮弹幕，每发弹着点附近炸开一次范围伤害。"
+  }
+ },
+ "expected": {
+  "opsMustInclude": [
+   "fire_bullets",
+   "select_landing_points"
+  ],
+  "opsMustExclude": [
+   "modify_cost",
+   "spawn_entity"
+  ],
+  "triggerEventsAny": [
+   "OnAbilityBegin",
+   "OnAbilityEnd"
+  ],
+  "magnitude": [
+   {
+    "path": "fire_bullets.bulletDataIndex",
+    "min": 0,
+    "max": 0
+   }
+  ],
+  "effectSummary": "选取密集落点发射弹幕，弹着造成范围伤害"
+ }
+}

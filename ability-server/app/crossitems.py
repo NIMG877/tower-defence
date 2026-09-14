@@ -65,15 +65,31 @@ def _entities(snapshot: dict, camp: int | None = None) -> list[dict]:
     return out
 
 
-def _self_pos(snapshot: dict) -> tuple[float, float] | None:
-    pos = snapshot.get("selfPos")
-    if not isinstance(pos, dict) or "x" not in pos or "y" not in pos:
-        return None
-    return (float(pos["x"]), float(pos["y"]))
-
-
-def _dist(a: tuple[float, float], b: tuple[float, float]) -> float:
+def dist(a: tuple[float, float], b: tuple[float, float]) -> float:
     return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+
+
+def self_record(snapshot: dict) -> dict | None:
+    """契约 v2：self 拍平进 entities，selfId 作指针。无 selfId 或指针悬空返回
+    None（generate 入口的 battle_digest.build 先做形状校验，工具层拿到的是已
+    过检的快照）。"""
+    self_id = snapshot.get("selfId")
+    if not self_id:
+        return None
+    for e in snapshot.get("entities") or []:
+        if e.get("id") == self_id:
+            return e
+    return None
+
+
+def _self_pos(snapshot: dict) -> tuple[float, float] | None:
+    rec = self_record(snapshot)
+    if rec is None:
+        return None
+    pos = rec.get("pos")
+    if isinstance(pos, dict) and "x" in pos and "y" in pos:
+        return (float(pos["x"]), float(pos["y"]))
+    return None
 
 
 # ---------- 指标实现 ----------
@@ -85,12 +101,16 @@ def _enemy_count(snapshot, arg):
 
 @item("ally_count", "场上友军数（不含自身）")
 def _ally_count(snapshot, arg):
-    return len(_entities(snapshot, 1))
+    self_id = snapshot.get("selfId")
+    return sum(1 for e in _entities(snapshot, 1) if e.get("id") != self_id)
 
 
 @item("self_hp_rate", "自身血量比 0..1")
 def _self_hp_rate(snapshot, arg):
-    return snapshot.get("selfHpRate")
+    rec = self_record(snapshot)
+    if rec is not None and isinstance(rec.get("hpRate"), (int, float)):
+        return rec["hpRate"]
+    return None
 
 
 @item("nearest_enemy_distance", "自身到最近敌人的距离；无敌人返回 -1")
@@ -99,7 +119,7 @@ def _nearest_enemy(snapshot, arg):
     enemies = _entities(snapshot, 2)
     if self_pos is None or not enemies:
         return -1
-    best = min(_dist(self_pos, (e["pos"]["x"], e["pos"]["y"])) for e in enemies
+    best = min(dist(self_pos, (e["pos"]["x"], e["pos"]["y"])) for e in enemies
                if isinstance(e.get("pos"), dict))
     return round(best, 2)
 
@@ -125,10 +145,10 @@ def _entity(snapshot, arg):
 def _distance(snapshot, arg):
     self_pos = _self_pos(snapshot)
     if self_pos is None:
-        return "error: snapshot has no selfPos"
+        return "error: self entity has no pos in snapshot"
     for e in _entities(snapshot):
         if e.get("id") == arg and isinstance(e.get("pos"), dict):
-            return round(_dist(self_pos, (e["pos"]["x"], e["pos"]["y"])), 2)
+            return round(dist(self_pos, (e["pos"]["x"], e["pos"]["y"])), 2)
     return f"error: entity '{arg}' not in snapshot"
 
 
@@ -143,11 +163,13 @@ def _hp_rate(snapshot, arg):
 def _within(snapshot, arg, camp: int | None):
     self_pos = _self_pos(snapshot)
     if self_pos is None:
-        return "error: snapshot has no selfPos"
+        return "error: self entity has no pos in snapshot"
     radius = float(arg)
+    self_id = snapshot.get("selfId")
     ids = [e.get("id") for e in _entities(snapshot, camp)
-           if isinstance(e.get("pos"), dict)
-           and _dist(self_pos, (e["pos"]["x"], e["pos"]["y"])) <= radius]
+           if e.get("id") != self_id
+           and isinstance(e.get("pos"), dict)
+           and dist(self_pos, (e["pos"]["x"], e["pos"]["y"])) <= radius]
     return {"radius": radius, "count": len(ids), "ids": ids}
 
 
@@ -165,3 +187,49 @@ def _allies_within(snapshot, arg):
 def _can_set_cells(snapshot, arg):
     return {"higher": snapshot.get("canSetHigher") or [],
             "lower": snapshot.get("canSetLower") or []}
+
+
+@item("pairwise_distance", "任意两实体间距离，如 pairwise_distance(m-1,m-2)", needs_arg=True)
+def _pairwise_distance(snapshot, arg):
+    id_a, _, id_b = (s.strip() for s in arg.partition(","))
+    if not id_b:
+        return "error: pairwise_distance takes two ids: pairwise_distance(idA,idB)"
+    positions: dict[str, tuple[float, float]] = {}
+    for e in _entities(snapshot):
+        if e.get("id") in (id_a, id_b) and isinstance(e.get("pos"), dict):
+            positions[e["id"]] = (float(e["pos"]["x"]), float(e["pos"]["y"]))
+    for wanted in (id_a, id_b):
+        if wanted not in positions:
+            return f"error: entity '{wanted}' not in snapshot"
+    return round(dist(positions[id_a], positions[id_b]), 2)
+
+
+@item("enemy_group_stats", "敌群聚合：count/totalHp/avgHpRate/avgDefence/avgMagicRes")
+def _enemy_group_stats(snapshot, arg):
+    enemies = _entities(snapshot, 2)
+
+    def nums(key) -> list[float]:
+        return [e[key] for e in enemies if isinstance(e.get(key), (int, float))]
+
+    hp = nums("hp")
+    hp_rate = nums("hpRate")
+    defence = nums("defence")
+    magic_res = nums("magicRes")
+    avg = lambda xs: round(sum(xs) / len(xs), 2) if xs else None  # noqa: E731
+    return {"count": len(enemies), "totalHp": sum(hp) if hp else None,
+            "avgHpRate": avg(hp_rate), "avgDefence": avg(defence),
+            "avgMagicRes": avg(magic_res)}
+
+
+# ---------- 明细查询（agent 工具层的结构化入口，非 registry 指标） ----------
+
+def query_entities_at(snapshot: dict, x: float, y: float, radius: float,
+                      camp: int | None = None) -> list[dict]:
+    """任意圆心 (x,y) 半径 radius 内的实体完整记录；camp 过滤可选。"""
+    out = []
+    for e in _entities(snapshot, camp):
+        pos = e.get("pos")
+        if isinstance(pos, dict) and "x" in pos and "y" in pos:
+            if dist((float(x), float(y)), (float(pos["x"]), float(pos["y"]))) <= radius:
+                out.append(e)
+    return out

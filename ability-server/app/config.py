@@ -10,18 +10,33 @@ from pathlib import Path
 @dataclass
 class Config:
     # LLM（OpenAI 兼容协议）；key 从环境变量 ABILITY_LLM_API_KEY 读取
-    llm_base_url: str = "https://open.bigmodel.cn/api/paas/v4"
+    llm_base_url: str = "https://open.bigmodel.cn/api/coding/paas/v4"
     llm_api_key: str = os.environ.get("ABILITY_LLM_API_KEY", "")
     llm_model: str = "glm-5.3-flash"
     llm_temperature: float = 0.4
     # true = 不调真实 LLM，返回内置样例技能（无 key 跑通管线）
     llm_mock: bool = False
-    llm_timeout_seconds: float = 120.0
+    # 须大于最慢单次生成：glm-5.3-flash 写完整配置 JSON 实测可达 120~180s，
+    # 上限贴着生成时长会让收尾轮反复超时重试直至熔断（t09/t15 rejected 根因）。
+    llm_timeout_seconds: float = 600.0
 
-    # 生成 → 校验 → 带错重试 的最大轮数（含首轮，作用于 generate 阶段）
-    max_attempts: int = 3
-    # analyze 阶段 function-calling 工具循环的最大轮数
-    agent_max_rounds: int = 8
+    # v2 Agent 按角色分层路由（agent.py 两态机：plan_pending→strong，其余→mid）。
+    # mid 为 None 时回退 llm_model。weak 档（§4.4）：超限工具结果的摘要兜底——
+    # >4k 截断背闸触发时先用 weak 压缩全文再回喂，失败/None 回退盲截断。
+    llm_model_strong: str | None = "glm-5.3"
+    llm_model_mid: str | None = "glm-5.3-flash"
+    llm_model_weak: str | None = "glm-4.7-flash"
+
+    # v2 单线程自由循环的最大轮数（plan 修订含在内）
+    agent_max_rounds: int = 24
+    # update_plan 修订总次数上限（防无限刷计划）
+    agent_max_plan_updates: int = 6
+    # 预算闸（§4.4）：墙钟/tokens 双闸，每轮发起 LLM 调用前检查；耗尽时降级交付
+    # 最近一次 validate_draft ok 的 sanitized 草稿，无草稿宁 rejected。
+    # 计划默认 210s 对齐旧客户端 240s 死线；死线放开后按实测任务尾部（567.6s）
+    # +余量定 660。单次调用 timeout = min(llm_timeout_seconds, 剩余墙钟-5s)。
+    agent_max_wall_seconds: float = 660.0
+    agent_max_total_tokens: int = 500_000
 
     # 简单令牌鉴权：空 = 不鉴权（仅限本机开发）
     server_token: str = ""
@@ -38,9 +53,6 @@ class Config:
     # 技能语料（Unity 菜单⑤导出的现有 AbilityConfig 资产）——检索范例/风格统计/
     # 撞名检查的数据源；文件缺失时静默降级为无语料，按 mtime 惰性重载。
     corpus_path: str | None = str(Path(__file__).resolve().parent.parent / "data" / "skills.json")
-
-    server_host: str = "127.0.0.1"
-    server_port: int = 8765
 
 
 @dataclass

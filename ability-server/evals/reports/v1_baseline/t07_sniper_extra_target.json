@@ -1,0 +1,272 @@
+{
+ "envelope": {
+  "protocolVersion": 1,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "sniper",
+   "camp": 1,
+   "selfHpRate": 1.0,
+   "selfPos": {
+    "x": 6,
+    "y": 2
+   },
+   "skill": null,
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 2,
+      "y": 3
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime"
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 3,
+      "y": 5
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime"
+    },
+    {
+     "id": "m3",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 6
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier"
+    }
+   ]
+  },
+  "hostAssets": {
+   "canSpawnEntityIds": [],
+   "bulletCount": 0,
+   "iconKeys": []
+  },
+  "constraints": {
+   "request": "技能开启期间我的攻击可以同时多打一个目标。"
+  }
+ },
+ "taskId": "t07_sniper_extra_target",
+ "contract": "v1",
+ "wallSeconds": 0.03,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "sniper_s1",
+   "abilityName": "多重瞄准",
+   "description": "技能开启期间，每次攻击都会同时命中额外一个目标，多出的目标按原有索敌优先序自动选取；技能结束后攻击恢复为原来的目标数。",
+   "iconKey": null,
+   "sp": {
+    "totalSp": 0,
+    "initialSp": 0,
+    "chargeNum": 1,
+    "abilityAmount": 0.0,
+    "recoverMode": "Natural",
+    "consumeMode": "NoConsume",
+    "openMode": "Auto",
+    "recoverForbidDuringAbility": false,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnBeforeTargetSelect",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "attack_target_count_modifier",
+       "args": {
+        "entries": [
+         {
+          "key": "fields",
+          "value": "selectmaxnum",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "methods",
+          "value": "add",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "values",
+          "value": "1",
+          "type": "floatArray",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [],
+   "attempts": 1,
+   "phases": [
+    {
+     "phase": "analyze",
+     "detail": "start",
+     "t": 0.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool compute_cross_items round 1",
+     "t": 10.36
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool list_components round 1",
+     "t": 10.36
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 19.18
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_contract_doc round 2",
+     "t": 19.18
+    },
+    {
+     "phase": "describe",
+     "detail": "start",
+     "t": 49.42
+    },
+    {
+     "phase": "describe",
+     "detail": "plannedOps=['attack_target_count_modifier']",
+     "t": 67.63
+    },
+    {
+     "phase": "retrieve",
+     "detail": "top: ansel_t1(0.5), centurion(0.5)",
+     "t": 67.64
+    },
+    {
+     "phase": "generate",
+     "detail": "attempt 1",
+     "t": 67.64
+    },
+    {
+     "phase": "validate",
+     "detail": "ok",
+     "t": 117.43
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 117.43
+    }
+   ],
+   "analysis": "## 战局分析结论\n\n**一、敌我态势**\n- 自身：sniper（弓手/狙击位），位置 (6,2)，满血（hpRate 1.0），无友军（ally_count=0），只能自力输出。\n- 敌方共 3 个，全部满血：\n  - m1 史莱姆 (2,3)：550 HP，攻 120/防 30，距离 4.12（最脆、最近）\n  - m2 史莱姆 (3,5)：550 HP，攻 120/防 30，距离 4.24\n  - m3 士兵 (4,6)：1200 HP，攻 200/防 150，距离 4.47（坦克型）\n- 三个敌人距离集中在 4.1~4.5 区间，都在典型远程射程内，攻击索敌候选充足，\"多打一个目标\"大概率能命中第二个有效单位（如 m1 打 m2 时 m3 也在圈里）。\n\n**二、可利用机制机会**\n- 需求\"技能开启期间攻击同时多打一个目标\"与 `attack_target_count_modifier` 完全对口：该组件在 `OnBeforeTargetSelect` 时机改写本次攻击的 `selectMaxNum/selectMinNum`（CSV 三参数 fields/methods/values，支持 add/mult/set/div），改动只作用于\"当前这一次攻击\"，天然就是\"技能开启期间每次攻击 +1 目标\"的语义。\n- 推荐实现形态：单条规则，触发 `OnBeforeTargetSelect`（无额外条件，技能激活状态下才分发该事件），步骤仅一步 `attack_target_count_modifier`（fields=selectmaxnum, methods=add, values=1）。属于纯同步前缀步骤，无需 delay/wait_until，无状态残留。\n- 无需配对 restore 组件：该改写不落盘、逐事件生效，技能关闭后攻击自动恢复原目标数，不存在需要清理的持久覆盖。\n\n**三、本次生成的约束**\n- 宿主资源清单为空：`canSpawnEntityIds=[]`、`bulletCount=0`、`iconKeys=[]` —— 不可使用 `fire_bullets`、`spawn_entity`、`share_attack_target`（通信弹）等依赖宿主资产的组件，也不要引用任何召唤物/弹幕/图标。\n- 组件硬性限制：`attack_target_count_modifier` 仅在 `OnBeforeTargetSelect` 事件生效，其他事件会告警并跳过，触发器必须绑定该事件。\n- 目标选择发生在改写后、候选表在改写时已按优先级排好且未裁剪，因此 +1 目标会落在既有优先序的下一个候选上，无需额外排序/筛选拼装。\n- 方案应保持极简（单规则单步骤，reentry 用 IgnoreWhileRunning 即可，因序列同步完成），不引入黑板状态、随机分支或攻击范围/行为覆盖等不必要改动，避免超出\"多打一个目标\"的原始需求。",
+   "design": {
+    "abilityName": "多重瞄准",
+    "description": "技能开启期间，每次攻击都会同时命中额外一个目标，多出的目标按原有索敌优先序自动选取；技能结束后攻击恢复为原来的目标数。",
+    "designNotes": "触发：规则挂在 OnBeforeTargetSelect（groups 为空即无条件），仅当技能处于开启状态时该事件才会分发，天然实现『开启期间生效』。步骤：单一同步步骤 attack_target_count_modifier，args 为 fields=selectmaxnum / methods=add / values=1，通过事件桥 ref 回写改写本次攻击的 selectMaxNum，候选表在改写时已按优先级排好且未裁剪，故多出的目标即优先序中的下一个候选（当前 3 敌距离 4.1~4.5 均在射程内，候选充足）。不改动 selectMinNum，不设随机/分支。无落盘状态，逐事件生效，技能关闭后自动恢复，无需 restore 成对组件。reentry 取 IgnoreWhileRunning（序列全为立即步骤，事件重入前已结束）。宿主资产清单为空（无子弹/召唤/图标），不引入 fire_bullets、spawn_entity 等依赖项。",
+    "plannedOps": [
+     "attack_target_count_modifier"
+    ]
+   },
+   "cached": true
+  }
+ }
+}

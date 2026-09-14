@@ -1,0 +1,999 @@
+{
+ "envelope": {
+  "protocolVersion": 3,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "guard",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "guard",
+     "name": "guard",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 1600,
+     "maxHp": 1600,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 3
+     },
+     "attack": 620,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 1,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 3
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 5
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m3",
+     "name": "重甲领主",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 4500,
+     "maxHp": 4500,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 7
+     },
+     "attack": 500,
+     "defence": 400,
+     "magicRes": 30,
+     "job": -1,
+     "label": "boss",
+     "massLevel": 5
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 1,
+   "subJob": 0,
+   "cost": 20,
+   "baseAttackTime": 1.2,
+   "damageType": 0,
+   "blockOccupation": 2,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "给一个主动技：开技能时对眼前最近的敌人打出一发高倍率物理伤害。"
+  }
+ },
+ "taskId": "t04_guard_single_target_burst",
+ "contract": "v2",
+ "wallSeconds": 631.76,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "guard_s1",
+   "abilityName": "破军一击",
+   "description": "开技能时对眼前最近的敌人造成相当于攻击力300%的物理伤害",
+   "sp": {
+    "totalSp": 20,
+    "initialSp": 5,
+    "chargeNum": 1,
+    "abilityAmount": 1.0,
+    "recoverMode": "Natural",
+    "consumeMode": "Natural",
+    "openMode": "Manual",
+    "recoverForbidDuringAbility": true,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "apply_animation_override",
+       "args": {
+        "entries": [
+         {
+          "key": "mode",
+          "value": "once",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "slots",
+          "value": "AttackRemote,AttackClose",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "resources",
+          "value": "Skill2,Skill2",
+          "type": "stringArray",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "select_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "subjectMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "selectionMode",
+          "value": "ring",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "campRelation",
+          "value": "opposing",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "radius",
+          "value": "1.5",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "minRadius",
+          "value": "0",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "force",
+          "value": "True",
+          "type": "bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputEntitiesKey",
+          "value": "guard_s1_r1_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputCountKey",
+          "value": "guard_s1_r1_count",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "select_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "subjectMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "selectionMode",
+          "value": "ring",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "campRelation",
+          "value": "opposing",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "radius",
+          "value": "2.5",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "minRadius",
+          "value": "1.5",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "force",
+          "value": "True",
+          "type": "bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputEntitiesKey",
+          "value": "guard_s1_r2_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputCountKey",
+          "value": "guard_s1_r2_count",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "select_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "subjectMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "selectionMode",
+          "value": "ring",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "campRelation",
+          "value": "opposing",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "radius",
+          "value": "3.5",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "minRadius",
+          "value": "2.5",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "force",
+          "value": "True",
+          "type": "bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputEntitiesKey",
+          "value": "guard_s1_r3_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputCountKey",
+          "value": "guard_s1_r3_count",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "write_blackboard",
+       "args": {
+        "entries": [
+         {
+          "key": "key",
+          "value": "guard_s1_fired",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "value",
+          "value": "False",
+          "type": "Bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "method",
+          "value": "set",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "source",
+          "value": "value",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "apply_damage",
+       "args": {
+        "entries": [
+         {
+          "key": "targetMode",
+          "value": "blackboard",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "blackboardKey",
+          "value": "guard_s1_r1_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "attackerMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "baseValueMode",
+          "value": "attack",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "multiplier",
+          "value": "3",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "damageType",
+          "value": "0",
+          "type": "int",
+          "fromBlackboard": false
+         },
+         {
+          "key": "applyType",
+          "value": "2",
+          "type": "int",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [
+        {
+         "units": []
+        }
+       ],
+       "steps": [
+        {
+         "op": "write_blackboard",
+         "args": {
+          "entries": [
+           {
+            "key": "key",
+            "value": "guard_s1_fired",
+            "type": "string",
+            "fromBlackboard": false
+           },
+           {
+            "key": "value",
+            "value": "True",
+            "type": "Bool",
+            "fromBlackboard": false
+           },
+           {
+            "key": "method",
+            "value": "set",
+            "type": "string",
+            "fromBlackboard": false
+           },
+           {
+            "key": "source",
+            "value": "value",
+            "type": "string",
+            "fromBlackboard": false
+           }
+          ]
+         },
+         "condition": [],
+         "steps": [],
+         "elseSteps": []
+        }
+       ],
+       "elseSteps": []
+      },
+      {
+       "op": "apply_damage",
+       "args": {
+        "entries": [
+         {
+          "key": "targetMode",
+          "value": "blackboard",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "blackboardKey",
+          "value": "guard_s1_r2_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "attackerMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "baseValueMode",
+          "value": "attack",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "multiplier",
+          "value": "3",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "damageType",
+          "value": "0",
+          "type": "int",
+          "fromBlackboard": false
+         },
+         {
+          "key": "applyType",
+          "value": "2",
+          "type": "int",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [
+        {
+         "units": []
+        }
+       ],
+       "steps": [
+        {
+         "op": "write_blackboard",
+         "args": {
+          "entries": [
+           {
+            "key": "key",
+            "value": "guard_s1_fired",
+            "type": "string",
+            "fromBlackboard": false
+           },
+           {
+            "key": "value",
+            "value": "True",
+            "type": "Bool",
+            "fromBlackboard": false
+           },
+           {
+            "key": "method",
+            "value": "set",
+            "type": "string",
+            "fromBlackboard": false
+           },
+           {
+            "key": "source",
+            "value": "value",
+            "type": "string",
+            "fromBlackboard": false
+           }
+          ]
+         },
+         "condition": [],
+         "steps": [],
+         "elseSteps": []
+        }
+       ],
+       "elseSteps": []
+      },
+      {
+       "op": "apply_damage",
+       "args": {
+        "entries": [
+         {
+          "key": "targetMode",
+          "value": "blackboard",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "blackboardKey",
+          "value": "guard_s1_r3_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "attackerMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "baseValueMode",
+          "value": "attack",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "multiplier",
+          "value": "3",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "damageType",
+          "value": "0",
+          "type": "int",
+          "fromBlackboard": false
+         },
+         {
+          "key": "applyType",
+          "value": "2",
+          "type": "int",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [
+        {
+         "units": []
+        }
+       ],
+       "steps": [
+        {
+         "op": "write_blackboard",
+         "args": {
+          "entries": [
+           {
+            "key": "key",
+            "value": "guard_s1_fired",
+            "type": "string",
+            "fromBlackboard": false
+           },
+           {
+            "key": "value",
+            "value": "True",
+            "type": "Bool",
+            "fromBlackboard": false
+           },
+           {
+            "key": "method",
+            "value": "set",
+            "type": "string",
+            "fromBlackboard": false
+           },
+           {
+            "key": "source",
+            "value": "value",
+            "type": "string",
+            "fromBlackboard": false
+           }
+          ]
+         },
+         "condition": [],
+         "steps": [],
+         "elseSteps": []
+        }
+       ],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [],
+   "rounds": 11,
+   "phases": [
+    {
+     "phase": "plan",
+     "detail": "round 1 model=glm-5.3",
+     "t": 0.0
+    },
+    {
+     "phase": "plan",
+     "detail": "tool update_plan",
+     "t": 15.26
+    },
+    {
+     "phase": "act",
+     "detail": "tool list_components digest failed; truncation fallback",
+     "t": 75.49
+    },
+    {
+     "phase": "act",
+     "detail": "tool list_components",
+     "t": 75.49
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_contract_doc digest failed; truncation fallback",
+     "t": 75.76
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_contract_doc",
+     "t": 75.76
+    },
+    {
+     "phase": "plan",
+     "detail": "round 2 model=glm-5.3",
+     "t": 75.76
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc digest failed; truncation fallback",
+     "t": 79.7
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 79.7
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 79.7
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_schema_vocab",
+     "t": 79.7
+    },
+    {
+     "phase": "act",
+     "detail": "round 3 model=glm-5.3-flash",
+     "t": 79.7
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc digested via glm-4.7-flash",
+     "t": 149.73
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 149.73
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 149.73
+    },
+    {
+     "phase": "act",
+     "detail": "round 4 model=glm-5.3-flash",
+     "t": 149.73
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 155.84
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 155.85
+    },
+    {
+     "phase": "act",
+     "detail": "round 5 model=glm-5.3-flash",
+     "t": 155.85
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 162.2
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 162.2
+    },
+    {
+     "phase": "act",
+     "detail": "round 6 model=glm-5.3-flash",
+     "t": 162.2
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 172.63
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill digested via glm-4.7-flash",
+     "t": 218.97
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 218.97
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 218.98
+    },
+    {
+     "phase": "act",
+     "detail": "round 7 model=glm-5.3-flash",
+     "t": 218.98
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc digest failed; truncation fallback",
+     "t": 329.89
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 329.89
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 329.89
+    },
+    {
+     "phase": "act",
+     "detail": "round 8 model=glm-5.3-flash",
+     "t": 329.89
+    },
+    {
+     "phase": "act",
+     "detail": "tool list_components digest failed; truncation fallback",
+     "t": 348.33
+    },
+    {
+     "phase": "act",
+     "detail": "tool list_components",
+     "t": 348.33
+    },
+    {
+     "phase": "act",
+     "detail": "round 9 model=glm-5.3-flash",
+     "t": 348.33
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 494.9
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 494.9
+    },
+    {
+     "phase": "act",
+     "detail": "round 10 model=glm-5.3-flash",
+     "t": 494.9
+    },
+    {
+     "phase": "review",
+     "detail": "tool validate_draft",
+     "t": 609.12
+    },
+    {
+     "phase": "act",
+     "detail": "round 11 model=glm-5.3-flash",
+     "t": 609.12
+    },
+    {
+     "phase": "plan",
+     "detail": "tool update_plan",
+     "t": 631.3
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 631.3
+    },
+    {
+     "phase": "degraded",
+     "detail": "budget exhausted (wall_budget_exhausted); delivering last validated draft",
+     "t": 631.3
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 631.3
+    }
+   ],
+   "plan": "一、研究（已完成）\n- 契约/词表/组件文档已读齐；先例锚点：ansel_s1、eyjafjalla_s2（主动技 SP 形态、OnAbilityBegin 触发、Skill2 动画 once 写法）、ebnhlz_t2（config 编码形态）、creeper_t1（倍率量级 3.0 单体上限）。\n- select_targets 无排序参数 → \"最近\"用距离环带近似：各环带按近到远依次选取，首个非空环带造成伤害后封锁更远环带。\n\n二、修订（validate 发现 apply_damage 不消费 condition，只有 wait_until/branch/loop 消费）\n- 结构改为：三个 branch 步骤承载条件，apply_damage 移入 branch 的 steps[] 内：\n  1. branch(r1_count>=1)：伤 r1 + 置 guard_s1_fired=True\n  2. branch(r2_count>=1 且 fired≠True)：伤 r2 + 置 fired=True\n  3. branch(r3_count>=1 且 fired≠True)：伤 r3 + 置 fired=True\n- 先读 branch 组件文档确认参数形态再重写配置。\n\n三、其余设计不变\n- 触发 OnAbilityBegin（Manual）；SP total 20 / initial 5 / consume Natural / abilityAmount 1.0；动画 once AttackRemote,AttackClose→Skill2（宿主有 Skill2）。\n- 倍率 3.0 物理，量级对齐 creeper_t1 单体段。\n\n四、交付\n- 重写配置 → validate_draft → submit_skill。",
+   "tokens": {
+    "calls": 13,
+    "prompt_tokens": 129443,
+    "completion_tokens": 21393
+   },
+   "toolOutputs": [
+    {
+     "tool": "list_components",
+     "chars": 4402,
+     "full": "{\"components\": [{\"op\": \"apply_abnormal_state\", \"class\": \"ApplyAbnormalState\", \"summary\": \"mode=aura 要求 blackboardKey/outputTarget/outputState 三键齐全否则跳过；\"}, {\"op\": \"apply_animation_override\", \"class\": \"ApplyAnimationOverride\", \"summary\": \"slots/resources 缺失不应用；\"}, {\"op\": \"apply_buff\", \"class\": \"ApplyBuff\", \"summary\": \"modifiers 首次构建后缓存复用，magnitudes 即使 fromBlackboard=true 也冻结在首次读值——动态调值用 update_buff；\"}, {\"op\": \"apply_damage\", \"class\": \"ApplyDamage\", \"summary\": \"targetMode=eventTarget 仅在 DamageEventBase 派生事件上可用；\"}, {\"op\": \"apply_impulse\", \"class\": \"ApplyImpulse\", \"summary\": \"ctx.entity==null 时整体跳过；\"}, {\"op\": \"attack_behavior_override\", \"class\": \"AttackBehaviorOverride\", \"summary\": \"damageType/targetPriority 经 HasKey 门控：键不存在保持原值；\"}, {\"op\": \"attack_behavior_restore\", \"class\": \"AttackBehaviorRestore\", \"summary\": \"快照逆序恢复（同实体多重覆盖时最早的快照胜）；\"}, {\"op\": \"attack_candidate_override\", \"class\": \"AttackCandidateOverride\", \"summary\": \"仅当当前事件为 BeforeTargetSelectEvent 时生效（规则必须触发 OnBeforeTargetSelect）；\"}, {\"op\": \"attack_event_value_modifier\", \"class\": \"AttackEventValueModifier\", \"summary\": \"仅作用于 DamageEventBase 派生事件（BeforeAttack/AfterAttack/BeforeTakeDamage/AfterTakeDamage），否则报错整体跳过；\"}, {\"op\": \"attack_range_override\", \"class\": \"AttackRangeOverride\", \"summary\": \"与 attack_range_restore 成对使用（begin 触发 override、end 触发 restore）；\"}, {\"op\": \"attack_range_restore\", \"class\": \"AttackRangeRestore\", \"summary\": \"与 attack_range_override 成对使用；\"}, {\"op\": \"attack_target_count_modifier\", \"class\": \"AttackTargetCountModifier\", \"summary\": \"仅在 OnBeforeTargetSelect（BeforeTargetSelectEvent）触发时生效，其他事件告警跳过；\"}, {\"op\": \"charge_state_controller\", \"class\": \"ChargeStateController\", \"summary\": \"仅响应 TickEvent 且要求黑板非空，规则须用 OnTick；\"}, {\"op\": \"destroy_abnormal_state\", \"class\": \"DestroyAbnormalState\", \"summary\": \"两键都必须配置且对应列表存在，否则空操作；\"}, {\"op\": \"destroy_buff\", \"class\": \"DestroyBuff\", \"summary\": \"两键都必须配置（任一为空即空操作）；\"}, {\"op\": \"destroy_entity\", \"class\": \"DestroyEntity\", \"summary\": \"目标经 HashSet 去重；\"}, {\"op\": \"filter_targets\", \"class\": \"EntityFilter\", \"summary\": \"四个数组平行、按最短长度取齐，无完整条件时列表保持不变；\"}, {\"op\": \"fire_bullets\", \"class\": \"FireBullets\", \"summary\": \"bulletDataIndex 依赖宿主 EntityData.Bullets 弹幕列表（GameObject 引用装不进 ParamList 故按索引登记），出生点来自 BulletData 配置的 BulletSpawnTransform（Muzzle 挂点约定）；\"}, {\"op\": \"force_attack\", \"class\": \"ForceAttack\", \"summary\": \"对每个目标调用 Attack.TryToAttack(空目标, forceChange:true, 不可打断)：只播攻击动画并走 OnAttackSuccessfully 节拍（SP 消耗、事件桥照常），不索敌不直接造成伤害；\"}, {\"op\": \"force_reset_attack\", \"class\": \"ForceResetAttack\", \"summary\": \"对每个目标调用 Attack.ForceResetAttack()：重置攻击计时器、按当前攻击行为重新索敌并尝试强制进入攻击状态（有真实目标、真实伤害）；\"}, {\"op\": \"generate_skill\", \"class\": \"GenerateSkill\", \"summary\": \"运行时 LLM 生成技能：OnTrigger 把战局快照+宿主清单异步提交 ability-server 后立即返回（不阻塞步骤序列），生成完成（约 1-2 分钟）后经客户端终检并 ReplaceSkill 替换当前技能（仅本场有效）。有未完成任务时忽略再次触发；\"}, {\"op\": \"modify_cost\", \"class\": \"ModifyCost\", \"summary\": \"立即生效的全局费用变更，不走实体/黑板；\"}, {\"op\": \"prepend_entities\", \"class\": \"PrependEntities\", \"summary\": \"去重是提权语义：已在目标列表中的源实体会从原位移除并整体提到最前；\"}, {\"op\": \"random_roll\", \"class\": \"RandomRoll\", \"summary\": \"input 恒按字符串读取；\"}, {\"op\": \"recover_skill_sp\", \"class\": \"RecoverSkillSp\", \"summary\": \"必须有活跃宿主实体：脱离执行（ctx.entity 为 null）报错跳过；\"}, {\"op\": \"remove_animation_override\", \"class\": \"RemoveAnimationOverride\", \"summary\": \"既读也写 inputKey（读记录列表，移除后 Set 回写或 Remove 删键）；\"}, {\"op\": \"select_landing_points\", \"class\": \"SelectLandingPoints\", \"summary\": \"随机流水：攻击范围内敌群随机原位 → 不足补射程格（地面层先于高台层，每点 ±offset 偏移）→ 两池用尽交替重复选；\"}, {\"op\": \"select_targets\", \"class\": \"EntitySelector\", \"summary\": \"eventTarget 仅在 DamageEventBase 派生事件上可用；\"}, {\"op\": \"set_entity_state\", \"class\": \"SetEntityState\", \"summary\": \"state=Attack 不登记攻击帧回调、state=Die 不走 Entity.Die 完整死亡链；\"}, {\"op\": \"share_attack_target\", \"class\": \"ShareAttackTarget\", \"summary\": \"仅在 BeforeAttackEvent 且 attackEvent.target 非空时触发；\"}, {\"op\": \"shared_target_extra_attack\", \"class\": \"SharedTargetExtraAttack\", \"summary\": \"协议对：与 share_attack_target 共用 queueKey/activeSourceKey 默认值；\"}, {\"op\": \"spawn_entity\", \"class\": \"SpawnEntity\", \"summary\": \"召唤源锁定宿主 EntityData.CanSpawnEntityIds 注册表（spawnIndex 选第几项），不接受任意实体 id；\"}, {\"op\": \"update_buff\", \"class\": \"UpdateBuff\", \"summary\": \"与 apply_buff 的差异：输入对是持久句柄（不消费清键）、modifiers 每次 OnTrigger 重建不缓存；\"}, {\"op\": \"watch_summon_death\", \"class\": \"WatchSummonDeath\", \"summary\": \"订阅按列表差量维护（OnTrigger 同步一次，OnTick 补差）；\"}, {\"op\": \"write_blackboard\", \"class\": \"WriteBlackboard\", \"summary\": \"method 的 switch 不做 Normalize（大小写敏感）；\"}]}"
+    },
+    {
+     "tool": "read_contract_doc",
+     "chars": 27596,
+     "full": "{\"doc\": \"<!-- docs/ability-steps.md -->\\n# Ability Steps\\n\\nThe AbilitySystem stores behavior as event-driven rules. Each rule owns an\\nordered step sequence, so one matching trigger can select targets, apply an\\neffect, yield, and continue without splitting the flow across unrelated\\ntop-level entries.\\n\\n## Stored shape\\n\\n```text\\nAbilityConfig\\n└─ rules[]: AbilityRuleConfig\\n   ├─ triggers[]: ConditionConfig\\n   ├─ reentry: IgnoreWhileRunning | Restart | Parallel\\n   └─ steps[]: StepConfig\\n      ├─ op: string\\n      ├─ args: ParamList\\n      ├─ condition: ConditionGroup[]\\n      ├─ steps[]: StepConfig\\n      └─ elseSteps[]: StepConfig\\n```\\n\\n`rules` is the top-level execution list. `op` is an open string registry, so\\nadding an operation does not require an enum or serialized-schema change.\\n`args` uses the `(key, type, value, fromBlackboard)` encoding documented in\\n[Skill Components](skill-components/README.md).\\n\\nConceptual authoring example (the Unity YAML expands every `args` entry):\\n\\n```yaml\\nrules:\\n  - triggers:\\n      - { triggerEvent: OnAfterAttack, groups: [] }\\n    reentry: IgnoreWhileRunning\\n    steps:\\n      - { op: select_targets, args: { ... } }\\n      - { op: apply_damage, args: { ... } }\\n      - { op: delay, args: { seconds: 0.3 } }\\n      - { op: apply_damage, args: { ... } }\\n      - { op: wait_until, condition: [ ... ] }\\n```\\n\\nAuthor assets with `rules[].steps[]` and canonical operation names. The runtime\\nalso recognizes serialized component payloads and PascalCase component names as\\ncompatibility inputs; validators and authoring tools use the canonical shape.\\n\\n## Trigger and sequence semantics\\n\\nEach `ConditionConfig` selects one `TriggerEvent`. Its `groups` are OR-ed;\\nunits inside a group are AND-ed. An empty group list passes unconditionally.\\nWhen an event is dispatched, every matching trigger entry is evaluated against\\nthe entity's shared Blackboard. Every passing entry requests a start of its\\nowning rule.\\n\\nCondition-unit ops: `Equal`/`NotEqual`/`Greater`/`GreaterOrEqual`/`Less`/\\n`LessOrEqual` compare the left blackboard key against the `rightValue`\\nliteral (numeric when both sides parse, else ordinal string; a missing key\\nreads as `\\\"\\\"` = unequal). `KeyEqual`/`KeyNotEqual` compare **two blackboard\\nkeys** (`op(leftKey, rightKey)`) for identity: a singleton `List<Entity>` is\\nunwrapped (WriteBlackboard `path=origin` vs the bare-Entity\\n`summoner@spawn_entity` protocol), entities compare by reference, other\\ntypes by boxed `Equals`, and a missing key on either side is unequal.\\n\\nSteps run in array order. An operation either completes immediately or remains\\nrunning. Immediate operations advance to the next step in the same call. A\\nrunning operation pauses only its sequence; the runner advances it on later\\nticks until it completes, then continues with the next step.\\n\\nThe runner snapshots all existing executions across all abilities before it\\nadvances any of them. A sequence started while that snapshot is being advanced\\nruns its immediate `Tick(0)` prefix, but it does not consume that FixedUpdate's\\n`deltaTime`; its first timed advance happens on the next runner tick.\\n\\nThis creates a **synchronous prefix**: all leading immediate steps finish\\nbefore event dispatch returns. Put combat-event mutation and other\\ndispatch-time effects in that prefix. Once a sequence yields (`delay`, an\\nunsatisfied `wait_until`, or a yielding nested operation), the source event has\\nalready continued through the rest of the game pipeline; a later step cannot\\nretroactively change its completed outcome.\\n\\nOne pump advances at most 1,024 synchronous step transitions. This prevents an\\nunbounded immediate loop from freezing a frame. If a sequence exhausts that\\nbudget, its remaining \\\"immediate\\\" work resumes on a later runner tick and is\\ntherefore outside the dispatch-time prefix. Keep event mutation near the front\\nand put an actual yielding operation inside intentionally unbounded loops.\\n\\nSequences belonging to different rules are independent. They communicate only\\nthrough the entity's shared Blackboard and the game state touched by their\\noperations.\\n\\n## Reentry\\n\\n`reentry` applies when the same rule is requested again while it has at least\\none running sequence. A sequence made entirely from immediate operations has\\nalready finished before another event can reenter it.\\n\\n| Value | Behavior |\\n|---|---|\\n| `IgnoreWhileRunning` | Ignore the new request and let the existing sequence continue. |\\n| `Restart` | Cancel the existing sequence, clean up its active operations, and start again from step 0. |\\n| `Parallel` | Start another independent sequence alongside existing runs. Each run owns its own operation execution state. |\\n\\nReentry is per rule, not per operation name. Repeated passing trigger entries\\ntherefore pass through the same policy.\\n\\n`Parallel` isolates sequence cursors and native POCO operation objects only.\\nParallel runs still share the entity Blackboard, and component-backed steps\\nstill share the one component instance bound to that configured step. Use\\nrun-specific Blackboard keys and avoid stateful component adapters when runs\\nmust not interfere.\\n\\n## Canonical operations\\n\\n`RegisteredOps` exposes canonical names only. The 36 component-backed\\noperations use snake_case. PascalCase component names are lookup aliases.\\n\\n| Canonical `op` | Backing implementation / reference |\\n|---|---|\\n| `apply_abnormal_state` | [ApplyAbnormalState](skill-components/ApplyAbnormalState.md) |\\n| `apply_animation_override` | [ApplyAnimationOverride](skill-components/ApplyAnimationOverride.md) |\\n| `apply_buff` | [ApplyBuff](skill-components/ApplyBuff.md) |\\n| `apply_damage` | [ApplyDamage](skill-components/ApplyDamage.md) |\\n| `apply_impulse` | [ApplyImpulse](skill-components/ApplyImpulse.md) |\\n| `attack_behavior_override` | [AttackBehaviorOverride](skill-components/AttackBehaviorOverride.md) |\\n| `attack_behavior_restore` | [AttackBehaviorRestore](skill-components/AttackBehaviorRestore.md) |\\n| `attack_event_value_modifier` | [AttackEventValueModifier](skill-components/AttackEventValueModifier.md) |\\n| `attack_candidate_override` | [AttackCandidateOverride](skill-components/AttackCandidateOverride.md) |\\n| `attack_range_override` | [AttackRangeOverride](skill-components/AttackRangeOverride.md) |\\n| `attack_range_restore` | [AttackRangeRestore](skill-components/AttackRangeRestore.md) |\\n| `attack_target_count_modifier` | [AttackTargetCountModifier](skill-components/AttackTargetCountModifier.md) |\\n| `charge_attack_damage_modifier` | [ChargeAttackDamageModifier](skill-components/ChargeAttackDamageModifier.md) |\\n| `charge_attack_reserve_pool` | [ChargeAttackReservePool](skill-components/ChargeAttackReservePool.md) |\\n| `charge_state_controller` | [ChargeStateController](skill-components/ChargeStateController.md) |\\n| `destroy_abnormal_state` | [DestroyAbnormalState](skill-components/DestroyAbnormalState.md) |\\n| `destroy_buff` | [DestroyBuff](skill-components/DestroyBuff.md) |\\n| `destroy_entity` | [DestroyEntity](skill-components/DestroyEntity.md) |\\n| `filter_targets` | [EntityFilter](skill-components/EntityFilter.md) |\\n| `fire_bullets` | [FireBullets](skill-components/FireBullets.md) |\\n| `force_attack` | [ForceAttack](skill-components/ForceAttack.md) |\\n| `force_reset_attack` | [ForceResetAttack](skill-components/ForceResetAttack.md) |\\n| `modify_cost` | [ModifyCost](skill-components/ModifyCost.md) |\\n| `prepend_entities` | [PrependEntities](skill-components/PrependEntities.md) |\\n| `random_roll` | [RandomRoll](skill-components/RandomRoll.md) |\\n| `recover_skill_sp` | [RecoverSkillSp](skill-components/RecoverSkillSp.md) |\\n| `remove_animation_override` | [RemoveAnimationOverride](skill-components/RemoveAnimationOverride.md) |\\n| `select_targets` | [EntitySelector](skill-components/EntitySelector.md) |\\n| `select_landing_points` | [SelectLandingPoints](skill-components/SelectLandingPoints.md) |\\n| `set_entity_state` | [SetEntityState](skill-components/SetEntityState.md) |\\n| `share_attack_target` | [ShareAttackTarget](skill-components/ShareAttackTarget.md) |\\n| `shared_target_extra_attack` | [SharedTargetExtraAttack](skill-components/SharedTargetExtraAttack.md) |\\n| `spawn_entity` | [SpawnEntity](skill-components/SpawnEntity.md) |\\n| `update_buff` | [UpdateBuff](skill-components/UpdateBuff.md) |\\n| `watch_summon_death` | [WatchSummonDeath](skill-components/WatchSummonDeath.md) |\\n| `write_blackboard` | [WriteBlackboard](skill-components/WriteBlackboard.md) |\\n| `delay` | Yielding primitive; see below. |\\n| `wait_until` | Yielding condition primitive; see below. |\\n| `branch` | Conditional composite primitive; see below. |\\n| `loop` | Repeating composite primitive; see below. |\\n\\n## Primitive operations\\n\\nPrimitive operations use the same `StepConfig` and `ParamList` representation\\nas component-backed operations. Arguments marked as BB-capable honor\\n`fromBlackboard`; their value is resolved when execution first reaches that\\noperation.\\n\\n### `delay`\\n\\n| Argument | Type | Default | Meaning |\\n|---|---|---:|---|\\n| `seconds` | `Float`, BB-capable | `0` | Duration measured by accumulated ability-runner tick delta. |\\n\\nThe timer starts with a zero-delta execution during trigger dispatch, then\\nadvances on later runner ticks. Negative tick deltas and negative durations are\\nclamped to zero. A zero duration completes synchronously.\\n\\n### `wait_until`\\n\\n| Field | Type | Meaning |\\n|---|---|---|\\n| `condition` | OR-of-AND expression | Predicate re-evaluated while the operation is running. |\\n\\nEvaluates the step's `condition` using the normal OR-of-AND condition\\nsemantics. It completes synchronously when the condition already passes;\\notherwise it re-evaluates on later ticks. An empty condition passes. There is\\nno timeout argument; cancellation or teardown is the escape path for a\\ncondition that never becomes true.\\n\\n### `branch`\\n\\n| Field | Type | Meaning |\\n|---|---|---|\\n| `condition` | OR-of-AND expression | Predicate sampled once on entry. |\\n| `steps` | nested steps | Selected when the predicate passes. |\\n| `elseSteps` | nested steps | Selected when the predicate fails. |\\n\\nEvaluates `condition` once when reached. A passing condition executes nested\\n`steps`; a failing condition executes `elseSteps`. The branch completes when\\nthe selected child sequence completes. An empty condition selects `steps`.\\n\\n### `loop`\\n\\n| Argument/field | Type | Default | Meaning |\\n|---|---|---:|---|\\n| `count` | `Int`, BB-capable | `1` without `condition`; `-1` with one | Maximum iterations. A negative value means no count limit. |\\n| `condition` | OR-of-AND expression | empty | Continue predicate, evaluated before every iteration. |\\n| `steps` | nested steps | empty | Loop body. |\\n\\nBoth limits apply when both are present: the loop starts an iteration only\\nwhile the count has not been reached and the condition passes. A count of zero\\ncompletes without running the body. Every iteration receives fresh child\\nexecution state, while iterations share the event context and Blackboard. A\\nnegative count with an empty/always-true condition is unbounded and must contain\\na yielding operation to avoid repeatedly consuming the synchronous pump\\nbudget.\\n\\n## Operation lifecycle\\n\\nNative POCO operations and component-backed adapters have related but distinct\\nlifecycles.\\n\\nFor every native step activation, the registry factory creates a fresh\\n`AbilityStepOp`. The executor calls `OnInit` once, `OnTick(..., 0)` immediately,\\nand then `OnTick` on runner ticks while the status is `Running`. Completion\\ncalls `OnTeardown`. Cancellation (including `Restart`) calls `OnCancel` and\\nthen `OnTeardown`.\\n\\nComponent-backed steps bind one existing `AbilityComponentBase` instance per\\nconfigured step when the runtime is built. Entity initialization calls the\\ncomponent's `OnInit`; reaching the step calls `OnTrigger` and the adapter\\ncompletes immediately. While the ability is active, the runner continues to\\ncall the component's normal `OnTick`; ability removal/runner teardown calls its\\nnormal `OnTeardown`.\\n\\nEvery actual `SetActive` state transition first cancels executions from the\\ncurrent state lifetime, then changes the state and dispatches the corresponding Begin\\nor End rules. Thus `OnAbilityEnd` rules may yield during a normal inactive\\nlifetime, but a later `SetActive(true)` cancels their unfinished work before\\n`OnAbilityBegin` is dispatched. Runner teardown and extra-ability removal cancel\\nagain after End dispatch, so an End rule fired as part of destruction or removal\\nis guaranteed only its synchronous prefix.\\n\\n`StepConfig` and its args are configuration and must not hold mutable execution\\nstate. Native POCO state is isolated between `Parallel` runs because every\\nactivation has its own operation object. Component-backed adapters share their\\nbound component instance, so a stateful component is not made\\nparallel-safe merely by selecting `RuleReentry.Parallel`; review that component\\nbefore using parallel reentry.\\n\\n## Extending the registry\\n\\nAn operation is a POCO runtime implementation registered under a unique\\ncanonical lowercase snake_case string that describes one reusable behavior.\\nThe auto-registry discovers attributed operations at\\nstartup:\\n\\n```csharp\\n[RegisterAbilityStepOp(\\\"my_operation\\\")]\\npublic sealed class MyOperation : AbilityStepOp\\n{\\n    public override void OnInit(AbilityContext ctx)\\n    {\\n        // Resolve ctx.step.args and initialize this activation's state.\\n    }\\n\\n    public override AbilityStepStatus OnTick(AbilityContext ctx, float deltaTime)\\n    {\\n        return AbilityStepStatus.Completed;\\n    }\\n\\n    public override void OnCancel(AbilityContext ctx) { }\\n    public override void OnTeardown(AbilityContext ctx) { }\\n}\\n```\\n\\nCode-owned registration can instead call\\n`AbilityStepOpRegistry.Register(canonicalOp, factory, aliases)`. Registry\\nfactories must return a new operation object for every call. `RegisteredOps`\\ncontains sorted canonical names; `IsRegistered`, `Create`, and\\n`ResolveCanonical` also accept compatibility aliases. A duplicate canonical\\nname or alias fails registration with `InvalidOperationException`; registration\\norder never silently changes which implementation an asset resolves.\\n\\nDo not add an enum member or dispatch `switch` for an operation. Register one\\ncanonical name and configure aliases only for serialized compatibility.\\nUnknown operation names are\\nconfiguration errors and should be caught by asset validation before play.\\n\\n\\n<!-- docs/skill-components/README.md -->\\n# Skill Components\\n\\nParameter reference for the component-backed ability step operations in the\\nproject. One file per implementation; this README is the index.\\n\\nWhen you need to look up what a `key:` row in `rules[].steps[].args` means,\\nclick the component name in the list below. For rule sequencing, primitive\\noperations, reentry, and lifecycle semantics, see [Ability Steps](../ability-steps.md).\\n\\n## Storage\\n\\nAn `AbilityConfig` stores `rules[]`. Each rule owns its event/condition\\n`triggers[]`, its `reentry` policy, and an ordered `steps[]` sequence. A step's\\noperation name is stored in `op`; its ordinary parameters live in\\n`args.entries[]` (a `ParamList`). Composite operations can additionally use\\n`condition`, nested `steps`, and `elseSteps`.\\n\\nEach parameter entry is a `(key, type, value, fromBlackboard)` quadruple:\\n\\n- **key** — the parameter name (must match what the component's `OnInit`\\n  reads via `p.GetXxxLazy(key, defaultValue, ctx.sharedBlackboard)`).\\n- **type** — a `ParamValueType` enum tag that controls how `value` is\\n  parsed at OnInit and (for components using `GetValueLazy`) at apply time.\\n- **value** — the parameter's value, stored as a string. Parsed per `type`\\n  on the appropriate typed getter.\\n- **fromBlackboard** (bool, default `false`) — when `true`, the runtime\\n  treats `value` as a BlackBoard key name, not a literal. The typed\\n  getter re-reads the BlackBoard on every invocation, so the same config\\n  can yield different results across step executions. See\\n  `WriteBlackboard` for the full mechanic.\\n\\n## Type encoding\\n\\n| `type` tag | Storage form | Example |\\n|---|---|---|\\n| `Int` | Decimal integer | `5` |\\n| `Float` | `float.ToString(\\\"R\\\")` (round-trip) | `1.5` |\\n| `Bool` | `True` / `False` (matches `bool.TryParse`) | `True` |\\n| `String` | Literal text (BB keys are stored under this tag) | `skill_buff` |\\n| `Vector2Int` | `x,y` (comma) | `1,1` |\\n| `AnimationRef` | Asset path / reference string | `Animations/Swing` |\\n| `Prefab` | Asset path / reference string | `Prefabs/Bullet` |\\n| `EntityId` | Entity id string | `hero_warrior` |\\n| `Color` | Hex / `R,G,B,A` string | `#FF8800FF` |\\n\\nThe last 4 have no typed `GetXxxLazy` and currently are only consumed by\\n`WriteBlackboard` (which falls through to storing the string as-is).\\n\\n## CSV form\\n\\nSome component-backed operations accept CSV strings for parallel-array params.\\nThe storage type is `String`; the component splits on `,` and trims whitespace\\ninside its lazy getter:\\n\\n| Convention | Format | Example | Used by |\\n|---|---|---|---|\\n| `FloatCsv` | Plain floats, comma-separated | `0.5,1.0,-0.25` | `ApplyBuff`, `UpdateBuff`, `AttackEventValueModifier`, `AttackTargetCountModifier` |\\n| `StringCsv` | Plain strings, comma-separated | `multiplyer,cumbo`, `Attack,AttackSpeed` | `AttackEventValueModifier`, `AttackTargetCountModifier`, `ApplyBuff`/`UpdateBuff` attributes & ops |\\n\\n## DamageType encoding (convention)\\n\\nComponents that take a `damageType` parameter accept an int in the\\nrange 0–3:\\n\\n| Value | Meaning |\\n|---|---|\\n| `0` | Physical |\\n| `1` | Magical |\\n| `2` | Siege |\\n| `3` | Healing; attack target selection switches to same-camp entities |\\n\\nThe literal `3` has project-wide meaning, not per-operation meaning. Search the\\ncodebase for `damageType` when checking callers.\\n\\n## Component-backed operations\\n\\nAssets use canonical snake_case operation names. PascalCase component type\\nnames are compatibility aliases; they are not listed by `RegisteredOps` and\\nare not authoring names.\\n\\n### Buffs\\n\\n- [ApplyBuff](ApplyBuff.md) — applies one or more buffs to one or more\\n  targets. Optional `blackboardKey` input + `outputTarget` / `outputBuff`\\n  output for chained consumption.\\n- [DestroyBuff](DestroyBuff.md) — destroys buffs from a BlackBoard\\n  pair that `ApplyBuff` wrote.\\n- [UpdateBuff](UpdateBuff.md) — re-values standing buffs in place\\n  (`SetBuffValues`) from the same BlackBoard pair; magnitudes may be\\n  Blackboard-sourced, rebuilt per trigger.\\n\\n- [ApplyAbnormalState](ApplyAbnormalState.md) - applies or aura-synchronizes\\n  abnormal states and optionally writes target/state pairs.\\n- [DestroyAbnormalState](DestroyAbnormalState.md) - removes abnormal states\\n  from pairs written by `ApplyAbnormalState`.\\n\\n### Entity lifecycle\\n\\n- [SpawnEntity](SpawnEntity.md) — spawns an entity from the host's\\n  `CanSpawnEntityIds` registry; `spawnIndex` picks the entry.\\n  `appendToListKey` maintains a summon roster in the Blackboard.\\n- [DestroyEntity](DestroyEntity.md) - calls `Entity.Die()` for self or a\\n  Blackboard entity list.\\n- [WatchSummonDeath](WatchSummonDeath.md) — bridges deaths of entities in\\n  a Blackboard list into host-side `OnSummonDeath` events (with a position\\n  snapshot payload).\\n\\n### State flow\\n\\n- [SetEntityState](SetEntityState.md) - switches an entity's logical state;\\n  Cast supports `OneShot` (default, return to Idle on completion) and\\n  `Sustained` (loop until an explicit transition) modes.\\n- [ChargeStateController](ChargeStateController.md) - controls a cancellable\\n  charge sequence and publishes phase transitions to Blackboard.\\n\\n### Combat\\n\\n- [AttackEventValueModifier](AttackEventValueModifier.md) — generic CSV-driven\\n  rewriter for `DamageEventBase` event fields (`multiplyer`, `damageType`,\\n  `cumbo`, etc.).\\n- [ApplyDamage](ApplyDamage.md) - applies direct attack-based or fixed-value\\n  damage to the event target, self, or a Blackboard entity list.\\n- [ApplyImpulse](ApplyImpulse.md) - applies an outward movement impulse to the\\n  event target, self, or a Blackboard entity list.\\n- [FireBullets](FireBullets.md) — fires one harmless carrier bullet per\\n  Blackboard point; each landing dispatches `OnBulletLanded` with the actual\\n  landing position.\\n\\n- [ShareAttackTarget](ShareAttackTarget.md) - relays a current attack target\\n  to selected allied ability users, optionally through a communication bullet.\\n- [SharedTargetExtraAttack](SharedTargetExtraAttack.md) - consumes relayed\\n  targets as queued, exact-target extra attacks.\\n\\n### Entity selection\\n\\n- [EntitySelector](EntitySelector.md) - selects entities by subject, event\\n  target, vision, radius, ring, or range and writes the result/count to Blackboard.\\n- [EntityFilter](EntityFilter.md) - filters the entity list at a Blackboard\\n  key in place with configurable OR groups of AND conditions (attack\\n  preference = snapshot + filter + commit pipeline).\\n- [PrependEntities](PrependEntities.md) — deduplicates and prepends a source\\n  entity list to the front of a Blackboard list in place (the promote step of\\n  the attack-preference pipeline).\\n- [AttackCandidateOverride](AttackCandidateOverride.md) - replaces the live\\n  target-candidate list with a Blackboard entity list during\\n  `OnBeforeTargetSelect` (the commit step of the attack-preference pipeline).\\n- [SelectLandingPoints](SelectLandingPoints.md) — picks `count` landing\\n  points through a random pipeline: shuffled in-range enemies first, then\\n  attack-range cells (ground before highland, in-layer shuffled, ±offset\\n  jitter), repeating across both pools once they run out.\\n- [AttackTargetCountModifier](AttackTargetCountModifier.md) - rewrites the\\n  in-flight attack's `selectMaxNum` / `selectMinNum` via CSV-driven\\n  `mult` / `add` / `set` / `div`; must trigger on `OnBeforeTargetSelect`.\\n\\n### Economy\\n\\n- [ModifyCost](ModifyCost.md) — applies a signed change to the level\\n  deployment cost through `LevelResourceManager`.\\n\\n### Entity resources\\n\\n- [RecoverSkillSp](RecoverSkillSp.md) — restores SP to the host entity's\\n  selected skill.\\n\\n### Charge attacks\\n\\n- [ChargeAttackDamageModifier](ChargeAttackDamageModifier.md) - multiplies\\n  damage dealt by each stored ChargeAttack energy projectile.\\n- [ChargeAttackReservePool](ChargeAttackReservePool.md) - adds an extra\\n  conditionally consumable ChargeAttack energy pool.\\n\\n### Attack behavior\\n\\n- [AttackBehaviorOverride](AttackBehaviorOverride.md) - overrides attack\\n  damage type and target ordering, optionally saving the original values.\\n- [AttackBehaviorRestore](AttackBehaviorRestore.md) - restores snapshots\\n  written by `AttackBehaviorOverride`.\\n- [ForceResetAttack](ForceResetAttack.md) - immediately reselects targets and\\n  attempts a forced attack using the current behavior.\\n- [ForceAttack](ForceAttack.md) — immediately performs an empty-target forced\\n  attack (animation + event beats, no targets, no damage).\\n- [AttackRangeOverride](AttackRangeOverride.md) - temporarily replaces an\\n  entity's attack range.\\n- [AttackRangeRestore](AttackRangeRestore.md) - restores the entity's base\\n  attack range.\\n\\n### Animation\\n\\n- [ApplyAnimationOverride](ApplyAnimationOverride.md) - registers a one-shot\\n  override consumed in full the first time any covered slot is actually\\n  played, or adds a persistent Named Resource override.\\n- [RemoveAnimationOverride](RemoveAnimationOverride.md) - removes animation\\n  overrides (persistent or still-pending one-shot) using records stored in the\\n  Blackboard.\\n\\n### Random\\n\\n- [RandomRoll](RandomRoll.md) — per-event random roll. Three modes\\n  (`probability` / `value` / `list`) selected by the `mode` param;\\n  result is written to a per-Entity Blackboard key. Use for\\n  probability gates, random damage multipliers, weighted drops, etc.\\n\\n### BlackBoard utility\\n\\n- [WriteBlackboard](WriteBlackboard.md) — generic BB write. `set` for\\n  write-as-is (type from `ParamEntry.type`); `add` / `mult` / `div` for\\n  modify-numeric. `key` and `value` both support `fromBlackboard=true`.\\n\\n## Conditional triggers\\n\\n`OnTick` is dispatched once per physics tick to active abilities. It is useful\\nfor rules that must re-evaluate changing Blackboard inputs, such as a\\n`select_targets` step followed by `apply_buff` in `mode=aura`.\\n\\nEvery `AbilityRuleConfig` has a `triggers[]` array of `ConditionConfig`\\nentries. Each entry declares a `triggerEvent` plus a condition expression. At\\ndispatch time, an entry's expression is evaluated against the entity's shared\\nBlackboard (a per-entity key/value store that operations read and write). If it\\npasses, the rule's ordered `steps[]` sequence is started according to its\\n`reentry` policy. Failing entries are skipped. The `ConditionEvaluator` logs at\\nmost one warning per unknown condition operator, ever.\\n\\n### Expression shape\\n\\n```\\nConditionConfig  { triggerEvent, List<ConditionGroup> groups }\\n   |                  |\\n   |                  +- groups is OR across ConditionGroup entries\\n   |                     (any group passing = the whole config passes)\\n   |\\n   +- dispatch-time entry point: ConditionEvaluator.Evaluate(groups, ctx)\\n\\nConditionGroup   { List<ConditionUnit> units }\\n   |\\n   +- units is AND across ConditionUnit entries\\n      (all units passing = the group passes)\\n\\nConditionUnit    { op, leftKey, rightValue }\\n   |\\n   +- a single comparison: op(leftKey, rightValue)\\n```\\n\\nAn empty `groups` list is treated as \\\"always passes\\\" (an unconditional\\ntrigger), equivalent to a condition unit with `op: None`.\\n\\n### Operator semantics (from `ConditionEvaluator.cs`)\\n\\nThe `ConditionOp` whitelist:\\n\\n| `op` | Comparison |\\n|---|---|\\n| `None` | always passes (unit-level) |\\n| `Equal`, `NotEqual` | string `==` / `!=` on the key's value |\\n| `Greater` / `GreaterOrEqual` / `Less` / `LessOrEqual` | `float.TryParse` on both sides, falls back to ordinal string compare if either is unparseable |\\n| `KeyEqual` / `KeyNotEqual` | key-vs-key identity: `rightValue` names a second Blackboard key, both sides are read as objects and compared with `Equals`; single-entry `List<Entity>` values unwrap to the entity. A missing key on either side means \\\"not equal\\\". An empty `rightValue` is a wiring error — logs an error and fails the unit. |\\n\\nThe Blackboard is an object store; condition keys are read as objects and\\nstringified (invariant culture) before comparison, so a numeric counter\\nmaintained by `write_blackboard` `add` compares fine against `\\\"0\\\"`. A\\nmissing key reads as `\\\"\\\"` — `NotEqual` against any non-empty value passes.\\n\\nAny `ConditionOp` value outside the live whitelist is logged once across the\\napplication lifetime and treated as \\\"passes\\\", so the rule trigger is\\nunconditional.\\n\\n### Two coexisting expression forms\\n\\nDesigners have two ways to express multi-condition triggers; the\\nchoice is a data-authoring concern, not a dispatch concern:\\n\\n1. **Nested AND/OR** inside one `ConditionConfig.groups[]`. Use this when the\\n   goal is \\\"fire at most once per event\\n   if any matching condition is true\\\".\\n\\n2. **Repeated `triggers[]` entries** with the same `triggerEvent`\\n   request one start per passing entry. The selected `reentry` policy decides\\n   whether an already running sequence ignores, restarts, or runs alongside\\n   that request.\\n\"}"
+    },
+    {
+     "tool": "read_component_doc",
+     "chars": 4428,
+     "full": "{\"op\": \"select_targets\", \"doc\": \"docs/skill-components/EntitySelector.md\", \"content\": \"# EntitySelector\\n\\nSelects entities relative to one or more subjects, merges and deduplicates the\\nresults, then overwrites optional Blackboard entity-list and count outputs.\\n\\n**Canonical op:** `select_targets`\\n**Component registration:** `EntitySelector`\\n**Class:** `AbilitySystem.Components.EntitySelector`\\n**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/EntitySelector.cs`\\n\\n## Parameters\\n\\n| Key | Type | Default | Description |\\n|---|---|---|---|\\n| `subjectMode` | String | `self` | Subject source: `self`, `eventTarget`, or `blackboard` (alias `blackboardEntities`). Any other value logs an error and selects nothing. |\\n| `subjectBlackboardKey` | String | `\\\"\\\"` | Input `List<Entity>` key used by `subjectMode=blackboard`. |\\n| `selectionMode` | String | `radius` | Selection method: `vision`, `radius`, `ring`, `range`, or `all`. Any other value logs an error and selects nothing. |\\n| `campRelation` | String | `opposing` | Select entities of the `same`, `opposing`, or `both` camp relative to each subject. Used by `vision`, `radius`, `ring`, `range`, and `all`. |\\n| `radius` | Float | `1` | Radius passed to `EntitySelector_Radius`. |\\n| `minRadius` | Float | `0` | Inner radius used only by `selectionMode=ring`; negative values are treated as `0`. |\\n| `squareLength` | Float | `1` | Square half-length passed to `EntitySelector_Range`. |\\n| `force` | Bool | `False` | Passed through to the EntityManager selector methods. |\\n| `excludeSubjects` | Bool | `False` | Remove every resolved subject from the merged result. |\\n| `outputEntitiesKey` | String | `\\\"\\\"` | Optional output key overwritten with `List<Entity>`. |\\n| `outputCountKey` | String | `\\\"\\\"` | Optional output key overwritten with the deduplicated result count as a numeric string. |\\n\\n`eventTarget` is available only on events derived from `DamageEventBase`.\\n`range` uses each subject's calculated `Vision.Range`; a subject with a null\\nrange contributes no entities. `vision` reads the subject's current cached\\nvision lists.\\n\\n`ring` first performs the same outer-radius selection as `radius`, then keeps\\nentities whose distance from the subject is strictly greater than\\n`minRadius`. Its effective interval is `minRadius < distance <= radius`.\\nA non-positive `minRadius` (the default `0` included) skips the inner cut\\nentirely, so the selection degenerates to the plain `radius` result and an\\nentity at the subject's center is included.\\nWhen `minRadius` is greater than a non-negative `radius`, the result is empty.\\n\\n`all` returns every on-field entity of the `campRelation` camp (selectability\\nrules apply unless `force=true`). It routes through `EntitySelector_Radius`\\nwith `radius<0` (the existing whole-field convention — no distance test).\\nThe subject serves only as the camp anchor, so `all` also works in detached\\nexecutions via the snapshot camp.\\nTypical use: \\\"re-collect every entity of a kind currently on the field\\\" at\\nOnInitialize, paired with a `filter_targets` (mode `list`) step that narrows\\nthe result by identity.\\n\\n## Blackboard behavior\\n\\nEvery trigger creates a fresh result. Existing values at configured output\\nkeys are removed and replaced, including when the new result is empty. This\\nmakes the component suitable for per-event condition checks.\\n\\nThe count is stored as a numeric string because `ConditionEvaluator` reads\\nBlackboard operands as strings and parses numeric comparisons from them.\\n\\n## Detached executions (ctx.entity == null)\\n\\n`subjectMode=self` mirrors `spawn_entity`'s `positionMode=self` convention:\\nwith no live entity, the subject degrades to the fork snapshot's\\n`(position, camp)` captured at trigger time. Selections that need only the\\nsnapshot (`radius`, `ring`, `all`) are usable; `vision` and `range` need a\\nlive entity and log an error in detached executions. Null entries inside a\\n`subjectMode=blackboard` list are skipped.\\n\\nTypical shape: a summon's posthumous rule (`OnBeforeDieAnimation`, detached)\\nselects around its death position after a `delay` — the entity may be\\npool-recycled by then, which is exactly why the anchor comes from the\\nsnapshot.\\n\\n## Rule triggers\\n\\nUse any event appropriate to the selection. For per-hit checks, use\\n`OnAfterTakeDamage` or `OnBeforeTakeDamage` with `subjectMode=eventTarget`.\\n\"}"
+    },
+    {
+     "tool": "read_component_doc",
+     "chars": 4240,
+     "full": "{\"op\": \"filter_targets\", \"doc\": \"docs/skill-components/EntityFilter.md\", \"content\": \"# EntityFilter\\n\\nFilters the entity list at a Blackboard key in place with OR groups containing\\nAND conditions, matching the shape of `ConditionConfig.groups`. The component\\nis attack-system-agnostic: any `List<Entity>` key works. Two typical sources:\\n\\n- a list written by `select_targets`' `outputEntitiesKey` (chained filtering);\\n- the `attackCandidates` working copy during `BeforeTargetSelectEvent`\\n  dispatch (attack preference — see \\\"Attack preference wiring\\\" below).\\n\\n**Canonical op:** `filter_targets`\\n**Component registration:** `EntityFilter`\\n**Class:** `AbilitySystem.Components.EntityFilter`\\n**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/EntityFilter.cs`\\n\\n## Parameters\\n\\n| Key | Type | Default | Description |\\n|---|---|---|---|\\n| `blackboardKey` | String | `\\\"\\\"` | The `List<Entity>` key to filter in place. For attack preference use the conventional key `attackCandidates`. |\\n| `fields` | StringCsv | *(empty)* | Entity fields, one per condition. |\\n| `ops` | StringCsv | *(empty)* | Comparison operations, one per condition. |\\n| `values` | StringCsv | *(empty)* | Comparison values, one per condition. Numeric fields parse their value as float (invariant culture); string fields compare trimmed and case-insensitively. |\\n| `groups` | IntCsv | *(empty)* | Group id per condition. Conditions sharing an id are ANDed; distinct ids are ORed. |\\n\\nAll four condition arrays are parallel. Only entries up to the shortest array\\nlength are evaluated. With no complete conditions, the list is left\\nunchanged. Null entries in the list are removed.\\n\\n## Attack preference wiring\\n\\nAttack preference is a three-step pipeline. Timing comes from the event\\nsystem, data from the blackboard, and the only mutation of the live candidate\\nlist happens in the final commit step:\\n\\n```text\\ntriggers = OnBeforeTargetSelect\\nsteps    = write_blackboard      { key = attackCandidates, source = event, path = targets }  # snapshot copy\\n           filter_targets        { blackboardKey = attackCandidates, fields = ..., ... }     # filter the copy\\n           attack_candidate_override { blackboardKey = attackCandidates }                   # commit back to live\\n```\\n\\n`write_blackboard` extracts a **copy** of the event's candidate list, so the\\nblackboard never aliases the attack system's live list; `filter_targets`\\nremoves non-matching entities from that copy; `attack_candidate_override`\\nclears and refills the live list from the result. Omitting the first step\\nleaves `attackCandidates` holding a stale snapshot from an earlier selection —\\nskipping either end of the pipeline warns once and skips, exposing the wiring\\nerror. Skill scoping comes free from the dispatch-side `isActive` gate: an\\ninactive skill's rules never receive the event, so a temporary skill needs a\\nsingle trigger (no subscribe/unsubscribe pair). Pair with\\n`force_reset_attack` after engaging when the filtered target set must take\\neffect immediately.\\n\\n## Supported fields\\n\\n- `MonsterStatus`\\n- `Camp`\\n- `CurrentHp`\\n- `CurrentHpRate`\\n- `MaxHp`\\n- `IdN` — `EntityData.ID.ID_N` (numeric)\\n- `IdC` — `EntityData.ID.ID_C` (string; `Equal`/`NotEqual` only — ordering ops\\n  warn once and fail the condition)\\n\\n`IdC` + `IdN` together identify an entity kind, e.g. `t,1` = the `t/1`\\nentity (LavaBubble).\\n\\n## Supported operations\\n\\n- `None`\\n- `Equal` / `Eq`\\n- `NotEqual` / `Ne`\\n- `Greater` / `Gt`\\n- `GreaterOrEqual` / `Ge`\\n- `Less` / `Lt`\\n- `LessOrEqual` / `Le`\\n\\nUnknown fields or operations make that condition fail and emit a one-shot\\nwarning. A numeric field whose value does not parse as a number (invariant\\nculture) fails the same way. A missing key or a non-list value at the key\\nwarns once and skips.\\n\\n## Example\\n\\nAccept elite or leader monsters:\\n\\n```text\\nblackboardKey = attackCandidates\\nfields = MonsterStatus,MonsterStatus\\nops    = GreaterOrEqual,LessOrEqual\\nvalues = 1,2\\ngroups = 0,0\\n```\\n\\nKeep only `t/1` entities (e.g. LavaBubbles) in a selected list:\\n\\n```text\\nblackboardKey = my_bubbles\\nfields = IdC,IdN\\nops    = Equal,Equal\\nvalues = t,1\\ngroups = 0,0\\n```\\n\"}"
+    },
+    {
+     "tool": "read_skill",
+     "chars": 13963,
+     "full": "{\"skill\": {\"abilityId\": \"creeper_t1\", \"abilityName\": \"爆炸\", \"description\": \"附近存在我方单位时蓄力1秒，然后爆炸，对大范围内的所有实体造成距离衰减的物理伤害和冲量；蓄力期间失去目标则退火。\", \"iconKey\": null, \"sp\": {\"totalSp\": 0, \"initialSp\": 0, \"chargeNum\": 1, \"abilityAmount\": 0.0, \"recoverMode\": \"Natural\", \"consumeMode\": \"NoConsume\", \"openMode\": \"Auto\", \"recoverForbidDuringAbility\": false, \"canManualClose\": false}, \"rules\": [{\"triggers\": [{\"triggerEvent\": \"OnInitialize\", \"groups\": []}], \"reentry\": \"IgnoreWhileRunning\", \"steps\": [{\"op\": \"apply_abnormal_state\", \"args\": {\"entries\": [{\"key\": \"abnormalTypes\", \"value\": \"2\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"abnormalTimes\", \"value\": \"-10\", \"fromBlackboard\": false, \"type\": \"String\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}], \"detached\": false}, {\"triggers\": [{\"triggerEvent\": \"OnTick\", \"groups\": []}], \"reentry\": \"IgnoreWhileRunning\", \"steps\": [{\"op\": \"select_targets\", \"args\": {\"entries\": [{\"key\": \"selectionMode\", \"value\": \"vision\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"outputCountKey\", \"value\": \"creeper_t1_trigger_count\", \"fromBlackboard\": false, \"type\": \"String\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"charge_state_controller\", \"args\": {\"entries\": [{\"key\": \"targetCountKey\", \"value\": \"creeper_t1_trigger_count\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"phaseKey\", \"value\": \"creeper_t1_phase\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"phaseEnteredKey\", \"value\": \"creeper_t1_phase_entered\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"chargeDuration\", \"value\": \"1\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"backoutAnimation\", \"value\": \"BackOut\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"attackAnimation\", \"value\": \"Attack\", \"fromBlackboard\": false, \"type\": \"String\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}], \"detached\": false}, {\"triggers\": [{\"triggerEvent\": \"OnTick\", \"groups\": [{\"units\": [{\"op\": \"Equal\", \"leftKey\": \"creeper_t1_phase\", \"rightValue\": \"charging\", \"rightKey\": \"\"}, {\"op\": \"Equal\", \"leftKey\": \"creeper_t1_phase_entered\", \"rightValue\": \"True\", \"rightKey\": \"\"}]}]}], \"reentry\": \"IgnoreWhileRunning\", \"steps\": [{\"op\": \"apply_animation_override\", \"args\": {\"entries\": [{\"key\": \"slots\", \"value\": \"Cast\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"resources\", \"value\": \"ChargeLoop\", \"fromBlackboard\": false, \"type\": \"String\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"set_entity_state\", \"args\": {\"entries\": [{\"key\": \"state\", \"value\": \"Cast\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"castMode\", \"value\": \"Sustained\", \"fromBlackboard\": false, \"type\": \"String\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}], \"detached\": false}, {\"triggers\": [{\"triggerEvent\": \"OnTick\", \"groups\": [{\"units\": [{\"op\": \"Equal\", \"leftKey\": \"creeper_t1_phase\", \"rightValue\": \"backout\", \"rightKey\": \"\"}, {\"op\": \"Equal\", \"leftKey\": \"creeper_t1_phase_entered\", \"rightValue\": \"True\", \"rightKey\": \"\"}]}]}], \"reentry\": \"IgnoreWhileRunning\", \"steps\": [{\"op\": \"apply_animation_override\", \"args\": {\"entries\": [{\"key\": \"slots\", \"value\": \"Cast\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"resources\", \"value\": \"BackOut\", \"fromBlackboard\": false, \"type\": \"String\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"set_entity_state\", \"args\": {\"entries\": [{\"key\": \"state\", \"value\": \"Cast\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"castMode\", \"value\": \"OneShot\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"force\", \"value\": \"True\", \"fromBlackboard\": false, \"type\": \"Bool\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}], \"detached\": false}, {\"triggers\": [{\"triggerEvent\": \"OnTick\", \"groups\": [{\"units\": [{\"op\": \"Equal\", \"leftKey\": \"creeper_t1_phase\", \"rightValue\": \"attack\", \"rightKey\": \"\"}, {\"op\": \"Equal\", \"leftKey\": \"creeper_t1_phase_entered\", \"rightValue\": \"True\", \"rightKey\": \"\"}]}]}], \"reentry\": \"IgnoreWhileRunning\", \"steps\": [{\"op\": \"apply_animation_override\", \"args\": {\"entries\": [{\"key\": \"slots\", \"value\": \"Cast\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"resources\", \"value\": \"Attack\", \"fromBlackboard\": false, \"type\": \"String\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"set_entity_state\", \"args\": {\"entries\": [{\"key\": \"state\", \"value\": \"Cast\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"castMode\", \"value\": \"OneShot\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"force\", \"value\": \"True\", \"fromBlackboard\": false, \"type\": \"Bool\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}], \"detached\": false}, {\"triggers\": [{\"triggerEvent\": \"OnTick\", \"groups\": [{\"units\": [{\"op\": \"Equal\", \"leftKey\": \"creeper_t1_phase\", \"rightValue\": \"idle\", \"rightKey\": \"\"}, {\"op\": \"Equal\", \"leftKey\": \"creeper_t1_phase_entered\", \"rightValue\": \"True\", \"rightKey\": \"\"}]}]}, {\"triggerEvent\": \"OnTick\", \"groups\": [{\"units\": [{\"op\": \"Equal\", \"leftKey\": \"creeper_t1_phase\", \"rightValue\": \"detonate\", \"rightKey\": \"\"}]}]}], \"reentry\": \"IgnoreWhileRunning\", \"steps\": [{\"op\": \"set_entity_state\", \"args\": {\"entries\": [{\"key\": \"state\", \"value\": \"Idle\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"force\", \"value\": \"True\", \"fromBlackboard\": false, \"type\": \"Bool\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}], \"detached\": false}, {\"triggers\": [{\"triggerEvent\": \"OnTick\", \"groups\": [{\"units\": [{\"op\": \"Equal\", \"leftKey\": \"creeper_t1_phase\", \"rightValue\": \"detonate\", \"rightKey\": \"\"}]}]}], \"reentry\": \"IgnoreWhileRunning\", \"steps\": [{\"op\": \"select_targets\", \"args\": {\"entries\": [{\"key\": \"selectionMode\", \"value\": \"ring\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"campRelation\", \"value\": \"both\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"minRadius\", \"value\": \"0\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"radius\", \"value\": \"0.5\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"outputEntitiesKey\", \"value\": \"creeper_t1_bucket_1\", \"fromBlackboard\": false, \"type\": \"String\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"apply_damage\", \"args\": {\"entries\": [{\"key\": \"targetMode\", \"value\": \"blackboard\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"blackboardKey\", \"value\": \"creeper_t1_bucket_1\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"multiplier\", \"value\": \"3\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"applyType\", \"value\": \"1\", \"fromBlackboard\": false, \"type\": \"Int\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"apply_impulse\", \"args\": {\"entries\": [{\"key\": \"targetMode\", \"value\": \"blackboard\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"blackboardKey\", \"value\": \"creeper_t1_bucket_1\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"strengthLevel\", \"value\": \"5\", \"fromBlackboard\": false, \"type\": \"Int\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"select_targets\", \"args\": {\"entries\": [{\"key\": \"selectionMode\", \"value\": \"ring\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"campRelation\", \"value\": \"both\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"minRadius\", \"value\": \"0.5\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"radius\", \"value\": \"0.76\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"outputEntitiesKey\", \"value\": \"creeper_t1_bucket_2\", \"fromBlackboard\": false, \"type\": \"String\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"apply_damage\", \"args\": {\"entries\": [{\"key\": \"targetMode\", \"value\": \"blackboard\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"blackboardKey\", \"value\": \"creeper_t1_bucket_2\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"multiplier\", \"value\": \"3\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"applyType\", \"value\": \"1\", \"fromBlackboard\": false, \"type\": \"Int\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"apply_impulse\", \"args\": {\"entries\": [{\"key\": \"targetMode\", \"value\": \"blackboard\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"blackboardKey\", \"value\": \"creeper_t1_bucket_2\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"strengthLevel\", \"value\": \"3\", \"fromBlackboard\": false, \"type\": \"Int\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"select_targets\", \"args\": {\"entries\": [{\"key\": \"selectionMode\", \"value\": \"ring\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"campRelation\", \"value\": \"both\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"minRadius\", \"value\": \"0.76\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"radius\", \"value\": \"1.414214\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"outputEntitiesKey\", \"value\": \"creeper_t1_bucket_3\", \"fromBlackboard\": false, \"type\": \"String\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"apply_damage\", \"args\": {\"entries\": [{\"key\": \"targetMode\", \"value\": \"blackboard\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"blackboardKey\", \"value\": \"creeper_t1_bucket_3\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"multiplier\", \"value\": \"1.8\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"applyType\", \"value\": \"1\", \"fromBlackboard\": false, \"type\": \"Int\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"apply_impulse\", \"args\": {\"entries\": [{\"key\": \"targetMode\", \"value\": \"blackboard\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"blackboardKey\", \"value\": \"creeper_t1_bucket_3\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"strengthLevel\", \"value\": \"3\", \"fromBlackboard\": false, \"type\": \"Int\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"select_targets\", \"args\": {\"entries\": [{\"key\": \"selectionMode\", \"value\": \"ring\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"campRelation\", \"value\": \"both\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"minRadius\", \"value\": \"1.414214\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"radius\", \"value\": \"1.732051\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"outputEntitiesKey\", \"value\": \"creeper_t1_bucket_4\", \"fromBlackboard\": false, \"type\": \"String\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"apply_damage\", \"args\": {\"entries\": [{\"key\": \"targetMode\", \"value\": \"blackboard\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"blackboardKey\", \"value\": \"creeper_t1_bucket_4\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"multiplier\", \"value\": \"1.2\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"applyType\", \"value\": \"1\", \"fromBlackboard\": false, \"type\": \"Int\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"apply_impulse\", \"args\": {\"entries\": [{\"key\": \"targetMode\", \"value\": \"blackboard\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"blackboardKey\", \"value\": \"creeper_t1_bucket_4\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"strengthLevel\", \"value\": \"2\", \"fromBlackboard\": false, \"type\": \"Int\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"select_targets\", \"args\": {\"entries\": [{\"key\": \"selectionMode\", \"value\": \"ring\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"campRelation\", \"value\": \"both\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"minRadius\", \"value\": \"1.732051\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"radius\", \"value\": \"2.414214\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"outputEntitiesKey\", \"value\": \"creeper_t1_bucket_5\", \"fromBlackboard\": false, \"type\": \"String\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"apply_damage\", \"args\": {\"entries\": [{\"key\": \"targetMode\", \"value\": \"blackboard\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"blackboardKey\", \"value\": \"creeper_t1_bucket_5\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"multiplier\", \"value\": \"0.6\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"applyType\", \"value\": \"1\", \"fromBlackboard\": false, \"type\": \"Int\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"apply_impulse\", \"args\": {\"entries\": [{\"key\": \"targetMode\", \"value\": \"blackboard\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"blackboardKey\", \"value\": \"creeper_t1_bucket_5\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"strengthLevel\", \"value\": \"1\", \"fromBlackboard\": false, \"type\": \"Int\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"select_targets\", \"args\": {\"entries\": [{\"key\": \"selectionMode\", \"value\": \"ring\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"campRelation\", \"value\": \"both\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"minRadius\", \"value\": \"2.414214\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"radius\", \"value\": \"2.613126\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"outputEntitiesKey\", \"value\": \"creeper_t1_bucket_6\", \"fromBlackboard\": false, \"type\": \"String\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"apply_damage\", \"args\": {\"entries\": [{\"key\": \"targetMode\", \"value\": \"blackboard\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"blackboardKey\", \"value\": \"creeper_t1_bucket_6\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"multiplier\", \"value\": \"0.3\", \"fromBlackboard\": false, \"type\": \"Float\"}, {\"key\": \"applyType\", \"value\": \"1\", \"fromBlackboard\": false, \"type\": \"Int\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"apply_impulse\", \"args\": {\"entries\": [{\"key\": \"targetMode\", \"value\": \"blackboard\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"blackboardKey\", \"value\": \"creeper_t1_bucket_6\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"strengthLevel\", \"value\": \"1\", \"fromBlackboard\": false, \"type\": \"Int\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"apply_animation_override\", \"args\": {\"entries\": [{\"key\": \"mode\", \"value\": \"override\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"slots\", \"value\": \"Die\", \"fromBlackboard\": false, \"type\": \"String\"}, {\"key\": \"resources\", \"value\": \"Die2\", \"fromBlackboard\": false, \"type\": \"String\"}]}, \"condition\": [], \"steps\": [], \"elseSteps\": []}, {\"op\": \"destroy_entity\", \"args\": {\"entries\": []}, \"condition\": [], \"steps\": [], \"elseSteps\": []}], \"detached\": false}]}}"
+    },
+    {
+     "tool": "read_component_doc",
+     "chars": 5351,
+     "full": "{\"op\": \"write_blackboard\", \"doc\": \"docs/skill-components/WriteBlackboard.md\", \"content\": \"# WriteBlackboard\\n\\nWrites a value to the per-Entity shared Blackboard. Two modes:\\n\\n- **`set`** (default): writes the value as-is to the configured key. The\\n  value's runtime type is determined by `ParamEntry.type` (`Int` / `Float` /\\n  `Bool` / `String` / `Vector2Int`, plus the 4 Unity asset types which\\n  fall through to string). Both `key` and `value` support `fromBlackboard=true`.\\n- **`add` / `mult` / `div`**: reads the existing value at the key, applies\\n  the operation with the configured value, and writes the result back.\\n  Only supported for numeric existing values (`int` / `float` / `double`);\\n  bool/string/Vector2Int log a warning and skip. Math semantics for each\\n  method mirror `AttackEventValueModifier`.\\n\\n**Canonical op:** `write_blackboard`\\n**Component registration:** `WriteBlackboard`\\n**Class:** `AbilitySystem.Components.WriteBlackboard`\\n**File:** `Assets/PublicScripts/Entity-LevelPublicScripts/AbilitySystem/Components/WriteBlackboard.cs`\\n\\n## Parameters\\n\\nAll parameters are read via the `ParamList` lazy API; each `Func<T>`\\nre-evaluates the source on every call.\\n\\n| Key | Type | Default | Description |\\n|---|---|---|---|\\n| `key` | String | `\\\"\\\"` | The BlackBoard key to write to. Empty = component is a no-op. |\\n| `value` | typed (per `ParamEntry.type`) | `null` | The value to write (`set`) or the operand to apply (`add`/`mult`/`div`). |\\n| `method` | String | `set` | One of `set` / `add` / `mult` / `div`. Unknown method → `LogWarning` + skip. |\\n| `source` | String | `value` | Value source: `value`, `event`, `entity`, or `listCount`. |\\n| `path` | String | `\\\"\\\"` | Context field used by `source=event` / `entity`; BlackBoard entity-list key used by `source=listCount`. |\\n| `scale` | Float | `1` | Multiplier applied by `source=listCount` (writes `count × scale` as float). Setting it with another source warns once and is ignored. |\\n| `asString` | Bool | `False` | Convert non-entity-list context values to invariant strings before writing. Useful for `ConditionEvaluator`. |\\n\\n## Context sources\\n\\n`source=value` reads the configured `value`. `source=event` and\\n`source=entity` read the current trigger context. `source=listCount` reads\\nthe `List<Entity>` stored at the `path` BlackBoard key and resolves to\\n`count × scale` (float) — the standard bridge from an entity list produced by\\n`select_targets` to a derived numeric seed (e.g. per-stack magnitudes). A\\nmissing list at `path` emits a one-shot warning and skips the write.\\n\\nSupported event paths:\\n\\n- Damage events: `target`, `multiplyer`/`multiplier`, `defPenetrate`,\\n  `mgrPenetrate`, `defPenetrate_value`, `mgrPenetrate_value`, `damageType`,\\n  `applyType`\\n- Hurt events: `origin`, `damage`, the same multiplier/penetration/type\\n  fields, and `isDeadly`\\n- Before-target-select events: `targets`, `selectMaxNum`, `selectMinNum`,\\n  `sameComp`\\n- Specific events: `isDeadly` on after-attack/after-damage events and `cumbo`\\n  on before-attack events\\n\\n`event.targets` writes a **copy** of the live candidate list — the Blackboard\\nnever shares a reference with the attack system (same \\\"extract data, never\\nhand out mutable event state\\\" rule as the other list-valued paths). That copy\\nis the snapshot step of the attack-preference pipeline; see\\n[AttackCandidateOverride](AttackCandidateOverride.md) for the commit step.\\n\\nSupported entity paths:\\n\\n- empty path or `self`\\n- `camp`, `currentHp`, `currentHpRate`, `maxHp`, `attack`, `monsterStatus`\\n\\nEntity-valued paths (`event.target`, `event.origin`, and `entity.self`) write\\n`List<Entity>` so they can feed operations such as `apply_buff`. Unsupported\\npaths emit a one-shot warning and skip the write.\\n\\n### Value type\\n\\n`value` is the only param whose runtime type is determined by the\\n`ParamEntry.type` field (rather than by a fixed `GetXxxLazy` call). The\\nunderlying API is `ParamList.GetValueLazy`, which dispatches to:\\n\\n| `ParamEntry.type` | Parse / store |\\n|---|---|\\n| `Int` | `int.TryParse`, store as `int` |\\n| `Float` | `float.TryParse`, store as `float` |\\n| `Bool` | `bool.TryParse`, store as `bool` |\\n| `String` | literal, store as `string` |\\n| `Vector2Int` | `x,y` parse, store as `Vector2Int` |\\n| `AnimationRef` / `Prefab` / `EntityId` / `Color` | store the raw string as-is (no typed parser exists; designer responsibility) |\\n\\n`value` can also have `fromBlackboard=true` — the operation reads the\\nconfigured key from BlackBoard at apply time and uses whatever is stored.\\n\\n## Modify-mode semantics\\n\\nFor `add` / `mult` / `div`:\\n\\n1. If `value` is null, no-op (prevents an unconfigured param from\\n   zeroing out the BlackBoard via `mult`).\\n2. If no existing value at `key`, no-op (use `set` first to seed).\\n3. Read existing value, use its runtime type to select the math path:\\n   `int` / `float` / `double`. `Convert.ToX(value)` widens/narrows as\\n   needed; conversion failure is caught and logged.\\n4. Apply the op (`add` = +, `mult` = *, `div` = /), write result back.\\n\\nNon-numeric existing types log a warning and skip. `div` by zero is\\n**not** guarded — matches `AttackEventValueModifier` behavior (int throws\\n`DivideByZeroException` caught by the try/catch; float/double produce\\n`±Infinity` / `NaN`, stored as-is).\\n\"}"
+    },
+    {
+     "tool": "list_components",
+     "chars": 4402,
+     "full": "{\"components\": [{\"op\": \"apply_abnormal_state\", \"class\": \"ApplyAbnormalState\", \"summary\": \"mode=aura 要求 blackboardKey/outputTarget/outputState 三键齐全否则跳过；\"}, {\"op\": \"apply_animation_override\", \"class\": \"ApplyAnimationOverride\", \"summary\": \"slots/resources 缺失不应用；\"}, {\"op\": \"apply_buff\", \"class\": \"ApplyBuff\", \"summary\": \"modifiers 首次构建后缓存复用，magnitudes 即使 fromBlackboard=true 也冻结在首次读值——动态调值用 update_buff；\"}, {\"op\": \"apply_damage\", \"class\": \"ApplyDamage\", \"summary\": \"targetMode=eventTarget 仅在 DamageEventBase 派生事件上可用；\"}, {\"op\": \"apply_impulse\", \"class\": \"ApplyImpulse\", \"summary\": \"ctx.entity==null 时整体跳过；\"}, {\"op\": \"attack_behavior_override\", \"class\": \"AttackBehaviorOverride\", \"summary\": \"damageType/targetPriority 经 HasKey 门控：键不存在保持原值；\"}, {\"op\": \"attack_behavior_restore\", \"class\": \"AttackBehaviorRestore\", \"summary\": \"快照逆序恢复（同实体多重覆盖时最早的快照胜）；\"}, {\"op\": \"attack_candidate_override\", \"class\": \"AttackCandidateOverride\", \"summary\": \"仅当当前事件为 BeforeTargetSelectEvent 时生效（规则必须触发 OnBeforeTargetSelect）；\"}, {\"op\": \"attack_event_value_modifier\", \"class\": \"AttackEventValueModifier\", \"summary\": \"仅作用于 DamageEventBase 派生事件（BeforeAttack/AfterAttack/BeforeTakeDamage/AfterTakeDamage），否则报错整体跳过；\"}, {\"op\": \"attack_range_override\", \"class\": \"AttackRangeOverride\", \"summary\": \"与 attack_range_restore 成对使用（begin 触发 override、end 触发 restore）；\"}, {\"op\": \"attack_range_restore\", \"class\": \"AttackRangeRestore\", \"summary\": \"与 attack_range_override 成对使用；\"}, {\"op\": \"attack_target_count_modifier\", \"class\": \"AttackTargetCountModifier\", \"summary\": \"仅在 OnBeforeTargetSelect（BeforeTargetSelectEvent）触发时生效，其他事件告警跳过；\"}, {\"op\": \"charge_state_controller\", \"class\": \"ChargeStateController\", \"summary\": \"仅响应 TickEvent 且要求黑板非空，规则须用 OnTick；\"}, {\"op\": \"destroy_abnormal_state\", \"class\": \"DestroyAbnormalState\", \"summary\": \"两键都必须配置且对应列表存在，否则空操作；\"}, {\"op\": \"destroy_buff\", \"class\": \"DestroyBuff\", \"summary\": \"两键都必须配置（任一为空即空操作）；\"}, {\"op\": \"destroy_entity\", \"class\": \"DestroyEntity\", \"summary\": \"目标经 HashSet 去重；\"}, {\"op\": \"filter_targets\", \"class\": \"EntityFilter\", \"summary\": \"四个数组平行、按最短长度取齐，无完整条件时列表保持不变；\"}, {\"op\": \"fire_bullets\", \"class\": \"FireBullets\", \"summary\": \"bulletDataIndex 依赖宿主 EntityData.Bullets 弹幕列表（GameObject 引用装不进 ParamList 故按索引登记），出生点来自 BulletData 配置的 BulletSpawnTransform（Muzzle 挂点约定）；\"}, {\"op\": \"force_attack\", \"class\": \"ForceAttack\", \"summary\": \"对每个目标调用 Attack.TryToAttack(空目标, forceChange:true, 不可打断)：只播攻击动画并走 OnAttackSuccessfully 节拍（SP 消耗、事件桥照常），不索敌不直接造成伤害；\"}, {\"op\": \"force_reset_attack\", \"class\": \"ForceResetAttack\", \"summary\": \"对每个目标调用 Attack.ForceResetAttack()：重置攻击计时器、按当前攻击行为重新索敌并尝试强制进入攻击状态（有真实目标、真实伤害）；\"}, {\"op\": \"generate_skill\", \"class\": \"GenerateSkill\", \"summary\": \"运行时 LLM 生成技能：OnTrigger 把战局快照+宿主清单异步提交 ability-server 后立即返回（不阻塞步骤序列），生成完成（约 1-2 分钟）后经客户端终检并 ReplaceSkill 替换当前技能（仅本场有效）。有未完成任务时忽略再次触发；\"}, {\"op\": \"modify_cost\", \"class\": \"ModifyCost\", \"summary\": \"立即生效的全局费用变更，不走实体/黑板；\"}, {\"op\": \"prepend_entities\", \"class\": \"PrependEntities\", \"summary\": \"去重是提权语义：已在目标列表中的源实体会从原位移除并整体提到最前；\"}, {\"op\": \"random_roll\", \"class\": \"RandomRoll\", \"summary\": \"input 恒按字符串读取；\"}, {\"op\": \"recover_skill_sp\", \"class\": \"RecoverSkillSp\", \"summary\": \"必须有活跃宿主实体：脱离执行（ctx.entity 为 null）报错跳过；\"}, {\"op\": \"remove_animation_override\", \"class\": \"RemoveAnimationOverride\", \"summary\": \"既读也写 inputKey（读记录列表，移除后 Set 回写或 Remove 删键）；\"}, {\"op\": \"select_landing_points\", \"class\": \"SelectLandingPoints\", \"summary\": \"随机流水：攻击范围内敌群随机原位 → 不足补射程格（地面层先于高台层，每点 ±offset 偏移）→ 两池用尽交替重复选；\"}, {\"op\": \"select_targets\", \"class\": \"EntitySelector\", \"summary\": \"eventTarget 仅在 DamageEventBase 派生事件上可用；\"}, {\"op\": \"set_entity_state\", \"class\": \"SetEntityState\", \"summary\": \"state=Attack 不登记攻击帧回调、state=Die 不走 Entity.Die 完整死亡链；\"}, {\"op\": \"share_attack_target\", \"class\": \"ShareAttackTarget\", \"summary\": \"仅在 BeforeAttackEvent 且 attackEvent.target 非空时触发；\"}, {\"op\": \"shared_target_extra_attack\", \"class\": \"SharedTargetExtraAttack\", \"summary\": \"协议对：与 share_attack_target 共用 queueKey/activeSourceKey 默认值；\"}, {\"op\": \"spawn_entity\", \"class\": \"SpawnEntity\", \"summary\": \"召唤源锁定宿主 EntityData.CanSpawnEntityIds 注册表（spawnIndex 选第几项），不接受任意实体 id；\"}, {\"op\": \"update_buff\", \"class\": \"UpdateBuff\", \"summary\": \"与 apply_buff 的差异：输入对是持久句柄（不消费清键）、modifiers 每次 OnTrigger 重建不缓存；\"}, {\"op\": \"watch_summon_death\", \"class\": \"WatchSummonDeath\", \"summary\": \"订阅按列表差量维护（OnTrigger 同步一次，OnTick 补差）；\"}, {\"op\": \"write_blackboard\", \"class\": \"WriteBlackboard\", \"summary\": \"method 的 switch 不做 Normalize（大小写敏感）；\"}]}"
+    }
+   ],
+   "degradedReason": "wall_budget_exhausted"
+  },
+  "degraded": true
+ }
+}

@@ -1,0 +1,640 @@
+{
+ "envelope": {
+  "protocolVersion": 3,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "mortar",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "mortar",
+     "name": "mortar",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 950,
+     "maxHp": 950,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 3
+     },
+     "attack": 460,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 4,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 3,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 3,
+      "y": 5
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m3",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    },
+    {
+     "id": "m4",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 6
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster",
+     "massLevel": 1
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 4,
+   "subJob": 0,
+   "cost": 18,
+   "baseAttackTime": 1.2,
+   "damageType": 1,
+   "blockOccupation": 1,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   },
+   "bullets": [
+    {
+     "index": 0,
+     "bulletType": 1,
+     "allowNoTarget": false
+    }
+   ]
+  },
+  "constraints": {
+   "request": "朝敌人最密集的地方发射一轮弹幕，每发弹着点附近炸开一次范围伤害。"
+  }
+ },
+ "taskId": "t09_mortar_barrage",
+ "contract": "v2",
+ "wallSeconds": 510.08,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "mortar_barrage",
+   "abilityName": "密集轰炸",
+   "description": "朝攻击范围内的敌群发射一轮弹幕（5发），落点散布在敌人所在处；齐射对范围内每个敌人造成一次相当于攻击力100%的法术伤害。",
+   "sp": {
+    "totalSp": 18,
+    "initialSp": 0,
+    "chargeNum": 1,
+    "abilityAmount": 1.0,
+    "recoverMode": "Natural",
+    "consumeMode": "OnAttackSuccessfully",
+    "openMode": "Manual",
+    "recoverForbidDuringAbility": false,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "select_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "selectionMode",
+          "value": "vision",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "campRelation",
+          "value": "opposing",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputEntitiesKey",
+          "value": "barrage_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputCountKey",
+          "value": "barrage_target_count",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "branch",
+       "args": {
+        "entries": []
+       },
+       "condition": [
+        {
+         "units": [
+          {
+           "op": "Greater",
+           "leftKey": "barrage_target_count",
+           "rightValue": "0",
+           "rightKey": ""
+          }
+         ]
+        }
+       ],
+       "steps": [
+        {
+         "op": "select_landing_points",
+         "args": {
+          "entries": [
+           {
+            "key": "count",
+            "value": "5",
+            "type": "int",
+            "fromBlackboard": false
+           },
+           {
+            "key": "offset",
+            "value": "0.24",
+            "type": "float",
+            "fromBlackboard": false
+           },
+           {
+            "key": "outputKey",
+            "value": "barrage_points",
+            "type": "string",
+            "fromBlackboard": false
+           }
+          ]
+         },
+         "condition": [],
+         "steps": [],
+         "elseSteps": []
+        },
+        {
+         "op": "apply_animation_override",
+         "args": {
+          "entries": [
+           {
+            "key": "mode",
+            "value": "once",
+            "type": "string",
+            "fromBlackboard": false
+           },
+           {
+            "key": "slots",
+            "value": "AttackRemote,AttackClose",
+            "type": "stringArray",
+            "fromBlackboard": false
+           },
+           {
+            "key": "resources",
+            "value": "Skill2,Skill2",
+            "type": "stringArray",
+            "fromBlackboard": false
+           }
+          ]
+         },
+         "condition": [],
+         "steps": [],
+         "elseSteps": []
+        },
+        {
+         "op": "force_attack",
+         "args": {
+          "entries": []
+         },
+         "condition": [],
+         "steps": [],
+         "elseSteps": []
+        },
+        {
+         "op": "apply_damage",
+         "args": {
+          "entries": [
+           {
+            "key": "targetMode",
+            "value": "blackboard",
+            "type": "string",
+            "fromBlackboard": false
+           },
+           {
+            "key": "blackboardKey",
+            "value": "barrage_targets",
+            "type": "string",
+            "fromBlackboard": false
+           },
+           {
+            "key": "attackerMode",
+            "value": "self",
+            "type": "string",
+            "fromBlackboard": false
+           },
+           {
+            "key": "baseValueMode",
+            "value": "attack",
+            "type": "string",
+            "fromBlackboard": false
+           },
+           {
+            "key": "multiplier",
+            "value": "1.0",
+            "type": "float",
+            "fromBlackboard": false
+           },
+           {
+            "key": "damageType",
+            "value": "1",
+            "type": "int",
+            "fromBlackboard": false
+           },
+           {
+            "key": "applyType",
+            "value": "2",
+            "type": "int",
+            "fromBlackboard": false
+           }
+          ]
+         },
+         "condition": [],
+         "steps": [],
+         "elseSteps": []
+        }
+       ],
+       "elseSteps": []
+      }
+     ]
+    },
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityEnd",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "branch",
+       "args": {
+        "entries": []
+       },
+       "condition": [
+        {
+         "units": [
+          {
+           "op": "Greater",
+           "leftKey": "barrage_target_count",
+           "rightValue": "0",
+           "rightKey": ""
+          }
+         ]
+        }
+       ],
+       "steps": [
+        {
+         "op": "fire_bullets",
+         "args": {
+          "entries": [
+           {
+            "key": "pointsKey",
+            "value": "barrage_points",
+            "type": "string",
+            "fromBlackboard": false
+           },
+           {
+            "key": "bulletDataIndex",
+            "value": "0",
+            "type": "int",
+            "fromBlackboard": false
+           }
+          ]
+         },
+         "condition": [],
+         "steps": [],
+         "elseSteps": []
+        }
+       ],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [
+    {
+     "severity": "warning",
+     "path": "rules[0].steps[1].steps[1]",
+     "message": "param 'slots' type label 'String' coerced to schema type 'stringArray'"
+    },
+    {
+     "severity": "warning",
+     "path": "rules[0].steps[1].steps[1]",
+     "message": "param 'resources' type label 'String' coerced to schema type 'stringArray'"
+    }
+   ],
+   "rounds": 8,
+   "phases": [
+    {
+     "phase": "plan",
+     "detail": "round 1 model=glm-5.3-flash",
+     "t": 0.0
+    },
+    {
+     "phase": "plan",
+     "detail": "tool update_plan",
+     "t": 13.96
+    },
+    {
+     "phase": "plan",
+     "detail": "round 2 model=glm-5.3-flash",
+     "t": 13.96
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 18.58
+    },
+    {
+     "phase": "act",
+     "detail": "tool list_components",
+     "t": 18.58
+    },
+    {
+     "phase": "act",
+     "detail": "round 3 model=glm-5.3-flash",
+     "t": 18.58
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 29.2
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 29.2
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 29.2
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 29.2
+    },
+    {
+     "phase": "act",
+     "detail": "round 4 model=glm-5.3-flash",
+     "t": 29.2
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 49.31
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 49.32
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_contract_doc",
+     "t": 49.32
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_schema_vocab",
+     "t": 49.32
+    },
+    {
+     "phase": "act",
+     "detail": "round 5 model=glm-5.3-flash",
+     "t": 49.32
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 75.36
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 75.36
+    },
+    {
+     "phase": "act",
+     "detail": "round 6 model=glm-5.3-flash",
+     "t": 75.36
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 287.96
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 287.96
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 287.96
+    },
+    {
+     "phase": "act",
+     "detail": "round 7 model=glm-5.3-flash",
+     "t": 287.96
+    },
+    {
+     "phase": "plan",
+     "detail": "tool update_plan",
+     "t": 482.44
+    },
+    {
+     "phase": "review",
+     "detail": "tool validate_draft",
+     "t": 482.44
+    },
+    {
+     "phase": "plan",
+     "detail": "round 8 model=glm-5.3-flash",
+     "t": 482.44
+    },
+    {
+     "phase": "submit",
+     "detail": "tool submit_skill",
+     "t": 509.7
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 509.7
+    }
+   ],
+   "plan": "技能诉求：朝敌人最密集处发射一轮弹幕（5发载体弹），弹着区域对敌群造成范围伤害。宿主 mortar（job4 术师，atk=460，弹资产 index0，无天赋、无可召唤实体）。\n\n【设计修订】研究后确认三点硬约束并定案：\n1. select_targets 无坐标锚（只有 self/eventTarget/blackboard 实体列表）+ canSpawnEntities=[] → 无法在弹着点生成爆炸物，\"每发各自炸开\"改为\"齐射对范围内敌群每敌结算一份伤害\"的等价近似（与 eyja_s2 先例同构）。\n2. 宿主弹 index0 allowNoTarget=false 与 FireBullets 载体要求冲突 → fire_bullets 仅承担弹幕视觉（放 OnAbilityEnd，仿 eyja_s2），可能被运行时 skip，伤害链路独立不受影响。\n3. \"最密集处\"无运行时 argmax → select_landing_points 敌人优先池天然把 5 发弹散布在敌群所在处，即\"朝敌群发射\"。\n\n最终结构（abilityId=mortar_barrage）：\n- 规则1 OnAbilityBegin（IgnoreWhileRunning）：\n  select_targets(vision, opposing → barrage_targets/barrage_target_count)\n  → branch(count>0)：select_landing_points(5, →barrage_points) → apply_animation_override(once, AttackRemote/AttackClose→Skill2) → force_attack（攻击节拍，扣SP）→ apply_damage(blackboard=barrage_targets, attack×1.0, 法术)\n- 规则2 OnAbilityEnd（IgnoreWhileRunning）：branch(count>0) → fire_bullets(barrage_points, bulletDataIndex=0)（纯视觉弹幕）\n- SP：totalSp=18, openMode=Manual, consumeMode=OnAttackSuccessfully, recoverMode=Natural（仿 eyja_s2）\n- 黑板键：barrage_targets（规则1写→apply_damage读）、barrage_target_count（规则1写→两处branch条件读）、barrage_points（规则1写→规则2 fire_bullets读）\n\n数值定标：每敌 1.0×460=460 法伤 vs 敌均HP 775/均魔抗12.5 ≈ 两发击杀，参照 lavabubble 3.7×atk 单爆与宁简勿滥原则。\n下一步：validate_draft → submit_skill。",
+   "tokens": {
+    "calls": 8,
+    "prompt_tokens": 109488,
+    "completion_tokens": 22704
+   }
+  }
+ }
+}

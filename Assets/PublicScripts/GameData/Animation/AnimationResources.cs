@@ -115,6 +115,22 @@ public sealed class AnimationResources : ScriptableObject
             $"Animation group '{name}' was not found in animation library '{this.name}'.");
     }
 
+    /// <summary>
+    /// 命名动画/动画组名清单（hostAssets.animations 投影的取值源，即
+    /// ApplyAnimationOverride.resources 参数的合法域）。
+    /// </summary>
+    public List<string> GetAnimationNames()
+    {
+        EnsureLookup();
+        return new List<string>(_animationLookup.Keys);
+    }
+
+    public List<string> GetAnimationGroupNames()
+    {
+        EnsureLookup();
+        return new List<string>(_animationGroupLookup.Keys);
+    }
+
     private void OnEnable()
     {
         RebuildLookup();

@@ -1,5 +1,5 @@
 {
-  "protocolVersion": 1,
+  "protocolVersion": 3,
   "triggerEvents": [
     "OnPreWarm", "OnInitialize", "OnAbilityBegin", "OnAbilityEnd", "OnAbilityAdded", "OnAbilityRemoved",
     "OnBeforeAttack", "OnAfterAttack", "OnBeforeTakeDamage", "OnAfterTakeDamage",
@@ -30,10 +30,7 @@
       "delay/wait_until/branch/loop 是原语 op；其余见 componentOps"
     ]
   },
-  "knownBlackboardKeys": [
-    "snapshot:self_hp_rate", "snapshot:enemy_count", "snapshot:ally_count",
-    "snapshot:nearest_enemy_distance", "snapshot:lowest_enemy_hp_rate", "snapshot:lowest_enemy_id"
-  ],
+  "knownBlackboardKeys": [],
   "primitives": {
     "delay": {
       "usesCondition": false,
@@ -469,5 +466,308 @@
     "sp.chargeNum": [1, 9],
     "sp.abilityAmount": [0, 120]
   },
-  "notes": "clamps 为人工可调保守值，键为 \"canonicalOp.参数键\" 或 \"sp.字段名\"；未列出的数值参数只做可解析性检查"
+
+  "eventContext": {
+    "OnBeforeAttack": {
+      "target": {
+        "type": "List<Entity>",
+        "desc": "攻击目标（包成单元素列表）"
+      },
+      "targetblocked": {
+        "type": "Bool",
+        "desc": "目标是否在本体阻挡列表内"
+      },
+      "multiplier": {
+        "type": "Float",
+        "desc": "伤害倍率（别名 multiplyer 同义）"
+      },
+      "defpenetrate": {
+        "type": "Float",
+        "desc": "物理穿透"
+      },
+      "mgrpenetrate": {
+        "type": "Float",
+        "desc": "法术穿透"
+      },
+      "defpenetrate_value": {
+        "type": "Float",
+        "desc": "物理穿透固定值"
+      },
+      "mgrpenetrate_value": {
+        "type": "Float",
+        "desc": "法术穿透固定值"
+      },
+      "damagetype": {
+        "type": "Int",
+        "desc": "伤害类型"
+      },
+      "applytype": {
+        "type": "Int",
+        "desc": "施加类型"
+      },
+      "cumbo": {
+        "type": "Int",
+        "desc": "攻击累计次数（BeforeAttackEvent 专有）"
+      }
+    },
+    "OnAfterAttack": {
+      "target": {
+        "type": "List<Entity>",
+        "desc": "攻击目标（包成单元素列表）"
+      },
+      "targetblocked": {
+        "type": "Bool",
+        "desc": "目标是否在本体阻挡列表内"
+      },
+      "multiplier": {
+        "type": "Float",
+        "desc": "伤害倍率（别名 multiplyer 同义）"
+      },
+      "defpenetrate": {
+        "type": "Float",
+        "desc": "物理穿透"
+      },
+      "mgrpenetrate": {
+        "type": "Float",
+        "desc": "法术穿透"
+      },
+      "defpenetrate_value": {
+        "type": "Float",
+        "desc": "物理穿透固定值"
+      },
+      "mgrpenetrate_value": {
+        "type": "Float",
+        "desc": "法术穿透固定值"
+      },
+      "damagetype": {
+        "type": "Int",
+        "desc": "伤害类型"
+      },
+      "applytype": {
+        "type": "Int",
+        "desc": "施加类型"
+      },
+      "isdeadly": {
+        "type": "Bool",
+        "desc": "本次攻击是否致死（AfterAttackEvent 专有；非 HurtEventBase，无 origin/damage）"
+      }
+    },
+    "OnBeforeTakeDamage": {
+      "target": {
+        "type": "List<Entity>",
+        "desc": "攻击目标（包成单元素列表）"
+      },
+      "targetblocked": {
+        "type": "Bool",
+        "desc": "目标是否在本体阻挡列表内"
+      },
+      "multiplier": {
+        "type": "Float",
+        "desc": "伤害倍率（别名 multiplyer 同义）"
+      },
+      "defpenetrate": {
+        "type": "Float",
+        "desc": "物理穿透"
+      },
+      "mgrpenetrate": {
+        "type": "Float",
+        "desc": "法术穿透"
+      },
+      "defpenetrate_value": {
+        "type": "Float",
+        "desc": "物理穿透固定值"
+      },
+      "mgrpenetrate_value": {
+        "type": "Float",
+        "desc": "法术穿透固定值"
+      },
+      "damagetype": {
+        "type": "Int",
+        "desc": "伤害类型"
+      },
+      "applytype": {
+        "type": "Int",
+        "desc": "施加类型"
+      }
+    },
+    "OnAfterTakeDamage": {
+      "target": {
+        "type": "List<Entity>",
+        "desc": "攻击目标（包成单元素列表）"
+      },
+      "targetblocked": {
+        "type": "Bool",
+        "desc": "目标是否在本体阻挡列表内"
+      },
+      "multiplier": {
+        "type": "Float",
+        "desc": "伤害倍率（别名 multiplyer 同义）"
+      },
+      "defpenetrate": {
+        "type": "Float",
+        "desc": "物理穿透"
+      },
+      "mgrpenetrate": {
+        "type": "Float",
+        "desc": "法术穿透"
+      },
+      "defpenetrate_value": {
+        "type": "Float",
+        "desc": "物理穿透固定值"
+      },
+      "mgrpenetrate_value": {
+        "type": "Float",
+        "desc": "法术穿透固定值"
+      },
+      "damagetype": {
+        "type": "Int",
+        "desc": "伤害类型"
+      },
+      "applytype": {
+        "type": "Int",
+        "desc": "施加类型"
+      },
+      "isdeadly": {
+        "type": "Bool",
+        "desc": "本次伤害是否致死（AfterTakeDamageEvent 专有）"
+      }
+    },
+    "OnBeforeHurt": {
+      "origin": {
+        "type": "List<Entity>",
+        "desc": "伤害来源"
+      },
+      "damage": {
+        "type": "Float",
+        "desc": "最终伤害值"
+      },
+      "multiplier": {
+        "type": "Float",
+        "desc": "伤害倍率（别名 multiplyer 同义）"
+      },
+      "defpenetrate": {
+        "type": "Float",
+        "desc": "物理穿透"
+      },
+      "mgrpenetrate": {
+        "type": "Float",
+        "desc": "法术穿透"
+      },
+      "defpenetrate_value": {
+        "type": "Float",
+        "desc": "物理穿透固定值"
+      },
+      "mgrpenetrate_value": {
+        "type": "Float",
+        "desc": "法术穿透固定值"
+      },
+      "damagetype": {
+        "type": "Int",
+        "desc": "伤害类型"
+      },
+      "applytype": {
+        "type": "Int",
+        "desc": "施加类型"
+      },
+      "isdeadly": {
+        "type": "Bool",
+        "desc": "本次伤害是否致死"
+      }
+    },
+    "OnAfterHurt": {
+      "origin": {
+        "type": "List<Entity>",
+        "desc": "伤害来源"
+      },
+      "damage": {
+        "type": "Float",
+        "desc": "最终伤害值"
+      },
+      "multiplier": {
+        "type": "Float",
+        "desc": "伤害倍率（别名 multiplyer 同义）"
+      },
+      "defpenetrate": {
+        "type": "Float",
+        "desc": "物理穿透"
+      },
+      "mgrpenetrate": {
+        "type": "Float",
+        "desc": "法术穿透"
+      },
+      "defpenetrate_value": {
+        "type": "Float",
+        "desc": "物理穿透固定值"
+      },
+      "mgrpenetrate_value": {
+        "type": "Float",
+        "desc": "法术穿透固定值"
+      },
+      "damagetype": {
+        "type": "Int",
+        "desc": "伤害类型"
+      },
+      "applytype": {
+        "type": "Int",
+        "desc": "施加类型"
+      },
+      "isdeadly": {
+        "type": "Bool",
+        "desc": "本次伤害是否致死"
+      }
+    },
+    "OnBeforeTargetSelect": {
+      "targets": {
+        "type": "List<Entity>",
+        "desc": "候选列表副本（筛选后经 attack_candidate_override 提交回 live 列表）"
+      },
+      "selectmaxnum": {
+        "type": "Int",
+        "desc": "数量上限"
+      },
+      "selectminnum": {
+        "type": "Int",
+        "desc": "数量下限"
+      },
+      "samecomp": {
+        "type": "Bool",
+        "desc": "是否同组件"
+      }
+    }
+  },
+  "entityContext": {
+    "self": {
+      "type": "List<Entity>",
+      "desc": "宿主自身包成单元素列表（空串同义）；SpawnEntity.passStat 共用本词表"
+    },
+    "camp": {
+      "type": "Int",
+      "desc": "阵营（1=友军 2=敌人）"
+    },
+    "currenthp": {
+      "type": "Float",
+      "desc": "当前生命"
+    },
+    "currenthprate": {
+      "type": "Float",
+      "desc": "当前生命比 0..1"
+    },
+    "maxhp": {
+      "type": "Float",
+      "desc": "最大生命"
+    },
+    "attack": {
+      "type": "Float",
+      "desc": "攻击力"
+    },
+    "blockoccupation": {
+      "type": "Int",
+      "desc": "阻挡数"
+    },
+    "monsterstatus": {
+      "type": "Int",
+      "desc": "MonsterStatus 出怪元数据"
+    }
+  },
+  "notes": "clamps 为人工可调保守值，键为 \"canonicalOp.参数键\" 或 \"sp.字段名\"；未列出的数值参数只做可解析性检查；eventContext/entityContext 以 WriteBlackboard.ResolveEventValue/ResolveEntityValue 逐分支核对（AbilityEvents.cs 事件类层级），改动事件桥接时同步本表"
 }

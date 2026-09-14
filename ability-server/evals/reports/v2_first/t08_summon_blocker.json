@@ -1,0 +1,542 @@
+{
+ "envelope": {
+  "protocolVersion": 3,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "summoner",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "summoner",
+     "name": "summoner",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 1100,
+     "maxHp": 1100,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 4
+     },
+     "attack": 300,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 6,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m2",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 6,
+   "subJob": 0,
+   "cost": 15,
+   "baseAttackTime": 1.2,
+   "damageType": 0,
+   "blockOccupation": 1,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   },
+   "canSpawnEntities": [
+    {
+     "id": "summon_blocker",
+     "name": "碎石偶",
+     "isStatic": true,
+     "hp": 900,
+     "maxHp": 900,
+     "hpRate": 1.0,
+     "attack": 60,
+     "defence": 80,
+     "magicRes": 0,
+     "count": 2
+    }
+   ]
+  },
+  "constraints": {
+   "request": "在我身边召唤一个能挡路的召唤物（用我注册的召唤物），召唤物阵亡时我要能感知到。"
+  }
+ },
+ "taskId": "t08_summon_blocker",
+ "contract": "v2",
+ "wallSeconds": 0.06,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "summoner_blocker_t1",
+   "abilityName": "碎石偶召唤",
+   "description": "在身边召唤一个碎石偶阻挡敌人前进；碎石偶阵亡时宿主立即获得死亡标志，并在下次攻击起手时以特殊动作示意。",
+   "sp": {
+    "totalSp": 20,
+    "initialSp": 0,
+    "chargeNum": 1,
+    "abilityAmount": 0.0,
+    "recoverMode": "Natural",
+    "consumeMode": "Ordinary",
+    "openMode": "Manual",
+    "recoverForbidDuringAbility": false,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnInitialize",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "watch_summon_death",
+       "args": {
+        "entries": [
+         {
+          "key": "blackboardKey",
+          "value": "summoner_blocker_roster",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    },
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "spawn_entity",
+       "args": {
+        "entries": [
+         {
+          "key": "spawnIndex",
+          "value": "0",
+          "type": "int",
+          "fromBlackboard": false
+         },
+         {
+          "key": "positionMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "offset",
+          "value": "1,1",
+          "type": "vector2int",
+          "fromBlackboard": false
+         },
+         {
+          "key": "camp",
+          "value": "1",
+          "type": "int",
+          "fromBlackboard": false
+         },
+         {
+          "key": "placement",
+          "value": "static",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "appendToListKey",
+          "value": "summoner_blocker_roster",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "watch_summon_death",
+       "args": {
+        "entries": [
+         {
+          "key": "blackboardKey",
+          "value": "summoner_blocker_roster",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    },
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnSummonDeath",
+       "groups": []
+      }
+     ],
+     "reentry": "Parallel",
+     "detached": false,
+     "steps": [
+      {
+       "op": "write_blackboard",
+       "args": {
+        "entries": [
+         {
+          "key": "key",
+          "value": "blocker_dead",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "method",
+          "value": "set",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "value",
+          "value": "True",
+          "type": "Bool",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "apply_animation_override",
+       "args": {
+        "entries": [
+         {
+          "key": "toSelf",
+          "value": "True",
+          "type": "bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "mode",
+          "value": "once",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "slots",
+          "value": "AttackBegin",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "resources",
+          "value": "Skill2",
+          "type": "stringArray",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [
+    {
+     "severity": "warning",
+     "path": "rules[2].steps[1]",
+     "message": "param 'slots' type label 'String' coerced to schema type 'stringArray'"
+    },
+    {
+     "severity": "warning",
+     "path": "rules[2].steps[1]",
+     "message": "param 'resources' type label 'String' coerced to schema type 'stringArray'"
+    }
+   ],
+   "rounds": 8,
+   "phases": [
+    {
+     "phase": "plan",
+     "detail": "round 1 model=glm-5.3-flash",
+     "t": 0.0
+    },
+    {
+     "phase": "plan",
+     "detail": "tool update_plan",
+     "t": 21.13
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 21.13
+    },
+    {
+     "phase": "act",
+     "detail": "tool list_components",
+     "t": 21.13
+    },
+    {
+     "phase": "plan",
+     "detail": "round 2 model=glm-5.3-flash",
+     "t": 21.13
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 24.9
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 24.9
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 24.9
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 24.9
+    },
+    {
+     "phase": "act",
+     "detail": "round 3 model=glm-5.3-flash",
+     "t": 24.9
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 73.27
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_schema_vocab",
+     "t": 73.27
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_contract_doc",
+     "t": 73.27
+    },
+    {
+     "phase": "act",
+     "detail": "round 4 model=glm-5.3-flash",
+     "t": 73.27
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 78.24
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 78.24
+    },
+    {
+     "phase": "act",
+     "detail": "tool deploy_cells_near",
+     "t": 78.24
+    },
+    {
+     "phase": "act",
+     "detail": "round 5 model=glm-5.3-flash",
+     "t": 78.24
+    },
+    {
+     "phase": "act",
+     "detail": "llm error (1): LLM request failed: The read operation timed out",
+     "t": 198.41
+    },
+    {
+     "phase": "act",
+     "detail": "round 6 model=glm-5.3-flash",
+     "t": 203.41
+    },
+    {
+     "phase": "plan",
+     "detail": "tool update_plan",
+     "t": 319.5
+    },
+    {
+     "phase": "review",
+     "detail": "tool validate_draft",
+     "t": 319.5
+    },
+    {
+     "phase": "plan",
+     "detail": "round 7 model=glm-5.3-flash",
+     "t": 319.5
+    },
+    {
+     "phase": "review",
+     "detail": "tool validate_draft",
+     "t": 347.97
+    },
+    {
+     "phase": "act",
+     "detail": "round 8 model=glm-5.3-flash",
+     "t": 347.97
+    },
+    {
+     "phase": "submit",
+     "detail": "tool submit_skill",
+     "t": 361.89
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 361.89
+    }
+   ],
+   "plan": "目标技能：辅助（召唤师）主动技能「碎石偶召唤」——在我身边召唤宿主注册的碎石偶（summon_blocker，spawnIndex=0，唯一注册项），并感知其阵亡。\n\n最终设计：\n1. 规则A（OnInitialize，IgnoreWhileRunning）：watch_summon_death(blackboardKey=summoner_blocker_roster) 建立死亡监听（先例 eyjafjalla_t1 同构）。\n2. 规则B（OnAbilityBegin，IgnoreWhileRunning）：spawn_entity(spawnIndex=0, positionMode=self, offset=1,1 → 落点(5,5) 自身右前方地面格、离敌方向最近的可挡路格, camp=1, placement=static, appendToListKey=summoner_blocker_roster)；随后再同步一次 watch_summon_death（幂等，确保新召唤实体即时入订）。\n3. 规则C（OnSummonDeath，Parallel）：write_blackboard set blocker_dead=True（宿主可读死亡标志）+ apply_animation_override(once, slots=Attack, resources=Skill2，宿主下次攻击播放特殊动作作为可感知反馈)。\n\n黑板键：summoner_blocker_roster（spawn_entity 写 / watch_summon_death 读，差量订阅）、blocker_dead（规则C写，供宿主与其他规则读）。本技能无条件分支需求，不涉及 listCount 桥。\nSP：totalSp 20 / Manual / Natural 回复。数值量级对齐语料先例（spawn/watch 配置完全同构）。\n下一步：validate_draft 自检 → submit_skill。",
+   "tokens": {
+    "calls": 25,
+    "prompt_tokens": 297605,
+    "completion_tokens": 30690
+   },
+   "cached": true
+  }
+ }
+}

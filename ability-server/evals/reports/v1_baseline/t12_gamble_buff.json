@@ -1,0 +1,340 @@
+{
+ "envelope": {
+  "protocolVersion": 1,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "gambler",
+   "camp": 1,
+   "selfHpRate": 1.0,
+   "selfPos": {
+    "x": 4,
+    "y": 4
+   },
+   "skill": null,
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "m1",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier"
+    },
+    {
+     "id": "m2",
+     "name": "重甲领主",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 4500,
+     "maxHp": 4500,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 7
+     },
+     "attack": 500,
+     "defence": 400,
+     "magicRes": 30,
+     "job": -1,
+     "label": "boss"
+    }
+   ]
+  },
+  "hostAssets": {
+   "canSpawnEntityIds": [],
+   "bulletCount": 0,
+   "iconKeys": []
+  },
+  "constraints": {
+   "request": "开技能时掷一次骰子，一半概率让我的攻击力大幅提升一段时间。"
+  }
+ },
+ "taskId": "t12_gamble_buff",
+ "contract": "v1",
+ "wallSeconds": 0.03,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "gambler_s1",
+   "abilityName": "孤注一掷",
+   "description": "发动技能时掷一次骰子：50% 概率使自身攻击力提升 80%，持续 10 秒；掷出失败则本次无任何效果。",
+   "iconKey": null,
+   "sp": {
+    "totalSp": 0,
+    "initialSp": 0,
+    "chargeNum": 1,
+    "abilityAmount": 0.0,
+    "recoverMode": "Natural",
+    "consumeMode": "NoConsume",
+    "openMode": "Auto",
+    "recoverForbidDuringAbility": false,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "random_roll",
+       "args": {
+        "entries": [
+         {
+          "key": "mode",
+          "value": "probability",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "input",
+          "value": "0.5",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputKey",
+          "value": "gambler_dice_result",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "branch",
+       "args": {
+        "entries": []
+       },
+       "condition": [
+        {
+         "units": [
+          {
+           "op": "Equal",
+           "leftKey": "gambler_dice_result",
+           "rightValue": "True",
+           "rightKey": null
+          }
+         ]
+        }
+       ],
+       "steps": [
+        {
+         "op": "apply_buff",
+         "args": {
+          "entries": [
+           {
+            "key": "attributes",
+            "value": "Attack",
+            "type": "stringArray",
+            "fromBlackboard": false
+           },
+           {
+            "key": "ops",
+            "value": "AddPercent",
+            "type": "stringArray",
+            "fromBlackboard": false
+           },
+           {
+            "key": "magnitudes",
+            "value": "0.8",
+            "type": "floatArray",
+            "fromBlackboard": false
+           },
+           {
+            "key": "buffId",
+            "value": "gambler_dice_atk_buff",
+            "type": "string",
+            "fromBlackboard": false
+           },
+           {
+            "key": "buffTime",
+            "value": "10",
+            "type": "float",
+            "fromBlackboard": false
+           },
+           {
+            "key": "toSelf",
+            "value": "True",
+            "type": "bool",
+            "fromBlackboard": false
+           },
+           {
+            "key": "buffScope",
+            "value": "normal",
+            "type": "string",
+            "fromBlackboard": false
+           },
+           {
+            "key": "mode",
+            "value": "normal",
+            "type": "string",
+            "fromBlackboard": false
+           }
+          ]
+         },
+         "condition": [],
+         "steps": [],
+         "elseSteps": []
+        }
+       ],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [],
+   "attempts": 1,
+   "phases": [
+    {
+     "phase": "analyze",
+     "detail": "start",
+     "t": 0.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool compute_cross_items round 1",
+     "t": 18.83
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool list_components round 1",
+     "t": 18.83
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_contract_doc round 1",
+     "t": 18.83
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 23.03
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 23.03
+    },
+    {
+     "phase": "describe",
+     "detail": "start",
+     "t": 57.25
+    },
+    {
+     "phase": "describe",
+     "detail": "plannedOps=['random_roll', 'apply_buff', 'branch']",
+     "t": 106.2
+    },
+    {
+     "phase": "retrieve",
+     "detail": "top: ardign_t1(0.333), beagle_t1(0.333), catap_t1(0.333)",
+     "t": 106.21
+    },
+    {
+     "phase": "generate",
+     "detail": "attempt 1",
+     "t": 106.21
+    },
+    {
+     "phase": "validate",
+     "detail": "ok",
+     "t": 159.73
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 159.73
+    }
+   ],
+   "analysis": "## 战局分析结论\n\n### 一、敌我态势\n- **我方**：仅自身 gambler（camp=1），位置 (4,4)，血量 100%。场上友军数 0，没有任何可联动单位。\n- **敌方**：共 2 个，均满血：\n  - `m1 士兵`：HP 1200，攻 200 / 防 150 / 魔抗 0，位于 (5,5)，距自身 **1.41 格**（半径 2.5 内）——已贴脸，自身有即时近战威胁。\n  - `m2 重甲领主`：HP 4500，攻 500 / 防 400 / 魔抗 30，位于 (7,7)，距自身 4.24 格（半径 5 内）——高血高防，是持续性压力源。\n- 判定：本回合目标诉求是\"掷骰搏爆发\"，战场趋势是自身先接住 m1、随后面对 m2 高防体，攻击力增益是当前最优方向，与需求一致。\n\n### 二、可利用的机制机会\n- **骰子组件**：`random_roll`（mode=probability, input=\"0.5\"）向黑板写 `\"True\"/\"False\"`，完全对应\"掷一次骰子\"语义。\n- **分支结构**：`branch` 原语按黑板键一次性采样（`Equal leftKey=骰子结果 rightValue=True`），中/出即走。骰子写入与分支判定都在**同步前缀**内完成（步骤顺序执行 + 即时操作），不存在时序竞态。\n- **增益组件**：`apply_buff`（toSelf=true, attributes=`Attack`, ops=`AddPercent`, magnitudes=大幅值如 0.8~1.0，buffTime=10s 左右）可实现\"大幅提升一段时间\"。\n- **触发点**：`OnAbilityBegin` 是干净的单次触发点；整个规则基本同步瞬时完成，reentry 用 `IgnoreWhileRunning` 即可。\n\n### 三、本次生成技能的约束（重要）\n1. **宿主资产为空**：`canSpawnEntityIds=[]`、`bulletCount=0`、`iconKeys=[]`——禁用 `spawn_entity`、`fire_bullets`、`apply_animation_override`、`watch_summon_death`，纯 Buff 类技能最稳妥。\n2. **增益对象固定为自身**（toSelf=true），不要硬编码敌方实体 id。\n3. **buff 时限**：`buffTime` 必须用正值（如 10），**不要用 -10（永久）**；normal 模式 buff 不会在技能结束时自动销毁，时限靠 buffTime 本身收敛（可选在 OnAbilityEnd 配 `destroy_buff` 兜底）。\n4. **magnitudes 冻结机制**：`apply_buff` 首次构建后缓存 modifiers——本需求为固定值不受影响，但不要试图动态改幅度（那需要 `update_buff`）。\n5. **CSV 对齐**：attributes/ops/magnitudes 三列索引必须一一对应，长度不齐会静默截断并告警。\n\n### 四、推荐技能骨架\n- 规则 1（OnAbilityBegin）：`random_roll(probability, \"0.5\")` → `branch(结果==True)` → 成功分支：`apply_buff`（自身攻击力大增幅，有限时长）；失败分支：留空或仅写黑板标记，无副作用。",
+   "design": {
+    "abilityName": "孤注一掷",
+    "description": "发动技能时掷一次骰子：50% 概率使自身攻击力提升 80%，持续 10 秒；掷出失败则本次无任何效果。",
+    "designNotes": "机制要点：① 触发事件用 OnAbilityBegin，单次、无条件触发（空 groups），不依赖事件目标；② 步骤序列（全同步前缀，reentry=IgnoreWhileRunning）：random_roll(mode=probability, input=\"0.5\", outputKey=gambler_dice_result) → branch(condition: BB[gambler_dice_result] Equal \"True\")；③ 分支成功 steps：apply_buff(mode=normal, toSelf=true, blackboardKey 留空, attributes=\"Attack\", ops=\"AddPercent\", magnitudes=\"0.8\", buffTime=10, buffId=gambler_dice_atk_buff, buffScope=normal)——toSelf 锁定宿主自身，不引用敌方 id；④ 分支失败 elseSteps 留空，无副作用；⑤ 数值依据：+80% 属\"大幅提升\"量级（m2 防御 400，m1 防御 150），10 秒覆盖接敌窗口（m1 距 1.41 已贴脸、m2 距 4.24 跟进）；⑥ 约束遵守：hostAssets 无子弹/召唤/图标，未使用 spawn_entity/fire_bullets/动画组件；buffTime 用正值 10 自然到期，不用 -10 永久值，normal 模式不依赖 outputTarget/outputBuff，故不追加 destroy_buff；magnitudes 为固定字面量，不受 apply_buff 首建缓存冻结影响；CSV 三列各 1 项严格对齐。",
+    "plannedOps": [
+     "random_roll",
+     "apply_buff",
+     "branch"
+    ]
+   },
+   "cached": true
+  }
+ }
+}

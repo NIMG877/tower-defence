@@ -216,6 +216,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 9a33ac06692c8a44b8df73dc20dcf0be, type: 2}
     Talents:
     - {fileID: 11400000, guid: 30336de6325142b458941f1e612088c2, type: 2}
+    - {fileID: 11400000, guid: e27894cf318f4da5beba27234c85f3cb, type: 2}
     SubJobTrait: {fileID: 11400000, guid: 8ca1b39face32653dbc0b613483296ab, type: 2}
     AnimationResources: {fileID: 11400000, guid: 2eb42c200c1aab54496fec70451c4fa9, type: 2}
     Bullets:

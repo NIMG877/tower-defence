@@ -1,0 +1,348 @@
+{
+ "envelope": {
+  "protocolVersion": 1,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "beagle",
+   "camp": 1,
+   "selfHpRate": 1.0,
+   "selfPos": {
+    "x": 3,
+    "y": 4
+   },
+   "skill": null,
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "m1",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier"
+    },
+    {
+     "id": "m2",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 4
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier"
+    },
+    {
+     "id": "m3",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 6
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster"
+    }
+   ]
+  },
+  "hostAssets": {
+   "canSpawnEntityIds": [],
+   "bulletCount": 0,
+   "iconKeys": []
+  },
+  "constraints": {
+   "request": "前线压力很大，开技能时让我的防御和法抗都明显提升，关技能后恢复。"
+  }
+ },
+ "taskId": "t03_defender_defense_buff",
+ "contract": "v1",
+ "wallSeconds": 0.02,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "beagle_iron_wall",
+   "abilityName": "铁壁坚守",
+   "description": "开启技能时，自身的防御力与法术抗性提升60%；技能关闭后恢复原值。",
+   "iconKey": "",
+   "sp": {
+    "totalSp": 40,
+    "initialSp": 0,
+    "chargeNum": 1,
+    "abilityAmount": 30.0,
+    "recoverMode": "Natural",
+    "consumeMode": "Natural",
+    "openMode": "Manual",
+    "recoverForbidDuringAbility": true,
+    "canManualClose": true
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "apply_buff",
+       "args": {
+        "entries": [
+         {
+          "key": "attributes",
+          "value": "Defence,MagicRes",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "ops",
+          "value": "AddPercent,AddPercent",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "magnitudes",
+          "value": "0.6,0.6",
+          "type": "floatArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "buffId",
+          "value": "beagle_iron_wall",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "buffTime",
+          "value": "-10",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "toSelf",
+          "value": "True",
+          "type": "bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "mode",
+          "value": "normal",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputTarget",
+          "value": "beagle_iron_wall_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputBuff",
+          "value": "beagle_iron_wall_buffs",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    },
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityEnd",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "destroy_buff",
+       "args": {
+        "entries": [
+         {
+          "key": "inputTarget",
+          "value": "beagle_iron_wall_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "inputBuff",
+          "value": "beagle_iron_wall_buffs",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [],
+   "attempts": 1,
+   "phases": [
+    {
+     "phase": "analyze",
+     "detail": "start",
+     "t": 0.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool compute_cross_items round 1",
+     "t": 20.07
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool list_components round 1",
+     "t": 20.07
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 31.17
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 31.17
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_contract_doc round 2",
+     "t": 31.17
+    },
+    {
+     "phase": "describe",
+     "detail": "start",
+     "t": 88.64
+    },
+    {
+     "phase": "describe",
+     "detail": "plannedOps=['apply_buff', 'destroy_buff']",
+     "t": 118.41
+    },
+    {
+     "phase": "retrieve",
+     "detail": "top: adnach_s1(1.0), beagle_s1(1.0), catap_s1(1.0)",
+     "t": 118.41
+    },
+    {
+     "phase": "generate",
+     "detail": "attempt 1",
+     "t": 118.41
+    },
+    {
+     "phase": "validate",
+     "detail": "ok",
+     "t": 152.78
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 152.78
+    }
+   ],
+   "analysis": "## 战局分析\n\n### 一、敌我态势\n- **自身**：beagle（camp 1），位于 (3,4)，满血（hpRate 1.0），刚接敌、压力即将兑现。\n- **场上敌人 3 个，友军 0 个**（无队友可支援，增益只能作用于自身）：\n  - **m1 士兵** (4,5)：满血 1200，攻 200 / 防 150 / 法抗 0，距离 **1.41**（贴脸）；\n  - **m2 士兵** (5,4)：满血 1200，攻 200 / 防 150 / 法抗 0，距离 **2.0**；\n  - **m3 术师** (6,6)：满血 800，攻 250 / **法术伤害** / 防 20 / 法抗 50，距离 3.61（远程跟火）。\n- **威胁构成**：近战双士兵物理伤害 200×2=400/轮 + 术师法术 250/轮，合计约 650/轮的混合伤害，正好对应\"物防+法抗\"双提升需求。敌方两个物理单位防 150 较硬，但本次需求是防御向技能，不涉及输出。\n\n### 二、可利用的机制机会\n- 需求本质是\"开关式增益\"：`OnAbilityBegin` 上 buff、`OnAbilityEnd` 拆 buff，经典两条规则结构。\n- **apply_buff**（normal 模式，toSelf）：`attributes=\"Defence,MagicRes\"`、`ops=\"AddPercent,AddPercent\"`、`buffTime=-10`（永久，由关技能侧手动回收），并配置 `outputTarget`/`outputBuff` 输出对。\n- **destroy_buff**：normal 模式的 buff **不会**在技能结束时自动销毁，必须在 `OnAbilityEnd` 规则里读取 apply_buff 写下的目标/Buff 配对键来拆除——这是本技能正确性的关键链路。\n- 数值建议：\"明显提升\"取 **+50%~70%** 量级（面对 650/轮混合伤害）。\n\n### 三、本次生成的约束\n- **hostAssets 全空**：`canSpawnEntityIds=[]`、`bulletCount=0`、`iconKeys=[]` → 不可召唤实体、不可发子弹、无图标资源，技能只能是纯属性 buff/状态类，无弹道/召唤表现。\n- apply_buff 的 modifiers 首次构建后缓存复用（magnitudes 冻结），静态数值加成无影响；如需动态调值才需要 update_buff，本需求不需要。\n- 环境细节：可部署格充裕（高台 3、地面 6），但本技能不涉及部署，仅作背景信息。\n\n**结论**：建议生成一个双规则防御增益技能——开启时给自身施加 Defence+MagicRes 双加成 buff（约 +60%），关闭时经 destroy_buff 精确回收，不引用任何宿主不存在的资源。",
+   "design": {
+    "abilityName": "铁壁坚守",
+    "description": "开启技能时，自身的防御力与法术抗性提升60%；技能关闭后恢复原值。",
+    "designNotes": "双规则开关式结构：规则1触发OnAbilityBegin（无条件），单步执行apply_buff——mode=normal、toSelf=true、attributes=Defence,MagicRes、ops=AddPercent,AddPercent、magnitudes=0.6,0.6、buffTime=-10（项目约定负值=永久，由关闭侧手动回收，避免时长漂移）、buffId=beagle_iron_wall、并写outputTarget=beagle_iron_wall_targets与outputBuff=beagle_iron_wall_buffs两键作交接记录；规则2触发OnAbilityEnd，单步执行destroy_buff——inputTarget与inputBuff读同一对键，按索引配对销毁刚施加的buff，组件消费后自动清键防止重触发双重销毁。目标选择：ally_count=0，仅自身受益，无需select_targets。数值依据：当前混合威胁约650/轮（m1+m2各200物理、m3为250法术），Defence+60%与MagicRes+60%（0法抗单位收益体现在后续法伤压力）对应'明显提升'诉求，防御向不涉及输出。约束遵守：hostAssets为空（无子弹/召唤/图标），纯属性buff方案，无任何宿主资源依赖；modifiers首次构建后冻结，静态数值无影响。",
+    "plannedOps": [
+     "apply_buff",
+     "destroy_buff"
+    ]
+   },
+   "cached": true
+  }
+ }
+}

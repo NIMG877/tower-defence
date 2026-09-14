@@ -1,0 +1,370 @@
+{
+ "envelope": {
+  "protocolVersion": 1,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "pusher",
+   "camp": 1,
+   "selfHpRate": 1.0,
+   "selfPos": {
+    "x": 4,
+    "y": 4
+   },
+   "skill": null,
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime"
+    },
+    {
+     "id": "m2",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier"
+    },
+    {
+     "id": "m3",
+     "name": "重甲领主",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 4500,
+     "maxHp": 4500,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 6
+     },
+     "attack": 500,
+     "defence": 400,
+     "magicRes": 30,
+     "job": -1,
+     "label": "boss"
+    }
+   ]
+  },
+  "hostAssets": {
+   "canSpawnEntityIds": [],
+   "bulletCount": 0,
+   "iconKeys": []
+  },
+  "constraints": {
+   "request": "开技能时把身边的轻装敌人往外推开，重甲敌人推不动。"
+  }
+ },
+ "taskId": "t11_mass_knockback",
+ "contract": "v1",
+ "wallSeconds": 0.0,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "pusher_s1",
+   "abilityName": "震荡气浪",
+   "description": "开启技能时，以自身为中心向外爆发一道气浪：半径3格内的敌方轻装单位（最大生命值低于2000）被向外击退，并在位移稳定前无法移动与攻击；最大生命值2000及以上的重甲单位推不动，不受影响。本技能不造成伤害。",
+   "iconKey": null,
+   "sp": {
+    "totalSp": 0,
+    "initialSp": 0,
+    "chargeNum": 1,
+    "abilityAmount": 0.0,
+    "recoverMode": "Natural",
+    "consumeMode": "NoConsume",
+    "openMode": "Auto",
+    "recoverForbidDuringAbility": false,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "select_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "subjectMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "selectionMode",
+          "value": "radius",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "campRelation",
+          "value": "opposing",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "radius",
+          "value": "3",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputEntitiesKey",
+          "value": "push_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputCountKey",
+          "value": "push_targets_count",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "filter_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "blackboardKey",
+          "value": "push_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "fields",
+          "value": "maxhp",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "ops",
+          "value": "less",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "values",
+          "value": "2000",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "groups",
+          "value": "0",
+          "type": "intArray",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "apply_impulse",
+       "args": {
+        "entries": [
+         {
+          "key": "targetMode",
+          "value": "blackboard",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "blackboardKey",
+          "value": "push_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "strengthLevel",
+          "value": "1",
+          "type": "int",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [],
+   "attempts": 1,
+   "phases": [
+    {
+     "phase": "analyze",
+     "detail": "start",
+     "t": 0.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool compute_cross_items round 1",
+     "t": 17.38
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool list_components round 1",
+     "t": 17.38
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 32.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 32.01
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_contract_doc round 2",
+     "t": 32.01
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 3",
+     "t": 44.32
+    },
+    {
+     "phase": "describe",
+     "detail": "start",
+     "t": 91.39
+    },
+    {
+     "phase": "describe",
+     "detail": "plannedOps=['select_targets', 'filter_targets', 'apply_impulse']",
+     "t": 127.5
+    },
+    {
+     "phase": "retrieve",
+     "detail": "top: ebnhlz_t2(0.25), creeper_t1(0.222), skeleton_t1(0.2)",
+     "t": 127.5
+    },
+    {
+     "phase": "generate",
+     "detail": "attempt 1",
+     "t": 127.5
+    },
+    {
+     "phase": "validate",
+     "detail": "ok",
+     "t": 193.01
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 193.01
+    }
+   ],
+   "analysis": "## 战局分析结论\n\n### 一、敌我态势\n- **自身**：pusher（camp 1），位于高台格 (4,4)，满血（hpRate=1.0），场上无友军（ally_count=0），孤立作战。\n- **敌人**（camp 2，共 3 个，全部在自身半径 3 内）：\n  - **m1 史莱姆（轻装）**：距离 1.0，HP 550/550，攻 120 / 防 30 / 法抗 0。\n  - **m2 士兵（中轻装）**：距离 1.41，HP 1200/1200，攻 200 / 防 150 / 法抗 0。\n  - **m3 重甲领主（boss）**：距离 2.83，HP 4500/4500，攻 500 / 防 400 / 法抗 30——单体威胁最大。\n- 地图 8×9；自身站高台，周边高台格 (4,5)(5,4)、地面格 (3,2)(3,3)(4,2)(5,2)(5,3)(5,5) 可用。\n\n### 二、可利用的机制机会（对应需求\"轻装推开、重甲推不动\"）\n- **`apply_impulse` 天然支持该语义**：它对每个目标沿\"自宿主向外\"方向施加冲量，由 `MoveBase.TryToAddImpulse` 按目标**质量决定是否接受**——重甲推不动可交由引擎自然判定，不必硬编码。\n- **附加控制价值**：被接受的冲量会附带 unbalance 异常状态（目标在位移稳定前**不能移动/攻击**），等效打断 m1/m2 行动，为自身争取输出窗口。\n- **推荐流程**（单规则、同步前缀内完成）：\n  1. `select_targets`：radius≈3（当前三敌全部覆盖），campRelation=opposing，outputEntitiesKey 写入黑板；\n  2. `filter_targets`：按 `MaxHp < 阈值` 过滤（当前血量分层 550 / 1200 / 4500，阈值取 **<2000** 可把 m1+m2 判为轻装、m3 排除；若想表现\"推了但推不动\"，可跳过过滤直接全体送 impulse）；\n  3. `apply_impulse`：targetMode=blackboard，strengthLevel 建议取 1~2（具体推距由 MoveBase 裁决）。\n- 触发时机：技能开启事件（如 OnAbilityBegin），reentry 用 `IgnoreWhileRunning`（开技能一次性触发，无多段需求）。\n- 注意：位于宿主正中心的目标会被跳过（当前最近 1.0，无此情况）。\n\n### 三、本次生成约束\n- **宿主资源为空**：canSpawnEntityIds=[]（不可召唤实体）、bulletCount=0（fire_bullets 不可用）、iconKeys=[]（动画 override 等宿主资源类组件基本不可用）。技能只能是**纯位移/纯逻辑**组合：选目标 → 过滤 → 推开，不加伤害/子弹/召唤。\n- m3 boss（攻 500 / 防 400）不可被推开，本次需求不含对 boss 的应对手段，属已知留白。\n- \"轻装\"判定标准需在生成时定稿：建议以 MaxHp 阈值（<2000）为准，落点在 m2（可推）与 m3（不可推）之间。",
+   "design": {
+    "abilityName": "震荡气浪",
+    "description": "开启技能时，以自身为中心向外爆发一道气浪：半径3格内的敌方轻装单位（最大生命值低于2000）被向外击退，并在位移稳定前无法移动与攻击；最大生命值2000及以上的重甲单位推不动，不受影响。本技能不造成伤害。",
+    "designNotes": "触发：OnAbilityBegin（开技能一次性），groups为空=无条件，reentry=IgnoreWhileRunning。步骤序列（全部为同步立即步骤）：1) select_targets：subjectMode=self、selectionMode=radius、radius=3、campRelation=opposing，输出黑板键 push_targets（outputCountKey=push_targets_count，便于调试）；2) filter_targets：blackboardKey=push_targets，按 MaxHp Less 2000 原位过滤——当前敌群血量分层 550(m1)/1200(m2)/4500(m3)，阈值2000落在可推的m2与不可推的m3之间，实现'轻装推开、重甲排除'；3) apply_impulse：targetMode=blackboard、blackboardKey=push_targets、strengthLevel=1，冲量方向由宿主指向各目标向外，MoveBase 按目标质量二次裁决并附加unbalance异常（位移稳定前不能Move/Attack）。约束遵循：宿主 canSpawnEntityIds/bulletCount/iconKeys 均为空，故不含伤害/子弹/召唤/动画组件；目标列表过滤后为空时 apply_impulse 对空列表自然空操作，无报错。",
+    "plannedOps": [
+     "select_targets",
+     "filter_targets",
+     "apply_impulse"
+    ]
+   },
+   "cached": true
+  }
+ }
+}

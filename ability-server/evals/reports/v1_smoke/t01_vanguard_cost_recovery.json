@@ -1,0 +1,241 @@
+{
+ "envelope": {
+  "protocolVersion": 1,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "fang",
+   "camp": 1,
+   "selfHpRate": 1.0,
+   "selfPos": {
+    "x": 3,
+    "y": 3
+   },
+   "skill": null,
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime"
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 6
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime"
+    }
+   ]
+  },
+  "hostAssets": {
+   "canSpawnEntityIds": [],
+   "bulletCount": 0,
+   "iconKeys": []
+  },
+  "constraints": {
+   "request": "我的部署费用经常跟不上，开技能时帮我回一笔费用，量级对齐先锋标准。"
+  }
+ },
+ "taskId": "t01_vanguard_cost_recovery",
+ "contract": "v1",
+ "wallSeconds": 134.83,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "fang_s2",
+   "abilityName": "战地补给调度",
+   "description": "技能开启时，立即获得2点部署费用。",
+   "iconKey": "",
+   "sp": {
+    "totalSp": 15,
+    "initialSp": 5,
+    "chargeNum": 1,
+    "abilityAmount": 0.0,
+    "recoverMode": "Natural",
+    "consumeMode": "Natural",
+    "openMode": "Auto",
+    "recoverForbidDuringAbility": false,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "modify_cost",
+       "args": {
+        "entries": [
+         {
+          "key": "amount",
+          "value": "2",
+          "type": "int",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [],
+   "attempts": 1,
+   "phases": [
+    {
+     "phase": "analyze",
+     "detail": "start",
+     "t": 0.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool compute_cross_items round 1",
+     "t": 18.22
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool list_components round 1",
+     "t": 18.22
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 27.97
+    },
+    {
+     "phase": "describe",
+     "detail": "start",
+     "t": 83.47
+    },
+    {
+     "phase": "describe",
+     "detail": "tool read_contract_doc (attempt 1)",
+     "t": 91.47
+    },
+    {
+     "phase": "describe",
+     "detail": "plannedOps=['modify_cost']",
+     "t": 104.9
+    },
+    {
+     "phase": "retrieve",
+     "detail": "top: fang_s1(1.0), charger(0.5), wyvern_s1(0.333)",
+     "t": 104.91
+    },
+    {
+     "phase": "generate",
+     "detail": "attempt 1",
+     "t": 104.91
+    },
+    {
+     "phase": "validate",
+     "detail": "ok",
+     "t": 133.87
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 133.87
+    }
+   ],
+   "analysis": "**敌我态势**\n- 场上仅 2 名敌人（camp 2），均为满血史莱姆（550/550，攻 120 / 防 30 / 法抗 0）：\n  - m1 位于 (6,4)，距我 3.16；m2 位于 (7,6)，距我 5.0——尚未进入交战距离，属进攻途中。\n- 我方：仅自身（fang，camp 1，位于 (3,3)），ally_count=0，无队友可联动；血量 1.0，无生存压力。\n- 地图 8×9；高台可部署：4,4 / 4,5 / 5,4；地面可部署 6 格（含自身所在 3,3）。敌人从右侧逼近，本格是顺路防守位。\n\n**机制机会**\n- 本次需求是纯功能性回费，不涉及索敌、伤害、召唤：m1/m2 的 30 防御、0 法抗对设计无影响，无目标选择需求。\n- `modify_cost` 是全局立即生效的费用变更，不走实体/黑板、无目标依赖，与\"开技能即生效\"的诉求完全匹配；适合挂在技能开启类触发（PreWarm / OnAbilityBegin 规则）上，单步执行即可。\n- 无条件单次触发，无需 random_roll/branch 门控或黑板中转（组件支持 fromBlackboard，但静态量级更稳）。\n\n**本次生成技能的约束**\n- hostAssets 完全为空：canSpawnEntityIds=[]、bulletCount=0、iconKeys=[] → 不能引用召唤物、子弹、动画资源，技能必须是纯逻辑效果（本需求正好不受影响）。\n- 触发设计：技能开启时一次性执行 `modify_cost`；注意若改挂实体事件，会随每次通过触发而重复加费，本例单次开启语义下无此问题。\n- 量级建议：对齐先锋回费标准，每次开启回复 **2 点费用**（先锋回费技能常见量级为 1~2 点，2 点属标准上限，符合\"经常跟不上部署费用\"的诉求；若求保守可取 1）。amount=2、fixed 值，无需动态黑板来源。\n- 结论：生成一条单步规则——技能开启 → modify_cost(amount=2)，不依赖任何宿主资产，可行性无阻碍。",
+   "design": {
+    "abilityName": "战地补给调度",
+    "description": "技能开启时，立即获得2点部署费用。",
+    "designNotes": "触发事件：OnAbilityBegin（技能开启时触发一次）。步骤序列：单步 modify_cost，amount=2（Int，固定字面量，fromBlackboard=false），无前置目标选择、无条件门控——该组件为全局立即生效的费用变更（LevelResourceManager.ChangeCost），与实体/黑板无关，全同步步骤在事件派发前缀内完成，不会产生延迟或重复结算。reentry 选取 IgnoreWhileRunning（纯即时序列，实际无可重入窗口）。数值依据：用户要求回费量级对齐先锋标准，取标准区间（1~2）上限 2 点，匹配'部署费用经常跟不上'的诉求。无宿主资产依赖：当前 bulletCount=0、canSpawnEntityIds=[]，本技能不引用召唤物/子弹/动画，纯逻辑效果，可行性无阻碍。",
+    "plannedOps": [
+     "modify_cost"
+    ]
+   }
+  }
+ }
+}

@@ -1,0 +1,497 @@
+{
+ "envelope": {
+  "protocolVersion": 3,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "sniper",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "sniper",
+     "name": "sniper",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 850,
+     "maxHp": 850,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 2
+     },
+     "attack": 520,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 3,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 2,
+      "y": 3
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 3,
+      "y": 5
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m3",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 6
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 3,
+   "subJob": 0,
+   "cost": 15,
+   "baseAttackTime": 2.4,
+   "damageType": 0,
+   "blockOccupation": 1,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "技能开启期间我的攻击可以同时多打一个目标。"
+  }
+ },
+ "taskId": "t07_sniper_extra_target",
+ "contract": "v2",
+ "wallSeconds": 0.03,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "sniper_multi_target",
+   "abilityName": "双重瞄准",
+   "description": "技能开启期间，攻击可以同时多打一个目标。",
+   "sp": {
+    "totalSp": 25,
+    "initialSp": 15,
+    "chargeNum": 1,
+    "abilityAmount": 0.0,
+    "recoverMode": "Natural",
+    "consumeMode": "Once",
+    "openMode": "Manual",
+    "recoverForbidDuringAbility": true,
+    "canManualClose": true
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "write_blackboard",
+       "args": {
+        "entries": [
+         {
+          "key": "key",
+          "value": "sniper_multi_on",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "value",
+          "value": "True",
+          "type": "Bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "method",
+          "value": "set",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    },
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityEnd",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "write_blackboard",
+       "args": {
+        "entries": [
+         {
+          "key": "key",
+          "value": "sniper_multi_on",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "value",
+          "value": "False",
+          "type": "Bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "method",
+          "value": "set",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    },
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnBeforeTargetSelect",
+       "groups": [
+        {
+         "units": [
+          {
+           "op": "Equal",
+           "leftKey": "sniper_multi_on",
+           "rightValue": "True",
+           "rightKey": ""
+          }
+         ]
+        }
+       ]
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "attack_target_count_modifier",
+       "args": {
+        "entries": [
+         {
+          "key": "fields",
+          "value": "selectmaxnum",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "methods",
+          "value": "add",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "values",
+          "value": "1",
+          "type": "floatArray",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [
+    {
+     "severity": "warning",
+     "path": "rules[2].steps[0]",
+     "message": "param 'fields' type label 'String' coerced to schema type 'stringArray'"
+    },
+    {
+     "severity": "warning",
+     "path": "rules[2].steps[0]",
+     "message": "param 'methods' type label 'String' coerced to schema type 'stringArray'"
+    },
+    {
+     "severity": "warning",
+     "path": "rules[2].steps[0]",
+     "message": "param 'values' type label 'Float' coerced to schema type 'floatArray'"
+    }
+   ],
+   "rounds": 8,
+   "phases": [
+    {
+     "phase": "plan",
+     "detail": "round 1 model=glm-5.3-flash",
+     "t": 0.0
+    },
+    {
+     "phase": "plan",
+     "detail": "tool update_plan",
+     "t": 25.88
+    },
+    {
+     "phase": "plan",
+     "detail": "round 2 model=glm-5.3-flash",
+     "t": 25.88
+    },
+    {
+     "phase": "act",
+     "detail": "tool list_components",
+     "t": 30.79
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_schema_vocab",
+     "t": 30.79
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_contract_doc",
+     "t": 30.79
+    },
+    {
+     "phase": "act",
+     "detail": "round 3 model=glm-5.3-flash",
+     "t": 30.79
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 55.56
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 55.56
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 55.56
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 55.56
+    },
+    {
+     "phase": "act",
+     "detail": "round 4 model=glm-5.3-flash",
+     "t": 55.56
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 60.86
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 60.86
+    },
+    {
+     "phase": "act",
+     "detail": "round 5 model=glm-5.3-flash",
+     "t": 60.86
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 101.05
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 101.05
+    },
+    {
+     "phase": "act",
+     "detail": "round 6 model=glm-5.3-flash",
+     "t": 101.05
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 145.0
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 145.0
+    },
+    {
+     "phase": "act",
+     "detail": "round 7 model=glm-5.3-flash",
+     "t": 145.0
+    },
+    {
+     "phase": "review",
+     "detail": "tool validate_draft",
+     "t": 197.78
+    },
+    {
+     "phase": "act",
+     "detail": "round 8 model=glm-5.3-flash",
+     "t": 197.78
+    },
+    {
+     "phase": "submit",
+     "detail": "tool submit_skill",
+     "t": 215.76
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 215.76
+    }
+   ],
+   "plan": "技能设计计划：狙击手「开启期间攻击同时多打一个目标」\n\n一、机制理解\n- 宿主为狙击（job=3），普攻单目标（targetPriority=0）。诉求：技能开启期间，每次普攻额外再命中 1 个目标（共打 2 个）。\n- 机制范围只做：①开启/关闭切换状态；②开启期间普攻附带对第二个目标造成伤害。不附加其他效果。\n\n二、组件调研\n1. list_components 看全量 op 索引，定位：攻击/命中触发事件、状态开关（buff/toggle）、目标选择、伤害施加、弹道表现类组件。\n2. read_component_doc 精读候选组件参数表（预计：普攻触发、select_targets、apply_damage、开关状态类）。\n3. read_contract_doc 确认规则步骤/触发时机/重入契约（同一帧多敌人、触发节流等）。\n4. read_schema_vocab 拿 triggerEvents / conditionOps / 参数编码词表。\n\n三、先例查证\n- search_skills 关键词：额外目标 / 多重攻击 / onAttack / apply_damage，读 1~2 个完整配置确定数值量级（额外目标通常 100%~130% 攻击力）与结构写法。\n\n四、配置草案方向\n- 触发：技能开启事件 → 进入开启状态（写黑板标记/施加自身可见状态）；\n- 触发：普攻命中/攻击事件 → select_targets 选「当前目标之外的最近 1 个可攻击敌人」→ 对其 apply_damage（攻击力×系数）→ 可选子弹表现（若 hostAssets.bullets 为空则用直接伤害，避免引用越界）。\n- 目标选取过滤敌人标签按词表写；距离/视野范围沿用宿主 visionRadius=2.5。\n- 黑板键：select_targets 写实体列表 → apply_damage 直接读列表；是否需要 listCount 桥接视组件文档而定（若第二目标为空则自然不造成伤害）。\n\n五、交付\n- validate_draft 自检修复 → submit_skill 提交。",
+   "tokens": {
+    "calls": 8,
+    "prompt_tokens": 108190,
+    "completion_tokens": 8845
+   },
+   "cached": true
+  }
+ }
+}

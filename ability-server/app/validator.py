@@ -21,8 +21,9 @@ import re
 from . import schema as schema_mod
 
 # 客户端 DTO 白名单（AbilityConfigDto / SPConfig / AbilityRuleConfig / StepConfig /
-# ConditionConfig / ConditionUnit / ParamEntry 的字段集，见 docs/ability-steps.md 存储形态）
-DTO_KEYS = ("abilityId", "abilityName", "description", "iconKey", "sp", "rules")
+# ConditionConfig / ConditionUnit / ParamEntry 的字段集，见 docs/ability-steps.md 存储形态）。
+# iconKey 不在其中：生成技能统一图标，sanitize 恒剥离（技能卡走 AbilityIconPool null 兜底）。
+DTO_KEYS = ("abilityId", "abilityName", "description", "sp", "rules")
 SP_KEYS = ("totalSp", "initialSp", "chargeNum", "abilityAmount",
            "recoverMode", "consumeMode", "openMode", "recoverForbidDuringAbility", "canManualClose")
 SP_NUMERIC_KEYS = ("totalSp", "initialSp", "chargeNum", "abilityAmount")
@@ -41,15 +42,24 @@ _SP_CLAMP_KEYS = {
 
 
 class Walk:
-    def __init__(self, schema: dict):
+    def __init__(self, schema: dict, host_assets: dict | None = None,
+                 corpus_usage: dict | None = None):
         self.schema = schema
+        self.host_assets = host_assets or {}
+        self.corpus_usage = corpus_usage or {}
         self.issues: list[dict] = []
         self.reads: set[str] = set()
         self.writes: set[str] = set()
         self.fixed_writes: set[str] = set()
+        # 当前规则的触发事件（eventContext 并集检查用）与已见实体列表键（listCount 写前读序用）
+        self.current_rule_events: list[str] = []
+        self.list_keys: set[str] = set()
 
     def add(self, is_error: bool, path: str, message: str) -> None:
         self.issues.append({"severity": "error" if is_error else "warning", "path": path, "message": message})
+
+    def add_info(self, path: str, message: str) -> None:
+        self.issues.append({"severity": "info", "path": path, "message": message})
 
     @property
     def ok(self) -> bool:
@@ -118,17 +128,22 @@ def _fmt(value: float) -> str:
 
 
 def validate(dto: dict, schema: dict | None = None,
-             existing_ids: set[str] | None = None) -> tuple[bool, list[dict], dict]:
+             existing_ids: set[str] | None = None,
+             host_assets: dict | None = None,
+             corpus_usage: dict | None = None) -> tuple[bool, list[dict], dict]:
     """返回 (ok, issues, sanitized)。sanitized 总是产出；调用方仅在 ok 时使用。
-    existing_ids（来自技能语料）非空时，abilityId 与现有技能撞名记 warning。"""
+    existing_ids（来自技能语料）非空时，abilityId 与现有技能撞名记 warning。
+    host_assets（请求的宿主资产清单）非空时，spawn/fire/动画引用做边界校验（error 级）。
+    corpus_usage（{"triggerEvents": set, "reentries": set}，来自技能语料）非空时，
+    语料零使用的触发事件/reentry 附 info 级"无先例"提示。"""
     schema = schema or schema_mod.load_schema()
-    ctx = Walk(schema)
+    ctx = Walk(schema, host_assets, corpus_usage)
 
     if not isinstance(dto, dict):
         ctx.add(True, "", "dto is not an object")
         return False, ctx.issues, {}
 
-    sanitized: dict = {k: dto.get(k) for k in ("abilityId", "abilityName", "description", "iconKey")}
+    sanitized: dict = {k: dto.get(k) for k in DTO_KEYS}
 
     if existing_ids and isinstance(sanitized.get("abilityId"), str) \
             and sanitized["abilityId"] in existing_ids:
@@ -186,6 +201,10 @@ def _sanitize_rules(rules: list, ctx: Walk) -> list[dict]:
         triggers = rule.get("triggers")
         if not isinstance(triggers, list) or not triggers:
             ctx.add(True, path, "rule has no triggers; it would never execute")
+        # 当前规则触发事件：eventContext 并集检查的数据域（多 trigger 取并集——
+        # 实际触发哪个运行时才定，静态不可知，warning 级以控制误报为先）。
+        ctx.current_rule_events = [t.get("triggerEvent") for t in (triggers or [])
+                                   if isinstance(t, dict)]
         out.append({
             "triggers": _sanitize_triggers(triggers, events, ctx),
             "reentry": rule.get("reentry", "IgnoreWhileRunning"),
@@ -195,6 +214,9 @@ def _sanitize_rules(rules: list, ctx: Walk) -> list[dict]:
         reentry = out[-1]["reentry"]
         if reentry not in reentries:
             ctx.add(True, f"{path}.reentry", f"unknown reentry '{reentry}'; expected one of {sorted(reentries)}")
+        elif ctx.corpus_usage and reentry not in ctx.corpus_usage.get("reentries", set()):
+            ctx.add_info(f"{path}.reentry",
+                         f"reentry '{reentry}' has no precedent in the skill corpus; verify intent")
     return out
 
 
@@ -202,6 +224,7 @@ def _sanitize_triggers(triggers, events: set[str], ctx: Walk) -> list[dict]:
     if not isinstance(triggers, list):
         return []
     out = []
+    corpus_events = ctx.corpus_usage.get("triggerEvents")
     for i, trigger in enumerate(triggers):
         path = f"triggers[{i}]"
         if not isinstance(trigger, dict):
@@ -211,6 +234,9 @@ def _sanitize_triggers(triggers, events: set[str], ctx: Walk) -> list[dict]:
         if event not in events:
             ctx.add(True, f"{path}.triggerEvent",
                     f"unknown TriggerEvent '{event}'; expected one of {sorted(events)}")
+        elif corpus_events is not None and event not in corpus_events:
+            ctx.add_info(f"{path}.triggerEvent",
+                         f"trigger event '{event}' has no precedent in the skill corpus; verify intent")
         out.append({
             "triggerEvent": event,
             "groups": _sanitize_groups(trigger.get("groups"), f"{path}.groups", ctx),
@@ -288,6 +314,8 @@ def _sanitize_step(step: dict, path: str, ctx: Walk) -> dict:
     clone["args"] = {"entries": _sanitize_entries(entries, op_def, canonical, path, ctx)}
     for fw in op_def.get("fixedWrites", []):
         ctx.fixed_writes.add(fw)
+    if canonical == "write_blackboard":
+        _check_context_paths(clone["args"]["entries"], path, ctx)
 
     condition = step.get("condition")
     has_condition = isinstance(condition, list) and bool(condition)
@@ -301,6 +329,51 @@ def _sanitize_step(step: dict, path: str, ctx: Walk) -> dict:
     clone["steps"] = _sanitize_steps(step.get("steps"), f"{path}.steps", ctx)
     clone["elseSteps"] = _sanitize_steps(else_steps, f"{path}.elseSteps", ctx)
     return clone
+
+
+def _check_context_paths(entries: list[dict], path: str, ctx: Walk) -> None:
+    """write_blackboard 取值来源的语义检查（全部 warning 级，§五.2/§五.3）：
+    - source=event：path ∈ 所在规则全部 triggers 的 eventContext 并集（词表外运行时
+      会 WarnUnknownContextPath 返回 null，写值静默跳过）；
+    - source=entity：path ∈ entityContext；
+    - source=listCount：path 须为本技能内先前 select_targets（outputEntitiesKey）
+      产出的实体列表键，否则运行时读到空列表、写入跳过。"""
+    by_key = {e.get("key"): e for e in entries if isinstance(e, dict)}
+    source_entry = by_key.get("source")
+    if source_entry and source_entry.get("fromBlackboard"):
+        return  # source 运行时才解析，静态不查
+    source = str((source_entry or {}).get("value") or "value").strip().lower()
+    path_entry = by_key.get("path")
+    if not path_entry or path_entry.get("fromBlackboard") or not path_entry.get("value"):
+        return
+    path_value = path_entry["value"]
+
+    if source == "event":
+        # path 在 schema 里是 readKey（listCount 语义），但 event/entity 源下它是
+        # 事件字段/实体路径名，不是黑板键——从 reads 剔除，避免"读键无生产者"误报。
+        ctx.reads.discard(path_value)
+        event_context = ctx.schema.get("eventContext") or {}
+        legal: set[str] = set()
+        for event in ctx.current_rule_events:
+            legal.update((event_context.get(event) or {}).keys())
+        if path_value not in legal:
+            ctx.add(False, f"{path}.args",
+                    f"source=event path '{path_value}' is outside the eventContext of "
+                    f"{ctx.current_rule_events}; runtime would warn and write nothing "
+                    f"(legal: {sorted(legal) or 'no context paths on these events'})")
+    elif source == "entity":
+        ctx.reads.discard(path_value)
+        entity_context = ctx.schema.get("entityContext") or {}
+        if path_value not in entity_context:
+            ctx.add(False, f"{path}.args",
+                    f"source=entity path '{path_value}' is outside entityContext; runtime "
+                    f"would warn and write nothing (legal: {sorted(entity_context)})")
+    elif source == "listcount":
+        if path_value not in ctx.list_keys:
+            ctx.add(False, f"{path}.args",
+                    f"source=listCount path '{path_value}' has no earlier select_targets "
+                    "outputEntitiesKey producer in this ability; runtime would find no "
+                    "list and skip the write")
 
 
 def _sanitize_entries(entries, op_def: dict, canonical: str, path: str, ctx: Walk) -> list[dict]:
@@ -337,8 +410,66 @@ def _sanitize_entries(entries, op_def: dict, canonical: str, path: str, ctx: Wal
                 ctx.reads.add(clone["value"])
             elif role == "writeKey":
                 ctx.writes.add(clone["value"])
+        # 实体列表产出登记：listCount 写前读序检查（§五.3）只认 select_targets 的
+        # outputEntitiesKey（其它 writeKey 不产出 List<Entity>）。
+        if canonical == "select_targets" and key == "outputEntitiesKey" \
+                and not clone["fromBlackboard"] and clone["value"]:
+            ctx.list_keys.add(clone["value"])
+        # hostAssets 边界校验只管字面量（fromBlackboard 的值是黑板键名，运行时才解析）。
+        if not clone["fromBlackboard"] and clone["value"]:
+            _check_host_asset_bounds(clone, canonical, path, ctx)
         out.append(clone)
     return out
+
+
+def _check_host_asset_bounds(entry: dict, canonical: str, path: str, ctx: Walk) -> None:
+    """hostAssets 边界校验（error 级，拒绝级）：引用只能指向宿主实际持有的资产，
+    与客户端运行时行为对齐（SpawnEntity.ResolveSpawnId 越界 LogError 跳过本次生成、
+    AnimationResources 按名精确解析）。hostAssets 未携带对应清单时无从校验，跳过。"""
+    host = ctx.host_assets
+    if not isinstance(host, dict):
+        return
+    if canonical == "spawn_entity" and entry["key"] == "spawnIndex":
+        if isinstance(host.get("canSpawnEntities"), list):      # 契约 v2 字段（实体投影列表）
+            registry = host["canSpawnEntities"]
+        elif isinstance(host.get("canSpawnEntityIds"), list):   # 契约 v1 字段（id 列表）
+            registry = host["canSpawnEntityIds"]
+        else:
+            return
+        _check_index(entry["value"], len(registry), "spawn_entity.spawnIndex",
+                     "hostAssets.canSpawnEntityIds", path, ctx)
+    elif canonical == "fire_bullets" and entry["key"] == "bulletDataIndex":
+        bullets = host.get("bullets")
+        count = host.get("bulletCount")
+        if isinstance(bullets, list):                           # 契约 v2 字段（弹幕投影列表）
+            count = len(bullets)
+        elif isinstance(count, bool) or not isinstance(count, (int, float)):  # 契约 v1 字段
+            return
+        _check_index(entry["value"], int(count), "fire_bullets.bulletDataIndex",
+                     "hostAssets.bullets", path, ctx)
+    elif canonical == "apply_animation_override" and entry["key"] == "resources":
+        animations = host.get("animations")
+        names = animations.get("named") if isinstance(animations, dict) else None
+        groups = animations.get("groups") if isinstance(animations, dict) else None
+        legal = {n for n in (names or []) + (groups or []) if isinstance(n, str)}
+        if not legal:
+            return  # 契约 v2 才携带动画清单，此前无从校验
+        for token in _csv_tokens(entry["value"]):
+            if token and token not in legal:  # 客户端按名精确解析（大小写敏感）
+                ctx.add(True, path,
+                        f"animation resource '{token}' is not in hostAssets.animations "
+                        "(named ∪ groups); client resolution would fail")
+
+
+def _check_index(value: str, count: int, param: str, source: str, path: str, ctx: Walk) -> None:
+    num = _coerce_num(value)
+    if num is None or num != int(num):
+        return  # 非整数字面量已由 int 类型校验告警；此处只管越界
+    if 0 <= int(num) < count:
+        return
+    ctx.add(True, path,
+            f"{param}={int(num)} out of range: {source} has {count} entries "
+            "(client logs an error and skips the step)")
 
 
 def _validate_entry_value(entry: dict, param: dict, canonical: str, path: str, ctx: Walk) -> None:

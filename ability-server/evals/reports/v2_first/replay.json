@@ -1,0 +1,104 @@
+{
+ "run": "v2_first",
+ "tasks": 16,
+ "submitOkRate": 1.0,
+ "replayGreenRate": 1.0,
+ "perTask": [
+  {
+   "taskId": "t01_vanguard_cost_recovery",
+   "submitted": true,
+   "replayGreen": true,
+   "replayErrors": 0
+  },
+  {
+   "taskId": "t02_medic_attack_buff",
+   "submitted": true,
+   "replayGreen": true,
+   "replayErrors": 0
+  },
+  {
+   "taskId": "t03_defender_defense_buff",
+   "submitted": true,
+   "replayGreen": true,
+   "replayErrors": 0
+  },
+  {
+   "taskId": "t04_guard_single_target_burst",
+   "submitted": true,
+   "replayGreen": true,
+   "replayErrors": 0
+  },
+  {
+   "taskId": "t05_caster_splash_radius",
+   "submitted": true,
+   "replayGreen": true,
+   "replayErrors": 0
+  },
+  {
+   "taskId": "t06_thorns_reflect",
+   "submitted": true,
+   "replayGreen": true,
+   "replayErrors": 0
+  },
+  {
+   "taskId": "t07_sniper_extra_target",
+   "submitted": true,
+   "replayGreen": true,
+   "replayErrors": 0
+  },
+  {
+   "taskId": "t08_summon_blocker",
+   "submitted": true,
+   "replayGreen": true,
+   "replayErrors": 0
+  },
+  {
+   "taskId": "t09_mortar_barrage",
+   "submitted": true,
+   "replayGreen": true,
+   "replayErrors": 0
+  },
+  {
+   "taskId": "t10_animation_costume_swap",
+   "submitted": true,
+   "replayGreen": true,
+   "replayErrors": 0
+  },
+  {
+   "taskId": "t11_mass_knockback",
+   "submitted": true,
+   "replayGreen": true,
+   "replayErrors": 0
+  },
+  {
+   "taskId": "t12_gamble_buff",
+   "submitted": true,
+   "replayGreen": true,
+   "replayErrors": 0
+  },
+  {
+   "taskId": "t13_tick_damage_aura",
+   "submitted": true,
+   "replayGreen": true,
+   "replayErrors": 0
+  },
+  {
+   "taskId": "t14_silence_casters",
+   "submitted": true,
+   "replayGreen": true,
+   "replayErrors": 0
+  },
+  {
+   "taskId": "t15_blocked_priority",
+   "submitted": true,
+   "replayGreen": true,
+   "replayErrors": 0
+  },
+  {
+   "taskId": "t16_kill_reward_cost",
+   "submitted": true,
+   "replayGreen": true,
+   "replayErrors": 0
+  }
+ ]
+}

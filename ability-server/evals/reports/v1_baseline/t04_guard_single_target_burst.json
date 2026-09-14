@@ -1,0 +1,347 @@
+{
+ "envelope": {
+  "protocolVersion": 1,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "guard",
+   "camp": 1,
+   "selfHpRate": 1.0,
+   "selfPos": {
+    "x": 4,
+    "y": 3
+   },
+   "skill": null,
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "m1",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 3
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier"
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 5
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime"
+    },
+    {
+     "id": "m3",
+     "name": "重甲领主",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 4500,
+     "maxHp": 4500,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 7
+     },
+     "attack": 500,
+     "defence": 400,
+     "magicRes": 30,
+     "job": -1,
+     "label": "boss"
+    }
+   ]
+  },
+  "hostAssets": {
+   "canSpawnEntityIds": [],
+   "bulletCount": 0,
+   "iconKeys": []
+  },
+  "constraints": {
+   "request": "给一个主动技：开技能时对眼前最近的敌人打出一发高倍率物理伤害。"
+  }
+ },
+ "taskId": "t04_guard_single_target_burst",
+ "contract": "v1",
+ "wallSeconds": 0.0,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "guard_s1",
+   "abilityName": "破军直刺",
+   "description": "开启技能时，立即对身前1.5格范围内的敌人打出一发400%攻击力的物理伤害，并附带40%物理防御穿透。",
+   "iconKey": null,
+   "sp": {
+    "totalSp": 30,
+    "initialSp": 15,
+    "chargeNum": 1,
+    "abilityAmount": 0.0,
+    "recoverMode": "Natural",
+    "consumeMode": "Natural",
+    "openMode": "Manual",
+    "recoverForbidDuringAbility": false,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "select_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "subjectMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "selectionMode",
+          "value": "radius",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "campRelation",
+          "value": "opposing",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "radius",
+          "value": "1.5",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputEntitiesKey",
+          "value": "skill_target_list",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "apply_damage",
+       "args": {
+        "entries": [
+         {
+          "key": "targetMode",
+          "value": "blackboard",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "blackboardKey",
+          "value": "skill_target_list",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "attackerMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "baseValueMode",
+          "value": "attack",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "multiplier",
+          "value": "4",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "damageType",
+          "value": "0",
+          "type": "int",
+          "fromBlackboard": false
+         },
+         {
+          "key": "defPenetrate",
+          "value": "0.4",
+          "type": "float",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [],
+   "attempts": 1,
+   "phases": [
+    {
+     "phase": "analyze",
+     "detail": "start",
+     "t": 0.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool compute_cross_items round 1",
+     "t": 9.44
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool list_components round 1",
+     "t": 9.44
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 18.43
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 18.45
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 18.46
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_contract_doc round 2",
+     "t": 18.46
+    },
+    {
+     "phase": "describe",
+     "detail": "start",
+     "t": 65.25
+    },
+    {
+     "phase": "describe",
+     "detail": "plannedOps=['select_targets', 'apply_damage']",
+     "t": 92.9
+    },
+    {
+     "phase": "retrieve",
+     "detail": "top: ebnhlz_t2(1.0), lavabubble_t1(0.4), ardign_s1(0.333)",
+     "t": 92.9
+    },
+    {
+     "phase": "generate",
+     "detail": "attempt 1",
+     "t": 92.9
+    },
+    {
+     "phase": "validate",
+     "detail": "ok",
+     "t": 113.45
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 113.45
+    }
+   ],
+   "analysis": "## 战局分析结论\n\n**一、敌我态势**\n- 自身 `guard`（camp 1）位于 (4,3)，满血，贴脸正面对敌。\n- 敌方 3 个，全部满血（hpRate 均 1.0）：\n  - **m1 士兵** (5,3)：距离 **1.0**（最近），HP 1200，攻 200，防 150 —— 立即威胁。\n  - **m2 史莱姆** (6,5)：距离 2.83，HP 550，攻 120，防 30 —— 脆弱，收割目标。\n  - **m3 重甲领主** (7,7)：距离 5.0，HP 4500，攻 **500**，防 **400**、魔抗 30 —— boss 级，高防高攻，纯物理直伤对其性价比最低。\n- 工具计算确认最近敌人即 m1（1.0），与次近的 m2（2.83）之间有明显间隔。\n\n**二、可利用机制机会**\n- \"眼前最近\"可用 `select_targets`（radius 选择）表达：radius 取 1.5 左右，当前只会命中 m1，同时不至于误伤 2.83 外的 m2；输出 `outputEntitiesKey` 供后续步骤读取。\n- 高倍率物理直伤走 `apply_damage`：`baseValueMode=attack` + 高 `multiplier` + `damageType=0`，经 `EntityStats.ApplyDamage` 即时生效，可放在触发后的同步前缀内一步完成。\n- 对 m3（防 400）建议附带 `defPenetrate`（如 30%~50% 物理穿透），否则高倍率也会被护甲大幅稀释。\n- 主动技开技能时机的触发事件可用 `OnAbilityBegin`；整条 select→damage 均为即时步骤，同步完成，无需 yield。\n\n**三、本次生成约束（来自 hostAssets）**\n- `canSpawnEntityIds` 为空 → 不能召唤实体。\n- `bulletCount = 0` → 不可用 `fire_bullets`（无弹幕资源），伤害必须是直接 `apply_damage` 而非弹道表现。\n- `iconKeys` 为空、无动画资源 → 不可引用自定义动画/图标覆盖，保持默认表现。\n- 空目标列表时 `apply_damage` 为安全空操作，无需额外的\"有敌人才放\"守卫。\n\n**四、建议技能骨架**\n1. 触发：`OnAbilityBegin`（主动技开启），reentry `IgnoreWhileRunning`。\n2. `select_targets`：`selectionMode=radius`，`radius≈1.5`，`campRelation=opposing`，输出 `skill_target_list`。\n3. `apply_damage`：`targetMode=blackboard`、`baseValueMode=attack`、`multiplier` 高倍率（如 3~4 倍）、`damageType=0`、`defPenetrate≈0.4`，输入 `skill_target_list`。\n\n效果预期：开技能一击对贴脸的 m1（1200 HP / 防 150）打出高倍率物理伤害即可重创或击杀，形成减员后再处理 m2，m3 留给普攻持续磨血。",
+   "design": {
+    "abilityName": "破军直刺",
+    "description": "开启技能时，立即对身前1.5格范围内的敌人打出一发400%攻击力的物理伤害，并附带40%物理防御穿透。",
+    "designNotes": "触发事件：OnAbilityBegin（主动技开启，契约文档确认 Begin 规则派发时机）；reentry=IgnoreWhileRunning，全步骤即时完成无需 yield。步骤序列：①select_targets(subjectMode=self, selectionMode=radius, radius=1.5, campRelation=opposing, outputEntitiesKey=skill_target_list) —— 半径取1.5基于工具实测：最近敌 m1 距离1.0，次近 m2 距离2.83，该半径稳定只圈中贴脸目标且不误伤后排；②apply_damage(targetMode=blackboard, blackboardKey=skill_target_list, attackerMode=self, baseValueMode=attack, multiplier=4.0, damageType=0, defPenetrate=0.4) —— baseValueMode=attack 以守卫自身攻击力为基数走 EntityStats.ApplyDamage 直伤。数值依据：m1 士兵1200HP/防150，4倍攻击+40%穿透可重创或击杀贴脸单位；m3 boss 防400不指望本技能处理，40%穿透为兜底。约束遵守：hostAssets bulletCount=0、canSpawnEntityIds 为空，故不使用 fire_bullets/spawn_entity，纯 apply_damage 直伤；无动画资源故不做表现覆盖。空目标列表时 apply_damage 为安全空操作，无需额外守卫。",
+    "plannedOps": [
+     "select_targets",
+     "apply_damage"
+    ]
+   },
+   "cached": true
+  }
+ }
+}

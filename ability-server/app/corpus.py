@@ -1,20 +1,17 @@
 """技能语料：现有 AbilityConfig 资产经 Unity 菜单导出的 data/skills.json。
 
-两个用途（用户拍板的 2+3 方案）：
-- retrieve：按 plannedOps 与语料技能的 op 集合 Jaccard 重叠取 top-k，作为
-  generate 阶段的少样本范例（组合惯用法与数值量级）；
-- style_summary：全语料蒸馏的风格统计（各 op 参数取值范围/常用值、reentry
-  分布、规则规模），作为 generate system 的常数先验。
-- 语料的 existingIds 另供校验器做 abilityId 撞名 warning。
+用途（agent 工具层与校验器的数据源）：
+- search_skills / read_skill：设计前查先例——相似技能怎么组合、数值量级多少；
+- usage_stats：语料零使用的触发事件/reentry 记 info"无先例"（validator 低频挡位）；
+- existingIds：abilityId 撞名 warning（validator）。
 
 文件按 mtime 惰性重载：Unity 重新导出后无需重启服务。缺失/损坏 → 返回
-None，调用方全部静默降级为无语料（不注入、不统计、不查撞名）。
+None，调用方全部静默降级为无语料（不检索、不统计、不查撞名）。
 """
 
 from __future__ import annotations
 
 import json
-from collections import Counter
 from pathlib import Path
 
 # 通用原语几乎每个技能都有，参与 Jaccard 只会稀释区分度，不计入重叠。
@@ -84,103 +81,56 @@ def skill_ops(skill: dict, schema: dict | None = None) -> set[str]:
     return ops
 
 
-def retrieve(corpus: dict, planned_ops: list[str], schema: dict | None = None,
-             k: int = 3) -> list[dict]:
-    """按 op 集合 Jaccard 取 top-k 范例（score>0 才返回；同分按 abilityId 稳定排序）。
-    返回项为语料技能原 dict，附 "_score" 仅供调试/上报，注入提示词前会剥离。"""
-    planned = {_canonical(schema, op) for op in planned_ops}
-    if not planned:
+def search_skills(corpus: dict, query: str, schema: dict | None = None,
+                  limit: int = 5) -> list[dict]:
+    """关键词检索（agent 的 search_skills 工具后端）：匹配 abilityId/名称/描述
+    子串与 op 名全词，按命中项数排序。返回紧凑列表，全文走 read_skill——
+    设计前查先例，替代 v1 的语料后置注入（不受控变量）。"""
+    terms = [t for t in (query or "").split() if t]
+    whole = (query or "").strip()
+    if whole and whole not in terms:
+        terms.append(whole)  # CJK 诉求无空格，整串也作为一个词参与匹配
+    if not terms:
         return []
     scored = []
     for skill in corpus["skills"]:
         ops = skill_ops(skill, schema)
-        union = ops | planned
-        score = len(ops & planned) / len(union) if union else 0.0
-        if score > 0:
-            scored.append((score, str(skill.get("abilityId") or ""), skill))
+        haystack = " ".join(filter(None, (skill.get("abilityId"),
+                                          skill.get("abilityName"),
+                                          skill.get("description")))).lower()
+        hits = sum(1 for t in terms
+                   if t.lower() in haystack or t in ops)
+        if hits:
+            scored.append((hits, str(skill.get("abilityId") or ""), skill))
     scored.sort(key=lambda item: (-item[0], item[1]))
     out = []
-    for score, _, skill in scored[:k]:
-        out.append({**skill, "_score": round(score, 3)})
+    for _, _, skill in scored[:limit]:
+        out.append({"abilityId": skill.get("abilityId"),
+                    "abilityName": skill.get("abilityName"),
+                    "sp": (skill.get("sp") or {}).get("totalSp"),
+                    "ops": sorted(skill_ops(skill, schema))})
     return out
 
 
-def style_summary(corpus: dict, schema: dict | None = None) -> dict:
-    """全语料蒸馏：每 op 的使用数与参数取值统计 + 全局规模/reentry 分布。
-
-    数值参数给 min/max；字符串参数给 top-3 常用值（截断 24 字符）。输出体量
-    有界（只含有技能使用的 op），作为 generate system 的常数先验。
-    """
-    op_skills: Counter = Counter()
-    op_params: dict[str, dict[str, dict]] = {}
-    reentry: Counter = Counter()
-    rules_counts: list[int] = []
-    steps_counts: list[int] = []
-
-    def collect_params(op: str, entries) -> None:
-        bucket = op_params.setdefault(op, {})
-        for entry in entries or []:
-            if not isinstance(entry, dict) or not entry.get("key"):
-                continue
-            key, raw, ptype = entry["key"], entry.get("value"), entry.get("type")
-            stat = bucket.setdefault(key, {"type": ptype, "n": 0, "min": None, "max": None,
-                                           "values": Counter()})
-            stat["n"] += 1
-            # 客户端导出的 type 是枚举名 PascalCase（Float/Int），schema 编码是小写——归一后判定
-            if isinstance(ptype, str) and ptype.lower() in ("int", "float") and isinstance(raw, str):
-                try:
-                    num = float(raw)
-                except ValueError:
-                    pass
-                else:
-                    stat["min"] = num if stat["min"] is None else min(stat["min"], num)
-                    stat["max"] = num if stat["max"] is None else max(stat["max"], num)
-            elif isinstance(raw, str):
-                stat["values"][raw[:24]] += 1
-
-    def walk(steps) -> None:
-        """与 skill_ops 同深度递归：嵌套 steps/elseSteps 里的参数也进统计。"""
-        for step in steps or []:
-            if not isinstance(step, dict):
-                continue
-            op = step.get("op")
-            if isinstance(op, str):
-                entries = (step.get("args") or {}).get("entries") \
-                    if isinstance(step.get("args"), dict) else None
-                collect_params(_canonical(schema, op), entries)
-            walk(step.get("steps"))
-            walk(step.get("elseSteps"))
-
+def read_skill(corpus: dict, ability_id: str) -> dict | None:
+    """按 abilityId 取语料技能全文（agent 的 read_skill 工具后端）。"""
     for skill in corpus["skills"]:
-        ops = skill_ops(skill, schema)
-        for op in ops:
-            op_skills[op] += 1
-        rules = skill.get("rules") or []
-        rules_counts.append(len(rules))
-        for rule in rules:
+        if skill.get("abilityId") == ability_id:
+            return skill
+    return None
+
+
+def usage_stats(corpus: dict) -> dict:
+    """语料使用统计（validator 低频挡位提示的数据源）：全部语料技能用到的
+    triggerEvent 集合与 reentry 集合。配置命中集合外的取值时记 info"无先例"。"""
+    events: set[str] = set()
+    reentries: set[str] = set()
+    for skill in corpus["skills"]:
+        for rule in skill.get("rules") or []:
             if not isinstance(rule, dict):
                 continue
-            reentry[rule.get("reentry", "IgnoreWhileRunning")] += 1
-            rule_steps = rule.get("steps") or []
-            steps_counts.append(len(rule_steps))
-            walk(rule_steps)
-
-    params_out = {}
-    for op, bucket in op_params.items():
-        params_out[op] = {}
-        for key, stat in bucket.items():
-            entry = {"type": stat["type"], "n": stat["n"]}
-            if stat["min"] is not None:
-                entry["min"], entry["max"] = stat["min"], stat["max"]
-            if stat["values"]:
-                entry["values"] = [v for v, _ in stat["values"].most_common(3)]
-            params_out[op][key] = entry
-
-    return {
-        "skills": len(corpus["skills"]),
-        "opUsage": dict(op_skills.most_common()),
-        "reentry": dict(reentry.most_common()),
-        "rulesPerSkill": {"min": min(rules_counts), "max": max(rules_counts)} if rules_counts else {},
-        "stepsPerRule": {"min": min(steps_counts), "max": max(steps_counts)} if steps_counts else {},
-        "paramStats": params_out,
-    }
+            reentries.add(rule.get("reentry", "IgnoreWhileRunning"))
+            for trigger in rule.get("triggers") or []:
+                if isinstance(trigger, dict) and trigger.get("triggerEvent"):
+                    events.add(trigger["triggerEvent"])
+    return {"triggerEvents": events, "reentries": reentries}

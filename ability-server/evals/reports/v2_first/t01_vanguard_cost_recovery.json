@@ -1,0 +1,324 @@
+{
+ "envelope": {
+  "protocolVersion": 3,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "fang",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "fang",
+     "name": "fang",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 1300,
+     "maxHp": 1300,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 3,
+      "y": 3
+     },
+     "attack": 280,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 0,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 6
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 0,
+   "subJob": 2,
+   "cost": 9,
+   "baseAttackTime": 1.2,
+   "damageType": 0,
+   "blockOccupation": 2,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "我的部署费用经常跟不上，开技能时帮我回一笔费用，量级对齐先锋标准。"
+  }
+ },
+ "taskId": "t01_vanguard_cost_recovery",
+ "contract": "v2",
+ "wallSeconds": 0.09,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "fang_s2",
+   "abilityName": "冲锋号令·β型",
+   "description": "立即获得6点部署费用",
+   "sp": {
+    "totalSp": 25,
+    "initialSp": 6,
+    "chargeNum": 1,
+    "abilityAmount": 0.0,
+    "recoverMode": "Natural",
+    "consumeMode": "Natural",
+    "openMode": "Auto",
+    "recoverForbidDuringAbility": false,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "modify_cost",
+       "args": {
+        "entries": [
+         {
+          "key": "amount",
+          "value": "6",
+          "type": "int",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [],
+   "rounds": 6,
+   "phases": [
+    {
+     "phase": "plan",
+     "detail": "round 1 model=glm-5.3-flash",
+     "t": 0.0
+    },
+    {
+     "phase": "plan",
+     "detail": "tool update_plan",
+     "t": 30.27
+    },
+    {
+     "phase": "plan",
+     "detail": "round 2 model=glm-5.3-flash",
+     "t": 30.27
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 35.03
+    },
+    {
+     "phase": "act",
+     "detail": "tool list_components",
+     "t": 35.03
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_schema_vocab",
+     "t": 35.03
+    },
+    {
+     "phase": "act",
+     "detail": "round 3 model=glm-5.3-flash",
+     "t": 35.03
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 42.43
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 42.43
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 42.43
+    },
+    {
+     "phase": "act",
+     "detail": "round 4 model=glm-5.3-flash",
+     "t": 42.43
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 59.57
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_contract_doc",
+     "t": 59.57
+    },
+    {
+     "phase": "act",
+     "detail": "round 5 model=glm-5.3-flash",
+     "t": 59.57
+    },
+    {
+     "phase": "review",
+     "detail": "tool validate_draft",
+     "t": 87.84
+    },
+    {
+     "phase": "act",
+     "detail": "round 6 model=glm-5.3-flash",
+     "t": 87.84
+    },
+    {
+     "phase": "submit",
+     "detail": "tool submit_skill",
+     "t": 96.07
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 96.07
+    }
+   ],
+   "plan": "目标：为宿主 fang（先锋 job=0，subJob=2 冲锋手，cost=9）设计一个「开技能立即回一笔部署费用」的技能，量级对齐先锋标准。\n\n步骤：\n1. 研究：list_components 看组件索引 → 重点读回费类 op（如 gain_cost/add_cost）与触发类组件的文档；read_schema_vocab 拿触发事件词表与参数编码；read_contract_doc 确认多步骤规则/重入契约。\n2. 先例：search_skills 查「回费/费用/先锋」相似技能 → read_skill 看完整配置，确定数值量级（先锋标准预计单次 8~12 点）与触发写法。\n3. 设计：技能触发（激活瞬间）→ 单步规则执行回费 op；不附加其他效果（不加 buff/伤害，宁简勿滥）。\n4. 黑板键：即时效果预计无需黑板键；若触发条件需运行时判断（如场上无敌人），走 select_targets→listCount→条件读键链。\n5. 交付：validate_draft 自检修复 → submit_skill 提交。",
+   "tokens": {
+    "calls": 6,
+    "prompt_tokens": 53345,
+    "completion_tokens": 3708
+   },
+   "cached": true
+  }
+ }
+}

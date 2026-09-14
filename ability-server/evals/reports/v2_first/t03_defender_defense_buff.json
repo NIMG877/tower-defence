@@ -1,0 +1,504 @@
+{
+ "envelope": {
+  "protocolVersion": 3,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "beagle",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "beagle",
+     "name": "beagle",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 2200,
+     "maxHp": 2200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 3,
+      "y": 4
+     },
+     "attack": 180,
+     "defence": 400,
+     "magicRes": 10,
+     "job": 2,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    },
+    {
+     "id": "m2",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 4
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    },
+    {
+     "id": "m3",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 6
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster",
+     "massLevel": 1
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 2,
+   "subJob": 0,
+   "cost": 18,
+   "baseAttackTime": 1.5,
+   "damageType": 0,
+   "blockOccupation": 3,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "前线压力很大，开技能时让我的防御和法抗都明显提升，关技能后恢复。"
+  }
+ },
+ "taskId": "t03_defender_defense_buff",
+ "contract": "v2",
+ "wallSeconds": 0.07,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "beagle_s2",
+   "abilityName": "铁壁姿态",
+   "description": "防御力+60%，法术抗性+20，关闭技能后恢复",
+   "sp": {
+    "totalSp": 40,
+    "initialSp": 0,
+    "chargeNum": 1,
+    "abilityAmount": 30.0,
+    "recoverMode": "Natural",
+    "consumeMode": "Natural",
+    "openMode": "Manual",
+    "recoverForbidDuringAbility": true,
+    "canManualClose": true
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "apply_buff",
+       "args": {
+        "entries": [
+         {
+          "key": "attributes",
+          "value": "Defense,MagicRes",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "ops",
+          "value": "AddPercent,AddFlat",
+          "type": "stringArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "magnitudes",
+          "value": "0.6,20",
+          "type": "floatArray",
+          "fromBlackboard": false
+         },
+         {
+          "key": "buffId",
+          "value": "beagle_s2",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "buffTime",
+          "value": "-10",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputTarget",
+          "value": "beagle_s2_buff_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputBuff",
+          "value": "beagle_s2_buffs",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    },
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityEnd",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "destroy_buff",
+       "args": {
+        "entries": [
+         {
+          "key": "inputTarget",
+          "value": "beagle_s2_buff_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "inputBuff",
+          "value": "beagle_s2_buffs",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [
+    {
+     "severity": "warning",
+     "path": "rules[0].steps[0]",
+     "message": "param 'attributes' type label 'String' coerced to schema type 'stringArray'"
+    },
+    {
+     "severity": "warning",
+     "path": "rules[0].steps[0]",
+     "message": "param 'ops' type label 'String' coerced to schema type 'stringArray'"
+    },
+    {
+     "severity": "warning",
+     "path": "rules[0].steps[0]",
+     "message": "param 'magnitudes' type label 'String' coerced to schema type 'floatArray'"
+    }
+   ],
+   "rounds": 11,
+   "phases": [
+    {
+     "phase": "plan",
+     "detail": "round 1 model=glm-5.3-flash",
+     "t": 0.0
+    },
+    {
+     "phase": "plan",
+     "detail": "tool update_plan",
+     "t": 21.86
+    },
+    {
+     "phase": "plan",
+     "detail": "round 2 model=glm-5.3-flash",
+     "t": 21.86
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 26.86
+    },
+    {
+     "phase": "act",
+     "detail": "tool list_components",
+     "t": 26.86
+    },
+    {
+     "phase": "act",
+     "detail": "round 3 model=glm-5.3-flash",
+     "t": 26.86
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 33.24
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 33.24
+    },
+    {
+     "phase": "act",
+     "detail": "round 4 model=glm-5.3-flash",
+     "t": 33.24
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 53.11
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 53.11
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_schema_vocab",
+     "t": 53.11
+    },
+    {
+     "phase": "act",
+     "detail": "round 5 model=glm-5.3-flash",
+     "t": 53.11
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 74.06
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_contract_doc",
+     "t": 74.06
+    },
+    {
+     "phase": "act",
+     "detail": "round 6 model=glm-5.3-flash",
+     "t": 74.06
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 93.75
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 93.76
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 93.76
+    },
+    {
+     "phase": "act",
+     "detail": "round 7 model=glm-5.3-flash",
+     "t": 93.76
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 100.59
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 100.59
+    },
+    {
+     "phase": "act",
+     "detail": "round 8 model=glm-5.3-flash",
+     "t": 100.59
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 185.52
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 185.52
+    },
+    {
+     "phase": "act",
+     "detail": "round 9 model=glm-5.3-flash",
+     "t": 185.52
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 197.62
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 197.62
+    },
+    {
+     "phase": "act",
+     "detail": "round 10 model=glm-5.3-flash",
+     "t": 197.62
+    },
+    {
+     "phase": "review",
+     "detail": "tool validate_draft",
+     "t": 254.48
+    },
+    {
+     "phase": "act",
+     "detail": "round 11 model=glm-5.3-flash",
+     "t": 254.48
+    },
+    {
+     "phase": "submit",
+     "detail": "tool submit_skill",
+     "t": 270.07
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 270.07
+    }
+   ],
+   "plan": "1. 需求理解：宿主 beagle（重装，防 400/法抗 10），诉求是\"开技能时防御+法抗明显提升，关技能后恢复\"——典型的重装开关型防御强化技能。机制范围仅限：技能开启时上防/法抗 buff，技能关闭时移除恢复。不加攻击、回血等未要求效果。\n\n2. 组件调研：\n   - list_components 看索引 → 读 buff/属性修改类组件文档（预计 apply_buff 或类似）确认参数与协议依赖\n   - read_contract_doc 确认多步骤规则、触发/重入契约（开关型技能需要开/关两个触发点）\n   - read_schema_vocab 拿触发事件词表（找技能开启/技能关闭对应事件）与数值字段编码\n\n3. 先例：search_skills 查\"防御 法抗 buff / 防御强化\"类语料，read_skill 看典型开关型防御技能的完整配置与数值量级（buff 幅度、持续时间写法）\n\n4. 设计：\n   - 触发：技能开启事件 → 对自身 select_targets + apply_buff(防御↑、法抗↑，无限时或跟随技能)；技能关闭事件 → 移除 buff 恢复\n   - 目标选择：自身（self）\n   - 数值量级：参照语料先例（预计防 +50%~+100%、法抗 +10~+20 量级，以查到的先例为准）\n   - 黑板：本技能为无条件的开关 buff，预计不需要黑板键；若组件协议要求条件链再补\n\n5. 交付：validate_draft 自检 → 修复 issues → submit_skill 提交",
+   "tokens": {
+    "calls": 11,
+    "prompt_tokens": 147858,
+    "completion_tokens": 10932
+   },
+   "cached": true
+  }
+ }
+}

@@ -1,0 +1,473 @@
+{
+ "envelope": {
+  "protocolVersion": 1,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "tactician",
+   "camp": 1,
+   "selfHpRate": 1.0,
+   "selfPos": {
+    "x": 4,
+    "y": 4
+   },
+   "skill": null,
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "m1",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier"
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 6
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime"
+    },
+    {
+     "id": "m3",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 7
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster"
+    }
+   ]
+  },
+  "hostAssets": {
+   "canSpawnEntityIds": [],
+   "bulletCount": 0,
+   "iconKeys": []
+  },
+  "constraints": {
+   "request": "技能开启期间，让我只攻击被友军阻挡住的敌人，没有被阻挡的就照常攻击。"
+  }
+ },
+ "taskId": "t15_blocked_priority",
+ "contract": "v1",
+ "wallSeconds": 379.58,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "tactician_s1",
+   "abilityName": "协同阻截",
+   "description": "技能开启期间：每次选择攻击目标时，先找出正被友军阻挡（与任一友军贴身，距离≤1格）的敌人，并将其置于攻击目标的最优先位置；若当前没有任何敌人被友军阻挡，则照常索敌攻击。技能开启瞬间会立即重新索敌一次，使该偏好即刻生效。",
+   "iconKey": null,
+   "sp": {
+    "totalSp": 20,
+    "initialSp": 10,
+    "chargeNum": 1,
+    "abilityAmount": 120.0,
+    "recoverMode": "Natural",
+    "consumeMode": "Natural",
+    "openMode": "Manual",
+    "recoverForbidDuringAbility": true,
+    "canManualClose": true
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnBeforeTargetSelect",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "write_blackboard",
+       "args": {
+        "entries": [
+         {
+          "key": "key",
+          "value": "attackCandidates",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "source",
+          "value": "event",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "path",
+          "value": "targets",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "select_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "subjectMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "campRelation",
+          "value": "same",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "selectionMode",
+          "value": "all",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "excludeSubjects",
+          "value": "True",
+          "type": "bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputEntitiesKey",
+          "value": "allies",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "select_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "subjectMode",
+          "value": "blackboard",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "subjectBlackboardKey",
+          "value": "allies",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "campRelation",
+          "value": "opposing",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "selectionMode",
+          "value": "radius",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "radius",
+          "value": "1",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputEntitiesKey",
+          "value": "blockedEnemies",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "prepend_entities",
+       "args": {
+        "entries": [
+         {
+          "key": "blackboardKey",
+          "value": "attackCandidates",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "sourceKey",
+          "value": "blockedEnemies",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "attack_candidate_override",
+       "args": {
+        "entries": [
+         {
+          "key": "blackboardKey",
+          "value": "attackCandidates",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    },
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnAbilityBegin",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "force_reset_attack",
+       "args": {
+        "entries": [
+         {
+          "key": "toSelf",
+          "value": "True",
+          "type": "bool",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [
+    {
+     "severity": "warning",
+     "path": "blackboard",
+     "message": "read key 'targets' has no producer in this ability (externally-fed keys are legitimate; verify intent)"
+    }
+   ],
+   "attempts": 1,
+   "phases": [
+    {
+     "phase": "analyze",
+     "detail": "start",
+     "t": 0.0
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool compute_cross_items round 1",
+     "t": 66.89
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool list_components round 1",
+     "t": 66.89
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 114.29
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 114.29
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 114.3
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 114.3
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 2",
+     "t": 114.31
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_contract_doc round 2",
+     "t": 114.31
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 3",
+     "t": 163.35
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 3",
+     "t": 163.35
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 3",
+     "t": 163.36
+    },
+    {
+     "phase": "analyze",
+     "detail": "tool read_component_doc round 3",
+     "t": 163.37
+    },
+    {
+     "phase": "describe",
+     "detail": "start",
+     "t": 256.5
+    },
+    {
+     "phase": "describe",
+     "detail": "plannedOps=['write_blackboard', 'select_targets', 'prepend_entities', 'attack_candidate_override', 'force_reset_attack']",
+     "t": 313.75
+    },
+    {
+     "phase": "retrieve",
+     "detail": "top: eyjafjalla_t1(0.333), ebnhlz_s3(0.3), lavabubble_t1(0.25)",
+     "t": 313.75
+    },
+    {
+     "phase": "generate",
+     "detail": "attempt 1",
+     "t": 313.75
+    },
+    {
+     "phase": "validate",
+     "detail": "ok",
+     "t": 379.25
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 379.25
+    }
+   ],
+   "analysis": "分析完成。以下为战局分析与技能生成约束结论。\n\n## 一、敌我态势\n\n- **自身**：tactician（阵营1/友方），位于 (4,4)（高台），满血；**场上友军数 = 0**（除自身无其他友军单位）。\n- **敌方**：共 3 个，均满血，位于东南侧：\n  - m1 士兵 (4,5)：HP 1200，攻 200/防 150，距离 1.0 —— 紧贴自身；\n  - m2 史莱姆 (6,6)：HP 550，攻 120/防 30，距离 2.83；\n  - m3 术师 (7,7)：HP 800，攻 250/魔抗 50，距离 4.24 —— 威胁最高但最远。\n- 自身半径 2 内仅 m1 一个敌人。\n\n## 二、需求解读与机制机会\n\n需求为**攻击目标偏好**（\"被友军阻挡的敌人优先攻击，未阻挡的照常\"），正好匹配组件库的攻击偏好管线，且组件文档明确支持：\n\n1. **触发时机**：`OnBeforeTargetSelect`，规则必须全由立即操作组成（write → select → prepend → override 均为同步完成），落在派发同步前缀内，可对本次索敌立即生效。\n2. **推荐管线**（单规则）：\n   - `write_blackboard` { key=attackCandidates, source=event, path=targets }（快照，写的是副本）；\n   - `select_targets`（选友军：subjectMode=self, campRelation=same, selectionMode=all → 输出 allies）；\n   - `select_targets`（以 allies 为 subject：subjectMode=blackboard, campRelation=opposing, selectionMode=radius, radius≈1.0 → 输出 blockedEnemies，即\"贴身友军身边的敌人\"≈被阻挡者；多主体结果自动合并去重）；\n   - `prepend_entities` { blackboardKey=attackCandidates, sourceKey=blockedEnemies }（把被阻挡者**提到候选最前**）；\n   - `attack_candidate_override` { blackboardKey=attackCandidates }（提交回活动候选列表）。\n3. **\"没被阻挡就照常攻击\"自动成立**：无友军或无敌人被阻挡时，select 结果为空列表，`prepend_entities` 对空源是合法 no-op，候选列表保持原样走原生索敌。每次索敌都会重触发 `OnBeforeTargetSelect`，友军部署/移动后判定自动刷新，无需 OnTick 轮询。\n4. **可选增强**：技能开启（OnAbilityBegin）时配一步 `force_reset_attack`，让偏好在切换瞬间立即接管正在进行的攻击（否则进行中的攻击不受影响）。\n\n## 三、判定的近似性与限制（需在生成时说明）\n\n- **filter_targets 不支持\"是否被阻挡\"字段**（仅支持 Camp/CurrentHp/MonsterStatus/IdN/IdC 等），无法做硬过滤；且严格\"只打被阻挡者\"在无阻挡者时会因空列表清空候选（需额外恢复逻辑），与\"照常攻击\"矛盾。因此采用 **prepend 优先级方案**：被阻挡者置顶，实际等效\"优先（攻击数=1 时即只）攻击被阻挡者\"，这是现有组件能力下的正确实现。\n- **\"阻挡\"以距离近似**：建议 radius≈1.0（同格贴身），过大会把\"路过但未挡住\"的敌人误判为被阻挡。参数下一轮生成时定。\n- **范围外目标特性**：prepend 提交不做射程复查（组件文档明确），被阻挡的敌人即使略超出自身索敌范围也会被攻击——这恰好符合\"攻击被友军阻挡的敌人\"的意图。\n- **当前战局空转状态**：场上友军数 = 0，技能开启后短时间内所有目标均\"未阻挡\"→ 行为退化为照常攻击；待友军部署到敌人路径（建议西侧/南侧地面格 3,2 / 3,3 / 4,2 / 5,2 / 5,3）后管线才产生实际效果。\n\n## 四、本次生成约束\n\n- **hostAssets 为空**：无可召唤实体（canSpawnEntityIds=[]）、无子弹（bulletCount=0）、无图标/动画资源 → 技能必须是纯索敌逻辑，不涉及 spawn_entity / fire_bullets / 动画覆盖。\n- 无需 `attack_behavior_override`（不改伤害类型/优先序），也无需 `attack_range_override`。\n- 规则建议 reentry=IgnoreWhileRunning（全同步、单次触发即完成，避免重入干扰黑板键）；黑板键命名独立（如 attackCandidates / allies / blockedEnemies）避免与其他技能冲突。",
+   "design": {
+    "abilityName": "协同阻截",
+    "description": "技能开启期间：每次选择攻击目标时，先找出正被友军阻挡（与任一友军贴身，距离≤1格）的敌人，并将其置于攻击目标的最优先位置；若当前没有任何敌人被友军阻挡，则照常索敌攻击。技能开启瞬间会立即重新索敌一次，使该偏好即刻生效。",
+    "designNotes": "触发事件：规则1=OnBeforeTargetSelect（每次索敌时重评估，友军部署/移动后自动刷新，无需OnTick轮询）；规则2=OnAbilityBegin（开启瞬间立即生效）。规则1步骤序列（全同步操作，落在派发同步前缀内，reentry=IgnoreWhileRunning）：1) write_blackboard{key=attackCandidates, source=event, path=targets} 取当前候选列表快照（写入的是副本，不与攻击系统共享引用）；2) select_targets{subjectMode=self, campRelation=same, selectionMode=all, excludeSubjects=True, outputEntitiesKey=allies} 收集场上全部友军并排除自身；3) select_targets{subjectMode=blackboard, subjectBlackboardKey=allies, campRelation=opposing, selectionMode=radius, radius=1.0, outputEntitiesKey=blockedEnemies} 对每个友军选其贴身敌人，多主体结果合并去重，即'被阻挡者'集合；4) prepend_entities{blackboardKey=attackCandidates, sourceKey=blockedEnemies} 将被阻挡者提到候选最前（去重为提权语义，已在候选中的移到队首，不重复）；5) attack_candidate_override{blackboardKey=attackCandidates} 提交回活动候选列表（Clear+AddRange，覆盖语义）。规则2：OnAbilityBegin→force_reset_attack{toSelf=True}，重置攻击计时并按新偏好立即重索敌。空态语义：场上友军数为0或无敌人贴身友军时，blockedEnemies为空列表，prepend对空源是合法no-op，候选列表维持原样=照常索敌，与'没有被阻挡的就照常攻击'严格一致。数值依据：radius=1.0取地图格间距（快照中m1与自身(4,4)-(4,5)中心距恰为1.0，同格贴身即阻挡近似）；过大会把路过未挡的敌人误判为阻挡，故不放大。本技能不产生任何伤害/治疗，纯索敌逻辑。已知特性（写入玩家描述口径）：attack_candidate_override提交不做射程复查，被友军阻挡的敌人即使略超自身索敌范围也会被攻击，符合'攻击被友军阻挡的敌人'意图；'只打被阻挡者'的硬过滤方案在无阻挡者时会因空列表清空候选而违背'照常攻击'，故采用置顶优先方案（攻击数=1时等效只攻击被阻挡者，多目标时被阻挡者优先）。当前战局友军数=0，技能开启后先退化为照常攻击，友军部署至敌方路径（西侧/南侧地面格3,2/3,3/4,2/5,2/5,3）后管线产生实际效果。hostAssets为空，不涉及召唤/子弹/动画资源。",
+    "plannedOps": [
+     "write_blackboard",
+     "select_targets",
+     "prepend_entities",
+     "attack_candidate_override",
+     "force_reset_attack"
+    ]
+   }
+  }
+ }
+}

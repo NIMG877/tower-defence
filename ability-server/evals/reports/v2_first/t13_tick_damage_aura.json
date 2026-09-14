@@ -1,0 +1,486 @@
+{
+ "envelope": {
+  "protocolVersion": 3,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "aura",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "aura",
+     "name": "aura",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 1300,
+     "maxHp": 1300,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 4
+     },
+     "attack": 320,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 4,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 4
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 5,
+      "y": 5
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m3",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 7
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster",
+     "massLevel": 1
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 4,
+   "subJob": 0,
+   "cost": 17,
+   "baseAttackTime": 1.2,
+   "damageType": 1,
+   "blockOccupation": 1,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "以我为中心持续灼烧周围一圈敌人，伤害低但稳定。"
+  }
+ },
+ "taskId": "t13_tick_damage_aura",
+ "contract": "v2",
+ "wallSeconds": 183.84,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "aura_burn",
+   "abilityName": "灼烧光环",
+   "description": "以自身为中心持续灼烧周围一圈（约2格内）的敌人，每秒对圈内所有敌人造成相当于攻击力30%的法术伤害，伤害低但稳定。",
+   "sp": {
+    "totalSp": 0,
+    "initialSp": 0,
+    "chargeNum": 1,
+    "abilityAmount": 0.0,
+    "recoverMode": "Natural",
+    "consumeMode": "NoConsume",
+    "openMode": "Auto",
+    "recoverForbidDuringAbility": false,
+    "canManualClose": false
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnTick",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "select_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "subjectMode",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "selectionMode",
+          "value": "radius",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "campRelation",
+          "value": "opposing",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "radius",
+          "value": "1.9",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "force",
+          "value": "True",
+          "type": "bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "excludeSubjects",
+          "value": "True",
+          "type": "bool",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputEntitiesKey",
+          "value": "aura_burn_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputCountKey",
+          "value": "aura_burn_count",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "apply_damage",
+       "args": {
+        "entries": [
+         {
+          "key": "targetMode",
+          "value": "blackboard",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "blackboardKey",
+          "value": "aura_burn_targets",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "baseValueMode",
+          "value": "attack",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "multiplier",
+          "value": "0.3",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "damageType",
+          "value": "1",
+          "type": "int",
+          "fromBlackboard": false
+         },
+         {
+          "key": "applyType",
+          "value": "2",
+          "type": "int",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "delay",
+       "args": {
+        "entries": [
+         {
+          "key": "seconds",
+          "value": "1",
+          "type": "float",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [],
+   "rounds": 9,
+   "phases": [
+    {
+     "phase": "plan",
+     "detail": "round 1 model=glm-5.3-flash",
+     "t": 0.0
+    },
+    {
+     "phase": "plan",
+     "detail": "tool update_plan",
+     "t": 22.48
+    },
+    {
+     "phase": "plan",
+     "detail": "round 2 model=glm-5.3-flash",
+     "t": 22.48
+    },
+    {
+     "phase": "act",
+     "detail": "tool list_components",
+     "t": 23.72
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_schema_vocab",
+     "t": 23.72
+    },
+    {
+     "phase": "act",
+     "detail": "round 3 model=glm-5.3-flash",
+     "t": 23.72
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 29.28
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 29.28
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 29.28
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_contract_doc",
+     "t": 29.28
+    },
+    {
+     "phase": "act",
+     "detail": "round 4 model=glm-5.3-flash",
+     "t": 29.28
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 33.54
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 33.54
+    },
+    {
+     "phase": "act",
+     "detail": "round 5 model=glm-5.3-flash",
+     "t": 33.54
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 38.02
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 38.02
+    },
+    {
+     "phase": "act",
+     "detail": "round 6 model=glm-5.3-flash",
+     "t": 38.02
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 77.28
+    },
+    {
+     "phase": "act",
+     "detail": "tool compute_cross_items",
+     "t": 77.28
+    },
+    {
+     "phase": "act",
+     "detail": "round 7 model=glm-5.3-flash",
+     "t": 77.28
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 112.81
+    },
+    {
+     "phase": "act",
+     "detail": "round 8 model=glm-5.3-flash",
+     "t": 112.81
+    },
+    {
+     "phase": "review",
+     "detail": "tool validate_draft",
+     "t": 170.58
+    },
+    {
+     "phase": "act",
+     "detail": "round 9 model=glm-5.3-flash",
+     "t": 170.58
+    },
+    {
+     "phase": "submit",
+     "detail": "tool submit_skill",
+     "t": 183.48
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 183.48
+    }
+   ],
+   "plan": "目标：为宿主「aura」（术师，job=4）设计持续灼烧光环技能——以自身为中心，持续对周围一圈（半径覆盖相邻8格，约1.9）的敌人造成低额稳定伤害。\n\n步骤：\n1. 读组件索引 list_components，找出周期性伤害/光环类 op；\n2. 读 read_contract_doc 确认多步规则契约；读 read_schema_vocab 拿触发事件与词表（周期触发类事件、伤害类型编码）；\n3. search_skills 查「灼烧/持续伤害/光环」先例，read_skill 看数值量级（每跳伤害、间隔）；\n4. 设计：\n   - 触发：周期性（按先例选事件，如 onInterval/每秒）；\n   - 步骤序列：select_targets（自身半径~1.9内敌人，写实体列表）→（如需计数条件则 write_blackboard 桥接 listCount）→ apply_damage 低额伤害；\n   - 若有动画可用 hostAssets.animations（Skill2 等）；\n5. compute_cross_items 验证半径覆盖（m1/m2 在圈、m3 在圈外）；\n6. validate_draft 自检 → submit_skill 交付。\n\n黑板键方案：当前诉求无条件持续灼烧，预计不需要条件分支；若先例/契约要求运行时条件才引入 select_targets→listCount 链。",
+   "tokens": {
+    "calls": 17,
+    "prompt_tokens": 243935,
+    "completion_tokens": 18188
+   }
+  }
+ }
+}

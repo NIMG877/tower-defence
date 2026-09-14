@@ -5,12 +5,14 @@ using Newtonsoft.Json;
 using UnityEngine;
 
 /// <summary>
-/// 战局快照序列化器：把当前战局<b>基本信息</b>（自身/敌我实体/地图可部署格/技能 SP）
-/// 投影成紧凑 JSON，供服务端 Agent 分析。派生交叉项（最近敌距/半径内清单等）不在
+/// 战局快照序列化器：把当前战局<b>基本信息</b>（敌我实体/地图可部署格）投影成
+/// 紧凑 JSON，供服务端 Agent 分析。派生交叉项（最近敌距/半径内清单等）不在
 /// 客户端预计算——服务端 Agent 用 compute_cross_items 工具按需计算（crossitems.py），
 /// 减少上下文消耗与噪声。
-/// 交叉项词表与 AbilitySystem.SnapshotBlackboardKeys（GameData 侧）对应；阶段三把
-/// 指标同步写入宿主黑板后，生成技能的 fromBlackboard 参数引用同一词表。
+/// 契约 v2：self 与其它实体同构拍平进 entities（selfId 作指针），实体记录含
+/// massLevel（失衡/击退类技能需要质量对比）。本类只负责序列化，不向宿主黑板
+/// 写入任何快照键；生成技能的实时战局条件走 select_targets（写实体列表）+
+/// write_blackboard source=listCount（桥接计数）链路。
 /// </summary>
 public static class BattleSnapshotBuilder
 {
@@ -35,28 +37,17 @@ public static class BattleSnapshotBuilder
         public float magicRes;
         public int job;         // 角色职业（EntityData.CharacterJob），非角色为 -1
         public string label;    // 怪物标签（EntityData.MonsterLabel），非怪物为 null
-    }
-
-    public class SnapshotSkill
-    {
-        public string abilityId;
-        public float currentSp;
-        public int totalSp;
-        public bool active;
+        public int massLevel;   // 质量（EntityData.MassLevel），失衡/击退对比用
     }
 
     public class BattleSnapshot
     {
-        public string selfId;
-        public int camp;
-        public float selfHpRate;
-        public SnapshotPos selfPos;
-        public SnapshotSkill skill;     // 首个已构建技能的 SP 状态，无则 null
+        public string selfId;           // 指针：entities 中与 self 同构的记录
         public int mapI;
         public int mapJ;
         public string[] canSetHigher;   // 高台可部署格 "i,j" 列表
         public string[] canSetLower;    // 地面可部署格 "i,j" 列表
-        public SnapshotEntity[] entities;   // 不含自身
+        public SnapshotEntity[] entities;   // 含自身（首条为 self）
     }
 
     /// <summary>
@@ -71,7 +62,7 @@ public static class BattleSnapshotBuilder
         if (MapDataManager.Manager == null) throw new InvalidOperationException("MapDataManager is not initialized; snapshot requires an active battle.");
 
         Vector2 selfPos = self.Movement.Position;
-        List<SnapshotEntity> entities = new List<SnapshotEntity>();
+        List<SnapshotEntity> entities = new List<SnapshotEntity> { ToSnapshotEntity(self) };
         HashSet<Entity> seen = new HashSet<Entity> { self };
 
         // _turrets/_monsters 两个活实体源：radius<0 走 ignoreDistance，force 忽略可选性/休眠过滤
@@ -95,14 +86,6 @@ public static class BattleSnapshotBuilder
         var snapshot = new BattleSnapshot
         {
             selfId = self.EntityData.ID.ToString(),
-            camp = self.Camp,
-            selfHpRate = Round(self.Stats.CurrentHpRate, 3),
-            selfPos = new SnapshotPos
-            {
-                x = Round(self.Movement.Position.x, 2),
-                y = Round(self.Movement.Position.y, 2),
-            },
-            skill = BuildSkillSnapshot(self),
             mapI = map.iSize,
             mapJ = map.jSize,
             canSetHigher = CollectCanSet(map.HigherCanSetBlock),
@@ -118,7 +101,8 @@ public static class BattleSnapshotBuilder
         return JsonConvert.SerializeObject(snapshot, indented ? Formatting.Indented : Formatting.None);
     }
 
-    /// <summary>单实体投影。纯函数，公开供 EditMode 测试。</summary>
+    /// <summary>单实体投影（含 self——契约 v2 把 self 拍平进 entities）。纯函数，
+    /// 公开供 EditMode 测试。</summary>
     public static SnapshotEntity ToSnapshotEntity(Entity entity)
     {
         EntityData data = entity.EntityData;
@@ -137,6 +121,7 @@ public static class BattleSnapshotBuilder
             magicRes = Round(entity.Stats.MagicResistanceS, 1),
             job = data.CharacterJob,
             label = data.MonsterLabel,
+            massLevel = data.MassLevel,
         };
     }
 
@@ -149,21 +134,6 @@ public static class BattleSnapshotBuilder
             if (entity != null && seen.Add(entity))
                 destination.Add(ToSnapshotEntity(entity));
         }
-    }
-
-    private static SnapshotSkill BuildSkillSnapshot(Entity self)
-    {
-        var runner = self.AbilityRunner;
-        if (runner == null || runner.Skills.Count == 0) return null;
-        AbilityRuntime ability = runner.Skills[0];
-        if (ability == null) return null;
-        return new SnapshotSkill
-        {
-            abilityId = ability.config != null ? ability.config.abilityId : null,
-            currentSp = Round(ability.spEngine != null ? ability.spEngine.CurrentSp : 0f, 1),
-            totalSp = ability.config != null && ability.config.sp != null ? ability.config.sp.totalSp : 0,
-            active = ability.spEngine != null && ability.spEngine.IsActive,
-        };
     }
 
     private static string[] CollectCanSet(bool[,] canSetBlock)

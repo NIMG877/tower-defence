@@ -1,0 +1,574 @@
+{
+ "envelope": {
+  "protocolVersion": 3,
+  "opList": [
+   "apply_abnormal_state",
+   "apply_animation_override",
+   "apply_buff",
+   "apply_damage",
+   "apply_impulse",
+   "attack_behavior_override",
+   "attack_behavior_restore",
+   "attack_candidate_override",
+   "attack_event_value_modifier",
+   "attack_range_override",
+   "attack_range_restore",
+   "attack_target_count_modifier",
+   "branch",
+   "charge_state_controller",
+   "delay",
+   "destroy_abnormal_state",
+   "destroy_buff",
+   "destroy_entity",
+   "filter_targets",
+   "fire_bullets",
+   "force_attack",
+   "force_reset_attack",
+   "generate_skill",
+   "loop",
+   "modify_cost",
+   "prepend_entities",
+   "random_roll",
+   "recover_skill_sp",
+   "remove_animation_override",
+   "select_landing_points",
+   "select_targets",
+   "set_entity_state",
+   "share_attack_target",
+   "shared_target_extra_attack",
+   "spawn_entity",
+   "update_buff",
+   "wait_until",
+   "watch_summon_death",
+   "write_blackboard"
+  ],
+  "battleSnapshot": {
+   "selfId": "tactician",
+   "mapI": 8,
+   "mapJ": 9,
+   "canSetHigher": [
+    "4,4",
+    "4,5",
+    "5,4"
+   ],
+   "canSetLower": [
+    "3,2",
+    "3,3",
+    "4,2",
+    "5,2",
+    "5,3",
+    "5,5"
+   ],
+   "entities": [
+    {
+     "id": "tactician",
+     "name": "tactician",
+     "camp": 1,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 4
+     },
+     "attack": 420,
+     "defence": 100,
+     "magicRes": 10,
+     "job": 4,
+     "label": null,
+     "massLevel": 2
+    },
+    {
+     "id": "m1",
+     "name": "士兵",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 1200,
+     "maxHp": 1200,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 4,
+      "y": 5
+     },
+     "attack": 200,
+     "defence": 150,
+     "magicRes": 0,
+     "job": -1,
+     "label": "soldier",
+     "massLevel": 2
+    },
+    {
+     "id": "m2",
+     "name": "史莱姆",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 550,
+     "maxHp": 550,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 6,
+      "y": 6
+     },
+     "attack": 120,
+     "defence": 30,
+     "magicRes": 0,
+     "job": -1,
+     "label": "slime",
+     "massLevel": 1
+    },
+    {
+     "id": "m3",
+     "name": "术师",
+     "camp": 2,
+     "isStatic": false,
+     "hp": 800,
+     "maxHp": 800,
+     "hpRate": 1.0,
+     "pos": {
+      "x": 7,
+      "y": 7
+     },
+     "attack": 250,
+     "defence": 20,
+     "magicRes": 50,
+     "job": -1,
+     "label": "caster",
+     "massLevel": 1
+    }
+   ]
+  },
+  "hostAssets": {
+   "job": 4,
+   "subJob": 0,
+   "cost": 16,
+   "baseAttackTime": 1.2,
+   "damageType": 1,
+   "blockOccupation": 1,
+   "targetPriority": 0,
+   "visionRadius": 2.5,
+   "visionRange": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "animations": {
+    "named": [
+     "Attack",
+     "Skill2"
+    ],
+    "groups": [
+     "AttackRemote",
+     "AttackClose"
+    ]
+   }
+  },
+  "constraints": {
+   "request": "技能开启期间，让我只攻击被友军阻挡住的敌人，没有被阻挡的就照常攻击。"
+  }
+ },
+ "taskId": "t15_blocked_priority",
+ "contract": "v2",
+ "wallSeconds": 567.58,
+ "error": "",
+ "response": {
+  "status": "ok",
+  "ability": {
+   "abilityId": "tactician_s1_engaged",
+   "abilityName": "接战锁定",
+   "description": "技能开启期间，只攻击被友军阻挡的敌人；若场上没有被友军阻挡的敌人，则照常索敌。",
+   "sp": {
+    "totalSp": 20,
+    "initialSp": 0,
+    "chargeNum": 1,
+    "abilityAmount": 30.0,
+    "recoverMode": "Natural",
+    "consumeMode": "Natural",
+    "openMode": "Manual",
+    "recoverForbidDuringAbility": true,
+    "canManualClose": true
+   },
+   "rules": [
+    {
+     "triggers": [
+      {
+       "triggerEvent": "OnBeforeTargetSelect",
+       "groups": []
+      }
+     ],
+     "reentry": "IgnoreWhileRunning",
+     "detached": false,
+     "steps": [
+      {
+       "op": "select_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "selectionMode",
+          "value": "all",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "campRelation",
+          "value": "same",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputEntitiesKey",
+          "value": "tfb_allies",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "write_blackboard",
+       "args": {
+        "entries": [
+         {
+          "key": "key",
+          "value": "tfb_anchors",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "source",
+          "value": "entity",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "path",
+          "value": "self",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "method",
+          "value": "set",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "prepend_entities",
+       "args": {
+        "entries": [
+         {
+          "key": "blackboardKey",
+          "value": "tfb_anchors",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "sourceKey",
+          "value": "tfb_allies",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "select_targets",
+       "args": {
+        "entries": [
+         {
+          "key": "subjectMode",
+          "value": "blackboard",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "subjectBlackboardKey",
+          "value": "tfb_anchors",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "selectionMode",
+          "value": "radius",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "radius",
+          "value": "1.2",
+          "type": "float",
+          "fromBlackboard": false
+         },
+         {
+          "key": "campRelation",
+          "value": "opposing",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputEntitiesKey",
+          "value": "tfb_blocked",
+          "type": "string",
+          "fromBlackboard": false
+         },
+         {
+          "key": "outputCountKey",
+          "value": "tfb_blocked_count",
+          "type": "string",
+          "fromBlackboard": false
+         }
+        ]
+       },
+       "condition": [],
+       "steps": [],
+       "elseSteps": []
+      },
+      {
+       "op": "branch",
+       "args": {
+        "entries": []
+       },
+       "condition": [
+        {
+         "units": [
+          {
+           "op": "Greater",
+           "leftKey": "tfb_blocked_count",
+           "rightValue": "0",
+           "rightKey": ""
+          }
+         ]
+        }
+       ],
+       "steps": [
+        {
+         "op": "attack_candidate_override",
+         "args": {
+          "entries": [
+           {
+            "key": "blackboardKey",
+            "value": "tfb_blocked",
+            "type": "string",
+            "fromBlackboard": false
+           }
+          ]
+         },
+         "condition": [],
+         "steps": [],
+         "elseSteps": []
+        }
+       ],
+       "elseSteps": []
+      }
+     ]
+    }
+   ]
+  },
+  "report": {
+   "issues": [],
+   "rounds": 9,
+   "phases": [
+    {
+     "phase": "plan",
+     "detail": "round 1 model=glm-5.3-flash",
+     "t": 0.0
+    },
+    {
+     "phase": "plan",
+     "detail": "tool update_plan",
+     "t": 45.92
+    },
+    {
+     "phase": "act",
+     "detail": "tool list_components",
+     "t": 45.92
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_schema_vocab",
+     "t": 45.92
+    },
+    {
+     "phase": "plan",
+     "detail": "round 2 model=glm-5.3-flash",
+     "t": 45.92
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 52.35
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 52.35
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 52.35
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 52.35
+    },
+    {
+     "phase": "act",
+     "detail": "round 3 model=glm-5.3-flash",
+     "t": 52.35
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 169.44
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_component_doc",
+     "t": 169.44
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 169.44
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_contract_doc",
+     "t": 169.44
+    },
+    {
+     "phase": "act",
+     "detail": "round 4 model=glm-5.3-flash",
+     "t": 169.44
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 208.52
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 208.52
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 208.52
+    },
+    {
+     "phase": "act",
+     "detail": "round 5 model=glm-5.3-flash",
+     "t": 208.52
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 215.67
+    },
+    {
+     "phase": "act",
+     "detail": "tool read_skill",
+     "t": 215.67
+    },
+    {
+     "phase": "act",
+     "detail": "round 6 model=glm-5.3-flash",
+     "t": 215.67
+    },
+    {
+     "phase": "plan",
+     "detail": "tool update_plan",
+     "t": 465.45
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 465.45
+    },
+    {
+     "phase": "act",
+     "detail": "tool search_skills",
+     "t": 465.45
+    },
+    {
+     "phase": "act",
+     "detail": "tool entity",
+     "t": 465.45
+    },
+    {
+     "phase": "plan",
+     "detail": "round 7 model=glm-5.3-flash",
+     "t": 465.45
+    },
+    {
+     "phase": "review",
+     "detail": "tool validate_draft",
+     "t": 520.7
+    },
+    {
+     "phase": "act",
+     "detail": "round 8 model=glm-5.3-flash",
+     "t": 520.7
+    },
+    {
+     "phase": "review",
+     "detail": "tool validate_draft",
+     "t": 552.92
+    },
+    {
+     "phase": "act",
+     "detail": "round 9 model=glm-5.3-flash",
+     "t": 552.92
+    },
+    {
+     "phase": "submit",
+     "detail": "tool submit_skill",
+     "t": 566.65
+    },
+    {
+     "phase": "done",
+     "detail": "ok",
+     "t": 566.65
+    }
+   ],
+   "plan": "1. 需求：开启型技能——开启期间只攻击\"被友军阻挡\"的敌人；场上无被阻挡敌人时照常索敌。已确认 isaActive 门控：技能未开启时 OnBeforeTargetSelect 规则不触发，天然实现\"开启期间\"。\n2. 已完成研究：attack_candidate_override（OnBeforeTargetSelect 专用，commit 步骤，文档明确\"override = only these targets\"）；filter_targets 字段闭集（无阻挡字段）；write_blackboard 实体路径闭集（无阻挡列表路径）；先例 ebnhlz_s3（\"只以精英/领袖为目标\"= snapshot+filter+override 三步管线）、eyjafjalla_t1（branch 计数>0 才干预，否则不干预——正是\"没有被阻挡就照常攻击\"的形态）。\n3. 关键结论：运行时无\"阻挡列表\"直接查询组件。采用语料可行的空间近似：敌人位于任一友方单位（含自身）radius≈1.2 内（相邻格距离 1.0，对角 1.414 被排除）≈\"被阻挡住/接战中\"。黑板键全用 tfb_ 前缀。\n4. 设计（单规则，OnBeforeTargetSelect，IgnoreWhileRunning，全同步前缀）：\n   a. select_targets all+same → tfb_allies；\n   b. write_blackboard path=self → tfb_anchors（[自身]）；\n   c. prepend_entities 把 tfb_allies 并入 tfb_anchors（去重=友军∪自身锚点）；\n   d. select_targets subjectMode=blackboard + radius=1.2 + opposing → tfb_blocked；\n   e. write_blackboard listCount → tfb_blocked_count；\n   f. branch(tfb_blocked_count>0)：steps=[attack_candidate_override(tfb_blocked)]，elseSteps=[]（不干预=照常攻击）。\n   黑板流：select_targets 写 tfb_allies/tfb_blocked → write_blackboard 写 tfb_anchors/tfb_blocked_count → branch 与 attack_candidate_override 读。\n5. SP 形态参照 ebnhlz_s3（唯一\"开启期间\"先例）：Manual 开启、canManualClose、Natural 消耗、abilityAmount=30s、总量酌降（纯功能型）。先 validate_draft 后 submit_skill。",
+   "tokens": {
+    "calls": 9,
+    "prompt_tokens": 163450,
+    "completion_tokens": 25963
+   }
+  }
+ }
+}
