@@ -219,15 +219,16 @@ def test_producer_consumer_pair_passes():
     assert issues == []
 
 
-def test_alias_resolution_like_runtime_registry():
+def test_pascal_case_alias_is_rejected():
+    """类名别名已退役：只认 canonical snake_case（与 SYSTEM 纪律对齐）。"""
     dto = valid_dto()
     dto["rules"][0]["steps"] = [{
-        "op": "ApplyDamage",  # PascalCase 别名
+        "op": "ApplyDamage",
         "args": {"entries": [{"key": "multiplier", "value": "2", "type": "Float",
                               "fromBlackboard": False}]}}]
-    ok, issues, sanitized = validate(dto, SCHEMA)
-    assert ok, "\n".join(messages(issues))
-    assert sanitized["rules"][0]["steps"][0]["op"] == "apply_damage"
+    ok, issues, _ = validate(dto, SCHEMA)
+    assert not ok
+    assert any("ApplyDamage" in i["message"] for i in issues)
 
 
 # ---------- hostAssets 边界校验（error 级） ----------

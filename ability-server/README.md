@@ -21,8 +21,10 @@ rejected；degraded 不入缓存）。单次调用 timeout 收紧至剩余墙钟
 过程经 on_phase 实时上报：同步端点计入 `report.phases`，异步端点可轮询
 （phase 词表 plan/act/review/submit/degraded）。
 
-schema 与客户端同源：`Assets/Resources/Data/AbilityOps/ability-ops.json`；
-Python 校验引擎（validator.py）是客户端 AbilityConfigValidator 的镜像。
+校验规则、组件文档、技能语料统一存组件库 `data/ability.db`（**唯一真源**，见下节）；
+Python 校验引擎（validator.py）从库重建校验形状，服务端 submit_skill 关卡 +
+FromDto 严格反序列化是仅有的两道结构闸（客户端不再持有规则副本）。
+生成期参考的历史 md 已退役（内容收编入库，原文见 git 历史）。
 历史：v1 三段接力（analyze→describe→generate）经 16 黄金任务对比后被 v2 替换，
 对比报告见 `evals/reports/ACCEPTANCE_v2.md`（v1 代码 git 历史保留）。
 
@@ -44,12 +46,34 @@ uvicorn app.main:app --host 127.0.0.1 --port 8765
 ABILITY_LLM_API_KEY="你的key" uvicorn app.main:app --host 127.0.0.1 --port 8765
 ```
 
+## 组件库（文档与语料的单一数据源）
+
+`data/ability.db`（SQLite）存三样东西，Agent 的文档工具与语料检索全部查它：
+
+- **组件表**（ops/op_params）：39 个 op（35 组件+4 原语）的参数表/词表/行为语义/
+  组合配方——中文文档内容直接存于库，`list_components`/`read_component_doc` 查表；
+- **全局契约**（global_docs 等 8 张小表）：规则形状/触发与条件/序列语义/重入/
+  参数存储/操作生命周期/注册表扩展——`read_contract_doc` 按节查；
+- **技能表**（skills，只读）：Unity 导出的语料 48 技能，`search_skills`/`read_skill`
+  与撞名检查/风格统计的数据源。
+
+```bash
+# Unity 重新导出 skills.json 后导入语料：
+python db/import_skills.py
+```
+
+**改任何内容（参数/词表/钳制值/文档文案）都直接 UPDATE 库**（SQL 或 DB Browser），
+服务端按库文件 mtime 惰性重载，改完即生效、无需重启。新增/下架 op = 插删
+`ops`/`op_params` 行，并把客户端 `AgentGenerateRequest.ProtocolVersion` 常量与
+`meta.protocolVersion` 同步 bump（握手做相等断言，漂移即拒绝并给出 diff）。
+
 ## 技能语料（检索范例 + 风格统计）
 
 Unity 菜单 `Tools → AbilityGeneration → 5. 导出技能语料` 收集两类来源、按资产引用
 去重，导出为 `data/skills.json`（只导出通过客户端校验器的技能）：① `Resources/Abilities`
 下的 SubJobs 特性类技能资产；② `EntityDataCollection` 各实体 Skills/Talents 引用的
-AbilityConfig。服务端按文件 mtime 惰性重载，重新导出无需重启 uvicorn。生成时：
+AbilityConfig。**导出后重跑 `python db/import_skills.py` 入库**（见上节）。
+生成时：
 
 - **检索先例**：Agent 循环内 `search_skills` 按 op 集合 Jaccard 检索相似技能、
   `read_skill` 读全文——借鉴组合方式与数值量级，禁止照抄 id/名称/描述；
@@ -57,7 +81,7 @@ AbilityConfig。服务端按文件 mtime 惰性重载，重新导出无需重启
   validator 低频挡位提示；
 - **撞名检查**：生成 abilityId 与语料现有技能撞名时记 warning（不拒绝）。
 
-语料文件缺失/损坏时静默降级为无语料，生成管线其余部分不受影响。
+库缺失/损坏时静默降级为无语料，生成管线其余部分不受影响。
 
 ## 接口
 
@@ -80,29 +104,32 @@ rejected 并返回缺失/多余清单——防 schema 与客户端注册表漂�
 预算闸（agent_max_rounds / agent_max_wall_seconds / agent_max_total_tokens /
 agent_max_plan_updates）/ 单调用超时（llm_timeout_seconds）/ 鉴权 token
 （server_token）/ 限流（rate_limit）/ 缓存条数 / 案例落盘目录（`log_dir`，默认
-`ability-server/logs/`，每次生成落一份 `gen-*.json` 案例含请求全文+响应全文；
-设 None 关闭；已 gitignore）。
+`ability-server/logs/`，每次生成落一份 `gen-*.json` 案例含请求全文+响应全文+
+黑盒回放——`trace`：每次模型调用的耗时/分项 tokens（含 reasoning）/思考原文；
+`thread`：完整对话线程（原始工具参数字符串原文随 assistant.tool_calls 在列）。
+黑盒只落盘，API 响应不携带；设 None 关闭；已 gitignore）。
 
 ## 测试
 
 ```bash
 cd ability-server
-python -m pytest tests/ -q     # 93 个纯逻辑测试（无需 fastapi；agent 测试脚本化 LLM）
+python -m pytest tests/ -q     # 纯逻辑测试（无需 fastapi；agent 测试脚本化 LLM）
 ```
 
 ## 客户端接入
 
 编辑器菜单 `Tools → AbilityGeneration`：
 
-- `5. 导出技能语料`：AbilityConfig 资产 → 服务端检索库（见上节，随时重跑）；
-- PlayMode 下 `4. 经本地服务器 Agent 生成技能`：异步提交 → 非阻塞轮询并实时
-  打印 Agent 阶段 → 客户端终检（AbilityConfigValidator）→ ReplaceSkill 注入
-  （替换当前技能，不动 EntityData）。
+- `4. 导出技能语料`：AbilityConfig 资产 → `data/skills.json`（FromDto 严格
+  反序列化当闸，解析失败的资产跳过；重导后跑 `python db/import_skills.py` 入库）；
+- PlayMode 下 `3. 经本地服务器 Agent 生成技能`：异步提交 → 非阻塞轮询并实时
+  打印 Agent 阶段 → ReplaceSkill 注入（服务端已过 submit_skill 关卡；FromDto
+  严格反序列化为结构闸；替换当前技能，不动 EntityData）。
 
-运行时管线（阶段三，真机可用）：`generate_skill` 组件（见
-docs/skill-components/GenerateSkill.md）——天赋挂在角色 `EntityData.Talents`
+运行时管线（阶段三，真机可用）：`generate_skill` 组件（退役文档
+docs/skill-components/GenerateSkill.md，git 历史可查）——天赋挂在角色 `EntityData.Talents`
 （xlsx Talents 列配资产路径），部署时（OnInitialize）异步提交战局快照，组件
-OnTick 轮询，完成后客户端终检并 ReplaceSkill 替换当前技能（仅本场有效）。
+OnTick 轮询，完成后 FromDto 并 ReplaceSkill 替换当前技能（仅本场有效）。
 样例资产 `Resources/Prefabs/Characters/3/Kroos/talents/kroos_tllm.asset`。
 
 ## 安全提醒

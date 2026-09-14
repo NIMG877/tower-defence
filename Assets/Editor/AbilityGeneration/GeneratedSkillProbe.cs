@@ -42,18 +42,6 @@ public static class GeneratedSkillProbe
   ]
 }";
 
-    private const string InvalidJson = @"
-{
-  ""abilityId"": ""gen_probe_bad"",
-  ""abilityName"": ""非法技能（应被拒绝）"",
-  ""description"": ""op 不在注册表"",
-  ""rules"": [
-    {
-      ""triggers"": [ { ""triggerEvent"": ""OnInitialize"", ""groups"": [] } ],
-      ""steps"": [ { ""op"": ""make_big_explosion"", ""args"": { ""entries"": [] } } ]
-    }
-  ]
-}";
 
     [MenuItem("Tools/AbilityGeneration/1. 打印战局快照")]
     public static void PrintSnapshot()
@@ -66,46 +54,21 @@ public static class GeneratedSkillProbe
                   BattleSnapshotBuilder.ToJson(snapshot, indented: true));
     }
 
-    [MenuItem("Tools/AbilityGeneration/2. 注入探针技能（JSON→校验→ReplaceSkill）")]
+    [MenuItem("Tools/AbilityGeneration/2. 注入探针技能（JSON→ReplaceSkill）")]
     public static void InjectProbeSkill()
     {
         Entity self = FindProbeHost();
         if (self == null) return;
 
         AbilityConfigDto dto = AbilityConfigBuilder.Parse(ProbeJson);
-        AbilityConfigValidator.Result result = AbilityConfigValidator.Validate(dto);
-        AgentJobStatus.LogValidatorIssues(result, "[Probe]");
-        if (!result.Ok)
-        {
-            Debug.LogError("[Probe] 校验未通过，拒绝注入");
-            return;
-        }
-
-        AbilityConfig cfg = AbilityConfigBuilder.FromDto(result.Sanitized);
+        AbilityConfig cfg = AbilityConfigBuilder.FromDto(dto);
         string runtimeId = self.AbilityRunner.ReplaceSkill(cfg);
         Debug.Log($"[Probe] 已替换当前技能 id={runtimeId}，Skills.Count={self.AbilityRunner.Skills.Count}，" +
                   $"icon={(cfg.icon != null ? cfg.icon.name : "null")}；" +
                   "此刻应看到 +99 费用飘字与音效（modify_cost），撤退再部署会再触发一次");
     }
 
-    [MenuItem("Tools/AbilityGeneration/3. 注入非法技能（应被校验拒绝）")]
-    public static void InjectInvalidSkill()
-    {
-        Entity self = FindProbeHost();
-        if (self == null) return;
-
-        AbilityConfigDto dto = AbilityConfigBuilder.Parse(InvalidJson);
-        AbilityConfigValidator.Result result = AbilityConfigValidator.Validate(dto);
-        AgentJobStatus.LogValidatorIssues(result, "[Probe]");
-        if (result.Ok)
-        {
-            Debug.LogError("[Probe] 非法技能意外通过校验——校验器有漏洞，检查 unknown-op 路径！");
-            return;
-        }
-        Debug.Log("[Probe] 非法技能被校验器正确拒绝（未注入）。上面的 error 即 unknown-op 路径。");
-    }
-
-    [MenuItem("Tools/AbilityGeneration/4. 经本地服务器 Agent 生成技能（阶段二）")]
+    [MenuItem("Tools/AbilityGeneration/3. 经本地服务器 Agent 生成技能（阶段二）")]
     public static void GenerateViaServer()
     {
         Entity self = FindProbeHost();
@@ -205,7 +168,7 @@ public static class GeneratedSkillProbe
         Debug.LogError(message);
     }
 
-    /// <summary>job done：主线程终检 + 注入（原同步路径的后半段）。
+    /// <summary>job done：主线程注入（原同步路径的后半段）。
     /// 先报服务端结果再判宿主——宿主已死也不能把拒绝/成功信息吞掉。</summary>
     private static void CompletePoll(Entity self, AgentJobStatus status)
     {
@@ -230,18 +193,9 @@ public static class GeneratedSkillProbe
             return;
         }
 
-        // 客户端终检（防 schema 版本漂移 + hostAssets 边界），再走与阶段一相同的注入路径。
-        AbilityConfigValidator.Result result = AbilityConfigValidator.Validate(
-            response.ability, HostAssets.FromEntityData(self.EntityData));
-        AgentJobStatus.LogValidatorIssues(result, "[Probe]");
         AgentJobStatus.LogServerIssues(response, "[Probe]");
-        if (!result.Ok)
-        {
-            Debug.LogError("[Probe] 服务端返回未通过客户端终检（op 注册表与服务端 schema 漂移？）");
-            return;
-        }
 
-        AbilityConfig cfg = AbilityConfigBuilder.FromDto(result.Sanitized);
+        AbilityConfig cfg = AbilityConfigBuilder.FromDto(response.ability);
         string runtimeId = self.AbilityRunner.ReplaceSkill(cfg);
         Debug.Log($"[Probe] 服务器生成技能已替换当前技能 id={runtimeId}，Skills.Count={self.AbilityRunner.Skills.Count}，" +
                   $"icon={(cfg.icon != null ? cfg.icon.name : "null")}，cached={response.report?.cached}；" +

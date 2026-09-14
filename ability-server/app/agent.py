@@ -32,6 +32,9 @@ MIN_ROUND_MARGIN_SECONDS = 30.0
 STATE_PLAN_PENDING = "plan_pending"
 STATE_ACT = "act"
 
+# 黑盒回放键：随案例落盘、service 层从 API 响应剥离（客户端 DTO 不变）。
+BLACKBOX_KEYS = ("trace", "thread")
+
 
 class HandshakeError(Exception):
     """客户端 op 注册表与服务端 schema 漂移——拒绝生成并返回 diff。"""
@@ -62,8 +65,9 @@ SYSTEM = (
     "工作方式（单线程自由循环，自己决定节奏）：\n"
     "1. 第一轮必须用 update_plan 提交计划：打算读哪些组件文档、技能设计思路（触发事件/"
     "步骤序列/目标选择）、黑板键方案（哪些键谁写谁读）。中途重大转向时用 update_plan 修订。\n"
-    "2. 研究：list_components 看索引 → read_component_doc 读参数表 → read_contract_doc "
-    "确认规则契约 → read_schema_vocab 拿触发事件/词表/字段编码。不确定的词表一律查，不要凭记忆猜。\n"
+    "2. 研究：list_components 看索引 → read_component_doc 读参数表与行为语义 → "
+    "read_contract_doc 读全局契约（先看节索引，按节取全文）→ read_schema_vocab 拿触发事件/"
+    "词表/字段编码。不确定的词表一律查，不要凭记忆猜。\n"
     "3. 战局：首条消息已给战局 digest 与宿主资产摘要；明细用 entity(id)/entities_at/"
     "deploy_cells_near，派生指标用 compute_cross_items（那是设计期参考）。\n"
     "4. 先例：search_skills 查相似技能 → read_skill 看完整配置与数值量级。\n"
@@ -121,9 +125,20 @@ def route_model(state: str, cfg) -> str | None:
     return cfg.llm_model_mid or cfg.llm_model
 
 
+def trace_entry(round_no: int, model: str | None, call_started: float,
+                **extra) -> dict:
+    """单条黑盒记录：耗时与调用方上下文共用构造（错误/成功两路径共用）。"""
+    return {"round": round_no, "model": model,
+            "durationS": round(time.monotonic() - call_started, 2), **extra}
+
+
 def run(request: dict, cfg, schema: dict, on_phase=None) -> dict:
     reporter = _Reporter(on_phase)
     started = time.monotonic()
+    # 黑盒回放：trace 记每次模型调用的耗时/分项 tokens/思考原文；thread 记完整
+    # 对话线程——原始工具参数随 assistant.tool_calls 原文在列，不另存副本。
+    trace: list[dict] = []
+    thread: list[dict] | None = None
 
     def finish(status: str, ability, issues: list[dict], rounds: int, ctx,
                tokens: dict | None = None,
@@ -141,6 +156,10 @@ def run(request: dict, cfg, schema: dict, on_phase=None) -> dict:
         response = {"status": status, "ability": ability, "report": report}
         if degraded_reason is not None:
             response["degraded"] = True
+        if trace:
+            response["trace"] = trace
+        if thread is not None:
+            response["thread"] = thread
         return response
 
     try:
@@ -161,7 +180,7 @@ def run(request: dict, cfg, schema: dict, on_phase=None) -> dict:
                       [{"severity": "error", "path": "battleSnapshot", "message": str(exc)}],
                       0, None)
 
-    corpus_data = corpus.get_corpus(cfg.corpus_path)
+    corpus_data = corpus.get_corpus(cfg.db_path)
     ctx = tools.ToolContext(request, cfg, schema, corpus_data)
     thread = [
         {"role": "system", "content": SYSTEM},
@@ -202,6 +221,8 @@ def run(request: dict, cfg, schema: dict, on_phase=None) -> dict:
         # 单次调用 timeout 收紧至剩余预算（§4.4）：挂起中的调用不受轮间检查约束，
         # 不收紧会穿破墙钟死线。能走到这里 remaining ≥ 30s，减 5s 留收尾余量。
         call_timeout = min(cfg.llm_timeout_seconds, remaining_wall - 5.0)
+        call_started = time.monotonic()
+        usage_before = llm.usage_snapshot()
         try:
             message = llm.chat_tools(thread, tool_defs, cfg, model=model,
                                      timeout=call_timeout)
@@ -210,6 +231,7 @@ def run(request: dict, cfg, schema: dict, on_phase=None) -> dict:
             # 断网），烧完预算只会更糟，直接进降级判定。
             consecutive_llm_errors += 1
             reporter.report("act", f"llm error ({consecutive_llm_errors}): {exc}")
+            trace.append(trace_entry(round_no, model, call_started, error=str(exc)))
             if consecutive_llm_errors >= 4:
                 reporter.report("act", "circuit breaker: 4 consecutive llm errors; aborting")
                 return degrade_or_reject("llm_error_circuit_breaker", round_no)
@@ -219,6 +241,9 @@ def run(request: dict, cfg, schema: dict, on_phase=None) -> dict:
         consecutive_llm_errors = 0
 
         tool_calls = message.get("tool_calls")
+        trace.append(trace_entry(round_no, model, call_started,
+                                 tokens=llm.usage_delta(usage_before),
+                                 thinking=message.get("reasoning_content") or ""))
         if not tool_calls:
             content = message.get("content") or ""
             thread.append({"role": "assistant", "content": content})
@@ -356,7 +381,7 @@ def _first_user(digest: dict, ctx: tools.ToolContext) -> str:
         host_summary["skills"] = [
             {"abilityId": s.get("abilityId"), "name": s.get("abilityName"),
              "sp": (s.get("sp") or {}).get("totalSp"),
-             "ops": sorted(corpus.skill_ops(s, ctx.schema))}
+             "ops": sorted(corpus.skill_ops(s))}
             for s in ctx.host_skills.values()]
     return json.dumps({"battleDigest": digest, "hostAssets": host_summary,
                        "constraints": ctx.constraints},

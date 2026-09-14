@@ -10,7 +10,7 @@ namespace AbilitySystem.Components
     /// <summary>
     /// 运行时 LLM 生成技能（plan-llm-generated-ability 阶段三）。OnTrigger 把战局快照 +
     /// 宿主清单异步提交给 ability-server 后立即返回（fire-and-forget，不阻塞步骤序列），
-    /// OnTick 轮询任务状态；完成后客户端终检 → FromDto → ReplaceSkill 替换当前技能
+    /// OnTick 轮询任务状态；完成后 FromDto → ReplaceSkill 替换当前技能
     /// （生成物仅本场有效：ReplaceSkill 不触碰 EntityData，下场战斗 PreWarm 恢复原技能）。
     ///
     /// 典型配置：常驻天赋规则触发 OnInitialize（部署时生成一次；休眠重部署会重新触发，
@@ -188,24 +188,13 @@ namespace AbilitySystem.Components
         }
 
         /// <summary>
-        /// 客户端终检（防 schema 版本漂移）→ FromDto → 销毁上一代生成物 → ReplaceSkill。
-        /// 返回 runtimeId，失败返回 null。public 供 EditMode 测试直接断言（测试 asmdef 无
+        /// FromDto（严格反序列化即结构闸）→ 销毁上一代生成物 → ReplaceSkill。
+        /// 返回 runtimeId。public 供 EditMode 测试直接断言（测试 asmdef 无
         /// InternalsVisibleTo）。
         /// </summary>
         public string ApplyGeneratedAbility(EntityAbilityRunner runner, AbilityConfigDto dto)
         {
-            // 终检带 hostAssets 边界：hostAssets 全部取自 EntityData 静态数据，
-            // 轮询完成时重投影与请求时一致（宿主若已销毁走不到这里，OnTeardown 中止轮询）。
-            AbilityConfigValidator.Result result = AbilityConfigValidator.Validate(
-                dto, HostAssets.FromEntityData(_host.EntityData));
-            AgentJobStatus.LogValidatorIssues(result, "[GenerateSkill]");
-            if (!result.Ok)
-            {
-                Debug.LogError("[GenerateSkill] 服务端返回未通过客户端终检（op 注册表与服务端 schema 漂移？）");
-                return null;
-            }
-
-            AbilityConfig cfg = AbilityConfigBuilder.FromDto(result.Sanitized);
+            AbilityConfig cfg = AbilityConfigBuilder.FromDto(dto);
             string runtimeId = runner.ReplaceSkill(cfg);
             if (_lastGenerated != null) UnityEngine.Object.Destroy(_lastGenerated);
             _lastGenerated = cfg;

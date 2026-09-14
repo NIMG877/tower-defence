@@ -29,7 +29,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 TASKS_DIR = HERE / "tasks"
 REPORTS_DIR = HERE / "reports"
-SCHEMA_PATH = HERE.parents[1] / "Assets" / "Resources" / "Data" / "AbilityOps" / "ability-ops.json"
+DB_PATH = HERE.parent / "data" / "ability.db"
 
 
 def http_json(method: str, url: str, body: dict | None = None,
@@ -173,7 +173,7 @@ def main() -> int:
     ap.add_argument("--server", required=True, help="如 http://127.0.0.1:8766")
     ap.add_argument("--run", required=True, help="报告目录名，如 v2_first")
     ap.add_argument("--protocol-version", type=int, default=None,
-                    help="envelope 版本号，默认取 ability-ops.json 的 protocolVersion")
+                    help="envelope 版本号，默认取组件库 meta 的 protocolVersion")
     ap.add_argument("--token", default=None, help="X-Auth-Token（服务端未设 token 可省）")
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--only", default=None, help="逗号分隔 taskId 过滤")
@@ -183,10 +183,15 @@ def main() -> int:
                     help="并发任务数（>1 时延迟指标含并发争用，绿率/tokens 不受影响）")
     args = ap.parse_args()
 
-    schema_text = SCHEMA_PATH.read_text(encoding="utf-8")
-    schema_json = json.loads(schema_text)
-    if args.protocol_version is None:
-        args.protocol_version = schema_json["protocolVersion"]
+    import sqlite3
+    con = sqlite3.connect(DB_PATH)
+    try:
+        if args.protocol_version is None:
+            args.protocol_version = int(con.execute(
+                "SELECT value FROM meta WHERE key='protocolVersion'").fetchone()[0])
+        schema_ops = sorted({r[0] for r in con.execute("SELECT op FROM ops")})
+    finally:
+        con.close()
 
     tasks = sorted(TASKS_DIR.glob("*.json"))
     if args.only:
@@ -200,7 +205,6 @@ def main() -> int:
 
     out_dir = REPORTS_DIR / args.run
     out_dir.mkdir(parents=True, exist_ok=True)
-    schema_ops = sorted(set(schema_json["primitives"]) | set(schema_json["componentOps"]))
 
     from concurrent.futures import ThreadPoolExecutor, as_completed
     workers = max(1, args.parallel)

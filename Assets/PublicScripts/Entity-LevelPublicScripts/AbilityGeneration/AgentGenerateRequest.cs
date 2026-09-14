@@ -11,16 +11,19 @@ using AbilitySystem;
 /// animations 是 apply_animation_override.resources 的合法域。skills/talents
 /// 默认不传（宿主现有技能/天赋上下文按需开启）。不产出 iconKey（统一图标，
 /// 技能卡走 AbilityIconPool null 兜底）。
-/// hostAssets 的形状与构建器在 AbilitySystem.HostAssets（GameData 程序集）——
-/// 客户端终检（AbilityConfigValidator 边界校验）与请求构建共享同一投影。
+/// hostAssets 的形状与构建器在 AbilitySystem.HostAssets（GameData 程序集）。
 /// </summary>
 public static class AgentGenerateRequest
 {
+    /// <summary>契约版本：与服务端 ability.db meta.protocolVersion 手动同步 bump
+    /// （握手做相等断言，漂移即拒绝并给出 diff）。</summary>
+    public const int ProtocolVersion = 4;
+
     public static object Build(Entity self, object constraints)
     {
         return new
         {
-            protocolVersion = AbilityOpsSchema.Load().protocolVersion,
+            protocolVersion = ProtocolVersion,
             opList = AbilityStepOpRegistry.RegisteredOps,
             battleSnapshot = BattleSnapshotBuilder.Build(self),
             hostAssets = HostAssets.FromEntityData(self.EntityData),

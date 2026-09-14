@@ -22,7 +22,7 @@ public static class SkillCorpusExporter
     // 与 GameDataService.EntityCollectionPath 同源（那边是 private const，这里镜像一份）
     private const string EntityCollectionPath = "GameDatas/EntityDataCollection";
 
-    [MenuItem("Tools/AbilityGeneration/5. 导出技能语料（AbilityConfig→服务端检索库）")]
+    [MenuItem("Tools/AbilityGeneration/4. 导出技能语料（AbilityConfig→服务端检索库）")]
     public static void Export()
     {
         var seen = new HashSet<AbilityConfig>();
@@ -62,7 +62,7 @@ public static class SkillCorpusExporter
         string path = Path.Combine(dir, "skills.json");
         var payload = new
         {
-            protocolVersion = AbilityOpsSchema.Load().protocolVersion,
+            protocolVersion = AgentGenerateRequest.ProtocolVersion,
             exportedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             skills,
         };
@@ -83,11 +83,15 @@ public static class SkillCorpusExporter
         {
             if (cfg == null || !seen.Add(cfg)) continue;
             AbilityConfigDto dto = ToDto(cfg);
-            // 挂在运行时的资产理应全部合法；被校验器拒绝说明资产或校验器出了问题，挡下来人工看。
-            if (!AbilityConfigValidator.Validate(dto).Ok)
+            // FromDto 严格反序列化当闸：DTO 缺字段/类型不符在此抛出，挡下来人工看。
+            try
+            {
+                AbilityConfigBuilder.FromDto(dto);
+            }
+            catch (System.Exception exc)
             {
                 skipped++;
-                Debug.LogWarning($"[Corpus] 跳过未通过校验的技能 {dto.abilityId}（请检查对应资产）");
+                Debug.LogWarning($"[Corpus] 跳过无法反序列化的技能 {dto.abilityId}（{exc.Message}；请检查对应资产）");
                 continue;
             }
             skills.Add(dto);

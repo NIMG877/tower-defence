@@ -11,7 +11,8 @@ class LlmError(Exception):
 
 
 # 进程级 LLM 用量累计（评测的成本口径；agent 每次生成取快照差值进 report.tokens）。
-_usage_totals = {"calls": 0, "prompt_tokens": 0, "completion_tokens": 0}
+_usage_totals = {"calls": 0, "prompt_tokens": 0, "completion_tokens": 0,
+                 "reasoning_tokens": 0}
 
 
 def usage_snapshot() -> dict:
@@ -24,9 +25,11 @@ def usage_delta(snapshot: dict) -> dict:
 
 def _accumulate(data: dict) -> None:
     usage = data.get("usage") or {}
+    details = usage.get("completion_tokens_details") or {}
     _usage_totals["calls"] += 1
     _usage_totals["prompt_tokens"] += int(usage.get("prompt_tokens") or 0)
     _usage_totals["completion_tokens"] += int(usage.get("completion_tokens") or 0)
+    _usage_totals["reasoning_tokens"] += int(details.get("reasoning_tokens") or 0)
 
 
 def _complete(cfg, messages: list[dict], tools: list[dict] | None,

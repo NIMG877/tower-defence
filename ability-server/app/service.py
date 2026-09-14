@@ -32,8 +32,12 @@ class _Cache:
 class GenerateService:
     def __init__(self, cfg):
         self.cfg = cfg
-        self.schema = schema_mod.load_schema()
         self._cache = _Cache(cfg.cache_size)
+
+    @property
+    def schema(self) -> dict:
+        """每次访问经 mtime 缓存取最新——改库后无需重启服务。"""
+        return schema_mod.load_schema()
 
     def generate(self, request: dict, on_phase=None) -> dict:
         cache_key = self._cache_key(request)
@@ -42,10 +46,12 @@ class GenerateService:
             return {**cached, "report": {**cached.get("report", {}), "cached": True}}
 
         response = agent.run(request, self.cfg, self.schema, on_phase)
+        # 黑盒回放只落盘不回客户端：客户端 DTO 不变、响应体积不膨胀，回放根因看案例文件。
+        extras = {k: response.pop(k) for k in agent.BLACKBOX_KEYS if k in response}
         # 非 ok / 降级产物不入缓存：同 payload 重触发可重跑，坏结果不被永久命中。
         if response.get("status") == "ok" and not response.get("degraded"):
             self._cache.put(cache_key, response)
-        self._log(request, response)
+        self._log(request, response, extras)
         return response
 
     @staticmethod
@@ -65,7 +71,8 @@ class GenerateService:
         ))
         return hashlib.sha256(parts.encode()).hexdigest()
 
-    def _log(self, request: dict, response: dict) -> None:
+    def _log(self, request: dict, response: dict,
+             extras: dict | None = None) -> None:
         if not self.cfg.log_dir:
             return
         log_dir = Path(self.cfg.log_dir)
@@ -73,7 +80,8 @@ class GenerateService:
             log_dir.mkdir(parents=True, exist_ok=True)
             stamp = time.strftime("%Y%m%d-%H%M%S")
             path = log_dir / f"gen-{stamp}-{int(time.time() * 1000) % 10000}.json"
-            path.write_text(json.dumps({"request": request, "response": response},
+            path.write_text(json.dumps({"request": request, "response": response,
+                                        **(extras or {})},
                                        ensure_ascii=False, indent=1), encoding="utf-8")
         except OSError:
             pass  # 日志落盘失败不影响生成结果

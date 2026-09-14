@@ -38,7 +38,7 @@ def make_request(**overrides) -> dict:
 def tiered_cfg(**overrides) -> Config:
     # 循环测试默认 llm_mock=False（直接 patch llm.chat_tools）；mock 路径测试显式传 True。
     # weak 钉 None：摘要兜底不被无关用例触发，digest 测试显式开。
-    base = dict(log_dir=None, corpus_path=None, llm_mock=False,
+    base = dict(log_dir=None, db_path=None, llm_mock=False,
                 llm_model="base-model", llm_model_strong="strong-model",
                 llm_model_mid="mid-model", llm_model_weak=None)
     base.update(overrides)
@@ -70,7 +70,7 @@ def test_route_model_two_state_machine():
     assert agent.route_model(agent.STATE_PLAN_PENDING, cfg) == "strong-model"
     assert agent.route_model(agent.STATE_ACT, cfg) == "mid-model"
     # 档位配置为 None 时回退默认模型
-    plain = Config(llm_mock=True, log_dir=None, corpus_path=None,
+    plain = Config(llm_mock=True, log_dir=None, db_path=None,
                    llm_model_strong=None, llm_model_mid=None)
     assert agent.route_model(agent.STATE_PLAN_PENDING, plain) == plain.llm_model
     assert agent.route_model(agent.STATE_ACT, plain) == plain.llm_model
@@ -272,11 +272,99 @@ def test_service_routes_to_agent():
     """service 统一路由 agent（v1 编排已删，git 保留）。"""
     from app.service import GenerateService
 
-    service = GenerateService(Config(llm_mock=True, log_dir=None, corpus_path=None))
+    service = GenerateService(Config(llm_mock=True, log_dir=None, db_path=None))
     response = service.generate(make_request())
     assert response["status"] == "ok", response["report"]
     phases = [p["phase"] for p in response["report"]["phases"]]
     assert "submit" in phases
+
+
+# ---------- 逐调用黑盒（trace + thread：只落盘，不回客户端） ----------
+
+def test_trace_captures_per_call_metrics_and_thread(monkeypatch):
+    """每次模型调用记耗时/分项 tokens（含 reasoning）/思考原文；完整对话线程
+    （含原始工具参数原文）随响应带出。"""
+    models_seen = []
+
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+        models_seen.append(model)
+        if len(models_seen) == 1:
+            return {**tool_call("c1", "update_plan", {"plan": "计划"}),
+                    "reasoning_content": "先提交计划再研究。"}
+        return tool_call("c2", "submit_skill", {"config": submit_config()})
+
+    monkeypatch.setattr(llm, "chat_tools", fake_chat_tools)
+    response = agent.run(make_request(), tiered_cfg(), SCHEMA)
+    assert response["status"] == "ok", response["report"]
+
+    trace = response["trace"]
+    assert [e["round"] for e in trace] == [1, 2]
+    # 路由切换发生在计划轮之后：执行 update_plan 的下一轮才进 mid 档
+    assert [e["model"] for e in trace] == ["strong-model", "strong-model"]
+    assert trace[0]["thinking"] == "先提交计划再研究。"
+    for entry in trace:
+        assert "durationS" in entry
+        assert {"calls", "prompt_tokens", "completion_tokens",
+                "reasoning_tokens"} <= set(entry["tokens"])
+    # 原始参数在对话线程留证（assistant.tool_calls 为字符串原文，未预解析）
+    assert json.loads(response["thread"][2]["tool_calls"][0]["function"]
+                      ["arguments"]) == {"plan": "计划"}
+
+    roles = [m["role"] for m in response["thread"]]
+    assert roles == ["system", "user", "assistant", "tool", "assistant", "tool"]
+
+
+def test_thread_preserves_malformed_arguments(monkeypatch):
+    """模型发了畸形参数 JSON：循环按 {} 兜底继续，线程里原文留证。"""
+    calls = []
+
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+        calls.append(1)
+        if len(calls) == 1:
+            return tool_call("c1", "update_plan", {"plan": "计划"})
+        if len(calls) == 2:
+            return {"role": "assistant", "content": None, "tool_calls": [
+                {"id": "c2", "type": "function",
+                 "function": {"name": "read_component_doc",
+                              "arguments": "not-json{"}}]}
+        return tool_call("c3", "submit_skill", {"config": submit_config()})
+
+    monkeypatch.setattr(llm, "chat_tools", fake_chat_tools)
+    response = agent.run(make_request(), tiered_cfg(), SCHEMA)
+    assert response["status"] == "ok", response["report"]
+    assistants = [m for m in response["thread"] if m["role"] == "assistant"]
+    assert assistants[1]["tool_calls"][0]["function"]["arguments"] == "not-json{"
+
+
+def test_mock_mode_has_no_trace():
+    """mock 路径不触 LLM：无黑盒可记，响应不带 trace/thread。"""
+    response = agent.run(make_request(), tiered_cfg(llm_mock=True), SCHEMA)
+    assert response["status"] == "ok"
+    assert "trace" not in response and "thread" not in response
+
+
+def test_service_strips_trace_into_log(monkeypatch, tmp_path):
+    """service 从客户端响应剥离黑盒，随案例完整落盘。"""
+    from app.service import GenerateService
+
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+        if len(messages) == 2:  # 首轮：system + 首条用户消息
+            return {**tool_call("c1", "update_plan", {"plan": "计划"}),
+                    "reasoning_content": "想法。"}
+        return tool_call("c2", "submit_skill", {"config": submit_config()})
+
+    monkeypatch.setattr(llm, "chat_tools", fake_chat_tools)
+    service = GenerateService(tiered_cfg(log_dir=str(tmp_path)))
+    response = service.generate(make_request())
+    assert response["status"] == "ok", response["report"]
+    assert "trace" not in response and "thread" not in response
+
+    logs = list(tmp_path.glob("gen-*.json"))
+    assert len(logs) == 1
+    case = json.loads(logs[0].read_text(encoding="utf-8"))
+    assert case["trace"][0]["thinking"] == "想法。"
+    assert case["thread"][0]["role"] == "system"
+    assert "trace" not in case["response"]["report"]
 
 
 # ---------- 预算闸与降级协议（M4 §4.4） ----------

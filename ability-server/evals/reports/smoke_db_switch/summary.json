@@ -1,0 +1,40 @@
+{
+ "run": "smoke_db_switch",
+ "server": "http://127.0.0.1:8766",
+ "tasks": 1,
+ "cachedHits": 0,
+ "okRate": 1.0,
+ "autoPassRate": 1.0,
+ "rounds": [
+  5
+ ],
+ "totalTokens": [
+  30765
+ ],
+ "wallSeconds": [
+  64.99
+ ],
+ "perTask": [
+  {
+   "taskId": "t01_vanguard_cost_recovery",
+   "status": "ok",
+   "cached": false,
+   "wallSeconds": 64.99,
+   "rounds": 5,
+   "totalTokens": 30765,
+   "auto": {
+    "submitted": true,
+    "opCoverage": {
+     "missing": [],
+     "banned": [],
+     "anyOfUnmet": [],
+     "triggerEventsMissing": [],
+     "triggerEventsAnyUnmet": false
+    },
+    "magnitudeOutOfBand": [],
+    "autoPass": true
+   },
+   "print": "[t01_vanguard_cost_recovery] ok wall=64.99s  autoPass=True"
+  }
+ ]
+}

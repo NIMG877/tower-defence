@@ -40,7 +40,7 @@ def make_ctx(**request_overrides) -> tools.ToolContext:
         "constraints": {"request": "测试诉求"},
     }
     request.update(request_overrides)
-    cfg = Config(llm_mock=True, log_dir=None, corpus_path=None)
+    cfg = Config(llm_mock=True, log_dir=None, db_path=None)
     return tools.ToolContext(request, cfg, schema(), None)
 
 
@@ -165,32 +165,49 @@ def test_tool_errors_never_raise():
     assert "error" in call(ctx, "compute_cross_items", None)
 
 
-# ---------- 文档工具后端（tools.py；>4k 由工具层截断，故直测纯函数） ----------
+# ---------- 文档工具后端（真实组件库 data/ability.db；>4k 由工具层截断） ----------
+
+def make_db_ctx() -> tools.ToolContext:
+    """默认 db_path 指向真实组件库，用于文档工具测试。"""
+    return tools.ToolContext(
+        {"protocolVersion": schema()["protocolVersion"], "battleSnapshot": {},
+         "hostAssets": {}, "constraints": {}},
+        Config(llm_mock=True, log_dir=None), schema(), None)
+
 
 def test_list_components_returns_full_index():
-    from app import tools
-
-    components = tools.component_index(schema())
+    components = tools.component_index(make_db_ctx())["components"]
     assert len(components) == 35
     entry = next(c for c in components if c["op"] == "apply_damage")
-    assert entry["class"] == "ApplyDamage" and entry["summary"]
+    assert entry["summary"]
+    assert "class" not in entry  # 索引只留 op/摘要（尺寸回 4k 线下）
 
 
 def test_read_component_doc_by_op_and_alias():
-    from app import tools
+    ctx = make_db_ctx()
+    by_op = tools.component_doc(ctx, "apply_damage")
+    assert by_op["op"] == "apply_damage"
+    assert by_op["behavior"] and by_op["params"]
+    assert any(p["key"] == "damageType" for p in by_op["params"])
+    assert "error" in tools.component_doc(ctx, "ApplyDamage")  # 类名别名已退役
+    assert "error" in tools.component_doc(ctx, "nope")
 
-    by_op = tools.component_doc(schema(), "apply_damage")
-    by_alias = tools.component_doc(schema(), "ApplyDamage")
-    assert by_op["op"] == by_alias["op"] == "apply_damage"
-    assert by_op["doc"] == "docs/skill-components/ApplyDamage.md"
-    assert "# ApplyDamage" in by_op["content"]
-    assert "error" in tools.component_doc(schema(), "nope")
+
+def test_doc_tools_degrade_without_db():
+    ctx = make_ctx()  # db_path=None
+    assert "error" in tools.component_index(ctx)
+    assert "error" in tools.component_doc(ctx, "apply_damage")
+    assert "error" in tools._contract_doc(ctx, None)
 
 
-def test_read_contract_doc_returns_text():
-    from app import schema as schema_mod
-
-    assert "AbilityConfig" in schema_mod.contract_docs()
+def test_read_contract_doc_sections():
+    ctx = make_db_ctx()
+    out = call(ctx, "read_contract_doc", {})
+    assert {s["section"] for s in out["sections"]} >= {"stored_shape", "sequence_semantics"}
+    assert "section=" in out["note"]
+    full = call(ctx, "read_contract_doc", {"section": "stored_shape"})
+    assert "AbilityConfig" in full["content"]
+    assert "unknown section" in call(ctx, "read_contract_doc", {"section": "nope"})["error"]
 
 
 # ---------- 语料检索（fixture 语料，不依赖 data/skills.json） ----------
@@ -212,7 +229,7 @@ def make_corpus_ctx() -> tools.ToolContext:
     return tools.ToolContext(
         {"protocolVersion": schema()["protocolVersion"], "battleSnapshot": {},
          "hostAssets": {}, "constraints": {}},
-        Config(llm_mock=True, log_dir=None, corpus_path=None), schema(), corpus_data)
+        Config(llm_mock=True, log_dir=None, db_path=None), schema(), corpus_data)
 
 
 def test_search_skills_matches_text_and_ops():

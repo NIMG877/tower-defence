@@ -44,17 +44,6 @@ public class AgentJobStatus
         public string message;
     }
 
-    /// <summary>客户端校验器 Issue 按 IsError 打 Console；tag 为日志前缀（如 "[Probe]"）。</summary>
-    public static void LogValidatorIssues(AbilityConfigValidator.Result result, string tag)
-    {
-        for (int i = 0; i < result.Issues.Count; i++)
-        {
-            AbilityConfigValidator.Issue issue = result.Issues[i];
-            if (issue.IsError) Debug.LogError($"{tag}[校验 error] {issue}");
-            else Debug.LogWarning($"{tag}[校验 warning] {issue}");
-        }
-    }
-
     /// <summary>服务端 report.issues（撞名 warning、钳制、设计层失败原因等）按 severity 打 Console。</summary>
     public static void LogServerIssues(GenerateResponse response, string tag)
     {

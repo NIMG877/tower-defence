@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import json
 
-from . import battle_digest, corpus, crossitems, schema as schema_mod, validator
+from . import ability_db, battle_digest, corpus, crossitems, schema as schema_mod, validator
 
 # 数值字段语义（唯一出处）：camp 入 read_schema_vocab 与文档（§三·A）；
 # job/subJob/bulletType 随 hostAssets 摘要注入。
@@ -43,7 +43,7 @@ def list_components_def() -> dict:
         "type": "function",
         "function": {
             "name": "list_components",
-            "description": "列出全部可用技能组件 op 的紧凑索引（op 名/类名/一句话摘要）。"
+            "description": "列出全部可用技能组件 op 的紧凑索引（op 名/一句话摘要）。"
                            "先读索引再决定读哪篇详细文档，不要凭空使用未读过文档的组件。",
             "parameters": {"type": "object", "properties": {}},
         },
@@ -55,11 +55,11 @@ def read_component_doc_def() -> dict:
         "type": "function",
         "function": {
             "name": "read_component_doc",
-            "description": "读取单个技能组件的完整说明文档（参数表/默认值/触发限制/协议依赖）。"
-                           "name 传 op 名（如 apply_damage）或类名（如 ApplyDamage）。",
+            "description": "读取单个技能组件的完整说明（参数表/行为语义/组合配方）。"
+                           "name 传 op 名（如 apply_damage）。",
             "parameters": {
                 "type": "object",
-                "properties": {"name": {"type": "string", "description": "op 名或组件类名"}},
+                "properties": {"name": {"type": "string", "description": "op 名"}},
                 "required": ["name"],
             },
         },
@@ -71,9 +71,12 @@ def read_contract_doc_def() -> dict:
         "type": "function",
         "function": {
             "name": "read_contract_doc",
-            "description": "读取规则/序列/重入/生命周期契约文档（ability-steps.md）。"
-                           "设计多步骤规则、判断触发时机前先读。",
-            "parameters": {"type": "object", "properties": {}},
+            "description": "读取全局规则契约（规则形状/触发与条件系统/序列语义/重入/"
+                           "参数存储与 damageType/操作生命周期/注册表扩展）。默认返回节索引，"
+                           "传 section 取单节全文。设计多步骤规则、判断触发时机前先读相关节。",
+            "parameters": {"type": "object",
+                           "properties": {"section": {"type": "string",
+                                                      "description": "可选：只取某一节全文"}}},
         },
     }
 
@@ -225,12 +228,11 @@ def _dispatch(ctx: ToolContext, name: str, args: dict):
             ctx.snapshot, (float(args.get("x", 0)), float(args.get("y", 0))),
             float(args.get("radius", 0)))
     if name == "list_components":
-        return {"components": component_index(ctx.schema)}
+        return component_index(ctx)
     if name == "read_component_doc":
-        return component_doc(ctx.schema, args.get("name", ""))
+        return component_doc(ctx, args.get("name", ""))
     if name == "read_contract_doc":
-        text = schema_mod.contract_docs()
-        return {"doc": text or "error: contract docs not found"}
+        return _contract_doc(ctx, args.get("section"))
     if name == "read_schema_vocab":
         return _schema_vocab(ctx.schema, args.get("section"))
     if name == "search_skills":
@@ -244,37 +246,44 @@ def _dispatch(ctx: ToolContext, name: str, args: dict):
     return {"error": f"unknown tool '{name}'"}
 
 
-def _summary(op_def: dict) -> str:
-    """组件一句话摘要：notes 的第一句；没有 notes 时用第一个参数的描述。"""
-    notes = (op_def.get("notes") or "").strip()
-    for sep in ("；", "。", "; "):
-        if sep in notes:
-            return notes.split(sep, 1)[0].strip() + sep.strip()
-    return notes or "（无摘要，详见文档）"
+def component_index(ctx: "ToolContext") -> dict:
+    """list_components 后端:紧凑索引来自组件库(summary 已是第一句摘要)。"""
+    snap = ability_db.get(ctx.cfg.db_path)
+    if snap is None:
+        return {"error": "component db unavailable; design from schema vocab only"}
+    return {"components": snap.components}
 
 
-def component_index(schema: dict) -> list[dict]:
-    return [
-        {"op": op, "class": defn.get("class"), "summary": _summary(defn)}
-        for op, defn in sorted(schema["componentOps"].items())
-    ]
-
-
-def component_doc(schema: dict, name: str) -> dict:
-    resolved = schema_mod.resolve_op(schema, name)
+def component_doc(ctx: "ToolContext", name: str) -> dict:
+    """read_component_doc 后端:别名/大小写经 schema 解析到 canonical 再查库。"""
+    resolved = schema_mod.resolve_op(ctx.schema, name)
     if resolved is None:
         return {"error": f"unknown component '{name}'; call list_components first"}
-    canonical, op_def = resolved
-    if not op_def.get("doc"):
-        return {"op": canonical,
-                "params": op_def.get("params", []),
-                "notes": op_def.get("notes", ""),
-                "doc": None,
-                "error": "no standalone doc file; the embedded params/notes above are authoritative"}
-    text = schema_mod.read_doc(op_def["doc"])
-    if text is None:
-        return {"op": canonical, "error": f"doc file missing: {op_def['doc']}"}
-    return {"op": canonical, "doc": op_def["doc"], "content": text}
+    canonical, _ = resolved
+    snap = ability_db.get(ctx.cfg.db_path)
+    if snap is None:
+        return {"error": "component db unavailable; design from schema vocab only"}
+    doc = snap.docs.get(canonical)
+    if doc is None:
+        return {"error": f"component '{canonical}' missing from component db"}
+    return doc
+
+
+def _contract_doc(ctx: "ToolContext", section: str | None) -> dict:
+    """read_contract_doc 后端:全局契约节索引/单节全文(总量 5.5k 超背闸,默认只给索引)。"""
+    snap = ability_db.get(ctx.cfg.db_path)
+    if snap is None:
+        return {"error": "component db unavailable"}
+    sections = snap.contract_sections
+    if section:
+        if section in sections:
+            return {"section": section, "content": sections[section]}
+        return {"error": f"unknown section '{section}'; available: {', '.join(sections)}"}
+    return {
+        "sections": [{"section": name, "topic": (text.splitlines()[0] if text else "")[:80]}
+                     for name, text in sections.items()],
+        "note": "call again with section='<name>' for the full text of that section",
+    }
 
 
 def _update_plan(ctx: ToolContext, args: dict) -> dict:
@@ -321,7 +330,7 @@ def _search_skills(ctx: ToolContext, args: dict) -> dict:
         return {"skills": [], "note": "corpus unavailable; design without precedent lookup"}
     limit = args.get("limit") if isinstance(args.get("limit"), int) else 5
     return {"skills": corpus.search_skills(ctx.corpus, args.get("query", ""),
-                                           ctx.schema, limit=max(1, min(limit, 10)))}
+                                           limit=max(1, min(limit, 10)))}
 
 
 def _read_skill(ctx: ToolContext, args: dict) -> dict:

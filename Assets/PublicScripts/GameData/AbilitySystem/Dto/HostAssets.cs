@@ -4,10 +4,9 @@ using UnityEngine;
 namespace AbilitySystem
 {
     /// <summary>
-    /// hostAssets 投影（契约 v2）：请求 payload 的组成部分，也是客户端终检
-    /// （AbilityConfigValidator 边界校验）的数据源——两处共用同一构建器。
-    /// 定义在 GameData 程序集：AbilityConfigValidator（GameData）与
-    /// AgentGenerateRequest（BasicScripts，引用 GameData）都能看到，依赖方向不逆行。
+    /// hostAssets 投影（契约 v2）：请求 payload 的组成部分。
+    /// 定义在 GameData 程序集：AgentGenerateRequest（BasicScripts，引用 GameData）
+    /// 也能看到，依赖方向不逆行。
     /// </summary>
     public class HostAssets
     {

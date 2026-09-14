@@ -1,6 +1,6 @@
 """服务端全量校验引擎——客户端 AbilityConfigValidator（C#）的 Python 镜像。
 
-两份引擎读同一份 ability-ops.json，规则对齐：
+校验规则来自组件库 ability.db（经 schema.load_schema 重建），双端规则同源：
   Error（整技能拒绝）：未知 op、空 rules、规则无 triggers、枚举名非法
     （triggerEvent/reentry/conditionOp/paramValueType——这些在客户端是强类型反
     序列化，非法名会在 Parse 层抛异常，等价于拒绝）。
@@ -21,7 +21,7 @@ import re
 from . import schema as schema_mod
 
 # 客户端 DTO 白名单（AbilityConfigDto / SPConfig / AbilityRuleConfig / StepConfig /
-# ConditionConfig / ConditionUnit / ParamEntry 的字段集，见 docs/ability-steps.md 存储形态）。
+# ConditionConfig / ConditionUnit / ParamEntry 的字段集，存储形态见库 global_docs.stored_shape）。
 # iconKey 不在其中：生成技能统一图标，sanitize 恒剥离（技能卡走 AbilityIconPool null 兜底）。
 DTO_KEYS = ("abilityId", "abilityName", "description", "sp", "rules")
 SP_KEYS = ("totalSp", "initialSp", "chargeNum", "abilityAmount",
@@ -302,7 +302,7 @@ def _sanitize_steps(steps, path: str, ctx: Walk) -> list[dict]:
 def _sanitize_step(step: dict, path: str, ctx: Walk) -> dict:
     resolved = schema_mod.resolve_op(ctx.schema, step.get("op"))
     if resolved is None:
-        ctx.add(True, path, f"unknown op '{step.get('op')}' (not registered in ability-ops.json)")
+        ctx.add(True, path, f"unknown op '{step.get('op')}' (not registered in the op registry)")
         # 保留原步骤（整技能已拒绝，保留仅为诊断）。
         return {k: step.get(k) for k in STEP_KEYS}
 
@@ -528,9 +528,8 @@ def _validate_entry_value(entry: dict, param: dict, canonical: str, path: str, c
 
 
 def _check_blackboard_symmetry(ctx: Walk) -> None:
-    known = set(ctx.schema.get("knownBlackboardKeys", []))
     for key in sorted(ctx.reads):
-        if key in ctx.writes or key in known or key in ctx.fixed_writes:
+        if key in ctx.writes or key in ctx.fixed_writes:
             continue
         ctx.add(False, "blackboard",
                 f"read key '{key}' has no producer in this ability "

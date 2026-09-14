@@ -1,17 +1,15 @@
-"""语料模块测试：op 特征 / 检索排序 / 撞名 warning。"""
+"""语料模块测试：op 特征 / 检索排序 / 撞名 warning / 库数据源访问。"""
 
-import json
 import os
+import shutil
+import sqlite3
+from pathlib import Path
 
 from app import corpus, schema as schema_mod
 from app.validator import validate
 
 SCHEMA = schema_mod.load_schema()
-
-# 最小假 schema：只测 _canonical 的别名归一，不依赖真实组件表
-FAKE_SCHEMA = {"componentOps": {"modify_cost": {"aliases": ["ModifyCost"]},
-                                "apply_damage": {"aliases": []}}}
-
+COMMITTED_DB = Path(__file__).resolve().parents[1] / "data" / "ability.db"
 
 def skill(ability_id, steps, triggers=("OnInitialize",), reentry="IgnoreWhileRunning"):
     return {"abilityId": ability_id, "abilityName": ability_id, "description": "",
@@ -22,35 +20,36 @@ def skill(ability_id, steps, triggers=("OnInitialize",), reentry="IgnoreWhileRun
 def test_skill_ops_recurses_and_excludes_primitives():
     s = skill("s1", [
         {"op": "apply_damage"},
-        {"op": "delay", "steps": [{"op": "branch", "elseSteps": [{"op": "ModifyCost"}]}]},
+        {"op": "delay", "steps": [{"op": "branch", "elseSteps": [{"op": "modify_cost"}]}]},
     ])
-    # elseSteps 深处也计入；原语 delay/branch 排除；legacy 别名 ModifyCost 归一 canonical
-    assert corpus.skill_ops(s, FAKE_SCHEMA) == {"apply_damage", "modify_cost"}
+    # elseSteps 深处也计入；原语 delay/branch 排除
+    assert corpus.skill_ops(s) == {"apply_damage", "modify_cost"}
 
 
-def test_load_corpus_missing_or_invalid_returns_none(tmp_path):
-    assert corpus.load_corpus(str(tmp_path / "nope.json")) is None
-    bad = tmp_path / "bad.json"
-    bad.write_text("{not json", encoding="utf-8")
-    assert corpus.load_corpus(str(bad)) is None
-    empty = tmp_path / "empty.json"
-    empty.write_text(json.dumps({"skills": []}), encoding="utf-8")
-    assert corpus.load_corpus(str(empty)) is None
+def test_get_corpus_missing_or_invalid_returns_none(tmp_path):
+    assert corpus.get_corpus(str(tmp_path / "nope.db")) is None
+    bad = tmp_path / "bad.db"
+    bad.write_text("not a sqlite db", encoding="utf-8")
+    assert corpus.get_corpus(str(bad)) is None
+    assert corpus.get_corpus(None) is None
 
 
 def test_get_corpus_reloads_on_mtime_change(tmp_path):
-    path = tmp_path / "skills.json"
-    path.write_text(json.dumps({"skills": [skill("a", [])]}), encoding="utf-8")
+    path = tmp_path / "ability.db"
+    shutil.copy(COMMITTED_DB, path)
     os.utime(path, (1_000_000_000, 1_000_000_000))
     first = corpus.get_corpus(str(path))
-    assert [s["abilityId"] for s in first["skills"]] == ["a"]
+    n = len(first["skills"])
+    assert n == 48
+    assert first["existingIds"]  # 撞名检查的数据源来自库
 
-    path.write_text(json.dumps({"skills": [skill("a", []), skill("b", [])]}), encoding="utf-8")
+    # 改内容 + 改 mtime → 快照重载（重建库后服务无需重启的同款语义）
+    con = sqlite3.connect(path)
+    con.execute("DELETE FROM skills WHERE ability_id=(SELECT min(ability_id) FROM skills)")
+    con.commit()
+    con.close()
     os.utime(path, (1_000_000_100, 1_000_000_100))
-    assert len(corpus.get_corpus(str(path))["skills"]) == 2  # mtime 变化触发重载
-
-    assert corpus.get_corpus(None) is None
-    assert corpus.get_corpus(str(tmp_path / "nope.json")) is None
+    assert len(corpus.get_corpus(str(path))["skills"]) == n - 1
 
 
 def test_validate_warns_on_id_collision():

@@ -11,16 +11,11 @@ def test_schema_loads_with_expected_counts():
     assert schema_mod.canonical_ops(schema) == set(schema["primitives"]) | set(schema["componentOps"])
 
 
-def test_resolve_primitives_and_aliases():
+def test_resolve_canonical_only():
     schema = schema_mod.load_schema()
     assert schema_mod.resolve_op(schema, "delay")[0] == "delay"
     assert schema_mod.resolve_op(schema, "apply_damage")[0] == "apply_damage"
-    assert schema_mod.resolve_op(schema, "ApplyDamage")[0] == "apply_damage"
     assert schema_mod.resolve_op(schema, "select_targets")[0] == "select_targets"
-    assert schema_mod.resolve_op(schema, "EntitySelector")[0] == "select_targets"
+    assert schema_mod.resolve_op(schema, "ApplyDamage") is None  # 类名别名已退役
+    assert schema_mod.resolve_op(schema, "EntitySelector") is None
     assert schema_mod.resolve_op(schema, "nope") is None
-
-
-def test_contract_docs_available():
-    text = schema_mod.contract_docs()
-    assert "AbilityConfig" in text  # ability-steps.md 或 README 至少加载到了一份
