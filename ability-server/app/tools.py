@@ -6,9 +6,10 @@ read_component_doc/read_contract_doc）的 def 构造与实现后端也在这里
 本模块是 agent 唯一的工具注册表。
 
 工具执行永不抛异常——错误以 {"error": ...} JSON 回喂，让模型自行修正。
-update_plan / validate_draft / submit_skill 会改写 ToolContext 的会话状态：
-plan 用于路由（plan_pending→strong）、draft 是降级交付源、submitted 表示
-关卡通过。
+update_plan 与增量写作五件套（start_draft/design_rules/put_step/drop_step/
+drop_rule）改写 ToolContext 的会话状态：plan 用于路由（plan_pending→strong）、
+working/outline/step_walk 是增量草稿与其校验游标、draft 是降级交付源与免重写
+提交源、submitted 表示关卡通过。
 """
 
 from __future__ import annotations
@@ -26,9 +27,6 @@ FIELD_SEMANTICS = {
     "bulletType": "1=带偏差弹道",
 }
 
-# 工具结果回填体积自限（§4.4）：>4k chars 截断回填（截断标记注明去向），
-# 原文记入 ToolContext.tool_outputs → report.toolOutputs 落盘回放。
-TOOL_RESULT_CHAR_LIMIT = 4096
 
 _PHASE_BY_TOOL = {"update_plan": "plan", "validate_draft": "review", "submit_skill": "submit"}
 
@@ -79,6 +77,10 @@ def read_contract_doc_def() -> dict:
                                                       "description": "可选：只取某一节全文"}}},
         },
     }
+
+
+# 依赖战局快照的工具：无快照的描述模式下从工具表中剔除，模型不会白调死工具。
+SNAPSHOT_TOOLS = ("compute_cross_items", "entity", "entities_at", "deploy_cells_near")
 
 
 def tool_definitions() -> list[dict]:
@@ -156,20 +158,69 @@ def tool_definitions() -> list[dict]:
                            "properties": {"abilityId": {"type": "string"}}, "required": ["abilityId"]},
         }},
         {"type": "function", "function": {
-            "name": "validate_draft",
-            "description": "随手校验一份 AbilityConfig 草案（全量校验+hostAssets 边界），返回完整 issues。"
-                           "submit 前先自检；通过即可直接 submit_skill。",
+            "name": "start_draft",
+            "description": "开始增量构建技能草稿：定 abilityId/名称/描述与 SP。"
+                           "之后 design_rules 立骨架、put_step 逐个转写。不要一次性写整份配置。",
             "parameters": {"type": "object",
-                           "properties": {"config": {"type": "object", "description": "AbilityConfig JSON"}},
-                           "required": ["config"]},
+                           "properties": {
+                               "abilityId": {"type": "string"},
+                               "abilityName": {"type": "string"},
+                               "description": {"type": "string", "description": "技能描述（中文，写明行为与数值）"},
+                               "sp": {"type": "object", "description": "SP 配置（totalSp/initialSp/…）"}},
+                           "required": ["abilityId", "abilityName", "description", "sp"]},
+        }},
+        {"type": "function", "function": {
+            "name": "design_rules",
+            "description": "转 JSON 前的设计骨架（语义层）：一次给出全部规则——触发事件/条件/"
+                           "reentry 与每个 step 的 op+intent。intent 一句话写明该步意图与数据来源"
+                           "（谁产出谁消费，如'收集主目标周围敌人，供后续 apply_damage 读'）。"
+                           "骨架经检查后按位置逐个 put_step 转写完整参数。",
+            "parameters": {"type": "object",
+                           "properties": {"rules": {"type": "array", "items": {"type": "object"},
+                                                    "description": "规则骨架数组：[{triggerEvent, reentry?, "
+                                                                   "condition?(完整 groups), detached?, "
+                                                                   "steps:[{op, intent}]}]"}},
+                           "required": ["rules"]},
+        }},
+        {"type": "function", "function": {
+            "name": "put_step",
+            "description": "按骨架把一个 step 的完整 JSON 写入草稿（op + args.entries，可含 "
+                           "condition/steps/elseSteps 子结构）。每步即时 lint：参数键/类型/词表/"
+                           "钳制与骨架位置对照，有 error 先修再写下一步。index 省略=追加到该规则末尾。",
+            "parameters": {"type": "object",
+                           "properties": {"ruleIndex": {"type": "integer"},
+                                          "step": {"type": "object"},
+                                          "index": {"type": "integer", "description": "可选：插入位置"}},
+                           "required": ["ruleIndex", "step"]},
+        }},
+        {"type": "function", "function": {
+            "name": "drop_step",
+            "description": "从草稿删除一个 step（写错时修正用）。",
+            "parameters": {"type": "object",
+                           "properties": {"ruleIndex": {"type": "integer"}, "index": {"type": "integer"}},
+                           "required": ["ruleIndex", "index"]},
+        }},
+        {"type": "function", "function": {
+            "name": "drop_rule",
+            "description": "从草稿删除整条规则（含其全部 step）。",
+            "parameters": {"type": "object",
+                           "properties": {"index": {"type": "integer"}}, "required": ["index"]},
+        }},
+        {"type": "function", "function": {
+            "name": "validate_draft",
+            "description": "随手校验：无 config 时校验当前增量草稿（start_draft 后的全量检查），"
+                           "传 config 则校验指定配置。返回完整 issues；通过即可直接 submit_skill。",
+            "parameters": {"type": "object",
+                           "properties": {"config": {"type": "object", "description": "AbilityConfig JSON；省略=校验增量草稿"}}},
         }},
         {"type": "function", "function": {
             "name": "submit_skill",
             "description": "唯一交付出口：提交 AbilityConfig 进入交付关卡（全量校验+hostAssets 边界+撞名）。"
+                           "config 可省略——省略时直接交付最近一次 validate_draft 通过的草稿（无需重写一遍）。"
                            "通过即结束；拒绝则按 issues 修复后重新提交。不要以裸文本输出配置 JSON。",
             "parameters": {"type": "object",
-                           "properties": {"config": {"type": "object", "description": "AbilityConfig JSON"}},
-                           "required": ["config"]},
+                           "properties": {"config": {"type": "object",
+                                                     "description": "AbilityConfig JSON；省略=提交已过闸草稿"}}},
         }},
     ]
 
@@ -192,21 +243,21 @@ class ToolContext:
         self.plan_updates = 0
         self.draft: dict | None = None      # 最近一次 validate_draft ok 的 sanitized 草稿
         self.submitted: dict | None = None  # submit_skill 通过时的 sanitized 配置
-        self.tool_outputs: list[dict] = []  # 被截断工具结果的全文（报告落盘回放用）
+
+        # 增量写作状态：working=渐进构建的配置；outline=design_rules 的骨架
+        # （每规则的 op 序列，put_step 对照）；step_walk=跨 put_step 持久的
+        # 校验游标（黑板读写/列表键累积，撑起"到目前为止"的渐进反馈）。
+        self.working: dict | None = None
+        self.outline: list[list[str]] | None = None
+        self.step_walk: validator.Walk | None = None
 
 
 def execute_tool(ctx: ToolContext, name: str, arguments: dict) -> str:
-    """执行工具并回填 JSON 字符串（错误不抛，回喂模型；超限截断保预算，§4.4）。"""
+    """执行工具并回填完整 JSON 字符串；错误不抛，回喂模型。"""
     try:
-        text = json.dumps(_dispatch(ctx, name, arguments), ensure_ascii=False)
+        return json.dumps(_dispatch(ctx, name, arguments), ensure_ascii=False)
     except Exception as exc:  # noqa: BLE001 —— 工具层永不抛
         return json.dumps({"error": f"{type(exc).__name__}: {exc}"}, ensure_ascii=False)
-    if len(text) <= TOOL_RESULT_CHAR_LIMIT:
-        return text
-    ctx.tool_outputs.append({"tool": name, "chars": len(text), "full": text})
-    return text[:TOOL_RESULT_CHAR_LIMIT] + (
-        f"...[truncated {len(text)}->{TOOL_RESULT_CHAR_LIMIT} chars; "
-        f"full text in report.toolOutputs[{len(ctx.tool_outputs) - 1}]]")
 
 
 def _dispatch(ctx: ToolContext, name: str, args: dict):
@@ -239,6 +290,16 @@ def _dispatch(ctx: ToolContext, name: str, args: dict):
         return _search_skills(ctx, args)
     if name == "read_skill":
         return _read_skill(ctx, args)
+    if name == "start_draft":
+        return _start_draft(ctx, args)
+    if name == "design_rules":
+        return _design_rules(ctx, args)
+    if name == "put_step":
+        return _put_step(ctx, args)
+    if name == "drop_step":
+        return _drop_step(ctx, args)
+    if name == "drop_rule":
+        return _drop_rule(ctx, args)
     if name == "validate_draft":
         return _validate(ctx, args.get("config"), submit=False)
     if name == "submit_skill":
@@ -270,7 +331,7 @@ def component_doc(ctx: "ToolContext", name: str) -> dict:
 
 
 def _contract_doc(ctx: "ToolContext", section: str | None) -> dict:
-    """read_contract_doc 后端:全局契约节索引/单节全文(总量 5.5k 超背闸,默认只给索引)。"""
+    """read_contract_doc 后端:全局契约节索引/单节全文(全文 5.5k,默认只给索引控制单次回喂体积)。"""
     snap = ability_db.get(ctx.cfg.db_path)
     if snap is None:
         return {"error": "component db unavailable"}
@@ -286,6 +347,193 @@ def _contract_doc(ctx: "ToolContext", section: str | None) -> dict:
     }
 
 
+# ---------- 增量写作后端（复用 validator 的单元级 sanitize/lint，全量闸仍属 validate/submit） ----------
+
+def _err(path: str, message: str) -> dict:
+    return {"severity": "error", "path": path, "message": message}
+
+
+def _draft_summary(ctx: ToolContext) -> str:
+    rules = ctx.working["rules"]
+    return f"{len(rules)} rules / {sum(len(r['steps']) for r in rules)} steps"
+
+
+def _start_draft(ctx: ToolContext, args: dict) -> dict:
+    ability_id = args.get("abilityId")
+    if not isinstance(ability_id, str) or not ability_id.strip():
+        return {"error": "abilityId is required"}
+    walk = validator.Walk(ctx.schema, ctx.host_assets or None)
+    sp = args.get("sp")
+    sp_out = validator._sanitize_sp(sp, walk) if isinstance(sp, dict) else None
+    issues = list(walk.issues)
+    if sp_out is None:
+        issues.insert(0, _err("sp", "sp is not an object"))
+    discarded = sum(len(r["steps"]) for r in ctx.working["rules"]) if ctx.working else 0
+    ctx.working = {"abilityId": ability_id.strip(),
+                   "abilityName": str(args.get("abilityName") or ""),
+                   "description": str(args.get("description") or ""),
+                   "sp": sp_out, "rules": []}
+    ctx.outline = None
+    ctx.step_walk = validator.Walk(ctx.schema, ctx.host_assets or None)
+    note = f"draft ready ({_draft_summary(ctx)}); call design_rules next"
+    if discarded:
+        note += f" [restart: discarded previous draft with {discarded} steps]"
+    return {"ok": sp_out is not None and not any(i["severity"] == "error" for i in issues),
+            "sp": sp_out, "issues": issues, "note": note}
+
+
+def _design_rules(ctx: ToolContext, args: dict) -> dict:
+    if ctx.working is None:
+        return {"error": "call start_draft first"}
+    rules_in = args.get("rules")
+    if not isinstance(rules_in, list) or not rules_in:
+        return {"error": "rules must be a non-empty array of rule outlines"}
+    events = set(ctx.schema.get("triggerEvents", []))
+    reentries = set(ctx.schema.get("ruleReentry", []))
+    issues: list[dict] = []
+    shells: list[dict] = []
+    outline: list[list[str]] = []
+    echo: list[dict] = []
+    discarded = sum(len(r["steps"]) for r in ctx.working["rules"])
+    walk_before = len(ctx.step_walk.issues)  # 条件组 sanitize 的 issues 落在游标里，循环后并回
+    for i, rule in enumerate(rules_in):
+        path = f"rules[{i}]"
+        if not isinstance(rule, dict):
+            issues.append(_err(path, "rule outline is not an object"))
+            # 占位补齐 shell/outline，保持 put_step 的 ruleIndex 与回显编号对齐。
+            shells.append({"triggers": [], "reentry": "IgnoreWhileRunning",
+                           "detached": False, "steps": []})
+            outline.append([])
+            continue
+        ev = rule.get("triggerEvent")
+        ev_list = [ev] if isinstance(ev, str) else ev
+        if not isinstance(ev_list, list) or not ev_list:
+            issues.append(_err(f"{path}.triggerEvent", "triggerEvent (string or array) is required"))
+            ev_list = []
+        triggers = []
+        for e in ev_list:
+            if e not in events:
+                issues.append(_err(f"{path}.triggerEvent",
+                                   f"unknown TriggerEvent '{e}'; expected one of {sorted(events)}"))
+            triggers.append({"triggerEvent": e, "groups": []})
+        reentry = rule.get("reentry", "IgnoreWhileRunning")
+        if reentry not in reentries:
+            issues.append(_err(f"{path}.reentry",
+                               f"unknown reentry '{reentry}'; expected one of {sorted(reentries)}"))
+        ctx.step_walk.current_rule_events = [e for e in ev_list if isinstance(e, str)]
+        condition = rule.get("condition")
+        if condition:  # 触发条件跟首条 trigger 的 groups（单触发为主；多触发共用同条件）
+            triggers[0]["groups"] = validator._sanitize_groups(
+                condition, f"{path}.condition", ctx.step_walk) if triggers else []
+        step_ops: list[str] = []
+        steps_echo = []
+        for j, s in enumerate(rule.get("steps") or []):
+            spath = f"{path}.steps[{j}]"
+            if not isinstance(s, dict):
+                issues.append(_err(spath, "step outline is not an object"))
+                step_ops.append("?")
+                continue
+            op = s.get("op")
+            if schema_mod.resolve_op(ctx.schema, op) is None:
+                issues.append(_err(spath, f"unknown op '{op}' (not registered in the op registry)"))
+            step_ops.append(str(op))
+            intent = str(s.get("intent") or "").strip()
+            if not intent:
+                issues.append({"severity": "warning", "path": spath,
+                               "message": "outline step has no intent; state what this step does "
+                                          "and where its data comes from"})
+            steps_echo.append({"pos": j, "op": op, "intent": intent})
+        if not step_ops:
+            issues.append(_err(path, "rule outline has no steps; it would never do anything"))
+        shells.append({"triggers": triggers, "reentry": reentry,
+                       "detached": bool(rule.get("detached", False)), "steps": []})
+        outline.append(step_ops)
+        echo.append({"rule": i, "triggerEvent": ev_list, "reentry": reentry, "steps": steps_echo})
+    issues.extend(ctx.step_walk.issues[walk_before:])
+    ctx.working["rules"] = shells
+    ctx.outline = outline
+    out = {"ok": not any(i["severity"] == "error" for i in issues),
+           "issues": issues, "outline": echo, "draft": _draft_summary(ctx),
+           "next": "put_step(ruleIndex, step) following the outline positions"}
+    if discarded:
+        out["note"] = f"outline replaced; discarded {discarded} previously written steps"
+    return out
+
+
+def _put_step(ctx: ToolContext, args: dict) -> dict:
+    if ctx.working is None:
+        return {"error": "call start_draft first"}
+    rules = ctx.working["rules"]
+    ri = args.get("ruleIndex")
+    if not isinstance(ri, int) or isinstance(ri, bool) or not 0 <= ri < len(rules):
+        return {"error": f"ruleIndex {ri} out of range; draft has {len(rules)} rules "
+                         "(call design_rules first if the skeleton is missing)"}
+    step = args.get("step")
+    if not isinstance(step, dict):
+        return {"error": "step must be an object ({op, args:{entries:[...]}})"}
+    steps = rules[ri]["steps"]
+    index = args.get("index")
+    if index is None:
+        pos = len(steps)
+    elif isinstance(index, int) and not isinstance(index, bool) and 0 <= index <= len(steps):
+        pos = index
+    else:
+        return {"error": f"index {index} out of range; rule {ri} has {len(steps)} steps"}
+    ctx.step_walk.current_rule_events = [t.get("triggerEvent") for t in rules[ri]["triggers"]
+                                         if isinstance(t, dict)]
+    before = len(ctx.step_walk.issues)
+    sanitized = validator._sanitize_step(step, f"rules[{ri}].steps[{pos}]", ctx.step_walk)
+    steps.insert(pos, sanitized)
+    issues = ctx.step_walk.issues[before:]
+    outline_ops = ctx.outline[ri] if ctx.outline and ri < len(ctx.outline) else None
+    if outline_ops:
+        if pos < len(outline_ops) and outline_ops[pos] not in ("?", sanitized["op"]):
+            issues.append({"severity": "warning", "path": f"rules[{ri}].steps[{pos}]",
+                           "message": f"outline expects '{outline_ops[pos]}' at this position; "
+                                      f"got '{sanitized['op']}' — revise the step or deviate knowingly"})
+        elif pos >= len(outline_ops):
+            issues.append({"severity": "warning", "path": f"rules[{ri}].steps[{pos}]",
+                           "message": "beyond the design_rules outline; verify the rule is still as designed"})
+    return {"ok": not any(i["severity"] == "error" for i in issues),
+            "issues": issues,
+            "ruleSteps": [s["op"] for s in steps],
+            "blackboardWritesSoFar": sorted(ctx.step_walk.writes),
+            "draft": _draft_summary(ctx)}
+
+
+def _drop_step(ctx: ToolContext, args: dict) -> dict:
+    return _draft_mutate(ctx, args, per_rule=True)
+
+
+def _drop_rule(ctx: ToolContext, args: dict) -> dict:
+    return _draft_mutate(ctx, args, per_rule=False)
+
+
+def _draft_mutate(ctx: ToolContext, args: dict, per_rule: bool) -> dict:
+    if ctx.working is None:
+        return {"error": "call start_draft first"}
+    rules = ctx.working["rules"]
+    ri = args.get("ruleIndex" if per_rule else "index")
+    if not isinstance(ri, int) or isinstance(ri, bool) or not 0 <= ri < len(rules):
+        return {"error": f"index {ri} out of range; draft has {len(rules)} rules"}
+    if per_rule:
+        index = args.get("index")
+        steps = rules[ri]["steps"]
+        if not isinstance(index, int) or isinstance(index, bool) or not 0 <= index < len(steps):
+            return {"error": f"index {index} out of range; rule {ri} has {len(steps)} steps"}
+        dropped = steps.pop(index)["op"]
+        out = {"ok": True, "dropped": dropped, "ruleSteps": [s["op"] for s in steps]}
+    else:
+        dropped_rule = rules.pop(ri)
+        out = {"ok": True, "dropped": f"rule {ri} ({len(dropped_rule['steps'])} steps)"}
+        if ctx.outline and ri < len(ctx.outline):
+            ctx.outline.pop(ri)
+    out["draft"] = _draft_summary(ctx)
+    out["note"] = ("blackboard accumulation keeps dropped keys; the full validate/submit "
+                   "gate re-checks everything from scratch and is authoritative")
+    return out
+
+
 def _update_plan(ctx: ToolContext, args: dict) -> dict:
     limit = ctx.cfg.agent_max_plan_updates
     if ctx.plan_updates >= limit:
@@ -299,8 +547,8 @@ def _update_plan(ctx: ToolContext, args: dict) -> dict:
     return {"ok": True, "note": "plan recorded; proceed with research and design"}
 
 
-# 体积大的词表节不随默认返回（§4.4 长文档分段）：read_schema_vocab 默认只给轻节，
-# 重节用 section 参数单独取——避免 4k 截断背闸把词表 JSON 切坏。
+# 体积大的词表节不随默认返回：read_schema_vocab 默认只给轻节，重节用 section
+# 参数单独取——整份 eventContext 无谓占用上下文。
 _HEAVY_VOCAB_SECTIONS = ("eventContext",)
 
 
@@ -309,6 +557,9 @@ def _schema_vocab(schema: dict, section: str | None = None) -> dict:
         "triggerEvents": schema.get("triggerEvents"),
         "conditionOps": schema.get("conditionOps"),
         "ruleReentry": schema.get("ruleReentry"),
+        "spRecoverModes": schema.get("spRecoverModes"),
+        "spConsumeModes": schema.get("spConsumeModes"),
+        "abilityOpenModes": schema.get("abilityOpenModes"),
         "paramValueTypeEncoding": schema.get("paramValueTypeEncoding"),
         "clamps": schema.get("clamps"),
         "eventContext": schema.get("eventContext"),
@@ -344,7 +595,22 @@ def _read_skill(ctx: ToolContext, args: dict) -> dict:
 
 
 def _validate(ctx: ToolContext, config, submit: bool) -> dict:
-    """submit_skill 与 validate_draft 共用同一关卡：全量校验 + hostAssets 边界 + 撞名。"""
+    """submit_skill 与 validate_draft 共用同一关卡：全量校验 + hostAssets 边界 + 撞名。
+    config 省略时：validate_draft 校验当前增量草稿；submit 交付已过闸草稿
+    （免重写；同一关卡再验一次，幂等）。"""
+    if config is None:
+        if submit:
+            if ctx.draft is None:
+                return {"accepted": False, "issues": [
+                    {"severity": "error", "path": "config",
+                     "message": "no validated draft to submit; call validate_draft first"}]}
+            config = ctx.draft
+        else:
+            config = ctx.working
+            if config is None:
+                return {"ok": False, "issues": [
+                    _err("config", "nothing to validate: no incremental draft "
+                                   "(call start_draft first) and no config given")]}
     if not isinstance(config, dict):
         return {"accepted" if submit else "ok": False, "issues": [
             {"severity": "error", "path": "config", "message": "config is not an object"}]}

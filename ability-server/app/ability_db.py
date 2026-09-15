@@ -19,7 +19,7 @@ class Snapshot:
     """一次库读取的全量快照(纯数据,连接即关)。"""
 
     def __init__(self, con: sqlite3.Connection):
-        self.components = [  # list_components 紧凑索引(op/一句话摘要;不带 class,尺寸回 4k 线下)
+        self.components = [  # list_components 紧凑索引(op/一句话摘要,索引保持轻量)
             {"op": r["op"], "summary": r["summary"]}
             for r in con.execute(
                 "SELECT op, summary FROM ops WHERE kind='component' ORDER BY op")
@@ -30,13 +30,15 @@ class Snapshot:
                 " FROM ops ORDER BY op"):
             params = []
             for p in con.execute(
-                    "SELECT key, type, default_value, allowed_values, bb_role, desc"
+                    "SELECT key, type, value_shape, default_value, allowed_values, bb_role, desc"
                     " FROM op_params WHERE op=? ORDER BY rowid", (r["op"],)):
                 entry = {"key": p["key"], "type": p["type"],
                          "default": json.loads(p["default_value"]),
                          "values": json.loads(p["allowed_values"]) if p["allowed_values"] is not None else None}
                 if p["bb_role"] is not None:
                     entry["bbRole"] = p["bb_role"]
+                if p["value_shape"] == "csv":
+                    entry["shape"] = "csv"
                 entry["desc"] = p["desc"]
                 params.append(entry)
             self.docs[r["op"]] = {
@@ -65,13 +67,15 @@ class Snapshot:
         def contract_params(op: str) -> list[dict]:
             out = []
             for p in con.execute(
-                    "SELECT key, type, default_value, allowed_values, bb_role, desc"
+                    "SELECT key, type, value_shape, default_value, allowed_values, bb_role, desc"
                     " FROM op_params WHERE op=? ORDER BY rowid", (op,)):
                 entry = {"key": p["key"], "type": p["type"],
                          "default": json.loads(p["default_value"])}
                 if p["allowed_values"] is not None:
                     entry["values"] = json.loads(p["allowed_values"])
                 entry["bbRole"] = p["bb_role"]
+                if p["value_shape"] == "csv":
+                    entry["shape"] = "csv"
                 entry["desc"] = p["desc"]
                 out.append(entry)
             return out
@@ -85,13 +89,8 @@ class Snapshot:
             od["params"] = contract_params(r["op"])
             primitives[r["op"]] = od
         components: dict[str, dict] = {}
-        for r in con.execute(
-                "SELECT op, fixed_writes FROM ops WHERE kind='component' ORDER BY rowid"):
-            od = {}
-            if r["fixed_writes"] is not None:
-                od["fixedWrites"] = json.loads(r["fixed_writes"])
-            od["params"] = contract_params(r["op"])
-            components[r["op"]] = od
+        for r in con.execute("SELECT op FROM ops WHERE kind='component' ORDER BY rowid"):
+            components[r["op"]] = {"params": contract_params(r["op"])}
 
         def vocab(name: str) -> list:
             return json.loads(con.execute(
@@ -102,6 +101,9 @@ class Snapshot:
             "triggerEvents": vocab("triggerEvents"),
             "conditionOps": vocab("conditionOps"),
             "ruleReentry": vocab("ruleReentry"),
+            "spRecoverModes": vocab("spRecoverModes"),
+            "spConsumeModes": vocab("spConsumeModes"),
+            "abilityOpenModes": vocab("abilityOpenModes"),
             "paramValueTypeEncoding": {r["type"]: r["encoding"] for r in con.execute(
                 "SELECT type, encoding FROM value_type_encodings ORDER BY rowid")},
             "primitives": primitives,

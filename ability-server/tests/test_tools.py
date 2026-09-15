@@ -113,6 +113,79 @@ def test_non_object_config_rejected():
     assert out["accepted"] is False
 
 
+def test_submit_skill_without_config_delivers_validated_draft():
+    """免重写交付：无草稿拒绝；有草稿直接提交且不污染草稿位。"""
+    ctx = make_ctx()
+    out = call(ctx, "submit_skill", {})
+    assert out["accepted"] is False
+    assert "validate_draft" in out["issues"][0]["message"]
+
+    assert call(ctx, "validate_draft", {"config": valid_config()})["ok"] is True
+    out = call(ctx, "submit_skill", {})
+    assert out["accepted"] is True
+    assert ctx.submitted["abilityId"] == "gen_t"
+    assert ctx.draft is not None  # 草稿位不动（与带 config 提交同语义）
+
+
+# ---------- 增量写作（start_draft/design_rules/put_step → validate → submit） ----------
+
+def test_incremental_draft_full_flow():
+    """骨架立规则 → 逐步转写 → 全量校验 → 免重写提交，一条龙走通。"""
+    ctx = make_ctx()
+    out = call(ctx, "start_draft", {"abilityId": "gen_inc", "abilityName": "增量",
+                                    "description": "d", "sp": {"totalSp": 33}})
+    assert out["ok"] is True and ctx.working["rules"] == []
+
+    out = call(ctx, "design_rules", {"rules": [
+        {"triggerEvent": "OnInitialize", "steps": [
+            {"op": "modify_cost", "intent": "部署即回费"}]},
+        {"triggerEvent": "OnTick", "steps": [{"op": "apply_damage", "intent": ""}]},
+    ]})
+    assert out["ok"] is True  # 空 intent 是 warning，不阻断
+    assert any(i["severity"] == "warning" and "no intent" in i["message"]
+               for i in out["issues"])
+    assert len(ctx.working["rules"]) == 2
+
+    out = call(ctx, "put_step", {"ruleIndex": 0, "step": {
+        "op": "modify_cost", "args": {"entries": [{"key": "amount", "value": "5",
+                                                   "type": "Int", "fromBlackboard": False}]}}})
+    assert out["ok"] is True and out["ruleSteps"] == ["modify_cost"]
+
+    # 骨架位置对照：rule1 骨架位是 make_boom，写 modify_cost 记 warning
+    out = call(ctx, "put_step", {"ruleIndex": 1, "step": {
+        "op": "modify_cost", "args": {"entries": []}}})
+    assert any("outline expects" in i["message"] for i in out["issues"])
+
+    out = call(ctx, "validate_draft", {})
+    assert out["ok"] is True, out["issues"]
+    assert ctx.draft["abilityId"] == "gen_inc"
+
+    out = call(ctx, "submit_skill", {})
+    assert out["accepted"] is True
+    assert ctx.submitted["abilityId"] == "gen_inc"
+
+
+def test_incremental_draft_guards():
+    """越界/未开工/未立骨架全部 error 回喂；drop_step/drop_rule 修正可用。"""
+    ctx = make_ctx()
+    assert "error" in call(ctx, "put_step", {"ruleIndex": 0, "step": {"op": "delay"}})
+    call(ctx, "start_draft", {"abilityId": "g", "abilityName": "n", "description": "d",
+                              "sp": {"totalSp": 1}})
+    assert "error" in call(ctx, "put_step", {"ruleIndex": 0, "step": {"op": "delay"}})
+    call(ctx, "design_rules", {"rules": [
+        {"triggerEvent": "OnInitialize", "steps": [{"op": "modify_cost", "intent": "x"}]}]})
+    assert "error" in call(ctx, "put_step", {"ruleIndex": 3, "step": {"op": "delay"}})
+    out = call(ctx, "put_step", {"ruleIndex": 0, "step": {
+        "op": "modify_cost", "args": {"entries": [{"key": "amount", "value": "5",
+                                                   "type": "Int", "fromBlackboard": False}]}}})
+    assert out["ok"] is True
+    assert "error" in call(ctx, "put_step", {"ruleIndex": 0, "index": 5,
+                                             "step": {"op": "delay"}})
+    out = call(ctx, "drop_step", {"ruleIndex": 0, "index": 0})
+    assert out["ok"] is True and out["ruleSteps"] == []
+    assert "error" in call(ctx, "drop_rule", {"index": 2})
+
+
 # ---------- 数据源工具 ----------
 
 def test_entity_and_entities_at():
@@ -146,12 +219,20 @@ def test_read_schema_vocab_sections():
     ctx = make_ctx()
     out = call(ctx, "read_schema_vocab", {})
     assert out["triggerEvents"] and out["conditionOps"] and out["ruleReentry"]
+    assert out["spRecoverModes"] == [
+        "Natural", "OnAttackSuccessfully", "OnAfterHurt", "Other"]
+    assert out["spConsumeModes"] == [
+        "Natural", "OnAttackSuccessfully", "OnAfterHurt", "Instant", "Other", "NoConsume"]
+    assert out["abilityOpenModes"] == [
+        "Auto", "OnAttackAnimBegin", "OnBeforeHurt", "Manual", "Other", "OnDeadlyHurt"]
     assert out["paramValueTypeEncoding"] and out["clamps"]
     assert out["entityContext"]  # M2 语义词表随 schema 出（轻节默认返回）
-    assert "eventContext" not in out  # 重节分段按需取（§4.4 体积自限，防 4k 背闸切坏 JSON）
+    assert "eventContext" not in out  # 重节分段按需取（体积自限，eventContext 不随默认返回）
     assert "eventContext" in out["note"]
     heavy = call(ctx, "read_schema_vocab", {"section": "eventContext"})
     assert "isdeadly" in heavy["eventContext"]["OnAfterAttack"]
+    assert call(ctx, "read_schema_vocab", {"section": "spRecoverModes"}) == {
+        "spRecoverModes": ["Natural", "OnAttackSuccessfully", "OnAfterHurt", "Other"]}
     assert "currenthprate" in out["entityContext"]
     assert "1=友军 2=敌人" in out["fieldSemantics"]["camp"]
     assert "0=先锋" in out["fieldSemantics"]["job"]
@@ -165,7 +246,7 @@ def test_tool_errors_never_raise():
     assert "error" in call(ctx, "compute_cross_items", None)
 
 
-# ---------- 文档工具后端（真实组件库 data/ability.db；>4k 由工具层截断） ----------
+# ---------- 文档工具后端（真实组件库 data/ability.db） ----------
 
 def make_db_ctx() -> tools.ToolContext:
     """默认 db_path 指向真实组件库，用于文档工具测试。"""
@@ -180,7 +261,7 @@ def test_list_components_returns_full_index():
     assert len(components) == 35
     entry = next(c for c in components if c["op"] == "apply_damage")
     assert entry["summary"]
-    assert "class" not in entry  # 索引只留 op/摘要（尺寸回 4k 线下）
+    assert "class" not in entry  # 索引只留 op/摘要（保持轻量）
 
 
 def test_read_component_doc_by_op_and_alias():

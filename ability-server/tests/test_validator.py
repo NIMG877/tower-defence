@@ -50,31 +50,49 @@ def test_unknown_op_rejects_whole_ability():
     assert sanitized["rules"][0]["steps"][0]["op"] == "make_big_explosion"
 
 
-def test_array_param_type_label_coerced_to_schema_type():
-    """LLM 把数组参数标成标量 type（实测样例）：值按 schema 验证后强制对齐标签。"""
+def test_array_param_type_label_normalized_to_client_vocabulary():
+    """数组参数的 label 与参数类型同词表（ParamValueType）：数组值客户端按 CSV
+    自解析，label 记元素标量类型——写 "stringArray" 这类自造名会让客户端枚举
+    反序列化失败（实测事故）。词表等效（含大小写）静默归一。"""
     dto = {
         "abilityId": "gen_t", "abilityName": "n", "description": "d",
         "rules": [{"triggers": [{"triggerEvent": "OnInitialize", "groups": []}],
                    "steps": [{"op": "apply_buff",
                               "args": {"entries": [
-                                  {"key": "attributes", "value": "Attack", "type": "String",
+                                  {"key": "attributes", "value": "Attack", "type": "Bool",
                                    "fromBlackboard": False},
                                   {"key": "ops", "value": "AddPercent", "type": "String",
                                    "fromBlackboard": False},
                                   {"key": "magnitudes", "value": "0.25", "type": "Float",
                                    "fromBlackboard": False},
-                                  {"key": "buffTime", "value": "10", "type": "Float",
+                                  {"key": "buffTime", "value": "10", "type": "float",
                                    "fromBlackboard": False},
                               ]}}]}],
     }
     ok, issues, sanitized = validate(dto, SCHEMA)
     assert ok, "\n".join(messages(issues))
     entries = {e["key"]: e for e in sanitized["rules"][0]["steps"][0]["args"]["entries"]}
-    assert entries["attributes"]["type"] == "stringArray"
-    assert entries["ops"]["type"] == "stringArray"
-    assert entries["magnitudes"]["type"] == "floatArray"
-    assert entries["buffTime"]["type"] == "float"  # 仅大小写差异：静默归一
-    assert len([i for i in issues if "coerced" in i["message"]]) == 3
+    assert entries["attributes"]["type"] == "String"  # Bool → 归一（真错，记 warning）
+    assert entries["ops"]["type"] == "String"         # 词表等效：静默
+    assert entries["magnitudes"]["type"] == "Float"   # 词表等效：静默
+    assert entries["buffTime"]["type"] == "Float"     # 仅大小写差异：静默归一
+    assert len([i for i in issues if "normalized" in i["message"]]) == 1
+    assert all(i["type"] != "stringArray" for i in entries.values())
+
+
+def test_any_param_label_outside_client_vocabulary_warns():
+    """any 参数的 label 不覆写，但越 ParamValueType 词表记 warning——否则客户端
+    枚举解析失败、整份注入失败。"""
+    dto = valid_dto()
+    dto["rules"][0]["steps"] = [
+        {"op": "write_blackboard", "args": {"entries": [
+            {"key": "value", "value": "42", "type": "integer",
+             "fromBlackboard": False}]}}]
+    ok, issues, sanitized = validate(dto, SCHEMA)
+    assert ok  # warning 不拒绝
+    entry = sanitized["rules"][0]["steps"][0]["args"]["entries"][0]
+    assert entry["type"] == "integer"  # any 不覆写
+    assert any("outside the ParamValueType vocabulary" in i["message"] for i in issues)
 
 
 def test_empty_rules_and_triggers_are_errors():

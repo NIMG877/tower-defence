@@ -37,10 +37,9 @@ def make_request(**overrides) -> dict:
 
 def tiered_cfg(**overrides) -> Config:
     # 循环测试默认 llm_mock=False（直接 patch llm.chat_tools）；mock 路径测试显式传 True。
-    # weak 钉 None：摘要兜底不被无关用例触发，digest 测试显式开。
     base = dict(log_dir=None, db_path=None, llm_mock=False,
                 llm_model="base-model", llm_model_strong="strong-model",
-                llm_model_mid="mid-model", llm_model_weak=None)
+                llm_model_mid="mid-model")
     base.update(overrides)
     return Config(**base)
 
@@ -76,6 +75,21 @@ def test_route_model_two_state_machine():
     assert agent.route_model(agent.STATE_ACT, plain) == plain.llm_model
 
 
+def test_route_effort_three_tiers():
+    """思考强度按轮分档：规划轮 max → 研究与设计 high → 草稿过闸后 low。"""
+    from app import tools
+    cfg = tiered_cfg()
+    ctx = tools.ToolContext(make_request(), cfg, SCHEMA, None)
+    assert agent.route_effort(agent.STATE_PLAN_PENDING, ctx, cfg) == "max"
+    assert agent.route_effort(agent.STATE_ACT, ctx, cfg) == "high"
+    ctx.draft = {"abilityId": "d"}
+    assert agent.route_effort(agent.STATE_ACT, ctx, cfg) == "low"
+    # 档位配置为 None → 不传 reasoning_effort，走 API 默认
+    plain = tiered_cfg(llm_effort_act=None)
+    ctx.draft = None
+    assert agent.route_effort(agent.STATE_ACT, ctx, plain) is None
+
+
 # ---------- 握手 ----------
 
 def test_protocol_version_drift_rejected():
@@ -101,7 +115,7 @@ def test_ok_path_plan_research_submit(monkeypatch):
     models_seen = []
     threads = []
 
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
         models_seen.append(model)
         threads.append(json.dumps(messages, ensure_ascii=False))
         if len(models_seen) == 1:
@@ -130,7 +144,7 @@ def test_plan_enforced_before_research(monkeypatch):
     """第一轮跳过计划直接调研究工具 → 回喂 PLAN_REQUIRED，补交计划后才继续。"""
     state = {"n": 0}
 
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
         state["n"] += 1
         if state["n"] == 1:  # 违规：没出计划就调研究工具
             return tool_call("c1", "list_components", {})
@@ -151,7 +165,7 @@ def test_bare_text_output_nudged_not_parsed(monkeypatch):
     """裸文本不解析交付，回喂引导 submit_skill。"""
     state = {"n": 0}
 
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
         state["n"] += 1
         if state["n"] == 1:
             return tool_call("c1", "update_plan", {"plan": "计划"})
@@ -173,7 +187,7 @@ def test_submit_rejection_continues_loop(monkeypatch):
     """submit 被关卡拒绝 → issues 回喂，修复后重新提交。"""
     state = {"n": 0}
 
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
         state["n"] += 1
         if state["n"] == 1:
             return tool_call("c1", "update_plan", {"plan": "计划"})
@@ -194,7 +208,7 @@ def test_submit_rejection_continues_loop(monkeypatch):
 def test_self_check_reminder_every_five_rounds(monkeypatch):
     state = {"n": 0}
 
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
         state["n"] += 1
         if state["n"] == 1:
             return tool_call("c1", "update_plan", {"plan": "计划"})
@@ -212,7 +226,7 @@ def test_self_check_reminder_every_five_rounds(monkeypatch):
 
 
 def test_plan_update_limit_stops_spam(monkeypatch):
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
         n = sum(1 for m in messages if m.get("role") == "assistant") + 1  # 1-based 轮次
         if n <= 2:  # 连续两轮提交计划（第二次应被限额拒绝）
             return tool_call(f"c{n}", "update_plan", {"plan": f"计划 v{n}"})
@@ -226,7 +240,7 @@ def test_plan_update_limit_stops_spam(monkeypatch):
 
 
 def test_max_rounds_exhausted_rejected(monkeypatch):
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
         return tool_call("loop", "read_component_doc", {"name": "delay"})
 
     monkeypatch.setattr(llm, "chat_tools", fake_chat_tools)
@@ -240,7 +254,7 @@ def test_max_rounds_exhausted_rejected(monkeypatch):
 def test_llm_error_keeps_loop_alive(monkeypatch):
     calls = {"n": 0}
 
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
         calls["n"] += 1
         if calls["n"] == 1:
             raise llm.LlmError("network down")
@@ -254,6 +268,117 @@ def test_llm_error_keeps_loop_alive(monkeypatch):
     assert calls["n"] == 3
     phases = [p for p in response["report"]["phases"] if "llm error" in p["detail"]]
     assert phases  # 错误经 phase 可见（Unity 日志滚动）
+
+
+# ---------- 描述模式（无战局快照，CLI 测试入口） ----------
+
+def description_request(**overrides) -> dict:
+    request = {
+        "protocolVersion": SCHEMA["protocolVersion"],
+        "opList": sorted(schema_mod.canonical_ops(SCHEMA)),
+        "description": "部署时立刻对全场敌人造成 500 点真实伤害",
+        "constraints": {"request": "只做一次伤害"},
+    }
+    request.update(overrides)
+    return request
+
+
+def test_description_mode_ok_without_snapshot(monkeypatch):
+    """无快照有描述：免 digest 进循环；首条消息带 designBrief、系统提示带描述模式附注。"""
+    threads = []
+
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
+        threads.append(list(messages))
+        if len(threads) == 1:
+            return tool_call("d1", "update_plan", {"plan": "1. 读文档 2. 直接伤害"})
+        return tool_call("d2", "submit_skill", {"config": submit_config()})
+
+    monkeypatch.setattr(llm, "chat_tools", fake_chat_tools)
+    response = agent.run(description_request(), tiered_cfg(), SCHEMA)
+    assert response["status"] == "ok", response["report"]
+    system_text, first_user = threads[0][0]["content"], threads[0][1]["content"]
+    assert agent.DESCRIPTION_MODE_NOTE in system_text
+    brief = json.loads(first_user)
+    assert brief["mode"] == "description"
+    assert "500 点真实伤害" in brief["designBrief"]
+    assert brief["constraints"] == {"request": "只做一次伤害"}
+    assert "battleDigest" not in first_user and "hostAssets" not in first_user
+
+
+def test_description_mode_excludes_snapshot_tools(monkeypatch):
+    """描述模式剔除战局类工具；研究/设计/交付工具保留。"""
+    from app import tools as tools_mod
+
+    seen_defs = []
+
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
+        seen_defs.append(tools)
+        return tool_call("d1", "submit_skill", {"config": submit_config()})
+
+    monkeypatch.setattr(llm, "chat_tools", fake_chat_tools)
+    response = agent.run(description_request(), tiered_cfg(), SCHEMA)
+    assert response["status"] == "ok", response["report"]
+    names = {d["function"]["name"] for d in seen_defs[0]}
+    assert not names & set(tools_mod.SNAPSHOT_TOOLS)
+    assert {"update_plan", "list_components", "read_component_doc",
+            "start_draft", "put_step", "validate_draft", "submit_skill"} <= names
+
+
+def test_no_snapshot_no_description_rejected():
+    """快照与描述皆无：保持原闸拒绝（battleSnapshot 路径报错）。"""
+    response = agent.run(description_request(description=""), tiered_cfg(), SCHEMA)
+    assert response["status"] == "rejected"
+    assert response["report"]["issues"][0]["path"] == "battleSnapshot"
+
+
+def test_on_event_streams_thinking_and_tools(monkeypatch):
+    """on_event 富事件：思考原文（含 tokens/耗时）与工具调用/结果按序外发。"""
+    calls = []
+    events = []
+
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
+        calls.append(1)
+        if len(calls) == 1:
+            return {**tool_call("e1", "read_component_doc", {"name": "modify_cost"}),
+                    "reasoning_content": "先读文档再设计。"}
+        return tool_call("e2", "submit_skill", {"config": submit_config()})
+
+    monkeypatch.setattr(llm, "chat_tools", fake_chat_tools)
+    response = agent.run(make_request(), tiered_cfg(), SCHEMA,
+                         on_event=lambda kind, data: events.append((kind, data)))
+    assert response["status"] == "ok", response["report"]
+    assert [k for k, _ in events] == ["thinking", "tool_call", "tool_result",
+                                      "thinking", "tool_call", "tool_result"]
+    thinking, call, result = (events[i][1] for i in range(3))
+    assert thinking["round"] == 1 and thinking["thinking"] == "先读文档再设计。"
+    assert thinking["model"] == "strong-model" and thinking["effort"] == "max"
+    assert {"prompt_tokens", "completion_tokens"} <= set(thinking["tokens"])
+    assert call["name"] == "read_component_doc"
+    assert json.loads(call["arguments"]) == {"name": "modify_cost"}
+    # 事件携带模型可见的结果串（db_path=None 时组件文档工具返回错误串，后端另有测试）
+    assert isinstance(result["result"], str) and result["result"]
+    assert events[3][1]["model"] == "mid-model"  # 计划轮后路由切 mid
+
+
+def test_service_cache_key_includes_description(monkeypatch):
+    """缓存键含 description：不同描述各自生成，相同描述命中缓存。"""
+    from app.service import GenerateService
+
+    calls = {"n": 0}
+
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
+        calls["n"] += 1
+        return tool_call("c1", "submit_skill", {"config": submit_config()})
+
+    monkeypatch.setattr(llm, "chat_tools", fake_chat_tools)
+    service = GenerateService(tiered_cfg())
+    r1 = service.generate(description_request(description="描述A"))
+    r2 = service.generate(description_request(description="描述B"))
+    r3 = service.generate(description_request(description="描述A"))
+    assert calls["n"] == 2
+    assert not r1["report"].get("cached") and not r2["report"].get("cached")
+    assert r3["report"].get("cached") is True
+    assert r3["ability"]["abilityId"] == "gen_a2"
 
 
 # ---------- mock 路径与 service 接线 ----------
@@ -286,7 +411,7 @@ def test_trace_captures_per_call_metrics_and_thread(monkeypatch):
     （含原始工具参数原文）随响应带出。"""
     models_seen = []
 
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
         models_seen.append(model)
         if len(models_seen) == 1:
             return {**tool_call("c1", "update_plan", {"plan": "计划"}),
@@ -301,6 +426,7 @@ def test_trace_captures_per_call_metrics_and_thread(monkeypatch):
     assert [e["round"] for e in trace] == [1, 2]
     # 路由切换发生在计划轮之后：执行 update_plan 的下一轮才进 mid 档
     assert [e["model"] for e in trace] == ["strong-model", "strong-model"]
+    assert [e["effort"] for e in trace] == ["max", "max"]  # 计划态两轮都深想
     assert trace[0]["thinking"] == "先提交计划再研究。"
     for entry in trace:
         assert "durationS" in entry
@@ -318,7 +444,7 @@ def test_thread_preserves_malformed_arguments(monkeypatch):
     """模型发了畸形参数 JSON：循环按 {} 兜底继续，线程里原文留证。"""
     calls = []
 
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
         calls.append(1)
         if len(calls) == 1:
             return tool_call("c1", "update_plan", {"plan": "计划"})
@@ -347,7 +473,7 @@ def test_service_strips_trace_into_log(monkeypatch, tmp_path):
     """service 从客户端响应剥离黑盒，随案例完整落盘。"""
     from app.service import GenerateService
 
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
         if len(messages) == 2:  # 首轮：system + 首条用户消息
             return {**tool_call("c1", "update_plan", {"plan": "计划"}),
                     "reasoning_content": "想法。"}
@@ -384,7 +510,7 @@ def test_breaker_with_validated_draft_degrades(monkeypatch):
     monkeypatch.setattr(agent.time, "sleep", lambda *_: None)  # 退避不真睡
     state = {"n": 0}
 
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
         state["n"] += 1
         if state["n"] == 1:
             return _scripted_plan_and_draft()
@@ -401,7 +527,7 @@ def test_breaker_with_validated_draft_degrades(monkeypatch):
 
 
 def test_rounds_exhausted_degrades_to_last_valid_draft(monkeypatch):
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
         n = sum(1 for m in messages if m.get("role") == "assistant") + 1
         if n == 1:
             return _scripted_plan_and_draft()
@@ -418,7 +544,7 @@ def test_rounds_exhausted_degrades_to_last_valid_draft(monkeypatch):
 
 def test_rounds_exhausted_without_draft_rejected(monkeypatch):
     """无草稿宁 rejected——绝不交付未过校验的配置（§4.4）。"""
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
         n = sum(1 for m in messages if m.get("role") == "assistant") + 1
         return tool_call(f"c{n}", "read_component_doc", {"name": "delay"})
 
@@ -432,7 +558,7 @@ def test_rounds_exhausted_without_draft_rejected(monkeypatch):
 def test_wall_budget_stops_before_first_llm_call(monkeypatch):
     calls = {"n": 0}
 
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
         calls["n"] += 1
         return tool_call("c1", "update_plan", {"plan": "计划"})
 
@@ -444,7 +570,7 @@ def test_wall_budget_stops_before_first_llm_call(monkeypatch):
 
 
 def test_token_budget_degrades_after_validated_draft(monkeypatch):
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
         llm._accumulate({"usage": {"prompt_tokens": 600, "completion_tokens": 0}})
         return _scripted_plan_and_draft()
 
@@ -458,7 +584,7 @@ def test_token_budget_degrades_after_validated_draft(monkeypatch):
 def test_call_timeout_tightened_to_remaining_wall_budget(monkeypatch):
     captured = []
 
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
         captured.append(timeout)
         if len(captured) == 1:
             return tool_call("c1", "update_plan", {"plan": "计划"})
@@ -471,122 +597,12 @@ def test_call_timeout_tightened_to_remaining_wall_budget(monkeypatch):
     assert 90 <= captured[0] <= 95  # min(600, 100 - 已耗~0 - 5)
 
 
-def test_tool_result_truncated_and_full_text_recorded(monkeypatch):
-    """>4k chars 工具结果：截断回填 + 原文入 tool_outputs（报告落盘回放，§4.4）。"""
+def test_tool_result_is_not_truncated(monkeypatch):
+    """工具结果完整回填，不受字符上限或摘要流程影响。"""
     from app import tools
 
     ctx = tools.ToolContext(make_request(), tiered_cfg(), SCHEMA, None)
     big = {"doc": "x" * 10_000}
     monkeypatch.setattr(tools, "_dispatch", lambda c, name, args: big)
     out = tools.execute_tool(ctx, "read_contract_doc", {})
-    assert len(out) < tools.TOOL_RESULT_CHAR_LIMIT + 200
-    assert "truncated" in out
-    assert ctx.tool_outputs[0]["tool"] == "read_contract_doc"
-    assert ctx.tool_outputs[0]["chars"] == len(json.dumps(big, ensure_ascii=False))
-
-
-# ---------- weak 档摘要兜底（M4 §4.4，三档模型实验） ----------
-
-def test_weak_model_digests_oversized_tool_result(monkeypatch):
-    """weak 档配置时：截断背闸触发 → weak 摘要替代盲截断回喂，全文仍入报告。"""
-    from app import tools
-
-    big = {"doc": "x" * 10_000}
-    real_execute = tools.execute_tool
-
-    def fake_execute(ctx, name, args):
-        if name != "read_contract_doc":  # 其余工具走真实现（update_plan/submit 语义不能劫持）
-            return real_execute(ctx, name, args)
-        text = json.dumps(big, ensure_ascii=False)
-        ctx.tool_outputs.append({"tool": name, "chars": len(text), "full": text})
-        return text[:tools.TOOL_RESULT_CHAR_LIMIT] + "...[truncated]"
-
-    chat_calls = []
-
-    def fake_chat(messages, cfg, model=None, timeout=None):
-        chat_calls.append({"model": model, "user_chars": len(messages[1]["content"]),
-                           "timeout": timeout})
-        return '{"doc": "compact"}'
-
-    monkeypatch.setattr(tools, "execute_tool", fake_execute)
-    monkeypatch.setattr(llm, "chat", fake_chat)
-
-    state = {"n": 0}
-
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
-        state["n"] += 1
-        if state["n"] == 1:
-            return tool_call("c1", "update_plan", {"plan": "计划"})
-        if state["n"] == 2:
-            return tool_call("c2", "read_contract_doc", {})
-        return tool_call("c3", "submit_skill", {"config": submit_config()})
-
-    monkeypatch.setattr(llm, "chat_tools", fake_chat_tools)
-    cfg = tiered_cfg(llm_model_weak="weak-model")
-    response = agent.run(make_request(), cfg, SCHEMA)
-
-    assert chat_calls == [{"model": "weak-model", "timeout": 60.0,
-                           "user_chars": len(json.dumps(big, ensure_ascii=False))}]
-    assert response["status"] == "ok", response["report"]
-    phases = [p["detail"] for p in response["report"]["phases"]]
-    assert any("digested via weak-model" in d for d in phases)
-    assert response["report"]["toolOutputs"][0]["chars"] == len(json.dumps(big, ensure_ascii=False))
-
-
-def test_weak_digest_failure_falls_back_to_truncation(monkeypatch):
-    from app import tools
-
-    big = {"doc": "x" * 10_000}
-    real_execute = tools.execute_tool
-
-    def fake_execute(ctx, name, args):
-        if name != "read_contract_doc":
-            return real_execute(ctx, name, args)
-        text = json.dumps(big, ensure_ascii=False)
-        ctx.tool_outputs.append({"tool": name, "chars": len(text), "full": text})
-        return text[:tools.TOOL_RESULT_CHAR_LIMIT] + "...[truncated]"
-
-    monkeypatch.setattr(tools, "execute_tool", fake_execute)
-    monkeypatch.setattr(llm, "chat",
-                        lambda *a, **k: (_ for _ in ()).throw(llm.LlmError("weak down")))
-
-    state = {"n": 0}
-
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
-        state["n"] += 1
-        if state["n"] == 1:
-            return tool_call("c1", "update_plan", {"plan": "计划"})
-        if state["n"] == 2:
-            return tool_call("c2", "read_contract_doc", {})
-        return tool_call("c3", "submit_skill", {"config": submit_config()})
-
-    monkeypatch.setattr(llm, "chat_tools", fake_chat_tools)
-    cfg = tiered_cfg(llm_model_weak="weak-model")
-    response = agent.run(make_request(), cfg, SCHEMA)
-
-    assert response["status"] == "ok", response["report"]
-    phases = [p["detail"] for p in response["report"]["phases"]]
-    assert any("digest failed; truncation fallback" in d for d in phases)
-
-
-def test_weak_none_keeps_blind_truncation(monkeypatch):
-    """weak=None（默认）：截断背闸只盲截断，不发起摘要调用。"""
-    from app import tools
-
-    chat_calls = []
-    monkeypatch.setattr(llm, "chat", lambda *a, **k: chat_calls.append(1))
-
-    state = {"n": 0}
-
-    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None):
-        state["n"] += 1
-        if state["n"] == 1:
-            return tool_call("c1", "update_plan", {"plan": "计划"})
-        if state["n"] == 2:
-            return tool_call("c2", "read_contract_doc", {})
-        return tool_call("c3", "submit_skill", {"config": submit_config()})
-
-    monkeypatch.setattr(llm, "chat_tools", fake_chat_tools)
-    response = agent.run(make_request(), tiered_cfg(), SCHEMA)  # weak=None
-    assert response["status"] == "ok", response["report"]
-    assert chat_calls == []
+    assert out == json.dumps(big, ensure_ascii=False)

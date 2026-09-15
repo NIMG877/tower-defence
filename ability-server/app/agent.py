@@ -5,9 +5,11 @@ plan-agent-framework-v2 §七：跑分达标（§六验收，见 evals/reports/A
 编排（§4.1）：
   握手（opList + protocolVersion 相等断言）
   thread = [system(角色+工作方式+运行时边界), user(digest + hostAssets摘要 + constraints)]
+  描述模式：无快照仅 description 时免 digest 按文字描述设计，战局类工具剔除（CLI 测试入口）
   loop（预算内）:
-    按路由状态选档（plan_pending→strong，其余→mid）调 chat_tools
-    执行工具 → 结果回填（>4k chars 截断，原文入 report.toolOutputs）
+    按路由状态选模型档（plan_pending→strong，其余→mid）与思考档（max/high/low）
+    调 chat_tools
+    执行工具 → 完整结果回填
     submit_skill 通过即结束；裸文本输出 → 回喂引导，不解析交付
   预算耗尽（轮数/墙钟/tokens/熔断）→ 降级：交付最近一次 validate_draft ok 的
   sanitized 草稿（response.degraded=true + report.degradedReason）；无草稿宁 rejected
@@ -71,7 +73,11 @@ SYSTEM = (
     "3. 战局：首条消息已给战局 digest 与宿主资产摘要；明细用 entity(id)/entities_at/"
     "deploy_cells_near，派生指标用 compute_cross_items（那是设计期参考）。\n"
     "4. 先例：search_skills 查相似技能 → read_skill 看完整配置与数值量级。\n"
-    "5. 交付：写好配置先 validate_draft 随手校验，按 issues 修复，然后 submit_skill 提交。"
+    "5. 交付（增量构建，禁止一次性写整份配置）：start_draft 定身份与 SP → "
+    "design_rules 一次立全部规则骨架（触发事件/条件/reentry 与每个 step 的 op+intent，"
+    "intent 写明该步意图与数据来源，谁产出谁消费）→ 按骨架逐个 put_step 写完整参数"
+    "（每步即时反馈，有 error 先修再写下一步；规则多就分多轮，不要赶）→ "
+    "validate_draft 全量自检 → submit_skill 提交（无需修改可不带 config，不要重写）。"
     "submit_skill 是唯一交付出口——不要以裸文本输出配置 JSON，那不会被接受。\n"
     "运行时边界（违反会被关卡拒绝）：\n"
     "- spawn_entity.spawnIndex / fire_bullets.bulletDataIndex 只能引用 hostAssets 实际清单"
@@ -81,6 +87,16 @@ SYSTEM = (
     "- 生成配置不产出 iconKey（统一图标）。\n"
     "设计纪律：机制范围对齐 constraints.request，只实现诉求要求的机制，不附加未要求的"
     "效果（宁简勿滥）；数值量级先查语料先例再定，不凭感觉。\n"
+)
+
+# 描述模式（无战局快照）追加在 SYSTEM 尾部：研究面收窄到文档/契约/语料，
+# 宿主相关引用无从校验，约定占位写法。
+DESCRIPTION_MODE_NOTE = (
+    "本次运行没有战局快照与宿主资产：首条用户消息只有设计描述（designBrief）与约束，"
+    "按描述设计。战局类工具（compute_cross_items/entity/entities_at/deploy_cells_near）"
+    "本次不可用，不要尝试调用。宿主相关引用无从校验：spawn_entity.spawnIndex / "
+    "fire_bullets.bulletDataIndex 取 0 占位并在该步 intent 注明待宿主绑定；"
+    "不要使用 apply_animation_override（动画名域未知）。"
 )
 
 BARE_TEXT_FEEDBACK = (
@@ -101,8 +117,9 @@ LLM_ERROR_FEEDBACK = "上一次模型调用失败：{exc}。从中断处继续�
 class _Reporter:
     """phase 上报：异步任务模式转发给轮询客户端，同时计入 report.phases 供落盘回放。"""
 
-    def __init__(self, on_phase):
+    def __init__(self, on_phase, on_event=None):
         self.on_phase = on_phase
+        self.on_event = on_event
         self.phases: list[dict] = []
         self._start = time.monotonic()
 
@@ -116,6 +133,15 @@ class _Reporter:
             except Exception:  # noqa: BLE001 —— 上报失败不影响生成
                 pass
 
+    def emit(self, kind: str, data: dict) -> None:
+        """富事件外发（思考原文/工具调用与结果）：进程内实时观测用（CLI）。
+        不计入 phases——回放素材已由 trace 覆盖，不双写。"""
+        if self.on_event:
+            try:
+                self.on_event(kind, data)
+            except Exception:  # noqa: BLE001 —— 同 report：观测失败不影响生成
+                pass
+
 
 def route_model(state: str, cfg) -> str | None:
     """两态路由（§4.3）：plan_pending→strong（错误代价高、token 量小）；
@@ -125,6 +151,16 @@ def route_model(state: str, cfg) -> str | None:
     return cfg.llm_model_mid or cfg.llm_model
 
 
+def route_effort(state: str, ctx: "tools.ToolContext", cfg) -> str | None:
+    """思考强度分档（与 route_model 同构）：规划轮深想（max）；研究与设计轮
+    次档（high）；草稿过闸后的修复/提交是对定稿的机械转写，轻档（low）。"""
+    if state == STATE_PLAN_PENDING:
+        return cfg.llm_effort_plan
+    if ctx.draft is not None:
+        return cfg.llm_effort_draft
+    return cfg.llm_effort_act
+
+
 def trace_entry(round_no: int, model: str | None, call_started: float,
                 **extra) -> dict:
     """单条黑盒记录：耗时与调用方上下文共用构造（错误/成功两路径共用）。"""
@@ -132,8 +168,8 @@ def trace_entry(round_no: int, model: str | None, call_started: float,
             "durationS": round(time.monotonic() - call_started, 2), **extra}
 
 
-def run(request: dict, cfg, schema: dict, on_phase=None) -> dict:
-    reporter = _Reporter(on_phase)
+def run(request: dict, cfg, schema: dict, on_phase=None, on_event=None) -> dict:
+    reporter = _Reporter(on_phase, on_event)
     started = time.monotonic()
     # 黑盒回放：trace 记每次模型调用的耗时/分项 tokens/思考原文；thread 记完整
     # 对话线程——原始工具参数随 assistant.tool_calls 原文在列，不另存副本。
@@ -149,8 +185,6 @@ def run(request: dict, cfg, schema: dict, on_phase=None) -> dict:
                   "plan": ctx.plan if ctx else None}
         if tokens is not None:
             report["tokens"] = tokens
-        if ctx is not None and ctx.tool_outputs:
-            report["toolOutputs"] = ctx.tool_outputs
         if degraded_reason is not None:
             report["degradedReason"] = degraded_reason
         response = {"status": status, "ability": ability, "report": report}
@@ -173,20 +207,33 @@ def run(request: dict, cfg, schema: dict, on_phase=None) -> dict:
         return _run_mock(request, cfg, schema, reporter, finish)
 
     usage_start = llm.usage_snapshot()
-    try:
-        digest = battle_digest.build(request.get("battleSnapshot") or {})
-    except ValueError as exc:
-        return finish("rejected", None,
-                      [{"severity": "error", "path": "battleSnapshot", "message": str(exc)}],
-                      0, None)
+    # 描述模式：无快照但带 description——免快照按文字描述设计（CLI 测试入口）。
+    # 有快照走原路径（description 忽略）；两者皆无保持原闸（build 抛 ValueError）。
+    description = (request.get("description") or "").strip()
+    description_mode = not request.get("battleSnapshot") and bool(description)
+    if description_mode:
+        digest = None
+    else:
+        try:
+            digest = battle_digest.build(request.get("battleSnapshot") or {})
+        except ValueError as exc:
+            return finish("rejected", None,
+                          [{"severity": "error", "path": "battleSnapshot", "message": str(exc)}],
+                          0, None)
 
     corpus_data = corpus.get_corpus(cfg.db_path)
     ctx = tools.ToolContext(request, cfg, schema, corpus_data)
     thread = [
-        {"role": "system", "content": SYSTEM},
-        {"role": "user", "content": _first_user(digest, ctx)},
+        {"role": "system",
+         "content": (SYSTEM + DESCRIPTION_MODE_NOTE) if description_mode else SYSTEM},
+        {"role": "user",
+         "content": _description_first_user(description, ctx) if description_mode
+         else _first_user(digest, ctx)},
     ]
     tool_defs = tools.tool_definitions()
+    if description_mode:
+        tool_defs = [d for d in tool_defs
+                     if d["function"]["name"] not in tools.SNAPSHOT_TOOLS]
     state = STATE_PLAN_PENDING
     issues: list[dict] = []
     consecutive_llm_errors = 0
@@ -215,9 +262,10 @@ def run(request: dict, cfg, schema: dict, on_phase=None) -> dict:
         if used_tokens > cfg.agent_max_total_tokens:
             return degrade_or_reject("token_budget_exhausted", round_no - 1)
         model = route_model(state, cfg)
+        effort = route_effort(state, ctx, cfg)
         # 轮次上报落在对外 phase 词表（§4.1）：plan_pending 态计为 plan。
         reporter.report("plan" if state == STATE_PLAN_PENDING else "act",
-                        f"round {round_no} model={model}")
+                        f"round {round_no} model={model} effort={effort}")
         # 单次调用 timeout 收紧至剩余预算（§4.4）：挂起中的调用不受轮间检查约束，
         # 不收紧会穿破墙钟死线。能走到这里 remaining ≥ 30s，减 5s 留收尾余量。
         call_timeout = min(cfg.llm_timeout_seconds, remaining_wall - 5.0)
@@ -225,7 +273,7 @@ def run(request: dict, cfg, schema: dict, on_phase=None) -> dict:
         usage_before = llm.usage_snapshot()
         try:
             message = llm.chat_tools(thread, tool_defs, cfg, model=model,
-                                     timeout=call_timeout)
+                                     timeout=call_timeout, effort=effort)
         except llm.LlmError as exc:
             # 429/网络瞬断：指数退避重试；连续 4 次失败判定为外部故障（配额耗尽/
             # 断网），烧完预算只会更糟，直接进降级判定。
@@ -241,9 +289,11 @@ def run(request: dict, cfg, schema: dict, on_phase=None) -> dict:
         consecutive_llm_errors = 0
 
         tool_calls = message.get("tool_calls")
-        trace.append(trace_entry(round_no, model, call_started,
-                                 tokens=llm.usage_delta(usage_before),
-                                 thinking=message.get("reasoning_content") or ""))
+        entry = trace_entry(round_no, model, call_started, effort=effort,
+                            tokens=llm.usage_delta(usage_before),
+                            thinking=message.get("reasoning_content") or "")
+        trace.append(entry)
+        reporter.emit("thinking", entry)
         if not tool_calls:
             content = message.get("content") or ""
             thread.append({"role": "assistant", "content": content})
@@ -263,17 +313,12 @@ def run(request: dict, cfg, schema: dict, on_phase=None) -> dict:
                 arguments = json.loads(function.get("arguments") or "{}")
             except json.JSONDecodeError:
                 arguments = {}
-            tool_out_idx = len(ctx.tool_outputs)
+            reporter.emit("tool_call", {"round": round_no, "name": name,
+                                        "arguments": function.get("arguments") or ""})
             result = tools.execute_tool(ctx, name, arguments)
-            if len(ctx.tool_outputs) > tool_out_idx and cfg.llm_model_weak:
-                # §4.4 weak 档摘要兜底：截断背闸触发时先用 weak 档压缩全文再回喂。
-                digested = _digest_tool_result(ctx, cfg)
-                if digested is not None:
-                    result = digested
-                    reporter.report("act", f"tool {name} digested via {cfg.llm_model_weak}")
-                else:
-                    reporter.report("act", f"tool {name} digest failed; truncation fallback")
             reporter.report(tools.phase_for(name), f"tool {name}")
+            reporter.emit("tool_result", {"round": round_no, "name": name,
+                                          "result": result})
             thread.append({"role": "tool", "tool_call_id": call.get("id"),
                            "content": result})
 
@@ -332,28 +377,11 @@ def _result_flag(result_json: str, key: str) -> bool:
         return False
 
 
-DIGEST_SYSTEM = (
-    "你是工具结果压缩器。把用户给出的完整工具结果压缩为紧凑 JSON，"
-    "保留对技能设计有意义的结构化字段与全部数值，丢弃重复与冗长描述；"
-    "输出不超过 1200 字符。"
-)
-# 摘要输入上限：超长全文只取前段（盲截断只能保 4k，摘要有 60k 可用已是大改善）。
-DIGEST_INPUT_CHAR_LIMIT = 60_000
-
-
-def _digest_tool_result(ctx: tools.ToolContext, cfg) -> str | None:
-    """weak 档摘要兜底（§4.4）：把刚被截断的工具结果全文压缩后回喂；失败返回
-    None（调用方回退盲截断版）。全文始终留在 report.toolOutputs 供回放。"""
-    full = ctx.tool_outputs[-1]["full"]
-    try:
-        text = llm.chat([{"role": "system", "content": DIGEST_SYSTEM},
-                         {"role": "user", "content": full[:DIGEST_INPUT_CHAR_LIMIT]}],
-                        cfg, model=cfg.llm_model_weak, timeout=60.0)
-    except llm.LlmError:
-        return None
-    digest = text.strip()
-    return (f"{digest}\n[digested from {len(full)} chars by {cfg.llm_model_weak}; "
-            f"full text in report.toolOutputs]")
+def _description_first_user(description: str, ctx: tools.ToolContext) -> str:
+    """描述模式首条消息：设计描述 + 约束（无战局 digest 与宿主摘要）。"""
+    return json.dumps({"mode": "description", "designBrief": description,
+                       "constraints": ctx.constraints},
+                      ensure_ascii=False, indent=1)
 
 
 def _first_user(digest: dict, ctx: tools.ToolContext) -> str:

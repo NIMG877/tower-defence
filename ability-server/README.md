@@ -5,18 +5,26 @@ plan-agent-framework-v2 架构）：
 
 1. **强制计划**：第一轮必须 `update_plan` 提交设计计划（读哪些组件文档/技能思路/
    黑板键方案），重大转向时修订（次数上限防刷）。
-2. **自主研究与设计**：LLM 按需取用 13 个工具——战局明细（entity/entities_at/
+2. **自主研究与设计**：LLM 按需取用 18 个工具——战局明细（entity/entities_at/
    deploy_cells_near）、派生指标（compute_cross_items）、组件文档三件套
    （list_components/read_component_doc/read_contract_doc）、schema 词表
    （read_schema_vocab，重节分段按需取）、语料先例（search_skills/read_skill）。
-   设计中随手 validate_draft 校验草稿，按 issues 修复。
-3. **唯一交付关卡**：`submit_skill` 全量校验（未知 op/hostAssets 边界/黑板键可达性/
-   撞名），通过即结束；裸文本输出不解析，回喂引导重交。
+3. **增量构建（CC 式微步）**：start_draft 定身份与 SP → design_rules 一次立全部
+   规则骨架（触发/条件/reentry 与每 step 的 op+intent，语义层先于 JSON）→
+   按骨架逐个 put_step 转写完整参数（每步即时 lint：参数键/类型/词表/钳制与
+   骨架位置对照；drop_step/drop_rule 修正）→ validate_draft 全量自检（无 config
+   即校验增量草稿）。
+4. **唯一交付关卡**：`submit_skill` 全量校验（未知 op/hostAssets 边界/黑板键可达性/
+   撞名），可免重写直接交付已过闸草稿；通过即结束；裸文本输出不解析，回喂引导重交。
 
-路由两态机：plan_pending→strong 档（计划质量优先），其余→mid 档。每轮发起调用前
-过预算闸（轮数/墙钟/tokens）：耗尽时降级交付最近一次 validate_draft 全绿的
-sanitized 草稿（`response.degraded=true` + `report.degradedReason`；无草稿宁
-rejected；degraded 不入缓存）。单次调用 timeout 收紧至剩余墙钟，防挂起穿破死线。
+路由两态机：plan_pending→strong 档（计划质量优先），其余→mid 档。思考强度
+（`reasoning_effort`，GLM-5.3 系仅 low/high/max、强制思考不可关闭）按轮分档：
+规划轮 max / 研究与设计轮 high / 草稿过闸后的修复与提交轮 low——交付纪律上
+模型先出设计定稿再转写配置，`submit_skill` 可不带 config 直接交付已过闸草稿
+（免重写）。每轮发起调用前过预算闸（轮数/墙钟/tokens）：耗尽时降级交付最近一次
+validate_draft 全绿的 sanitized 草稿（`response.degraded=true` +
+`report.degradedReason`；无草稿宁 rejected；degraded 不入缓存）。单次调用
+timeout 收紧至剩余墙钟，防挂起穿破死线。
 
 过程经 on_phase 实时上报：同步端点计入 `report.phases`，异步端点可轮询
 （phase 词表 plan/act/review/submit/degraded）。
@@ -87,8 +95,8 @@ AbilityConfig。**导出后重跑 `python db/import_skills.py` 入库**（见上
 
 - `GET /health`：mock 状态/schema 协议版本/canonical op 数。
 - `POST /generate-ability`（同步）：请求 `{protocolVersion, opList[], battleSnapshot,
-  hostAssets, constraints}`，响应 `{status, ability, degraded?, report:{issues,
-  rounds, plan, tokens, phases, toolOutputs?, degradedReason?, cached}}`——阻塞至
+  hostAssets, constraints, description?}`，响应 `{status, ability, degraded?, report:{issues,
+  rounds, plan, tokens, phases, degradedReason?, cached}}`——阻塞至
   Agent 跑完。
 - `POST /generate-ability/async`：同请求体，立即返回 `{jobId}`，Agent 在后台线程执行。
 - `GET /jobs/{jobId}`：`{done, phases:[{phase,detail,t}], error, response}`——
@@ -96,6 +104,29 @@ AbilityConfig。**导出后重跑 `python db/import_skills.py` 入库**（见上
 
 **版本握手**：opList 与服务端 schema 的 canonical 集合做集合 diff，不一致直接
 rejected 并返回缺失/多余清单——防 schema 与客户端注册表漂移。
+
+## 交互式测试入口（CLI）
+
+不走 HTTP、不需要 Unity：输入一段技能描述，Agent 免战局快照按描述设计，终端
+实时打印每轮路由（模型/思考档）、思考原文（逐调用整块，非 token 级流式）、工具
+调用与模型可见结果、最终 status/issues/ability。进程内直调 GenerateService，
+案例照常落盘（`logs/gen-*.json` 含 trace/thread 回放）。
+
+```bash
+cd ability-server
+python -m app.cli "部署时立刻对全场敌人造成 500 点真实伤害"   # 一次性
+python -m app.cli                                            # 交互循环，逐条输入
+echo "描述" | python -m app.cli                              # 管道一次性
+```
+
+**描述模式语义**（`request` 新增可选 `description` 字段）：无 `battleSnapshot` 且
+有 `description` 时生效——免战局 digest，系统提示追加描述模式说明，战局类工具
+（compute_cross_items/entity/entities_at/deploy_cells_near）从工具表剔除；无宿主
+资产，spawnIndex/bulletDataIndex 等边界引用不做校验（系统提示约定取 0 占位并在
+intent 标注待宿主绑定）。有快照时 description 被忽略，原路径不变；快照与描述皆无
+保持原闸拒绝。HTTP 契约、protocolVersion、客户端均不变；缓存键已含 description
+（相同描述命中缓存，改描述即重跑）。on_event 富事件（thinking/tool_call/
+tool_result）只在进程内回调——HTTP 响应按设计剥离黑盒，不携带。
 
 ## 配置
 

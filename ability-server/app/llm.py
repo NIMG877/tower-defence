@@ -12,7 +12,7 @@ class LlmError(Exception):
 
 # 进程级 LLM 用量累计（评测的成本口径；agent 每次生成取快照差值进 report.tokens）。
 _usage_totals = {"calls": 0, "prompt_tokens": 0, "completion_tokens": 0,
-                 "reasoning_tokens": 0}
+                 "reasoning_tokens": 0, "cached_tokens": 0}
 
 
 def usage_snapshot() -> dict:
@@ -25,19 +25,23 @@ def usage_delta(snapshot: dict) -> dict:
 
 def _accumulate(data: dict) -> None:
     usage = data.get("usage") or {}
-    details = usage.get("completion_tokens_details") or {}
+    comp_details = usage.get("completion_tokens_details") or {}
+    prompt_details = usage.get("prompt_tokens_details") or {}
     _usage_totals["calls"] += 1
     _usage_totals["prompt_tokens"] += int(usage.get("prompt_tokens") or 0)
     _usage_totals["completion_tokens"] += int(usage.get("completion_tokens") or 0)
-    _usage_totals["reasoning_tokens"] += int(details.get("reasoning_tokens") or 0)
+    _usage_totals["reasoning_tokens"] += int(comp_details.get("reasoning_tokens") or 0)
+    _usage_totals["cached_tokens"] += int(prompt_details.get("cached_tokens") or 0)
 
 
-def _complete(cfg, messages: list[dict], tools: list[dict] | None,
-              model: str | None, timeout: float | None) -> dict:
-    """单次 /chat/completions，返回首个 choice 的 message（纯文本与 function
-    calling 共用一条请求路径）。timeout 缺省用 cfg.llm_timeout_seconds；
-    agent 预算闸传入 min(llm_timeout, 剩余墙钟-5s)，防挂起中的调用穿破墙钟死线
-    （§4.4）。"""
+def chat_tools(messages: list[dict], tools: list[dict], cfg,
+               model: str | None = None, timeout: float | None = None,
+               effort: str | None = None) -> dict:
+    """function calling 单次 /chat/completions，返回首个 choice 的完整 assistant
+    message（含 content 与/或 tool_calls），由 Agent 决定执行工具还是收尾。
+    timeout 缺省用 cfg.llm_timeout_seconds；agent 预算闸传入 min(llm_timeout,
+    剩余墙钟-5s)，防挂起中的调用穿破墙钟死线（§4.4）。effort 思考强度分档
+    （GLM-5.3 系 low/high/max；None=不传走 API 默认）。"""
     model = model or cfg.llm_model
     if not cfg.llm_api_key or not model:
         raise LlmError("config.llm_api_key / config.llm_model 未配置")
@@ -45,9 +49,9 @@ def _complete(cfg, messages: list[dict], tools: list[dict] | None,
     import httpx  # 延迟导入：纯逻辑测试不需要装它
 
     payload = {"model": model, "messages": messages,
-               "temperature": cfg.llm_temperature}
-    if tools is not None:
-        payload["tools"] = tools
+               "temperature": cfg.llm_temperature, "tools": tools}
+    if effort:
+        payload["reasoning_effort"] = effort
     try:
         resp = httpx.post(
             cfg.llm_base_url.rstrip("/") + "/chat/completions",
@@ -61,16 +65,3 @@ def _complete(cfg, messages: list[dict], tools: list[dict] | None,
         return data["choices"][0]["message"]
     except Exception as exc:  # noqa: BLE001 —— 网络/协议错误统一转 LlmError
         raise LlmError(f"LLM request failed: {exc}") from exc
-
-
-def chat(messages: list[dict], cfg, model: str | None = None,
-         timeout: float | None = None) -> str:
-    """纯文本补全（agent 的 weak 档工具结果摘要用）。"""
-    return _complete(cfg, messages, None, model, timeout)["content"]
-
-
-def chat_tools(messages: list[dict], tools: list[dict], cfg,
-               model: str | None = None, timeout: float | None = None) -> dict:
-    """function calling 单轮。返回完整 assistant message（含 content 与/或
-    tool_calls），由 Agent 决定执行工具还是收尾。"""
-    return _complete(cfg, messages, tools, model, timeout)

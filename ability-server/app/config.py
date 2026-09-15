@@ -21,11 +21,14 @@ class Config:
     llm_timeout_seconds: float = 600.0
 
     # v2 Agent 按角色分层路由（agent.py 两态机：plan_pending→strong，其余→mid）。
-    # mid 为 None 时回退 llm_model。weak 档（§4.4）：超限工具结果的摘要兜底——
-    # >4k 截断背闸触发时先用 weak 压缩全文再回喂，失败/None 回退盲截断。
-    llm_model_strong: str | None = "glm-5.3"
+    # mid 为 None 时回退 llm_model。
+    llm_model_strong: str | None = "glm-5.3-flash"
     llm_model_mid: str | None = "glm-5.3-flash"
-    llm_model_weak: str | None = "glm-4.7-flash"
+    # 思考强度分档（GLM-5.3 系仅支持 low/high/max，API 默认 max）：按轮路由——
+    # 规划轮深想；研究与设计轮次档；草稿过闸后的修复/提交是对定稿的机械转写，轻档。
+    llm_effort_plan: str | None = "max"
+    llm_effort_act: str | None = "high"
+    llm_effort_draft: str | None = "low"
 
     # v2 单线程自由循环的最大轮数（plan 修订含在内）
     agent_max_rounds: int = 24

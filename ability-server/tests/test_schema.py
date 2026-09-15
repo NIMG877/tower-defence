@@ -8,7 +8,14 @@ def test_schema_loads_with_expected_counts():
     assert schema["protocolVersion"] >= 1
     assert len(schema["componentOps"]) == 35
     assert len(schema["primitives"]) == 4
+    assert schema["spRecoverModes"] == [
+        "Natural", "OnAttackSuccessfully", "OnAfterHurt", "Other"]
+    assert schema["spConsumeModes"] == [
+        "Natural", "OnAttackSuccessfully", "OnAfterHurt", "Instant", "Other", "NoConsume"]
+    assert schema["abilityOpenModes"] == [
+        "Auto", "OnAttackAnimBegin", "OnBeforeHurt", "Manual", "Other", "OnDeadlyHurt"]
     assert schema_mod.canonical_ops(schema) == set(schema["primitives"]) | set(schema["componentOps"])
+    assert all("fixedWrites" not in op_def for op_def in schema["componentOps"].values())
 
 
 def test_resolve_canonical_only():

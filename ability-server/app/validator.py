@@ -1,11 +1,12 @@
-"""服务端全量校验引擎——客户端 AbilityConfigValidator（C#）的 Python 镜像。
+"""服务端交付关卡校验引擎（唯一校验方；源自已退役的客户端校验环，规则同源）。
 
 校验规则来自组件库 ability.db（经 schema.load_schema 重建），双端规则同源：
   Error（整技能拒绝）：未知 op、空 rules、规则无 triggers、枚举名非法
-    （triggerEvent/reentry/conditionOp/paramValueType——这些在客户端是强类型反
-    序列化，非法名会在 Parse 层抛异常，等价于拒绝）。
+    （triggerEvent/reentry/conditionOp——这些在客户端是强类型反序列化，非法名
+    会在 Parse 层抛异常，等价于拒绝）。
   Warning（仅记录）：未知参数键（丢弃）、字面量不可解析（保留原值，运行时按
-    默认值兜底）、词表外 token、读键无生产者、死配置（component op 上的
+    默认值兜底）、词表外 token、type 标签越 ParamValueType 词表（any 参数保留
+    原标签，其余归一为 schema 类型）、读键无生产者、死配置（component op 上的
     condition / 非 branch 的 elseSteps）。
 
 sanitize 产物是白名单重建的干净 DTO——客户端 Parse 开了
@@ -50,7 +51,6 @@ class Walk:
         self.issues: list[dict] = []
         self.reads: set[str] = set()
         self.writes: set[str] = set()
-        self.fixed_writes: set[str] = set()
         # 当前规则的触发事件（eventContext 并集检查用）与已见实体列表键（listCount 写前读序用）
         self.current_rule_events: list[str] = []
         self.list_keys: set[str] = set()
@@ -312,8 +312,6 @@ def _sanitize_step(step: dict, path: str, ctx: Walk) -> dict:
     args = step.get("args")
     entries = args.get("entries") if isinstance(args, dict) else None
     clone["args"] = {"entries": _sanitize_entries(entries, op_def, canonical, path, ctx)}
-    for fw in op_def.get("fixedWrites", []):
-        ctx.fixed_writes.add(fw)
     if canonical == "write_blackboard":
         _check_context_paths(clone["args"]["entries"], path, ctx)
 
@@ -395,15 +393,22 @@ def _sanitize_entries(entries, op_def: dict, canonical: str, path: str, ctx: Wal
             "fromBlackboard": bool(entry.get("fromBlackboard", False)),
         }
         _validate_entry_value(clone, param, canonical, path, ctx)
-        # type 标签对齐 schema：值已按 schema 类型验证过，标签写错（如数组参数标成
-        # 标量）不影响运行时取值，但违反四元组契约、误导人与工具——统一改写并记
-        # warning（仅大小写差异静默归一，不算问题）。
+        # type 标签与参数类型同词表（ParamValueType，见 value_type_encodings）：
+        # 值已按 schema 类型验证过，label 只做大小写归一。any 不覆写（GetValueLazy
+        # 功能路径保持模型原标签），但越客户端词表的 label 记 warning——枚举解析
+        # 失败会让整份配置注入失败。
         schema_type = param.get("type")
         if schema_type and schema_type != "any":
             if str(clone["type"] or "").lower() != str(schema_type).lower():
                 ctx.add(False, path, f"param '{key}' type label {clone['type']!r} "
-                                     f"coerced to schema type {schema_type!r}")
+                                     f"normalized to '{schema_type}'")
             clone["type"] = schema_type
+        else:
+            label = str(clone["type"] or "")
+            encodings = ctx.schema.get("paramValueTypeEncoding") or {}
+            if label and encodings and label.lower() not in {k.lower() for k in encodings}:
+                ctx.add(False, path, f"param '{key}' type label {label!r} is outside the "
+                                     "ParamValueType vocabulary; client deserialization would fail")
         role = param.get("bbRole")
         if clone["value"]:
             if role == "readKey":
@@ -479,47 +484,49 @@ def _validate_entry_value(entry: dict, param: dict, canonical: str, path: str, c
         return
 
     ptype = param.get("type")
+    is_csv = param.get("shape") == "csv"
     values = param.get("values")
     clamp_key = f"{canonical}.{entry['key']}"
 
-    if ptype == "int":
-        if _coerce_num(raw) is None or not re.fullmatch(r"[+-]?\d+", raw.strip()):
+    if ptype == "Int":
+        if is_csv:
+            for token in _csv_tokens(raw):
+                if token and not re.fullmatch(r"[+-]?\d+", token):
+                    ctx.add(False, path, f"CSV token '{token}' on '{canonical}.{entry['key']}' does not parse as int")
+        elif _coerce_num(raw) is None or not re.fullmatch(r"[+-]?\d+", raw.strip()):
             ctx.add(False, path, f"value '{raw}' on '{canonical}.{entry['key']}' does not parse as int; "
                                  "runtime will fall back to the parameter default")
-    elif ptype == "float":
-        num = _coerce_num(raw)
-        if num is None:
-            ctx.add(False, path, f"value '{raw}' on '{canonical}.{entry['key']}' does not parse as float; "
-                                 "runtime will fall back to the parameter default")
-        elif clamp_key in ctx.schema.get("clamps", {}):
-            clamped = _clamp(num, ctx.schema["clamps"][clamp_key])
-            if clamped != num:
-                entry["value"] = _fmt(clamped)
-                ctx.add(False, clamp_key, f"value {_fmt(num)} clamped to {ctx.schema['clamps'][clamp_key]} -> {entry['value']}")
-    elif ptype == "bool":
+    elif ptype == "Float":
+        if is_csv:
+            for token in _csv_tokens(raw):
+                if token and _coerce_num(token) is None:
+                    ctx.add(False, path, f"CSV token '{token}' on '{canonical}.{entry['key']}' does not parse as float")
+        else:
+            num = _coerce_num(raw)
+            if num is None:
+                ctx.add(False, path, f"value '{raw}' on '{canonical}.{entry['key']}' does not parse as float; "
+                                     "runtime will fall back to the parameter default")
+            elif clamp_key in ctx.schema.get("clamps", {}):
+                clamped = _clamp(num, ctx.schema["clamps"][clamp_key])
+                if clamped != num:
+                    entry["value"] = _fmt(clamped)
+                    ctx.add(False, clamp_key, f"value {_fmt(num)} clamped to {ctx.schema['clamps'][clamp_key]} -> {entry['value']}")
+    elif ptype == "Bool":
         if raw not in ("True", "False", "true", "false"):
             ctx.add(False, path, f"value '{raw}' on '{canonical}.{entry['key']}' does not parse as bool")
-    elif ptype == "vector2int":
-        if not _try_parse_vector2int(raw):
+    elif ptype == "Vector2Int":
+        if is_csv:
+            if not _try_parse_vector2int_array(raw):
+                ctx.add(False, path, f"value '{raw}' on '{canonical}.{entry['key']}' does not parse as "
+                                     'vector2int array "[[x,y],...]"')
+        elif not _try_parse_vector2int(raw):
             ctx.add(False, path, f"value '{raw}' on '{canonical}.{entry['key']}' does not parse as vector2int \"x,y\"")
-    elif ptype == "vector2intArray":
-        if not _try_parse_vector2int_array(raw):
-            ctx.add(False, path, f"value '{raw}' on '{canonical}.{entry['key']}' does not parse as "
-                                 'vector2int array "[[x,y],...]"')
-    elif ptype == "floatArray":
-        for token in _csv_tokens(raw):
-            if token and _coerce_num(token) is None:
-                ctx.add(False, path, f"CSV token '{token}' on '{canonical}.{entry['key']}' does not parse as float")
-    elif ptype == "intArray":
-        for token in _csv_tokens(raw):
-            if token and (not re.fullmatch(r"[+-]?\d+", token)):
-                ctx.add(False, path, f"CSV token '{token}' on '{canonical}.{entry['key']}' does not parse as int")
-    elif ptype == "stringArray":
-        if values and not all(_in_values(values, t) for t in _csv_tokens(raw) if t):
-            ctx.add(False, path, f"CSV token on '{canonical}.{entry['key']}' is outside the accepted tokens; "
-                                 f"expected one of {values}")
-    elif ptype == "string":
-        if values and not _in_values(values, raw):
+    elif ptype == "String":
+        if is_csv:
+            if values and not all(_in_values(values, t) for t in _csv_tokens(raw) if t):
+                ctx.add(False, path, f"CSV token on '{canonical}.{entry['key']}' is outside the accepted tokens; "
+                                     f"expected one of {values}")
+        elif values and not _in_values(values, raw):
             ctx.add(False, path, f"value '{raw}' on '{canonical}.{entry['key']}' is outside the accepted tokens; "
                                  f"expected one of {values}")
     elif ptype == "any":
@@ -529,7 +536,7 @@ def _validate_entry_value(entry: dict, param: dict, canonical: str, path: str, c
 
 def _check_blackboard_symmetry(ctx: Walk) -> None:
     for key in sorted(ctx.reads):
-        if key in ctx.writes or key in ctx.fixed_writes:
+        if key in ctx.writes:
             continue
         ctx.add(False, "blackboard",
                 f"read key '{key}' has no producer in this ability "
