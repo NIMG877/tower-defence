@@ -5,7 +5,9 @@ using UnityEngine.UI;
 namespace MyUI
 {
     /// <summary>
-    /// Owns the level-wide HUD values and all time-scale controls.
+    /// Owns the level-wide HUD values and the speed/pause button visuals.
+    /// 时间倍速本体在 <see cref="TimeScaleManager"/>，这里的按钮只是它的
+    /// 一个申请来源（按自己的开关状态翻 true/false）。
     /// </summary>
     internal sealed class LevelMessageHudModule
     {
@@ -23,9 +25,11 @@ namespace MyUI
         private readonly TextMeshProUGUI _currentNumAndTotalNum;
         private readonly TextMeshProUGUI _levelHpLeft;
 
+        // 按钮开关的 UI 表现状态（sprite/遮罩）；时间倍速状态在 TimeScaleManager
         private bool _isPause;
         private bool _is2X;
-        private bool _isSlow;
+        // 退出确认框非模态且 timeScale=0 时 UI 仍可点：防连点重复申请暂停
+        private bool _exitConfirming;
 
         public LevelMessageHudModule(GameObject root)
         {
@@ -47,22 +51,28 @@ namespace MyUI
             {
                 _is2X = !_is2X;
                 _timeMultiple.image.sprite = _is2X ? _x2 : _x1;
-                ApplyTimeScale();
+                TimeScaleManager.Manager.SetFast(_is2X);
             });
             _pause.onClick.AddListener(() =>
             {
                 _isPause = !_isPause;
                 _pause.image.sprite = _isPause ? _pauseSprite : _continue;
                 _pauseMask.SetActive(_isPause);
-                ApplyTimeScale();
+                TimeScaleManager.Manager.SetPause(_isPause);
             });
             LevelMessageViewLookup.Get<Button>(root, "exit").onClick.AddListener(() =>
             {
-                Time.timeScale = 0;
+                if (_exitConfirming) return;
+                _exitConfirming = true;
+                TimeScaleManager.Manager.SetPause(true);
                 NoticeManager.NM.LaunchMessageBox(
                     "确认退出当前关卡？",
                     () => LevelActionManager.Manager.MissionEnd(false),
-                    ApplyTimeScale);
+                    () =>
+                    {
+                        _exitConfirming = false;
+                        TimeScaleManager.Manager.SetPause(false);
+                    });
             });
         }
 
@@ -70,11 +80,11 @@ namespace MyUI
         {
             _isPause = false;
             _is2X = false;
-            _isSlow = false;
+            _exitConfirming = false;
             _pause.image.sprite = _continue;
             _pauseMask.SetActive(false);
             _timeMultiple.image.sprite = _x1;
-            ApplyTimeScale();
+            TimeScaleManager.Manager.Reset();
 
         }
 
@@ -82,25 +92,19 @@ namespace MyUI
         {
             _isPause = false;
             _is2X = false;
-            _isSlow = false;
-            Time.timeScale = 1;
+            TimeScaleManager.Manager.Reset();
         }
 
         public void OnPause()
         {
-            // Panel stack pause is temporary. Preserve the user's flags so OnResume can restore them.
-            Time.timeScale = 1;
+            // Panel stack pause is temporary. TimeScaleManager keeps the tier
+            // requests so OnResume re-synthesizes them.
+            TimeScaleManager.Manager.Suspend();
         }
 
         public void OnResume()
         {
-            ApplyTimeScale();
-        }
-
-        public void SetSlow(bool slow)
-        {
-            _isSlow = slow;
-            ApplyTimeScale();
+            TimeScaleManager.Manager.Resume();
         }
 
         public void UpdateCost()
@@ -123,18 +127,6 @@ namespace MyUI
             _currentNumAndTotalNum.text =
                 LevelResourceManager.Manager.CurrentOperateCount + "/" +
                 LevelResourceManager.Manager.NeedOperateCount;
-        }
-
-        private void ApplyTimeScale()
-        {
-            if (_isPause)
-                Time.timeScale = 0;
-            else if (_isSlow)
-                Time.timeScale = 0.1f;
-            else if (_is2X)
-                Time.timeScale = 2;
-            else
-                Time.timeScale = 1;
         }
 
         public void Tick()

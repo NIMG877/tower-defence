@@ -10,8 +10,13 @@ namespace AbilitySystem.Components
     /// <summary>
     /// 运行时 LLM 生成技能（plan-llm-generated-ability 阶段三）。OnTrigger 把战局快照 +
     /// 宿主清单异步提交给 ability-server 后立即返回（fire-and-forget，不阻塞步骤序列），
-    /// OnTick 轮询任务状态；完成后 FromDto → ReplaceSkill 替换当前技能
-    /// （生成物仅本场有效：ReplaceSkill 不触碰 EntityData，下场战斗 PreWarm 恢复原技能）。
+    /// OnTick 轮询任务状态；新增阶段经同一增量游标分流——Console 全量滚动 +
+    /// LevelMessagePanel 飘字短文案（ProgressTextOf 映射）；完成后 FromDto →
+    /// ReplaceSkill 替换当前技能（生成物仅本场有效：ReplaceSkill 不触碰
+    /// EntityData，下场战斗 PreWarm 恢复原技能）。
+    ///
+    /// 生成期间经 TimeScaleManager.SetSlow 申请战场慢速（计数制，与查看慢速
+    /// 独立），任务结束/中止时释放——等 LLM 出技能的几十秒战场放缓而非停摆。
     ///
     /// 典型配置：常驻天赋规则触发 OnInitialize（部署时生成一次；休眠重部署会重新触发，
     /// OnTeardown 已中止上一笔在途任务）。轮询靠 OnTick 驱动，要求宿主能力常驻 active
@@ -22,8 +27,10 @@ namespace AbilitySystem.Components
     public class GenerateSkill : AbilityComponentBase
     {
         private const string DefaultServerUrl = "http://127.0.0.1:8765";
-        private const float PollIntervalSeconds = 0.4f;
+        private const float PollIntervalSeconds = 1f;
         private const float PollTimeoutSeconds = 900f; // 服务端 v2 预算 660s 硬闸 + 轮询/握手余量
+        // 生成进度飘字底色：深紫罗兰，区别于伤害红/治疗绿/费用橙/SP 蓝
+        private static readonly Color ProgressColor = new Color(0.55f, 0.20f, 0.85f);
 
         private enum TaskPhase { Idle, AwaitJobId, Polling }
 
@@ -129,10 +136,17 @@ namespace AbilitySystem.Components
             if (status.phases != null)
             {
                 for (; _printed < status.phases.Count; _printed++)
-                    Debug.Log($"[GenerateSkill][Agent] {status.phases[_printed].phase}  {status.phases[_printed].detail}");
+                {
+                    AgentJobStatus.PhaseEntry entry = status.phases[_printed];
+                    Debug.Log($"[GenerateSkill][Agent] {entry.phase}  {entry.detail}");
+                    string progress = ProgressTextOf(entry.phase, entry.detail);
+                    if (progress != null)
+                        ShowProgressText(progress);
+                }
             }
             _nextPollAt = now + PollIntervalSeconds;
             if (!status.done) return;
+            ReleaseSlow();
             ResetTask();
             HandleServerResponse(raw);
         }
@@ -141,7 +155,53 @@ namespace AbilitySystem.Components
         {
             // 宿主休眠/阵亡：中止在途任务，重部署后规则重新触发。
             // _lastGenerated 不销毁——它还是当前在场技能。
+            ReleaseSlow();
             ResetTask();
+        }
+
+        /// <summary>
+        /// 阶段 → 飘字短文案（与 Console 同一增量游标逐条触发，null = 不飘）。
+        /// 游戏化词表：推演=plan、构筑=act、校准=review(validate_draft)、定型=
+        /// submit_skill、降格=degraded、故障=handshake 契约漂移、习得/失败=done 结果。
+        /// plan/act 轮次条目从 detail 取轮号（"round N model=..."），工具/异常条目
+        /// 退回不带轮号。public 供 EditMode 测试直接断言（测试 asmdef 无
+        /// InternalsVisibleTo）。
+        /// </summary>
+        public static string ProgressTextOf(string phase, string detail)
+        {
+            switch (phase)
+            {
+                case "plan":
+                case "act":
+                    return WithRound(phase == "plan" ? "推演" : "构筑", detail);
+                case "review": return "校准";
+                case "submit": return "定型";
+                case "degraded": return "降格";
+                case "handshake": return "故障";
+                case "done":
+                    if (detail == "ok") return "习得！";
+                    if (detail == "rejected") return "失败";
+                    return null;
+                default: return null;
+            }
+        }
+
+        private static string WithRound(string word, string detail)
+        {
+            if (detail != null && detail.StartsWith("round "))
+            {
+                string tail = detail.Substring("round ".Length);
+                int end = tail.IndexOf(' ');
+                if (int.TryParse(end < 0 ? tail : tail.Substring(0, end), out int round))
+                    return $"{word} {round}";
+            }
+            return word;
+        }
+
+        private void ShowProgressText(string content)
+        {
+            MyUI.LevelMessagePanel.Panel.ShowText(
+                _host.transform.position, content, ProgressColor);
         }
 
         /// <summary>
@@ -217,6 +277,7 @@ namespace AbilitySystem.Components
             _inFlight = request;
             _phase = TaskPhase.AwaitJobId;
             _deadline = Time.realtimeSinceStartup + PollTimeoutSeconds;
+            TimeScaleManager.Manager.SetSlow(true);
             Debug.Log($"[GenerateSkill] 已提交生成任务（request={_requestText()}），后台轮询中");
         }
 
@@ -228,8 +289,17 @@ namespace AbilitySystem.Components
             return request;
         }
 
+        /// <summary>任务在身（_phase 非 Idle）时释放战场慢速。任务结束的三条路径
+        /// （Fail/完成/OnTeardown）都经此收口；Idle 时（如未提交先休眠）不动计数。</summary>
+        private void ReleaseSlow()
+        {
+            if (_phase == TaskPhase.Idle) return;
+            TimeScaleManager.Manager.SetSlow(false);
+        }
+
         private void Fail(string message)
         {
+            ReleaseSlow();
             ResetTask();
             Debug.LogError($"[GenerateSkill] {message}");
         }

@@ -87,27 +87,40 @@ namespace MyUI
 
         public void ShowText(Vector2 entityPosition, CombatTextKind kind, int value)
         {
+            (Color color, string content) = StyleFor(kind, value);
+            ShowText(entityPosition, content, color);
+        }
+
+        /// <summary>自定义文字飘字：内容与颜色由调用方给定（如 GenerateSkill 的
+        /// 生成进度），池与弹出补间管线和类型化飘字共用。</summary>
+        public void ShowText(Vector2 entityPosition, string content, Color color)
+        {
             TextMeshProUGUI text = _textPool.Get();
             _borrowedTexts.Add(text);
 
-            (Color color, string content) = StyleFor(kind, value);
             text.color = color;
             text.text = content;
 
             text.transform.position = entityPosition + 1.2f * Vector2.up + 0.06f * Random.insideUnitCircle;
             text.transform.localScale = Vector3.zero;
             text.gameObject.SetActive(true);
-            // 弹出→停顿→收缩是同一条补间链（延时挂在收缩补间上）：暂停/退出由
-            // ResetText 的 DOKill 与面板 Kill("LevelMessagePanel") 整链取消，
-            // 归还只发生在链正常走完时
+            // 弹出→停顿→缩小淡出：收缩与淡出是并行补间（延时同时挂两条上），
+            // 暂停/退出由 ResetText 的 DOKill 与面板 Kill("LevelMessagePanel")
+            // 整链取消，归还只发生在淡出走完时；补间走缩放时间，倍速/暂停随
+            // TimeScaleManager 同步
             text.transform.DOScale(1, 0.2f)
-                .SetUpdate(true)
                 .SetId("LevelMessagePanel")
                 .OnComplete(() =>
                 {
-                    text.transform.DOScale(0, 0.2f)
-                        .SetDelay(0.36f)
-                        .SetUpdate(true)
+                    text.transform.DOScale(0.9f, 0.36f)
+                        .SetDelay(0.5f)
+                        .SetId("LevelMessagePanel");
+                    // 本套 DOTween 无 TMP_Text 的 DOFade 扩展，按 BasePanel
+                    // 惯例走 DOTween.To 调 alpha；SetTarget 供 ResetText 的
+                    // text.DOKill 命中
+                    DOTween.To(() => text.alpha, v => text.alpha = v, 0f, 0.36f)
+                        .SetDelay(0.5f)
+                        .SetTarget(text)
                         .SetId("LevelMessagePanel")
                         .OnComplete(() => ReturnText(text));
                 });
@@ -158,7 +171,9 @@ namespace MyUI
         /// 杀掉该节点上的整条展示补间链并复位视觉。</summary>
         private void ResetText(TextMeshProUGUI text)
         {
+            // 缩放补间挂 transform、淡出补间挂文本本体，两个目标都要杀
             text.transform.DOKill();
+            text.DOKill();
             text.transform.localScale = Vector3.zero;
             text.gameObject.SetActive(false);
         }

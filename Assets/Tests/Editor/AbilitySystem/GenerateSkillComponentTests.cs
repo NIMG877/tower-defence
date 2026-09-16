@@ -155,5 +155,27 @@ namespace AbilitySystem.Tests
             LogAssert.Expect(LogType.Error, new Regex(@"\[GenerateSkill\] 轮询响应解析失败"));
             comp.HandleServerResponse("{ not json");
         }
+
+        [Test]
+        public void ProgressTextOf_MapsPhaseVocabulary_ToShortFloatText()
+        {
+            // 轮次条目带轮号，工具/异常条目退回不带轮号
+            Assert.AreEqual("推演 1",
+                GenerateSkill.ProgressTextOf("plan", "round 1 model=glm-5.3 effort=max"));
+            Assert.AreEqual("构筑 3",
+                GenerateSkill.ProgressTextOf("act", "round 3 model=glm-5.3-flash effort=high"));
+            Assert.AreEqual("构筑", GenerateSkill.ProgressTextOf("act", "tool read_component_doc"));
+            Assert.AreEqual("构筑", GenerateSkill.ProgressTextOf("act", null));
+            Assert.AreEqual("校准", GenerateSkill.ProgressTextOf("review", "tool validate_draft"));
+            Assert.AreEqual("定型", GenerateSkill.ProgressTextOf("submit", "tool submit_skill"));
+            Assert.AreEqual("降格",
+                GenerateSkill.ProgressTextOf("degraded", "budget exhausted (wall); delivering last validated draft"));
+            Assert.AreEqual("故障", GenerateSkill.ProgressTextOf("handshake", "drift rejected"));
+            // done 按结果飘；degraded 已有专属条目不重复，未知阶段不飘
+            Assert.AreEqual("习得！", GenerateSkill.ProgressTextOf("done", "ok"));
+            Assert.AreEqual("失败", GenerateSkill.ProgressTextOf("done", "rejected"));
+            Assert.IsNull(GenerateSkill.ProgressTextOf("done", "degraded"));
+            Assert.IsNull(GenerateSkill.ProgressTextOf("unknown", "x"));
+        }
     }
 }

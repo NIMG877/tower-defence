@@ -168,6 +168,13 @@ namespace MyUI
             _combat.ShowText(entityPos, kind, value);
         }
 
+        /// <summary>自定义文字飘字：内容与颜色由调用方给定（样式不走
+        /// <see cref="CombatTextKind"/> 词表）。</summary>
+        public void ShowText(Vector2 entityPos, string content, Color color)
+        {
+            _combat.ShowText(entityPos, content, color);
+        }
+
         public void EntityBackToSelector(Entity entityToBack)
         {
             _deployment.EntityBackToSelector(entityToBack);
@@ -284,7 +291,10 @@ namespace MyUI
 
         private void SwitchToNormal()
         {
-            _hud.SetSlow(false);
+            // 慢速释放跟随状态转移：从慢态回 Normal 恰释放一次，
+            // Normal→Normal 的调用（如 OnExit 前已自动回 Normal）不动计数
+            if (_currentState != LevelMessageUIState.Normal)
+                TimeScaleManager.Manager.SetSlow(false);
             _currentState = LevelMessageUIState.Normal;
             _deployment.DeselectCurrentPlaceData();
             _selection.Clear();
@@ -308,7 +318,8 @@ namespace MyUI
 
         private void SwitchToViewAfterSet(Entity entity)
         {
-            _hud.SetSlow(true);
+            // 只从 Normal 进入（非 Normal 点空白先经 SwitchToNormal）
+            TimeScaleManager.Manager.SetSlow(true);
             _selection.SelectEntity(entity);
             ApplyStateView(LevelMessageUIState.ViewAfterSet);
             EnterStateAndStartUpdates(LevelMessageUIState.ViewAfterSet);
@@ -318,7 +329,9 @@ namespace MyUI
             LevelMessageUIState state,
             LevelMessagePlaceData placeData)
         {
-            _hud.SetSlow(true);
+            // 预览三态族内转移（ViewBeforeSet→Setting→Choosing）不重复申请
+            if (_currentState == LevelMessageUIState.Normal)
+                TimeScaleManager.Manager.SetSlow(true);
             _selection.SelectPlace(placeData);
             ApplyStateView(state);
             EnterStateAndStartUpdates(state);
