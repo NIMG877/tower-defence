@@ -68,16 +68,6 @@ MapPrefab 仍按引用拖入，预制体本身在 Prefab 工程内制作。
 
 底部状态条文案三态：`✓ 校验通过` / `⚠ N 个 Warning` / `✗ N 个 Error, M 个 Warning`。规则清单见 [LevelDataValidator](../Assets/Editor/LevelEditor/Validation/LevelDataValidator.cs)。
 
-## Playtest
-
-点底部 ▶ Playtest 按钮：
-
-1. 先校验：有 Error 时弹对话框列出全部 Error，可选择"继续/取消"
-2. 询问保存当前打开的场景（可拒绝，拒绝则中止）
-3. 自动创建/复用 `Assets/Scenes/LevelTest.unity`（含 LM/MCam/UICam/LevelTestStarter）
-4. 切到测试场景，设置 LevelDataToPlay，Enter Play
-5. 退出 Play 时 `LevelTestStarter.OnDisable` 调用 `LevelResourceSharing.LevelEnd()` 清理关卡资源
-
 ## 范围
 
 - 修改 LevelData 不需要重启编辑器

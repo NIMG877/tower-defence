@@ -641,7 +641,7 @@ MonoBehaviour:
     MagicResistance: 0
     PhysicalDodge: 0
     MagicDodge: 0
-    BlockOccupation: 10
+    BlockOccupation: 3
     TauntLevel: 0
     CanSpawnEntityIds: []
     CanSpawnEntityCounts: 
