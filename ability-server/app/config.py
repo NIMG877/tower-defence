@@ -53,6 +53,9 @@ class Config:
     # 失败/成功案例落盘目录（回放调试用），None = 关闭。
     # 锚定本文件位置（ability-server/logs），不受进程启动目录影响；该目录已 gitignore。
     log_dir: str | None = str(Path(__file__).resolve().parent.parent / "logs")
+    # ok 产物导出收件箱（ability-server/out）：Unity 编辑器轮询导入为资产；None = 关闭。
+    # 同 log_dir 锚定写法；该目录已 gitignore。
+    out_dir: str | None = str(Path(__file__).resolve().parent.parent / "out")
     # 组件库（唯一真源：规则/文档/语料；Unity 语料经 db/import_skills.py 导入）
     # ——文档工具与语料检索的数据源；文件缺失时静默降级，按 mtime 惰性重载。
     db_path: str | None = str(Path(__file__).resolve().parent.parent / "data" / "ability.db")

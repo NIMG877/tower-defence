@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import time
 from collections import OrderedDict
 from pathlib import Path
@@ -43,7 +44,10 @@ class GenerateService:
         cache_key = self._cache_key(request)
         cached = self._cache.get(cache_key)
         if cached is not None:
-            return {**cached, "report": {**cached.get("report", {}), "cached": True}}
+            response = {**cached, "report": {**cached.get("report", {}), "cached": True}}
+            # 收件箱重灌：out/ 里同名文件可能已被 Unity 导入消费，同 payload 命中即重写（幂等）。
+            self._export_out(response)
+            return response
 
         response = agent.run(request, self.cfg, self.schema, on_phase, on_event)
         # 黑盒回放只落盘不回客户端：客户端 DTO 不变、响应体积不膨胀，回放根因看案例文件。
@@ -51,6 +55,7 @@ class GenerateService:
         # 非 ok / 降级产物不入缓存：同 payload 重触发可重跑，坏结果不被永久命中。
         if response.get("status") == "ok" and not response.get("degraded"):
             self._cache.put(cache_key, response)
+        self._export_out(response)
         self._log(request, response, extras)
         return response
 
@@ -71,6 +76,30 @@ class GenerateService:
             norm(request.get("description")),
         ))
         return hashlib.sha256(parts.encode()).hexdigest()
+
+    def _export_out(self, response: dict) -> None:
+        """ok 且非降级的产物原子写入 out/{abilityId}.json，供 Unity 编辑器轮询导入；
+        降级/拒绝仍只进 logs/ 案例文件。report.outPath 供 CLI 提示（运行时字段，
+        与 cached 同类）。"""
+        if not self.cfg.out_dir:
+            return
+        if response.get("status") != "ok" or response.get("degraded"):
+            return
+        ability = response["ability"]
+        out_dir = Path(self.cfg.out_dir)
+        try:
+            out_dir.mkdir(parents=True, exist_ok=True)
+            # 先写临时名再原子替换：编辑器轮询不会读到半截 JSON，.tmp 也不匹配 *.json 扫描。
+            tmp = out_dir / f"{ability['abilityId']}.json.tmp"
+            tmp.write_text(json.dumps(ability, ensure_ascii=False, indent=1),
+                           encoding="utf-8")
+            path = out_dir / f"{ability['abilityId']}.json"
+            os.replace(tmp, path)
+        except OSError:
+            return  # 导出失败不影响生成结果
+        report = response.get("report")
+        if isinstance(report, dict):
+            report["outPath"] = str(path)
 
     def _log(self, request: dict, response: dict,
              extras: dict | None = None) -> None:

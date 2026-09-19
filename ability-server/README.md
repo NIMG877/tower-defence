@@ -71,7 +71,7 @@ Unity 菜单 `Tools → AbilityGeneration → 5. 导出技能语料` 收集两�
 
 ## 交互式测试入口（CLI）
 
-不走 HTTP、不需要 Unity：输入一段技能描述，Agent 免战局快照按描述设计，终端实时打印每轮路由（模型/思考档）、思考原文（逐调用整块，非 token 级流式）、工具调用与模型可见结果、最终 status/issues/ability。进程内直调 GenerateService，案例照常落盘（`logs/gen-*.json` 含 trace/thread 回放）。
+不走 HTTP、不需要 Unity：输入一段技能描述，Agent 免战局快照按描述设计，终端实时打印每轮路由（模型/思考档）、思考原文（逐调用整块，非 token 级流式）、工具调用与模型可见结果、最终 status/issues——ability 本体不刷屏：ok 产物落 out/ 收件箱（见下），降级稿不进 out/ 仍即时打印。进程内直调 GenerateService，案例照常落盘（`logs/gen-*.json` 含 trace/thread 回放）。
 
 ```bash
 cd ability-server
@@ -82,9 +82,11 @@ echo "描述" | python -m app.cli                              # 管道一次性
 
 **描述模式语义**（`request` 新增可选 `description` 字段）：无 `battleSnapshot` 且有 `description` 时生效——免战局 digest，系统提示追加描述模式说明，战局类工具（compute_cross_items/entity/entities_at/deploy_cells_near）从工具表剔除；无宿主资产，spawnIndex/bulletDataIndex 等边界引用不做校验（系统提示约定取 0 占位并在intent 标注待宿主绑定）。有快照时 description 被忽略，原路径不变；快照与描述皆无保持原闸拒绝。HTTP 契约、protocolVersion、客户端均不变；缓存键已含 description（相同描述命中缓存，改描述即重跑）。on_event 富事件（thinking/tool_call/tool_result）只在进程内回调——HTTP 响应按设计剥离黑盒，不携带。
 
+**生成物导出收件箱**（`out_dir`，默认 `ability-server/out/`，已 gitignore）：status=ok 且非降级的产物原子写 `out/{abilityId}.json`——文件就是 ability DTO 本体（无协议包装），同 id 覆盖、最新者胜；降级/拒绝仍只进 `logs/` 案例文件；缓存命中同 payload 重灌收件箱（文件被消费后无需改描述即可重得）。Unity 编辑器开着时由 `GeneratedSkillImporter`（InitializeOnLoad 轮询）自动导入为 `Assets/Resources/GeneratedAbilities/{abilityId}.asset`：Parse 严格反序列化当闸，成功即消费 json（失败移入 `out/failed/`），同 id 重生成 CopySerialized 原地覆盖（GUID 不变，既有引用不断），spawnIndex/bulletDataIndex=0 打占位警告待宿主绑定。该目录刻意在 `Resources.LoadAll("Abilities")` 扫描根之外——不进菜单④语料导出与图标池，采纳（移入角色目录/xlsx Talents 列配路径）是人工动作。
+
 ## 配置
 
-环境变量只有一个：`ABILITY_LLM_API_KEY`（未设且非 mock 时拒绝生成）。其余全部是`app/config.py` 的字面值：base_url / 模型三档（strong/mid）/ temperature / mock 开关 /预算闸（agent_max_rounds / agent_max_wall_seconds / agent_max_total_tokens /agent_max_plan_updates）/ 单调用超时（llm_timeout_seconds）/ 鉴权 token（server_token）/ 限流（rate_limit）/ 缓存条数 / 案例落盘目录（`log_dir`，默认`ability-server/logs/`，每次生成落一份 `gen-*.json` 案例含请求全文+响应全文+黑盒回放——`trace`：每次模型调用的耗时/分项 tokens（含 reasoning）/思考原文；`thread`：完整对话线程（原始工具参数字符串原文随 assistant.tool_calls 在列）。黑盒只落盘，API 响应不携带；设 None 关闭；已 gitignore）。
+环境变量只有一个：`ABILITY_LLM_API_KEY`（未设且非 mock 时拒绝生成）。其余全部是`app/config.py` 的字面值：base_url / 模型三档（strong/mid）/ temperature / mock 开关 /预算闸（agent_max_rounds / agent_max_wall_seconds / agent_max_total_tokens /agent_max_plan_updates）/ 单调用超时（llm_timeout_seconds）/ 鉴权 token（server_token）/ 限流（rate_limit）/ 缓存条数 / 案例落盘目录（`log_dir`，默认`ability-server/logs/`，每次生成落一份 `gen-*.json` 案例含请求全文+响应全文+黑盒回放——`trace`：每次模型调用的耗时/分项 tokens（含 reasoning）/思考原文；`thread`：完整对话线程（原始工具参数字符串原文随 assistant.tool_calls 在列）。黑盒只落盘，API 响应不携带；设 None 关闭；已 gitignore）/ 生成物导出收件箱（`out_dir`，默认 `ability-server/out/`，设 None 关闭，已 gitignore）。
 
 ## 测试
 

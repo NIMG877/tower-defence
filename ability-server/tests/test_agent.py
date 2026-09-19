@@ -37,7 +37,8 @@ def make_request(**overrides) -> dict:
 
 def tiered_cfg(**overrides) -> Config:
     # 循环测试默认 llm_mock=False（直接 patch llm.chat_tools）；mock 路径测试显式传 True。
-    base = dict(log_dir=None, db_path=None, llm_mock=False,
+    # 落盘类配置基座全关：测试不写真实 logs/ 与 out/，要写时显式传路径。
+    base = dict(log_dir=None, db_path=None, out_dir=None, llm_mock=False,
                 llm_model="base-model", llm_model_strong="strong-model",
                 llm_model_mid="mid-model")
     base.update(overrides)

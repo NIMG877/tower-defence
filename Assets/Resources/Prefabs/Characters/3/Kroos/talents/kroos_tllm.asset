@@ -11,23 +11,22 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c8277af13663d744be772c4061d0ca7, type: 3}
   m_Name: kroos_tllm
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   abilityId: kroos_tllm
-  abilityName: "\u6280\u80fd\u6f14\u5316"
-  description: "\u90e8\u7f72\u65f6\u4f9d\u636e\u5f53\u524d\u6218\u5c40\u751f\u6210\u4e00\u4e2a\u65b0\u6280\u80fd\u66ff\u6362\u73b0\u6709\u6280\u80fd\uff08\u7ea6\u4e00\u4e24\u5206\u949f\u540e\u751f\u6548\uff09"
+  abilityName: "\u6280\u80FD\u6F14\u5316"
+  description: "\u90E8\u7F72\u65F6\u4F9D\u636E\u5F53\u524D\u6218\u5C40\u751F\u6210\u4E00\u4E2A\u65B0\u6280\u80FD\u66FF\u6362\u73B0\u6709\u6280\u80FD"
   icon: {fileID: 0}
   Kind: 1
   sp:
     totalSp: 0
     initialSp: 0
     chargeNum: 1
-    abilityAmount: 99999
+    abilityAmount: 0
     recoverMode: 0
-    consumeMode: 0
+    consumeMode: 5
     openMode: 0
     recoverForbidDuringAbility: 0
     canManualClose: 0
-    abilityAttackRange: []
   rules:
   - triggers:
     - triggerEvent: 1
@@ -38,9 +37,11 @@ MonoBehaviour:
       args:
         entries:
         - key: request
-          value: "\u7ed3\u5408\u5f53\u524d\u6218\u5c40\uff0c\u4e3a\u8be5\u5e72\u5458\u751f\u6210\u4e00\u4e2a\u9002\u914d\u6218\u5c40\u7684\u65b0\u6280\u80fd"
+          value: "\u7ED3\u5408\u5F53\u524D\u6218\u5C40\uFF0C\u4E3A\u8BE5\u5E72\u5458\u751F\u6210\u4E00\u4E2A\u9002\u914D\u6218\u5C40\u7684\u65B0\u6280\u80FD"
           fromBlackboard: 0
           type: 3
       condition: []
       steps: []
       elseSteps: []
+    detached: 0
+  legacyComponents: []

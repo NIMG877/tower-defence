@@ -21,13 +21,12 @@ MonoBehaviour:
     totalSp: 0
     initialSp: 0
     chargeNum: 1
-    abilityAmount: 99999
+    abilityAmount: 0
     recoverMode: 0
-    consumeMode: 0
+    consumeMode: 5
     openMode: 0
     recoverForbidDuringAbility: 0
     canManualClose: 0
-    abilityAttackRange: []
   rules:
   - triggers:
     - triggerEvent: 6
@@ -48,6 +47,7 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
+    detached: 0
   - triggers:
     - triggerEvent: 6
       groups:
@@ -55,6 +55,7 @@ MonoBehaviour:
         - op: 1
           leftKey: t1_trigger
           rightValue: True
+          rightKey: 
     reentry: 0
     steps:
     - op: attack_event_value_modifier
@@ -75,3 +76,5 @@ MonoBehaviour:
       condition: []
       steps: []
       elseSteps: []
+    detached: 0
+  legacyComponents: []

@@ -64,7 +64,7 @@ def check_handshake(request: dict, schema: dict) -> None:
 
 SYSTEM = (
     "你是塔防游戏的技能生成 Agent，自主完成一次技能设计并交付可运行的 AbilityConfig。\n"
-    "工作方式（单线程自由循环，自己决定节奏）：\n"
+    "工作方式：\n"
     "1. 第一轮必须用 update_plan 提交计划：打算读哪些组件文档、技能设计思路（触发事件/"
     "步骤序列/目标选择）、黑板键方案（哪些键谁写谁读）。中途重大转向时用 update_plan 修订。\n"
     "2. 研究：list_components 看索引 → read_component_doc 读参数表与行为语义 → "

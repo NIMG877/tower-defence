@@ -88,4 +88,5 @@ __pycache__/
 *.pyc
 .venv/
 ability-server/logs/
+ability-server/out/
 .pytest_tmp/
