@@ -127,7 +127,7 @@ public sealed class EditorPathManipulator : MouseManipulator
             _dragAccumWorld += ViewTransform.ScreenDeltaToWorldDelta(
                 evt.mouseDelta, _state.Cache.ISize, _state.Cache.JSize, _state.View.Zoom);
             var world = _dragStartWorld + _dragAccumWorld;
-            var writePos = _state.Snap ? ViewTransform.SnapToGrid(world) : world;
+            var writePos = _state.Snap ? ViewTransform.SnapToGrid(world, _state.Cache.EntityR) : world;
             UpdateCheckpointVisual(_dragCpIdx, writePos);
         }
     }
@@ -140,7 +140,7 @@ public sealed class EditorPathManipulator : MouseManipulator
             // 跟 Move 阶段完全同源(都是把 mouseDelta 累加),保证松手时 cp 落在
             // Move 阶段最后显示的位置,不会有"最后 N 像素漂移"。
             var world = _dragStartWorld + _dragAccumWorld;
-            var writePos = _state.Snap ? ViewTransform.SnapToGrid(world) : world;
+            var writePos = _state.Snap ? ViewTransform.SnapToGrid(world, _state.Cache.EntityR) : world;
             CommitCheckpointPosition(_dragCpIdx, writePos);
             _dragCpIdx = -1;
             target.ReleaseMouse();
@@ -170,7 +170,7 @@ public sealed class EditorPathManipulator : MouseManipulator
     void AddCheckpointAt(Vector2 local)
     {
         var world = _state.View.ScreenToWorld(local, _state.Cache.ISize, _state.Cache.JSize);
-        var writePos = _state.Snap ? ViewTransform.SnapToGrid(world) : world;
+        var writePos = _state.Snap ? ViewTransform.SnapToGrid(world, _state.Cache.EntityR) : world;
         var pathProp = _so.FindProperty("Paths");
         var pathEl = pathProp.GetArrayElementAtIndex(_state.SelectedPathIdx);
         var cpsProp = pathEl.FindPropertyRelative("CheckPoints");

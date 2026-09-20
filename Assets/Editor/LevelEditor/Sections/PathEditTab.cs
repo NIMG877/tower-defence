@@ -67,6 +67,11 @@ public static class PathEditTab
         listView.style.overflow = Overflow.Hidden;
         right.Add(listView);
 
+        var queryView = PathLengthQueryView.Build(so, state);
+        queryView.style.flexShrink = 0;
+        queryView.style.marginTop = 4;
+        right.Add(queryView);
+
         var detailView = CheckpointDetailView.Build(so, state);
         detailView.style.flexShrink = 0;
         detailView.style.marginTop = 4;
@@ -227,12 +232,13 @@ public static class PathEditTab
         SyncDelEnabled();
         bar.Add(delCpBtn);
 
-        // 格点吸附 toggle(off 时自由坐标,on 时 0.25 粒度)
-        var snapBtn = EditorTabShell.MakeToggleButton(state, "格点吸附 (.25)",
+        // 格点吸附 toggle(off 时自由坐标,on 时 entityR 粒度,与实体半径对齐)
+        float entityR = state.Cache.EntityR;
+        var snapBtn = EditorTabShell.MakeToggleButton(state, $"格点吸附 ({entityR:0.##})",
             isActive: () => state.Snap,
             onClick: () => { state.Snap = !state.Snap; state.NotifyChanged(); });
         snapBtn.style.marginLeft = 4;
-        snapBtn.tooltip = "开启后,新建/移动 checkpoint 都会吸附到 0.25 粒度格点(每格 4 个点)";
+        snapBtn.tooltip = $"开启后,新建/移动 checkpoint 都会吸附到 {entityR:0.##} 粒度格点(与实体半径对齐)";
         bar.Add(snapBtn);
 
         bar.Add(EditorTabShell.MakeVerticalSeparator());

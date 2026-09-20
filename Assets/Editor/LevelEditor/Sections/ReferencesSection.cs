@@ -4,6 +4,7 @@ using UnityEngine.UIElements;
 
 /// <summary>
 /// 引用节: MapPrefab / EnvironmentalControlDevice (单 GameObject)。
+/// MapPrefab 除手填外支持一键生成/重建(见 MapPrefabGenerator)。
 /// WaveEntityPrefabIDs 字段已删除 — action 直接持有 EntityID。
 /// </summary>
 public static class ReferencesSection
@@ -13,11 +14,12 @@ public static class ReferencesSection
         var section = new VisualElement();
         section.AddToClassList("level-editor-section");
 
-        var title = new Label("▸ 引用 (只填, 不做内部编辑)");
+        var title = new Label("▸ 引用");
         title.AddToClassList("level-editor-section-title");
         section.Add(title);
 
         section.Add(MakeSingleRow(so.FindProperty("MapPrefab")));
+        section.Add(MapPrefabGenerator.Build(so));
         section.Add(MakeSingleRow(so.FindProperty("EnvironmentalControlDevice")));
 
         return section;

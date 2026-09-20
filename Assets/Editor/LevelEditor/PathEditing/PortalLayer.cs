@@ -10,7 +10,7 @@ using UnityEngine.UIElements;
 ///     从源格中心到 portal 出口坐标的虚线+箭头(永久显示,与编辑模式无关)。
 ///  2. 预览线:仅在 Brush 工具 + Portal=SetPortalOut + 已点了第一段 + 鼠标在 canvas 上
 ///     时,画一条从 pendingPortalSource 到当前鼠标世界坐标(state.MouseWorld)
-///     的虚线+箭头。state.Snap 开启时应用 0.25 吸附。
+///     的虚线+箭头。state.Snap 开启时应用 entityR 粒度吸附。
 ///
 /// 重绘触发:state.Changed、Undo/Redo、canvas MouseMove(跟随鼠标)/MouseLeave(隐藏预览)。
 /// </summary>
@@ -64,7 +64,7 @@ public static class PortalLayer
                 var (i, j) = brush.pendingPortalSource.Value;
                 var srcWorld = new Vector2(j, i);
                 var end = state.MouseWorld;
-                if (state.Snap) end = ViewTransform.SnapToGrid(end);
+                if (state.Snap) end = ViewTransform.SnapToGrid(end, state.Cache.EntityR);
                 DrawArrow(ctx, state, srcWorld, end);
             }
         };

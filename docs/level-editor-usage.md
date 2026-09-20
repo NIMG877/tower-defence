@@ -7,7 +7,7 @@
 ## Section 总览（自上而下）
 
 1. **元数据**（MetadataSection）：关卡名/代码/描述/相机/转场贴图
-2. **引用**（ReferencesSection）：拖拽 MapPrefab / EnvironmentalControlDevice
+2. **引用**（ReferencesSection）：MapPrefab（可拖拽引用或一键生成）/ EnvironmentalControlDevice
 3. **经济**（EconomySection）：HP/成本/上限/部署上限/恢复速度
 4. **波次时间线**（WaveTimelineSection）：多 Wave × 多 Track
 5. **地图编辑器**（MapEditorSection）：Tab 切换"地图"（方块/传送门）与"路径"
@@ -60,9 +60,13 @@ CommandType 0 的卡片上按 `GapsFromLastRepeat` 画深绿正方形标记，�
 ## 地图编辑器（地图 / 路径 Tab）
 
 - **地图 Tab**（MapEditTab）：单字段画刷 + 橡皮 + 传送门两点模式，直接编辑 `LevelData.MapData`（经 BlockMapCache 读写）。地图方块与传送门都在这里编辑。
-- **路径 Tab**（PathEditTab）：编辑路径检查点。
+- **路径 Tab**（PathEditTab）：编辑路径检查点。右侧栏在检查点列表与详情之间有**长度查询**模块：选起点/终点检查点，按当前 moveMethod 沿 A* 折线逐段累加路径长度（与画布绿线同源，含绕障；某段不可达标红）；可选填移动速度（格/秒）折算耗时 = 长度/速度 + 途经点 WaitTime（起点等计入、终点等不计，与运行时"到点先等再走"口径一致；负等待按 0）。
 
-MapPrefab 仍按引用拖入，预制体本身在 Prefab 工程内制作。
+MapPrefab 无需手工搭建：引用节的 **生成 MapPrefab** 按钮按当前 `MapData` 生成/重建预制体的地块方块（每个画过的格子一个 Quad 子物体，位置 = 格点 (j, i)，z=0.01；材质按 地穴/高台/地面 三槽位选择，槽位留空则该类格子呈紫红占位）。生成规则：
+
+- 首次生成落在 LevelData 同目录 `Map.prefab`，并自动填入引用；已引用的 prefab 则原地重建（保 GUID，其他资产对它的引用不断）。
+- 覆盖已有 prefab 时只删除"会被运行时当成地块"的子物体（整数格点 + MeshRenderer，与 `MapDataManager.MapInitialize` 的消费判据同源），SpriteRenderer 出生点标记等手工装饰原样保留，生成可反复迭代。
+- 生成后点 **编辑** 进入 Prefab 模式换材质、摆装饰；之后在地图 Tab 重画格子再点生成，装饰仍在。
 
 ## 校验条
 
