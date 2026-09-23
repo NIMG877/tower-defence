@@ -7,7 +7,13 @@ from __future__ import annotations
 
 
 class LlmError(Exception):
-    pass
+    """LLM 调用失败。retryable=True：瞬态故障（网络/超时/429/5xx），退避重试有意义；
+    retryable=False：确定性失败（配置缺失、4xx 拒绝——上下文超限/鉴权/模型名错），
+    同一请求重发只会得到同一结果，调用方应直接进降级判定。"""
+
+    def __init__(self, message: str, retryable: bool = True):
+        super().__init__(message)
+        self.retryable = retryable
 
 
 # 进程级 LLM 用量累计（评测的成本口径；agent 每次生成取快照差值进 report.tokens）。
@@ -44,7 +50,7 @@ def chat_tools(messages: list[dict], tools: list[dict], cfg,
     （GLM-5.3 系 low/high/max；None=不传走 API 默认）。"""
     model = model or cfg.llm_model
     if not cfg.llm_api_key or not model:
-        raise LlmError("config.llm_api_key / config.llm_model 未配置")
+        raise LlmError("config.llm_api_key / config.llm_model 未配置", retryable=False)
 
     import httpx  # 延迟导入：纯逻辑测试不需要装它
 
@@ -52,6 +58,11 @@ def chat_tools(messages: list[dict], tools: list[dict], cfg,
                "temperature": cfg.llm_temperature, "tools": tools}
     if effort:
         payload["reasoning_effort"] = effort
+    # 保留式思考（官方 thinking-mode 文档）：GLM-5.3 仅支持 type=enabled；显式传
+    # clear_thinking 固定行为不随端点默认漂移（True 保留 / False 清除），
+    # agent 侧配套决定是否回传 reasoning_content 原文。
+    payload["thinking"] = {"type": "enabled",
+                           "clear_thinking": not cfg.llm_preserve_thinking}
     try:
         resp = httpx.post(
             cfg.llm_base_url.rstrip("/") + "/chat/completions",
@@ -63,5 +74,11 @@ def chat_tools(messages: list[dict], tools: list[dict], cfg,
         data = resp.json()
         _accumulate(data)
         return data["choices"][0]["message"]
-    except Exception as exc:  # noqa: BLE001 —— 网络/协议错误统一转 LlmError
+    except httpx.HTTPStatusError as exc:
+        # 状态码分类：408/429/5xx 是瞬态（限流/过载/网关超时），退避重试有意义；
+        # 其余 4xx（上下文超限/鉴权/模型名错）是确定性拒绝，重发同请求无意义。
+        status = exc.response.status_code
+        raise LlmError(f"LLM request failed: {exc}",
+                       retryable=status in (408, 429) or status >= 500) from exc
+    except Exception as exc:  # noqa: BLE001 —— 网络断连/协议错误统一转 LlmError（瞬态）
         raise LlmError(f"LLM request failed: {exc}") from exc

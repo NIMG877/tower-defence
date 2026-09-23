@@ -77,6 +77,9 @@ consulo/
 .superpowers/
 .codex/
 
+# Runtime-generated LLM ability assets (editor GeneratedSkillImporter writes here)
+Assets/Resources/GeneratedAbilities/
+
 # Keep these Unity project files tracked:
 # - Assets/** including .meta files, scenes, prefabs, ScriptableObjects, sprites,
 #   audio, models, fonts, plugins, Resources, StreamingAssets, and TextMesh Pro.
@@ -89,4 +92,5 @@ __pycache__/
 .venv/
 ability-server/logs/
 ability-server/out/
+ability-server/evals/reports/
 .pytest_tmp/

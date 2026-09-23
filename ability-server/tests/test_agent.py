@@ -271,6 +271,72 @@ def test_llm_error_keeps_loop_alive(monkeypatch):
     assert phases  # 错误经 phase 可见（Unity 日志滚动）
 
 
+def test_deterministic_llm_error_aborts_without_retry(monkeypatch):
+    """确定性 LLM 错误（上下文超限类）：跳过退避重试，直接进降级判定。"""
+    calls = {"n": 0}
+
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return _scripted_plan_and_draft()
+        raise llm.LlmError("context length exceeded", retryable=False)
+
+    monkeypatch.setattr(llm, "chat_tools", fake_chat_tools)
+    response = agent.run(make_request(), tiered_cfg(), SCHEMA)
+    assert response["status"] == "ok", response["report"]
+    assert response["degraded"] is True
+    assert response["report"]["degradedReason"] == "llm_error_deterministic"
+    assert calls["n"] == 2  # 第二轮失败后不再重试
+    assert response["trace"][-1]["retryable"] is False
+    assert response["ability"]["abilityId"] == "gen_a2"
+
+
+def test_deterministic_llm_error_without_draft_rejected(monkeypatch):
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
+        raise llm.LlmError("invalid api key", retryable=False)
+
+    monkeypatch.setattr(llm, "chat_tools", fake_chat_tools)
+    response = agent.run(make_request(), tiered_cfg(), SCHEMA)
+    assert response["status"] == "rejected"
+    assert response["report"]["rounds"] == 1
+    assert response["ability"] is None
+
+
+def test_reasoning_content_preserved_across_rounds(monkeypatch):
+    """官方 preserved thinking 约定：assistant 条目带 reasoning_content 原文回传。"""
+
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
+        if len(messages) > 2:  # 第二轮：上轮 assistant 条目应带思考原文
+            assistant = messages[2]
+            assert assistant["role"] == "assistant"
+            assert assistant["reasoning_content"] == "想法A"
+            return tool_call("c2", "submit_skill", {"config": submit_config()})
+        return {**tool_call("c1", "update_plan", {"plan": "计划"}),
+                "reasoning_content": "想法A"}
+
+    monkeypatch.setattr(llm, "chat_tools", fake_chat_tools)
+    response = agent.run(make_request(), tiered_cfg(), SCHEMA)
+    assert response["status"] == "ok", response["report"]
+    assert response["trace"][0]["thinking"] == "想法A"
+
+
+def test_preserve_thinking_off_drops_reasoning_echo(monkeypatch):
+    """关闭保留式思考：assistant 条目不回传 reasoning_content（trace 仍记）。"""
+
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
+        if len(messages) > 2:
+            assistant = messages[2]
+            assert "reasoning_content" not in assistant
+            return tool_call("c2", "submit_skill", {"config": submit_config()})
+        return {**tool_call("c1", "update_plan", {"plan": "计划"}),
+                "reasoning_content": "想法A"}
+
+    monkeypatch.setattr(llm, "chat_tools", fake_chat_tools)
+    response = agent.run(make_request(), tiered_cfg(llm_preserve_thinking=False), SCHEMA)
+    assert response["status"] == "ok", response["report"]
+    assert response["trace"][0]["thinking"] == "想法A"  # 黑盒留证不受开关影响
+
+
 # ---------- 描述模式（无战局快照，CLI 测试入口） ----------
 
 def description_request(**overrides) -> dict:
@@ -442,7 +508,7 @@ def test_trace_captures_per_call_metrics_and_thread(monkeypatch):
 
 
 def test_thread_preserves_malformed_arguments(monkeypatch):
-    """模型发了畸形参数 JSON：循环按 {} 兜底继续，线程里原文留证。"""
+    """模型发了畸形参数 JSON：不派发，回喂真因（malformed + 原文截片），线程留证。"""
     calls = []
 
     def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
@@ -461,6 +527,32 @@ def test_thread_preserves_malformed_arguments(monkeypatch):
     assert response["status"] == "ok", response["report"]
     assistants = [m for m in response["thread"] if m["role"] == "assistant"]
     assert assistants[1]["tool_calls"][0]["function"]["arguments"] == "not-json{"
+    # 回喂的是畸形真因与原文截片，不是缺参类下游错误（模型据此重发而非误修）
+    tool_msgs = [m for m in response["thread"] if m.get("role") == "tool"]
+    assert "malformed tool arguments" in tool_msgs[1]["content"]
+    assert "not-json{" in tool_msgs[1]["content"]
+
+
+def test_non_object_arguments_fed_back_not_dispatched(monkeypatch):
+    """参数是合法 JSON 但非 object（如数组）：按畸形回喂，不进工具派发。"""
+    state = {"n": 0}
+
+    def fake_chat_tools(messages, tools, cfg, model=None, timeout=None, effort=None):
+        state["n"] += 1
+        if state["n"] == 1:
+            return tool_call("c1", "update_plan", {"plan": "计划"})
+        if state["n"] == 2:
+            return {"role": "assistant", "content": None, "tool_calls": [
+                {"id": "c2", "type": "function",
+                 "function": {"name": "read_component_doc",
+                              "arguments": "[1,2]"}}]}
+        return tool_call("c3", "submit_skill", {"config": submit_config()})
+
+    monkeypatch.setattr(llm, "chat_tools", fake_chat_tools)
+    response = agent.run(make_request(), tiered_cfg(), SCHEMA)
+    assert response["status"] == "ok", response["report"]
+    tool_msgs = [m for m in response["thread"] if m.get("role") == "tool"]
+    assert "must be a JSON object" in tool_msgs[1]["content"]
 
 
 def test_mock_mode_has_no_trace():

@@ -11,7 +11,8 @@ plan-agent-framework-v2 §七：跑分达标（§六验收，见 evals/reports/A
     调 chat_tools
     执行工具 → 完整结果回填
     submit_skill 通过即结束；裸文本输出 → 回喂引导，不解析交付
-  预算耗尽（轮数/墙钟/tokens/熔断）→ 降级：交付最近一次 validate_draft ok 的
+  预算耗尽（轮数/墙钟/tokens）或 LLM 错误到头（瞬态连续4次熔断/确定性失败直降）→
+  降级：交付最近一次 validate_draft ok 的
   sanitized 草稿（response.degraded=true + report.degradedReason）；无草稿宁 rejected
 
 路由是显式两态机（§4.3）：调用前必须定 model，而"这轮做什么"只有模型自己
@@ -168,6 +169,18 @@ def trace_entry(round_no: int, model: str | None, call_started: float,
             "durationS": round(time.monotonic() - call_started, 2), **extra}
 
 
+def _assistant_entry(message: dict, cfg, tool_calls: list | None = None) -> dict:
+    """assistant 条目构造：保留式思考开启时，思考原文随条目完整回传（官方约定——
+    工具循环中必须未修改地保留 reasoning_content，保证推理连续性与缓存命中）；
+    关闭时不回传（服务端已清除，回传无意义）。trace 另存思考原文不受影响。"""
+    entry = {"role": "assistant", "content": message.get("content")}
+    if cfg.llm_preserve_thinking and message.get("reasoning_content"):
+        entry["reasoning_content"] = message["reasoning_content"]
+    if tool_calls is not None:
+        entry["tool_calls"] = tool_calls
+    return entry
+
+
 def run(request: dict, cfg, schema: dict, on_phase=None, on_event=None) -> dict:
     reporter = _Reporter(on_phase, on_event)
     started = time.monotonic()
@@ -275,14 +288,18 @@ def run(request: dict, cfg, schema: dict, on_phase=None, on_event=None) -> dict:
             message = llm.chat_tools(thread, tool_defs, cfg, model=model,
                                      timeout=call_timeout, effort=effort)
         except llm.LlmError as exc:
-            # 429/网络瞬断：指数退避重试；连续 4 次失败判定为外部故障（配额耗尽/
-            # 断网），烧完预算只会更糟，直接进降级判定。
+            # 错误分类处置（llm.py 按状态码标 retryable）：瞬态错误（网络/429/5xx）
+            # 指数退避重试，连续 4 次判定外部故障熔断；确定性错误（上下文超限/鉴权/
+            # 配置缺失）重发同请求只会同结果，跳过重试直接进降级判定。
             consecutive_llm_errors += 1
             reporter.report("act", f"llm error ({consecutive_llm_errors}): {exc}")
-            trace.append(trace_entry(round_no, model, call_started, error=str(exc)))
-            if consecutive_llm_errors >= 4:
-                reporter.report("act", "circuit breaker: 4 consecutive llm errors; aborting")
-                return degrade_or_reject("llm_error_circuit_breaker", round_no)
+            trace.append(trace_entry(round_no, model, call_started, error=str(exc),
+                                     retryable=exc.retryable))
+            if not exc.retryable or consecutive_llm_errors >= 4:
+                reason = ("llm_error_circuit_breaker" if exc.retryable
+                          else "llm_error_deterministic")
+                reporter.report("act", f"{reason}; aborting")
+                return degrade_or_reject(reason, round_no)
             thread.append({"role": "user", "content": LLM_ERROR_FEEDBACK.format(exc=exc)})
             time.sleep(min(5 * 2 ** (consecutive_llm_errors - 1), 30))
             continue
@@ -295,27 +312,35 @@ def run(request: dict, cfg, schema: dict, on_phase=None, on_event=None) -> dict:
         trace.append(entry)
         reporter.emit("thinking", entry)
         if not tool_calls:
-            content = message.get("content") or ""
-            thread.append({"role": "assistant", "content": content})
+            thread.append(_assistant_entry(message, cfg))
             nudge = PLAN_REQUIRED_FEEDBACK if ctx.plan is None else BARE_TEXT_FEEDBACK
             thread.append({"role": "user", "content": nudge})
             reporter.report("act", "bare text; nudged")
             state = STATE_ACT
             continue
 
-        thread.append({"role": "assistant", "content": message.get("content"),
-                       "tool_calls": tool_calls})
+        thread.append(_assistant_entry(message, cfg, tool_calls))
         planned_this_round = False
         for call in tool_calls:
             function = call.get("function", {})
             name = function.get("name", "")
-            try:
-                arguments = json.loads(function.get("arguments") or "{}")
-            except json.JSONDecodeError:
-                arguments = {}
+            raw_arguments = function.get("arguments") or ""
             reporter.emit("tool_call", {"round": round_no, "name": name,
-                                        "arguments": function.get("arguments") or ""})
-            result = tools.execute_tool(ctx, name, arguments)
+                                        "arguments": raw_arguments})
+            try:
+                arguments = json.loads(raw_arguments or "{}")
+                if not isinstance(arguments, dict):
+                    raise ValueError("arguments must be a JSON object")
+            except ValueError as exc:
+                # 畸形参数（非法 JSON / 非 object）不派发：回喂真因与原文截片，
+                # 模型据此重发——掩盖真因只会让它收到误导性的缺参类下游错误。
+                # JSONDecodeError 是 ValueError 子类，一并在此捕获。
+                result = json.dumps({"error": f"malformed tool arguments ({exc}); "
+                                              "resend the tool call with corrected arguments",
+                                     "rawArguments": raw_arguments[:2000]},
+                                    ensure_ascii=False)
+            else:
+                result = tools.execute_tool(ctx, name, arguments)
             reporter.report(tools.phase_for(name), f"tool {name}")
             reporter.emit("tool_result", {"round": round_no, "name": name,
                                           "result": result})

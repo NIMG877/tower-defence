@@ -29,6 +29,13 @@ class Config:
     llm_effort_plan: str | None = "max"
     llm_effort_act: str | None = "high"
     llm_effort_draft: str | None = "low"
+    # 保留式思考（连续思考）：True = 服务端保留思考原文（clear_thinking=false），
+    # 且 agent 循环把 assistant 的 reasoning_content 完整回传——官方 thinking-mode
+    # 文档的工具循环约定，推理连续性+缓存命中双收益；False = 显式清除、不回传
+    # （关闭与 A/B 对照）。环境变量 ABILITY_LLM_PRESERVE_THINKING=0 覆盖默认，
+    # 评测/线上开关不必改代码。
+    llm_preserve_thinking: bool = os.environ.get(
+        "ABILITY_LLM_PRESERVE_THINKING", "1").strip().lower() not in ("0", "false", "off")
 
     # v2 单线程自由循环的最大轮数（plan 修订含在内）
     agent_max_rounds: int = 24

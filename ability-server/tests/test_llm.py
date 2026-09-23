@@ -1,4 +1,6 @@
-"""llm 客户端测试：思考强度传参与用量账本（httpx 打桩，不触网）。"""
+"""llm 客户端测试：思考强度/保留式思考传参、错误分类、用量账本（httpx 打桩，不触网）。"""
+
+import pytest
 
 from app import llm
 from app.config import Config
@@ -51,3 +53,37 @@ def test_usage_ledger_includes_reasoning_and_cache(monkeypatch):
     assert delta["calls"] == 1
     assert delta["prompt_tokens"] == 10 and delta["completion_tokens"] == 5
     assert delta["reasoning_tokens"] == 3 and delta["cached_tokens"] == 4
+
+
+def test_preserve_thinking_param_in_payload(monkeypatch):
+    """保留式思考开关：True 传 clear_thinking=false（保留）；False 传 true（清除）。
+    thinking 组始终显式传，行为不随端点默认漂移。"""
+    captured: dict = {}
+    monkeypatch.setattr("httpx.post", _fake_post_factory(captured))
+
+    llm.chat_tools([{"role": "user", "content": "x"}], [], cfg())
+    assert captured["payload"]["thinking"] == {"type": "enabled", "clear_thinking": False}
+
+    llm.chat_tools([{"role": "user", "content": "x"}], [], cfg(llm_preserve_thinking=False))
+    assert captured["payload"]["thinking"] == {"type": "enabled", "clear_thinking": True}
+
+
+def _status_post_factory(status: int):
+    import httpx
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        return httpx.Response(status_code=status, request=httpx.Request("POST", url))
+
+    return fake_post
+
+
+@pytest.mark.parametrize("status,retryable", [
+    (400, False), (401, False), (404, False), (422, False),
+    (408, True), (429, True), (500, True), (503, True),
+])
+def test_http_status_classifies_retryable(monkeypatch, status, retryable):
+    """状态码分类：408/429/5xx 瞬态可重试；其余 4xx 确定性不可重试。"""
+    monkeypatch.setattr("httpx.post", _status_post_factory(status))
+    with pytest.raises(llm.LlmError) as exc_info:
+        llm.chat_tools([{"role": "user", "content": "x"}], [], cfg())
+    assert exc_info.value.retryable is retryable
