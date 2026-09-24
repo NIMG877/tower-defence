@@ -1,5 +1,5 @@
 // 启动时校验静态数据完整性。
-// 触发时机：Editor 启动 / Domain Reload / Asset 重新导入。
+// 触发时机：Editor 加载与每次域重载（含脚本重编译）后。
 // 行为：只读 + Debug.LogWarning，不修改任何资产（避免循环）。
 
 using System.Collections.Generic;

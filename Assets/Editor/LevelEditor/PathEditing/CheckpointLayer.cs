@@ -33,7 +33,7 @@ public static class CheckpointLayer
         float unitY = ViewTransform.CanvasHeight / cache.ISize;
         float unit = Mathf.Min(unitX, unitY) * state.View.Zoom;
         float radius = cache.EntityR;   // 与可移动实体同半径,点即实体落位占地
-        float diameter = 2f * radius * unit;  // 0.5 世界单位直径
+        float diameter = 2f * radius * unit;  // 直径=2×entityR(0.2 世界单位,随 MovableEntityR 自适应)
 
         for (int k = 0; k < cpsProp.arraySize; k++)
         {
@@ -65,7 +65,7 @@ public static class CheckpointLayer
             dot.style.borderRightColor = dot.style.borderLeftColor;
             dot.style.borderTopColor = dot.style.borderLeftColor;
             dot.style.borderBottomColor = dot.style.borderLeftColor;
-            // 选中态略粗 + 更高 alpha 背景区分
+            // 选中态边框宽不变,仅更高 alpha 背景与边框色区分
             if (selected)
             {
                 dot.style.borderLeftWidth = 1;

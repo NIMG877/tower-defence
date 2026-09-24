@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 /// 选起点/终点检查点,对区间内每对相邻检查点跑一次 A*(与 MapCanvasView.DrawPaths
 /// 同一调用:cache.Blocks + cache.EntityR + state.MoveMethod),沿折线逐段累加长度
 /// —— 结果与画布绿线完全同源,含绕障;某段不可达时标红提示,不给直线距离误导值。
-/// 可选填移动速度(格/秒),>0 时折算移动耗时(仅移动,不含 WaitTime)。
+/// 可选填移动速度(格/秒),>0 时折算移动耗时(长度/速度 + 途经点 WaitTime,口径=到点先等再走)。
 /// </summary>
 public static class PathLengthQueryView
 {
@@ -69,7 +69,7 @@ public static class PathLengthQueryView
         // 底行:速度输入 + 耗时结果
         var speedField = new FloatField("速度") { value = 0f };
         speedField.labelElement.style.minWidth = 0;
-        speedField.tooltip = "移动速度(格/秒)。>0 时折算移动耗时,不含检查点 WaitTime";
+        speedField.tooltip = "移动速度(格/秒)。>0 时折算移动耗时:长度/速度 + 途经点 WaitTime";
         speedField.style.flexGrow = 1;
         speedField.style.flexShrink = 1;
         speedField.style.minWidth = 0;

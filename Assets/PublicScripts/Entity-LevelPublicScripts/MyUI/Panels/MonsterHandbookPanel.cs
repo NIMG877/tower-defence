@@ -140,7 +140,7 @@ namespace MyUI
             }
         }
         /// <summary>
-        /// ������ʱ�����������ڵײ�
+        /// 列表向下滚动一行：把首行卡片循环移到底部作为新行，填入新行的怪物头像，数据不足的格子隐藏。
         /// </summary>
         private void LineDown()
         {

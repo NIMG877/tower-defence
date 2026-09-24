@@ -491,7 +491,7 @@ def test_trace_captures_per_call_metrics_and_thread(monkeypatch):
 
     trace = response["trace"]
     assert [e["round"] for e in trace] == [1, 2]
-    # 路由切换发生在计划轮之后：执行 update_plan 的下一轮才进 mid 档
+    # 计划轮后下一轮仍是 plan_pending→strong；本例两轮即 submit，未进 mid 档
     assert [e["model"] for e in trace] == ["strong-model", "strong-model"]
     assert [e["effort"] for e in trace] == ["max", "max"]  # 计划态两轮都深想
     assert trace[0]["thinking"] == "先提交计划再研究。"

@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 /// <summary>
 /// Map-paint tab. See spec §4.3. Single-field brush with portal two-click mode.
 /// Writes to <c>LevelData.MapData</c> via SerializedProperty + Undo.
-/// Layout matches PathEditTab: green collapsible header, path-picker-style size row, toolbar, canvas left, brush right.
+/// Layout matches PathEditTab: green header label, path-picker-style size row, toolbar, canvas left, brush right.
 /// </summary>
 public static class MapEditTab
 {
@@ -213,9 +213,6 @@ public static class MapEditTab
         bar.style.borderTopLeftRadius = 3; bar.style.borderTopRightRadius = 3;
         bar.style.borderBottomLeftRadius = 3; bar.style.borderBottomRightRadius = 3;
 
-        // 工具栏原"✕ 删除选中点"按钮已删 —— 它的功能("删当前 hover cell 的 entry")
-        // 跟 Eraser 工具的左键单击完全重复,而且 Eraser 还支持拖动连续擦。
-
         bar.Add(EditorTabShell.MakeVerticalSeparator());
 
         var toolLabel = new Label("工具:");
@@ -264,7 +261,7 @@ public static class MapEditTab
     static VisualElement BuildCanvasContainer(SerializedObject so, BlockMapCache cache, BrushState brush, PathEditingState state)
     {
         // chrome / status / hint / repaint / cleanup 全部交给 EditorCanvasShell
-        // onDetach 清 HoverCell —— 原本写在 detach 回调里,这里挪进 shell 的清理钩子
+        // onDetach 清 HoverCell(走 shell 的清理钩子)
         var (canvas, status) = EditorCanvasShell.Build(state,
             statusText: "(i, j): -",
             hintText: "左键拖:画/擦 · 右键拖:缩放 · 中键拖:平移",
@@ -615,7 +612,7 @@ public static class MapEditTab
 
             var cell = ScreenToCell(evt.localMousePosition);
             _status.text = cell.HasValue ? $"(i, j): ({cell.Value.i}, {cell.Value.j})" : "(i, j): -";
-            // 同步 hover 状态(供 toolbar 的删除按钮使用)
+            // 同步 hover 状态(供 BuildSelectedCellPanel 显示悬停格字段用)
             if (!NullableEquals(cell, _state.HoverCell))
             {
                 _state.HoverCell = cell;
@@ -794,7 +791,7 @@ public static class MapEditTab
             entry.FindPropertyRelative("canSet").boolValue = _brush.canSet;
             entry.FindPropertyRelative("passableType").intValue = _brush.passableType;
             entry.FindPropertyRelative("deadly").boolValue = _brush.deadly;
-            // portalOutI/J 的 -1 是 "no portal" sentinel(见 Tile.cs:18-19)。
+            // portalOutI/J 的 -1 是 "no portal" sentinel(见 Tile.cs:22-23)。
             // 新建 entry 时 Unity 给 int 字段的默认值是 0,会让 Cell panel 误显示
             // "portal: -> (0, 0)"。新建时显式写 -1;已有 entry 上的 portal 不动 ——
             // 用户可能想保留现有的 portal 出口,只是改其他字段。

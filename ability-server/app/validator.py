@@ -6,8 +6,9 @@
     会在 Parse 层抛异常，等价于拒绝）。
   Warning（仅记录）：未知参数键（丢弃）、字面量不可解析（保留原值，运行时按
     默认值兜底）、词表外 token、type 标签越 ParamValueType 词表（any 参数保留
-    原标签，其余归一为 schema 类型）、读键无生产者、死配置（component op 上的
-    condition / 非 branch 的 elseSteps）。
+    原标签，其余归一为 schema 类型）、读键无生产者、死配置（op 带 condition 但
+    未声明 usesCondition——component op 或 delay 等原语一视同仁 / 非 branch 的
+    elseSteps）。
 
 sanitize 产物是白名单重建的干净 DTO——客户端 Parse 开了
 MissingMemberHandling.Error，任何未知字段都会让注入失败，所以服务端必须
@@ -435,9 +436,9 @@ def _check_host_asset_bounds(entry: dict, canonical: str, path: str, ctx: Walk) 
     if not isinstance(host, dict):
         return
     if canonical == "spawn_entity" and entry["key"] == "spawnIndex":
-        if isinstance(host.get("canSpawnEntities"), list):      # 契约 v2 字段（实体投影列表）
+        if isinstance(host.get("canSpawnEntities"), list):      # 实体投影列表
             registry = host["canSpawnEntities"]
-        elif isinstance(host.get("canSpawnEntityIds"), list):   # 契约 v1 字段（id 列表）
+        elif isinstance(host.get("canSpawnEntityIds"), list):   # 旧版 id 列表（兼容）
             registry = host["canSpawnEntityIds"]
         else:
             return
@@ -446,9 +447,9 @@ def _check_host_asset_bounds(entry: dict, canonical: str, path: str, ctx: Walk) 
     elif canonical == "fire_bullets" and entry["key"] == "bulletDataIndex":
         bullets = host.get("bullets")
         count = host.get("bulletCount")
-        if isinstance(bullets, list):                           # 契约 v2 字段（弹幕投影列表）
+        if isinstance(bullets, list):                           # 弹幕投影列表
             count = len(bullets)
-        elif isinstance(count, bool) or not isinstance(count, (int, float)):  # 契约 v1 字段
+        elif isinstance(count, bool) or not isinstance(count, (int, float)):  # 旧版计数字段（兼容）
             return
         _check_index(entry["value"], int(count), "fire_bullets.bulletDataIndex",
                      "hostAssets.bullets", path, ctx)
@@ -458,7 +459,7 @@ def _check_host_asset_bounds(entry: dict, canonical: str, path: str, ctx: Walk) 
         groups = animations.get("groups") if isinstance(animations, dict) else None
         legal = {n for n in (names or []) + (groups or []) if isinstance(n, str)}
         if not legal:
-            return  # 契约 v2 才携带动画清单，此前无从校验
+            return  # 未携带动画清单则无从校验
         for token in _csv_tokens(entry["value"]):
             if token and token not in legal:  # 客户端按名精确解析（大小写敏感）
                 ctx.add(True, path,

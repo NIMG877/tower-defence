@@ -52,7 +52,7 @@ public readonly struct Modifier
     ///   通常只用于"切换"语义时需写覆盖逻辑，直接加 int 会偏移到相邻枚举值。</item>
     /// <item><b>特殊换算属性</b>：
     ///   <c>AttackSpeed</c>（base=100，设计常量）；<c>HpRecover</c>（base=0，纯增量）；
-    ///   <c>PhysicalDodge</c>/<c>MagicDodge</c>（base=0，magnitude 存<b>未命中概率</b>，迁移用 <c>1-旧值</c>）；
+    ///   <c>PhysicalDodge</c>/<c>MagicDodge</c>（base=1，Final 是<b>未命中乘数</b>，无 buff=1）；
     ///   <c>PhysicalDamageRate</c>/<c>MagicDamageRate</c>（base=1，magnitude 存<b>最终乘数本身</b>，迁移用 <c>1+旧值</c>）。</item>
     /// </list>
     /// <para><b>拼写注意</b>：裸字符串拼错不报编译错，运行时 <see cref="AttributeStore.GetFinal"/>

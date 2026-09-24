@@ -151,7 +151,7 @@ def test_incremental_draft_full_flow():
                                                    "type": "Int", "fromBlackboard": False}]}}})
     assert out["ok"] is True and out["ruleSteps"] == ["modify_cost"]
 
-    # 骨架位置对照：rule1 骨架位是 make_boom，写 modify_cost 记 warning
+    # 骨架位置对照：rule1 声明的是 apply_damage，改写 modify_cost 记 warning
     out = call(ctx, "put_step", {"ruleIndex": 1, "step": {
         "op": "modify_cost", "args": {"entries": []}}})
     assert any("outline expects" in i["message"] for i in out["issues"])

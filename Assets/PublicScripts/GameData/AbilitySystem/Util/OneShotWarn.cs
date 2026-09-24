@@ -13,9 +13,7 @@ namespace AbilitySystem
     /// should namespace their keys with a category prefix to avoid collisions
     /// (e.g. <c>"cond-op:" + op</c>, <c>"bb-missing:" + paramKey</c>).</para>
     ///
-    /// <para>Used by <c>ConditionEvaluator</c> (was <c>_warnedOps</c>) and
-    /// <c>ParamList</c> (was <c>_warnedMissingBlackboard</c> /
-    /// <c>_warnedTypeMismatch</c>).</para>
+    /// <para>Used by <c>ConditionEvaluator</c> and <c>ParamList</c>.</para>
     /// </summary>
     public static class OneShotWarn
     {

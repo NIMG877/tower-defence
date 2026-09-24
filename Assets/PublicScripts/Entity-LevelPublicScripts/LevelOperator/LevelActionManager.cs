@@ -273,7 +273,7 @@ public class LevelActionManager : IManagerStartEnd
     {
         _currentIndex = 0;
         _waveEntities = new List<Entity>();
-        // 从 actions 扫描派生 ID -> 召唤次数,直接喂给 EntityPoolManager(不再走 WaveEntityPrefabIDs 索引)
+        // 从 actions 扫描派生 ID -> 召唤次数,直接喂给 EntityPoolManager
         Dictionary<EntityID, int> entityNum = new Dictionary<EntityID, int>();
         for (int i = 0; i < _waves.Length; i++)
         {

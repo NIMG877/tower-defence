@@ -11,8 +11,7 @@ using UnityEngine.UIElements;
 /// </summary>
 public static class WaveTimelineSection
 {
-    // 每个 Wave 独立的缩放(在 BuildWaveBlock 内定义为局部变量 _zoom,各 Wave 互不影响)
-// 所有 Track 的删除 Action 按钮(供选中状态变化时刷新 enabled)
+    // 所有 Track 的删除 Action 按钮(供选中状态变化时刷新 enabled)
     static readonly List<Button> _allDelActionBtns = new();
 
     // 所有 Track 的详情容器(按 (waveIdx, trackIdx) 索引;选中变化时 ShowDetail 走这里)
@@ -43,7 +42,7 @@ public static class WaveTimelineSection
         Action rebuild = () => RebuildWaves(wavesListContainer, wavesProp, so, onActionSelected, getCurrentSelection);
         rebuild();
 
-        // 顶层按钮行:只有 + 新增 Wave (老的 × 删除 Wave 已删,删除走 per-Wave scaleHeader 里的 ×)
+        // 顶层按钮行:只有 + 新增 Wave (Wave 的删除走刻度行 scaleRow 里的 ×)
         var topBtnRow = new VisualElement();
         topBtnRow.style.flexDirection = FlexDirection.Row;
         topBtnRow.style.marginTop = 6;
@@ -269,7 +268,7 @@ public static class WaveTimelineSection
         addTrackBtn.style.marginRight = 4;
         btnRow.Add(addTrackBtn);
 
-        // 2. 缩放条:Label "缩放 X.Xx" + Slider (本 Wave 独立 _zoom,改它只影响本 Wave)
+        // 2. 缩放条:Label "缩放 X.Xx" + Slider
         var zoomContainer = new VisualElement();
         zoomContainer.style.flexGrow = 1;
         zoomContainer.style.flexBasis = 0;
@@ -417,7 +416,7 @@ public static class WaveTimelineSection
     }
 
     /// <summary>
-    /// 刷新所有 Track 卡片边框(选中 → 3px 亮琥珀;未激活 Track → 1px 琥珀;普通 → 1px 灰)。
+    /// 刷新所有 Track 卡片边框(选中 → 1px 亮琥珀;未激活 Track → 1px 琥珀;普通 → 1px 灰)。
     /// 选中变化时调用,清掉旧的"亮琥珀"高亮并加到新选中的卡片上。
     /// 自动剔除 detached (rebuild 后旧元素) 的 State。
     /// </summary>
@@ -434,7 +433,7 @@ public static class WaveTimelineSection
     }
 
     /// <summary>
-    /// 计算整 Wave 的最大时间(所有 Track / 所有 Action 中 TriggerTime + DurationTime 的最大值)。
+    /// 计算整 Wave 的最大时间(所有 Track / 所有 Action 的 ComputeEndTime 最大值)。
     /// 刻度尺按这个数延伸。
     /// </summary>
     public static float ComputeMaxTimeAcrossTracks(SerializedProperty tracksProp)

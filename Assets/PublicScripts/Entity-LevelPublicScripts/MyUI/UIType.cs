@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// ´¢´æµ¥¸öUIĞÅÏ¢£¨Name£¬Path£©
+/// å‚¨å­˜å•ä¸ªUIä¿¡æ¯ï¼ˆNameï¼ŒPathï¼‰
 /// </summary>
 public class UIType
 {

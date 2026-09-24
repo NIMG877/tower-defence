@@ -5,11 +5,11 @@ using UnityEngine;
 namespace MapData.Tests
 {
     /// <summary>
-    /// Parity test: <see cref="MapPathFinder.AStar{T}"/> (new pure-function home)
-    /// must produce byte-identical output to <see cref="MapDataManager.AStarWayFinding"/>
-    /// (the pre-refactor instance-method implementation).
-    /// These tests run BEFORE the MapDataManager refactor so the old code path
-    /// is still alive and the parity is meaningful.
+    /// Parity test: <see cref="MapPathFinder.AStar"/> (the pure-function home)
+    /// and <see cref="MapDataManager.AStarWayFinding"/> (instance-method entry,
+    /// now a thin delegate to the former) must produce identical output.
+    /// The two entry points coexist, so these cases serve as a regression lock
+    /// against the two paths drifting apart.
     /// </summary>
     public class MapPathFinderTests
     {
@@ -60,7 +60,8 @@ namespace MapData.Tests
             var ld = ScriptableObject.CreateInstance<LevelData>();
             ld.iSize = 3;
             ld.jSize = 3;
-            ld.MapData = new List<Tile>(); // all default = passable
+            // 空 MapData → 全格按 Tile.Default() 补(passableType=2),moveMethod=0 下不可走
+            ld.MapData = new List<Tile>();
 
             var mgr = MakeManager(ld);
             var grid = DenseGrid(ld);
@@ -210,7 +211,7 @@ namespace MapData.Tests
                 new Tile { i = 2, j = 1, highland = true,  passableType = 2 },
                 new Tile { i = 2, j = 3, highland = true,  passableType = 2 },
                 new Tile { i = 2, j = 4, passableType = 0 }, // 注意:不是 highland
-                // (4, 1) 没有 entry → 默认 passableType=0,可走
+                // (4, 1) 没有 entry → Tile.Default() 补 passableType=2
             };
 
             // 偏离格心 ~0.05~0.15(模拟编辑器拖拽手感)

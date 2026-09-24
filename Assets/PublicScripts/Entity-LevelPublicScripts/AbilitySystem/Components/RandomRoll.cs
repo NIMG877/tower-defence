@@ -14,8 +14,9 @@ namespace AbilitySystem.Components
     /// <c>"True"</c> or <c>"False"</c> (matches <c>bool.TryParse</c>).</item>
     ///
     /// <item><b>"value"</b>: <c>input</c> is a 2-float CSV <c>"min,max"</c>.
-    /// Uniform float in <c>[min,max]</c> → writes <c>float.ToString("R")</c>
-    /// (round-trippable, parses back via <c>float.TryParse</c>).</item>
+    /// Uniform float in <c>[min,max]</c> (<c>RandomF</c>, closed interval) →
+    /// writes the <c>float</c> itself; downstream readers should read it back
+    /// as a float.</item>
     ///
     /// <item><b>"list"</b>: <c>input</c> is a string CSV
     /// <c>"a,b,c,..."</c>. Uniform pick → writes the chosen trimmed string.
@@ -24,8 +25,10 @@ namespace AbilitySystem.Components
     ///
     /// <para>All three parameters (<c>input</c>, <c>mode</c>, <c>outputKey</c>)
     /// support <c>fromBlackboard=true</c>; <c>input</c> is always read as a
-    /// string (downstream readers should also read as a string — matches the
-    /// <c>ConditionEvaluator</c> convention).</para>
+    /// string. Writes are heterogeneous — probability / list store strings,
+    /// value stores a float — so downstream readers must fetch each key as the
+    /// type its mode wrote (<c>ConditionEvaluator</c> reads via <c>object</c>
+    /// plus invariant formatting, so either representation compares).</para>
     /// </summary>
     [RegisterComponent("RandomRoll")]
     public class RandomRoll : AbilityComponentBase

@@ -101,10 +101,14 @@ public class SlidersManager : IManagerStartEnd
         return _allTypeSlider.Count - 1;
     }
     /// <summary>
-    /// ����UI��
+    /// 从 type 对应的滑条池取一个滑条绑定到 hostEntity 开始显示;
+    /// 显示中的首个滑条会启动统一刷新循环。
     /// </summary>
-    /// <param name="hostEntity">Ŀ������</param>
-    /// <param name="type">�������ͣ�0-����HP��1-��ɫHP��2-BOSSHP��3-����SP��4-��ɫSP��5-MOVEELEMENT��6-STATICELEMENT</param>
+    /// <param name="hostEntity">目标实体(滑条宿主)</param>
+    /// <param name="type">滑条池槽位。0-4 为构造函数注册的固定池:0=HPSlider_Enemy、
+    /// 1=HPSlider_Turret、2=HPSlider_Enemy(与槽位 0 同一 prefab,并非 BOSS 血条)、
+    /// 3/4=SPSlider_normal;type≥5 无固定池,须先经 AddSliderType 动态注册后方可使用,
+    /// 传入未注册的值会越界。</param>
     public void SetSlider(Entity hostEntity, float smoothSpeed, int type, int positionLayer, bool hideWhenFull, bool moveSlider)
     {
         SliderControllerBasic sc = _sliderPools[type].Get();

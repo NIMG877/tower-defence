@@ -10,8 +10,8 @@ namespace AbilitySystem
     {
         // sharedBlackboard is intentionally uninitialized: caller MUST set it.
         // A forgotten assignment would silently use a fresh empty Blackboard and
-        // break the per-Entity handoff. The one call site (EntityAbilityRunner)
-        // always sets it explicitly.
+        // break the per-Entity handoff. Every call site (EntityAbilityRunner
+        // dispatch, AbilityStepRuntime step conditions) sets it explicitly.
         public Blackboard sharedBlackboard;
         public Entity entity;
         public AbilityEvent currentEvent;
@@ -116,8 +116,8 @@ namespace AbilitySystem
 
         // 黑板是 object 存储：条件键可能是数字计数（write_blackboard add 维护），
         // 也可能是字符串标志（random_roll 的 "True"/"False"）。统一按 object 读出
-        // 后转字符串比较；此前 Get<string> 是硬转型，数字键会在条件求值处抛
-        // InvalidCastException。缺键返回 ""，与既有 "缺失 = 不等" 语义一致。
+        // 后转字符串比较（不能按 string 硬取，数字键会类型不符）。
+        // 缺键返回 ""，与既有 "缺失 = 不等" 语义一致。
         private static string ReadAsString(Blackboard bb, string key)
         {
             object v = bb.Get<object>(key, null);

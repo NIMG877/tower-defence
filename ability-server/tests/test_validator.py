@@ -1,4 +1,4 @@
-"""校验引擎测试——与客户端 AbilityConfigValidatorTests 同案例集同源。"""
+"""校验引擎测试。"""
 
 from app import schema as schema_mod
 from app.validator import validate
@@ -277,7 +277,7 @@ def test_spawn_index_from_blackboard_skips_bound_check():
 
 
 def test_spawn_index_checks_contract_v2_registry_shape():
-    """契约 v2 的 canSpawnEntities（实体投影列表）同样作为注册表长度来源。"""
+    """canSpawnEntities（实体投影列表）同样作为注册表长度来源。"""
     dto = valid_dto()
     dto["rules"][0]["steps"] = [{
         "op": "spawn_entity",
@@ -320,7 +320,7 @@ def test_animation_resource_outside_host_vocabulary_is_error():
 
 
 def test_boundary_checks_skip_when_host_assets_lack_the_lists():
-    """hostAssets 未携带对应清单时无从校验（契约 v2 前没有 animations 字段）。"""
+    """hostAssets 未携带对应清单时无从校验（如缺 animations 字段）。"""
     dto = valid_dto()
     dto["rules"][0]["steps"] = [{
         "op": "apply_animation_override",

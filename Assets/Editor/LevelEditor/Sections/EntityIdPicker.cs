@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 
 /// <summary>
 /// EntityPrefabID 下拉框:从 EntityDataCollection 拉所有 EntityData,选项文案
-/// "<c>-<n> (ChineseName)"。不允许空值 —— 加载时若当前 ID_C 为空,自动落回
+/// "<c>-<n> (EnglishName)"。不允许空值 —— 加载时若当前 ID_C 为空,自动落回
 /// 第一个真实实体并写回(带 Undo, 用户可撤销)。
 ///
 /// 写回:通过 SerializedProperty 的 ID_C / ID_N 子字段双写,支持 Undo。

@@ -161,8 +161,9 @@ namespace AbilitySystem.Components
 
         /// <summary>
         /// 阶段 → 飘字短文案（与 Console 同一增量游标逐条触发，null = 不飘）。
-        /// 游戏化词表：推演=plan、构筑=act、校准=review(validate_draft)、定型=
-        /// submit_skill、降格=degraded、故障=handshake 契约漂移、习得/失败=done 结果。
+        /// 游戏化词表：推演=plan、构筑=act、校准=review(validate_draft)、
+        /// 定型=submit(submit_skill)、降格=degraded、故障=handshake 契约漂移、
+        /// 习得/失败=done 结果。
         /// plan/act 轮次条目从 detail 取轮号（"round N model=..."），工具/异常条目
         /// 退回不带轮号。public 供 EditMode 测试直接断言（测试 asmdef 无
         /// InternalsVisibleTo）。
@@ -206,8 +207,7 @@ namespace AbilitySystem.Components
 
         /// <summary>
         /// 处理 GET /jobs/{jobId} 的完成响应（done 后的原始 JSON）：服务端任务异常/拒绝
-        /// → 报错返回；ok → 终检并注入。public 供 EditMode 测试直接断言（测试 asmdef 无
-        /// InternalsVisibleTo）。
+        /// → 报错返回；ok → 终检并注入。public 供 EditMode 测试直接断言。
         /// </summary>
         public void HandleServerResponse(string rawJson)
         {
@@ -248,9 +248,8 @@ namespace AbilitySystem.Components
         }
 
         /// <summary>
-        /// FromDto（严格反序列化即结构闸）→ 销毁上一代生成物 → ReplaceSkill。
-        /// 返回 runtimeId。public 供 EditMode 测试直接断言（测试 asmdef 无
-        /// InternalsVisibleTo）。
+        /// FromDto（严格反序列化即结构闸）→ ReplaceSkill → 销毁上一代生成物。
+        /// 返回 runtimeId。public 供 EditMode 测试直接断言。
         /// </summary>
         public string ApplyGeneratedAbility(EntityAbilityRunner runner, AbilityConfigDto dto)
         {

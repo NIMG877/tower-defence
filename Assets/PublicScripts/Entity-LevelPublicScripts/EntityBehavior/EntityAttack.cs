@@ -122,12 +122,11 @@ public sealed class EntityAttack
         return true;
     }
 
-    /// <summary>Default implementation is the former NormalAttack behavior.</summary>
+    /// <summary>Default attack implementation.</summary>
     public bool TryToAttack(Entity[] attackTargets, bool forceChange, bool canBeInterrupt)
     {
         if (attackTargets.Length == 0 && canBeInterrupt) return false;
 
-        _entity.entityAM.SetAttackBranch(AttackAnimationBranch.Normal);
         if (!_entity.StateMachine.TrySetAttackState(forceChange, () => AttackByAnimation(attackTargets, canBeInterrupt)))
             return false;
 

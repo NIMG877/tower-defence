@@ -5,8 +5,8 @@ using System.Collections.Generic;
 /// 运行时玩家存档。仅持久化玩家改得动的数据（拥有的角色、各队伍配置等）。
 /// 静态配置（角色基础属性、技能数值等）走 ScriptableObject，不在这里。
 ///
-/// 注意：P1-6 重构后，<see cref="TeamSave.Members"/> 不再是平行 List，而是 <see cref="MemberEntry"/> 列表——
-/// 避免"两个 List 长度不一致"的隐性 bug。旧存档的平行 List 形态直接作废（开发初期无用户数据）。
+/// 注意：<see cref="TeamSave.Members"/> 是 <see cref="MemberEntry"/> 列表（非平行 List），
+/// 避免"两个 List 长度不一致"的隐性 bug。
 /// </summary>
 [Serializable]
 public class PlayerSave

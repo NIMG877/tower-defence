@@ -11,8 +11,8 @@ namespace AbilitySystem
     /// runtime components (BasicScripts) can see it; <c>BasicScripts.asmdef</c> already
     /// references GameData.</para>
     ///
-    /// Used by <see cref="BuffParamParser"/>, <c>AttackEventValueModifier</c> (was inline),
-    /// and <c>ParamList.ParseVector2Int</c> (was inline 2-element split).
+    /// Used by <c>ParamList</c> (GameData data layer: vector/coordinate/array
+    /// parsing) and the <c>RandomRoll</c> component (BasicScripts).
     /// </summary>
     public static class CsvParser
     {

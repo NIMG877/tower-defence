@@ -18,9 +18,12 @@ namespace AbilitySystem.Components
     ///   the <see cref="Entity"/> to rewrite. Empty / unset = no target when
     ///   <c>toSelf=false</c> (component is a no-op).</item>
     ///   <item><c>range</c> (Vector2Int[] via <see cref="ParamList.GetVector2IntArrayLazy"/>,
-    ///   default <c>null</c>) — designer literal format
-    ///   <c>"[x,y],[x,y],..."</c>; fromBlackboard=true accepts <c>Vector2Int[]</c> /
-    ///   <c>Vector2Int</c> / <c>string</c>. Null or empty range = no-op.</item>
+    ///   default <c>null</c>) — literal value must be a JSON int-array
+    ///   <c>"[[x,y],[x,y],...]"</c> (parsed via <c>ComponentConfig.ParseVector2IntArray</c>,
+    ///   i.e. <c>JsonConvert.DeserializeObject&lt;int[][]&gt;</c>; working example:
+    ///   spot_s1.asset's <c>range</c> param); fromBlackboard=true accepts
+    ///   <c>Vector2Int[]</c> / <c>Vector2Int</c> / <c>string</c>. Null or empty
+    ///   range = no-op.</item>
     /// </list>
     /// </summary>
     [RegisterComponent("AttackRangeOverride")]
@@ -60,8 +63,7 @@ namespace AbilitySystem.Components
         }
 
         // EntityVision.Range setter takes (int x, int y)[]; Vector2Int[] is designer-friendly
-        // but not assignable. Cheap shape conversion — same one the old Skill.cs used for
-        // its _skillAttackRange field (see legacy-skill-archive tag).
+        // but not assignable. Cheap shape conversion.
         private static (int x, int y)[] ToTupleRange(Vector2Int[] range)
         {
             var arr = new (int x, int y)[range.Length];

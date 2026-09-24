@@ -9,7 +9,7 @@ using UnityEngine;
 /// 写入策略：先备份主档到 .bak，再写临时文件，最后原子 rename。
 /// 读取策略：主档 -> 备份 -> 新建默认。三级降级保证不丢数据不卡死。
 ///
-/// 写入约定（P0-3 收口）：
+/// 写入约定：
 /// - 调用方应使用本类提供的 <c>SetTeamMembers</c> 等写 API，内部已自动 <see cref="Save"/>
 /// - 不要直接修改 <see cref="Current"/> 返回的 <see cref="PlayerSave"/> 后忘了 Save——会丢数据
 /// </summary>
@@ -91,7 +91,7 @@ public static class SaveSystem
         return save;
     }
 
-    // ===== 查询 / 修改 helper（P0-3 收口） =====
+    // ===== 查询 / 修改 helper =====
 
     /// <summary>按名字找一支队伍。找不到返回 null。</summary>
     public static TeamSave GetTeam(string teamName)

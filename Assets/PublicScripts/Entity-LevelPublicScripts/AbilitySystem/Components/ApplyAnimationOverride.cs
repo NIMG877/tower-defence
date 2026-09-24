@@ -50,8 +50,9 @@ namespace AbilitySystem.Components
             Debug.LogWarning($"ApplyAnimationOverride: unknown mode '{mode}'; expected 'once' or 'override'");
         }
 
-        // once registers a one-shot entry: no state transition, each covered slot
-        // is consumed the next time the machine naturally plays it. override
+        // once registers a one-shot entry: no state transition, the entry is
+        // consumed whole the first time the machine naturally plays any of its
+        // covered slots (see AnimationMachine.AddOneShotOverride). override
         // registers a persistent entry. Both record revocable handles to outputKey.
         private void Register(AbilityContext ctx, List<Entity> targets, AnimationOverride animations, bool oneShot)
         {

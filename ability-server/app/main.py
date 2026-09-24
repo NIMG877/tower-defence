@@ -2,7 +2,7 @@
 
 同步：POST /generate-ability（阻塞至 Agent 跑完）
 异步：POST /generate-ability/async → {jobId}，GET /jobs/{jobId} 轮询阶段状态
-      （phases 实时追加，词表 plan/act/review/submit/done/degraded，客户端只打印不解析）
+      （phases 实时追加，词表 plan/act/review/submit/done/degraded/handshake，客户端只打印不解析）
 
 启动：cd ability-server && uvicorn app.main:app --host 127.0.0.1 --port 8765
 （无 key 冒烟：把 app/config.py 的 llm_mock 改为 True）

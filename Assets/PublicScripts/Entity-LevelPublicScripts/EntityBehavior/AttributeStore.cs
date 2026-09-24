@@ -60,7 +60,7 @@ public class AttributeStore
             AttrState s = EnsureState(modifiers[i].attribute);
             s.entries.Add(new Entry { mod = modifiers[i], group = group });
             s.dirty = true;
-            _states[modifiers[i].attribute] = s;   // struct: 写回
+            _states[modifiers[i].attribute] = s;
         }
         return group;
     }
@@ -79,7 +79,7 @@ public class AttributeStore
             if (removed > 0)
             {
                 s.dirty = true;
-                _states[key] = s;   // struct: 写回
+                _states[key] = s;
             }
         }
     }
@@ -98,7 +98,7 @@ public class AttributeStore
         {
             s.cached = Compute(s);
             s.dirty = false;
-            _states[attribute] = s;   // struct: 写回
+            _states[attribute] = s;
         }
         return s.cached;
     }
@@ -114,7 +114,7 @@ public class AttributeStore
             if (s.entries != null) s.entries.Clear();
             s.dirty = true;
             s.cached = 0f;
-            _states[key] = s;   // struct: 写回
+            _states[key] = s;
         }
     }
 

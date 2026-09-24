@@ -120,7 +120,7 @@ public static class WaveActionCard
             card.style.backgroundColor = CommandTypeColor(cmd);
 
             // 边框三态(优先级从高到低):选中 > 未激活 Track > 普通
-            // - 选中:3px 亮琥珀,视觉强调当前编辑对象
+            // - 选中:1px 亮琥珀,视觉强调当前编辑对象
             // - 未激活 Track(Locked):1px 琥珀,提示运行时该 Action 不参与
             // - 普通:1px 灰
             bool isSelected = selW == waveIdx && selT == trackIdx && selA == i;
@@ -155,7 +155,8 @@ public static class WaveActionCard
             // 仅 CommandType == 0(spawner)绘制。其他类型(静态/路径预览/dialog/剧情)无运行时 repeat 行为。
             // GapsFromLastRepeat.Length = N 时,画 N 个正方形 — 每次 repeat 触发点各一个。
             // g 从 0 开始:第 g 次 repeat 在 triggerTime + sum(gaps[0..g]) 位置。
-            // 例:gaps=[0, 32, 32, 16] → 4 个正方形,中心在 card.left + 0/+32/+64/+80 px。
+            // 例:gaps=[0, 32, 32, 16] → 4 个正方形,中心在 card.left + cumGap×pxPerSec
+            //   (默认 24 px/s 时即 +0/+768/+1536/+1920 px)。
             //   - g=0 时 cumGap=0 → 正方形贴卡片左端(主触发后立即 repeat 的视觉化)
             //   - g=3 时 cumGap=sum(全部) → 正方形在卡片右端(最后一次 repeat)
             var squareContainer = state.SquareContainers[i];

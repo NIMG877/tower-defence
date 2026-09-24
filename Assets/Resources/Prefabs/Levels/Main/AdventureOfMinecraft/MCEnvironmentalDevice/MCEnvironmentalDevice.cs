@@ -9,14 +9,18 @@ using static UnityEngine.EventSystems.EventTrigger;
 public class MCEnvironmentalDevice : MonoBehaviour, IManagerStartEnd
 {
     /// <summary>
-    /// ñ£©±HungryRate>100Ù¶ë¹¥ÖµÙ»Ö¸Ğµã±¥80<HungryRate<=100ÖµÖ¸ó£©³Ì¬30<HungryRate<=80Ğ§Õ¸0<HungryRate<=30Ù¶ë¹¥Â½HungryRate=0Ù¶ë¹¥Â½Ò»Û³Öµ
+    /// ¼¢¶öÏµÍ³(×Ö¶ÎÊÇ HungryValue,ËæÊ±¼äÃ¿ÃëË¥¼õ 0.15,Ç¯ÔÚ 0~130):
+    /// HungryValue>100 Ê±Î´ÂúÑªÃ¿Ãë¿Û 200 Ñª²¢»ØÂä 2 µã;80<HungryValue<=100 Ê±Î´ÂúÑªÃ¿Ãë¿Û 40 Ñª²¢»ØÂä 0.4 µã;
+    /// HungryValue==0 Ê±Ã¿Ãë¿Û 50 Ñª¡£Ôö¼õÒæµµÎ»:>100 ¹¥»÷+15%/¹¥ËÙ+30;30<HungryValue<=100 ÎŞÔö¼õ;<=30 ¹¥»÷-15%/¹¥ËÙ-30¡£
     /// </summary>
     private class EntityAndHungryMessage
     {
 
         public Entity Entity;
         /// <summary>
-        /// ×´Ì¬0-1-2-
+        /// ×´Ì¬ÖÖ±ğ(¹¹ÔìÊ±´«Èë,µ±Ç° ToStart ¹Ì¶¨ 0):×÷ StatImages Í¼±ê×éÏÂ±ê,
+        /// Îª 1 Ê±¹¥»÷³É¹¦Ã¿´Î¶à¿Û 5 µã¼¢¶öÖµ(·ñÔò 1)¡£¼¢¶öÔö¼õÒæµµÎ»²»È¡
+        /// ¾öÓÚËü,ÓÉ Update() °´ HungryValue ãĞÖµÇĞ»»¡£
         /// </summary>
         public int HungryState;
         private float _hungryValue;

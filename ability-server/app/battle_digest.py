@@ -1,4 +1,4 @@
-"""战局 digest：从契约 v2 快照计算注入用战局摘要（agent 首条 user 消息）。
+"""战局 digest：从战局快照计算注入用战局摘要（agent 首条 user 消息）。
 
 设计依据（plan-agent-framework-v2 §4.1）：长结构化 JSON 对 flash 档模型有
 lost-in-the-middle / 嵌套扫描不可靠 / 规模无界 / 输出复述污染四类实害，派生
@@ -52,7 +52,7 @@ def _self_record(snapshot: dict) -> dict:
 
 def build(snapshot: dict, nearest_k: int = NEAREST_K,
           bands: tuple[float, ...] = DISTANCE_BANDS) -> dict:
-    """快照 → digest（纯函数，pytest 可测）。契约 v2 形状：self 在 entities。"""
+    """快照 → digest（纯函数，pytest 可测）。快照形状：self 拍平在 entities。"""
     self_rec = _self_record(snapshot)
     self_pos = _pos(self_rec)
     entities = snapshot.get("entities") or []

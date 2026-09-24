@@ -5,15 +5,15 @@ using UnityEngine;
 public interface IPoolOperation
 {
     /// <summary>
-    /// ʵ���Ԥ�ȼ��غ��������ö�����á�
+    /// 实体池预热加载函数【不用额外调用】
     /// </summary>
     void PreWarm();
     /// <summary>
-    /// ��ʼ����ÿ��ʵ�����ʱ���á����ö�����á�
+    /// 初始化，每次实体出池时调用【不用额外调用】
     /// </summary>
     void Initialize();
     /// <summary>
-    /// ���ߣ�ÿ��ʵ�����ʱ���á����ö�����á�
+    /// 休眠，每次实体入池时调用【不用额外调用】
     /// </summary>
     void Dormancy();
 }

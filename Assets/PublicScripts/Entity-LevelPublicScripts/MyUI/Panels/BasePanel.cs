@@ -35,16 +35,16 @@ namespace MyUI
                 {
                     return t;
                 }
-                Debug.LogWarning($"δ�������� {child.name} �з������{typeof(T)}");
+                Debug.LogWarning($"在 {child.name} 上未找到组件 {typeof(T)}");
                 return null;
             }
-            Debug.LogWarning($"δ�ҵ�·�� {path} ��Ӧ��������");
+            Debug.LogWarning($"未找到路径 {path} 对应的子物体");
             return null;
 
         }
 
         /// <summary>
-        /// UI����ʱ�Ĳ�������ʼ���ȣ�
+        /// 面板入栈进入（Push 对新栈顶调用）：激活 UI 并置于最前，alpha 从 0 淡入到 1（0.2 秒，不受 TimeScale 影响）。
         /// </summary>
         public virtual void OnEnter()
         {
@@ -61,14 +61,14 @@ namespace MyUI
             }, 0, 1, 0.2f).SetTarget(UIGroup).SetUpdate(true);
         }
         /// <summary>
-        /// UI��ͣʱ�Ĳ���
+        /// 面板被覆盖暂停（Push 对原栈顶调用）。基类无操作，子类可覆盖。
         /// </summary>
         public virtual void OnPause()
         {
 
         }
         /// <summary>
-        /// UI����ִ�еĲ���
+        /// 面板恢复栈顶（Pop/PopTo 对新栈顶调用）：重新激活并置于最前。
         /// </summary>
         public virtual void OnResume()
         {
@@ -76,7 +76,7 @@ namespace MyUI
             UIObject.SetActive(true);
         }
         /// <summary>
-        /// UI�˳�ʱ�Ĳ���
+        /// 面板出栈退出（Pop/PopTo 对被移除面板调用）：alpha 从 1 淡出到 0（0.2 秒），淡出完成后在 OnComplete 中 SetActive(false) 收尾。
         /// </summary>
         public virtual void OnExit()
         {

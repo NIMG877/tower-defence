@@ -14,9 +14,6 @@ using UnityEngine.UIElements;
 ///       Path tab:把 status.name 改成 "cursor-readout",EditorPathManipulator 通过
 ///                canvas.Q<Label>("cursor-readout") 拿
 ///       Map  tab:直接传给 MapEditManipulator 构造函数,manipulator 写它
-///
-/// 修复的潜在 bug:原 MapCanvasView.Build 订阅了 state.Changed 与 Undo.undoRedoPerformed
-/// 但没注册 DetachFromPanelEvent 清理,tab 切换会泄漏订阅。这里统一清理。
 /// </summary>
 public static class EditorCanvasShell
 {
@@ -79,8 +76,8 @@ public static class EditorCanvasShell
         state.Changed += stateRepaint;
         Undo.undoRedoPerformed += undoRepaint;
 
-        // Cleanup on detach —— 修原 MapCanvasView 漏掉的 DetachFromPanelEvent 订阅,
-        // 防止 tab 切换后 state.Changed / Undo.undoRedoPerformed 列表里残留死引用。
+        // DetachFromPanelEvent 统一清理订阅,防止 tab 切换后
+        // state.Changed / Undo.undoRedoPerformed 列表里残留死引用。
         canvas.RegisterCallback<DetachFromPanelEvent>(_ =>
         {
             state.Changed -= stateRepaint;

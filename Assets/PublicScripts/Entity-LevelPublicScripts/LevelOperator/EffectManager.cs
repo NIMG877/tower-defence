@@ -20,7 +20,7 @@ public class EffectManager : IManagerStartEnd
     }
 
     /// <summary>一条借出记录：实例、粒子/拖尾组件、autoReturn 时被临时改写的粒子原值。
-    /// 原实现用三个平行列表靠索引对齐，归还时 IndexOf + 三表同步删除，现合并为单记录。</summary>
+    /// 三类信息合一记录，归还时按记录整体处理，无需跨表对齐。</summary>
     private sealed class BorrowedEffect
     {
         public GameObject Instance;
@@ -41,7 +41,7 @@ public class EffectManager : IManagerStartEnd
         private readonly Action<GameObject> _onReturned;
         private readonly List<BorrowedEffect> _borrowed = new List<BorrowedEffect>();
         // 拖尾基准时长按实例缓存：借出时绝对赋值 baseTime/timeScale，
-        // 修掉原实现每次出池 /= timeScale 的复用累除 bug
+        // 若按相对值缩放会跨复用累除，故必须绝对赋值
         private readonly Dictionary<GameObject, float[]> _trailBaseTimes =
             new Dictionary<GameObject, float[]>();
         private bool _autoReturnLoopRunning;

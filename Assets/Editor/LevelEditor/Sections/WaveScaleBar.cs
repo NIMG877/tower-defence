@@ -58,7 +58,6 @@ public static class WaveScaleBar
             state.TickLabels.RemoveAt(state.TickLabels.Count - 1);
         }
 
-        // 设置位置 + 文案
         int ti = 0;
         for (float t = 0f; t <= maxTime + 0.001f; t += tickInterval)
         {

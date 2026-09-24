@@ -69,7 +69,6 @@ namespace Wave.Tests
         [Test]
         public void Collect_tie_breaks_by_track_index_then_action_index()
         {
-            // 3 个 Action 都 TriggerTime=5,TrackIndex 0/1/2,ActionIndex 0/0/0
             var wave = new LevelActions.Wave
             {
                 Tracks = new[]
@@ -89,7 +88,6 @@ namespace Wave.Tests
         [Test]
         public void Collect_tie_breaks_by_action_index_within_same_track()
         {
-            // 同 Track 两个 Action 同 TriggerTime
             var wave = new LevelActions.Wave
             {
                 Tracks = new[]

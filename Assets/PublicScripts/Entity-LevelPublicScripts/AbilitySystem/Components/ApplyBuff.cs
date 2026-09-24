@@ -37,7 +37,9 @@ namespace AbilitySystem.Components
         private Func<string> _outputTargetKey;
         private Func<string> _outputBuffKey;
         // aura 模式下 OnTrigger 可能被 OnTick 驱动（每物理帧），GetModifiers 若每次重跑会每帧分配+解析字符串。
-        // 配置 CSV 在 OnInit 后不变，故首次构建后缓存复用。
+        // 缓存是 aura 每 tick 重跑的性能取舍（对照 UpdateBuff 的每次重建）：代价是
+        // 三 CSV 走 fromBlackboard 时只定格首次读到的值、不随后续黑板更新——数值要
+        // 跟随黑板变化的刷新场景交给 UpdateBuff。
         private Modifier[] _builtModifiers;
         private bool _modifiersBuilt;
 
@@ -60,7 +62,7 @@ namespace AbilitySystem.Components
 
         /// <summary>
         /// 把三 CSV（attributes/ops/magnitudes）按下标对齐构造成 Modifier[]，构建后缓存。
-        /// 长度不一致取最短 + 一次性 warn（沿用 AttackEventValueModifier 容错模式）。
+        /// 长度不一致取最短 + 一次性 warn（OneShotWarn）。
         /// attrs/ops 经 GetStringArrayLazy 已 Trim，此处不再重复。
         /// </summary>
         private Modifier[] GetModifiers()
@@ -112,10 +114,8 @@ namespace AbilitySystem.Components
             bool needWrite = !string.IsNullOrEmpty(_outputTargetKey()) && !string.IsNullOrEmpty(_outputBuffKey());
 
             // Per-round collected lists. Sized to the target list so the
-            // downstream blackboard write is one AddRange each. Targets without
-            // a buffController are skipped (continue above), so the two lists
-            // stay aligned: index i in roundTargets matches index i in roundBuffs.
-            // A null in roundBuffs means CreateBuff returned null for that target.
+            // downstream blackboard write is one AddRange each (alignment and
+            // null-slot semantics: see the _outputTargetKey field comment).
             var roundTargets = new List<Entity>(targets.Count);
             var roundBuffs   = new List<Buff>(targets.Count);
 

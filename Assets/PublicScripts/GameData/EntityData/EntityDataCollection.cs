@@ -8,7 +8,7 @@ using UnityEditor;
 /// 实体数据集合（纯存储 SO）。
 /// 只负责把 <see cref="EntityData"/> 数组序列化成 .asset；
 /// 所有查询由 <see cref="EntityDataRepository"/> 负责（懒构建索引）。
-/// 写入请用 <see cref="SetEntityBasicDatas"/>（JSON2DataAsset 工具用），不要反射写私有字段。
+/// 写入请用 <see cref="SetEntityBasicDatas"/>（XLSX2DataAsset 工具用），不要反射写私有字段。
 /// </summary>
 [CreateAssetMenu(menuName = "TD/Static Data/Entity Data Collection", fileName = "EntityDataCollection")]
 public class EntityDataCollection : ScriptableObject, ISerializationCallbackReceiver
@@ -19,7 +19,7 @@ public class EntityDataCollection : ScriptableObject, ISerializationCallbackRece
     public EntityData[] EntityBasicDatas => _entityBasicDatas;
 
     /// <summary>
-    /// 写入入口。由 JSON2DataAsset 工具调用。
+    /// 写入入口。由 XLSX2DataAsset 工具调用。
     /// 自动 EditorUtility.SetDirty 标记，调用方仍需 AssetDatabase.SaveAssets 落盘。
     /// </summary>
     public void SetEntityBasicDatas(EntityData[] data)
@@ -32,7 +32,8 @@ public class EntityDataCollection : ScriptableObject, ISerializationCallbackRece
 
     // —— ISerializationCallbackReceiver ——
     // 不在这里构建索引。索引归 Repository，懒构建。
-    // 这里只放"反序列化后必须立即修的数据"。目前 YAML 失同步的迁移在 OnValidate 里做（见下）。
+    // 这里只放"反序列化后必须立即修的数据"。OnValidate 只做校验告警与重建提示，
+    // 不修改资产（见下）。
 
     void ISerializationCallbackReceiver.OnBeforeSerialize() { }
     void ISerializationCallbackReceiver.OnAfterDeserialize()

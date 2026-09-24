@@ -3,8 +3,8 @@
 客户端快照只含基本信息（自身/实体/地图），派生交叉项由 Agent 按需计算——
 避免把所有可能的指标一次性塞进上下文。
 
-指标语法：`name` 或 `name(arg)`。registry 是唯一词表，工具的描述文本从
-AVAILABLE_ITEMS 生成，LLM 不需要猜。
+指标语法：`name` 或 `name(arg)`。REGISTRY 是唯一词表，工具的描述文本从
+REGISTRY 生成，LLM 不需要猜。
 """
 
 from __future__ import annotations
@@ -70,7 +70,7 @@ def dist(a: tuple[float, float], b: tuple[float, float]) -> float:
 
 
 def self_record(snapshot: dict) -> dict | None:
-    """契约 v2：self 拍平进 entities，selfId 作指针。无 selfId 或指针悬空返回
+    """快照形状：self 拍平进 entities，selfId 作指针。无 selfId 或指针悬空返回
     None（generate 入口的 battle_digest.build 先做形状校验，工具层拿到的是已
     过检的快照）。"""
     self_id = snapshot.get("selfId")

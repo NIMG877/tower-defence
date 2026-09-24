@@ -28,14 +28,14 @@ namespace MyUI
         private Vector2 _dragOffset;
         private bool _isDragging;
         private Vector2 _initialDragPosition;
-        private bool _isHorizontalLock;  // Shift+Ë®Æ½ÍÏ×§Ê±Ëø¶¨
-        private bool _isVerticalLock;    // Shift+´¹Ö±ÍÏ×§Ê±Ëø¶¨
+        private bool _isHorizontalLock;  // Shift+æ°´å¹³æ‹–æ‹½æ—¶é”å®š
+        private bool _isVerticalLock;    // Shift+å‚ç›´æ‹–æ‹½æ—¶é”å®š
 
 
 
         private MapEditorPanel() : base(new UIType("Prefabs/UI/MyUIs/MapEditorPanel"))
         {
-            //ÆÁÄ»·Ö¸îÆ÷
+            //å±å¹•åˆ†å‰²å™¨
             _topLeft = GetComponentInChildrenByPath<Image>("topLeft");
             _bottomLeft=GetComponentInChildrenByPath<Image>("bottomLeft");
             _topRight = GetComponentInChildrenByPath<Image>("topRight");
@@ -45,10 +45,9 @@ namespace MyUI
             _draggerRect = _dragger.GetComponent<RectTransform>();
             InitializeDragger();
         }
-        #region ÆÁÄ»·Ö¸îÆ÷Âß¼­
+        #region å±å¹•åˆ†å‰²å™¨é€»è¾‘
         private void InitializeDragger()
         {
-            // Ìí¼ÓÍÏ×§ÊÂ¼ş¼àÌı
             EventTrigger.Entry dragEntry = new EventTrigger.Entry();
             dragEntry.eventID = EventTriggerType.Drag;
             dragEntry.callback.AddListener((data) => { OnDraggerDrag((PointerEventData)data); });
@@ -61,7 +60,6 @@ namespace MyUI
         }
         private void OnDragStart(PointerEventData eventData)
         {
-            // ¼ÇÂ¼³õÊ¼Î»ÖÃºÍÆ«ÒÆ
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _parentRect,
                 eventData.position,
@@ -77,7 +75,7 @@ namespace MyUI
         {
             if (!_isDragging) return;
 
-            // »ñÈ¡µ±Ç°Êó±êÎ»ÖÃ£¨¾Ö²¿×ø±ê£©
+            // è·å–å½“å‰é¼ æ ‡ä½ç½®ï¼ˆå±€éƒ¨åæ ‡ï¼‰
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _parentRect,
                 
@@ -86,13 +84,12 @@ namespace MyUI
                 out Vector2 currentPosition
             );
 
-            // ¼ÆËãÆ«ÒÆÁ¿
             Vector2 delta = currentPosition - _initialDragPosition;
             
-            // Shift¼ü´¦Àí£¨Ëø¶¨µ¥Öá£©
+            // Shifté”®å¤„ç†ï¼ˆé”å®šå•è½´ï¼‰
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
-                // Ê×´Î°´ÏÂShiftÊ±ÅĞ¶ÏËø¶¨·½Ïò
+                // é¦–æ¬¡æŒ‰ä¸‹Shiftæ—¶åˆ¤æ–­é”å®šæ–¹å‘
                 if (!_isHorizontalLock && !_isVerticalLock)
                 {
                     if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
@@ -110,41 +107,40 @@ namespace MyUI
                 _isVerticalLock = false;
             }
 
-            // ¼ÆËãĞÂµÄdraggerÎ»ÖÃ£¨ÏŞÖÆÔÚ¸¸¾ØĞÎ·¶Î§ÄÚ£©
+            // è®¡ç®—æ–°çš„draggerä½ç½®ï¼ˆé™åˆ¶åœ¨çˆ¶çŸ©å½¢èŒƒå›´å†…ï¼‰
             Vector2 newPos = _draggerRect.anchoredPosition + delta;
             newPos.x = Mathf.Clamp(newPos.x, -_parentRect.rect.width/2 + 50, _parentRect.rect.width/2 - 50);
             newPos.y = Mathf.Clamp(newPos.y, -_parentRect.rect.height/2 + 50, _parentRect.rect.height/2 - 50);
             
-            // ¸üĞÂdraggerÎ»ÖÃ
             _draggerRect.anchoredPosition = newPos;
             
-            // Í¬²½¸üĞÂËÄ¸öÇøÓò
+            // åŒæ­¥æ›´æ–°å››ä¸ªåŒºåŸŸ
             UpdatePanelsLayout(newPos);
             _initialDragPosition = currentPosition;
         }
 
         private void UpdatePanelsLayout(Vector2 draggerPosition)
         {
-            // ½«draggerµÄ¾Ö²¿×ø±ê×ª»»Îª±ÈÀıÖµ£¨0~1£©
+            // å°†draggerçš„å±€éƒ¨åæ ‡è½¬æ¢ä¸ºæ¯”ä¾‹å€¼ï¼ˆ0~1ï¼‰
             float widthRatio = (draggerPosition.x + _parentRect.rect.width/2) / _parentRect.rect.width;
             float heightRatio = (draggerPosition.y + _parentRect.rect.height/2) / _parentRect.rect.height;
 
-            // ×óÉÏÇøÓò£¨ÓÒÏÂ½Ç¸úËædragger£©
+            // å·¦ä¸ŠåŒºåŸŸï¼ˆå³ä¸‹è§’è·Ÿéšdraggerï¼‰
             SetPanelAnchor(_topLeft.rectTransform, 
                 new Vector2(0, heightRatio), 
                 new Vector2(widthRatio, 1));
 
-            // ×óÏÂÇøÓò£¨ÓÒÉÏ½Ç¸úËædragger£©
+            // å·¦ä¸‹åŒºåŸŸï¼ˆå³ä¸Šè§’è·Ÿéšdraggerï¼‰
             SetPanelAnchor(_bottomLeft.rectTransform,
                 new Vector2(0, 0),
                 new Vector2(widthRatio, heightRatio));
 
-            // ÓÒÉÏÇøÓò£¨×óÏÂ½Ç¸úËædragger£©
+            // å³ä¸ŠåŒºåŸŸï¼ˆå·¦ä¸‹è§’è·Ÿéšdraggerï¼‰
             SetPanelAnchor(_topRight.rectTransform,
                 new Vector2(widthRatio, heightRatio),
                 new Vector2(1, 1));
 
-            // ÓÒÏÂÇøÓò£¨×óÉÏ½Ç¸úËædragger£©
+            // å³ä¸‹åŒºåŸŸï¼ˆå·¦ä¸Šè§’è·Ÿéšdraggerï¼‰
             SetPanelAnchor(_bottomRight.rectTransform,
                 new Vector2(widthRatio, 0),
                 new Vector2(1, heightRatio));
@@ -154,8 +150,8 @@ namespace MyUI
         {
             panel.anchorMin = anchorMin;
             panel.anchorMax = anchorMax;
-            panel.offsetMin = Vector2.zero; // left-bottom
-            panel.offsetMax = Vector2.zero; // right-top
+            panel.offsetMin = Vector2.zero;
+            panel.offsetMax = Vector2.zero;
         }
         #endregion
         

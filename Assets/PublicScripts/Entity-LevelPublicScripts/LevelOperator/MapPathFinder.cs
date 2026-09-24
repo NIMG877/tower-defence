@@ -3,14 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Pure-function A* pathfinding — the single source of truth for the
-/// non-Jump variant. Behaviour is byte-identical to the previous
-/// runtime implementation in <see cref="MapDataManager.AStarWayFinding"/>
-/// and the editor-side copy in
-/// <c>Assets/Editor/LevelEditor/PathEditing/EditorPathFinder.cs</c>
-/// (now deleted). All state is local to the call — no singletons, no
-/// instance fields. Reads <see cref="Tile.passableType"/> / portal coords
-/// from a <c>Tile[,]</c> matrix.
+/// Pure-function A* pathfinding — the single source of truth;
+/// <see cref="MapDataManager.AStarWayFinding"/> delegates here. All state is
+/// local to the call — no singletons, no instance fields. Reads
+/// <see cref="Tile.passableType"/> / portal coords from a <c>Tile[,]</c> matrix.
 /// </summary>
 public static class MapPathFinder
 {

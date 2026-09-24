@@ -9,7 +9,7 @@ using Spine.Unity;
 /// </summary>
 public class EntityVisuals : MonoBehaviour, IPoolOperation
 {
-    // applyType 约定值：2=无受击表现（与 EntityStats.ApplyDamage 调用方的约定一致，原 AnimationMachine 同判据）
+    // applyType 约定值：2=无受击表现（与 EntityStats.ApplyDamage 调用方的约定一致）
     private const int ApplyTypeSuppressHurtFlash = 2;
 
     private Entity _entity;

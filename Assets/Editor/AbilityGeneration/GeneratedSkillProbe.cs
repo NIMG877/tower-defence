@@ -6,15 +6,15 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 /// <summary>
-/// 阶段一闭环验证探针（plan-llm-generated-ability）。四个入口：
+/// 阶段一闭环验证探针（plan-llm-generated-ability）。三个入口：
 ///   1. 打印战局快照 —— 验证 BattleSnapshotBuilder（需 PlayMode + 已部署干员）；
 ///   2. 注入探针技能 —— 走完整管线 JSON→Parse→Validate→FromDto→ReplaceSkill，
 ///      效果为部署即 +99 费用（modify_cost 飘字+音效，肉眼可见）；
-///   3. 注入非法技能 —— op 不在注册表，验证校验器拒绝路径（应弹 error 且不注入）；
-///   4. 经本地服务器 Agent 生成 —— 阶段二管线：异步提交快照+opList+宿主清单，
-///      EditorApplication.update 非阻塞轮询 Agent 三阶段状态（analyze/describe/generate，
-///      阶段日志实时滚动，编辑器不卡），完成后客户端终检并 ReplaceSkill 注入。
-///      启动方式见 ability-server/README.md；ABILITY_LLM_MOCK=1 无 key 可跑通。
+///   3. 经本地服务器 Agent 生成 —— 阶段二管线：异步提交快照+opList+宿主清单，
+///      EditorApplication.update 非阻塞轮询任务阶段状态（词表 plan/act/review/submit/
+///      done/degraded/handshake，客户端只打印不解析；阶段日志实时滚动，编辑器不卡），
+///      完成后客户端终检并 ReplaceSkill 注入。
+///      启动方式见 ability-server/README.md；无 key 冒烟把 app/config.py 的 llm_mock 改为 True。
 /// </summary>
 public static class GeneratedSkillProbe
 {
@@ -93,7 +93,7 @@ public static class GeneratedSkillProbe
 
     private const float PollTimeoutSeconds = 900f; // 服务端 v2 预算 660s 硬闸 + 轮询/握手余量，与 GenerateSkill 同步
 
-    /// <summary>菜单④的在途轮询状态；_poll 非 null 即生成进行中（兼作重入闸）。</summary>
+    /// <summary>菜单③的在途轮询状态；_poll 非 null 即生成进行中（兼作重入闸）。</summary>
     private class ServerPoll
     {
         public Entity self;             // 完成时可能已被销毁，用 Unity null 判定

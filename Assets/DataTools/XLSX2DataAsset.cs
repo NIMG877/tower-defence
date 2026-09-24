@@ -1,15 +1,15 @@
 // 静态数据重建工具：从 EntityAttributes.xlsx 重新生成 EntityDataCollection.asset
 // 菜单：Tools > Static Data > Rebuild Entity Collection
-// 流程：读 xlsx → 校验 → 备份旧 .asset → 转换 → 写入 → AssetDatabase.SaveAssets
+// 流程：读 xlsx → 解析转换 → 排序校验 → 备份旧 .asset → 写入 → AssetDatabase.SaveAssets
 //
 // 实现：手写 OpenXML 解析器（0 外部依赖）
 //   xlsx = ZIP 文件 → 解出 xl/sharedStrings.xml + xl/worksheets/sheet1.xml
 //   用 System.IO.Compression.ZipFile（Unity Mono BCL 内置）+ System.Xml.Linq
 //   不依赖任何 NuGet / DLL —— 不受 Unity 平台 / 依赖链问题影响
 //
-// xlsx 布局：第 1-2 行是注释/分组，第 3 行（cell A3）开始是 header + 数据。
-// 用 HeaderRow=2 / DataStart=3 显式定位。
-// xlsx 列名 = 策划用 camelCase；EntityData 字段 = PascalCase。两者映射在 ReadEntityData() 中显式列出。
+// xlsx 布局：第 3 行是中文装饰表头，第 4 行是英文 header（cell A4=ChineseName），第 5 行起是数据。
+// 用 HeaderRow=3 / DataStart=4（0-based）显式定位，见下方常量。
+// xlsx 列名 = PascalCase，与 EntityData 字段同名（ChineseName/EnglishName/CanSpawnEntityIds/CanSpawnEntityCounts 等），在 ReadEntityData() 中按列名取值。
 
 using System;
 using System.Collections.Generic;
@@ -63,7 +63,7 @@ public class XLSX2DataAsset
                 data.Add(d);
             }
 
-            // 4. 排序（与原 xlsx2json.py 行为一致）
+            // 4. 排序（先按 ID_C,再按 ID_N 升序）
             data = data.OrderBy(d => d.ID.ID_C).ThenBy(d => d.ID.ID_N).ToList();
 
             // 5. 校验
@@ -308,8 +308,8 @@ public class XLSX2DataAsset
     }
 
     // ===== 嵌套结构解析（xlsx 里这些列是结构化字符串） =====
-    // xlsx 实际格式：visionRange_L 是 Python tuple list 格式 [(0,0),(0,1)]（python xlsx2json.py 时代产物）
-    //                canSpawnEntityID_L / canSpawnEntityNum_L 是 JSON 数组 ["t-1"] / [1]
+    // xlsx 实际格式：VisionRange 是 Python tuple list 格式 [(0,0),(0,1)]
+    //                CanSpawnEntityIds / CanSpawnEntityCounts 是 JSON 数组 ["t-1"] / [1]
     // 统一在解析前 normalize 为 JSON 数组
 
     // 把 (a,b,c) 转成 [a,b,c]，用于把 Python tuple list 转换成 JSON 数组

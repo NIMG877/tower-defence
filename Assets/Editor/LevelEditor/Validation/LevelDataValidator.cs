@@ -39,9 +39,7 @@ namespace Validation
                 }
             }
 
-            // 规则 3: (已删除 WaveEntityPrefabIDs 字段 — action 直接持有 EntityID)
-
-            // 规则 4: EntityPrefabID 空 -> Error
+            // 规则 3: EntityPrefabID 空 -> Error
             if (data.Waves != null)
             {
                 for (int w = 0; w < data.Waves.Length; w++)

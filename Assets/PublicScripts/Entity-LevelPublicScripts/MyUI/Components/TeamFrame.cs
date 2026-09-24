@@ -111,7 +111,7 @@ namespace MyUI
             }
             _lastSelectNum = _selectedCharacter.Length;
 
-            // 空编队时 delete 按钮变为"删除编队"；空且是唯一一支时禁用（不允许删光所有编队）
+            // 空且非唯一编队时为"删除编队"；空且是唯一编队仍显"清空编队"，仅禁用按钮（不允许删光所有编队）
             bool empty = _selectedCharacter.Length == 0;
             bool soleTeam = SaveSystem.Current.teams.Count == 1;
             _deleteText.text = empty && !soleTeam ? "删除编队" : "清空编队";

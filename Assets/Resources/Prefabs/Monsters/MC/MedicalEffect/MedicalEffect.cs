@@ -24,17 +24,9 @@ public class MedicalEffect
     }
 
     private static MedicalEffect _medicalEffectLauncher;
-    // 0-ÉúÃü»Ø¸´ 1-Ë²¼äÖÎÁÆ 2-ÖĞ¶¾ 3-Ë²¼äÉËº¦ 4-¼¢¶ö 5-±¥¸¹ ...
+    // 0-ç”Ÿå‘½å›å¤ 1-ç¬é—´æ²»ç–— 2-ä¸­æ¯’ 3-ç¬é—´ä¼¤å®³ 4-é¥¥é¥¿ 5-é¥±è…¹ ...
     private GameObject _medicalEffect_stay, _medicalEffect_burst, _medicalEffect_abhere_stay, _medicalEffect_abhere_burst;
-    /// <summary>
-    /// ´´½¨Ò©Ë®Ğ§¹û
-    /// </summary>
-    /// <param name="medicalEffectOrigin">Ò©Ë®Ğ§¹ûÀ´Ô´</param>
-    /// <param name="medicalEffectTarget">Ò©Ë®Ğ§¹ûÄ¿±ê(ÖÃ¿ÕÔòÎªÅç½¦ĞÍÒ©Ë®£¬ÌîĞ´ÔòÎªÒûÓÃĞÍÒ©Ë®)</param>
-    /// <param name="medicalEffectRadius">Åç½¦ĞÍÒ©Ë®½¦Éä°ë¾¶</param>
-    /// <param name="medicalEffectDuration">Ò©Ë®³ÖĞøÊ±¼ä</param>
-    /// <param name="medicalEffectType">Ò©Ë®ÀàĞÍ0-ÉúÃü»Ø¸´ 1-Ë²¼äÖÎÁÆ 2-ÖĞ¶¾ 3-Ë²¼äÉËº¦ 4-¼¢¶ö 5-±¥¸¹ ...</param>
-    /// <param name="medicalEffectLevel">Ò©Ë®Ğ§¹ûµÈ¼¶</param>
+    /// <summary>æŒ‰è¯æ°´ç±»å‹è¿”å›å¯¹åº”ç²’å­é¢œè‰²(0/1 ç»¿,2 è‰ç»¿,3 ç´«,å…¶ä½™ç™½),ä¾›è¯æ°´ç²’å­ startColor ç”¨ã€‚</summary>
     public Color GetMedicalEffectColor(int type)
     {
         return type switch

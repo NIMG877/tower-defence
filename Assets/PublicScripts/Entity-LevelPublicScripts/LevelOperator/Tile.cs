@@ -1,8 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// One grid tile. Replaces the former per-context split (BlockDataEntry for
-/// editor storage, BlockState for runtime) — one struct now serves both.
+/// One grid tile — one struct serves both editor storage and the runtime.
 /// Carries explicit <c>i</c>/<c>j</c> so the same struct works in both the
 /// sparse <c>LevelData.MapData</c> list and the dense runtime
 /// <c>Tiles[i, j]</c> array. Rendering-layer <c>Material</c> references live

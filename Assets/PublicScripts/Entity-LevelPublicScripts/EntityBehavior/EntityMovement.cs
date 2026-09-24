@@ -6,13 +6,13 @@ using UnityEngine;
 /// 持有：
 ///   1. 位置（LocalPosition = transform.position）
 ///   2. 格位（InBlocks 4 元素数组）
-///   3. 阻挡列表（ResistList，原 entityResistList）
+///   3. 阻挡列表（ResistList）
 ///   4. 朝向镜像（mirror of Entity._orientation；Task 2.2 视野子系统已持有，本系统不必再持）
-///   5. 优先级（Priority = raw priority + 1000 * TauntLevel；与原 Entity.Priority 语义一致）
+///   5. 优先级（Priority = raw priority + 1000 * TauntLevel）
 ///
 /// 设计要点：
 ///   - POCO，构造接受 Entity 引用以便访问 transform / Camp / Stats。
-///   - SetPosition 包含 FindSelfInBlocks 副作用（原 EntityPosition setter 的逻辑）。
+///   - SetPosition 包含 FindSelfInBlocks 副作用。
 ///   - Camp getter 镜像 Entity._camp；setter 因有 EntityManager 副作用留 Entity 根（不在本子系统内）。
 ///   - 阵营参与（participateIn）读取自 Stats.IsActive，不在本子系统内重新存储。
 /// </summary>
@@ -33,8 +33,7 @@ public class EntityMovement
     // === 位置 ===
     public Vector2 LocalPosition => _entity.transform.position;
     /// <summary>
-    /// 等价于原 Entity.EntityPosition（get/set 一体，set 隐含 FindSelfInBlocks）。
-    /// 外部代码迁移到 Movement.Position 即可代替原 _entity.EntityPosition。
+    /// 位置（get/set 一体，set 隐含 FindSelfInBlocks 刷新格位）。
     /// </summary>
     public Vector2 Position
     {
@@ -42,7 +41,7 @@ public class EntityMovement
         set => SetPosition(value);
     }
     /// <summary>
-    /// 替代原 Entity.EntityPosition setter。设置 transform.position 并按需刷新所在格位。
+    /// 设置 transform.position 并刷新所在格位（FindSelfInBlocks）。
     /// </summary>
     public void SetPosition(Vector2 value)
     {
@@ -53,7 +52,7 @@ public class EntityMovement
     // === 格位 ===
     public (int i, int j)[] InBlocks => _inBlocks;
 
-    // === 阻挡列表（原 entityResistList） ===
+    // === 阻挡列表 ===
     public List<Entity> ResistList => _resistList;
 
     // === 稳定阻挡位置（明日方舟 F 点语义：吸附时锁定并覆写，作为同干员后续多敌排开基准） ===
@@ -76,7 +75,7 @@ public class EntityMovement
     // === 参与标志（只读镜像 Stats.IsActive） ===
     public bool IsActive => _entity.Stats.IsActive;
 
-    // === 初始化（替代原 Entity.PreWarm 中的 entityResistList/InBlocks 初始化） ===
+    // === 初始化 ===
     public void Initialize()
     {
         _resistList = new List<Entity>();
@@ -90,7 +89,7 @@ public class EntityMovement
             _inBlocks[i] = (-1, -1);
     }
 
-    // === 格位刷新（替代原 Entity.FindSelfInBlocks） ===
+    // === 格位刷新 ===
     public void FindSelfInBlocks(Vector2 point)
     {
         // 静态实体（干员/召唤物）与可移动实体（敌人）碰撞半径不同，按组件互斥绑定取值

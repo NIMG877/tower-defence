@@ -215,7 +215,7 @@ namespace MyUI
 
         private void UpdateCountText()
         {
-            _countText.text = _remainingCount > 1 ? $"��{_remainingCount}" : string.Empty;
+            _countText.text = _remainingCount > 1 ? $"×{_remainingCount}" : string.Empty;
         }
 
         private void UpdateRespawnVisual()

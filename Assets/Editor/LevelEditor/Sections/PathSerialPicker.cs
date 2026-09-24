@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 /// 的 popup 一致(#{i}: {Name},空 Name 退化 "Path {i}")。
 ///
 /// PathSerial 是 int(索引),直接读写 prop.intValue;无 "-1 / 空" 选项 ——
-/// CommandType 2/3/4 强制需要有效路径,UI 上给 "(无路径)" 提示而不允许选空。
+/// CommandType 0/2/3/4 强制需要有效路径,UI 上给 "(无路径)" 提示而不允许选空。
 /// </summary>
 public static class PathSerialPicker
 {
@@ -54,13 +54,9 @@ public static class PathSerialPicker
             display.Add($"#{i}: {name}");
         }
 
-        // 当前值:clamp 到 [0, pathCount-1],越界时落回 0
+        // 当前值:clamp 到 [0, pathCount-1] 仅用于本帧显示(下越界落 0,上越界落末位),不写回;
+        // 用户在下拉框选择后才写回
         int current = Mathf.Clamp(prop.intValue, 0, pathCount - 1);
-        // 如果 prop 越界,clamp 后会改实际值,下面立即修正
-        if (prop.intValue != current)
-        {
-            // 不在这里写回 — 仅用于显示,用户编辑时再写
-        }
 
         var popup = new PopupField<string>(display, current);
         popup.style.flexGrow = 1;

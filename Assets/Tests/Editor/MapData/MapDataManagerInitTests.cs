@@ -10,7 +10,6 @@ namespace MapData.Tests
         {
             var mgr = new MapDataManager();
             mgr.Initialize();
-            // iSize/jSize default to 0; matrix is null. This is a "no data" state.
             Assert.AreEqual(0, mgr.iSize);
             Assert.AreEqual(0, mgr.jSize);
             Assert.IsNull(mgr.Tiles);
@@ -48,7 +47,6 @@ namespace MapData.Tests
             Assert.AreEqual(0, mgr.Tiles[1, 2].portalOutI);
             Assert.AreEqual(0, mgr.Tiles[1, 2].portalOutJ);
 
-            // unlisted cell: default
             Assert.IsFalse(mgr.Tiles[3, 2].highland);
             Assert.IsFalse(mgr.Tiles[3, 2].canSet);
             Assert.AreEqual(0, mgr.Tiles[3, 2].passableType);

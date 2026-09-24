@@ -126,12 +126,10 @@ namespace MapData.Tests
         }
 
         /// <summary>
-        /// 撞墙时 hitPoint 必须指向**第一个撞到的 cell** 的中心(垂直线)。
-        /// 老 mid-point 算法在垂直线时,Y 列表第一个被检查的 mid-point 是
-        /// ((endPos.y + beginPos.y) / 2) 附近 → 对应 cell 中心。
-        /// DDA 应当报告**射线最先进入的 impassable cell 中心**。
-        /// (0.5,0.5) → (4.5,0.5) 撞 (0,0):hitPoint ≈ (0.5, 0.5)
-        /// (0.5,0.5) → (4.5,0.5) 撞 (2,0):hitPoint ≈ (2.5, 0.5)
+        /// 撞墙时 hitPoint 必须指向**射线最先进入的 impassable cell** 的中心。
+        /// 本例为水平线:(0.5,0.5) → (4.5,0.5) 依次穿过 (0,0)..(4,0),
+        /// 其中只有 (2,0) 不可走,DDA 逐格推进必然最先进入 (2,0),
+        /// hitPoint = 该 cell 中心 (2.5, 0.5)。
         /// </summary>
         [Test]
         public void Hit_returns_first_wall_cell_center_horizontal_line()

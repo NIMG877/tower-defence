@@ -27,7 +27,6 @@ namespace AbilitySystem
         internal bool isCancellingStepExecutions;
 
         // Wire/UnwireRuntime 存放在这里;EntityAbilityRunner 负责 set/clear 这个字段。
-        // 见 spec §3.2。
         public Action _wireTeardown;
 
         public AbilityContext MakeContext(

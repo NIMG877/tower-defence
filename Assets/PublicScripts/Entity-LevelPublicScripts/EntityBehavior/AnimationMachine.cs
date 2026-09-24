@@ -3,12 +3,6 @@ using Spine;
 using Spine.Unity;
 using UnityEngine;
 
-public enum AttackAnimationBranch
-{
-    Normal,
-    Charge,
-}
-
 public sealed class AnimationOverrideHandle
 {
     internal int Id;
@@ -33,7 +27,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     private AnimationSet _activeAnimations;
     private readonly List<OverrideEntry> _overrides = new List<OverrideEntry>();
     private int _nextOverrideId;
-    private AttackAnimationBranch _attackBranch;
 
     // 当前攻击编排段（播完上报以 逻辑状态/相位 + Animation 对象身份 双重判定，与旧实现同防线；
     // 跨槽位复用同一资产是既有惯用法（曾有用同一资产填 AttackClose/AttackRemote 两槽的配置），身份单义不可靠）
@@ -54,15 +47,6 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
     /// first frame of the attack animation.
     /// </summary>
     public event OperationsOnAttackAnimationBegin OnAttackAnimationBegin;
-
-    /// <summary>
-    /// Attack 分支（普攻/蓄力）：每个 TrySetAttackState 调用点先设分支；
-    /// 蓄力转换失败时调用方须回设 Normal。
-    /// </summary>
-    public void SetAttackBranch(AttackAnimationBranch branch)
-    {
-        _attackBranch = branch;
-    }
 
     public float ResolveAnimationDuration(AnimationSlot slot)
     {
@@ -174,9 +158,8 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
     public void Initialize()
     {
-        // 仅复位分支：Initialize 逆序晚于 Entity.Initialize 的 Start 播放，
-        // 此处若清播完追踪字段会抹掉刚记录的 _startAnim（追踪字段在 OnStateChanged(Default) 清）
-        _attackBranch = AttackAnimationBranch.Normal;
+        // 不在此清播完追踪字段：Initialize 逆序晚于 Entity.Initialize 的 Start 播放，
+        // 清了会抹掉刚记录的 _startAnim（追踪字段在 OnStateChanged(Default) 清）
     }
 
     public void Dormancy()
@@ -257,25 +240,11 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
 
     private void OnAttackStarted(bool continueCombo)
     {
-        bool charge = _attackBranch == AttackAnimationBranch.Charge;
-        AnimationSlot beginSlot, groupSlot;
-        if (charge)
-        {
-            _currentAttackBegin = _activeAnimations.GetSingle(AnimationSlot.ChargeBegin);
-            _currentAttackEnd = _activeAnimations.GetSingle(AnimationSlot.ChargeEnd);
-            _attackGroup = _activeAnimations.GetGroup(AnimationSlot.Charge);
-            beginSlot = AnimationSlot.ChargeBegin;
-            groupSlot = AnimationSlot.Charge;
-        }
-        else
-        {
-            _currentAttackBegin = _activeAnimations.GetSingle(AnimationSlot.AttackBegin);
-            _currentAttackEnd = _activeAnimations.GetSingle(AnimationSlot.AttackEnd);
-            bool ranged = thisEntity.Movement.ResistList.Count == 0;
-            _attackGroup = _activeAnimations.GetGroup(ranged ? AnimationSlot.AttackRemote : AnimationSlot.AttackClose);
-            beginSlot = AnimationSlot.AttackBegin;
-            groupSlot = ranged ? AnimationSlot.AttackRemote : AnimationSlot.AttackClose;
-        }
+        _currentAttackBegin = _activeAnimations.GetSingle(AnimationSlot.AttackBegin);
+        _currentAttackEnd = _activeAnimations.GetSingle(AnimationSlot.AttackEnd);
+        bool ranged = thisEntity.Movement.ResistList.Count == 0;
+        _attackGroup = _activeAnimations.GetGroup(ranged ? AnimationSlot.AttackRemote : AnimationSlot.AttackClose);
+        AnimationSlot groupSlot = ranged ? AnimationSlot.AttackRemote : AnimationSlot.AttackClose;
         int length = _attackGroup.Length;
         AnimationReferenceAsset attack = (_sm.AttackComboIndex < length)
             ? _attackGroup[_sm.AttackComboIndex]
@@ -300,7 +269,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
             SetSpineAnimation(_currentAttackBegin, false, scaleB > 1 ? scaleB : 1);
             AddSpineAnimation(attack, false, scale, 0);
             _activeAttackAnim = attack.Animation;
-            ConsumeOneShots(beginSlot, groupSlot);
+            ConsumeOneShots(AnimationSlot.AttackBegin, groupSlot);
         }
         // Fire after tracks are queued (旧实现在轨道排定后触发).
         OnAttackAnimationBegin?.Invoke();
@@ -313,9 +282,7 @@ public class AnimationMachine : MonoBehaviour, IPoolOperation
         {
             _endAnim = _currentAttackEnd.Animation;
             skeleton.state.SetAnimation(0, _currentAttackEnd, false);
-            ConsumeOneShots(_attackBranch == AttackAnimationBranch.Charge
-                ? AnimationSlot.ChargeEnd
-                : AnimationSlot.AttackEnd);
+            ConsumeOneShots(AnimationSlot.AttackEnd);
         }
         else
         {

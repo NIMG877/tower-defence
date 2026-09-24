@@ -316,7 +316,8 @@ def component_index(ctx: "ToolContext") -> dict:
 
 
 def component_doc(ctx: "ToolContext", name: str) -> dict:
-    """read_component_doc 后端:别名/大小写经 schema 解析到 canonical 再查库。"""
+    """read_component_doc 后端:按 canonical 名对 schema 精确查找（无别名/大小写
+    归一），未知名返回 error。"""
     resolved = schema_mod.resolve_op(ctx.schema, name)
     if resolved is None:
         return {"error": f"unknown component '{name}'; call list_components first"}
@@ -624,6 +625,6 @@ def _validate(ctx: ToolContext, config, submit: bool) -> dict:
             return {"accepted": True, "config": sanitized, "issues": issues}
         return {"accepted": False, "issues": issues}
     if ok:
-        ctx.draft = sanitized  # 降级交付源（§4.4；M4 接预算闸）
+        ctx.draft = sanitized  # 降级交付源（预算闸耗尽时由 agent 循环消费：有草稿降级交付，无草稿拒绝）
         return {"ok": True, "issues": issues}
     return {"ok": False, "issues": issues}

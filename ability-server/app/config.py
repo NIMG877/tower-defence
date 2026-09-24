@@ -54,7 +54,8 @@ class Config:
     rate_limit: int = 10
     rate_window_seconds: int = 60
 
-    # 快照哈希 → 响应 的内存缓存条数上限
+    # 生成请求键（opList+battleSnapshot+hostAssets+constraints+description
+    # 五要素 sha256）→响应 的内存缓存条数上限
     cache_size: int = 64
 
     # 失败/成功案例落盘目录（回放调试用），None = 关闭。

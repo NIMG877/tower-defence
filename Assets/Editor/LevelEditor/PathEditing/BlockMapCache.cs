@@ -87,7 +87,7 @@ public sealed class BlockMapCache : IDisposable
     }
 
     /// <summary>
-    /// 收集缓存层面的诊断信息:超出网格范围 / (i,j) 重复 / MapPrefab 上残留旧 BlockData 组件。
+    /// 收集缓存层面的诊断信息:超出网格范围 / (i,j) 重复。
     /// 见 spec §7。
     /// </summary>
     public List<CacheWarning> GetWarnings()

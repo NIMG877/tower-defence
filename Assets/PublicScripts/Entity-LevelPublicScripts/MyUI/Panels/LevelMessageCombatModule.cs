@@ -23,7 +23,7 @@ namespace MyUI
     internal sealed class LevelMessageCombatModule
     {
         private readonly Transform _textRoot;
-        // 场景模板节点，只作克隆源、永不借出（原实现占 list[0] 的隐式约定改为显式字段）
+        // 场景模板节点，只作克隆源、永不借出
         private readonly TextMeshProUGUI _textTemplate;
         private readonly ObjectPool<TextMeshProUGUI> _textPool;
         // 在展示中的飘字注册表：暂停/退出时据此全量收回；归还仅由补间链终点触发
@@ -44,7 +44,7 @@ namespace MyUI
                 () => Object.Instantiate(_textTemplate, _textRoot),
                 actionOnRelease: ResetText,
                 collectionCheck: true);
-            // 共享单池按全场并发峰值增长，预热 8 个（原 6 类型 × 各 4 个 = 30 个常驻）
+            // 共享单池按全场并发峰值增长，预热 8 个
             for (int i = 0; i < 8; i++)
                 _textPool.Release(_textPool.Get());
         }
@@ -126,7 +126,7 @@ namespace MyUI
                 });
         }
 
-        /// <summary>类型 → 颜色与文本。颜色取自原 6 个样本节点的预制体值；
+        /// <summary>类型 → 颜色与文本。颜色为代码内定值；
         /// 未知类型直接抛出，不静默落默认样式。</summary>
         private static (Color color, string content) StyleFor(CombatTextKind kind, int value)
         {

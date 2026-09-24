@@ -158,8 +158,9 @@ namespace MyUI
             }
         }
 
-        /// <summary>按运算方式区分显示:直接加算 +300 / 直接百分比 +15% /
-        /// 最终加算 +50(最终) / 最终乘算 ×1.5。语义见 ModifierOp。</summary>
+        /// <summary>按运算方式区分显示:AddPercent ±x%;AddFlat 与 AddFlatFinal
+        /// 输出完全相同,均为 ±x(无后缀区分);MulFinal ×p%(如 1.5 显示 ×150%)。
+        /// 语义见 ModifierOp。</summary>
         private static string FormatMagnitude(Modifier modifier)
         {
             switch (modifier.op)

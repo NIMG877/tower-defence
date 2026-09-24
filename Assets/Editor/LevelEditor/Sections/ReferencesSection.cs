@@ -5,7 +5,6 @@ using UnityEngine.UIElements;
 /// <summary>
 /// 引用节: MapPrefab / EnvironmentalControlDevice (单 GameObject)。
 /// MapPrefab 除手填外支持一键生成/重建(见 MapPrefabGenerator)。
-/// WaveEntityPrefabIDs 字段已删除 — action 直接持有 EntityID。
 /// </summary>
 public static class ReferencesSection
 {

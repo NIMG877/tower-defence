@@ -48,17 +48,14 @@ namespace AbilitySystem
 
         public void OnTick(float dt, float dtMultiplier)
         {
-            // Recovery
             if (_cfg.recoverMode == SpRecoverMode.Natural)
             {
                 RecoverSp(dt * dtMultiplier);
             }
-            // Amount consume
             if (_isActive && _cfg.consumeMode == SpConsumeMode.Natural)
             {
                 ConsumeAmount(dt);
             }
-            // Natural open
             if (!_isActive && _cfg.openMode == AbilityOpenMode.Auto && CanBegin())
             {
                 StartAbility();

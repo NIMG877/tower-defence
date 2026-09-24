@@ -110,7 +110,7 @@ namespace AbilitySystem
         public Vector2 position;
     }
     // 子弹（视觉载弹）抵达目标点销毁时，由宿主侧 FireBullets 桥接派发。
-    // position=销毁时刻实际落点（抛物线含随机偏移，非瞄准点）。
+    // position=销毁时刻实际位置（抛物线弹型弧线含随机偏移、非瞄准点；直线弹落点即瞄准点）。
     public class BulletLandedEvent : AbilityEvent
     {
         public override TriggerEvent TriggerEvent => AbilitySystem.TriggerEvent.OnBulletLanded;

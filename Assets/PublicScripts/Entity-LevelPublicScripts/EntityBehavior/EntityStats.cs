@@ -3,12 +3,13 @@ using System;
 /// <summary>
 /// 实体属性子系统（POCO）。
 /// 持有：
-///   1. 战斗基准属性（_xxxBase：EntityData 原始值 + 关卡环境"基础数值修改" buff，整场战斗不变；储存字段）
+///   1. 战斗基准属性（base：EntityData 原始值 + 关卡环境"基础数值修改" buff，整场战斗不变；
+///      一律经 SetBase 存入 AttributeStore，仅少数例外存 _xxxBase 字段，见"基础属性"区注记）
 ///   2. 含战斗过程 buff 的计算属性（XxxS：computed property，每次访问实时从 AttributeStore.GetFinal 取）
 ///   3. 状态（HP rate、participateIn、hurtable、selectable、isolate、dormant）
 ///
 /// 数据计算流水线（buff 数值走 AttributeStore，Modifier 入口在 BuffController）：
-///   EntityData 原始值 → [+ 关卡环境基础 buff] → _xxxBase（字段，注入 store.SetBase）
+///   EntityData 原始值 → [+ 关卡环境基础 buff] → base（store.SetBase 注入 AttributeStore）
 ///     → [+ 战斗过程 buff（store 聚合 Modifier）] → XxxS（property = _store.GetFinal）
 ///
 /// 设计要点：
@@ -25,7 +26,7 @@ public class EntityStats
 
     // === 基础属性 ===
     // 读侧统一收口：所有数值属性经 store（GetFinal），XxxS 薄壳只做 clamp/强转/复合公式。
-    // base 一律 SetBase 进 store，不再用 _xxxBase 字段参与加法（避免 base 算两次）。
+    // base 一律 SetBase 进 store，_xxxBase 字段不参与加法（避免 base 算两次）。
     // 例外（仍留字段）：
     //   _physicalDodgeBase/_magicDodgeBase：Dodge 固有闪避，参与薄壳 1-(1-固有)*Final（store base=1 是"未命中乘数"）。
     //   _attackNumBase：仅用于 <0 哨兵判断（AttackNum<0 表示无限攻击次数），不参与加法。
@@ -62,8 +63,7 @@ public class EntityStats
     public int TauntLevel => (int)_store.GetFinal("TauntLevel");
 
     // === 计算属性（computed property：_store.GetFinal，O(1) 实时计算） ===
-    // 流水线末段，无中间储存；store 置脏即影响下次读取，调用方不可能读到陈旧值。
-    // 薄壳只做 clamp/强转/复合公式，base+mod 全在 store 内。
+    // 流水线末段，无中间储存。
     public float MaxHpS => Math.Max(0.001f, _store.GetFinal("MaxHp"));
     public float DefS => Math.Max(0, _store.GetFinal("Defense"));
     public float MagicResistanceS => Math.Max(0, _store.GetFinal("MagicResistance"));
@@ -140,12 +140,12 @@ public class EntityStats
     public bool IsIsolated => _isolate;
     public bool IsDormant => _dormant;
 
-    // === 计数变更（替代原 selectable++/hurtable++ 写法） ===
+    // === 计数变更 ===
     public void AddSelectable(int delta) { _selectable += delta; }
     public void AddHurtable(int delta) { _hurtable += delta; }
 
     // === 从 EntityData 装填战斗基准属性（PreWarm 时调用一次，整场战斗不变） ===
-    // 流水线：EntityData 原始值 → [关卡环境"基础数值修改" buff] → _xxxBase
+    // 流水线：EntityData 原始值 → base（一律 store.SetBase 注入 AttributeStore，例外留字段见上）
     // 战斗过程 buff 通过 XxxS computed property 在访问时实时计算。
     public void AttributesCaculateFirst(EntityData data)
     {
@@ -208,7 +208,7 @@ public class EntityStats
         _store.SetBase("VisionRadius", data.VisionRadius);
     }
 
-    // === HP 自然恢复（原 Entity.FixedUpdate 中 current_hp_rate < 1 分支） ===
+    // === HP 自然恢复 ===
     public void RecoverTick()
     {
         if (_currentHpRate < 1)
@@ -217,7 +217,7 @@ public class EntityStats
         }
     }
 
-    // === 死亡判定（原 Entity.HPUpdate） ===
+    // === 死亡判定 ===
     public void CheckDeath()
     {
         if (CurrentHp <= 0)
@@ -237,7 +237,7 @@ public class EntityStats
     }
 
     /// <summary>
-    /// 受到伤害。完全替代原 Entity.TakeDamage。
+    /// 受到伤害。
     /// 事件 OnBeforeHurt/OnAfterHurt 通过 _entity 桥触发（ref 参数由 Entity 透传）。
     /// 返回：true=本次伤害致命，false=未致命/被闪避/治疗。
     /// </summary>
@@ -313,7 +313,7 @@ public class EntityStats
         }
     }
 
-    // === 池激活时重置状态（原 Entity.Initialize 中的 current_hp_rate=1/participateIn=true/...） ===
+    // === 池激活时重置状态 ===
     public void ResetState()
     {
         _currentHpRate = 1;

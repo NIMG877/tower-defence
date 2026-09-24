@@ -705,7 +705,9 @@ namespace MyUI
             else if (entityData.Skills != null && entityData.Skills.Count > 0)
             {
                 // 部署前预览:显示该干员本次携带(编队选择)的技能。样本实体的
-                // SelectedSkillIndex 恒为默认 0,不代表编队选择,故走卡片配置。
+                // SelectedSkillIndex 由部署方在 CallOut 时重新断言、回池不重置,
+                // 撤退后再预览读到的是上次部署索引,不可信;预览一律走编队卡片
+                // 配置(_context.SelectedPlaceData.SkillIndex),不受该字段影响。
                 config = entityData.Skills[_context.SelectedPlaceData.SkillIndex];
             }
 
@@ -760,7 +762,8 @@ namespace MyUI
         private void ShowBuffDetails(Entity entity)
         {
             // 池化实体契约:CreateNewEntity 必 AddComponent BuffController 且 Entity.PreWarm
-            // 已缓存——部署前(样本实体)也能读到 level buff,不加判空,契约破坏就崩。
+            // 已缓存——部署前(样本实体)也能读到 level buff。真正的前提是 buffController
+            // 组件存在;Buffs 列表本身允许为 null,下方 ?.Count ?? 0 已兜底判空。
             List<Buff> buffs = entity.buffController.Buffs;
             int buffCount = buffs?.Count ?? 0;
             for (int i = 0; i < buffCount; i++)

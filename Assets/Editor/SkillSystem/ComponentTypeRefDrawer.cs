@@ -1,6 +1,6 @@
 // Inspector drawer for string fields marked with [ComponentTypeRef].
 // Renders an EditorGUI.Popup sourced from ComponentFactory.RegisteredTypes,
-// which is populated at runtime by SkillSystemBootstrap and, in editor cold-start,
+// which is populated at runtime by AbilitySystemBootstrap and, in editor cold-start,
 // by ComponentAutoRegistry.EnsureRegistered() invoked below.
 
 using System.Linq;

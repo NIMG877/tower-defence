@@ -5,8 +5,7 @@ using UnityEngine;
 namespace AbilitySystem.Components
 {
     /// <summary>
-    /// 为载弹落点取 <c>count</c> 个点，随机流水（2026-08-29 定稿，取代首版覆盖
-    /// 最优搜索）：① 攻击范围内敌群（<c>Vision.NearbyMonsters</c>，索敌同口径，
+    /// 为载弹落点取 <c>count</c> 个点，随机流水：① 攻击范围内敌群（<c>Vision.NearbyMonsters</c>，索敌同口径，
     /// 排除 <c>excludeKey</c> 名单——艾雅法拉传泡泡花名册）随机取原位；
     /// ② 不足补射程格（<c>Vision.Range</c>）：地面层先于高台层、层内随机不重复，
     /// 每点加 ±<c>offset</c> 双轴随机偏移；③ 两池去重名额用尽后从敌人重新

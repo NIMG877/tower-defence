@@ -24,8 +24,8 @@ public class Buff
 }
 /// <summary>
 /// buff 归属列表。Normal/WhiteList 随 Dormancy（每次回收）清除；
-/// Level（局内 buff）跨 Dormancy 存活，随实体 GameObject 销毁（池生命周期与关卡对齐）
-/// 自然消亡，无需显式清理点。
+/// Level（局内 buff）跨 Dormancy 存活，特效由 Dormancy 的 DestroyLevelBuffEffects
+/// 显式清理，数值随实体 GameObject 销毁（池生命周期与关卡对齐）消亡。
 /// </summary>
 public enum BuffScope
 {
@@ -112,7 +112,7 @@ public class BuffController : MonoBehaviour, IPoolOperation
     /// <param name="modifiers">modifier 数组（不可变快照）</param>
     /// <param name="buffEffect">特效</param>
     /// <param name="buffName">名称（同名复用既有特效）</param>
-    /// <param name="buffTime">时间，小于-5为永久</param>
+    /// <param name="buffTime">时间，≤-5 为永久</param>
     /// <param name="scope">归属列表：Normal/WhiteList 随回收（Dormancy）清除；Level 局内 buff 跨回收存活，随池销毁（退关）自然消亡</param>
     /// <returns>buff 实例</returns>
     public Buff CreateBuff(Modifier[] modifiers, GameObject buffEffect, string buffName, float buffTime, BuffScope scope)

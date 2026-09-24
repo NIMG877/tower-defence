@@ -17,7 +17,7 @@ public class RadarDataController : Graphic
         _datas = datas;
         float[] targetVerticesD = new float[7];
         //hp-S:80000,atk-S:3500,atkspd-S:2.5,def-S:3000,mgr-S:70,mspd-S:2.5
-        //µ±Ö¸±êxÖµ´óÓÚÉÏÊöSÖµÊ±£¬È¡ÓĞ½çº¯Êı1.2-1/x
+        //å½’ä¸€åŒ–æœ‰ç•Œæ˜ å°„ 1-e^(-1.7916Â·x/max)ï¼Œä¸‹é™ 0.06ï¼Œå…¨é‡ç¨‹ä½¿ç”¨
         float[] maxData = new float[6] { 80000, 3500, 2.5f, 3000, 70, 2.5f };
         for (int i = 0; i < 6; i++)
         {

@@ -4,13 +4,13 @@ using System.Collections.Generic;
 /// 实体战斗子系统（POCO）。
 /// 持有：
 ///   1. Entity 引用（排序时读 _entity.Movement.ResistList / .Camp）
-///   2. EntityUpdate 方法（原 Entity.EntityUpDate）—— 过滤不可参与或不可选择的实体
-///   3. PriorityOrder 方法（原 Entity.PriorityOrder）—— 按 OrderLogic 排序
+///   2. EntityUpdate 方法—— 过滤不可参与或不可选择的实体
+///   3. PriorityOrder 方法—— 按 OrderLogic 排序
 ///
 /// 设计要点：
 ///   - POCO，构造接受 Entity 引用。
 ///   - 需要访问其他子系统的属性：Stats.IsActive / Stats.Selectable / Stats.CurrentHpRate / Movement.ResistList / Movement.Priority。
-///   - 其他实体的属性通过 `entity.Stats.X` / `entity.Movement.X` 访问（不再用旧的 `entity.participateIn` / `entity.entityResistList` 等字段）。
+///   - 其他实体的属性通过 `entity.Stats.X` / `entity.Movement.X` 访问。
 /// </summary>
 public class EntityCombat
 {
@@ -22,7 +22,7 @@ public class EntityCombat
     }
 
     /// <summary>
-    /// 替代原 Entity.EntityUpDate。过滤掉不可参与（IsActive=false）或不可选择（Selectable!=0）的实体。
+    /// 过滤掉不可参与（IsActive=false）或不可选择（Selectable!=0）的实体。
     /// </summary>
     public Entity[] EntityUpdate(Entity[] entitiesA)
     {
@@ -38,7 +38,7 @@ public class EntityCombat
     }
 
     /// <summary>
-    /// 替代原 Entity.PriorityOrder。按 OrderLogic（目标优先级）对实体列表排序。
+    /// 按 OrderLogic（目标优先级）对实体列表排序。
     /// </summary>
     public List<Entity> PriorityOrder(List<Entity> originList, OrderLogic targetPriority)
     {

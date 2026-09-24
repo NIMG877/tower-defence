@@ -71,7 +71,7 @@ public class InteractableStatic : MonoBehaviour, IPoolOperation
             }
             if (_blockOccupationNum + candidate.Stats.BlockOccupationS > _thisEntity.Stats.BlockOccupationS)
             {
-                continue;   // 该敌占用放不下，看占用更小的下一名
+                continue;   // 剩余容量放不下该敌，按距离顺序尝试下一名候选
             }
             BlockEntity(candidate);
         }
@@ -161,7 +161,8 @@ public class InteractableStatic : MonoBehaviour, IPoolOperation
             }
             else
             {
-                // 失效/移出阻挡圈/容量不足时解除；容量缩减时先解除的是更晚吸附的（保留最早）
+                // 失效/移出阻挡圈/容量不足时解除；循环自表头遍历且 ResistList 按吸附先后排列，
+                // 容量缩减时先解除的是最早吸附的（保留最晚）
                 blocked.MoveBase.RelieveBlock(_thisEntity);
                 _thisEntity.Movement.ResistList.RemoveAt(i);
             }

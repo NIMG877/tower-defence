@@ -14,7 +14,8 @@ namespace AbilitySystem.Components
     ///   <item><c>methods</c> — comma-separated operators: <c>mult</c> / <c>add</c> / <c>set</c> / <c>div</c></item>
     /// </list>
     /// Each triple at the same index is applied in order. <c>cumbo</c> is only meaningful on
-    /// <see cref="BeforeAttackEvent"/> and is silently skipped on other DamageEventBase events.
+    /// <see cref="BeforeAttackEvent"/>; on other DamageEventBase events the triple is skipped
+    /// with a Debug.Log each time it fires.
     ///
     /// <para>Supersedes the removed <c>AttackMultiplierBoost</c> (<c>multiplyer *= N</c>) and
     /// <c>SetAttackCombo</c> (<c>cumbo = N</c>), both of which were folded into this component
@@ -49,7 +50,9 @@ namespace AbilitySystem.Components
             BeforeAttackEvent bae = dab as BeforeAttackEvent;
 
             // Length-mismatch guard: log once, then trim to min length so OnTrigger
-            // can index safely. Lenient by design (per spec §"CSV 错误处理").
+            // can index safely. Lenient by design — the same tolerance posture as
+            // the shared CsvParser convention (unparsable values read as 0, extra
+            // entries trimmed to the first N); a bad CSV never blocks the skill.
             int fLen = _fields().Length;
             int vLen = _floatValues().Length;
             int mLen = _methods().Length;

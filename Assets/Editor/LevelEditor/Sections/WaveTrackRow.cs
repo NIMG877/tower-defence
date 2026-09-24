@@ -47,7 +47,7 @@ public static class WaveTrackRow
         row.style.flexDirection = FlexDirection.Column;  // 上下两行:contentRow(× + header + timeline) + detailContainer
         row.style.marginBottom = 4;
 
-        // contentRow:承载 × 删除 / header / timelineScroll 三栏(原 Row 布局)
+        // contentRow:承载 × 删除 / header / timelineScroll 三栏
         var contentRow = new VisualElement();
         contentRow.style.flexDirection = FlexDirection.Row;
         row.Add(contentRow);
@@ -111,7 +111,7 @@ public static class WaveTrackRow
         btnRow.style.alignItems = Align.Center;
         header.Add(btnRow);
 
-        // 激活开关 40%(纯勾选框,勾选=激活,Locked=true → 未激活,运行时该 Track 的 Action 不被加载)
+        // 激活开关(纯勾选框,勾选=激活,Locked=true → 未激活,运行时该 Track 的 Action 不被加载)
         var lockProp = trackProp.FindPropertyRelative("Locked");
         var lockToggle = new Toggle { value = !lockProp.boolValue };
         lockToggle.labelElement.style.minWidth = 0;  // 无字也要归零:空标签仍带主题默认 min-width:120px
@@ -210,7 +210,7 @@ public static class WaveTrackRow
         detailContainer.style.width = Length.Percent(100);
         row.Add(detailContainer);
 
-        // Track 状态对象(后续 Phase 3 增量更新用)
+        // Track 状态对象
         var state = new State
         {
             NameField = nameField,

@@ -6,7 +6,8 @@ using UnityEngine.UIElements;
 /// <summary>
 /// Action 详情面板: 接收 waveIdx/trackIdx/actionIdx, 绑定对应 SerializedProperty 子路径。
 /// 基础字段: CommandType / TriggerTime / OnBeforeAction。
-/// 条件字段 (按 CommandType 显隐): 后续任务添加。
+/// 条件字段 (按 CommandType 显隐): RebuildConditional 按 CommandType 渲染
+/// 召唤参数 / 路径 / 重复召唤 / 静止目标 / 对话框 / 面板等条件字段。
 /// </summary>
 public static class ActionDetailSection
 {

@@ -5,7 +5,7 @@ using AbilitySystem;
 /// protocolVersion + opList + battleSnapshot + hostAssets + constraints。
 /// Editor 探针（菜单④）与运行时 GenerateSkill 组件共用——契约字段只改这里，
 /// 避免两份手抄漂移。返回匿名对象，由调用方自行序列化。
-/// 契约 v2：快照 self 拍平进 entities；hostAssets 携带技能原型的第一决定因素
+/// 快照 self 拍平进 entities；hostAssets 携带技能原型的第一决定因素
 /// （job/subJob/攻击节奏/物法方向等决策字段）与资产清单投影（不传引用）——
 /// bullets/canSpawnEntities 按下标登记（spawnIndex/bulletDataIndex 的合法域），
 /// animations 是 apply_animation_override.resources 的合法域。skills/talents

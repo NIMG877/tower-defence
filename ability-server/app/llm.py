@@ -59,8 +59,8 @@ def chat_tools(messages: list[dict], tools: list[dict], cfg,
     if effort:
         payload["reasoning_effort"] = effort
     # 保留式思考（官方 thinking-mode 文档）：GLM-5.3 仅支持 type=enabled；显式传
-    # clear_thinking 固定行为不随端点默认漂移（True 保留 / False 清除），
-    # agent 侧配套决定是否回传 reasoning_content 原文。
+    # clear_thinking 固定行为不随端点默认漂移（llm_preserve_thinking=True 时传
+    # clear_thinking=False 保留思考），agent 侧配套决定是否回传 reasoning_content 原文。
     payload["thinking"] = {"type": "enabled",
                            "clear_thinking": not cfg.llm_preserve_thinking}
     try:

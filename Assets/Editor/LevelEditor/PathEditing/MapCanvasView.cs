@@ -59,9 +59,7 @@ public static class MapCanvasView
         }
 
         // 2) 整张 grid 一次性画完(单 path,JSize+1 + ISize+1 条线,共约
-        //    (ISize + JSize + 2) × 4 顶点)。Fill 之后会被 cell 的填充覆盖,
-        //    视觉上还是只在空 cell 上看到 grid。
-        //    旧实现是每空 cell 一个 stroke rect,100x100 全空要 16k 顶点。
+        //    (ISize + JSize + 2) × 4 顶点)。画在 cell 填充之后,网格线浮于其上。
         DrawGridLines(p2d, state, cache);
 
         // 3) highland 外轮廓:全 grid 扫描,4 方向各一个 path + 一次 Stroke(批处理);
@@ -108,7 +106,7 @@ public static class MapCanvasView
 
     // highland 区块的外轮廓:每个 cell 检查 4 邻居,只在边界处画边。
     // 优化 A(扫描线):每个方向找连续段,合并成一条长边(50x50 块从 200 短边降到 4 长边)。
-    // 优化 B(批处理):4 方向各一个 BeginPath/Stroke,全 grid 只 4 次 mesh 提交(原来 N 次)。
+    // 优化 B(批处理):4 方向各一个 BeginPath/Stroke,全 grid 只 4 次 mesh 提交。
     // 空 cell 是 Tile.Default() { highland = false },所以对全 grid 扫描无需特判 HasEntry。
     static void DrawHighlandOutline(Painter2D p2d, PathEditingState state, BlockMapCache cache)
     {

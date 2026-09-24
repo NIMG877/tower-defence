@@ -101,7 +101,6 @@ public class ColorfulTape : MaskableGraphic
         }
         DOTween.To((value) =>
         {
-            //每个小文字改动
             for (int i = 0; i < values.Length; i++)
             {
                 if (values[i] != 0)
@@ -109,9 +108,7 @@ public class ColorfulTape : MaskableGraphic
                     texts[i].text = (values[i] * value).ToString("0");
                 }
             }
-            //总值文字改动
             textsTV.text = (tv * value).ToString("0") + "," + (tr * value * 100).ToString("0.0") + "%";
-            //长度改动
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 500 * tr * value);
         }, 0, 1, 0.6f);
     }

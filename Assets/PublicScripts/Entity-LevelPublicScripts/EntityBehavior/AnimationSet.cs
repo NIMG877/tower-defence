@@ -5,7 +5,7 @@ using Spine.Unity;
 /// <summary>
 /// 一套已解析的动画资源（槽位→AnimationReferenceAsset）。
 /// 单动画槽与组动画槽分两个字典；槽位属于哪类由 <see cref="GroupSlots"/> 静态定义。
-/// 替代旧版 15 个具名字段 + 7 组镜像 switch 的形态：新增槽位=枚举加一项 + From 填一行。
+/// 新增槽位=枚举加一项 + From 填一行。
 /// </summary>
 public sealed class AnimationSet
 {

@@ -229,7 +229,8 @@ public class EntityAbilityRunner
         }
 
         // 3) Unwire + 仅清掉 ExtraAbility（运行时 AddExtraAbility 加入的动态能力）。
-        //    Talents/SubJobTrait/Skills 保留在 _abilities,等下次 OnInitialize 走 spEngine.Reset + 组件 OnTeardown/OnInit 重置。
+        //    Talents/SubJobTrait/Skills 保留在 _abilities，等下次 OnInitialize 走
+        //    spEngine.Reset + 组件 OnInit 重置（OnTeardown 已在上面第 2 步对全部 ability 执行过）。
         for (int i = _abilities.Count - 1; i >= 0; i--)
         {
             var a = _abilities[i];

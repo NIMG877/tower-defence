@@ -15,7 +15,7 @@ public class AgentJobStatus
     public string error;
     public GenerateResponse response;
 
-    /// <summary>Agent 阶段流水（analyze/describe/generate/validate/...）。</summary>
+    /// <summary>Agent 阶段流水（词表 plan/act/review/submit/done/degraded/handshake）。</summary>
     public class PhaseEntry
     {
         public string phase;

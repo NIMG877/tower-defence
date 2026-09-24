@@ -40,8 +40,9 @@ public readonly struct DamageResolution
 }
 
 /// <summary>
-/// 实体协调者。持有 5 个 POCO 子系统（Stats/Vision/Movement/Combat/StateMachine）+ 阵营副作用 + 公开事件。
-/// 数据访问统一走子系统入口：<see cref="Stats"/> / <see cref="Vision"/> / <see cref="Movement"/> / <see cref="Combat"/> / <see cref="StateMachine"/>。
+/// 实体协调者。持有 8 个 POCO 子系统（AttributeStore/EntityStats/EntityVision/EntityMovement/
+/// EntityCombat/EntityAttack/EntityAbilityRunner/EntityStateMachine，构造点见本文件）+ 阵营副作用 + 公开事件。
+/// 数据访问统一走子系统入口：<see cref="Stats"/> / <see cref="Vision"/> / <see cref="Movement"/> / <see cref="Combat"/> / <see cref="Attack"/> / <see cref="AbilityRunner"/> / <see cref="StateMachine"/>。
 /// </summary>
 public class Entity : MonoBehaviour, IPoolOperation
 {
@@ -109,7 +110,6 @@ public class Entity : MonoBehaviour, IPoolOperation
         }
     }
 
-    /// <summary>
     public EntityPool thisEntityPool;
     /// <summary>实体池生命周期回调数组：CreateNewEntity 时扫描一次并缓存，
     /// 出池/入池派发 PreWarm/Initialize/Dormancy 时直接使用，避免每次 GetComponents。</summary>
@@ -199,7 +199,7 @@ public class Entity : MonoBehaviour, IPoolOperation
         }
     }
     /// <summary>到达终点退场：失活（关死移动/攻击/技能门禁，防淡出窗口内二次死亡/攻击造成双重回池）
-    /// + 转 Default + 淡出 + 回池（原 MoveBase.ArriveEnd 的表现部分上收）。</summary>
+    /// + 转 Default + 淡出 + 回池。</summary>
     public void ArriveEnd()
     {
         Stats.IsActive = false;
@@ -295,8 +295,9 @@ public class Entity : MonoBehaviour, IPoolOperation
     {
         _attack.Dormancy();
         _stateMachine.ResetForPool();
-        // 静态实体（阻挡者）回池前先逐个通知被挡敌人解除——Dormancy 链上 PoolOps 逆序派发，
-        // 本方法先于 InteractableStatic.Dormancy 执行且撤退不置 IsActive=false，
+        // 静态实体（阻挡者）回池前先逐个通知被挡敌人解除——Dormancy 链上 PoolOps 正序派发，
+        // 且 CreateNewEntity 中 InteractableStatic 先于 Entity 添加，故 InteractableStatic.Dormancy
+        // 先执行、本方法随后；而 InteractableStatic.Dormancy 并不通知被挡敌人解除，
         // 不主动通知的话被挡敌人会永久保持阻挡状态
         if (InteractableStatic != null)
         {

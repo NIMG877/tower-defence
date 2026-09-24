@@ -4,7 +4,7 @@ using UnityEngine;
 namespace AbilitySystem
 {
     /// <summary>
-    /// hostAssets 投影（契约 v2）：请求 payload 的组成部分。
+    /// hostAssets 投影：请求 payload 的组成部分。
     /// 定义在 GameData 程序集：AgentGenerateRequest（BasicScripts，引用 GameData）
     /// 也能看到，依赖方向不逆行。
     /// </summary>

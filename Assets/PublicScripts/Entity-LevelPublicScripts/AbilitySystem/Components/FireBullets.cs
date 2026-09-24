@@ -7,7 +7,8 @@ namespace AbilitySystem.Components
     /// <summary>
     /// 向黑板 <c>List&lt;Vector2&gt;</c> 点列表逐一发纯视觉载弹（无实体目标、
     /// 零伤害——伤害语义由落点侧规则负责），弹着时在宿主 runner 上派发
-    /// <see cref="BulletLandedEvent"/>（position=实际落点，抛物线含随机偏移）。
+    /// <see cref="BulletLandedEvent"/>（position=销毁时刻实际位置：抛物线弹型
+    /// 弧线含随机偏移、非瞄准点；直线弹落点即瞄准点）。
     /// 弹幕配置取宿主 <c>EntityAttack._bulletDatas[bulletDataIndex]</c>：
     /// GameObject 引用装不进 ParamList，带引用的弹幕配置登记在实体攻击数据上。
     /// </summary>
@@ -59,9 +60,9 @@ namespace AbilitySystem.Components
             Entity origin = ctx.entity;
             for (int i = 0; i < points.Count; i++)
             {
-                // 视觉载弹参数固化（原 Skill2 同款）：damage 0 / multiplyer 1 /
+                // 视觉载弹参数固化：damage 0 / multiplyer 1 /
                 // 穿透与伤害类型 0。落点回调闭包捕获发射时的宿主引用——宿主在
-                // 飞行期间死亡时事件仍照发（原版行为），runner 缺失才跳过。
+                // 飞行期间死亡时事件仍照发，runner 缺失才跳过。
                 new Bullet(null, null, pos => DispatchLanded(origin, pos), data.BulletData, origin, null,
                     points[i], spawnPos, 0f, 1f, 0f, 0f, 0f, 0f, 0, 0);
             }

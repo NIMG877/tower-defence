@@ -1,4 +1,4 @@
-"""交叉项计算器测试（compute_cross_items 工具的后端，契约 v2 快照形状）。"""
+"""交叉项计算器测试（compute_cross_items 工具的后端）。"""
 
 import pytest
 

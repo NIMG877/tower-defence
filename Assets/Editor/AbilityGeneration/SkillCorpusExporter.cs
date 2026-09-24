@@ -13,8 +13,8 @@ using UnityEngine;
 /// 两个来源，按资产引用去重：
 ///   ① Resources/Abilities 下的 SubJobs 特性类技能资产；
 ///   ② EntityDataCollection 各实体的 Skills/Talents 引用的 AbilityConfig。
-/// 只导出通过客户端校验器的技能；服务端按文件 mtime 惰性重载，重新导出后
-/// 无需重启 uvicorn。
+/// 只导出通过客户端校验器的技能。产物 data/skills.json 需手动跑 db/import_skills.py
+/// 入库；ability.db 按 mtime 惰性重载，入库后无需重启 uvicorn。
 /// </summary>
 public static class SkillCorpusExporter
 {

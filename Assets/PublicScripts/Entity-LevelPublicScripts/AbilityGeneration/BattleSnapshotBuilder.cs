@@ -9,7 +9,7 @@ using UnityEngine;
 /// 紧凑 JSON，供服务端 Agent 分析。派生交叉项（最近敌距/半径内清单等）不在
 /// 客户端预计算——服务端 Agent 用 compute_cross_items 工具按需计算（crossitems.py），
 /// 减少上下文消耗与噪声。
-/// 契约 v2：self 与其它实体同构拍平进 entities（selfId 作指针），实体记录含
+/// self 与其它实体同构拍平进 entities（selfId 作指针），实体记录含
 /// massLevel（失衡/击退类技能需要质量对比）。本类只负责序列化，不向宿主黑板
 /// 写入任何快照键；生成技能的实时战局条件走 select_targets（写实体列表）+
 /// write_blackboard source=listCount（桥接计数）链路。
@@ -53,7 +53,7 @@ public static class BattleSnapshotBuilder
     /// <summary>
     /// 从活动战局构建快照。仅可在战斗进行中调用（依赖 EntityManager/MapDataManager
     /// 单例）；实体遍历走 EntitySelector_Radius（radius&lt;0 = 不限距离、force 忽略可选性），
-    /// 静态实体（召唤物等）经 StaticEntityExistBlock 逐格补齐并按实例去重。
+    /// 静态实体（召唤物等）经 GetStaticEntityInBlock 逐格补齐并按实例去重。
     /// </summary>
     public static BattleSnapshot Build(Entity self)
     {
@@ -101,7 +101,7 @@ public static class BattleSnapshotBuilder
         return JsonConvert.SerializeObject(snapshot, indented ? Formatting.Indented : Formatting.None);
     }
 
-    /// <summary>单实体投影（含 self——契约 v2 把 self 拍平进 entities）。纯函数，
+    /// <summary>单实体投影（含 self——self 拍平进 entities）。纯函数，
     /// 公开供 EditMode 测试。</summary>
     public static SnapshotEntity ToSnapshotEntity(Entity entity)
     {

@@ -20,7 +20,7 @@ namespace AbilitySystem.Tests
         [Test]
         public void TriggerEvent_OnBulletLanded_AppendedAfterOnBeforeTargetSelect()
         {
-            // 既有 asset 按枚举序号序列化；OnBulletLanded 必须排在末尾且不改变既有序号。
+            // 既有 asset 按枚举序号序列化；后续事件只能追加在其后，不得改变既有触发序号（当前 OnBulletLanded=19）。
             Assert.That((int)TriggerEvent.OnSummonDeath, Is.EqualTo(17));
             Assert.That((int)TriggerEvent.OnBeforeTargetSelect, Is.EqualTo(18));
             Assert.That((int)TriggerEvent.OnBulletLanded, Is.EqualTo(19));

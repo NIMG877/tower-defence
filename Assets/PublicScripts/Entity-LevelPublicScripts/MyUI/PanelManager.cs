@@ -20,7 +20,7 @@ namespace MyUI
             Panel = GameObject.Find("GameUI/Panels").transform;
             if (Panel == null)
             {
-                Debug.LogError("Ã»ÓÐGameUI,Çë´´½¨");
+                Debug.LogError("æ²¡æœ‰GameUI,è¯·åˆ›å»º");
             }
             stackPanel = new List<BasePanel>();
             stackPanelCount = 0;

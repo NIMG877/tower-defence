@@ -2,17 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 静态数据门面。取代旧的 <c>GameDataManager.EntityDataCollection</c> / <c>GameDataManager.AudioData</c>。
+/// 静态数据门面：实体数据（<see cref="EntityRepository"/>）与音频集合（<see cref="AudioClips"/>）的唯一入口。
 ///
 /// 设计：
 /// - 纯静态（不挂 GameObject）—— 所有 SOs 通过 <c>Resources.Load</c> 获取，build 后正常可用
 /// - 懒构建：第一次访问 <see cref="EntityRepository"/> / <see cref="AudioClips"/> 时才加载
 /// - 生命周期由 Unity 资源系统管理（Resources 加载的资产随场景切换持久）
-///
-/// 调用方迁移：
-/// - <c>GameDataManager.EntityDataCollection.GetEntityData(id)</c> → <c>GameDataService.EntityRepository.Get(id)</c>
-/// - <c>GameDataManager.EntityDataCollection.GetEntityDataByIDC("c")</c> → <c>GameDataService.EntityRepository.GetByCategory("c")</c>
-/// - <c>GameDataManager.AudioData</c> → <c>GameDataService.AudioClips</c>
 /// </summary>
 public static class GameDataService
 {

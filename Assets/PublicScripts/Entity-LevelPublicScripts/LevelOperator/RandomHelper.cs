@@ -41,7 +41,7 @@ public class RandomHelper
         if (p >= 1f) return true;
         return NextFloat(useArray) <= p;
     }
-    // 均匀浮点。min/max 默认 [0,1] (Random.Range 含上界 1,默认调用与旧签名等价)。
+    // 均匀浮点。min/max 默认 [0,1] (Random.Range 含上界 1)。
     // max < min 静默 swap,min == max 恒返 min(0 * u == 0 路径自然成立)。
     public float RandomF(float min = 0f, float max = 1f, bool useArray = true)
     {

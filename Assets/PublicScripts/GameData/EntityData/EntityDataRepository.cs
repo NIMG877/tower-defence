@@ -9,7 +9,7 @@ using System.Collections.Generic;
 /// - 数据形状（<see cref="EntityData"/>）与 SO（<see cref="EntityDataCollection"/>）分离后，Repository 是唯一的查询入口
 /// - 懒构建：第一次访问 <c>EntityRepository</c> 时构建索引；之后 O(1) 查询
 /// - 单次扫描同时建两个索引，构建复杂度 O(n)
-/// - 分类索引不假设 DTO 排序：按 DTO 原序建 <c>List&lt;EntityData&gt;</c>，对 <c>xlsx2json.py</c> 的输出顺序无要求
+/// - 分类索引不假设 DTO 排序：按 DTO 原序建 <c>List&lt;EntityData&gt;</c>，对上游导入工具的输出顺序无要求
 /// </summary>
 public class EntityDataRepository
 {
@@ -49,7 +49,7 @@ public class EntityDataRepository
     /// <summary>实体总数（精确 ID 索引的 size）。</summary>
     public int Count => _byId.Count;
 
-    /// <summary>按精确 ID 查询。找不到返回 <c>default(EntityData)</c>（所有字段为零值）。</summary>
+    /// <summary>按精确 ID 查询。找不到返回 <c>null</c>（EntityData 为引用类型）。</summary>
     public EntityData Get(EntityID id)
         => _byId.TryGetValue(id, out var d) ? d : default;
 

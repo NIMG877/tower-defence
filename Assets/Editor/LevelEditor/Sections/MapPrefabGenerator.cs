@@ -16,7 +16,7 @@ using UnityEngine.UIElements;
 ///     与 MapInitialize 的消费判据同源),用户放的手工装饰(SpriteRenderer
 ///     出生点标记、非格点装饰物)原样保留 —— 生成是可迭代的,装饰不必重摆。
 ///
-/// 材质槽留空时该类格子仍生成 Quad(无材质呈紫红),补材质即可,不阻断生成。
+/// 材质槽留空时该类格子仍生成 Quad(地面/高台无材质呈紫红,地穴槽回退地面材质),补材质即可,不阻断生成。
 /// </summary>
 public static class MapPrefabGenerator
 {

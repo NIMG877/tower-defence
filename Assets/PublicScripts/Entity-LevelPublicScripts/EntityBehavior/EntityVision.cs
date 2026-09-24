@@ -3,23 +3,23 @@ using System.Collections.Generic;
 /// <summary>
 /// 实体视野子系统（POCO）。
 /// 持有：
-///   1. 基础视野（BaseRange/原 _visionRangeF、BaseRadius/原 _visionRadiusF，来自 EntityData）
-///   2. 计算视野（Range/原 _visionRangeS：BaseRange 经 MapDataManager.RangeCaculator 按实体位置+朝向偏移后的结果）
-///   3. 当前半径（Radius/原 _visionRadiusS）
+///   1. 基础视野（BaseRange/BaseRadius，来自 EntityData）
+///   2. 计算视野（Range：BaseRange 经 MapDataManager.RangeCaculator 按实体位置+朝向偏移后的结果）
+///   3. 当前半径（Radius）
 ///   4. 朝向（mirror of Entity._orientation，Range setter 与 SetOrientation 同步用）
-///   5. 视野内实体列表（NearbyMonsters/NearbyTurrets，原 monstersInRange/turretsInRange）
+///   5. 视野内实体列表（NearbyMonsters/NearbyTurrets）
 ///
 /// 设计要点：
 ///   - POCO，构造接受 Entity 引用以便访问 transform.position / Camp。
-///   - Range setter 有副作用（调 MapDataManager），保留原 Entity.VisionRange 行为。
-///   - Refresh() 替代原 Entity.FixedUpdate 中 EntitySelector_Range/Radius 分支。
-///   - SetOrientation 同时更新镜像朝向并重算 Range = BaseRange（替代原 Entity.SetOrientation）。
+///   - Range setter 有副作用（调 MapDataManager）。
+///   - Refresh() 每帧经 EntitySelector_Range/Radius 重算视野内实体列表。
+///   - SetOrientation 同时更新镜像朝向并重算 Range = BaseRange。
 /// </summary>
 public class EntityVision
 {
     private readonly Entity _entity;
 
-    // 基础（来自 EntityData；原 _visionRangeF / _visionRadiusF）
+    // 基础（来自 EntityData）
     private (int x, int y)[] _baseRange;
     private float _baseRadius;
 
@@ -39,14 +39,14 @@ public class EntityVision
         _entity = entity;
     }
 
-    // === 基础读（替代 Entity.VisionRange_1） ===
+    // === 基础读 ===
     public (int x, int y)[] BaseRange => _baseRange;
     public float BaseRadius => _baseRadius;
 
-    // === 计算读 + 写（替代 Entity.VisionRange） ===
+    // === 计算读 + 写 ===
     /// <summary>
     /// 经 MapDataManager.RangeCaculator 按实体位置 + 朝向偏移后的视野格子集。
-    /// 写入时立即重算（与原 Entity.VisionRange setter 行为一致）。
+    /// 写入时立即重算。
     /// </summary>
     public (int x, int y)[] Range
     {
@@ -58,12 +58,12 @@ public class EntityVision
     }
     public float Radius => _radius;
 
-    // === 视野内实体（替代 Entity.monstersInRange / turretsInRange） ===
+    // === 视野内实体 ===
     public List<Entity> NearbyMonsters => _monstersInRange;
     public List<Entity> NearbyTurrets => _turretsInRange;
 
     /// <summary>
-    /// 从 EntityData 装填基础视野。原 Entity.AttributesCaculateFirst 中 vision 部分。
+    /// 从 EntityData 装填基础视野。
     /// </summary>
     public void InitializeFromData(EntityData data)
     {
@@ -73,8 +73,9 @@ public class EntityVision
             _baseRange[i] = (data.VisionRange[i].x, data.VisionRange[i].y);
         }
         _baseRadius = data.VisionRadius;
-        // 初始化时 Range/S 是 base 的拷贝（与原 PreWarm 行为一致：_visionRangeS/_visionRadiusS 在 AttributesCaculateSecond 第一次被设为基础值）
-        _range = null;          // 启动时 Range 为 null，FixedUpdate 根据它走 RangeCaculator 或 Radius
+        // Radius 初始化为 base 的拷贝；Range 启动为 null（惰性初始化：Refresh 在其为 null 期间
+        // 走 Radius 分支，直到 setter 被写入——SetOrientation/攻击距离覆盖等——才经 RangeCaculator 计算）
+        _range = null;
         _radius = _baseRadius;
         _monstersInRange = new List<Entity>();
         _turretsInRange = new List<Entity>();
@@ -82,7 +83,6 @@ public class EntityVision
 
     /// <summary>
     /// 更新朝向并重算 Range = BaseRange。
-    /// 替代原 Entity.SetOrientation（保持 VisionRange = _visionRangeF 的语义）。
     /// </summary>
     public void SetOrientation(int orientation)
     {
@@ -91,7 +91,7 @@ public class EntityVision
     }
 
     /// <summary>
-    /// 每帧重算视野内实体列表。替代原 Entity.FixedUpdate 中 EntitySelector_Range/Radius 分支。
+    /// 每帧重算视野内实体列表。
     /// </summary>
     public void Refresh()
     {

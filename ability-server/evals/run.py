@@ -103,7 +103,7 @@ def collect_ops_and_params(ability: dict) -> tuple[set[str], dict[str, list[floa
 
 
 def auto_score(expected: dict, response: dict) -> dict:
-    """自动分：提交状态 + op 集合重合度 + 量级带。validator 绿率在 M3 用 v2 校验器统一回放。"""
+    """自动分：提交状态 + op 集合重合度 + 量级带。validator 绿率由 evals/replay_score.py 统一回放统计。"""
     ok = response is not None and response.get("status") == "ok"
     result: dict = {"submitted": ok}
     if not ok:

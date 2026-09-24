@@ -10,8 +10,7 @@ namespace AbilitySystem
     /// <para>Lives in <c>GameData</c> assembly so it can be used by both runtime
     /// components (BasicScripts) and any future designer-time tooling.</para>
     ///
-    /// <para>Used by <c>AttackEventValueModifier</c> (was inline ApplyFloat/ApplyInt)
-    /// and <c>WriteBlackboard</c> (was inline ApplyOpInt/ApplyOpFloat/ApplyOpDouble).
+    /// <para>Used by <c>AttackEventValueModifier</c> and <c>WriteBlackboard</c>.
     /// Unknown op returns the current value unchanged — callers that need a warning
     /// are responsible for logging once (see <see cref="OneShotWarn"/>).</para>
     /// </summary>

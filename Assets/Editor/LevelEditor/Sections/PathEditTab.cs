@@ -258,7 +258,6 @@ public static class PathEditTab
             {
                 state.MoveMethod = captured;
                 state.NotifyChanged();
-                // Update button visuals
                 foreach (var child in bar.Children())
                     if (child is Button b && methods.Contains(b.text)) b.style.backgroundColor = StyleKeyword.Null;
                 btn.style.backgroundColor = EditorTheme.AccentGreen;

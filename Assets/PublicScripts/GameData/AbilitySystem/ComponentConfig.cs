@@ -569,9 +569,8 @@ namespace AbilitySystem
         public string op;
         public ParamList args = new ParamList();
         public List<ConditionGroup> condition = new List<ConditionGroup>();
-        // Managed-reference boundaries are required for this self-recursive
-        // shape. Without them Unity expands StepConfig's type tree recursively
-        // and hits its serialization depth limit even when child arrays are empty.
+        // [Serializable] recursive step arrays; steps and elseSteps are
+        // serialized by Unity's default serializer.
         public StepConfig[] steps = Array.Empty<StepConfig>();
         public StepConfig[] elseSteps = Array.Empty<StepConfig>();
     }

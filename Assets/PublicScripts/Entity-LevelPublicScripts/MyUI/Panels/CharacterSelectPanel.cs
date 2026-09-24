@@ -332,7 +332,7 @@ namespace MyUI
         }
         private void UpDateSelectCharacter()
         {
-            //����ĳ��˳������
+            // 槽位模式只显示当前槽位的卡片（隐藏其余已选卡）；自由模式把全部已选卡置顶，按选择顺序排列
             if (_selectIndex >= 0)
             {
                 for (int i = 0; i < _selectedCharacters.Count; i++)

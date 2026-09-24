@@ -26,8 +26,6 @@ public class EntityFacing : MonoBehaviour, IPoolOperation
     /// <param name="target">World-space target position</param>
     public void SetDirection(Vector2 target)
     {
-        // Note: the trailing `return;` on the !left branch is intentional and preserved.
-        // Removing it would change rotation behavior for that branch.
         void SetDirectionBase()
         {
             float ry = _skeleton.transform.rotation.y;
