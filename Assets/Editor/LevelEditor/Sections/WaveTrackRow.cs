@@ -10,10 +10,15 @@ using UnityEngine.UIElements;
 /// </summary>
 public static class WaveTrackRow
 {
+    // 左块定宽:轨道头适配 btnRow 总宽(勾选框自然宽~16 + 右距2 + 按钮20 + 左距2 + 按钮20),
+    // 刻度行左块(删 Wave ×)用 LeftBlockWidth 同宽对齐,保证刻度尺与时间轴起点重合
+    public const int DelTrackBtnWidth = 20;                            // 最左删 Track ×
+    public const int HeaderWidth = 60;                                 // 轨道头 = btnRow 总宽
+    public const int LeftBlockWidth = DelTrackBtnWidth + HeaderWidth;  // 刻度行删 Wave × 对齐宽
+
     public class State
     {
         public TextField NameField;
-        public Button LockButton;
         public Button DelActionBtn;            // 删除 Action 按钮(供 WaveTimelineSection 刷新 enabled)
         public VisualElement CardsContainer;  // 时间轴容器
         public ScrollView TimelineScroll;      // 时间轴 ScrollView(供 WaveTimelineSection 同步横向滚动)
@@ -47,7 +52,7 @@ public static class WaveTrackRow
         contentRow.style.flexDirection = FlexDirection.Row;
         row.Add(contentRow);
 
-        // === 最左:× 删除 Track (与 header / timelineScroll 按 2:13:85 分总宽) ===
+        // === 最左:× 删除 Track (定宽 20,高度与行同高 40) ===
         var delTrackBtn = new Button(() =>
         {
             if (EditorUtility.DisplayDialog("删除 Track", $"确认删除 Track {trackIdx}?", "删除", "取消"))
@@ -59,16 +64,16 @@ public static class WaveTrackRow
             }
         })
         { text = "×" };
-        delTrackBtn.style.flexGrow = 1;
-        delTrackBtn.style.flexBasis = 0;
+        delTrackBtn.style.width = DelTrackBtnWidth;
         delTrackBtn.style.flexShrink = 0;
+        delTrackBtn.style.paddingLeft = 0;   // 20px 里放下 × 字形:去掉主题按钮默认水平内边距
+        delTrackBtn.style.paddingRight = 0;
         delTrackBtn.style.height = 40;
         contentRow.Add(delTrackBtn);
 
-        // === 中部:轨道头 (13% 总宽) ===
+        // === 中部:轨道头 (定宽 = btnRow 总宽:勾选框~16 + 2 + 20 + 2 + 20) ===
         var header = new VisualElement();
-        header.style.flexGrow = 20;
-        header.style.flexBasis = 0;
+        header.style.width = HeaderWidth;
         header.style.flexShrink = 0;
         header.style.flexDirection = FlexDirection.Column;
         header.style.backgroundColor = new Color(0.13f, 0.13f, 0.16f);
@@ -77,8 +82,7 @@ public static class WaveTrackRow
         header.style.borderBottomLeftRadius = 3;
         contentRow.Add(header);
 
-        // === 右栏:时间轴 (80% 总宽) ===
-        // timelineScroll 在下方单独设置 width=80%
+        // === 右栏:时间轴 (flexGrow=90 吃定宽左块 DelTrackBtnWidth+HeaderWidth 之外的剩余宽度) ===
 
         // 第一行:Name 输入框 (100% header 宽)
         var nameRow = new VisualElement();
@@ -101,30 +105,27 @@ public static class WaveTrackRow
         });
         nameRow.Add(nameField);
 
-        // 第二行:激活开关 40% / + 25% / × 25%
+        // 第二行:激活勾选框(吃剩余宽度) / + 定宽 20 / × 定宽 20
         var btnRow = new VisualElement();
         btnRow.style.flexDirection = FlexDirection.Row;
-        btnRow.style.marginRight = 4;
         btnRow.style.alignItems = Align.Center;
         header.Add(btnRow);
 
-        // 激活开关 40%(Locked=true → 未激活,运行时该 Track 的 Action 不被加载)
+        // 激活开关 40%(纯勾选框,勾选=激活,Locked=true → 未激活,运行时该 Track 的 Action 不被加载)
         var lockProp = trackProp.FindPropertyRelative("Locked");
-        bool initialLocked = lockProp.boolValue;
-        var lockBtn = new Button { text = initialLocked ? "激活" : "不激活" };
-        lockBtn.clicked += () =>
+        var lockToggle = new Toggle { value = !lockProp.boolValue };
+        lockToggle.labelElement.style.minWidth = 0;  // 无字也要归零:空标签仍带主题默认 min-width:120px
+        lockToggle.RegisterValueChangedCallback(evt =>
         {
             Undo.RecordObject(so.targetObject, "Toggle Track Active");
-            lockProp.boolValue = !lockProp.boolValue;
+            lockProp.boolValue = !evt.newValue;
             so.ApplyModifiedProperties();
-            lockBtn.text = lockProp.boolValue ? "激活" : "不激活";
-        };
-        // 用 flexGrow(2/1/1) + flexBasis(0) 实现"扣除 margin 后按 50/25/25 分剩余宽度"
-        // 比直接 width% + marginRight 更精确——margin 不挤压按钮视觉宽度
-        lockBtn.style.flexGrow = 2;
-        lockBtn.style.flexBasis = 0;
-        lockBtn.style.flexShrink = 0;
-        btnRow.Add(lockBtn);
+        });
+        // 勾选框自然宽(约16)不参与分宽:0/2 边距 + 两个定宽 20 按钮,总宽即 HeaderWidth
+        lockToggle.style.marginLeft = 0;
+        lockToggle.style.marginRight = 2;
+        lockToggle.style.flexShrink = 0;
+        btnRow.Add(lockToggle);
 
         // + 按钮(纯文字)
         var addActionBtn = new Button(() =>
@@ -144,12 +145,15 @@ public static class WaveTrackRow
             newAction.FindPropertyRelative("GapsFromLastRepeat").arraySize = 0;
             so.ApplyModifiedProperties();
         }) { text = "+" };
-        addActionBtn.style.flexGrow = 1;
-        addActionBtn.style.flexBasis = 0;
+        addActionBtn.style.width = 20;
         addActionBtn.style.flexShrink = 0;
+        addActionBtn.style.marginLeft = 0;
+        addActionBtn.style.marginRight = 2;   // 与 × 间隔 2px
+        addActionBtn.style.paddingLeft = 0;   // 20px 里放下 + 字形:去掉主题按钮默认水平内边距
+        addActionBtn.style.paddingRight = 0;
         btnRow.Add(addActionBtn);
 
-        // × 25%:删除选中的 Action(没选中 → disabled)
+        // × 定宽 20:删除选中的 Action(没选中 → disabled)
         var actionsProp0 = trackProp.FindPropertyRelative("Actions");
         var delActionBtn = new Button(() =>
         {
@@ -163,9 +167,11 @@ public static class WaveTrackRow
                 onActionSelected?.Invoke(-1, -1, -1);  // 删除后无选中 → 触发 RefreshDelActionBtnStates 全 disabled
             }
         }) { text = "×" };
-        delActionBtn.style.flexGrow = 1;
-        delActionBtn.style.flexBasis = 0;
+        delActionBtn.style.width = 20;
         delActionBtn.style.flexShrink = 0;
+        delActionBtn.style.marginLeft = 0;
+        delActionBtn.style.paddingLeft = 0;   // 20px 里放下 × 字形:去掉主题按钮默认水平内边距
+        delActionBtn.style.paddingRight = 0;
         delActionBtn.style.marginRight = 0;
         // 初始 enabled 状态(创建时按当前 _selectedAction 判断)
         var (initSelW, initSelT, initSelA) = getCurrentSelection();
@@ -208,7 +214,6 @@ public static class WaveTrackRow
         var state = new State
         {
             NameField = nameField,
-            LockButton = lockBtn,
             DelActionBtn = delActionBtn,
             CardsContainer = cardsContainer,
             TimelineScroll = timelineScroll,

@@ -111,13 +111,15 @@ public static class WaveTimelineSection
         block.Add(label);
 
         // === 顶部共享刻度尺 ScrollView (sticky 不随竖滚,横向滚动与所有 Track 同步) ===
-        // flex 1:4 布局:左侧 × 删除 Wave 按钮,右侧 scaleScroll
+        // 左块定宽 WaveTrackRow.LeftBlockWidth(删Wave×=删Track×20+轨道头60),scaleScroll flexGrow=90
+        // 与 Track 行 timelineScroll 同比例——两侧左块等宽,刻度尺与时间轴起点严格对齐
         var scaleRow = new VisualElement();
         scaleRow.style.flexDirection = FlexDirection.Row;
         scaleRow.style.marginBottom = 2;
         block.Add(scaleRow);
 
-        // 左侧 1/5 - × 删除 Wave (删本 Wave 块)
+        // 左侧定宽 - × 删除 Wave (删本 Wave 块;宽度=Track 行左块总宽,
+        // 两行左块同以 × 按钮开头、主题 margin 一致,起点保持对齐)
         var delWaveHereBtn = new Button(() =>
         {
             if (wavesProp == null || wavesProp.arraySize == 0) return;
@@ -130,8 +132,7 @@ public static class WaveTimelineSection
             }
         })
         { text = "×" };
-        delWaveHereBtn.style.flexGrow = 21;
-        delWaveHereBtn.style.flexBasis = 0;
+        delWaveHereBtn.style.width = WaveTrackRow.LeftBlockWidth;
         delWaveHereBtn.style.flexShrink = 0;
         delWaveHereBtn.style.height = 18;
         scaleRow.Add(delWaveHereBtn);
