@@ -3,7 +3,7 @@ using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// 引用节: MapPrefab / EnvironmentalControlDevice (单 GameObject)。
+/// 引用节: MapPrefab (单 GameObject) / EnvironmentalControlDevice (环境设备枚举)。
 /// MapPrefab 除手填外支持一键生成/重建(见 MapPrefabGenerator)。
 /// </summary>
 public static class ReferencesSection

@@ -526,7 +526,7 @@ MonoBehaviour:
     deadly: 0
     portalOutI: -1
     portalOutJ: -1
-  EnvironmentalControlDevice: {fileID: 6308497817176099097, guid: ba0fe5a46e68e4b469b07be44468fc35, type: 3}
+  EnvironmentalControlDevice: 1
   Waves:
   - Tracks:
     - Name: Trank1

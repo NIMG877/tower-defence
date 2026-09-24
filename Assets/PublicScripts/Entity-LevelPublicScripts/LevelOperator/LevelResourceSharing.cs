@@ -31,7 +31,7 @@ public interface IManagerStartEnd
 }
 public class LevelResourceSharing
 {
-    public static GameObject EnvironmentalControlDevice;
+    public static IManagerStartEnd EnvironmentalControlDevice;
     public static CancellationToken LevelCtk;
     public static Transform LM;
     public static LevelData LD;
@@ -66,13 +66,10 @@ public class LevelResourceSharing
         LevelResourceManager.Manager.CurrentOperateCount = 0;
         LevelResourceManager.Manager.SetCostMessage(LD.Cost0, LD.MaxCost, LD.CostRecoverSpeed);
         LevelResourceManager.Manager.Initialize();
-        if (LD.EnvironmentalControlDevice != null)
+        if (LD.EnvironmentalControlDevice != EnvironmentalDeviceKind.None)
         {
-            EnvironmentalControlDevice = Object.Instantiate(LD.EnvironmentalControlDevice, LM);
-            if (EnvironmentalControlDevice.TryGetComponent(out IManagerStartEnd iManagerStartEnd))
-            {
-                iManagerStartEnd.Initialize();
-            }
+            EnvironmentalControlDevice = CreateEnvironmentalDevice(LD.EnvironmentalControlDevice);
+            EnvironmentalControlDevice?.Initialize();
         }
     }
     public static void LevelStart()
@@ -88,10 +85,7 @@ public class LevelResourceSharing
         LevelActionManager.Manager.ToStart();
         DetachedStepScheduler.Manager.ToStart();
         LevelResourceManager.Manager.ToStart();
-        if (EnvironmentalControlDevice != null && EnvironmentalControlDevice.TryGetComponent(out IManagerStartEnd iManagerStartEnd))
-        {
-            iManagerStartEnd.ToStart();
-        }
+        EnvironmentalControlDevice?.ToStart();
     }
     public static void LevelEnd()
     {
@@ -105,14 +99,22 @@ public class LevelResourceSharing
         PathDataManager.Manager.ToEnd();
         SlidersManager.Manager.ToEnd();
         LevelResourceManager.Manager.ToEnd();
-        if (EnvironmentalControlDevice != null && EnvironmentalControlDevice.TryGetComponent(out IManagerStartEnd iManagerStartEnd))
-        {
-            iManagerStartEnd.ToEnd();
-            Object.Destroy(EnvironmentalControlDevice);
-        }
+        EnvironmentalControlDevice?.ToEnd();
         EnvironmentalControlDevice = null;
         _levelCts.Cancel();
         _levelCts = null;
         LevelCtk = default;
+    }
+
+    static IManagerStartEnd CreateEnvironmentalDevice(EnvironmentalDeviceKind kind)
+    {
+        switch (kind)
+        {
+            case EnvironmentalDeviceKind.MCHunger:
+                return new MCEnvironmentalDevice();
+            default:
+                Debug.LogError($"[LevelResourceSharing] 未实现的环境设备类型: {kind} ({LD.name})");
+                return null;
+        }
     }
 }

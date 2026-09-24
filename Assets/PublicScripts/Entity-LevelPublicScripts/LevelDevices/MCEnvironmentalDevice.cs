@@ -1,26 +1,26 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using MyUI;
 using Cysharp.Threading.Tasks;
 using UnityEngine.UI;
-using static UnityEngine.EventSystems.EventTrigger;
 
-public class MCEnvironmentalDevice : MonoBehaviour, IManagerStartEnd
+/// <summary>MC ä¸»é¢˜é¥¥é¥¿ç³»ç»Ÿè®¾å¤‡ï¼ˆæ™®é€šç±»ï¼Œé MonoBehaviourï¼‰ï¼šç”± LevelResourceSharing
+/// æŒ‰ LevelData.EnvironmentalControlDevice æšä¸¾åœ¨ LevelInitialize å®ä¾‹åŒ–å¹¶é©±åŠ¨ IManagerStartEndã€‚</summary>
+public class MCEnvironmentalDevice : IManagerStartEnd
 {
     /// <summary>
-    /// ¼¢¶öÏµÍ³(×Ö¶ÎÊÇ HungryValue,ËæÊ±¼äÃ¿ÃëË¥¼õ 0.15,Ç¯ÔÚ 0~130):
-    /// HungryValue>100 Ê±Î´ÂúÑªÃ¿Ãë¿Û 200 Ñª²¢»ØÂä 2 µã;80<HungryValue<=100 Ê±Î´ÂúÑªÃ¿Ãë¿Û 40 Ñª²¢»ØÂä 0.4 µã;
-    /// HungryValue==0 Ê±Ã¿Ãë¿Û 50 Ñª¡£Ôö¼õÒæµµÎ»:>100 ¹¥»÷+15%/¹¥ËÙ+30;30<HungryValue<=100 ÎŞÔö¼õ;<=30 ¹¥»÷-15%/¹¥ËÙ-30¡£
+    /// é¥¥é¥¿ç³»ç»Ÿ(å­—æ®µæ˜¯ HungryValue,éšæ—¶é—´æ¯ç§’è¡°å‡ 0.15,é’³åœ¨ 0~130):
+    /// HungryValue>100 æ—¶æœªæ»¡è¡€æ¯ç§’æ‰£ 200 è¡€å¹¶å›è½ 2 ç‚¹;80<HungryValue<=100 æ—¶æœªæ»¡è¡€æ¯ç§’æ‰£ 40 è¡€å¹¶å›è½ 0.4 ç‚¹;
+    /// HungryValue==0 æ—¶æ¯ç§’æ‰£ 50 è¡€ã€‚å¢å‡ç›Šæ¡£ä½:>100 æ”»å‡»+15%/æ”»é€Ÿ+30;30<HungryValue<=100 æ— å¢å‡;<=30 æ”»å‡»-15%/æ”»é€Ÿ-30ã€‚
     /// </summary>
     private class EntityAndHungryMessage
     {
 
         public Entity Entity;
         /// <summary>
-        /// ×´Ì¬ÖÖ±ğ(¹¹ÔìÊ±´«Èë,µ±Ç° ToStart ¹Ì¶¨ 0):×÷ StatImages Í¼±ê×éÏÂ±ê,
-        /// Îª 1 Ê±¹¥»÷³É¹¦Ã¿´Î¶à¿Û 5 µã¼¢¶öÖµ(·ñÔò 1)¡£¼¢¶öÔö¼õÒæµµÎ»²»È¡
-        /// ¾öÓÚËü,ÓÉ Update() °´ HungryValue ãĞÖµÇĞ»»¡£
+        /// çŠ¶æ€ç§åˆ«(æ„é€ æ—¶ä¼ å…¥,å½“å‰ ToStart å›ºå®š 0):ä½œ StatImages å›¾æ ‡ç»„ä¸‹æ ‡,
+        /// ä¸º 1 æ—¶æ”»å‡»æˆåŠŸæ¯æ¬¡å¤šæ‰£ 5 ç‚¹é¥¥é¥¿å€¼(å¦åˆ™ 1)ã€‚é¥¥é¥¿å¢å‡ç›Šæ¡£ä½ä¸å–
+        /// å†³äºå®ƒ,ç”± Update() æŒ‰ HungryValue é˜ˆå€¼åˆ‡æ¢ã€‚
         /// </summary>
         public int HungryState;
         private float _hungryValue;
@@ -129,6 +129,7 @@ public class MCEnvironmentalDevice : MonoBehaviour, IManagerStartEnd
     public void ToEnd()
     {
         _entityAndHungryMessages.Clear();
+        _instance = null;
     }
     public async UniTaskVoid EntityAndHungryMessageUpdate()
     {

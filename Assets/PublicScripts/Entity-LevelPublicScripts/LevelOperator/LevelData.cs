@@ -9,6 +9,14 @@ public struct PathData
     public float[]   WaitTimes;
 }
 
+/// <summary>关卡环境设备类型：LevelInitialize 时由 <see cref="LevelResourceSharing"/> 按此枚举
+/// 实例化对应普通类（实现 <see cref="IManagerStartEnd"/>），LevelStart/LevelEnd 驱动其生命周期。</summary>
+public enum EnvironmentalDeviceKind
+{
+    None,
+    MCHunger,
+}
+
 [CreateAssetMenu]
 public class LevelData : ScriptableObject
 {
@@ -24,7 +32,7 @@ public class LevelData : ScriptableObject
     public int iSize;
     public int jSize;
     public List<Tile> MapData = new List<Tile>();
-    public GameObject EnvironmentalControlDevice;
+    public EnvironmentalDeviceKind EnvironmentalControlDevice;
     public LevelActions.Wave[] Waves;
     public PathData[] Paths = new PathData[0];
     public int LevelHp;
