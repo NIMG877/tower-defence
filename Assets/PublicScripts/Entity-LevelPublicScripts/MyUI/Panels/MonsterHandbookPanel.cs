@@ -33,6 +33,7 @@ namespace MyUI
         private Image _headImg, _elitorbossImg, _content;
         private Sprite _elitSprite, _bossSprite;
         private RectTransform _skillImg, _talentImg, _details, _selectMask;
+        private UnityEngine.Events.UnityAction<Vector2> _onListScroll;
         private RadarDataController _radarDataController;
         private MonsterHandbookPanel() : base(new UIType("Prefabs/UI/MyUIs/MonsterHandbookPanel"))
         {
@@ -77,6 +78,18 @@ namespace MyUI
             SetMonsterDataToPanel(0);
             SetSelectMask(0);
         }
+        /// <summary>
+        /// 重设图鉴数据源并刷新列表。入口约定:Push 前调用——主界面全量传 GetByCategory("m"),关卡情报传本关实体收集结果。
+        /// </summary>
+        public void SetMonsterDatas(IReadOnlyList<EntityData> datas)
+        {
+            _monsterDatas = datas;
+            _currentSelectSerial = -1;  // 复位选中序号,否则 SetMonsterDataToPanel(0) 被"序号未变"守卫拦截不刷新
+            ResetMonsterList();
+            _monsterList.verticalNormalizedPosition = 1;  // 回到顶部,与 _currentMaxLineNum 的复位值保持一致
+            SetMonsterDataToPanel(0);
+            SetSelectMask(0);
+        }
         private void ResetMonsterList()
         {
             _currentMaxLineNum = _onePageLineNum;
@@ -95,11 +108,9 @@ namespace MyUI
             {
                 _images[i].gameObject.SetActive(false);
             }
-            if (_totalLineNum > _onePageLineNum + 1)
+            if (_onListScroll == null)
             {
-                _viewHeight = _monsterList.viewport.sizeDelta.y;
-                _canScrollHeight = size.y - _viewHeight;
-                _monsterList.onValueChanged.AddListener((value) =>
+                _onListScroll = value =>
                 {
                     float haveDownHeight = (1 - value.y) * _canScrollHeight;
                     int shouldMax = (int)((haveDownHeight + _cellSpace) / (_cellHeight + _cellSpace)) + _onePageLineNum;
@@ -117,7 +128,15 @@ namespace MyUI
                             LineUp();
                         }
                     }
-                });
+                };
+            }
+            // SetMonsterDatas 会多次进入本方法,先移除旧监听防叠加(叠加一次滚动触发多行翻页)
+            _monsterList.onValueChanged.RemoveListener(_onListScroll);
+            if (_totalLineNum > _onePageLineNum + 1)
+            {
+                _viewHeight = _monsterList.viewport.sizeDelta.y;
+                _canScrollHeight = size.y - _viewHeight;
+                _monsterList.onValueChanged.AddListener(_onListScroll);
             }
         }
         /// <summary>

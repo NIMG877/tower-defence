@@ -46,6 +46,16 @@ namespace MyUI
                     PanelManager.Push(teamPanel);
                 });
             }
+
+            Button entityDataB = GetComponentInChildrenByPath<Button>("rightframe/entityData");
+            if (entityDataB != null)
+            {
+                entityDataB.onClick.AddListener(() =>
+                {
+                    MonsterHandbookPanel.Panel.SetMonsterDatas(CollectLevelEntities(_levelDatas[_currentIndex]));
+                    PanelManager.Push(MonsterHandbookPanel.Panel);
+                });
+            }
         }
         public override void OnEnter()
         {
@@ -55,7 +65,6 @@ namespace MyUI
         public override void OnResume()
         {
             base.OnResume();
-            ShowLevelMessage(0);
         }
         public void SetLevelCollectionData(LevelCollectionData data)
         {
@@ -97,6 +106,43 @@ namespace MyUI
                 }
             }
 
+        }
+
+        /// <summary>
+        /// 收集本关会出现的实体(与运行时同口径:Locked 轨道不加载、仅 CommandType 0/1 的动作、按 EntityID 去重保序),
+        /// 供图鉴面板做"本关情报"数据源。
+        /// </summary>
+        private static List<EntityData> CollectLevelEntities(LevelData level)
+        {
+            List<EntityData> entities = new List<EntityData>();
+            if (level == null || level.Waves == null) return entities;
+            HashSet<EntityID> seen = new HashSet<EntityID>();
+            for (int w = 0; w < level.Waves.Length; w++)
+            {
+                LevelActions.Track[] tracks = level.Waves[w].Tracks;
+                if (tracks == null) continue;
+                for (int t = 0; t < tracks.Length; t++)
+                {
+                    if (tracks[t].Locked) continue;
+                    LevelActions.Action[] actions = tracks[t].Actions;
+                    if (actions == null) continue;
+                    for (int a = 0; a < actions.Length; a++)
+                    {
+                        LevelActions.Action action = actions[a];
+                        if (action.CommandType != 0 && action.CommandType != 1) continue;
+                        EntityID id = action.EntityPrefabID;
+                        if (id.IsNull || !seen.Add(id)) continue;
+                        EntityData data = GameDataService.EntityRepository.Get(id);
+                        if (data.ID.IsNull)
+                        {
+                            Debug.LogError($"实体 {id} 不在 EntityRepository,图鉴跳过该条情报");
+                            continue;
+                        }
+                        entities.Add(data);
+                    }
+                }
+            }
+            return entities;
         }
 
         private void ShowLevelMessage(int index)

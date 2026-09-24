@@ -28,7 +28,12 @@ namespace MyUI
             Button terminalb = GetComponentInChildrenByPath<Button>("RightNaveBar/terminal");
             terminalb.onClick.AddListener(() => PanelManager.Push(TerminalPanel.Panel));
             Button handBook = GetComponentInChildrenByPath<Button>("RightNaveBar/handbook");
-            handBook.onClick.AddListener(() => PanelManager.Push(MonsterHandbookPanel.Panel));
+            handBook.onClick.AddListener(() =>
+            {
+                // 单例常驻,可能被关卡情报入口改过数据源,打开前必须回喂全量
+                MonsterHandbookPanel.Panel.SetMonsterDatas(GameDataService.EntityRepository.GetByCategory("m"));
+                PanelManager.Push(MonsterHandbookPanel.Panel);
+            });
             Button editor = GetComponentInChildrenByPath<Button>("RightNaveBar/editor");
             editor.onClick.AddListener(() => PanelManager.Push(MapEditorPanel.Panel));
             Button team = GetComponentInChildrenByPath<Button>("RightNaveBar/team");
