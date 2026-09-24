@@ -48,13 +48,17 @@ namespace MyUI
         /// </summary>
         public virtual void OnEnter()
         {
+            // 进入/退出淡入淡出互斥：先杀对方在飞的 tween。OnExit 的延迟
+            // SetActive(false) 挂在其 tween 的 OnComplete 上，必须随杀取消，
+            // 否则同帧重入（如 restart）会被旧退出的 OnComplete 停用
+            DOTween.Kill(UIGroup);
             UIGroup.alpha = 0;
             UIObject.transform.SetAsLastSibling();
             UIObject.SetActive(true);
             DOTween.To((value) =>
             {
                 UIGroup.alpha = value;
-            }, 0, 1, 0.2f).SetUpdate(true);
+            }, 0, 1, 0.2f).SetTarget(UIGroup).SetUpdate(true);
         }
         /// <summary>
         /// UI��ͣʱ�Ĳ���
@@ -76,10 +80,11 @@ namespace MyUI
         /// </summary>
         public virtual void OnExit()
         {
+            DOTween.Kill(UIGroup);
             DOTween.To((value) =>
             {
                 UIGroup.alpha = value;
-            }, 1, 0, 0.2f).SetUpdate(true).OnComplete(() =>
+            }, 1, 0, 0.2f).SetTarget(UIGroup).SetUpdate(true).OnComplete(() =>
             {
                 UIObject.SetActive(false);
             });

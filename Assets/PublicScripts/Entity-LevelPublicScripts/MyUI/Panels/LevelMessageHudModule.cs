@@ -28,8 +28,9 @@ namespace MyUI
         // 按钮开关的 UI 表现状态（sprite/遮罩）；时间倍速状态在 TimeScaleManager
         private bool _isPause;
         private bool _is2X;
-        // 退出确认框非模态且 timeScale=0 时 UI 仍可点：防连点重复申请暂停
+        // 退出/重开确认框非模态且 timeScale=0 时 UI 仍可点：防连点重复申请暂停
         private bool _exitConfirming;
+        private bool _restartConfirming;
 
         public LevelMessageHudModule(GameObject root)
         {
@@ -74,6 +75,28 @@ namespace MyUI
                         TimeScaleManager.Manager.SetPause(false);
                     });
             });
+            LevelMessageViewLookup.Get<Button>(root, "restart").onClick.AddListener(() =>
+            {
+                if (_restartConfirming) return;
+                _restartConfirming = true;
+                TimeScaleManager.Manager.SetPause(true);
+                NoticeManager.NM.LaunchMessageBox(
+                    "确认重新开始本关？",
+                    () =>
+                    {
+                        // 与 MissionEnd 同序：先 LevelEnd 让实体还池、Dormancy 回填
+                        // 部署列表，面板退栈的 OnExit 清列表必须在其后；之后复走
+                        // TeamPanel→CutToLevel 的标准入场流程重开本关
+                        LevelResourceSharing.LevelEnd();
+                        PanelManager.PopTo(TeamPanel.Panel);
+                        PanelManager.Push(CutToLevelPanel.Panel);
+                    },
+                    () =>
+                    {
+                        _restartConfirming = false;
+                        TimeScaleManager.Manager.SetPause(false);
+                    });
+            });
         }
 
         public void OnEnter()
@@ -81,6 +104,7 @@ namespace MyUI
             _isPause = false;
             _is2X = false;
             _exitConfirming = false;
+            _restartConfirming = false;
             _pause.image.sprite = _continue;
             _pauseMask.SetActive(false);
             _timeMultiple.image.sprite = _x1;
